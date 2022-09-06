@@ -1,0 +1,63 @@
+name: CI/CD Process
+on:
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [windows, macos, ubuntu]
+    runs-on: ${{ matrix.os }}-latest
+    concurrency:
+      group: build-${{ github.workflow }}-${{ matrix.os }}-${{ github.event.number || github.ref }}
+      cancel-in-progress: true
+    steps:
+      - name: Checkout
+        uses: DanySK/action-checkout@0.2.1
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: adopt
+          java-version: 17
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+      - name: Build
+        run: ./gradlew build
+      - name: Lint Check
+        run: ./gradlew ktlintCheck
+      - name: Test
+        run: ./gradlew test
+  release:
+    concurrency:
+      # Only one release job at a time. Strictly sequential.
+      group: release
+    needs:
+      - build
+    runs-on: ubuntu-latest
+    if: >-
+      !github.event.repository.fork
+      && (
+        github.event_name != 'pull_request'
+        || github.event.pull_request.head.repo.full_name == github.repository
+      )
+    steps:
+      - name: Fetch sources
+        uses: actions/checkout@v3.0.2
+      - name: semver
+        uses: anitvam/conventionalcommit-semantic-releasing@v0.3.6
+        with:
+          token: ${{ secrets.RELEASE_TOKEN }}
+  success:
+    runs-on: ubuntu-latest
+    needs:
+      - release
+      - build
+    if: >-
+      always() && (
+        contains(join(needs.*.result, ','), 'failure')
+        || !contains(join(needs.*.result, ','), 'cancelled')
+      )
+    steps:
+      - name: Verify that there were no failures
+        run: ${{ !contains(join(needs.*.result, ','), 'failure') }}
