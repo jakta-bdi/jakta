@@ -12,4 +12,5 @@ gitHooks {
 
 rootProject.name = "ise-2022-project-baiardi"
 
-include(":core")
+include(":utils")
+include(":agent-fsm")
