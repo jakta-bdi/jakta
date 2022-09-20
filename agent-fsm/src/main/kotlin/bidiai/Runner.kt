@@ -1,5 +1,7 @@
 package bidiai
 
+import bidiai.impl.State
+
 /**
  * A [Runner] defines a Final-State Machine (FSM) lifecycle logic.
  */

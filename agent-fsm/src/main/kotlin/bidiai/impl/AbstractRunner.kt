@@ -1,13 +1,12 @@
 package bidiai.impl
 
-import bidiai.State.PAUSED
-import bidiai.State.RUNNING
-import bidiai.State.CREATED
-import bidiai.State.STARTED
-import bidiai.State.STOPPED
+import bidiai.impl.State.PAUSED
+import bidiai.impl.State.RUNNING
+import bidiai.impl.State.CREATED
+import bidiai.impl.State.STARTED
+import bidiai.impl.State.STOPPED
 import bidiai.Activity
 import bidiai.Runner
-import bidiai.State
 import bidiai.impl.AbstractRunner.Operation.PAUSE
 import bidiai.impl.AbstractRunner.Operation.CONTINUE
 import bidiai.impl.AbstractRunner.Operation.RESTART

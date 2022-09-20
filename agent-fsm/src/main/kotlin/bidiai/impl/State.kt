@@ -1,4 +1,4 @@
-package bidiai
+package bidiai.impl
 
 /**
  * State values that an FSM can hold.
