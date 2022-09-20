@@ -80,6 +80,7 @@ abstract class AbstractRunner(override val activity: Activity) : Runner {
             _state = null
             onException(e)
         } catch (e: IllegalStateException) {
+            _state = null
             onException(e)
         }
     }
@@ -99,6 +100,7 @@ abstract class AbstractRunner(override val activity: Activity) : Runner {
     private fun doStateTransitionFromRunning(whatToDo: Operation) = when (whatToDo) {
         PAUSE -> {
             _state = PAUSED
+            println("BEFORE onPause()")
             onPause()
         }
         RESTART -> {
