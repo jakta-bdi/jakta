@@ -8,9 +8,9 @@ import bidiai.Promise
  */
 class SyncRunner(override val activity: Activity) : AbstractRunner(activity) {
 
-    override fun onPause() = throw IllegalStateException("Is not possible to PAUSE a SyncRunner")
+    override fun onPause() = error("Is not possible to PAUSE a SyncRunner")
 
-    override fun onResume() = throw IllegalStateException("Is not possible to RESUME a SyncRunner")
+    override fun onResume() = error("Is not possible to RESUME a SyncRunner")
 
     override fun run(): Promise<Unit> {
         val promise = Promise<Unit>()
