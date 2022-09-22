@@ -1,16 +1,16 @@
-package bidiai.impl
+package io.github.anitvam.agents.fsm.impl
 
-import bidiai.impl.State.PAUSED
-import bidiai.impl.State.RUNNING
-import bidiai.impl.State.CREATED
-import bidiai.impl.State.STARTED
-import bidiai.impl.State.STOPPED
-import bidiai.Activity
-import bidiai.Runner
-import bidiai.impl.AbstractRunner.Operation.PAUSE
-import bidiai.impl.AbstractRunner.Operation.CONTINUE
-import bidiai.impl.AbstractRunner.Operation.RESTART
-import bidiai.impl.AbstractRunner.Operation.STOP
+import io.github.anitvam.agents.fsm.impl.State.PAUSED
+import io.github.anitvam.agents.fsm.impl.State.RUNNING
+import io.github.anitvam.agents.fsm.impl.State.CREATED
+import io.github.anitvam.agents.fsm.impl.State.STARTED
+import io.github.anitvam.agents.fsm.impl.State.STOPPED
+import io.github.anitvam.agents.fsm.Activity
+import io.github.anitvam.agents.fsm.Runner
+import io.github.anitvam.agents.fsm.impl.AbstractRunner.Operation.PAUSE
+import io.github.anitvam.agents.fsm.impl.AbstractRunner.Operation.CONTINUE
+import io.github.anitvam.agents.fsm.impl.AbstractRunner.Operation.RESTART
+import io.github.anitvam.agents.fsm.impl.AbstractRunner.Operation.STOP
 
 /**
  * Abstract implementation of a FSM [Runner].

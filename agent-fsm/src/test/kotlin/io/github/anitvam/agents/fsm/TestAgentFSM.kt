@@ -1,8 +1,8 @@
-package bidiai
+package io.github.anitvam.agents.fsm
 
-import bidiai.impl.State
-import bidiai.impl.SyncRunner
-import bidiai.impl.ThreadRunner
+import io.github.anitvam.agents.fsm.impl.State
+import io.github.anitvam.agents.fsm.impl.SyncRunner
+import io.github.anitvam.agents.fsm.impl.ThreadRunner
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.assertThrows

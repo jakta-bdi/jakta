@@ -1,7 +1,7 @@
-package bidiai.impl
+package io.github.anitvam.agents.fsm.impl
 
-import bidiai.Activity
-import bidiai.Promise
+import io.github.anitvam.agents.fsm.Activity
+import io.github.anitvam.agents.fsm.Promise
 import java.util.concurrent.Semaphore
 
 /**

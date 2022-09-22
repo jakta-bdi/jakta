@@ -1,4 +1,4 @@
-package bidiai
+package io.github.anitvam.agents.fsm
 
 /**
  * An [Activity] is something executed inside a final-state machine (FSM).

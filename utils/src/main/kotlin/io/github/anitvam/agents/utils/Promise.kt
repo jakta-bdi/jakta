@@ -1,4 +1,4 @@
-package bidiai
+package io.github.anitvam.agents.utils
 
 import java.util.concurrent.CompletableFuture
 

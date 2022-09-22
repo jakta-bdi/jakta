@@ -1,6 +1,6 @@
-package bidiai
+package io.github.anitvam.agents.fsm
 
-import bidiai.impl.State
+import io.github.anitvam.agents.fsm.impl.State
 
 /**
  * A [Runner] defines a Final-State Machine (FSM) lifecycle logic.

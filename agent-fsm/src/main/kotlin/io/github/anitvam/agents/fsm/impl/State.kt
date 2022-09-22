@@ -1,4 +1,4 @@
-package bidiai.impl
+package io.github.anitvam.agents.fsm.impl
 
 /**
  * State values that an FSM can hold.
