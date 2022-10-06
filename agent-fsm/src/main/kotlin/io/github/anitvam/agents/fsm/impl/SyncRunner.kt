@@ -1,7 +1,7 @@
 package io.github.anitvam.agents.fsm.impl
 
 import io.github.anitvam.agents.fsm.Activity
-import io.github.anitvam.agents.fsm.Promise
+import io.github.anitvam.agents.utils.Promise
 
 /**
  * [AbstractRunner] implementation that executes the FSM on the current thread.

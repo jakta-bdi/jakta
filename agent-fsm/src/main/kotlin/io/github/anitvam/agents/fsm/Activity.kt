@@ -1,5 +1,6 @@
 package io.github.anitvam.agents.fsm
 
+import io.github.anitvam.agents.fsm.impl.State
 /**
  * An [Activity] is something executed inside a final-state machine (FSM).
  */

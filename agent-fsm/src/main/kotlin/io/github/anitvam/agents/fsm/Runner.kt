@@ -1,6 +1,7 @@
 package io.github.anitvam.agents.fsm
 
 import io.github.anitvam.agents.fsm.impl.State
+import io.github.anitvam.agents.utils.Promise
 
 /**
  * A [Runner] defines a Final-State Machine (FSM) lifecycle logic.
