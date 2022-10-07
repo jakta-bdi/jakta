@@ -14,11 +14,23 @@ interface BeliefBase {
 
     val beliefs: ClauseMultiSet
 
-    /** Adds a [Belief] to this [BeliefBase] **/
-    fun add(belief: Belief): BeliefBase
+    /**
+     * Adds a [Belief] to this [BeliefBase]
+     * @param belief: the [Belief] to be added
+     * @param onAdditionPerformed: the callback that will be invoked when the addition is performed, it takes the
+     * added belief as a parameter. By default, it does nothing.
+     * @return the updated [BeliefBase]
+     **/
+    fun add(belief: Belief, onAdditionPerformed: (addedBelief: Belief) -> Unit = {}): BeliefBase
 
-    /** Adds all the given [Belief] to this [BeliefBase] **/
-    fun addAll(beliefs: Iterable<Belief>): BeliefBase
+    /**
+     * Adds all the given [Belief] to this [BeliefBase]
+     * @param beliefs: the collection of [Belief] to be added
+     * @param onAdditionPerformed: the callback that will be invoked when each addition is performed, it takes the
+     * added belief as a parameter. By default, it does nothing.
+     * @return the updated [BeliefBase]
+     **/
+    fun addAll(beliefs: Iterable<Belief>, onAdditionPerformed: (addedBelief: Belief) -> Unit = {}): BeliefBase
 
     /** Retrieves the first unifying [Belief] from this [BeliefBase] as a [RetrieveResult]**/
     fun retrieve(belief: Belief): RetrieveResult<out ClauseMultiSet>
@@ -28,9 +40,12 @@ interface BeliefBase {
 
     /**
      * Removes a [Belief] from the [BeliefBase]
+     * @param belief: the [Belief] to be removed
+     * @param onRemovalPerformed: the callback that will be invoked when the removal is performed, it takes the
+     * added belief as a parameter. By default, it does nothing.
      * @return the updated [BeliefBase]
      */
-    fun remove(belief: Belief): BeliefBase
+    fun remove(belief: Belief, onRemovalPerformed: (removedBelief: Belief) -> Unit = {}): BeliefBase
 
     companion object {
         fun empty(): BeliefBase = BeliefBaseImpl(ClauseMultiSet.empty())
