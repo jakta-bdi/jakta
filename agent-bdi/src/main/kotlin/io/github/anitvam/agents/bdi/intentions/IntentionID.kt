@@ -1,8 +1,8 @@
-package io.github.anitvam.agents.bdi
+package io.github.anitvam.agents.bdi.intentions
 
 import java.util.UUID
 
-data class PlanID(val id: String = generateId()) {
+data class IntentionID(val id: String = generateId()) {
     companion object {
         private fun generateId(): String = UUID.randomUUID().toString()
     }

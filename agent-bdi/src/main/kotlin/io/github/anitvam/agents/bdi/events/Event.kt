@@ -1,6 +1,6 @@
 package io.github.anitvam.agents.bdi.events
 
-import io.github.anitvam.agents.bdi.IntentionID
+import io.github.anitvam.agents.bdi.intentions.IntentionID
 import io.github.anitvam.agents.bdi.events.impl.EventImpl
 
 /**
@@ -27,11 +27,3 @@ interface Event {
         fun of(trigger: Trigger, intention: IntentionID? = null) = EventImpl(trigger, intention)
     }
 }
-
-/**
- * The collection of [Event] that the BDI Agent reacts on.
- *
- * As in Jason, Events are modeled with a FIFO queue. Users can provide an agent-specific event selection function,
- * that handle how an event is chosen from the queue.
- */
-typealias Events = List<Event>

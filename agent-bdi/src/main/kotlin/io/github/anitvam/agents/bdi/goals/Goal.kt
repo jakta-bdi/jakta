@@ -1,4 +1,4 @@
-package io.github.anitvam.agents.bdi
+package io.github.anitvam.agents.bdi.goals
 
 import java.sql.Struct
 

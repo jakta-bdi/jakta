@@ -1,9 +1,8 @@
 package io.github.anitvam.agents.bdi
 
 import io.github.anitvam.agents.bdi.beliefs.BeliefBase
-import io.github.anitvam.agents.bdi.events.Events
+import io.github.anitvam.agents.bdi.events.EventQueue
 import io.github.anitvam.agents.bdi.impl.AgentContextImpl
-
 
 /**
  * The Context is the actual state of a BDI Agent's structures.
@@ -14,7 +13,7 @@ interface AgentContext {
     val beliefBase: BeliefBase
 
     /** [Events] on which the BDI Agent reacts */
-    val events: Events
+    val events: EventQueue
 
     /**
      * Belief Update Function (BUF): Function that updates the current [BeliefBase] of the Agent with its new
@@ -24,6 +23,6 @@ interface AgentContext {
     fun buf(perceptions: BeliefBase): AgentContext
 
     companion object {
-        fun of(beliefBase: BeliefBase, events: Events) = AgentContextImpl(beliefBase, events)
+        fun of(beliefBase: BeliefBase, events: EventQueue) = AgentContextImpl(beliefBase, events)
     }
 }

@@ -1,4 +1,7 @@
-package io.github.anitvam.agents.bdi
+package io.github.anitvam.agents.bdi.intentions
+
+import io.github.anitvam.agents.bdi.ActivationRecord
+import io.github.anitvam.agents.bdi.goals.Goal
 
 interface Intention {
     val recordStack: List<ActivationRecord>
