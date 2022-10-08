@@ -5,9 +5,13 @@ import io.github.anitvam.agents.bdi.beliefs.BeliefBase
 import it.unibo.tuprolog.core.Struct
 import io.github.anitvam.agents.bdi.events.BeliefBaseRevision.BeliefBaseRemoval
 import io.github.anitvam.agents.bdi.events.BeliefBaseRevision.BeliefBaseAddition
+import it.unibo.tuprolog.core.Clause
 
 /** [Trigger] denotes the change that took place for the [Event] generation */
 sealed interface Trigger {
+
+    val value: Clause
+
     companion object {
 
         /** Static Factory for [BeliefBaseAddition] trigger */
@@ -23,17 +27,18 @@ sealed interface BeliefBaseRevision: Trigger {
 
     /** The [Belief] that is inserted (or removed) from the [BeliefBase] */
     val belief: Belief
+        get() = value
 
     /** [BeliefBaseRevision] generated after a [Belief] addition to agent's [BeliefBase] */
-    class BeliefBaseAddition(override val belief: Belief) : BeliefBaseRevision
+    class BeliefBaseAddition(override val value: Belief) : BeliefBaseRevision
 
     /** [BeliefBaseRevision] generated after a [Belief] removal from agent's [BeliefBase] */
-    class BeliefBaseRemoval(override val belief: Belief) : BeliefBaseRevision
+    class BeliefBaseRemoval(override val value: Belief) : BeliefBaseRevision
 }
 
 sealed interface TestGoalTrigger : Trigger {
     val goal: Struct
-        get() = goal
+        get() = value
 }
 
 sealed interface TestGoalInvocation : TestGoalTrigger
