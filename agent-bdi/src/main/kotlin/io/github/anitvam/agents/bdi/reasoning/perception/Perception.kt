@@ -3,9 +3,7 @@ package io.github.anitvam.agents.bdi.reasoning.perception
 import io.github.anitvam.agents.bdi.beliefs.BeliefBase
 import io.github.anitvam.agents.bdi.reasoning.perception.impl.EmptyPerception
 
-/**
- * Component of a BDI Agent that let it perceive the environment.
- */
+/** Component of a BDI Agent that let it perceive the environment. */
 interface Perception {
 
     /**
@@ -15,9 +13,7 @@ interface Perception {
     fun percept(): BeliefBase
 
     companion object {
-        /**
-         * @return a [EmptyPerception]
-         */
+        /** @return a [EmptyPerception] */
         fun empty(): Perception = EmptyPerception()
     }
 }
