@@ -1,6 +1,6 @@
 package io.github.anitvam.agents.bdi.goals
 
-import java.sql.Struct
+import it.unibo.tuprolog.core.Struct
 
 sealed interface Goal {
     val value: Struct

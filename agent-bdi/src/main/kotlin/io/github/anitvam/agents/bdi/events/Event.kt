@@ -1,7 +1,10 @@
 package io.github.anitvam.agents.bdi.events
 
+import io.github.anitvam.agents.bdi.beliefs.Belief
 import io.github.anitvam.agents.bdi.intentions.IntentionID
 import io.github.anitvam.agents.bdi.events.impl.EventImpl
+import io.github.anitvam.agents.bdi.goals.Achieve
+import io.github.anitvam.agents.bdi.goals.Test
 
 /**
  * A BDI Agent can react to two types of Events: External and Internal.
@@ -24,6 +27,69 @@ interface Event {
     fun isExternal(): Boolean = intention != null
 
     companion object {
-        fun of(trigger: Trigger, intention: IntentionID? = null) = EventImpl(trigger, intention)
+        /**
+         * Generates a new [Event]
+         * @param trigger: the [Trigger] of the [Event]
+         * @param intention: if the event is internal, this parameter specifies the intention id where the event belongs.
+         * If the event is external, this value is set to null. It's default value is null.
+         * @return a new instance of [Event]
+         */
+        fun of(trigger: Trigger, intention: IntentionID? = null): EventImpl = EventImpl(trigger, intention)
+
+        /**
+         * Generates an [Event] with a [BeliefBaseAddition] trigger.
+         * @param belief: the belief that triggered this Event
+         * @param intention: if the event is internal, this parameter specifies the intention id where the event belongs.
+         * If the event is external, this value is set to null. It's default value is null.
+         * @return a new instance of [Event]
+         */
+        fun ofBeliefBaseAddition(belief: Belief, intention: IntentionID?) = of(BeliefBaseAddition(belief.head), intention)
+
+        /**
+         * Generates an [Event] with a [BeliefBaseRemoval] trigger.
+         * @param belief: the belief that triggered this Event
+         * @param intention: if the event is internal, this parameter specifies the intention id where the event belongs.
+         * If the event is external, this value is set to null. It's default value is null.
+         * @return a new instance of [Event]
+         */
+        fun ofBeliefBaseRemoval(belief: Belief, intention: IntentionID?) = of(BeliefBaseRemoval(belief.head), intention)
+
+        /**
+         * Generates an [Event] with a [TestGoalInvocation] trigger.
+         * @param testGoal: the [Test] Goal that triggered this Event
+         * @param intention: if the event is internal, this parameter specifies the intention id where the event belongs.
+         * If the event is external, this value is set to null. It's default value is null.
+         * @return a new instance of [Event]
+         */
+        fun ofTestGoalInvocation(testGoal: Test, intention: IntentionID?) = of(TestGoalInvocation(testGoal.value), intention)
+
+        /**
+         * Generates an [Event] with a [TestGoalFailure] trigger.
+         * @param testGoal: the [Test] Goal that triggered this Event
+         * @param intention: if the event is internal, this parameter specifies the intention id where the event belongs.
+         * If the event is external, this value is set to null. It's default value is null.
+         * @return a new instance of [Event]
+         */
+        fun ofTestGoalFailure(testGoal: Test, intention: IntentionID?) = of(TestGoalFailure(testGoal.value), intention)
+
+        /**
+         * Generates an [Event] with a [AchievementGoalInvocation] trigger.
+         * @param achievementGoal: the [Achieve] Goal that triggered this Event
+         * @param intention: if the event is internal, this parameter specifies the intention id where the event belongs.
+         * If the event is external, this value is set to null. It's default value is null.
+         * @return a new instance of [Event]
+         */
+        fun ofAchievementGoalInvocation(achievementGoal: Achieve, intention: IntentionID?) =
+            of(AchievementGoalInvocation(achievementGoal.value), intention)
+
+        /**
+         * Generates an [Event] with a [AchievementGoalFailure] trigger.
+         * @param achievementGoal: the [Achieve] Goal that triggered this Event
+         * @param intention: if the event is internal, this parameter specifies the intention id where the event belongs.
+         * If the event is external, this value is set to null. It's default value is null.
+         * @return a new instance of [Event]
+         */
+        fun ofAchievementGoalFailure(achievementGoal: Achieve, intention: IntentionID?) =
+            of(AchievementGoalFailure(achievementGoal.value), intention)
     }
 }
