@@ -61,6 +61,9 @@ interface BeliefBase {
      */
     fun filter(filter: (Belief) -> Boolean): BeliefBase
 
+    /** @return true whether the belief is contained inside the [BeliefBase], otherwise false */
+    fun contains(belief: Belief) : Boolean
+
     companion object {
         /** @return an empty [BeliefBase] */
         fun empty(): BeliefBase = BeliefBaseImpl(ClauseMultiSet.empty())

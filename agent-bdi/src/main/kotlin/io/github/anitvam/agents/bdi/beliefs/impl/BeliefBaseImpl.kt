@@ -52,4 +52,6 @@ internal class BeliefBaseImpl(private val beliefs: ClauseMultiSet): BeliefBase {
         return bSet
     }
 
+    override fun contains(belief: Belief): Boolean = beliefs.contains(belief)
+
 }
