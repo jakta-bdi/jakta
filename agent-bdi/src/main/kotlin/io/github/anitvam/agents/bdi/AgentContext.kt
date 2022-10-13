@@ -4,6 +4,7 @@ import io.github.anitvam.agents.bdi.beliefs.BeliefBase
 import io.github.anitvam.agents.bdi.events.EventQueue
 import io.github.anitvam.agents.bdi.events.Event
 import io.github.anitvam.agents.bdi.impl.AgentContextImpl
+import io.github.anitvam.agents.bdi.intentions.IntentionPool
 import io.github.anitvam.agents.bdi.plans.PlanLibrary
 import io.github.anitvam.agents.bdi.plans.Plan
 import io.github.anitvam.agents.bdi.reasoning.perception.Perception
@@ -25,6 +26,8 @@ interface AgentContext {
     /** [Plan]s collection of the BDI Agent */
     val planLibrary : PlanLibrary
 
+    val intentions: IntentionPool
+
     /**
      * Belief Update Function (BUF): Function that updates the current [BeliefBase] of the Agent with its new
      * perceptions from the environment.
@@ -32,7 +35,21 @@ interface AgentContext {
      */
     fun buf(perceptions: BeliefBase): AgentContext
 
+    fun copy(
+        beliefBase: BeliefBase = this.beliefBase,
+        events: EventQueue = this.events,
+        planLibrary: PlanLibrary = this.planLibrary,
+        perception: Perception = this.perception,
+        intentions: IntentionPool = this.intentions,
+    ): AgentContext = of(beliefBase, events, planLibrary, perception, intentions)
+
     companion object {
-        fun of(beliefBase: BeliefBase, events: EventQueue) = AgentContextImpl(beliefBase, events)
+        fun of(
+            beliefBase: BeliefBase = BeliefBase.empty(),
+            events: EventQueue = emptyList(),
+            planLibrary: PlanLibrary = TODO("empty"),
+            perception: Perception = TODO("empty"),
+            intentions: IntentionPool = TODO("empty")
+        ): AgentContext = AgentContextImpl(beliefBase, events, planLibrary, perception, intentions)
     }
 }

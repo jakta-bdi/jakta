@@ -20,6 +20,7 @@ dependencies {
     api(project(":utils"))
     api(libs.tuprolog.core)
     api(libs.tuprolog.theory)
+    implementation(libs.tuprolog.solve.classic)
 }
 
 kotlin {

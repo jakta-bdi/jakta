@@ -5,6 +5,7 @@ import io.github.anitvam.agents.bdi.beliefs.BeliefBase
 import io.github.anitvam.agents.bdi.events.Event
 import io.github.anitvam.agents.bdi.events.EventQueue
 import io.github.anitvam.agents.bdi.events.Trigger
+import io.github.anitvam.agents.bdi.intentions.IntentionPool
 import io.github.anitvam.agents.bdi.plans.PlanLibrary
 import io.github.anitvam.agents.bdi.reasoning.perception.Perception
 
@@ -14,6 +15,7 @@ class AgentContextImpl(
     override val events: EventQueue,
     override val planLibrary: PlanLibrary,
     override val perception: Perception,
+    override val intentions: IntentionPool
 ): AgentContext {
 
     override fun buf(perceptions: BeliefBase): AgentContext = when (perceptions == beliefBase) {

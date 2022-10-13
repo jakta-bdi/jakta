@@ -8,7 +8,7 @@ import io.github.anitvam.agents.bdi.reasoning.impl.SimpleIntentionSelectionFunct
 import io.github.anitvam.agents.bdi.reasoning.impl.SimplePlanSelectionFunction
 
 /** A selection function chose element of type T from a collection of them */
-interface SelectionFunction<T> {
+fun interface SelectionFunction<T> {
     /** Method that select an element of type [T] from a collection of them */
     fun select(collection: Iterable<T>): T
 }

@@ -5,7 +5,7 @@ import it.unibo.tuprolog.collections.ClauseMultiSet
 import it.unibo.tuprolog.collections.RetrieveResult
 
 /** A BDI Agent's collection of [Belief] */
-interface BeliefBase {
+interface BeliefBase : Iterable<Belief> {
     /**
      * Adds a [Belief] to this [BeliefBase]
      * @param belief: the [Belief] to be added
