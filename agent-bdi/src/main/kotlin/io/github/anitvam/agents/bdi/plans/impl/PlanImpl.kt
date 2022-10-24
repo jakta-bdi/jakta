@@ -1,10 +1,12 @@
-package io.github.anitvam.agents.bdi.plans
+package io.github.anitvam.agents.bdi.plans.impl
 
 import io.github.anitvam.agents.bdi.ActivationRecord
 import io.github.anitvam.agents.bdi.beliefs.BeliefBase
 import io.github.anitvam.agents.bdi.events.Event
 import io.github.anitvam.agents.bdi.events.Trigger
 import io.github.anitvam.agents.bdi.goals.Goal
+import io.github.anitvam.agents.bdi.plans.Plan
+import io.github.anitvam.agents.bdi.plans.PlanID
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.solve.Solver
 import it.unibo.tuprolog.theory.Theory

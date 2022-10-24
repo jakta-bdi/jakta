@@ -2,9 +2,13 @@ package io.github.anitvam.agents.bdi.plans
 
 import io.github.anitvam.agents.bdi.beliefs.BeliefBase
 import io.github.anitvam.agents.bdi.events.Event
+import io.github.anitvam.agents.bdi.plans.impl.PlanLibraryImpl
 
 interface PlanLibrary {
-    val plans: Set<Plan>
+    /**
+     * Like a standard practice in prolog, plans are ordered to let programmers know when the end of an eventual recursion happens.
+     */
+    val plans: List<Plan>
 
     /** @return all the relevant [Plan]s from a given [Event] */
     fun relevantPlans(event : Event) : PlanLibrary
@@ -13,6 +17,6 @@ interface PlanLibrary {
     fun applicablePlans(beliefBase: BeliefBase) : PlanLibrary
 
     companion object {
-        fun of(plans: Set<Plan>) = PlanLibraryImpl(plans)
+        fun of(plans: List<Plan>) = PlanLibraryImpl(plans)
     }
 }
