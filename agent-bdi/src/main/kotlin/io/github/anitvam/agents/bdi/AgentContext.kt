@@ -28,13 +28,6 @@ interface AgentContext {
 
     val intentions: IntentionPool
 
-    /**
-     * Belief Update Function (BUF): Function that updates the current [BeliefBase] of the Agent with its new
-     * perceptions from the environment.
-     * @return the updated [AgentContext]
-     */
-    fun buf(perceptions: BeliefBase): AgentContext
-
     fun copy(
         beliefBase: BeliefBase = this.beliefBase,
         events: EventQueue = this.events,
