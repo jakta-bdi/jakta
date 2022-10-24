@@ -24,12 +24,6 @@ interface BeliefBase : Iterable<Belief> {
      **/
     fun addAll(beliefs: BeliefBase, onAdditionPerformed: (addedBelief: Belief) -> Unit = {}): BeliefBase
 
-    /** Retrieves the first unifying [Belief] from this [BeliefBase] as a [RetrieveResult]**/
-    fun retrieve(belief: Belief): RetrieveResult<out ClauseMultiSet>
-
-    /** Retrieves all the unifying [Belief] from this [BeliefBase] as a [RetrieveResult]**/
-    fun retrieveAll(belief: Belief): RetrieveResult<out ClauseMultiSet>
-
     /**
      * Removes a [Belief] from the [BeliefBase]
      * @param belief: the [Belief] to be removed
@@ -47,22 +41,6 @@ interface BeliefBase : Iterable<Belief> {
      * @return the updated [BeliefBase]
      */
     fun removeAll(beliefs: BeliefBase, onRemovalPerformed: (removedBelief: Belief) -> Unit = {}): BeliefBase
-
-    /**
-     * Executes an action for each element of this [BeliefBase]
-     * @param action: the action to be executed
-     */
-    fun forEachBelief(action: (Belief) -> Unit)
-
-    /**
-     * Returns a [BeliefBase] containing only elements matching the given filter.
-     * @param filter: the predicate
-     * @return a new [BeliefBase] with the elements matching the filter
-     */
-    fun filter(filter: (Belief) -> Boolean): BeliefBase
-
-    /** @return true whether the belief is contained inside the [BeliefBase], otherwise false */
-    fun contains(belief: Belief) : Boolean
 
     companion object {
         /** @return an empty [BeliefBase] */
