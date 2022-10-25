@@ -2,6 +2,10 @@ package io.github.anitvam.agents.bdi.beliefs.impl
 
 import io.github.anitvam.agents.bdi.beliefs.*
 import it.unibo.tuprolog.collections.ClauseMultiSet
+import it.unibo.tuprolog.core.Struct
+import it.unibo.tuprolog.solve.Solution
+import it.unibo.tuprolog.solve.Solver
+import it.unibo.tuprolog.theory.Theory
 
 internal class BeliefBaseImpl(private val beliefs: ClauseMultiSet) : BeliefBase {
     override fun add(belief: Belief) = when (beliefs.count(belief)) {
@@ -39,4 +43,6 @@ internal class BeliefBaseImpl(private val beliefs: ClauseMultiSet) : BeliefBase 
     }
 
     override fun iterator(): Iterator<Belief> = beliefs.filterIsInstance<Belief>().iterator()
+
+    override fun solve(struct: Struct): Solution = Solver.prolog.solverOf(staticKb = Theory.of(beliefs)).solveOnce(struct)
 }

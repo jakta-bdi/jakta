@@ -2,6 +2,8 @@ package io.github.anitvam.agents.bdi.beliefs
 
 import io.github.anitvam.agents.bdi.beliefs.impl.BeliefBaseImpl
 import it.unibo.tuprolog.collections.ClauseMultiSet
+import it.unibo.tuprolog.core.Struct
+import it.unibo.tuprolog.solve.Solution
 
 /** A BDI Agent's collection of [Belief] */
 interface BeliefBase : Iterable<Belief> {
@@ -32,6 +34,8 @@ interface BeliefBase : Iterable<Belief> {
      * @return a [RetrieveResult] with the new [BeliefBase] and the removed [Belief]s
      */
     fun removeAll(beliefs: BeliefBase): RetrieveResult
+
+    fun solve(struct: Struct) : Solution
 
     companion object {
         /** @return an empty [BeliefBase] */
