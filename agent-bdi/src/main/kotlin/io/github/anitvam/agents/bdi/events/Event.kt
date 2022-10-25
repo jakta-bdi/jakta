@@ -5,6 +5,7 @@ import io.github.anitvam.agents.bdi.intentions.IntentionID
 import io.github.anitvam.agents.bdi.events.impl.EventImpl
 import io.github.anitvam.agents.bdi.goals.Achieve
 import io.github.anitvam.agents.bdi.goals.Test
+import io.github.anitvam.agents.bdi.intentions.Intention
 
 /**
  * A BDI Agent can react to two types of Events: External and Internal.
@@ -18,7 +19,7 @@ interface Event {
     val trigger: Trigger
 
     /** The Event's associated Intention. Its value is null if the Event is an External one. */
-    val intention: IntentionID?
+    val intention: Intention?
 
     /** @return true if this is an Internal Event, otherwise false. */
     fun isInternal(): Boolean = intention != null
@@ -34,7 +35,7 @@ interface Event {
          * If the event is external, this value is set to null. It's default value is null.
          * @return a new instance of [Event]
          */
-        fun of(trigger: Trigger, intention: IntentionID? = null) : Event = EventImpl(trigger, intention)
+        fun of(trigger: Trigger, intention: Intention? = null) : Event = EventImpl(trigger, intention)
 
         /**
          * Generates an [Event] with a [BeliefBaseAddition] trigger.
@@ -43,7 +44,7 @@ interface Event {
          * If the event is external, this value is set to null. It's default value is null.
          * @return a new instance of [Event]
          */
-        fun ofBeliefBaseAddition(belief: Belief, intention: IntentionID?) : Event =
+        fun ofBeliefBaseAddition(belief: Belief, intention: Intention?) : Event =
             of(BeliefBaseAddition(belief.head), intention)
 
         /**
@@ -53,7 +54,7 @@ interface Event {
          * If the event is external, this value is set to null. It's default value is null.
          * @return a new instance of [Event]
          */
-        fun ofBeliefBaseRemoval(belief: Belief, intention: IntentionID?) : Event =
+        fun ofBeliefBaseRemoval(belief: Belief, intention: Intention?) : Event =
             of(BeliefBaseRemoval(belief.head), intention)
 
         /**
@@ -63,7 +64,7 @@ interface Event {
          * If the event is external, this value is set to null. It's default value is null.
          * @return a new instance of [Event]
          */
-        fun ofTestGoalInvocation(testGoal: Test, intention: IntentionID?) : Event =
+        fun ofTestGoalInvocation(testGoal: Test, intention: Intention?) : Event =
             of(TestGoalInvocation(testGoal.value), intention)
 
         /**
@@ -73,7 +74,7 @@ interface Event {
          * If the event is external, this value is set to null. It's default value is null.
          * @return a new instance of [Event]
          */
-        fun ofTestGoalFailure(testGoal: Test, intention: IntentionID?) : Event =
+        fun ofTestGoalFailure(testGoal: Test, intention: Intention?) : Event =
             of(TestGoalFailure(testGoal.value), intention)
 
         /**
@@ -83,7 +84,7 @@ interface Event {
          * If the event is external, this value is set to null. It's default value is null.
          * @return a new instance of [Event]
          */
-        fun ofAchievementGoalInvocation(achievementGoal: Achieve, intention: IntentionID?) : Event =
+        fun ofAchievementGoalInvocation(achievementGoal: Achieve, intention: Intention?) : Event =
             of(AchievementGoalInvocation(achievementGoal.value), intention)
 
         /**
@@ -93,7 +94,7 @@ interface Event {
          * If the event is external, this value is set to null. It's default value is null.
          * @return a new instance of [Event]
          */
-        fun ofAchievementGoalFailure(achievementGoal: Achieve, intention: IntentionID?) : Event =
+        fun ofAchievementGoalFailure(achievementGoal: Achieve, intention: Intention?) : Event =
             of(AchievementGoalFailure(achievementGoal.value), intention)
     }
 }
