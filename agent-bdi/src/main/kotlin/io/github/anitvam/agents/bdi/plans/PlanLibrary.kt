@@ -17,8 +17,8 @@ interface PlanLibrary {
     fun applicablePlans(beliefBase: BeliefBase) : PlanLibrary
 
     companion object {
-        fun of(plans: List<Plan>) = PlanLibraryImpl(plans)
+        fun of(plans: List<Plan>) : PlanLibrary = PlanLibraryImpl(plans)
 
-        fun empty() = PlanLibraryImpl(emptyList())
+        fun empty() : PlanLibrary = PlanLibraryImpl(emptyList())
     }
 }

@@ -34,7 +34,7 @@ interface Event {
          * If the event is external, this value is set to null. It's default value is null.
          * @return a new instance of [Event]
          */
-        fun of(trigger: Trigger, intention: IntentionID? = null): EventImpl = EventImpl(trigger, intention)
+        fun of(trigger: Trigger, intention: IntentionID? = null) : Event = EventImpl(trigger, intention)
 
         /**
          * Generates an [Event] with a [BeliefBaseAddition] trigger.
@@ -43,7 +43,8 @@ interface Event {
          * If the event is external, this value is set to null. It's default value is null.
          * @return a new instance of [Event]
          */
-        fun ofBeliefBaseAddition(belief: Belief, intention: IntentionID?) = of(BeliefBaseAddition(belief.head), intention)
+        fun ofBeliefBaseAddition(belief: Belief, intention: IntentionID?) : Event =
+            of(BeliefBaseAddition(belief.head), intention)
 
         /**
          * Generates an [Event] with a [BeliefBaseRemoval] trigger.
@@ -52,7 +53,8 @@ interface Event {
          * If the event is external, this value is set to null. It's default value is null.
          * @return a new instance of [Event]
          */
-        fun ofBeliefBaseRemoval(belief: Belief, intention: IntentionID?) = of(BeliefBaseRemoval(belief.head), intention)
+        fun ofBeliefBaseRemoval(belief: Belief, intention: IntentionID?) : Event =
+            of(BeliefBaseRemoval(belief.head), intention)
 
         /**
          * Generates an [Event] with a [TestGoalInvocation] trigger.
@@ -61,7 +63,8 @@ interface Event {
          * If the event is external, this value is set to null. It's default value is null.
          * @return a new instance of [Event]
          */
-        fun ofTestGoalInvocation(testGoal: Test, intention: IntentionID?) = of(TestGoalInvocation(testGoal.value), intention)
+        fun ofTestGoalInvocation(testGoal: Test, intention: IntentionID?) : Event =
+            of(TestGoalInvocation(testGoal.value), intention)
 
         /**
          * Generates an [Event] with a [TestGoalFailure] trigger.
@@ -70,7 +73,8 @@ interface Event {
          * If the event is external, this value is set to null. It's default value is null.
          * @return a new instance of [Event]
          */
-        fun ofTestGoalFailure(testGoal: Test, intention: IntentionID?) = of(TestGoalFailure(testGoal.value), intention)
+        fun ofTestGoalFailure(testGoal: Test, intention: IntentionID?) : Event =
+            of(TestGoalFailure(testGoal.value), intention)
 
         /**
          * Generates an [Event] with a [AchievementGoalInvocation] trigger.
@@ -79,7 +83,7 @@ interface Event {
          * If the event is external, this value is set to null. It's default value is null.
          * @return a new instance of [Event]
          */
-        fun ofAchievementGoalInvocation(achievementGoal: Achieve, intention: IntentionID?) =
+        fun ofAchievementGoalInvocation(achievementGoal: Achieve, intention: IntentionID?) : Event =
             of(AchievementGoalInvocation(achievementGoal.value), intention)
 
         /**
@@ -89,7 +93,7 @@ interface Event {
          * If the event is external, this value is set to null. It's default value is null.
          * @return a new instance of [Event]
          */
-        fun ofAchievementGoalFailure(achievementGoal: Achieve, intention: IntentionID?) =
+        fun ofAchievementGoalFailure(achievementGoal: Achieve, intention: IntentionID?) : Event =
             of(AchievementGoalFailure(achievementGoal.value), intention)
     }
 }

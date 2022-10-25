@@ -14,7 +14,7 @@ import io.github.anitvam.agents.bdi.intentions.SchedulingResult
 import io.github.anitvam.agents.bdi.plans.Plan
 import io.github.anitvam.agents.bdi.plans.PlanLibrary
 
-class AgentImpl(context: AgentContext) : Agent {
+internal class AgentImpl(context: AgentContext) : Agent {
     override var context: AgentContext = context
         private set
 

@@ -10,7 +10,7 @@ import io.github.anitvam.agents.bdi.plans.PlanLibrary
 import io.github.anitvam.agents.bdi.reasoning.perception.Perception
 
 /** Implementation of Agent's [AgentContext] */
-class AgentContextImpl(
+internal class AgentContextImpl(
     override val beliefBase: BeliefBase,
     override val events: EventQueue,
     override val planLibrary: PlanLibrary,
