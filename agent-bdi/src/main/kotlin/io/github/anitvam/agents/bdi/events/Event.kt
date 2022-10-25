@@ -21,10 +21,10 @@ interface Event {
     val intention: IntentionID?
 
     /** @return true if this is an Internal Event, otherwise false. */
-    fun isInternal(): Boolean = intention == null
+    fun isInternal(): Boolean = intention != null
 
     /** @return true if this is an External Event, otherwise false. */
-    fun isExternal(): Boolean = intention != null
+    fun isExternal(): Boolean = intention == null
 
     companion object {
         /**
