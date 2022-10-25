@@ -40,9 +40,9 @@ interface AgentContext {
         fun of(
             beliefBase: BeliefBase = BeliefBase.empty(),
             events: EventQueue = emptyList(),
-            planLibrary: PlanLibrary = TODO("empty"),
-            perception: Perception = TODO("empty"),
-            intentions: IntentionPool = TODO("empty")
+            planLibrary: PlanLibrary = PlanLibrary.empty(),
+            perception: Perception = Perception.empty(),
+            intentions: IntentionPool = IntentionPool.empty(),
         ): AgentContext = AgentContextImpl(beliefBase, events, planLibrary, perception, intentions)
     }
 }
