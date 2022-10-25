@@ -1,6 +1,5 @@
 package io.github.anitvam.agents.bdi.plans
 
-import io.github.anitvam.agents.bdi.ActivationRecord
 import io.github.anitvam.agents.bdi.beliefs.BeliefBase
 import io.github.anitvam.agents.bdi.events.Event
 import io.github.anitvam.agents.bdi.events.Trigger

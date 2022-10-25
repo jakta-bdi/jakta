@@ -18,5 +18,7 @@ interface PlanLibrary {
 
     companion object {
         fun of(plans: List<Plan>) = PlanLibraryImpl(plans)
+
+        fun empty() = PlanLibraryImpl(emptyList())
     }
 }

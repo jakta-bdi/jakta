@@ -1,7 +1,6 @@
-package io.github.anitvam.agents.bdi
+package io.github.anitvam.agents.bdi.plans
 
 import io.github.anitvam.agents.bdi.goals.Goal
-import io.github.anitvam.agents.bdi.plans.PlanID
 
 interface ActivationRecord {
     val goalQueue: List<Goal>
