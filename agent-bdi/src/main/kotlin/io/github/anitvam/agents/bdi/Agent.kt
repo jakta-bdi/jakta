@@ -7,6 +7,7 @@ import io.github.anitvam.agents.bdi.events.Event
 import io.github.anitvam.agents.bdi.events.EventQueue
 import io.github.anitvam.agents.bdi.intentions.Intention
 import io.github.anitvam.agents.bdi.intentions.IntentionPool
+import io.github.anitvam.agents.bdi.intentions.SchedulingResult
 import io.github.anitvam.agents.bdi.plans.Plan
 import io.github.anitvam.agents.bdi.plans.PlanLibrary
 
@@ -76,11 +77,21 @@ interface Agent {
     /**
      * Step 9 of reasoning cycle: Selecting an Intention for Further Execution.
      * Given all agent's intentions, this Selection Function selects the intention to be scheduled to execution
-     * by the agent.
+     * by the agent. By default, this function implements Round Robin scheduling.
+     * @param intentions: the agent's [IntentionPool]
+     * @return a [SchedulingResult] with the updated [IntentionPool] and the [Intention] to execute
      */
-    fun scheduleIntention(intentions: IntentionPool): Intention
+    fun scheduleIntention(intentions: IntentionPool): SchedulingResult
+
+    /**
+     * Step 10 of reasoning cycle: Executing One step of an Intention.
+     * Depending on the formula on the top of the intention, the agent will execute the related action.
+     * @param intention: [Intention] on which the agent is currently focused
+     * @return the updated [Intention] after agent execution
+     */
     fun runIntention(intention: Intention): Intention
 
+    /** Performs the whole procedure (10 steps) of the BDI Agent's Reasoning Cycle. */
     fun reason()
 }
 

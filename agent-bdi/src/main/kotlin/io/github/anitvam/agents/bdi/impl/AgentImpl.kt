@@ -10,6 +10,7 @@ import io.github.anitvam.agents.bdi.events.EventQueue
 import io.github.anitvam.agents.bdi.events.Trigger
 import io.github.anitvam.agents.bdi.intentions.Intention
 import io.github.anitvam.agents.bdi.intentions.IntentionPool
+import io.github.anitvam.agents.bdi.intentions.SchedulingResult
 import io.github.anitvam.agents.bdi.plans.Plan
 import io.github.anitvam.agents.bdi.plans.PlanLibrary
 
@@ -46,16 +47,21 @@ class AgentImpl(context: AgentContext) : Agent {
 
     override fun selectApplicablePlan(plans: Iterable<Plan>) = plans.first()
 
-    override fun assignPlanToIntention(event: Event, plan: Plan, intentions: IntentionPool): Intention {
-        TODO("Not yet implemented")
+    override fun assignPlanToIntention(event: Event, plan: Plan, intentions: IntentionPool) = when (event.isExternal()) {
+        true -> Intention.of(plan)
+        false -> intentions[event.intention]!!.push(plan.toActivationRecord())
     }
 
-    override fun scheduleIntention(intentions: IntentionPool): Intention {
-        TODO("Not yet implemented")
+    override fun scheduleIntention(intentions: IntentionPool): SchedulingResult {
+        val nextIntention = intentions.nextIntention()
+        return SchedulingResult(intentions.pop(), nextIntention)
     }
 
     override fun runIntention(intention: Intention): Intention {
-        TODO("Not yet implemented")
+        when (intention.nextGoal()){
+            else -> {}
+        }
+        return intention.pop()
     }
 
     override fun reason() {
@@ -92,11 +98,15 @@ class AgentImpl(context: AgentContext) : Agent {
         val selectedPlan = selectApplicablePlan(applicablePlans)
 
         // STEP9: Select an Intention for Further Execution.
+        // Add plan to intentions
         val updatedIntention = assignPlanToIntention(selectedEvent, selectedPlan, context.intentions)
 
-        val newIntentionPool = context.intentions.update(updatedIntention)
+        var newIntentionPool = context.intentions.update(updatedIntention)
 
-        val scheduledIntention = scheduleIntention(newIntentionPool)
+        // Select intention to execute
+        val result = scheduleIntention(newIntentionPool)
+        val scheduledIntention = result.intentionToExecute
+        newIntentionPool = result.newIntentionPool
 
         // STEP10: Executing one Step on an Intention
         val runIntention = runIntention(scheduledIntention)
@@ -104,7 +114,7 @@ class AgentImpl(context: AgentContext) : Agent {
         context = context.copy(
             beliefBase = newBeliefBase,
             events = newEvents,
-            intentions = context.intentions.update(runIntention)
+            intentions = newIntentionPool.update(runIntention)
         )
     }
 }
