@@ -89,7 +89,7 @@ interface Agent {
      * @param intention: [Intention] on which the agent is currently focused
      * @return the updated [Intention] after agent execution
      */
-    fun runIntention(intention: Intention): Intention
+    fun runIntention(intention: Intention, context: AgentContext): AgentContext
 
     /** Performs the whole procedure (10 steps) of the BDI Agent's Reasoning Cycle. */
     fun reason()

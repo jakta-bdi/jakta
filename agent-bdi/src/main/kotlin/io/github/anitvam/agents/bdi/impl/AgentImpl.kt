@@ -8,6 +8,7 @@ import io.github.anitvam.agents.bdi.beliefs.RetrieveResult
 import io.github.anitvam.agents.bdi.events.Event
 import io.github.anitvam.agents.bdi.events.EventQueue
 import io.github.anitvam.agents.bdi.events.Trigger
+import io.github.anitvam.agents.bdi.goals.*
 import io.github.anitvam.agents.bdi.intentions.Intention
 import io.github.anitvam.agents.bdi.intentions.IntentionPool
 import io.github.anitvam.agents.bdi.intentions.SchedulingResult
@@ -57,11 +58,30 @@ internal class AgentImpl(context: AgentContext) : Agent {
         return SchedulingResult(intentions.pop(), nextIntention)
     }
 
-    override fun runIntention(intention: Intention): Intention {
-        when (intention.nextGoal()){
+    override fun runIntention(intention: Intention, context: AgentContext): AgentContext {
+        val nextGoal = intention.nextGoal()
+        return when (nextGoal){
+            is ActionGoal -> TODO()
+            is Achieve -> {
+                context.copy(events = context.events + Event.ofAchievementGoalInvocation(nextGoal, intention))
+                // The goal is not removed when the internal event is created but only when a plan to achieve
+                // the goal successfully finishes executing, because there could be variables on which perform substitution
+            }
+
+            is Test -> {
+                val solution = context.beliefBase.solve(nextGoal.value)
+                var newIntention = intention.pop()
+                when (solution.isYes) {
+                    true -> newIntention = Intention.of(recordStack = intention.recordStack.last().applySubstitution(solution.substitution))
+                    else -> {} //If fails with the bb, then will try for a relevant plan
+                }
+                context.copy()
+                // If the property is believed by the agent beliefs the intention goes straight to intentions
+                // The test goal is used to retrieve information from the belief base.
+            }
+            is BeliefGoal -> TODO()
             else -> {}
         }
-        return intention.pop()
     }
 
     override fun reason() {
