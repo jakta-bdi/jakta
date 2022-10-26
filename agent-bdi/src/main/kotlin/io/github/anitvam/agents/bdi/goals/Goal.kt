@@ -1,9 +1,12 @@
 package io.github.anitvam.agents.bdi.goals
 
 import it.unibo.tuprolog.core.Struct
+import it.unibo.tuprolog.core.Substitution
 
 sealed interface Goal {
     val value: Struct
+
+    fun applySubstitution(substitution: Substitution) : Goal
 }
 
 sealed interface BeliefGoal : Goal {
@@ -11,24 +14,40 @@ sealed interface BeliefGoal : Goal {
         get() = value
 }
 
-sealed interface AddBelief : BeliefGoal
+data class AddBelief(override val value: Struct) : BeliefGoal {
+    override fun applySubstitution(substitution: Substitution) = AddBelief(value.apply(substitution).castToStruct())
+}
 
-sealed interface RemoveBelief : BeliefGoal
+data class RemoveBelief(override val value: Struct) : BeliefGoal {
+    override fun applySubstitution(substitution: Substitution) = RemoveBelief(value.apply(substitution).castToStruct())
+}
 
-sealed interface UpdateBelief : BeliefGoal
+data class UpdateBelief(override val value: Struct) : BeliefGoal {
+    override fun applySubstitution(substitution: Substitution) = UpdateBelief(value.apply(substitution).castToStruct())
+}
 
 
-sealed interface Achieve : Goal
+data class Achieve(override val value: Struct) : Goal {
+    override fun applySubstitution(substitution: Substitution) = Achieve(value.apply(substitution).castToStruct())
+}
 
-sealed interface Test : Goal
+data class Test(override val value: Struct) : Goal {
+    override fun applySubstitution(substitution: Substitution) = Test(value.apply(substitution).castToStruct())
+}
 
-sealed interface Spawn : Goal
+data class Spawn(override val value: Struct) : Goal {
+    override fun applySubstitution(substitution: Substitution) = Spawn(value.apply(substitution).castToStruct())
+}
 
 sealed interface ActionGoal : Goal {
     val action: Struct
         get() = value
 }
 
-sealed interface Act : ActionGoal
+data class Act(override val value: Struct) : ActionGoal {
+    override fun applySubstitution(substitution: Substitution) = Act(value.apply(substitution).castToStruct())
+}
 
-sealed interface ActInternally : ActionGoal
+data class ActInternally(override val value: Struct) : ActionGoal {
+    override fun applySubstitution(substitution: Substitution) = ActInternally(value.apply(substitution).castToStruct())
+}
