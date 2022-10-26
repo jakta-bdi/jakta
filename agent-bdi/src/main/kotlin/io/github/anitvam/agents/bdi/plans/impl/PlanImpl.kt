@@ -21,11 +21,9 @@ internal data class PlanImpl(
     override fun isApplicable(event: Event, beliefBase: BeliefBase): Boolean {
         val mgu = event.trigger.value mguWith this.event.value
         val actualGuard = guard.apply(mgu).castToStruct()
-        return Solver.prolog.solverOf(staticKb = Theory.of(beliefBase)).solveOnce(actualGuard).isYes
+        return beliefBase.solve(actualGuard).isYes
     }
 
-    override fun toActivationRecord(): ActivationRecord {
-        TODO("Not yet implemented")
-    }
+    override fun toActivationRecord(): ActivationRecord = ActivationRecord.of(goals)
 
 }
