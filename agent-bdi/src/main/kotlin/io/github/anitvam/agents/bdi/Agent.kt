@@ -7,6 +7,8 @@ import io.github.anitvam.agents.bdi.impl.AgentImpl
 import io.github.anitvam.agents.bdi.intentions.IntentionPool
 import io.github.anitvam.agents.bdi.intentions.SchedulingResult
 import io.github.anitvam.agents.bdi.plans.Plan
+import io.github.anitvam.agents.bdi.plans.PlanLibrary
+import io.github.anitvam.agents.bdi.reasoning.perception.Perception
 
 interface Agent {
 
@@ -24,5 +26,12 @@ interface Agent {
 
     companion object {
         fun default(): Agent = AgentImpl(AgentContext.of())
+        fun of(
+            beliefBase: BeliefBase = BeliefBase.empty(),
+            events: EventQueue = emptyList(),
+            planLibrary: PlanLibrary = PlanLibrary.empty(),
+            perception: Perception = Perception.empty(),
+            intentions: IntentionPool = IntentionPool.empty(),
+        ): Agent = AgentImpl(AgentContext.of(beliefBase, events, planLibrary, perception, intentions))
     }
 }
