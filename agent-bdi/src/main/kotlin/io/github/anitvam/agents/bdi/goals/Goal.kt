@@ -1,5 +1,6 @@
 package io.github.anitvam.agents.bdi.goals
 
+import io.github.anitvam.agents.bdi.beliefs.Belief
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
 

@@ -4,6 +4,7 @@ import io.github.anitvam.agents.bdi.plans.ActivationRecord
 import io.github.anitvam.agents.bdi.goals.Goal
 import io.github.anitvam.agents.bdi.intentions.impl.IntentionImpl
 import io.github.anitvam.agents.bdi.plans.Plan
+import it.unibo.tuprolog.core.Substitution
 
 interface Intention {
     val recordStack: List<ActivationRecord>
@@ -21,6 +22,8 @@ interface Intention {
     fun pop(): Intention
 
     fun push(activationRecord: ActivationRecord): Intention
+
+    fun applySubstitution(substitution: Substitution): Intention
 
     fun copy(
         recordStack : List<ActivationRecord> = this.recordStack,
