@@ -9,8 +9,11 @@ import io.github.anitvam.agents.bdi.intentions.SchedulingResult
 import io.github.anitvam.agents.bdi.plans.Plan
 import io.github.anitvam.agents.bdi.plans.PlanLibrary
 import io.github.anitvam.agents.bdi.reasoning.perception.Perception
+import java.util.*
 
 interface Agent {
+
+    val name: String
 
     /** Snapshot of Agent's Actual State */
     val context: AgentContext
@@ -24,14 +27,25 @@ interface Agent {
     /** Intention Selection Function */
     fun scheduleIntention(intentions: IntentionPool): SchedulingResult
 
+    fun copy(
+        name: String = this.name,
+        agentContext: AgentContext = this.context,
+    ): Agent = of(name, agentContext.copy())
+
     companion object {
         fun default(): Agent = AgentImpl(AgentContext.of())
         fun of(
+            name: String = "Agent-"+ UUID.randomUUID(),
             beliefBase: BeliefBase = BeliefBase.empty(),
             events: EventQueue = emptyList(),
             planLibrary: PlanLibrary = PlanLibrary.empty(),
             perception: Perception = Perception.empty(),
             intentions: IntentionPool = IntentionPool.empty(),
-        ): Agent = AgentImpl(AgentContext.of(beliefBase, events, planLibrary, perception, intentions))
+        ): Agent = AgentImpl(AgentContext.of(beliefBase, events, planLibrary, perception, intentions), name)
+
+        fun of(
+            name: String = "Agent-"+ UUID.randomUUID(),
+            agentContext: AgentContext,
+        ): Agent  = AgentImpl(agentContext, name)
     }
 }
