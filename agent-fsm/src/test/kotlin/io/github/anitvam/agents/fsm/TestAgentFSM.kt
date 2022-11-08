@@ -13,7 +13,7 @@ class TestAgentFSM : DescribeSpec({
     describe("A Thread Agent") {
 
         it("should stop after controller.stop() invocation") {
-            lateinit var runner: ThreadRunner
+            lateinit var runner: Runner
 
             val agent = object : Activity {
                 override fun onBegin(controller: Activity.Controller) = runner.state shouldBe State.CREATED
@@ -24,7 +24,7 @@ class TestAgentFSM : DescribeSpec({
 
                 override fun onEnd(controller: Activity.Controller) = runner.state shouldBe State.RUNNING
             }
-            runner = ThreadRunner(agent)
+            runner = Runner.threadOf(agent)
             runner.isOver shouldBe false
             runner.state shouldBe State.CREATED
             val promise: Promise<Unit> = runner.run()
@@ -33,7 +33,7 @@ class TestAgentFSM : DescribeSpec({
         }
 
         it("should pause after controller.pause() invocation") {
-            lateinit var runner: ThreadRunner
+            lateinit var runner: Runner
             lateinit var c: Activity.Controller
 
             val agent = object : Activity {
@@ -44,7 +44,7 @@ class TestAgentFSM : DescribeSpec({
                 override fun onStep(controller: Activity.Controller) = controller.pause()
                 override fun onEnd(controller: Activity.Controller) = Unit
             }
-            runner = ThreadRunner(agent)
+            runner = Runner.threadOf(agent)
             runner.isOver shouldBe false
             runner.state shouldBe State.CREATED
             runner.run()
@@ -57,7 +57,7 @@ class TestAgentFSM : DescribeSpec({
         }
 
         it("should restart after controller.restart() invocation") {
-            lateinit var runner: ThreadRunner
+            lateinit var runner: Runner
             lateinit var c: Activity.Controller
             var beginCounter = 0
 
@@ -70,7 +70,7 @@ class TestAgentFSM : DescribeSpec({
                 override fun onStep(controller: Activity.Controller) = controller.pause()
                 override fun onEnd(controller: Activity.Controller) = Unit
             }
-            runner = ThreadRunner(agent)
+            runner = Runner.threadOf(agent)
             runner.run()
             Thread.sleep(2000)
             c.restart()
@@ -85,7 +85,7 @@ class TestAgentFSM : DescribeSpec({
                 override fun onStep(controller: Activity.Controller) = controller.stop()
                 override fun onEnd(controller: Activity.Controller) = controller.pause()
             }
-            val runner = ThreadRunner(agent)
+            val runner = Runner.threadOf(agent)
             val promise = runner.run()
             assertThrows<ExecutionException> { promise.get() }
         }
@@ -98,7 +98,7 @@ class TestAgentFSM : DescribeSpec({
                 override fun onStep(controller: Activity.Controller) = controller.pause()
                 override fun onEnd(controller: Activity.Controller) = Unit
             }
-            val runner = SyncRunner(agent)
+            val runner = Runner.syncOf(agent)
             val promise = runner.run()
             assertThrows<ExecutionException> { promise.get() }
         }
@@ -114,7 +114,7 @@ class TestAgentFSM : DescribeSpec({
                 }
                 override fun onEnd(controller: Activity.Controller) = Unit
             }
-            val runner = SyncRunner(agent)
+            val runner = Runner.syncOf(agent)
             runner.run()
         }
     }

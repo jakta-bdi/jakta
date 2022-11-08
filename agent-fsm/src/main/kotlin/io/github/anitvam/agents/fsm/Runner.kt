@@ -1,6 +1,8 @@
 package io.github.anitvam.agents.fsm
 
 import io.github.anitvam.agents.fsm.impl.State
+import io.github.anitvam.agents.fsm.impl.SyncRunner
+import io.github.anitvam.agents.fsm.impl.ThreadRunner
 import io.github.anitvam.agents.utils.Promise
 
 /**
@@ -33,4 +35,10 @@ interface Runner {
      * @return a [Promise] that is completed when FSM execution is ended.
      */
     fun run(): Promise<Unit>
+
+    companion object {
+        fun syncOf(activity: Activity): Runner = SyncRunner(activity)
+
+        fun threadOf(activity: Activity): Runner = ThreadRunner(activity)
+    }
 }

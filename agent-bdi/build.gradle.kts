@@ -18,6 +18,7 @@ dependencies {
     implementation(libs.kotlin.stdlib)
     testImplementation(libs.bundles.kotlin.testing)
     api(project(":utils"))
+    api(project(":agent-fsm"))
     api(libs.tuprolog.core)
     api(libs.tuprolog.theory)
     implementation(libs.tuprolog.solve.classic)
