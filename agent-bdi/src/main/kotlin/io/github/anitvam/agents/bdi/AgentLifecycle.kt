@@ -5,6 +5,7 @@ import io.github.anitvam.agents.bdi.beliefs.Belief
 import io.github.anitvam.agents.bdi.beliefs.RetrieveResult
 import io.github.anitvam.agents.bdi.events.Event
 import io.github.anitvam.agents.bdi.events.EventQueue
+import io.github.anitvam.agents.bdi.impl.AgentLifecycleImpl
 import io.github.anitvam.agents.bdi.intentions.Intention
 import io.github.anitvam.agents.bdi.intentions.IntentionPool
 import io.github.anitvam.agents.bdi.intentions.SchedulingResult
@@ -91,5 +92,8 @@ interface AgentLifecycle {
 
     /** Performs the whole procedure (10 steps) of the BDI Agent's Reasoning Cycle. */
     fun reason()
-}
 
+    companion object {
+        fun default(agent: Agent = Agent.default()): AgentLifecycle = AgentLifecycleImpl(agent)
+    }
+}

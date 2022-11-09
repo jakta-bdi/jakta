@@ -10,17 +10,21 @@ import io.github.anitvam.agents.bdi.beliefs.RetrieveResult
 import io.github.anitvam.agents.bdi.events.Event
 import io.github.anitvam.agents.bdi.events.EventQueue
 import io.github.anitvam.agents.bdi.events.Trigger
-import io.github.anitvam.agents.bdi.goals.*
+import io.github.anitvam.agents.bdi.goals.Test
+import io.github.anitvam.agents.bdi.goals.Achieve
+import io.github.anitvam.agents.bdi.goals.RemoveBelief
+import io.github.anitvam.agents.bdi.goals.BeliefGoal
+import io.github.anitvam.agents.bdi.goals.AddBelief
+import io.github.anitvam.agents.bdi.goals.ActionGoal
 import io.github.anitvam.agents.bdi.intentions.Intention
 import io.github.anitvam.agents.bdi.intentions.IntentionPool
-import io.github.anitvam.agents.bdi.intentions.SchedulingResult
 import io.github.anitvam.agents.bdi.plans.Plan
 import io.github.anitvam.agents.bdi.plans.PlanLibrary
 
 internal class AgentLifecycleImpl(val agent: Agent = Agent.default()) : AgentLifecycle {
     private var context: AgentContext = agent.context
 
-    override fun updateBelief(perceptions: BeliefBase, beliefBase: BeliefBase) : RetrieveResult =
+    override fun updateBelief(perceptions: BeliefBase, beliefBase: BeliefBase): RetrieveResult =
         when (perceptions == beliefBase) {
             false -> {
                 // 1. each literal l in p not currently in b is added to b
@@ -36,7 +40,10 @@ internal class AgentLifecycleImpl(val agent: Agent = Agent.default()) : AgentLif
                     }
                 }
 
-                RetrieveResult(rrAddition.modifiedBeliefs + rrRemoval.modifiedBeliefs, rrRemoval.updatedBeliefBase)
+                RetrieveResult(
+                    rrAddition.modifiedBeliefs + rrRemoval.modifiedBeliefs,
+                    rrRemoval.updatedBeliefBase,
+                )
             }
             else -> RetrieveResult(emptyList(), beliefBase)
         }
@@ -45,19 +52,21 @@ internal class AgentLifecycleImpl(val agent: Agent = Agent.default()) : AgentLif
 
     override fun selectRelevantPlans(event: Event, planLibrary: PlanLibrary) = planLibrary.relevantPlans(event)
 
-    override fun isPlanApplicable(event: Event, plan: Plan, beliefBase: BeliefBase) = plan.isApplicable(event, beliefBase)
+    override fun isPlanApplicable(event: Event, plan: Plan, beliefBase: BeliefBase) =
+        plan.isApplicable(event, beliefBase)
 
     override fun selectApplicablePlan(plans: Iterable<Plan>) = agent.selectApplicablePlan(plans)
 
-    override fun assignPlanToIntention(event: Event, plan: Plan, intentions: IntentionPool) = when (event.isExternal()) {
-        true -> Intention.of(plan)
-        false -> intentions[event.intention!!.id]!!.push(plan.toActivationRecord())
-    }
+    override fun assignPlanToIntention(event: Event, plan: Plan, intentions: IntentionPool) =
+        when (event.isExternal()) {
+            true -> Intention.of(plan)
+            false -> intentions[event.intention!!.id]!!.push(plan.toActivationRecord())
+        }
 
     override fun scheduleIntention(intentions: IntentionPool) = agent.scheduleIntention(intentions)
 
     override fun runIntention(intention: Intention, context: AgentContext): AgentContext =
-        when (val nextGoal = intention.nextGoal()){
+        when (val nextGoal = intention.nextGoal()) {
             is ActionGoal -> TODO("An action goal could be InternalAction and ExternalAction")
             is Achieve -> context.copy(events = context.events + Event.ofAchievementGoalInvocation(nextGoal, intention))
             is Test -> {
@@ -70,33 +79,31 @@ internal class AgentLifecycleImpl(val agent: Agent = Agent.default()) : AgentLif
                 context.copy(intentions = context.intentions.update(newIntention))
             }
             is BeliefGoal -> when (nextGoal) {
-                    is AddBelief -> {
-                        val retrieveResult = context.beliefBase.add(Belief.of(nextGoal.value))
-                        val newBeliefBase = retrieveResult.updatedBeliefBase
-                        val newEvents = generateEvents(context.events, retrieveResult.modifiedBeliefs)
-                        context.copy(beliefBase = newBeliefBase, events = newEvents)
-                    }
-                    is RemoveBelief -> {
-                        val retrieveResult = context.beliefBase.remove(Belief.of(nextGoal.value))
-                        val newBeliefBase = retrieveResult.updatedBeliefBase
-                        val newEvents = generateEvents(context.events, retrieveResult.modifiedBeliefs)
-                        context.copy(beliefBase = newBeliefBase, events = newEvents)
-                    }
-                    else -> TODO("Update BeliefBase value")
+                is AddBelief -> {
+                    val retrieveResult = context.beliefBase.add(Belief.of(nextGoal.value))
+                    val newBeliefBase = retrieveResult.updatedBeliefBase
+                    val newEvents = generateEvents(context.events, retrieveResult.modifiedBeliefs)
+                    context.copy(beliefBase = newBeliefBase, events = newEvents)
                 }
+                is RemoveBelief -> {
+                    val retrieveResult = context.beliefBase.remove(Belief.of(nextGoal.value))
+                    val newBeliefBase = retrieveResult.updatedBeliefBase
+                    val newEvents = generateEvents(context.events, retrieveResult.modifiedBeliefs)
+                    context.copy(beliefBase = newBeliefBase, events = newEvents)
+                }
+                else -> TODO("Update BeliefBase value")
+            }
 
             else -> TODO("Spawn Goal ???")
         }
 
-
-    private fun generateEvents(events: EventQueue, modifiedBeliefs: List<BeliefUpdate>) : EventQueue =
+    private fun generateEvents(events: EventQueue, modifiedBeliefs: List<BeliefUpdate>): EventQueue =
         events + modifiedBeliefs.map {
             when (it.updateType) {
                 BeliefUpdate.UpdateType.REMOVAL -> Event.of(Trigger.ofBeliefBaseRemoval(it.belief))
                 BeliefUpdate.UpdateType.ADDITION -> Event.of(Trigger.ofBeliefBaseAddition(it.belief))
             }
         }
-
 
     override fun reason() {
         // STEP1: Perceive the Environment
@@ -138,11 +145,13 @@ internal class AgentLifecycleImpl(val agent: Agent = Agent.default()) : AgentLif
         newIntentionPool = result.newIntentionPool
 
         // STEP10: Executing one Step on an Intention
-        runIntention(scheduledIntention,
+        runIntention(
+            scheduledIntention,
             context.copy(
-                beliefBase = newBeliefBase,
                 events = newEvents,
-            ))
-
+                beliefBase = newBeliefBase,
+                intentions = newIntentionPool,
+            )
+        )
     }
 }
