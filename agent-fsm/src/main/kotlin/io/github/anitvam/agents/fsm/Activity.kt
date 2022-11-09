@@ -1,5 +1,6 @@
 package io.github.anitvam.agents.fsm
 
+import io.github.anitvam.agents.fsm.impl.ActivityImpl
 import io.github.anitvam.agents.fsm.impl.State
 /**
  * An [Activity] is something executed inside a final-state machine (FSM).
@@ -49,5 +50,13 @@ interface Activity {
          * Triggers a FSM state transition into [State.STOPPED] when possible.
          */
         fun stop()
+    }
+
+    companion object {
+        fun of(
+            onBeginProcedure: (controller: Controller) -> Unit = {},
+            onEndProcedure: (controller: Controller) -> Unit = {},
+            onStepProcedure: (controller: Controller) -> Unit = {},
+        ): Activity = ActivityImpl(onBeginProcedure, onStepProcedure, onEndProcedure)
     }
 }

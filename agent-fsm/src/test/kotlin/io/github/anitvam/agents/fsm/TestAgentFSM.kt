@@ -1,8 +1,6 @@
 package io.github.anitvam.agents.fsm
 
 import io.github.anitvam.agents.fsm.impl.State
-import io.github.anitvam.agents.fsm.impl.SyncRunner
-import io.github.anitvam.agents.fsm.impl.ThreadRunner
 import io.github.anitvam.agents.utils.Promise
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
@@ -15,16 +13,14 @@ class TestAgentFSM : DescribeSpec({
         it("should stop after controller.stop() invocation") {
             lateinit var runner: Runner
 
-            val agent = object : Activity {
-                override fun onBegin(controller: Activity.Controller) = runner.state shouldBe State.CREATED
+            runner = Runner.threadOf(
+                Activity.of(
+                    onBeginProcedure = { runner.state shouldBe State.CREATED },
+                    onStepProcedure = { it.stop() },
+                    onEndProcedure = { runner.state shouldBe State.RUNNING },
+                )
+            )
 
-                override fun onStep(controller: Activity.Controller) {
-                    controller.stop()
-                }
-
-                override fun onEnd(controller: Activity.Controller) = runner.state shouldBe State.RUNNING
-            }
-            runner = Runner.threadOf(agent)
             runner.isOver shouldBe false
             runner.state shouldBe State.CREATED
             val promise: Promise<Unit> = runner.run()
@@ -36,15 +32,13 @@ class TestAgentFSM : DescribeSpec({
             lateinit var runner: Runner
             lateinit var c: Activity.Controller
 
-            val agent = object : Activity {
-                override fun onBegin(controller: Activity.Controller) {
-                    c = controller
-                }
+            runner = Runner.threadOf(
+                Activity.of(
+                    onBeginProcedure = { c = it },
+                    onStepProcedure = { it.pause() },
+                )
+            )
 
-                override fun onStep(controller: Activity.Controller) = controller.pause()
-                override fun onEnd(controller: Activity.Controller) = Unit
-            }
-            runner = Runner.threadOf(agent)
             runner.isOver shouldBe false
             runner.state shouldBe State.CREATED
             runner.run()
@@ -57,21 +51,19 @@ class TestAgentFSM : DescribeSpec({
         }
 
         it("should restart after controller.restart() invocation") {
-            lateinit var runner: Runner
             lateinit var c: Activity.Controller
             var beginCounter = 0
 
-            val agent = object : Activity {
-                override fun onBegin(controller: Activity.Controller) {
-                    c = controller
-                    beginCounter ++
-                }
+            Runner.threadOf(
+                Activity.of(
+                    onBeginProcedure = {
+                        c = it
+                        beginCounter ++
+                    },
+                    onStepProcedure = { it.pause() },
+                )
+            ).run()
 
-                override fun onStep(controller: Activity.Controller) = controller.pause()
-                override fun onEnd(controller: Activity.Controller) = Unit
-            }
-            runner = Runner.threadOf(agent)
-            runner.run()
             Thread.sleep(2000)
             c.restart()
             Thread.sleep(1000)
@@ -80,42 +72,32 @@ class TestAgentFSM : DescribeSpec({
         }
 
         it("should throw ExecutionException containing an IllegalArgumentException") {
-            val agent = object : Activity {
-                override fun onBegin(controller: Activity.Controller) = Unit
-                override fun onStep(controller: Activity.Controller) = controller.stop()
-                override fun onEnd(controller: Activity.Controller) = controller.pause()
-            }
-            val runner = Runner.threadOf(agent)
-            val promise = runner.run()
+            val promise = Runner.threadOf(
+                Activity.of(
+                    onStepProcedure = { it.stop() },
+                    onEndProcedure = { it.pause() },
+                )
+            ).run()
             assertThrows<ExecutionException> { promise.get() }
         }
     }
 
     describe("A Sync Agent") {
         it("should not go on paused state") {
-            val agent = object : Activity {
-                override fun onBegin(controller: Activity.Controller) = Unit
-                override fun onStep(controller: Activity.Controller) = controller.pause()
-                override fun onEnd(controller: Activity.Controller) = Unit
-            }
-            val runner = Runner.syncOf(agent)
-            val promise = runner.run()
+            val promise = Runner.syncOf(
+                Activity.of { it.pause() }
+            ).run()
             assertThrows<ExecutionException> { promise.get() }
         }
 
         it("should be run on the same thread of the invoker") {
             val invokerThread = Thread.currentThread()
-
-            val agent = object : Activity {
-                override fun onBegin(controller: Activity.Controller) = Unit
-                override fun onStep(controller: Activity.Controller) {
+            Runner.syncOf(
+                Activity.of {
                     Thread.currentThread() shouldBe invokerThread
-                    controller.stop()
+                    it.stop()
                 }
-                override fun onEnd(controller: Activity.Controller) = Unit
-            }
-            val runner = Runner.syncOf(agent)
-            runner.run()
+            ).run()
         }
     }
 })
