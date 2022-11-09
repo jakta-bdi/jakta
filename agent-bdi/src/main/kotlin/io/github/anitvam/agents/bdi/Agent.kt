@@ -22,7 +22,7 @@ interface Agent {
     fun selectEvent(events: EventQueue): Event
 
     /** Plan Selection Function */
-    fun selectApplicablePlan(plans:Iterable<Plan>): Plan
+    fun selectApplicablePlan(plans: Iterable<Plan>): Plan
 
     /** Intention Selection Function */
     fun scheduleIntention(intentions: IntentionPool): SchedulingResult
@@ -35,7 +35,7 @@ interface Agent {
     companion object {
         fun default(): Agent = AgentImpl(AgentContext.of())
         fun of(
-            name: String = "Agent-"+ UUID.randomUUID(),
+            name: String = "Agent-" + UUID.randomUUID(),
             beliefBase: BeliefBase = BeliefBase.empty(),
             events: EventQueue = emptyList(),
             planLibrary: PlanLibrary = PlanLibrary.empty(),
@@ -44,8 +44,8 @@ interface Agent {
         ): Agent = AgentImpl(AgentContext.of(beliefBase, events, planLibrary, perception, intentions), name)
 
         fun of(
-            name: String = "Agent-"+ UUID.randomUUID(),
+            name: String = "Agent-" + UUID.randomUUID(),
             agentContext: AgentContext,
-        ): Agent  = AgentImpl(agentContext, name)
+        ): Agent = AgentImpl(agentContext, name)
     }
 }

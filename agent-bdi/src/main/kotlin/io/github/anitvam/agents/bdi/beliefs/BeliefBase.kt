@@ -35,7 +35,7 @@ interface BeliefBase : Iterable<Belief> {
      */
     fun removeAll(beliefs: BeliefBase): RetrieveResult
 
-    fun solve(struct: Struct) : Solution
+    fun solve(struct: Struct): Solution
 
     companion object {
         /** @return an empty [BeliefBase] */

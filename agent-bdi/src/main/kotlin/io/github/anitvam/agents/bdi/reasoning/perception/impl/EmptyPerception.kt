@@ -4,6 +4,6 @@ import io.github.anitvam.agents.bdi.beliefs.BeliefBase
 import io.github.anitvam.agents.bdi.reasoning.perception.Perception
 
 /** [Perception] that returns an empty [BeliefBase] */
-internal class EmptyPerception: Perception {
+internal class EmptyPerception : Perception {
     override fun percept(): BeliefBase = BeliefBase.empty()
 }

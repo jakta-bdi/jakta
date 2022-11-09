@@ -23,6 +23,3 @@ data class BeliefUpdate(
         REMOVAL,
     }
 }
-
-
-

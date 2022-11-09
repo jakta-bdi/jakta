@@ -1,13 +1,12 @@
 package io.github.anitvam.agents.bdi.goals
 
-import io.github.anitvam.agents.bdi.beliefs.Belief
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
 
 sealed interface Goal {
     val value: Struct
 
-    fun applySubstitution(substitution: Substitution) : Goal
+    fun applySubstitution(substitution: Substitution): Goal
 }
 
 sealed interface BeliefGoal : Goal {
@@ -26,7 +25,6 @@ data class RemoveBelief(override val value: Struct) : BeliefGoal {
 data class UpdateBelief(override val value: Struct) : BeliefGoal {
     override fun applySubstitution(substitution: Substitution) = UpdateBelief(value.apply(substitution).castToStruct())
 }
-
 
 data class Achieve(override val value: Struct) : Goal {
     override fun applySubstitution(substitution: Substitution) = Achieve(value.apply(substitution).castToStruct())

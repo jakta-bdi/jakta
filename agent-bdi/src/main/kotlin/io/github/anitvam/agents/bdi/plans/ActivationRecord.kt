@@ -14,6 +14,6 @@ interface ActivationRecord {
     fun applySubstitution(substitution: Substitution): ActivationRecord
 
     companion object {
-        fun of(goals: List<Goal>) : ActivationRecord = ActivationRecordImpl(goals)
+        fun of(goals: List<Goal>): ActivationRecord = ActivationRecordImpl(goals)
     }
 }

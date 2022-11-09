@@ -11,14 +11,14 @@ interface PlanLibrary {
     val plans: List<Plan>
 
     /** @return all the relevant [Plan]s from a given [Event] */
-    fun relevantPlans(event : Event) : PlanLibrary
+    fun relevantPlans(event: Event): PlanLibrary
 
     /** @return all the applicable [Plan]s in the agent with the specified [BeliefBase] */
-    fun applicablePlans(beliefBase: BeliefBase) : PlanLibrary
+    fun applicablePlans(beliefBase: BeliefBase): PlanLibrary
 
     companion object {
-        fun of(plans: List<Plan>) : PlanLibrary = PlanLibraryImpl(plans)
+        fun of(plans: List<Plan>): PlanLibrary = PlanLibraryImpl(plans)
 
-        fun empty() : PlanLibrary = PlanLibraryImpl(emptyList())
+        fun empty(): PlanLibrary = PlanLibraryImpl(emptyList())
     }
 }

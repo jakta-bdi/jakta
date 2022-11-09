@@ -16,4 +16,3 @@ interface Plan {
 
     fun toActivationRecord(): ActivationRecord
 }
-

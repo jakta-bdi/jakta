@@ -24,7 +24,7 @@ interface AgentContext {
     val perception: Perception
 
     /** [Plan]s collection of the BDI Agent */
-    val planLibrary : PlanLibrary
+    val planLibrary: PlanLibrary
 
     val intentions: IntentionPool
 

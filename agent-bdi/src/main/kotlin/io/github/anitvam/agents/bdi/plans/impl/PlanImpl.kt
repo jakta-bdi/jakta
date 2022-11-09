@@ -8,8 +8,6 @@ import io.github.anitvam.agents.bdi.goals.Goal
 import io.github.anitvam.agents.bdi.plans.Plan
 import io.github.anitvam.agents.bdi.plans.PlanID
 import it.unibo.tuprolog.core.Struct
-import it.unibo.tuprolog.solve.Solver
-import it.unibo.tuprolog.theory.Theory
 import it.unibo.tuprolog.unify.Unificator.Companion.mguWith
 
 internal data class PlanImpl(
@@ -25,5 +23,4 @@ internal data class PlanImpl(
     }
 
     override fun toActivationRecord(): ActivationRecord = ActivationRecord.of(goals)
-
 }

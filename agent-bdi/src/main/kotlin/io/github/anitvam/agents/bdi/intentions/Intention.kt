@@ -26,18 +26,18 @@ interface Intention {
     fun applySubstitution(substitution: Substitution): Intention
 
     fun copy(
-        recordStack : List<ActivationRecord> = this.recordStack,
-        isSuspended : Boolean = this.isSuspended,
-        id : IntentionID = this.id,
-    ) : Intention = of(recordStack, isSuspended, id)
+        recordStack: List<ActivationRecord> = this.recordStack,
+        isSuspended: Boolean = this.isSuspended,
+        id: IntentionID = this.id,
+    ): Intention = of(recordStack, isSuspended, id)
 
     companion object {
-        fun of(plan : Plan) : Intention = IntentionImpl(listOf(plan.toActivationRecord()))
+        fun of(plan: Plan): Intention = IntentionImpl(listOf(plan.toActivationRecord()))
 
         fun of(
             recordStack: List<ActivationRecord> = emptyList(),
             isSuspended: Boolean = false,
-            id : IntentionID = IntentionID(),
-        ) : Intention = IntentionImpl(recordStack, isSuspended, id)
+            id: IntentionID = IntentionID(),
+        ): Intention = IntentionImpl(recordStack, isSuspended, id)
     }
 }

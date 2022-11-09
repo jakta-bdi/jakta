@@ -12,6 +12,6 @@ interface IntentionPool : Map<IntentionID, Intention> {
     operator fun minus(id: IntentionID): IntentionPool
 
     companion object {
-        fun empty() : IntentionPool = IntentionPoolImpl()
+        fun empty(): IntentionPool = IntentionPoolImpl()
     }
 }
