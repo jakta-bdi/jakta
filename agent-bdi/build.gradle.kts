@@ -46,8 +46,8 @@ tasks.test {
     }
 }
 
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(libs.versions.java.toolchain.get()))
+tasks.detekt {
+    onlyIf {
+        project.hasProperty("runDetect")
     }
 }
