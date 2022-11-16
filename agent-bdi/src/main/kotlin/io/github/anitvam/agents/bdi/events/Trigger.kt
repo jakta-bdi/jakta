@@ -35,6 +35,8 @@ class BeliefBaseAddition(override val value: Struct) : BeliefBaseRevision
 /** [BeliefBaseRevision] generated after a [Belief] removal from agent's [BeliefBase]. */
 class BeliefBaseRemoval(override val value: Struct) : BeliefBaseRevision
 
+class BeliefBaseUpdate(override val value: Struct) : BeliefBaseRevision
+
 /** [Trigger] of an event made by a [Test] Goal. */
 sealed interface TestGoalTrigger : Trigger {
     val goal: Struct
