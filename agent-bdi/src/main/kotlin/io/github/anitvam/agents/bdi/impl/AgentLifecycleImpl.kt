@@ -16,6 +16,8 @@ import io.github.anitvam.agents.bdi.goals.RemoveBelief
 import io.github.anitvam.agents.bdi.goals.BeliefGoal
 import io.github.anitvam.agents.bdi.goals.AddBelief
 import io.github.anitvam.agents.bdi.goals.ActionGoal
+import io.github.anitvam.agents.bdi.goals.Spawn
+import io.github.anitvam.agents.bdi.goals.UpdateBelief
 import io.github.anitvam.agents.bdi.intentions.Intention
 import io.github.anitvam.agents.bdi.intentions.IntentionPool
 import io.github.anitvam.agents.bdi.plans.Plan
@@ -68,33 +70,46 @@ internal class AgentLifecycleImpl(val agent: Agent = Agent.default()) : AgentLif
     override fun runIntention(intention: Intention, context: AgentContext): AgentContext =
         when (val nextGoal = intention.nextGoal()) {
             is ActionGoal -> TODO("An action goal could be InternalAction and ExternalAction")
-            is Achieve -> context.copy(events = context.events + Event.ofAchievementGoalInvocation(nextGoal, intention))
+            is Spawn -> context.copy(
+                events = context.events + Event.ofAchievementGoalInvocation(Achieve(nextGoal.value)),
+            )
+            is Achieve -> context.copy(
+                events = context.events + Event.ofAchievementGoalInvocation(nextGoal, intention),
+                intentions = context.intentions - intention.id,
+            )
             is Test -> {
                 val solution = context.beliefBase.solve(nextGoal.value)
                 var newIntention = intention.pop()
                 when (solution.isYes) {
                     true -> newIntention = newIntention.applySubstitution(solution.substitution)
-                    else -> TODO("If fails with the bb, then will try for a relevant plan")
+                    else -> TODO("If fails with the bb")
                 }
                 context.copy(intentions = context.intentions.update(newIntention))
             }
             is BeliefGoal -> when (nextGoal) {
                 is AddBelief -> {
                     val retrieveResult = context.beliefBase.add(Belief.of(nextGoal.value))
-                    val newBeliefBase = retrieveResult.updatedBeliefBase
-                    val newEvents = generateEvents(context.events, retrieveResult.modifiedBeliefs)
-                    context.copy(beliefBase = newBeliefBase, events = newEvents)
+                    context.copy(
+                        beliefBase = retrieveResult.updatedBeliefBase,
+                        events = generateEvents(context.events, retrieveResult.modifiedBeliefs),
+                    )
                 }
                 is RemoveBelief -> {
                     val retrieveResult = context.beliefBase.remove(Belief.of(nextGoal.value))
-                    val newBeliefBase = retrieveResult.updatedBeliefBase
-                    val newEvents = generateEvents(context.events, retrieveResult.modifiedBeliefs)
-                    context.copy(beliefBase = newBeliefBase, events = newEvents)
+                    context.copy(
+                        beliefBase = retrieveResult.updatedBeliefBase,
+                        events = generateEvents(context.events, retrieveResult.modifiedBeliefs),
+                    )
                 }
-                else -> TODO("Update BeliefBase value")
+                is UpdateBelief -> {
+                    var retrieveResult = context.beliefBase.remove(Belief.of(nextGoal.value))
+                    retrieveResult = retrieveResult.updatedBeliefBase.add(Belief.of(nextGoal.value))
+                    context.copy(
+                        beliefBase = retrieveResult.updatedBeliefBase,
+                        events = generateEvents(context.events, retrieveResult.modifiedBeliefs)
+                    )
+                }
             }
-
-            else -> TODO("Spawn Goal ???")
         }
 
     private fun generateEvents(events: EventQueue, modifiedBeliefs: List<BeliefUpdate>): EventQueue =
