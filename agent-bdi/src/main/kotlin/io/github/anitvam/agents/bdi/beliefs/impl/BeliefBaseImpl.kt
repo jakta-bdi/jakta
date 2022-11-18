@@ -20,12 +20,13 @@ internal class BeliefBaseImpl(private val beliefs: ClauseMultiSet) : BeliefBase 
 
     override fun addAll(beliefs: BeliefBase): RetrieveResult {
         var addedBeliefs = emptyList<BeliefUpdate>()
-        var rr = RetrieveResult(addedBeliefs, this)
+        var bb: BeliefBase = this
         beliefs.forEach {
-            rr = add(it)
+            val rr = bb.add(it)
             addedBeliefs = addedBeliefs + rr.modifiedBeliefs
+            bb = rr.updatedBeliefBase
         }
-        return RetrieveResult(addedBeliefs, rr.updatedBeliefBase)
+        return RetrieveResult(addedBeliefs, bb)
     }
 
     override fun hashCode() = beliefs.hashCode()
@@ -38,12 +39,13 @@ internal class BeliefBaseImpl(private val beliefs: ClauseMultiSet) : BeliefBase 
 
     override fun removeAll(beliefs: BeliefBase): RetrieveResult {
         var removedBeliefs = emptyList<BeliefUpdate>()
-        var rr = RetrieveResult(removedBeliefs, this)
+        var bb: BeliefBase = this
         beliefs.forEach {
-            rr = remove(it)
+            val rr = bb.remove(it)
             removedBeliefs = removedBeliefs + rr.modifiedBeliefs
+            bb = rr.updatedBeliefBase
         }
-        return RetrieveResult(removedBeliefs, rr.updatedBeliefBase)
+        return RetrieveResult(removedBeliefs, bb)
     }
 
     override fun iterator(): Iterator<Belief> = beliefs.filterIsInstance<Belief>().iterator()

@@ -46,6 +46,10 @@ interface BeliefBase : Iterable<Belief> {
          * @param beliefs: the [Iterable] of [Belief] the [BeliefBase] will be composed of
          * @return the new [BeliefBase]
          */
-        fun of(beliefs: Iterable<Belief>): BeliefBase = BeliefBaseImpl(ClauseMultiSet.of(beliefs))
+        fun of(beliefs: Iterable<Belief>): BeliefBase {
+            var bb = empty()
+            beliefs.forEach { bb = bb.add(it).updatedBeliefBase }
+            return bb
+        }
     }
 }
