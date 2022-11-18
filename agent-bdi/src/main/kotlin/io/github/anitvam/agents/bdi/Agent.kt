@@ -8,7 +8,7 @@ import io.github.anitvam.agents.bdi.intentions.IntentionPool
 import io.github.anitvam.agents.bdi.intentions.SchedulingResult
 import io.github.anitvam.agents.bdi.plans.Plan
 import io.github.anitvam.agents.bdi.plans.PlanLibrary
-import io.github.anitvam.agents.bdi.reasoning.perception.Perception
+import io.github.anitvam.agents.bdi.perception.Perception
 import java.util.*
 
 interface Agent {
@@ -33,7 +33,7 @@ interface Agent {
     ): Agent = of(name, agentContext.copy())
 
     companion object {
-        fun default(): Agent = AgentImpl(AgentContext.of())
+        fun empty(): Agent = AgentImpl(AgentContext.of())
         fun of(
             name: String = "Agent-" + UUID.randomUUID(),
             beliefBase: BeliefBase = BeliefBase.empty(),

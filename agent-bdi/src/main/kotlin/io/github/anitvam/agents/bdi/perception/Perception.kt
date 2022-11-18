@@ -1,7 +1,7 @@
-package io.github.anitvam.agents.bdi.reasoning.perception
+package io.github.anitvam.agents.bdi.perception
 
 import io.github.anitvam.agents.bdi.beliefs.BeliefBase
-import io.github.anitvam.agents.bdi.reasoning.perception.impl.EmptyPerception
+import io.github.anitvam.agents.bdi.perception.impl.EmptyPerception
 
 /** Component of a BDI Agent that let it perceive the environment. */
 interface Perception {

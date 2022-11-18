@@ -1,4 +1,4 @@
-package io.github.anitvam.agents.bdi.reasoning.perception
+package io.github.anitvam.agents.bdi.perception
 
 import it.unibo.tuprolog.core.Fact
 

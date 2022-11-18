@@ -23,7 +23,7 @@ import io.github.anitvam.agents.bdi.intentions.IntentionPool
 import io.github.anitvam.agents.bdi.plans.Plan
 import io.github.anitvam.agents.bdi.plans.PlanLibrary
 
-internal class AgentLifecycleImpl(val agent: Agent = Agent.default()) : AgentLifecycle {
+internal class AgentLifecycleImpl(val agent: Agent = Agent.empty()) : AgentLifecycle {
     private var context: AgentContext = agent.context
 
     override fun updateBelief(perceptions: BeliefBase, beliefBase: BeliefBase): RetrieveResult =
@@ -160,7 +160,7 @@ internal class AgentLifecycleImpl(val agent: Agent = Agent.default()) : AgentLif
         newIntentionPool = result.newIntentionPool
 
         // STEP10: Executing one Step on an Intention
-        runIntention(
+        val context = runIntention(
             scheduledIntention,
             context.copy(
                 events = newEvents,
@@ -168,5 +168,8 @@ internal class AgentLifecycleImpl(val agent: Agent = Agent.default()) : AgentLif
                 intentions = newIntentionPool,
             )
         )
+        println("REASONING CYCLE STEP:")
+        println(context)
+        this.context = context
     }
 }

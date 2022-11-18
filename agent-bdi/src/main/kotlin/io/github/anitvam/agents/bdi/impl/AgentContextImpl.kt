@@ -5,7 +5,7 @@ import io.github.anitvam.agents.bdi.beliefs.BeliefBase
 import io.github.anitvam.agents.bdi.events.EventQueue
 import io.github.anitvam.agents.bdi.intentions.IntentionPool
 import io.github.anitvam.agents.bdi.plans.PlanLibrary
-import io.github.anitvam.agents.bdi.reasoning.perception.Perception
+import io.github.anitvam.agents.bdi.perception.Perception
 
 /** Implementation of Agent's [AgentContext] */
 internal class AgentContextImpl(

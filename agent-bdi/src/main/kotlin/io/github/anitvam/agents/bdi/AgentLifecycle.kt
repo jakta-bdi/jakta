@@ -94,6 +94,6 @@ interface AgentLifecycle {
     fun reason()
 
     companion object {
-        fun default(agent: Agent = Agent.default()): AgentLifecycle = AgentLifecycleImpl(agent)
+        fun default(agent: Agent = Agent.empty()): AgentLifecycle = AgentLifecycleImpl(agent)
     }
 }
