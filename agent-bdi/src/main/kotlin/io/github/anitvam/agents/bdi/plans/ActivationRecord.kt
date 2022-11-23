@@ -13,7 +13,9 @@ interface ActivationRecord {
 
     fun applySubstitution(substitution: Substitution): ActivationRecord
 
+    fun isLastGoal(): Boolean
+
     companion object {
-        fun of(goals: List<Goal>): ActivationRecord = ActivationRecordImpl(goals)
+        fun of(goals: List<Goal>, planID: PlanID = PlanID()): ActivationRecord = ActivationRecordImpl(goals, planID)
     }
 }

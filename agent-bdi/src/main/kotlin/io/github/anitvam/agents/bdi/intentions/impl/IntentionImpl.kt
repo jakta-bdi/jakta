@@ -11,12 +11,20 @@ internal class IntentionImpl(
     override val id: IntentionID = IntentionID(),
 ) : Intention {
 
-    override fun pop(): Intention =
-        this.copy(recordStack = recordStack - recordStack.last())
+    override fun pop(): Intention {
+        val record = recordStack.first()
+        return if (record.isLastGoal()) {
+            this.copy(recordStack = recordStack - record)
+        } else {
+            this.copy(recordStack = listOf(record.pop()) + recordStack - record)
+        }
+    }
 
     override fun push(activationRecord: ActivationRecord) =
         this.copy(recordStack = listOf(activationRecord) + recordStack)
 
-    override fun applySubstitution(substitution: Substitution): Intention =
-        this.copy(recordStack = recordStack.map { it.applySubstitution(substitution) })
+    override fun applySubstitution(substitution: Substitution): Intention {
+        val record = recordStack.first()
+        return this.copy(recordStack = listOf(record.applySubstitution(substitution)) + recordStack - record)
+    }
 }

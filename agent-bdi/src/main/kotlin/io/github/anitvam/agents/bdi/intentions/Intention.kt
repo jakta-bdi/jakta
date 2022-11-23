@@ -13,7 +13,7 @@ interface Intention {
 
     val id: IntentionID
 
-    fun nextGoal(): Goal = recordStack.last().goalQueue.first()
+    fun nextGoal(): Goal = recordStack.first().goalQueue.first()
 
     /**
      * Removes the first goal to be executed from the first activation record. If the goal is the last one,

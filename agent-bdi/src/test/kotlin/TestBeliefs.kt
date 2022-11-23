@@ -23,7 +23,6 @@ class TestBeliefs : DescribeSpec({
             rr.modifiedBeliefs.first().updateType shouldBe BeliefUpdate.UpdateType.ADDITION
             val bb = rr.updatedBeliefBase
             bb.count() shouldBe 1
-            bb.forEach { println(it) }
         }
 
         it("Should not be added to a Belief Base two times") {
@@ -31,7 +30,6 @@ class TestBeliefs : DescribeSpec({
             bb.count() shouldBe 1
             bb = bb.add(chocolateDesire).updatedBeliefBase
             bb.count() shouldBe 1
-            bb.forEach { println(it) }
         }
 
         it("Should be added to a BeliefBase with a Belief with the same predicate") {
@@ -39,7 +37,6 @@ class TestBeliefs : DescribeSpec({
             bb.count() shouldBe 1
             bb = bb.add(chocolateDesire).updatedBeliefBase
             bb.count() shouldBe 2
-            bb.forEach { println(it) }
         }
 
         it("should not be added to a BeliefBase with the same predicate and a Variable") {
@@ -47,7 +44,6 @@ class TestBeliefs : DescribeSpec({
             bb.count() shouldBe 1
             bb = bb.add(chocolateDesire).updatedBeliefBase
             bb.count() shouldBe 1
-            bb.forEach { println(it) }
         }
 
         it("should be removed from a BeliefBase") {

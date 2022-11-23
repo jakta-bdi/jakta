@@ -1,5 +1,6 @@
 package io.github.anitvam.agents.bdi.goals
 
+import io.github.anitvam.agents.bdi.beliefs.Belief
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
 
@@ -14,16 +15,31 @@ sealed interface BeliefGoal : Goal {
         get() = value
 }
 
-data class AddBelief(override val value: Struct) : BeliefGoal {
-    override fun applySubstitution(substitution: Substitution) = AddBelief(value.apply(substitution).castToStruct())
+data class AddBelief(private val addedBelief: Belief) : BeliefGoal {
+    override val value: Struct
+        get() = addedBelief.head
+    override fun applySubstitution(substitution: Substitution) =
+        AddBelief(Belief.of(value.apply(substitution).castToStruct()))
+
+    override fun toString(): String = "AddBelief(value=$value)"
 }
 
-data class RemoveBelief(override val value: Struct) : BeliefGoal {
-    override fun applySubstitution(substitution: Substitution) = RemoveBelief(value.apply(substitution).castToStruct())
+data class RemoveBelief(private val removedBelief: Belief) : BeliefGoal {
+    override val value: Struct
+        get() = removedBelief.head
+    override fun applySubstitution(substitution: Substitution) =
+        RemoveBelief(Belief.of(value.apply(substitution).castToStruct()))
+
+    override fun toString(): String = "RemoveBelief(value=$value)"
 }
 
-data class UpdateBelief(override val value: Struct) : BeliefGoal {
-    override fun applySubstitution(substitution: Substitution) = UpdateBelief(value.apply(substitution).castToStruct())
+data class UpdateBelief(private val updatedBelief: Belief) : BeliefGoal {
+    override val value: Struct
+        get() = updatedBelief.head
+    override fun applySubstitution(substitution: Substitution) =
+        UpdateBelief(Belief.of(value.apply(substitution).castToStruct()))
+
+    override fun toString(): String = "UpdateBelief(value=$value)"
 }
 
 data class Achieve(override val value: Struct) : Goal {

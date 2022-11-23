@@ -25,5 +25,5 @@ internal data class PlanImpl(
     override fun isRelevant(event: Event): Boolean =
         event.trigger::class == this.trigger::class && (trigger.value mguWith event.trigger.value).isSuccess
 
-    override fun toActivationRecord(): ActivationRecord = ActivationRecord.of(goals)
+    override fun toActivationRecord(): ActivationRecord = ActivationRecord.of(goals, id)
 }

@@ -14,4 +14,6 @@ internal data class ActivationRecordImpl(
 
     override fun applySubstitution(substitution: Substitution): ActivationRecord =
         copy(goalQueue = goalQueue.map { it.applySubstitution(substitution) })
+
+    override fun isLastGoal(): Boolean = goalQueue.size == 1
 }
