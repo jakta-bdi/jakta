@@ -10,7 +10,7 @@ internal class PlanLibraryImpl(override val plans: List<Plan>) : PlanLibrary {
     override fun relevantPlans(event: Event): PlanLibrary {
         var relevantPlans: List<Plan> = emptyList()
         plans.forEach {
-            if ((it.event.value mguWith event.trigger.value).isSuccess) {
+            if ((it.trigger.value mguWith event.trigger.value).isSuccess) {
                 relevantPlans = relevantPlans + it
             }
         }

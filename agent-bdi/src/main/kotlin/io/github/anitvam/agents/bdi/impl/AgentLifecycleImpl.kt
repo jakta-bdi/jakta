@@ -7,9 +7,10 @@ import io.github.anitvam.agents.bdi.beliefs.Belief
 import io.github.anitvam.agents.bdi.beliefs.BeliefBase
 import io.github.anitvam.agents.bdi.beliefs.BeliefUpdate
 import io.github.anitvam.agents.bdi.beliefs.RetrieveResult
+import io.github.anitvam.agents.bdi.events.BeliefBaseAddition
+import io.github.anitvam.agents.bdi.events.BeliefBaseRemoval
 import io.github.anitvam.agents.bdi.events.Event
 import io.github.anitvam.agents.bdi.events.EventQueue
-import io.github.anitvam.agents.bdi.events.Trigger
 import io.github.anitvam.agents.bdi.goals.Test
 import io.github.anitvam.agents.bdi.goals.Achieve
 import io.github.anitvam.agents.bdi.goals.RemoveBelief
@@ -115,8 +116,8 @@ internal class AgentLifecycleImpl(val agent: Agent = Agent.empty()) : AgentLifec
     private fun generateEvents(events: EventQueue, modifiedBeliefs: List<BeliefUpdate>): EventQueue =
         events + modifiedBeliefs.map {
             when (it.updateType) {
-                BeliefUpdate.UpdateType.REMOVAL -> Event.of(Trigger.ofBeliefBaseRemoval(it.belief))
-                BeliefUpdate.UpdateType.ADDITION -> Event.of(Trigger.ofBeliefBaseAddition(it.belief))
+                BeliefUpdate.UpdateType.REMOVAL -> Event.of(BeliefBaseRemoval(it.belief))
+                BeliefUpdate.UpdateType.ADDITION -> Event.of(BeliefBaseAddition(it.belief))
             }
         }
 

@@ -12,12 +12,15 @@ import it.unibo.tuprolog.unify.Unificator.Companion.mguWith
 
 internal data class PlanImpl(
     override val id: PlanID,
-    override val event: Trigger,
+    override val trigger: Trigger,
     override val guard: Struct,
     override val goals: List<Goal>
 ) : Plan {
     override fun isApplicable(event: Event, beliefBase: BeliefBase): Boolean {
-        val mgu = event.trigger.value mguWith this.event.value
+        if (event.trigger::class != this.trigger::class) {
+            return false
+        }
+        val mgu = event.trigger.value mguWith this.trigger.value
         val actualGuard = guard.apply(mgu).castToStruct()
         return beliefBase.solve(actualGuard).isYes
     }

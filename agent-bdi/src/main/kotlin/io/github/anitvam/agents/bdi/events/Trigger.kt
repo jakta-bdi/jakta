@@ -8,17 +8,7 @@ import io.github.anitvam.agents.bdi.goals.Achieve
 
 /** [Trigger] denotes the change that took place for the [Event] generation. */
 sealed interface Trigger {
-
     val value: Struct
-
-    companion object {
-
-        /** Static Factory for [BeliefBaseAddition] trigger. */
-        fun ofBeliefBaseAddition(belief: Belief) = BeliefBaseAddition(belief)
-
-        /** Static Factory for [BeliefBaseRemoval] trigger. */
-        fun ofBeliefBaseRemoval(belief: Belief) = BeliefBaseRemoval(belief)
-    }
 }
 
 /** [Trigger] generated after a [Belief] addition (or removal) from the [BeliefBase]. */
@@ -30,10 +20,16 @@ sealed interface BeliefBaseRevision : Trigger {
 }
 
 /** [BeliefBaseRevision] generated after a [Belief] addition to agent's [BeliefBase]. */
-class BeliefBaseAddition(override val value: Struct) : BeliefBaseRevision
+class BeliefBaseAddition(private val addedBelief: Belief) : BeliefBaseRevision {
+    override val value: Struct
+        get() = addedBelief.head
+}
 
 /** [BeliefBaseRevision] generated after a [Belief] removal from agent's [BeliefBase]. */
-class BeliefBaseRemoval(override val value: Struct) : BeliefBaseRevision
+class BeliefBaseRemoval(private val removedBelief: Belief) : BeliefBaseRevision {
+    override val value: Struct
+        get() = removedBelief.head
+}
 
 class BeliefBaseUpdate(override val value: Struct) : BeliefBaseRevision
 

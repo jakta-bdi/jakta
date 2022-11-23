@@ -45,7 +45,7 @@ interface Event {
          * @return a new instance of [Event]
          */
         fun ofBeliefBaseAddition(belief: Belief, intention: Intention? = null): Event =
-            of(BeliefBaseAddition(belief.head), intention)
+            of(BeliefBaseAddition(belief), intention)
 
         /**
          * Generates an [Event] with a [BeliefBaseRemoval] trigger.
@@ -55,7 +55,7 @@ interface Event {
          * @return a new instance of [Event]
          */
         fun ofBeliefBaseRemoval(belief: Belief, intention: Intention? = null): Event =
-            of(BeliefBaseRemoval(belief.head), intention)
+            of(BeliefBaseRemoval(belief), intention)
 
         fun ofBeliefBaseUpdate(belief: Belief, intention: Intention? = null): Event =
             of(BeliefBaseUpdate(belief.head), intention)
