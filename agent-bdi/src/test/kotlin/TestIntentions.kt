@@ -2,6 +2,7 @@ import io.github.anitvam.agents.bdi.beliefs.Belief
 import io.github.anitvam.agents.bdi.goals.Achieve
 import io.github.anitvam.agents.bdi.goals.AddBelief
 import io.github.anitvam.agents.bdi.intentions.Intention
+import io.github.anitvam.agents.bdi.intentions.IntentionPool
 import io.github.anitvam.agents.bdi.plans.ActivationRecord
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
@@ -17,7 +18,7 @@ class TestIntentions : DescribeSpec({
     val eatSomething = Belief.of(Struct.of("eat", X))
 
     val activationRecord = ActivationRecord.of(listOf(AddBelief(buySomething), AddBelief(eatSomething)))
-    val intention = Intention.of(recordStack = listOf(activationRecord))
+    val intention = Intention.of(listOf(activationRecord))
 
     describe("An intention") {
         it("should return the next goal to satisfy with nextGoal() invocation") {
@@ -56,6 +57,45 @@ class TestIntentions : DescribeSpec({
             computedIntention.recordStack.last().goalQueue.forEach {
                 it.value.args.first() shouldBe X
             }
+        }
+    }
+
+    describe("An intention pool") {
+        val intention2 = Intention.of(
+            listOf(
+                ActivationRecord.of(
+                    listOf(
+                        Achieve(Struct.of("clean", Atom.of("home")))
+                    )
+                )
+            )
+        )
+        val intentionPool = IntentionPool.of(listOf(intention, intention2))
+
+        it("should be created correctly providing a list of intentions") {
+            intentionPool[intention.id] shouldBe intention
+            intentionPool[intention2.id] shouldBe intention2
+            intentionPool.size shouldBe 2
+        }
+        it("should return the correct next intention after nextIntention() invocation") {
+            val nextIntention = intentionPool.nextIntention()
+            nextIntention shouldBe intention
+        }
+        it("should remove the next intention to be executed after pop() invocation") {
+            val newPool = intentionPool.pop()
+            newPool.size shouldBe 1
+            newPool.keys shouldBe setOf(intention2.id)
+            newPool.values.first() shouldBe intention2
+        }
+        it("should add a new intention after the update() invocation") {
+            val intentionPool2 = IntentionPool.of(listOf(intention))
+            var newPool = intentionPool2.update(intention2)
+            newPool shouldBe intentionPool
+
+            val updatedIntention2 = intention2.pop()
+            newPool = newPool.update(updatedIntention2)
+            newPool[intention2.id] shouldBe updatedIntention2
+            newPool.size shouldBe 2
         }
     }
 })

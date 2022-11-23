@@ -15,7 +15,7 @@ class TestPlans : DescribeSpec({
     val chocolateNeed = Belief.of(Struct.of("need", Atom.of("chocolate")))
     val genericDesire = Belief.of(Struct.of("desire", Var.of("X")))
 
-    val plan = Plan.ofBeliefBaseAddition(genericDesire)
+    val plan = Plan.ofBeliefBaseAddition(genericDesire, emptyList())
     val planLibrary = PlanLibrary.of(listOf(plan))
 
     describe("A Plan") {
@@ -29,7 +29,7 @@ class TestPlans : DescribeSpec({
             relevantPlans.plans.size shouldBe 1
             relevantPlans.plans.first() shouldBe plan
 
-            val planLibrary2 = PlanLibrary.of(listOf(Plan.ofBeliefBaseRemoval(genericDesire)))
+            val planLibrary2 = PlanLibrary.of(listOf(Plan.ofBeliefBaseRemoval(genericDesire, emptyList())))
             planLibrary2.relevantPlans(event).plans.size shouldBe 0
         }
 
@@ -43,10 +43,11 @@ class TestPlans : DescribeSpec({
             val plan2 = Plan.ofBeliefBaseAddition(
                 belief = genericDesire,
                 guard = Truth.FALSE,
+                goals = emptyList(),
             )
             plan2.isApplicable(event, bb) shouldBe false
 
-            val plan3 = Plan.ofBeliefBaseRemoval(genericDesire)
+            val plan3 = Plan.ofBeliefBaseRemoval(genericDesire, emptyList())
             plan3.isApplicable(event, bb) shouldBe false
         }
     }

@@ -33,44 +33,44 @@ interface Plan {
 
         fun ofBeliefBaseAddition(
             belief: Belief,
+            goals: List<Goal>,
             id: PlanID = PlanID(),
             guard: Struct = Truth.TRUE,
-            goals: List<Goal> = emptyList()
         ): Plan = of(id, BeliefBaseAddition(belief), guard, goals)
 
         fun ofBeliefBaseRemoval(
             belief: Belief,
+            goals: List<Goal>,
             id: PlanID = PlanID(),
             guard: Struct = Truth.TRUE,
-            goals: List<Goal> = emptyList()
         ): Plan = of(id, BeliefBaseRemoval(belief), guard, goals)
 
         fun ofAchievementGoalInvocation(
             value: Struct,
+            goals: List<Goal>,
             id: PlanID = PlanID(),
             guard: Struct = Truth.TRUE,
-            goals: List<Goal> = emptyList()
         ): Plan = of(id, AchievementGoalInvocation(value), guard, goals)
 
         fun ofAchievementGoalFailure(
             value: Struct,
+            goals: List<Goal>,
             id: PlanID = PlanID(),
             guard: Struct = Truth.TRUE,
-            goals: List<Goal> = emptyList()
         ): Plan = of(id, AchievementGoalFailure(value), guard, goals)
 
         fun ofTestGoalInvocation(
             value: Struct,
+            goals: List<Goal>,
             id: PlanID = PlanID(),
             guard: Struct = Truth.TRUE,
-            goals: List<Goal> = emptyList()
         ): Plan = of(id, TestGoalInvocation(value), guard, goals)
 
         fun ofTestGoalFailure(
             value: Struct,
             id: PlanID = PlanID(),
             guard: Struct = Truth.TRUE,
-            goals: List<Goal> = emptyList()
+            goals: List<Goal> = emptyList(),
         ): Plan = of(id, TestGoalFailure(value), guard, goals)
     }
 }

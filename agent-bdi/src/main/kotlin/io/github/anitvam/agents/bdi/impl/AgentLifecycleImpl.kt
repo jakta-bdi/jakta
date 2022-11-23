@@ -76,7 +76,7 @@ internal class AgentLifecycleImpl(val agent: Agent = Agent.empty()) : AgentLifec
             )
             is Achieve -> context.copy(
                 events = context.events + Event.ofAchievementGoalInvocation(nextGoal, intention),
-                intentions = context.intentions - intention.id,
+                intentions = IntentionPool.of(context.intentions - intention.id),
             )
             is Test -> {
                 val solution = context.beliefBase.solve(nextGoal.value)

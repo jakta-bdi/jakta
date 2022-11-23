@@ -14,6 +14,4 @@ internal class IntentionPoolImpl(
     override fun nextIntention(): Intention = this.entries.iterator().next().value
 
     override fun pop(): IntentionPool = IntentionPoolImpl(this - nextIntention().id)
-
-    override operator fun minus(id: IntentionID): IntentionPool = IntentionPoolImpl(this - id)
 }
