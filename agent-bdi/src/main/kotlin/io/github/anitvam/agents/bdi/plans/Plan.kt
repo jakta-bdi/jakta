@@ -23,6 +23,8 @@ interface Plan {
 
     fun isApplicable(event: Event, beliefBase: BeliefBase): Boolean
 
+    fun isRelevant(event: Event): Boolean
+
     fun toActivationRecord(): ActivationRecord
 
     companion object {

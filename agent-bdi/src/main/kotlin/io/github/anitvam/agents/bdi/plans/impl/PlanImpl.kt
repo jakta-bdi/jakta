@@ -17,13 +17,13 @@ internal data class PlanImpl(
     override val goals: List<Goal>
 ) : Plan {
     override fun isApplicable(event: Event, beliefBase: BeliefBase): Boolean {
-        if (event.trigger::class != this.trigger::class) {
-            return false
-        }
         val mgu = event.trigger.value mguWith this.trigger.value
         val actualGuard = guard.apply(mgu).castToStruct()
-        return beliefBase.solve(actualGuard).isYes
+        return isRelevant(event) && beliefBase.solve(actualGuard).isYes
     }
+
+    override fun isRelevant(event: Event): Boolean =
+        event.trigger::class == this.trigger::class && (trigger.value mguWith event.trigger.value).isSuccess
 
     override fun toActivationRecord(): ActivationRecord = ActivationRecord.of(goals)
 }

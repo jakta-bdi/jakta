@@ -14,7 +14,7 @@ interface PlanLibrary {
     fun relevantPlans(event: Event): PlanLibrary
 
     /** @return all the applicable [Plan]s in the agent with the specified [BeliefBase] */
-    fun applicablePlans(beliefBase: BeliefBase): PlanLibrary
+    fun applicablePlans(event: Event, beliefBase: BeliefBase): PlanLibrary
 
     companion object {
         fun of(plans: List<Plan>): PlanLibrary = PlanLibraryImpl(plans)

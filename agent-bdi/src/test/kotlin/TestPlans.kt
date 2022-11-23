@@ -28,6 +28,9 @@ class TestPlans : DescribeSpec({
 
             relevantPlans.plans.size shouldBe 1
             relevantPlans.plans.first() shouldBe plan
+
+            val planLibrary2 = PlanLibrary.of(listOf(Plan.ofBeliefBaseRemoval(genericDesire)))
+            planLibrary2.relevantPlans(event).plans.size shouldBe 0
         }
 
         it("should be applicable if its trigger is a valid Predicate") {
