@@ -19,10 +19,10 @@ interface Agent {
     val context: AgentContext
 
     /** Event Selection Function*/
-    fun selectEvent(events: EventQueue): Event
+    fun selectEvent(events: EventQueue): Event?
 
     /** Plan Selection Function */
-    fun selectApplicablePlan(plans: Iterable<Plan>): Plan
+    fun selectApplicablePlan(plans: Iterable<Plan>): Plan?
 
     /** Intention Selection Function */
     fun scheduleIntention(intentions: IntentionPool): SchedulingResult

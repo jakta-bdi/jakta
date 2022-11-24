@@ -4,8 +4,8 @@ import io.github.anitvam.agents.bdi.intentions.Intention
 import io.github.anitvam.agents.bdi.intentions.IntentionID
 import io.github.anitvam.agents.bdi.intentions.IntentionPool
 
-internal class IntentionPoolImpl(
-    from: Map<IntentionID, Intention> = emptyMap(),
+internal data class IntentionPoolImpl(
+    val from: Map<IntentionID, Intention> = emptyMap(),
 ) : IntentionPool, LinkedHashMap<IntentionID, Intention>(from) {
 
     override fun update(intention: Intention) =

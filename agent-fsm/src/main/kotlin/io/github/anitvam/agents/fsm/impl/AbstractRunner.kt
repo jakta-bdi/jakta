@@ -65,7 +65,7 @@ abstract class AbstractRunner(override val activity: Activity) : Runner {
         PAUSED -> doStateTransitionFromPaused(nextOperation)
         STOPPED -> doStateTransitionFromStopped(nextOperation)
         else -> error("Reached illegal state: $_state")
-    }.also { println("$_state --$nextOperation-->") }
+    }
 
     /**
      * Method that handle the execution of an [action] that could trigger an Exception.
@@ -100,7 +100,6 @@ abstract class AbstractRunner(override val activity: Activity) : Runner {
     private fun doStateTransitionFromRunning(whatToDo: Operation) = when (whatToDo) {
         PAUSE -> {
             _state = PAUSED
-            println("BEFORE onPause()")
             onPause()
         }
         RESTART -> {

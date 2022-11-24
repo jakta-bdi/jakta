@@ -23,15 +23,22 @@ sealed interface BeliefBaseRevision : Trigger {
 class BeliefBaseAddition(private val addedBelief: Belief) : BeliefBaseRevision {
     override val value: Struct
         get() = addedBelief.head
+
+    override fun toString(): String = "BeliefBaseAddition(value=$value)"
 }
 
 /** [BeliefBaseRevision] generated after a [Belief] removal from agent's [BeliefBase]. */
-class BeliefBaseRemoval(private val removedBelief: Belief) : BeliefBaseRevision {
+data class BeliefBaseRemoval(private val removedBelief: Belief) : BeliefBaseRevision {
     override val value: Struct
         get() = removedBelief.head
+    override fun toString(): String = "BeliefBaseRemoval(value=$value)"
 }
 
-class BeliefBaseUpdate(override val value: Struct) : BeliefBaseRevision
+data class BeliefBaseUpdate(private val removedBelief: Belief) : BeliefBaseRevision {
+    override val value: Struct
+        get() = removedBelief.head
+    override fun toString(): String = "BeliefBaseUpdate(value=$value)"
+}
 
 /** [Trigger] of an event made by a [Test] Goal. */
 sealed interface TestGoalTrigger : Trigger {
@@ -40,10 +47,10 @@ sealed interface TestGoalTrigger : Trigger {
 }
 
 /** [TestGoalTrigger] generated after an invocation of a [Test] Goal. */
-class TestGoalInvocation(override val value: Struct) : TestGoalTrigger
+data class TestGoalInvocation(override val value: Struct) : TestGoalTrigger
 
 /** [TestGoalTrigger] generated after a failure of a [Test] Goal. */
-class TestGoalFailure(override val value: Struct) : TestGoalTrigger
+data class TestGoalFailure(override val value: Struct) : TestGoalTrigger
 
 /** [Trigger] of an event made by a [Achieve] Goal. */
 sealed interface AchievementGoalTrigger : Trigger {
@@ -52,7 +59,7 @@ sealed interface AchievementGoalTrigger : Trigger {
 }
 
 /** [AchievementGoalTrigger] generated after the invocation of a [Achieve] Goal. */
-class AchievementGoalInvocation(override val value: Struct) : AchievementGoalTrigger
+data class AchievementGoalInvocation(override val value: Struct) : AchievementGoalTrigger
 
 /** [AchievementGoalTrigger] generated after the failure of a [Achieve] Goal. */
-class AchievementGoalFailure(override val value: Struct) : AchievementGoalTrigger
+data class AchievementGoalFailure(override val value: Struct) : AchievementGoalTrigger

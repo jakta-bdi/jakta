@@ -3,6 +3,7 @@ package io.github.anitvam.agents.bdi
 import io.github.anitvam.agents.bdi.beliefs.BeliefBase
 import io.github.anitvam.agents.bdi.events.EventQueue
 import io.github.anitvam.agents.bdi.events.Event
+import io.github.anitvam.agents.bdi.goals.actions.ActionLibrary
 import io.github.anitvam.agents.bdi.impl.AgentContextImpl
 import io.github.anitvam.agents.bdi.intentions.IntentionPool
 import io.github.anitvam.agents.bdi.plans.PlanLibrary
@@ -28,6 +29,8 @@ interface AgentContext {
 
     val intentions: IntentionPool
 
+    val actionLibrary: ActionLibrary
+
     fun copy(
         beliefBase: BeliefBase = this.beliefBase,
         events: EventQueue = this.events,
@@ -43,6 +46,7 @@ interface AgentContext {
             planLibrary: PlanLibrary = PlanLibrary.empty(),
             perception: Perception = Perception.empty(),
             intentions: IntentionPool = IntentionPool.empty(),
-        ): AgentContext = AgentContextImpl(beliefBase, events, planLibrary, perception, intentions)
+            actionLibrary: ActionLibrary = ActionLibrary.default(),
+        ): AgentContext = AgentContextImpl(beliefBase, events, planLibrary, perception, intentions, actionLibrary)
     }
 }

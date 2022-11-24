@@ -33,7 +33,7 @@ internal class BeliefBaseImpl(private val beliefs: ClauseMultiSet) : BeliefBase 
 
     override fun equals(other: Any?) = beliefs == other
 
-    // DA TESTARE BENE - NON SONO SICURA FUNZIONI
+    // TODO DA TESTARE BENE - NON SONO SICURA FUNZIONI
     override fun remove(belief: Belief) =
         RetrieveResult(listOf(BeliefUpdate.removal(first { it == belief })), BeliefBase.of(filter { it != belief }))
 

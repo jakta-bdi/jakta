@@ -3,7 +3,7 @@ package io.github.anitvam.agents.fsm.impl
 import io.github.anitvam.agents.fsm.Activity
 import io.github.anitvam.agents.fsm.Activity.Controller
 
-internal class ActivityImpl(
+internal data class ActivityImpl(
     val onBeginProcedure: (controller: Controller) -> Unit = {},
     val onStepProcedure: (controller: Controller) -> Unit = {},
     val onEndProcedure: (controller: Controller) -> Unit = {},

@@ -58,7 +58,7 @@ interface Event {
             of(BeliefBaseRemoval(belief), intention)
 
         fun ofBeliefBaseUpdate(belief: Belief, intention: Intention? = null): Event =
-            of(BeliefBaseUpdate(belief.head), intention)
+            of(BeliefBaseUpdate(belief), intention)
 
         /**
          * Generates an [Event] with a [TestGoalInvocation] trigger.

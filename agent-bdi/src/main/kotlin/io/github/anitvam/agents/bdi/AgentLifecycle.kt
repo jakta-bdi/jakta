@@ -31,7 +31,7 @@ interface AgentLifecycle {
      * @param events: [EventQueue] on which select the event
      * @return the selected [Event]
      */
-    fun selectEvent(events: EventQueue): Event
+    fun selectEvent(events: EventQueue): Event?
 
     /**
      * STEP 6 of reasoning cycle: Retrieving all Relevant Plans.
@@ -60,7 +60,7 @@ interface AgentLifecycle {
      * @param plans: applicable [Plan]s
      * @return the selected [Plan] to be executed
      */
-    fun selectApplicablePlan(plans: Iterable<Plan>): Plan
+    fun selectApplicablePlan(plans: Iterable<Plan>): Plan?
 
     /**
      * Step 8 of reasoning cycle: Assign selected plan to an Intention.

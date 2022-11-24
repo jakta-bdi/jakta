@@ -24,7 +24,7 @@ import io.github.anitvam.agents.bdi.intentions.IntentionPool
 import io.github.anitvam.agents.bdi.plans.Plan
 import io.github.anitvam.agents.bdi.plans.PlanLibrary
 
-internal class AgentLifecycleImpl(val agent: Agent = Agent.empty()) : AgentLifecycle {
+internal data class AgentLifecycleImpl(val agent: Agent = Agent.empty()) : AgentLifecycle {
     private var context: AgentContext = agent.context
 
     override fun updateBelief(perceptions: BeliefBase, beliefBase: BeliefBase): RetrieveResult =
@@ -70,7 +70,20 @@ internal class AgentLifecycleImpl(val agent: Agent = Agent.empty()) : AgentLifec
 
     override fun runIntention(intention: Intention, context: AgentContext): AgentContext =
         when (val nextGoal = intention.nextGoal()) {
-            is ActionGoal -> TODO("An action goal could be InternalAction and ExternalAction")
+            is ActionGoal -> {
+                var newIntention = intention.pop()
+                val substitution = context.actionLibrary.invoke(nextGoal) // TODO: Handle failure
+                if (newIntention.recordStack.isEmpty()) {
+                    context.copy(
+                        intentions = IntentionPool.of(context.intentions - newIntention.id)
+                    )
+                } else {
+                    newIntention = newIntention.applySubstitution(substitution)
+                    context.copy(
+                        intentions = context.intentions.update(newIntention)
+                    )
+                }
+            }
             is Spawn -> context.copy(
                 events = context.events + Event.ofAchievementGoalInvocation(Achieve(nextGoal.value)),
             )
@@ -131,46 +144,49 @@ internal class AgentLifecycleImpl(val agent: Agent = Agent.empty()) : AgentLifec
 
         // Generate events related to BeliefBase revision
         var newEvents = generateEvents(context.events, rr.modifiedBeliefs)
-
         // STEP3: Receiving Communication from Other Agents --> in futuro
         // STEP4: Selecting "Socially Acceptable" Messages --> in futuro
 
         // STEP5: Selecting an Event.
         val selectedEvent = selectEvent(newEvents)
-        newEvents = newEvents - selectedEvent
+        var newIntentionPool = context.intentions
+        if (selectedEvent != null) {
+            newEvents = newEvents - selectedEvent
 
-        // STEP6: Retrieving all Relevant Plans.
-        val relevantPlans = selectRelevantPlans(selectedEvent, context.planLibrary)
-        // if the set of relevant plans is empty, the event is simply discarded.
+            // STEP6: Retrieving all Relevant Plans.
+            val relevantPlans = selectRelevantPlans(selectedEvent, context.planLibrary)
+            // if the set of relevant plans is empty, the event is simply discarded.
 
-        // STEP7: Determining the Applicable Plans.
-        val applicablePlans = relevantPlans.plans.filter { isPlanApplicable(selectedEvent, it, context.beliefBase) }
+            // STEP7: Determining the Applicable Plans.
+            val applicablePlans = relevantPlans.plans.filter { isPlanApplicable(selectedEvent, it, context.beliefBase) }
 
-        // STEP8: Selecting one Applicable Plan.
-        val selectedPlan = selectApplicablePlan(applicablePlans)
+            // STEP8: Selecting one Applicable Plan.
+            val selectedPlan = selectApplicablePlan(applicablePlans)
 
-        // STEP9: Select an Intention for Further Execution.
-        // Add plan to intentions
-        val updatedIntention = assignPlanToIntention(selectedEvent, selectedPlan, context.intentions)
-
-        var newIntentionPool = context.intentions.update(updatedIntention)
+            // STEP9: Select an Intention for Further Execution.
+            // Add plan to intentions
+            if (selectedPlan != null) {
+                val updatedIntention = assignPlanToIntention(selectedEvent, selectedPlan, context.intentions)
+                newIntentionPool = context.intentions.update(updatedIntention)
+            } // TODO: Gestire un piano rilevante ma NON applicabile
+        }
 
         // Select intention to execute
-        val result = scheduleIntention(newIntentionPool)
-        val scheduledIntention = result.intentionToExecute
-        newIntentionPool = result.newIntentionPool
-
-        // STEP10: Executing one Step on an Intention
-        val context = runIntention(
-            scheduledIntention,
-            context.copy(
-                events = newEvents,
-                beliefBase = newBeliefBase,
-                intentions = newIntentionPool,
-            )
+        var newContext = context.copy(
+            events = newEvents,
+            beliefBase = newBeliefBase,
+            intentions = newIntentionPool,
         )
-        println("REASONING CYCLE STEP:")
-        println(context)
-        this.context = context
+
+        if (!newIntentionPool.isEmpty()) {
+            val result = scheduleIntention(newIntentionPool)
+            val scheduledIntention = result.intentionToExecute
+            newIntentionPool = result.newIntentionPool
+
+            // STEP10: Executing one Step on an Intention
+            newContext = runIntention(scheduledIntention, newContext.copy(intentions = newIntentionPool))
+        }
+
+        this.context = newContext
     }
 }
