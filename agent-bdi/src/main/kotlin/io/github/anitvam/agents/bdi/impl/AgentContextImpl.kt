@@ -3,19 +3,19 @@ package io.github.anitvam.agents.bdi.impl
 import io.github.anitvam.agents.bdi.AgentContext
 import io.github.anitvam.agents.bdi.beliefs.BeliefBase
 import io.github.anitvam.agents.bdi.events.EventQueue
-import io.github.anitvam.agents.bdi.goals.actions.ActionLibrary
+import io.github.anitvam.agents.bdi.goals.actions.InternalAction
 import io.github.anitvam.agents.bdi.intentions.IntentionPool
 import io.github.anitvam.agents.bdi.plans.PlanLibrary
 import io.github.anitvam.agents.bdi.perception.Perception
 
 /** Implementation of Agent's [AgentContext] */
-internal data class AgentContextImpl(
+internal class AgentContextImpl(
     override val beliefBase: BeliefBase,
     override val events: EventQueue,
     override val planLibrary: PlanLibrary,
     override val perception: Perception,
     override val intentions: IntentionPool,
-    override val actionLibrary: ActionLibrary,
+    override val internalActions: Map<String, InternalAction>,
 ) : AgentContext {
     override fun toString(): String {
         return """
@@ -25,7 +25,6 @@ internal data class AgentContextImpl(
                 planLibrary = [${planLibrary.plans}]
                 perception = [$perception]
                 intentions = [$intentions]
-                actionLibrary = [${actionLibrary.actions}]
             }
         """.trimIndent()
     }

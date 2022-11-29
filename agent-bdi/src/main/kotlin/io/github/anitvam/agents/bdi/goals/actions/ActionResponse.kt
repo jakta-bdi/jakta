@@ -4,9 +4,15 @@ import it.unibo.tuprolog.core.Substitution
 
 sealed interface ActionResponse<Change : SideEffect> {
     val substitution: Substitution
-    val effects: List<Change>
+    val effects: Iterable<Change>
 }
 
-sealed interface InternalResponse : ActionResponse<AgentChange>
+data class InternalResponse(
+    override val substitution: Substitution,
+    override val effects: Iterable<AgentChange>,
+) : ActionResponse<AgentChange>
 
-sealed interface ExternalResponse : ActionResponse<EnvironmentChange>
+data class ExternalResponse(
+    override val substitution: Substitution,
+    override val effects: Iterable<EnvironmentChange>,
+) : ActionResponse<EnvironmentChange>

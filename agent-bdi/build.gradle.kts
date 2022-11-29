@@ -21,7 +21,7 @@ dependencies {
     api(project(":agent-fsm"))
     api(libs.tuprolog.core)
     api(libs.tuprolog.theory)
-    api(libs.tuprolog.solve)
+    api(libs.tuprolog.solve.classic)
     implementation(libs.tuprolog.solve.classic)
     testImplementation(libs.tuprolog.parser.core)
 }

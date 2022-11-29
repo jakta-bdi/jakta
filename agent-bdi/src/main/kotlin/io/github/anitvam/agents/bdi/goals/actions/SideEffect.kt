@@ -4,12 +4,12 @@ sealed interface SideEffect
 
 sealed interface AgentChange : SideEffect
 
-class AddBelief : AgentChange
+object AddBelief : AgentChange
 
-class RemoveBelief : AgentChange
+object RemoveBelief : AgentChange
 
 sealed interface EnvironmentChange : SideEffect
 
-class SpawnAgent : EnvironmentChange
+object SpawnAgent : EnvironmentChange
 
-class SendMessage : EnvironmentChange
+object SendMessage : EnvironmentChange

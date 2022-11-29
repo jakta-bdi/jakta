@@ -3,7 +3,8 @@ package io.github.anitvam.agents.bdi
 import io.github.anitvam.agents.bdi.beliefs.BeliefBase
 import io.github.anitvam.agents.bdi.events.EventQueue
 import io.github.anitvam.agents.bdi.events.Event
-import io.github.anitvam.agents.bdi.goals.actions.ActionLibrary
+import io.github.anitvam.agents.bdi.goals.actions.InternalAction
+import io.github.anitvam.agents.bdi.goals.actions.InternalActions
 import io.github.anitvam.agents.bdi.impl.AgentContextImpl
 import io.github.anitvam.agents.bdi.intentions.IntentionPool
 import io.github.anitvam.agents.bdi.plans.PlanLibrary
@@ -29,7 +30,7 @@ interface AgentContext {
 
     val intentions: IntentionPool
 
-    val actionLibrary: ActionLibrary
+    val internalActions: Map<String, InternalAction>
 
     fun copy(
         beliefBase: BeliefBase = this.beliefBase,
@@ -37,6 +38,7 @@ interface AgentContext {
         planLibrary: PlanLibrary = this.planLibrary,
         perception: Perception = this.perception,
         intentions: IntentionPool = this.intentions,
+        internalActions: Map<String, InternalAction> = this.internalActions,
     ): AgentContext = of(beliefBase, events, planLibrary, perception, intentions)
 
     companion object {
@@ -46,7 +48,7 @@ interface AgentContext {
             planLibrary: PlanLibrary = PlanLibrary.empty(),
             perception: Perception = Perception.empty(),
             intentions: IntentionPool = IntentionPool.empty(),
-            actionLibrary: ActionLibrary = ActionLibrary.default(),
-        ): AgentContext = AgentContextImpl(beliefBase, events, planLibrary, perception, intentions, actionLibrary)
+            internalActions: Map<String, InternalAction> = InternalActions.default(),
+        ): AgentContext = AgentContextImpl(beliefBase, events, planLibrary, perception, intentions, internalActions)
     }
 }

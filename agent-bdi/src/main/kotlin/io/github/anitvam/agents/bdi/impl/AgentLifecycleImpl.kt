@@ -19,6 +19,7 @@ import io.github.anitvam.agents.bdi.goals.AddBelief
 import io.github.anitvam.agents.bdi.goals.ActionGoal
 import io.github.anitvam.agents.bdi.goals.Spawn
 import io.github.anitvam.agents.bdi.goals.UpdateBelief
+import io.github.anitvam.agents.bdi.goals.actions.InternalRequest
 import io.github.anitvam.agents.bdi.intentions.Intention
 import io.github.anitvam.agents.bdi.intentions.IntentionPool
 import io.github.anitvam.agents.bdi.plans.Plan
@@ -72,13 +73,16 @@ internal data class AgentLifecycleImpl(val agent: Agent = Agent.empty()) : Agent
         when (val nextGoal = intention.nextGoal()) {
             is ActionGoal -> {
                 var newIntention = intention.pop()
-                val substitution = context.actionLibrary.invoke(nextGoal) // TODO: Handle failure
+                val internalResponse = context.internalActions[nextGoal.action.functor]
+                    ?.execute(InternalRequest.of(nextGoal.action.args)) // TODO: Handle failure
                 if (newIntention.recordStack.isEmpty()) {
                     context.copy(
                         intentions = IntentionPool.of(context.intentions - newIntention.id)
                     )
                 } else {
-                    newIntention = newIntention.applySubstitution(substitution)
+                    if (internalResponse != null) {
+                        newIntention = newIntention.applySubstitution(internalResponse.substitution)
+                    }
                     context.copy(
                         intentions = context.intentions.update(newIntention)
                     )
