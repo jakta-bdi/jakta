@@ -39,7 +39,7 @@ interface AgentContext {
         perception: Perception = this.perception,
         intentions: IntentionPool = this.intentions,
         internalActions: Map<String, InternalAction> = this.internalActions,
-    ): AgentContext = of(beliefBase, events, planLibrary, perception, intentions)
+    ): AgentContext = of(beliefBase, events, planLibrary, perception, intentions, internalActions)
 
     companion object {
         fun of(

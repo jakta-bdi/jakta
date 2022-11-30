@@ -1,23 +1,27 @@
 package io.github.anitvam.agents.bdi.impl
 
 import io.github.anitvam.agents.bdi.Agent
-import io.github.anitvam.agents.bdi.AgentLifecycle
 import io.github.anitvam.agents.bdi.AgentContext
+import io.github.anitvam.agents.bdi.AgentLifecycle
 import io.github.anitvam.agents.bdi.beliefs.Belief
 import io.github.anitvam.agents.bdi.beliefs.BeliefBase
 import io.github.anitvam.agents.bdi.beliefs.BeliefUpdate
 import io.github.anitvam.agents.bdi.beliefs.RetrieveResult
+import io.github.anitvam.agents.bdi.events.AchievementGoalFailure
 import io.github.anitvam.agents.bdi.events.BeliefBaseAddition
 import io.github.anitvam.agents.bdi.events.BeliefBaseRemoval
 import io.github.anitvam.agents.bdi.events.Event
 import io.github.anitvam.agents.bdi.events.EventQueue
-import io.github.anitvam.agents.bdi.goals.Test
+import io.github.anitvam.agents.bdi.events.TestGoalFailure
 import io.github.anitvam.agents.bdi.goals.Achieve
-import io.github.anitvam.agents.bdi.goals.RemoveBelief
-import io.github.anitvam.agents.bdi.goals.BeliefGoal
-import io.github.anitvam.agents.bdi.goals.AddBelief
+import io.github.anitvam.agents.bdi.goals.Act
+import io.github.anitvam.agents.bdi.goals.ActInternally
 import io.github.anitvam.agents.bdi.goals.ActionGoal
+import io.github.anitvam.agents.bdi.goals.AddBelief
+import io.github.anitvam.agents.bdi.goals.BeliefGoal
+import io.github.anitvam.agents.bdi.goals.RemoveBelief
 import io.github.anitvam.agents.bdi.goals.Spawn
+import io.github.anitvam.agents.bdi.goals.Test
 import io.github.anitvam.agents.bdi.goals.UpdateBelief
 import io.github.anitvam.agents.bdi.goals.actions.InternalRequest
 import io.github.anitvam.agents.bdi.intentions.Intention
@@ -64,29 +68,40 @@ internal data class AgentLifecycleImpl(val agent: Agent = Agent.empty()) : Agent
     override fun assignPlanToIntention(event: Event, plan: Plan, intentions: IntentionPool) =
         when (event.isExternal()) {
             true -> Intention.of(plan)
-            false -> intentions[event.intention!!.id]!!.push(plan.toActivationRecord())
+            false -> when (event.trigger) {
+                is AchievementGoalFailure, is TestGoalFailure ->
+                    intentions[event.intention!!.id]!!.copy(recordStack = listOf(plan.toActivationRecord()))
+                else -> intentions[event.intention!!.id]!!.push(plan.toActivationRecord())
+            }
         }
 
     override fun scheduleIntention(intentions: IntentionPool) = agent.scheduleIntention(intentions)
 
     override fun runIntention(intention: Intention, context: AgentContext): AgentContext =
         when (val nextGoal = intention.nextGoal()) {
-            is ActionGoal -> {
-                var newIntention = intention.pop()
-                val internalResponse = context.internalActions[nextGoal.action.functor]
-                    ?.execute(InternalRequest.of(nextGoal.action.args)) // TODO: Handle failure
-                if (newIntention.recordStack.isEmpty()) {
-                    context.copy(
-                        intentions = IntentionPool.of(context.intentions - newIntention.id)
-                    )
-                } else {
-                    if (internalResponse != null) {
-                        newIntention = newIntention.applySubstitution(internalResponse.substitution)
+            is ActionGoal -> when (nextGoal) {
+                is ActInternally -> {
+                    var newIntention = intention.pop()
+                    val internalAction = context.internalActions[nextGoal.action.functor]
+
+                    if (internalAction == null) {
+                        // Internal Action not found
+                        failIntention(intention, context)
+                    } else {
+                        // Execute Internal Action
+                        val internalResponse = internalAction.execute(InternalRequest.of(nextGoal.action.args))
+                        // Apply substitution
+                        if (internalResponse.substitution.isSuccess) {
+                            if (newIntention.recordStack.isNotEmpty()) {
+                                newIntention = newIntention.applySubstitution(internalResponse.substitution)
+                            }
+                            context.copy(intentions = context.intentions.update(newIntention))
+                        } else {
+                            failIntention(intention, context)
+                        }
                     }
-                    context.copy(
-                        intentions = context.intentions.update(newIntention)
-                    )
                 }
+                is Act -> TODO()
             }
             is Spawn -> context.copy(
                 events = context.events + Event.ofAchievementGoalInvocation(Achieve(nextGoal.value)),
@@ -129,6 +144,12 @@ internal data class AgentLifecycleImpl(val agent: Agent = Agent.empty()) : Agent
                 }
             }
         }
+
+    private fun failIntention(intention: Intention, context: AgentContext) =
+        context.copy(
+            events = context.events + Event.ofAchievementGoalFailure(intention.currentPlan(), intention),
+            intentions = IntentionPool.of(intention)
+        )
 
     private fun generateEvents(events: EventQueue, modifiedBeliefs: List<BeliefUpdate>): EventQueue =
         events + modifiedBeliefs.map {
@@ -181,12 +202,10 @@ internal data class AgentLifecycleImpl(val agent: Agent = Agent.empty()) : Agent
             beliefBase = newBeliefBase,
             intentions = newIntentionPool,
         )
-
         if (!newIntentionPool.isEmpty()) {
             val result = scheduleIntention(newIntentionPool)
             val scheduledIntention = result.intentionToExecute
             newIntentionPool = result.newIntentionPool
-
             // STEP10: Executing one Step on an Intention
             newContext = runIntention(scheduledIntention, newContext.copy(intentions = newIntentionPool))
         }

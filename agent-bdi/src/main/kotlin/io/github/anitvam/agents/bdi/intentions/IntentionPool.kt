@@ -13,7 +13,7 @@ interface IntentionPool : Map<IntentionID, Intention> {
         fun empty(): IntentionPool = IntentionPoolImpl()
 
         fun of(intentions: Map<IntentionID, Intention>): IntentionPool = IntentionPoolImpl(intentions)
-
+        fun of(vararg intentions: Intention): IntentionPool = of(intentions.asList())
         fun of(intentions: List<Intention>): IntentionPool = IntentionPoolImpl(intentions.associateBy { it.id })
     }
 }

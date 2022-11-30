@@ -1,9 +1,10 @@
 package io.github.anitvam.agents.bdi.intentions
 
-import io.github.anitvam.agents.bdi.plans.ActivationRecord
 import io.github.anitvam.agents.bdi.goals.Goal
 import io.github.anitvam.agents.bdi.intentions.impl.IntentionImpl
+import io.github.anitvam.agents.bdi.plans.ActivationRecord
 import io.github.anitvam.agents.bdi.plans.Plan
+import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
 
 interface Intention {
@@ -14,6 +15,7 @@ interface Intention {
     val id: IntentionID
 
     fun nextGoal(): Goal = recordStack.first().goalQueue.first()
+    fun currentPlan(): Struct = recordStack.first().plan
 
     /**
      * Removes the first goal to be executed from the first activation record. If the goal is the last one,

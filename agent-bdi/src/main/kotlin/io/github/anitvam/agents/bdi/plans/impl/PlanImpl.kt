@@ -6,12 +6,10 @@ import io.github.anitvam.agents.bdi.events.Event
 import io.github.anitvam.agents.bdi.events.Trigger
 import io.github.anitvam.agents.bdi.goals.Goal
 import io.github.anitvam.agents.bdi.plans.Plan
-import io.github.anitvam.agents.bdi.plans.PlanID
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.unify.Unificator.Companion.mguWith
 
 internal data class PlanImpl(
-    override val id: PlanID,
     override val trigger: Trigger,
     override val guard: Struct,
     override val goals: List<Goal>,
@@ -25,5 +23,5 @@ internal data class PlanImpl(
     override fun isRelevant(event: Event): Boolean =
         event.trigger::class == this.trigger::class && (trigger.value mguWith event.trigger.value).isSuccess
 
-    override fun toActivationRecord(): ActivationRecord = ActivationRecord.of(goals, id)
+    override fun toActivationRecord(): ActivationRecord = ActivationRecord.of(goals, trigger.value)
 }

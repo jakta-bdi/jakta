@@ -16,7 +16,6 @@ import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Truth
 
 interface Plan {
-    val id: PlanID
     val trigger: Trigger
     val guard: Struct
     val goals: List<Goal>
@@ -28,49 +27,43 @@ interface Plan {
     fun toActivationRecord(): ActivationRecord
 
     companion object {
-        private fun of(id: PlanID, trigger: Trigger, guard: Struct, goals: List<Goal>): Plan =
-            PlanImpl(id, trigger, guard, goals)
+        private fun of(trigger: Trigger, guard: Struct, goals: List<Goal>): Plan =
+            PlanImpl(trigger, guard, goals)
 
         fun ofBeliefBaseAddition(
             belief: Belief,
             goals: List<Goal>,
-            id: PlanID = PlanID(),
             guard: Struct = Truth.TRUE,
-        ): Plan = of(id, BeliefBaseAddition(belief), guard, goals)
+        ): Plan = of(BeliefBaseAddition(belief), guard, goals)
 
         fun ofBeliefBaseRemoval(
             belief: Belief,
             goals: List<Goal>,
-            id: PlanID = PlanID(),
             guard: Struct = Truth.TRUE,
-        ): Plan = of(id, BeliefBaseRemoval(belief), guard, goals)
+        ): Plan = of(BeliefBaseRemoval(belief), guard, goals)
 
         fun ofAchievementGoalInvocation(
             value: Struct,
             goals: List<Goal>,
-            id: PlanID = PlanID(),
             guard: Struct = Truth.TRUE,
-        ): Plan = of(id, AchievementGoalInvocation(value), guard, goals)
+        ): Plan = of(AchievementGoalInvocation(value), guard, goals)
 
         fun ofAchievementGoalFailure(
             value: Struct,
             goals: List<Goal>,
-            id: PlanID = PlanID(),
             guard: Struct = Truth.TRUE,
-        ): Plan = of(id, AchievementGoalFailure(value), guard, goals)
+        ): Plan = of(AchievementGoalFailure(value), guard, goals)
 
         fun ofTestGoalInvocation(
             value: Struct,
             goals: List<Goal>,
-            id: PlanID = PlanID(),
             guard: Struct = Truth.TRUE,
-        ): Plan = of(id, TestGoalInvocation(value), guard, goals)
+        ): Plan = of(TestGoalInvocation(value), guard, goals)
 
         fun ofTestGoalFailure(
             value: Struct,
-            id: PlanID = PlanID(),
+            goals: List<Goal>,
             guard: Struct = Truth.TRUE,
-            goals: List<Goal> = emptyList(),
-        ): Plan = of(id, TestGoalFailure(value), guard, goals)
+        ): Plan = of(TestGoalFailure(value), guard, goals)
     }
 }

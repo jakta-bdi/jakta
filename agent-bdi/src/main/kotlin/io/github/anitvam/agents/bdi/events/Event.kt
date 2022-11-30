@@ -6,6 +6,7 @@ import io.github.anitvam.agents.bdi.events.impl.EventImpl
 import io.github.anitvam.agents.bdi.goals.Achieve
 import io.github.anitvam.agents.bdi.goals.Test
 import io.github.anitvam.agents.bdi.intentions.Intention
+import it.unibo.tuprolog.core.Struct
 
 /**
  * A BDI Agent can react to two types of Events: External and Internal.
@@ -72,13 +73,13 @@ interface Event {
 
         /**
          * Generates an [Event] with a [TestGoalFailure] trigger.
-         * @param testGoal: the [Test] Goal that triggered this Event
+         * @param testGoal: the Goal that triggered this Event
          * @param intention: if the event is internal, this parameter specifies the intention id where the event belongs.
          * If the event is external, this value is set to null. It's default value is null.
          * @return a new instance of [Event]
          */
-        fun ofTestGoalFailure(testGoal: Test, intention: Intention? = null): Event =
-            of(TestGoalFailure(testGoal.value), intention)
+        fun ofTestGoalFailure(testGoal: Struct, intention: Intention? = null): Event =
+            of(TestGoalFailure(testGoal), intention)
 
         /**
          * Generates an [Event] with a [AchievementGoalInvocation] trigger.
@@ -92,12 +93,12 @@ interface Event {
 
         /**
          * Generates an [Event] with a [AchievementGoalFailure] trigger.
-         * @param achievementGoal: the [Achieve] Goal that triggered this Event
+         * @param achievementGoal: the Goal that triggered this Event
          * @param intention: if the event is internal, this parameter specifies the intention id where the event belongs.
          * If the event is external, this value is set to null. It's default value is null.
          * @return a new instance of [Event]
          */
-        fun ofAchievementGoalFailure(achievementGoal: Achieve, intention: Intention? = null): Event =
-            of(AchievementGoalFailure(achievementGoal.value), intention)
+        fun ofAchievementGoalFailure(achievementGoal: Struct, intention: Intention? = null): Event =
+            of(AchievementGoalFailure(achievementGoal), intention)
     }
 }

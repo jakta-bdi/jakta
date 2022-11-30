@@ -2,12 +2,13 @@ package io.github.anitvam.agents.bdi.plans
 
 import io.github.anitvam.agents.bdi.goals.Goal
 import io.github.anitvam.agents.bdi.plans.impl.ActivationRecordImpl
+import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
 
 interface ActivationRecord {
     val goalQueue: List<Goal>
 
-    val plan: PlanID
+    val plan: Struct
 
     fun pop(): ActivationRecord
 
@@ -16,6 +17,6 @@ interface ActivationRecord {
     fun isLastGoal(): Boolean
 
     companion object {
-        fun of(goals: List<Goal>, planID: PlanID = PlanID()): ActivationRecord = ActivationRecordImpl(goals, planID)
+        fun of(goals: List<Goal>, plan: Struct): ActivationRecord = ActivationRecordImpl(goals, plan)
     }
 }

@@ -1,8 +1,8 @@
 package io.github.anitvam.agents.bdi.intentions.impl
 
-import io.github.anitvam.agents.bdi.plans.ActivationRecord
 import io.github.anitvam.agents.bdi.intentions.Intention
 import io.github.anitvam.agents.bdi.intentions.IntentionID
+import io.github.anitvam.agents.bdi.plans.ActivationRecord
 import it.unibo.tuprolog.core.Substitution
 
 internal class IntentionImpl(

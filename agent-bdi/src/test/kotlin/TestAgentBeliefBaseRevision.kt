@@ -1,14 +1,6 @@
 import io.github.anitvam.agents.bdi.Agent
-import io.github.anitvam.agents.bdi.Dispatcher
-import io.github.anitvam.agents.bdi.events.Event
-import io.github.anitvam.agents.bdi.goals.Achieve
-import io.github.anitvam.agents.bdi.goals.ActInternally
-import io.github.anitvam.agents.bdi.plans.Plan
-import io.github.anitvam.agents.bdi.plans.PlanLibrary
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
-import it.unibo.tuprolog.core.Atom
-import it.unibo.tuprolog.core.Struct
 
 class TestAgentBeliefBaseRevision : DescribeSpec({
     describe("An empty agent") {
@@ -26,17 +18,3 @@ class TestAgentBeliefBaseRevision : DescribeSpec({
         }
     }
 })
-
-fun main() {
-    val start = Atom.of("start")
-    val agent = Agent.of(
-        events = listOf(Event.ofAchievementGoalInvocation(Achieve(start))),
-        planLibrary = PlanLibrary.of(
-            Plan.ofAchievementGoalInvocation(
-                value = start,
-                goals = listOf(ActInternally(Struct.of("print", Atom.of("Hello World!"))))
-            )
-        )
-    )
-    Dispatcher.threadOf(agent).run()
-}

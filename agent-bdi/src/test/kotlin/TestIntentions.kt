@@ -17,7 +17,10 @@ class TestIntentions : DescribeSpec({
     val buySomething = Belief.of(Struct.of("buy", X))
     val eatSomething = Belief.of(Struct.of("eat", X))
 
-    val activationRecord = ActivationRecord.of(listOf(AddBelief(buySomething), AddBelief(eatSomething)))
+    val activationRecord = ActivationRecord.of(
+        listOf(AddBelief(buySomething), AddBelief(eatSomething)),
+        Struct.of("test"),
+    )
     val intention = Intention.of(listOf(activationRecord))
 
     describe("An intention") {
@@ -35,7 +38,10 @@ class TestIntentions : DescribeSpec({
         }
 
         it("should add on top of the record stack after a push() invocation") {
-            val newActivationRecord = ActivationRecord.of(listOf(Achieve(Atom.of("clean"))))
+            val newActivationRecord = ActivationRecord.of(
+                listOf(Achieve(Atom.of("clean"))),
+                Struct.of("test"),
+            )
             val updatedIntention = intention.push(newActivationRecord)
             updatedIntention.nextGoal() shouldBe Achieve(Atom.of("clean"))
         }
@@ -46,7 +52,10 @@ class TestIntentions : DescribeSpec({
             val substitution = Substitution.of(X, Atom.of("chocolate"))
             val newIntention = Intention.of(
                 intention.recordStack +
-                    ActivationRecord.of(listOf(Achieve(Struct.of("clean", X))))
+                    ActivationRecord.of(
+                        listOf(Achieve(Struct.of("clean", X))),
+                        Struct.of("test")
+                    )
             )
             newIntention.recordStack.size shouldBe 2
             val computedIntention = newIntention.applySubstitution(substitution)
@@ -66,7 +75,8 @@ class TestIntentions : DescribeSpec({
                 ActivationRecord.of(
                     listOf(
                         Achieve(Struct.of("clean", Atom.of("home")))
-                    )
+                    ),
+                    Struct.of("test"),
                 )
             )
         )

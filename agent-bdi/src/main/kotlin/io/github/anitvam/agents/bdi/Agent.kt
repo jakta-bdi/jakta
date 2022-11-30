@@ -3,6 +3,8 @@ package io.github.anitvam.agents.bdi
 import io.github.anitvam.agents.bdi.beliefs.BeliefBase
 import io.github.anitvam.agents.bdi.events.Event
 import io.github.anitvam.agents.bdi.events.EventQueue
+import io.github.anitvam.agents.bdi.goals.actions.InternalAction
+import io.github.anitvam.agents.bdi.goals.actions.InternalActions
 import io.github.anitvam.agents.bdi.impl.AgentImpl
 import io.github.anitvam.agents.bdi.intentions.IntentionPool
 import io.github.anitvam.agents.bdi.intentions.SchedulingResult
@@ -41,7 +43,11 @@ interface Agent {
             planLibrary: PlanLibrary = PlanLibrary.empty(),
             perception: Perception = Perception.empty(),
             intentions: IntentionPool = IntentionPool.empty(),
-        ): Agent = AgentImpl(AgentContext.of(beliefBase, events, planLibrary, perception, intentions), name)
+            internalActions: Map<String, InternalAction> = InternalActions.default(),
+        ): Agent = AgentImpl(
+            AgentContext.of(beliefBase, events, planLibrary, perception, intentions, internalActions),
+            name,
+        )
 
         fun of(
             name: String = "Agent-" + UUID.randomUUID(),

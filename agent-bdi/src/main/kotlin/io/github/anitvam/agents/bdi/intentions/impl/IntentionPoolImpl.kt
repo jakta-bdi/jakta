@@ -8,8 +8,12 @@ internal data class IntentionPoolImpl(
     val from: Map<IntentionID, Intention> = emptyMap(),
 ) : IntentionPool, LinkedHashMap<IntentionID, Intention>(from) {
 
-    override fun update(intention: Intention) =
-        IntentionPoolImpl(this + Pair(intention.id, intention))
+    override fun update(intention: Intention): IntentionPool =
+        if (intention.recordStack.isEmpty()) {
+            IntentionPoolImpl(this - intention.id)
+        } else {
+            IntentionPoolImpl(this + Pair(intention.id, intention))
+        }
 
     override fun nextIntention(): Intention = this.entries.iterator().next().value
 
