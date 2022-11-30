@@ -18,6 +18,7 @@ interface PlanLibrary {
 
     companion object {
         fun of(plans: List<Plan>): PlanLibrary = PlanLibraryImpl(plans)
+        fun of(vararg plans: Plan): PlanLibrary = of(plans.asList())
 
         fun empty(): PlanLibrary = PlanLibraryImpl(emptyList())
     }

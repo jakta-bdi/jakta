@@ -32,13 +32,9 @@ fun main() {
     val agent = Agent.of(
         events = listOf(Event.ofAchievementGoalInvocation(Achieve(start))),
         planLibrary = PlanLibrary.of(
-            listOf(
-                Plan.ofAchievementGoalInvocation(
-                    start,
-                    listOf(
-                        ActInternally(Struct.of("print", Atom.of("Hello World!")))
-                    )
-                )
+            Plan.ofAchievementGoalInvocation(
+                value = start,
+                goals = listOf(ActInternally(Struct.of("print", Atom.of("Hello World!"))))
             )
         )
     )
