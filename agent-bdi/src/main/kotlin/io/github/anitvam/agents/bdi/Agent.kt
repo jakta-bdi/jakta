@@ -32,7 +32,17 @@ interface Agent {
     fun copy(
         name: String = this.name,
         agentContext: AgentContext = this.context,
-    ): Agent = of(name, agentContext.copy())
+    ) = of(name, agentContext.copy())
+
+    fun copy(
+        name: String = this.name,
+        beliefBase: BeliefBase = this.context.beliefBase,
+        events: EventQueue = this.context.events,
+        planLibrary: PlanLibrary = this.context.planLibrary,
+        perception: Perception = this.context.perception,
+        intentions: IntentionPool = this.context.intentions,
+        internalActions: Map<String, InternalAction> = this.context.internalActions,
+    ) = of(name, beliefBase, events, planLibrary, perception, intentions, internalActions)
 
     companion object {
         fun empty(): Agent = AgentImpl(AgentContext.of())
