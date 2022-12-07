@@ -99,11 +99,11 @@ class TestIntentions : DescribeSpec({
         }
         it("should add a new intention after the update() invocation") {
             val intentionPool2 = IntentionPool.of(listOf(intention))
-            var newPool = intentionPool2.update(intention2)
+            var newPool = intentionPool2.updateIntention(intention2)
             newPool shouldBe intentionPool
 
             val updatedIntention2 = intention2.pop()
-            newPool = newPool.update(updatedIntention2)
+            newPool = newPool.updateIntention(updatedIntention2)
             newPool[intention2.id] shouldBe updatedIntention2
             newPool.size shouldBe 2
         }

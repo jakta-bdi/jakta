@@ -1,10 +1,13 @@
 package io.github.anitvam.agents.bdi.goals.actions
 
+import io.github.anitvam.agents.bdi.goals.actions.effects.AgentChange
+import io.github.anitvam.agents.bdi.goals.actions.effects.EnvironmentChange
+import io.github.anitvam.agents.bdi.goals.actions.effects.SideEffect
 import it.unibo.tuprolog.core.Substitution
 
-sealed interface ActionResponse<Change : SideEffect> {
+sealed interface ActionResponse<C : SideEffect> {
     val substitution: Substitution
-    val effects: Iterable<Change>
+    val effects: Iterable<C>
 }
 
 data class InternalResponse(
