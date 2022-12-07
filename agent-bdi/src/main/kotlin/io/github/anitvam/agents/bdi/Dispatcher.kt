@@ -6,7 +6,7 @@ import io.github.anitvam.agents.fsm.Runner
 interface Dispatcher {
     companion object {
         fun syncOf(agent: Agent): Runner {
-            val agentLC = AgentLifecycle.default(agent)
+            val agentLC = AgentLifecycle.of(agent)
             return Runner.threadOf(
                 Activity.of {
                     agentLC.reason()
@@ -15,7 +15,7 @@ interface Dispatcher {
         }
 
         fun threadOf(agent: Agent): Runner {
-            val agentLC = AgentLifecycle.default(agent)
+            val agentLC = AgentLifecycle.of(agent)
             return Runner.threadOf(
                 Activity.of {
                     agentLC.reason()
