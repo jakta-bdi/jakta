@@ -82,6 +82,9 @@ abstract class AbstractRunner(override val activity: Activity) : Runner {
         } catch (e: IllegalStateException) {
             _state = null
             onException(e)
+        } catch (e: Exception) {
+            onException(e)
+            throw e
         }
     }
 
