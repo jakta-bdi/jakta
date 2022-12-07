@@ -1,30 +1,21 @@
 package io.github.anitvam.agents.bdi.goals.actions
 
-import io.github.anitvam.agents.bdi.goals.actions.impl.InternalActionImpl
+import io.github.anitvam.agents.bdi.ContextUpdate.ADDITION
+import io.github.anitvam.agents.bdi.ContextUpdate.REMOVAL
+import io.github.anitvam.agents.bdi.beliefs.Belief
+import io.github.anitvam.agents.bdi.events.Event
+import io.github.anitvam.agents.bdi.goals.actions.effects.BeliefChange
+import io.github.anitvam.agents.bdi.goals.actions.effects.IntentionChange
+import io.github.anitvam.agents.bdi.goals.actions.effects.AgentChange
+import io.github.anitvam.agents.bdi.goals.actions.effects.EventChange
+import io.github.anitvam.agents.bdi.goals.actions.effects.PlanChange
+import io.github.anitvam.agents.bdi.intentions.Intention
+import io.github.anitvam.agents.bdi.plans.Plan
 import it.unibo.tuprolog.core.Substitution
-import it.unibo.tuprolog.core.Term
 import it.unibo.tuprolog.solve.Signature
 
-interface InternalAction : Action<AgentChange, InternalResponse, InternalRequest> {
-    companion object {
-        fun of(name: String, arity: Int, action: InternalRequest.() -> InternalResponse): InternalAction =
-            InternalActionImpl(Signature(name, arity), action)
-
-        fun unary(name: String, action: InternalRequest.(Term) -> Unit): InternalAction =
-            InternalActionImpl(Signature(name, 1)) {
-                action(arguments[0])
-                reply()
-            }
-
-        fun binary(name: String, action: InternalRequest.(Term, Term) -> Unit): InternalAction =
-            InternalActionImpl(Signature(name, 2)) {
-                action(arguments[0], arguments[1])
-                reply()
-            }
-    }
-}
-
-abstract class ImperativeInternalAction(override val signature: Signature) : InternalAction {
+abstract class InternalAction(override val signature: Signature) :
+    Action<AgentChange, InternalResponse, InternalRequest> {
 
     constructor(name: String, arity: Int) : this(Signature(name, arity))
 
@@ -39,7 +30,12 @@ abstract class ImperativeInternalAction(override val signature: Signature) : Int
 
     abstract fun InternalRequest.action()
 
-    fun addBelief() {
-        effects.add(AddBelief)
-    }
+    protected fun addBelief(belief: Belief) = effects.add(BeliefChange(belief, ADDITION))
+    protected fun removeBelief(belief: Belief) = effects.add(BeliefChange(belief, REMOVAL))
+    protected fun addIntention(intention: Intention) = effects.add(IntentionChange(intention, ADDITION))
+    protected fun removeIntention(intention: Intention) = effects.add(IntentionChange(intention, REMOVAL))
+    protected fun addEvent(event: Event) = effects.add(EventChange(event, ADDITION))
+    protected fun removeEvent(event: Event) = effects.add(EventChange(event, REMOVAL))
+    protected fun addPlan(plan: Plan) = effects.add(PlanChange(plan, ADDITION))
+    protected fun removePlan(plan: Plan) = effects.add(PlanChange(plan, REMOVAL))
 }
