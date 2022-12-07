@@ -1,6 +1,6 @@
+import io.github.anitvam.agents.bdi.ContextUpdate
 import io.github.anitvam.agents.bdi.beliefs.Belief
 import io.github.anitvam.agents.bdi.beliefs.BeliefBase
-import io.github.anitvam.agents.bdi.beliefs.BeliefUpdate
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
 import it.unibo.tuprolog.core.Atom
@@ -20,7 +20,7 @@ class TestBeliefs : DescribeSpec({
             val rr = emptybb.add(chocolateDesire)
             rr.modifiedBeliefs.size shouldBe 1
             rr.modifiedBeliefs.first().belief shouldBe chocolateDesire
-            rr.modifiedBeliefs.first().updateType shouldBe BeliefUpdate.UpdateType.ADDITION
+            rr.modifiedBeliefs.first().updateType shouldBe ContextUpdate.ADDITION
             val bb = rr.updatedBeliefBase
             bb.count() shouldBe 1
         }
@@ -56,7 +56,7 @@ class TestBeliefs : DescribeSpec({
             val rr = bb.remove(strawberryDesire)
             rr.modifiedBeliefs.size shouldBe 1
             rr.modifiedBeliefs.first().belief shouldBe strawberryDesire
-            rr.modifiedBeliefs.first().updateType shouldBe BeliefUpdate.UpdateType.REMOVAL
+            rr.modifiedBeliefs.first().updateType shouldBe ContextUpdate.REMOVAL
             bb = rr.updatedBeliefBase
             bb.count() shouldBe 1
             bb.first() shouldBe chocolateDesire
@@ -75,7 +75,7 @@ class TestBeliefs : DescribeSpec({
             rr.modifiedBeliefs.size shouldBe 2
             rr.modifiedBeliefs.map { it.belief } shouldBe listOf(genericNeed, chocolateDesire)
             rr.modifiedBeliefs.map { it.updateType } shouldBe
-                listOf(BeliefUpdate.UpdateType.ADDITION, BeliefUpdate.UpdateType.ADDITION)
+                listOf(ContextUpdate.ADDITION, ContextUpdate.ADDITION)
 
             bb = rr.updatedBeliefBase
             bb.count() shouldBe 3
@@ -91,7 +91,7 @@ class TestBeliefs : DescribeSpec({
             val rr = bb.removeAll(bb2)
             rr.modifiedBeliefs.map { it.belief } shouldBe listOf(chocolateDesire, strawberryDesire)
             rr.modifiedBeliefs.map { it.updateType } shouldBe
-                listOf(BeliefUpdate.UpdateType.REMOVAL, BeliefUpdate.UpdateType.REMOVAL)
+                listOf(ContextUpdate.REMOVAL, ContextUpdate.REMOVAL)
 
             bb = rr.updatedBeliefBase
             bb.count() shouldBe 1
