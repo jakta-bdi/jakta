@@ -4,13 +4,19 @@ import it.unibo.tuprolog.core.Substitution
 
 interface InternalActions {
     companion object {
-        val PRINT: InternalAction = object : ImperativeInternalAction("print", 1) {
+        val PRINT: InternalAction = object : InternalAction("print", 1) {
             override fun InternalRequest.action() = println(arguments.first())
         }
 
-        val FAIL: InternalAction = object : ImperativeInternalAction("fail", 0) {
+        val FAIL: InternalAction = object : InternalAction("fail", 0) {
             override fun InternalRequest.action() {
                 result = Substitution.failed()
+            }
+        }
+
+        val STOP: InternalAction = object : InternalAction("stop", 0) {
+            override fun InternalRequest.action() {
+                // TODO
             }
         }
 
