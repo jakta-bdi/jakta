@@ -1,5 +1,9 @@
 package io.github.anitvam.agents.bdi.goals.actions
 
+import io.github.anitvam.agents.bdi.AgentContext
+import io.github.anitvam.agents.bdi.goals.actions.effects.AgentChange
+import io.github.anitvam.agents.bdi.goals.actions.effects.EnvironmentChange
+import io.github.anitvam.agents.bdi.goals.actions.effects.SideEffect
 import io.github.anitvam.agents.bdi.goals.actions.impl.InternalRequestImpl
 import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.core.Term
@@ -14,12 +18,14 @@ sealed interface ActionRequest<C : SideEffect, Res : ActionResponse<C>> {
 }
 
 interface InternalRequest : ActionRequest<AgentChange, InternalResponse> {
-    // val agent: AgentContext
+    val agent: AgentContext
 
     companion object {
-        fun of(arguments: Iterable<Term>): InternalRequest = InternalRequestImpl(arguments.toList())
+        fun of(context: AgentContext, arguments: Iterable<Term>): InternalRequest =
+            InternalRequestImpl(context, arguments.toList())
 
-        fun of(vararg arguments: Term): InternalRequest = of(arguments.asList())
+        fun of(context: AgentContext, vararg arguments: Term): InternalRequest =
+            of(context, arguments.asList())
     }
 }
 
