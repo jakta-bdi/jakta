@@ -1,8 +1,11 @@
 import io.github.anitvam.agents.bdi.Agent
 import io.github.anitvam.agents.bdi.Dispatcher
+import io.github.anitvam.agents.bdi.beliefs.Belief
 import io.github.anitvam.agents.bdi.events.Event
 import io.github.anitvam.agents.bdi.goals.Achieve
 import io.github.anitvam.agents.bdi.goals.ActInternally
+import io.github.anitvam.agents.bdi.goals.AddBelief
+import io.github.anitvam.agents.bdi.goals.Test
 import io.github.anitvam.agents.bdi.goals.actions.InternalAction
 import io.github.anitvam.agents.bdi.goals.actions.InternalActions
 import io.github.anitvam.agents.bdi.goals.actions.InternalRequest
@@ -125,12 +128,64 @@ class TestAgent : DescribeSpec({
                     )
                 ),
             )
-            try {
-                Dispatcher.threadOf(newAgent).run().get()
-            } catch (e: Exception) {
-                e.printStackTrace()
-                fail(e.toString())
+            Dispatcher.threadOf(newAgent).run()
+        }
+        it("can modify agent's context declaring custom actions") {
+            val needChocolate = Belief.of(Struct.of("need", Atom.of("chocolate")))
+            val ADDBELIEF = object : InternalAction("add_belief", 1) {
+                override fun InternalRequest.action() {
+                    AddBelief(needChocolate)
+                }
             }
+            val newAgent = agent.copy(
+                internalActions = agent.context.internalActions + (ADDBELIEF.signature.name to ADDBELIEF),
+                planLibrary = PlanLibrary.of(
+                    Plan.ofAchievementGoalInvocation(
+                        value = start,
+                        goals = listOf(
+                            ActInternally(Struct.of("add_belief")),
+                        ),
+                    ),
+                    Plan.ofBeliefBaseAddition(
+                        belief = needChocolate,
+                        goals = listOf(
+                            Test(needChocolate),
+                            ActInternally(Struct.of("passtests"))
+                        )
+                    )
+                ),
+            )
+            Dispatcher.threadOf(newAgent).run()
         }
     }
 })
+
+fun main() {
+    val needChocolate = Belief.of(Struct.of("need", Atom.of("chocolate")))
+    val ADDBELIEF = object : InternalAction("add_belief", 1) {
+        override fun InternalRequest.action() {
+            addBelief(arguments.first().castToRule())
+        }
+    }
+    val start = Atom.of("start")
+    val agent = Agent.of(
+        events = listOf(Event.ofAchievementGoalInvocation(Achieve(start))),
+        internalActions = InternalActions.default() + (ADDBELIEF.signature.name to ADDBELIEF),
+        planLibrary = PlanLibrary.of(
+            Plan.ofAchievementGoalInvocation(
+                value = start,
+                goals = listOf(
+                    ActInternally(Struct.of("add_belief", needChocolate)),
+                ),
+            ),
+            Plan.ofBeliefBaseAddition(
+                belief = needChocolate,
+                goals = listOf(
+                    Test(needChocolate),
+                    ActInternally(Struct.of("fail"))
+                )
+            )
+        ),
+    )
+    Dispatcher.threadOf(agent).run()
+}

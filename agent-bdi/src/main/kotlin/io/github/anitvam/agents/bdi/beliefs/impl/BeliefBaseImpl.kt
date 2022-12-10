@@ -52,4 +52,6 @@ internal class BeliefBaseImpl(private val beliefs: ClauseMultiSet) : BeliefBase 
 
     override fun solve(struct: Struct): Solution =
         Solver.prolog.solverOf(staticKb = Theory.of(beliefs)).solveOnce(struct)
+
+    override fun toString(): String = beliefs.joinToString { it.toString() }
 }

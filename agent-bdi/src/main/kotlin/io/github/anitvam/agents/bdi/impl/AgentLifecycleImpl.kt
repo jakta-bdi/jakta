@@ -2,8 +2,9 @@ package io.github.anitvam.agents.bdi.impl
 
 import io.github.anitvam.agents.bdi.Agent
 import io.github.anitvam.agents.bdi.AgentContext
+import io.github.anitvam.agents.bdi.ContextUpdate.ADDITION
+import io.github.anitvam.agents.bdi.ContextUpdate.REMOVAL
 import io.github.anitvam.agents.bdi.AgentLifecycle
-import io.github.anitvam.agents.bdi.ContextUpdate
 import io.github.anitvam.agents.bdi.beliefs.Belief
 import io.github.anitvam.agents.bdi.beliefs.BeliefBase
 import io.github.anitvam.agents.bdi.beliefs.BeliefUpdate
@@ -25,6 +26,11 @@ import io.github.anitvam.agents.bdi.goals.Spawn
 import io.github.anitvam.agents.bdi.goals.Test
 import io.github.anitvam.agents.bdi.goals.UpdateBelief
 import io.github.anitvam.agents.bdi.goals.actions.InternalRequest
+import io.github.anitvam.agents.bdi.goals.actions.effects.AgentChange
+import io.github.anitvam.agents.bdi.goals.actions.effects.BeliefChange
+import io.github.anitvam.agents.bdi.goals.actions.effects.EventChange
+import io.github.anitvam.agents.bdi.goals.actions.effects.IntentionChange
+import io.github.anitvam.agents.bdi.goals.actions.effects.PlanChange
 import io.github.anitvam.agents.bdi.intentions.Intention
 import io.github.anitvam.agents.bdi.intentions.IntentionPool
 import io.github.anitvam.agents.bdi.plans.Plan
@@ -100,7 +106,8 @@ internal data class AgentLifecycleImpl(
                             if (newIntention.recordStack.isNotEmpty()) {
                                 newIntention = newIntention.applySubstitution(internalResponse.substitution)
                             }
-                            context.copy(intentions = context.intentions.updateIntention(newIntention))
+                            val newContext = applyEffects(context, internalResponse.effects)
+                            newContext.copy(intentions = newContext.intentions.updateIntention(newIntention))
                         } else {
                             failAchievementGoal(intention, context)
                         }
@@ -117,12 +124,16 @@ internal data class AgentLifecycleImpl(
             )
             is Test -> {
                 val solution = context.beliefBase.solve(nextGoal.value)
-                var newIntention = intention.pop()
                 when (solution.isYes) {
-                    true -> newIntention = newIntention.applySubstitution(solution.substitution)
-                    else -> TODO("If fails with the bb")
-                }
-                context.copy(intentions = context.intentions.updateIntention(newIntention))
+                    true -> context.copy(
+                        intentions = context.intentions.updateIntention(
+                            intention.pop().applySubstitution(solution.substitution)
+                        )
+                    )
+                    else -> context.copy(
+                        events = context.events + Event.ofTestGoalFailure(intention.currentPlan(), intention)
+                    )
+                }.also { println(it) }
             }
             is BeliefGoal -> when (nextGoal) {
                 is AddBelief -> {
@@ -150,17 +161,53 @@ internal data class AgentLifecycleImpl(
             }
         }
 
+    private fun applyEffects(context: AgentContext, effects: Iterable<AgentChange>): AgentContext {
+        var newBeliefBase = context.beliefBase
+        var newEvents = context.events
+        var newPlans = context.planLibrary
+        var newIntentions = context.intentions
+        effects.forEach {
+            when (it) {
+                is BeliefChange -> {
+                    val rr = when (it.changeType) {
+                        ADDITION -> newBeliefBase.add(it.belief)
+                        REMOVAL -> newBeliefBase.remove(it.belief)
+                    }
+                    newBeliefBase = rr.updatedBeliefBase
+                    newEvents = generateEvents(newEvents, rr.modifiedBeliefs)
+                }
+                is IntentionChange -> newIntentions = when (it.changeType) {
+                    ADDITION -> newIntentions.updateIntention(it.intention)
+                    REMOVAL -> newIntentions.deleteIntention(it.intention.id)
+                }
+                is EventChange -> newEvents = when (it.changeType) {
+                    ADDITION -> newEvents + it.event
+                    REMOVAL -> newEvents - it.event
+                }
+                is PlanChange -> newPlans = when (it.changeType) {
+                    ADDITION -> newPlans.addPlan(it.plan)
+                    REMOVAL -> newPlans.removePlan(it.plan)
+                }
+            }
+        }
+        return context.copy(
+            beliefBase = newBeliefBase,
+            events = newEvents,
+            planLibrary = newPlans,
+            intentions = newIntentions,
+        )
+    }
+
     private fun failAchievementGoal(intention: Intention, context: AgentContext) =
         context.copy(
             events = context.events + Event.ofAchievementGoalFailure(intention.currentPlan(), intention),
-            // intentions = IntentionPool.of(intention)
         )
 
     private fun generateEvents(events: EventQueue, modifiedBeliefs: List<BeliefUpdate>): EventQueue =
         events + modifiedBeliefs.map {
             when (it.updateType) {
-                ContextUpdate.REMOVAL -> Event.of(BeliefBaseRemoval(it.belief))
-                ContextUpdate.ADDITION -> Event.of(BeliefBaseAddition(it.belief))
+                REMOVAL -> Event.of(BeliefBaseRemoval(it.belief))
+                ADDITION -> Event.of(BeliefBaseAddition(it.belief))
             }
         }
 
@@ -171,7 +218,7 @@ internal data class AgentLifecycleImpl(
         // STEP2: Update the BeliefBase
         val rr = updateBelief(perceptions, context.beliefBase)
         val newBeliefBase = rr.updatedBeliefBase
-
+        // println("pre-run -> $context")
         // Generate events related to BeliefBase revision
         var newEvents = generateEvents(context.events, rr.modifiedBeliefs)
         // STEP3: Receiving Communication from Other Agents --> in futuro
@@ -188,14 +235,12 @@ internal data class AgentLifecycleImpl(
             // if the set of relevant plans is empty, the event is simply discarded.
 
             // STEP7: Determining the Applicable Plans.
-            val applicablePlans = relevantPlans.plans.filter { isPlanApplicable(selectedEvent, it, context.beliefBase) }
+            val applicablePlans = relevantPlans.plans.filter { isPlanApplicable(selectedEvent, it, newBeliefBase) }
 
             // STEP8: Selecting one Applicable Plan.
             val selectedPlan = selectApplicablePlan(applicablePlans)
             // STEP9: Select an Intention for Further Execution.
             // Add plan to intentions
-            println(selectedEvent)
-            println(context.intentions)
             if (selectedPlan != null) {
                 val updatedIntention = assignPlanToIntention(selectedEvent, selectedPlan, context.intentions)
                 newIntentionPool = context.intentions.updateIntention(updatedIntention)
@@ -205,8 +250,6 @@ internal data class AgentLifecycleImpl(
                     newIntentionPool = newIntentionPool.deleteIntention(selectedEvent.intention!!.id)
                 }
             }
-            println(newIntentionPool)
-            println()
         }
         // Select intention to execute
         var newContext = context.copy(
@@ -214,17 +257,21 @@ internal data class AgentLifecycleImpl(
             beliefBase = newBeliefBase,
             intentions = newIntentionPool,
         )
+        // println("PREPARED CONTEXT -> $newContext")
+
         if (!newIntentionPool.isEmpty()) {
             val result = scheduleIntention(newIntentionPool)
             val scheduledIntention = result.intentionToExecute
             newIntentionPool = result.newIntentionPool
             // STEP10: Executing one Step on an Intention
-            if (scheduledIntention.recordStack.isEmpty()) {
-                context.copy(intentions = newIntentionPool)
+            newContext = if (scheduledIntention.recordStack.isEmpty()) {
+                newContext.copy(intentions = newIntentionPool)
             } else {
-                newContext = runIntention(scheduledIntention, newContext.copy(intentions = newIntentionPool))
+                // println("RUN -> $scheduledIntention")
+                runIntention(scheduledIntention, newContext.copy(intentions = newIntentionPool))
             }
         }
+        // println("post run -> $newContext")
         this.context = newContext
     }
 }

@@ -27,4 +27,6 @@ internal class IntentionImpl(
         val record = recordStack.first()
         return this.copy(recordStack = listOf(record.applySubstitution(substitution)) + recordStack - record)
     }
+
+    override fun toString(): String = "[$recordStack]"
 }

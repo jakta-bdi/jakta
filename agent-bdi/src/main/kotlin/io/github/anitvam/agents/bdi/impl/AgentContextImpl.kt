@@ -20,7 +20,7 @@ internal class AgentContextImpl(
     override fun toString(): String {
         return """
             {
-                beliefBase = [${beliefBase.forEach { print("$it ") } }]
+                beliefBase = [$beliefBase]
                 events = $events
                 planLibrary = [${planLibrary.plans}]
                 perception = [$perception]
