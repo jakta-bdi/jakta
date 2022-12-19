@@ -3,8 +3,8 @@ package io.github.anitvam.agents.bdi
 import io.github.anitvam.agents.bdi.beliefs.BeliefBase
 import io.github.anitvam.agents.bdi.events.Event
 import io.github.anitvam.agents.bdi.events.EventQueue
-import io.github.anitvam.agents.bdi.goals.actions.InternalAction
-import io.github.anitvam.agents.bdi.goals.actions.InternalActions
+import io.github.anitvam.agents.bdi.actions.InternalAction
+import io.github.anitvam.agents.bdi.actions.InternalActions
 import io.github.anitvam.agents.bdi.impl.AgentImpl
 import io.github.anitvam.agents.bdi.intentions.IntentionPool
 import io.github.anitvam.agents.bdi.intentions.SchedulingResult

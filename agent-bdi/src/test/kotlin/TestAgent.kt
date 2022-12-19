@@ -6,9 +6,9 @@ import io.github.anitvam.agents.bdi.goals.Achieve
 import io.github.anitvam.agents.bdi.goals.ActInternally
 import io.github.anitvam.agents.bdi.goals.AddBelief
 import io.github.anitvam.agents.bdi.goals.Test
-import io.github.anitvam.agents.bdi.goals.actions.InternalAction
-import io.github.anitvam.agents.bdi.goals.actions.InternalActions
-import io.github.anitvam.agents.bdi.goals.actions.InternalRequest
+import io.github.anitvam.agents.bdi.actions.InternalAction
+import io.github.anitvam.agents.bdi.actions.InternalActions
+import io.github.anitvam.agents.bdi.actions.InternalRequest
 import io.github.anitvam.agents.bdi.plans.Plan
 import io.github.anitvam.agents.bdi.plans.PlanLibrary
 import io.kotest.assertions.fail

@@ -3,7 +3,7 @@ package io.github.anitvam.agents.bdi.impl
 import io.github.anitvam.agents.bdi.AgentContext
 import io.github.anitvam.agents.bdi.beliefs.BeliefBase
 import io.github.anitvam.agents.bdi.events.EventQueue
-import io.github.anitvam.agents.bdi.goals.actions.InternalAction
+import io.github.anitvam.agents.bdi.actions.InternalAction
 import io.github.anitvam.agents.bdi.intentions.IntentionPool
 import io.github.anitvam.agents.bdi.plans.PlanLibrary
 import io.github.anitvam.agents.bdi.perception.Perception

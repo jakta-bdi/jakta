@@ -1,6 +1,6 @@
-package io.github.anitvam.agents.bdi.goals.actions
+package io.github.anitvam.agents.bdi.actions
 
-import io.github.anitvam.agents.bdi.goals.actions.effects.SideEffect
+import io.github.anitvam.agents.bdi.actions.effects.SideEffect
 import it.unibo.tuprolog.solve.Signature
 
 sealed interface Action<C : SideEffect, Res : ActionResponse<C>, Req : ActionRequest<C, Res>> {

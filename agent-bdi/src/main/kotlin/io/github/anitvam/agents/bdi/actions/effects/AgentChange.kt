@@ -1,4 +1,4 @@
-package io.github.anitvam.agents.bdi.goals.actions.effects
+package io.github.anitvam.agents.bdi.actions.effects
 
 import io.github.anitvam.agents.bdi.ContextUpdate
 import io.github.anitvam.agents.bdi.beliefs.Belief

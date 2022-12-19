@@ -1,4 +1,4 @@
-package io.github.anitvam.agents.bdi.goals.actions
+package io.github.anitvam.agents.bdi.actions
 
 import it.unibo.tuprolog.core.Substitution
 

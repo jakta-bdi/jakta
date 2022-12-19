@@ -1,8 +1,8 @@
-package io.github.anitvam.agents.bdi.goals.actions
+package io.github.anitvam.agents.bdi.actions
 
-import io.github.anitvam.agents.bdi.goals.actions.effects.AgentChange
-import io.github.anitvam.agents.bdi.goals.actions.effects.EnvironmentChange
-import io.github.anitvam.agents.bdi.goals.actions.effects.SideEffect
+import io.github.anitvam.agents.bdi.actions.effects.AgentChange
+import io.github.anitvam.agents.bdi.actions.effects.EnvironmentChange
+import io.github.anitvam.agents.bdi.actions.effects.SideEffect
 import it.unibo.tuprolog.core.Substitution
 
 sealed interface ActionResponse<C : SideEffect> {

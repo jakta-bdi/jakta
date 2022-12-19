@@ -1,14 +1,14 @@
-package io.github.anitvam.agents.bdi.goals.actions
+package io.github.anitvam.agents.bdi.actions
 
 import io.github.anitvam.agents.bdi.ContextUpdate.ADDITION
 import io.github.anitvam.agents.bdi.ContextUpdate.REMOVAL
 import io.github.anitvam.agents.bdi.beliefs.Belief
 import io.github.anitvam.agents.bdi.events.Event
-import io.github.anitvam.agents.bdi.goals.actions.effects.BeliefChange
-import io.github.anitvam.agents.bdi.goals.actions.effects.IntentionChange
-import io.github.anitvam.agents.bdi.goals.actions.effects.AgentChange
-import io.github.anitvam.agents.bdi.goals.actions.effects.EventChange
-import io.github.anitvam.agents.bdi.goals.actions.effects.PlanChange
+import io.github.anitvam.agents.bdi.actions.effects.BeliefChange
+import io.github.anitvam.agents.bdi.actions.effects.IntentionChange
+import io.github.anitvam.agents.bdi.actions.effects.AgentChange
+import io.github.anitvam.agents.bdi.actions.effects.EventChange
+import io.github.anitvam.agents.bdi.actions.effects.PlanChange
 import io.github.anitvam.agents.bdi.intentions.Intention
 import io.github.anitvam.agents.bdi.plans.Plan
 import it.unibo.tuprolog.core.Substitution

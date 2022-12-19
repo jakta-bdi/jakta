@@ -1,9 +1,9 @@
-package io.github.anitvam.agents.bdi.goals.actions.impl
+package io.github.anitvam.agents.bdi.actions.impl
 
 import io.github.anitvam.agents.bdi.AgentContext
-import io.github.anitvam.agents.bdi.goals.actions.effects.AgentChange
-import io.github.anitvam.agents.bdi.goals.actions.InternalRequest
-import io.github.anitvam.agents.bdi.goals.actions.InternalResponse
+import io.github.anitvam.agents.bdi.actions.effects.AgentChange
+import io.github.anitvam.agents.bdi.actions.InternalRequest
+import io.github.anitvam.agents.bdi.actions.InternalResponse
 import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.core.Term
 
