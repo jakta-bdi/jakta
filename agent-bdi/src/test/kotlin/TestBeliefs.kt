@@ -1,3 +1,5 @@
+import io.github.anitvam.agents.bdi.Agent
+import io.github.anitvam.agents.bdi.AgentLifecycle
 import io.github.anitvam.agents.bdi.ContextUpdate
 import io.github.anitvam.agents.bdi.beliefs.Belief
 import io.github.anitvam.agents.bdi.beliefs.BeliefBase
@@ -8,20 +10,24 @@ import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Var
 
 class TestBeliefs : DescribeSpec({
-    val genericDesire = Belief.of(Struct.of("desire", Var.of("X")))
-    val chocolateDesire = Belief.of(Struct.of("desire", Atom.of("chocolate")))
-    val strawberryDesire = Belief.of(Struct.of("desire", Atom.of("strawberry")))
-    val genericNeed = Belief.of(Struct.of("need", Var.of("X")))
+    val genericDesire = Belief.fromSelfSource(Struct.of("desire", Var.of("X")))
+    val chocolateDesire = Belief.fromSelfSource(Struct.of("desire", Atom.of("chocolate")))
+    val strawberryDesire = Belief.fromSelfSource(Struct.of("desire", Atom.of("strawberry")))
+    val genericNeed = Belief.fromSelfSource(Struct.of("need", Var.of("X")))
     val emptybb = BeliefBase.empty()
 
-    describe("A belief") {
+    describe("A belief with self source") {
         it("Should be added to a Belief Base") {
             emptybb.count() shouldBe 0
             val rr = emptybb.add(chocolateDesire)
             rr.modifiedBeliefs.size shouldBe 1
             rr.modifiedBeliefs.first().belief shouldBe chocolateDesire
             rr.modifiedBeliefs.first().updateType shouldBe ContextUpdate.ADDITION
+            println(rr.modifiedBeliefs)
+            println(rr.updatedBeliefBase)
             val bb = rr.updatedBeliefBase
+            println(bb)
+            println(bb.count())
             bb.count() shouldBe 1
         }
 
@@ -99,13 +105,29 @@ class TestBeliefs : DescribeSpec({
         }
 
         it("should be solved") {
-            BeliefBase.of(listOf(strawberryDesire))
-                .solve(Struct.of("desire", Var.of("X")))
-                .substitution.values.first() shouldBe Atom.of("strawberry")
-            val substitution = BeliefBase.of(listOf(genericDesire))
-                .solve(Struct.of("desire", Atom.of("strawberry"))).substitution
+
+            var substitution = BeliefBase.of(listOf(strawberryDesire))
+                .solve(genericDesire).substitution
+            substitution.isFailed shouldBe false
+            substitution.values.first() shouldBe Atom.of("strawberry")
+            substitution = BeliefBase.of(listOf(genericDesire))
+                .solve(strawberryDesire).substitution
             substitution.isSuccess shouldBe true
             substitution.values.size shouldBe 0
+        }
+    }
+
+    describe("the belief update function") {
+        it("should not remove beliefs with source(self)") {
+            val belief = Belief.fromSelfSource(Struct.of("something", Var.of("X")))
+            val agent = Agent.of(beliefBase = BeliefBase.of(listOf(belief)))
+            val al = AgentLifecycle.of(agent)
+            val rr = al.updateBelief(BeliefBase.empty(), agent.context.beliefBase)
+            println(agent.context.beliefBase)
+            println(rr.modifiedBeliefs)
+            println(rr.modifiedBeliefs.count())
+            rr.modifiedBeliefs.size shouldBe 0
+            rr.updatedBeliefBase.count() shouldBe 1
         }
     }
 })

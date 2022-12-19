@@ -14,8 +14,8 @@ import it.unibo.tuprolog.core.Var
 
 class TestIntentions : DescribeSpec({
     val X = Var.of("X")
-    val buySomething = Belief.of(Struct.of("buy", X))
-    val eatSomething = Belief.of(Struct.of("eat", X))
+    val buySomething = Belief.fromSelfSource(Struct.of("buy", X))
+    val eatSomething = Belief.fromSelfSource(Struct.of("eat", X))
 
     val activationRecord = ActivationRecord.of(
         listOf(AddBelief(buySomething), AddBelief(eatSomething)),
@@ -27,13 +27,13 @@ class TestIntentions : DescribeSpec({
         it("should return the next goal to satisfy with nextGoal() invocation") {
             val nextGoal = intention.nextGoal()
             nextGoal.shouldBeTypeOf<AddBelief>()
-            nextGoal.belief shouldBe buySomething.head
+            nextGoal.belief shouldBe buySomething.rule.head
         }
 
         it("should remove the right goal with pop() invocation") {
             val updatedIntention = intention.pop()
             updatedIntention.recordStack.size shouldBe 1
-            updatedIntention.nextGoal().value shouldBe eatSomething.head
+            updatedIntention.nextGoal().value shouldBe eatSomething.rule.head
             updatedIntention.pop().recordStack shouldBe emptyList()
         }
 
@@ -61,7 +61,7 @@ class TestIntentions : DescribeSpec({
             val computedIntention = newIntention.applySubstitution(substitution)
             computedIntention.recordStack.size shouldBe 2
             computedIntention.recordStack.first().goalQueue.forEach {
-                it.value.args.first() shouldBe Atom.of("chocolate")
+                it.value.args[1] shouldBe Atom.of("chocolate")
             }
             computedIntention.recordStack.last().goalQueue.forEach {
                 it.value.args.first() shouldBe X

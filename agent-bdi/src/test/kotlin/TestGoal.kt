@@ -8,19 +8,19 @@ import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Var
 
 class TestGoal : DescribeSpec({
-    val strawberryDesire = Belief.of(Struct.of("desire", Atom.of("strawberry")))
-    val struct = Struct.of("desire", Var.of("X"))
+    val strawberryDesire = Belief.fromSelfSource(Struct.of("desire", Atom.of("strawberry")))
+    val belief = Belief.fromSelfSource(Struct.of("desire", Var.of("X")))
 
     describe("A Goal") {
         it("should apply a substitution to its variables") {
             val substitution = BeliefBase.of(listOf(strawberryDesire))
-                .solve(struct)
+                .solve(belief)
                 .substitution
 
-            val goal = Achieve(struct)
-            goal.value shouldBe struct
+            val goal = Achieve(belief.rule)
+            goal.value shouldBe belief.rule
 
-            goal.applySubstitution(substitution).value shouldBe strawberryDesire.head
+            goal.applySubstitution(substitution).value shouldBe strawberryDesire.rule
         }
     }
 })

@@ -22,7 +22,7 @@ sealed interface BeliefBaseRevision : Trigger {
 /** [BeliefBaseRevision] generated after a [Belief] addition to agent's [BeliefBase]. */
 class BeliefBaseAddition(private val addedBelief: Belief) : BeliefBaseRevision {
     override val value: Struct
-        get() = addedBelief.head
+        get() = addedBelief.rule.head
 
     override fun toString(): String = "BeliefBaseAddition(value=$value)"
 }
@@ -30,13 +30,13 @@ class BeliefBaseAddition(private val addedBelief: Belief) : BeliefBaseRevision {
 /** [BeliefBaseRevision] generated after a [Belief] removal from agent's [BeliefBase]. */
 data class BeliefBaseRemoval(private val removedBelief: Belief) : BeliefBaseRevision {
     override val value: Struct
-        get() = removedBelief.head
+        get() = removedBelief.rule.head
     override fun toString(): String = "BeliefBaseRemoval(value=$value)"
 }
 
 data class BeliefBaseUpdate(private val removedBelief: Belief) : BeliefBaseRevision {
     override val value: Struct
-        get() = removedBelief.head
+        get() = removedBelief.rule.head
     override fun toString(): String = "BeliefBaseUpdate(value=$value)"
 }
 

@@ -37,6 +37,8 @@ interface BeliefBase : Iterable<Belief> {
 
     fun solve(struct: Struct): Solution
 
+    fun solve(belief: Belief): Solution
+
     companion object {
         /** @return an empty [BeliefBase] */
         fun empty(): BeliefBase = BeliefBaseImpl(ClauseMultiSet.empty())

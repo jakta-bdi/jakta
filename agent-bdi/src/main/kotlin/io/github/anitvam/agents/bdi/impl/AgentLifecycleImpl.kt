@@ -51,7 +51,7 @@ internal data class AgentLifecycleImpl(
                 var removedBeliefs = emptyList<BeliefUpdate>()
                 var rrRemoval = RetrieveResult(removedBeliefs, rrAddition.updatedBeliefBase)
                 rrRemoval.updatedBeliefBase.forEach {
-                    if (!perceptions.contains(it)) {
+                    if (!perceptions.contains(it) && it.rule.head.args.first() == Belief.SOURCE_PERCEPT) {
                         rrRemoval = rrRemoval.updatedBeliefBase.remove(it)
                         removedBeliefs = removedBeliefs + rrRemoval.modifiedBeliefs
                     }
@@ -124,6 +124,7 @@ internal data class AgentLifecycleImpl(
             )
             is Test -> {
                 val solution = context.beliefBase.solve(nextGoal.value)
+                println(solution)
                 when (solution.isYes) {
                     true -> context.copy(
                         intentions = context.intentions.updateIntention(
@@ -133,26 +134,26 @@ internal data class AgentLifecycleImpl(
                     else -> context.copy(
                         events = context.events + Event.ofTestGoalFailure(intention.currentPlan(), intention)
                     )
-                }.also { println(it) }
+                }
             }
             is BeliefGoal -> when (nextGoal) {
                 is AddBelief -> {
-                    val retrieveResult = context.beliefBase.add(Belief.of(nextGoal.value))
+                    val retrieveResult = context.beliefBase.add(Belief.fromSelfSource(nextGoal.value))
                     context.copy(
                         beliefBase = retrieveResult.updatedBeliefBase,
                         events = generateEvents(context.events, retrieveResult.modifiedBeliefs),
                     )
                 }
                 is RemoveBelief -> {
-                    val retrieveResult = context.beliefBase.remove(Belief.of(nextGoal.value))
+                    val retrieveResult = context.beliefBase.remove(Belief.fromSelfSource(nextGoal.value))
                     context.copy(
                         beliefBase = retrieveResult.updatedBeliefBase,
                         events = generateEvents(context.events, retrieveResult.modifiedBeliefs),
                     )
                 }
                 is UpdateBelief -> {
-                    var retrieveResult = context.beliefBase.remove(Belief.of(nextGoal.value))
-                    retrieveResult = retrieveResult.updatedBeliefBase.add(Belief.of(nextGoal.value))
+                    var retrieveResult = context.beliefBase.remove(Belief.fromSelfSource(nextGoal.value))
+                    retrieveResult = retrieveResult.updatedBeliefBase.add(Belief.fromSelfSource(nextGoal.value))
                     context.copy(
                         beliefBase = retrieveResult.updatedBeliefBase,
                         events = generateEvents(context.events, retrieveResult.modifiedBeliefs)
@@ -236,9 +237,12 @@ internal data class AgentLifecycleImpl(
 
             // STEP7: Determining the Applicable Plans.
             val applicablePlans = relevantPlans.plans.filter { isPlanApplicable(selectedEvent, it, newBeliefBase) }
+            println(selectedEvent)
 
             // STEP8: Selecting one Applicable Plan.
             val selectedPlan = selectApplicablePlan(applicablePlans)
+            println(selectedPlan)
+            println()
             // STEP9: Select an Intention for Further Execution.
             // Add plan to intentions
             if (selectedPlan != null) {

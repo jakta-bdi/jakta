@@ -26,9 +26,6 @@ class TestAgent : DescribeSpec({
             if (arguments[0].isAtom && arguments[1].isAtom) {
                 val first: Int = Integer.parseInt(arguments[0].castToAtom().value)
                 val second: Int = Integer.parseInt(arguments[1].castToAtom().value)
-                println(first)
-                println(second)
-                System.out.flush()
                 first shouldBe second
             } else {
                 fail("Wrong Arguments for test action")
@@ -131,7 +128,7 @@ class TestAgent : DescribeSpec({
             Dispatcher.threadOf(newAgent).run()
         }
         it("can modify agent's context declaring custom actions") {
-            val needChocolate = Belief.of(Struct.of("need", Atom.of("chocolate")))
+            val needChocolate = Belief.fromSelfSource(Struct.of("need", Atom.of("chocolate")))
             val ADDBELIEF = object : InternalAction("add_belief", 1) {
                 override fun InternalRequest.action() {
                     AddBelief(needChocolate)
@@ -161,10 +158,10 @@ class TestAgent : DescribeSpec({
 })
 
 fun main() {
-    val needChocolate = Belief.of(Struct.of("need", Atom.of("chocolate")))
+    val needChocolate = Belief.fromSelfSource(Struct.of("need", Atom.of("chocolate")))
     val ADDBELIEF = object : InternalAction("add_belief", 1) {
         override fun InternalRequest.action() {
-            addBelief(arguments.first().castToRule())
+            addBelief(Belief.from(arguments.first().castToRule()))
         }
     }
     val start = Atom.of("start")
@@ -175,14 +172,14 @@ fun main() {
             Plan.ofAchievementGoalInvocation(
                 value = start,
                 goals = listOf(
-                    ActInternally(Struct.of("add_belief", needChocolate)),
+                    ActInternally(Struct.of("add_belief", needChocolate.rule)),
                 ),
             ),
             Plan.ofBeliefBaseAddition(
                 belief = needChocolate,
                 goals = listOf(
                     Test(needChocolate),
-                    ActInternally(Struct.of("fail"))
+                    ActInternally(Struct.of("print", Atom.of("guacamole")))
                 )
             )
         ),

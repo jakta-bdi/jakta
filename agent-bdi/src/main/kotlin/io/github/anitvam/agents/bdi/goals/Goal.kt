@@ -17,41 +17,46 @@ sealed interface BeliefGoal : Goal {
 
 data class AddBelief(private val addedBelief: Belief) : BeliefGoal {
     override val value: Struct
-        get() = addedBelief.head
+        get() = addedBelief.rule.head
     override fun applySubstitution(substitution: Substitution) =
-        AddBelief(Belief.of(value.apply(substitution).castToStruct()))
+        AddBelief(addedBelief.applySubstitution(substitution))
 
-    override fun toString(): String = "AddBelief(value=$value)"
+    override fun toString(): String = "AddBelief(value=$addedBelief)"
 }
 
 data class RemoveBelief(private val removedBelief: Belief) : BeliefGoal {
     override val value: Struct
-        get() = removedBelief.head
+        get() = removedBelief.rule.head
     override fun applySubstitution(substitution: Substitution) =
-        RemoveBelief(Belief.of(value.apply(substitution).castToStruct()))
+        RemoveBelief(removedBelief.applySubstitution(substitution))
 
-    override fun toString(): String = "RemoveBelief(value=$value)"
+    override fun toString(): String = "RemoveBelief(value=$removedBelief)"
 }
 
 data class UpdateBelief(private val updatedBelief: Belief) : BeliefGoal {
     override val value: Struct
-        get() = updatedBelief.head
+        get() = updatedBelief.rule.head
     override fun applySubstitution(substitution: Substitution) =
-        UpdateBelief(Belief.of(value.apply(substitution).castToStruct()))
+        UpdateBelief(updatedBelief.applySubstitution(substitution))
 
-    override fun toString(): String = "UpdateBelief(value=$value)"
+    override fun toString(): String = "UpdateBelief(value=$updatedBelief)"
 }
 
 data class Achieve(override val value: Struct) : Goal {
-    override fun applySubstitution(substitution: Substitution) = Achieve(value.apply(substitution).castToStruct())
+    override fun applySubstitution(substitution: Substitution) =
+        Achieve(value.apply(substitution).castToStruct())
 }
 
-data class Test(override val value: Struct) : Goal {
-    override fun applySubstitution(substitution: Substitution) = Test(value.apply(substitution).castToStruct())
+data class Test(val belief: Belief) : Goal {
+    override val value: Struct
+        get() = belief.rule.head
+    override fun applySubstitution(substitution: Substitution) =
+        Test(belief.applySubstitution(substitution))
 }
 
 data class Spawn(override val value: Struct) : Goal {
-    override fun applySubstitution(substitution: Substitution) = Spawn(value.apply(substitution).castToStruct())
+    override fun applySubstitution(substitution: Substitution) =
+        Spawn(value.apply(substitution).castToStruct())
 }
 
 sealed interface ActionGoal : Goal {
@@ -60,9 +65,11 @@ sealed interface ActionGoal : Goal {
 }
 
 data class Act(override val value: Struct) : ActionGoal {
-    override fun applySubstitution(substitution: Substitution) = Act(value.apply(substitution).castToStruct())
+    override fun applySubstitution(substitution: Substitution) =
+        Act(value.apply(substitution).castToStruct())
 }
 
 data class ActInternally(override val value: Struct) : ActionGoal {
-    override fun applySubstitution(substitution: Substitution) = ActInternally(value.apply(substitution).castToStruct())
+    override fun applySubstitution(substitution: Substitution) =
+        ActInternally(value.apply(substitution).castToStruct())
 }

@@ -11,9 +11,9 @@ import it.unibo.tuprolog.core.Truth
 import it.unibo.tuprolog.core.Var
 
 class TestPlans : DescribeSpec({
-    val strawberryDesire = Belief.of(Struct.of("desire", Atom.of("strawberry")))
-    val chocolateNeed = Belief.of(Struct.of("need", Atom.of("chocolate")))
-    val genericDesire = Belief.of(Struct.of("desire", Var.of("X")))
+    val strawberryDesire = Belief.fromSelfSource(Struct.of("desire", Atom.of("strawberry")))
+    val chocolateNeed = Belief.fromSelfSource(Struct.of("need", Atom.of("chocolate")))
+    val genericDesire = Belief.fromSelfSource(Struct.of("desire", Var.of("X")))
 
     val plan = Plan.ofBeliefBaseAddition(genericDesire, emptyList())
     val planLibrary = PlanLibrary.of(listOf(plan))

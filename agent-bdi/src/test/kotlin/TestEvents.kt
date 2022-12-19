@@ -6,7 +6,7 @@ import io.kotest.matchers.shouldBe
 import it.unibo.tuprolog.core.Atom
 
 class TestEvents : DescribeSpec({
-    val belief = Belief.of(Atom.of("something"))
+    val belief = Belief.fromSelfSource(Atom.of("something"))
     val externalEvent = Event.ofBeliefBaseAddition(belief)
     val internalEvent = Event.ofBeliefBaseRemoval(belief, Intention.of())
 
