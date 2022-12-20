@@ -31,13 +31,14 @@ import io.github.anitvam.agents.bdi.actions.effects.BeliefChange
 import io.github.anitvam.agents.bdi.actions.effects.EventChange
 import io.github.anitvam.agents.bdi.actions.effects.IntentionChange
 import io.github.anitvam.agents.bdi.actions.effects.PlanChange
+import io.github.anitvam.agents.bdi.environment.Environment
 import io.github.anitvam.agents.bdi.intentions.Intention
 import io.github.anitvam.agents.bdi.intentions.IntentionPool
 import io.github.anitvam.agents.bdi.plans.Plan
 import io.github.anitvam.agents.bdi.plans.PlanLibrary
 
 internal data class AgentLifecycleImpl(
-    val agent: Agent = Agent.empty(),
+    val agent: Agent,
 ) : AgentLifecycle {
     private var context: AgentContext = agent.context
 
@@ -212,7 +213,7 @@ internal data class AgentLifecycleImpl(
             }
         }
 
-    override fun reason() {
+    override fun reason(environment: Environment) {
         // STEP1: Perceive the Environment
         val perceptions = context.perception.percept()
 
