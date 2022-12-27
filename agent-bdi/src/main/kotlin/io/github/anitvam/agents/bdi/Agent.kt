@@ -15,6 +15,8 @@ import java.util.*
 
 interface Agent {
 
+    val agentID: AgentID
+
     val name: String
 
     /** Snapshot of Agent's Actual State */
@@ -29,24 +31,22 @@ interface Agent {
     /** Intention Selection Function */
     fun scheduleIntention(intentions: IntentionPool): SchedulingResult
 
-    fun copy(
-        name: String = this.name,
-        agentContext: AgentContext = this.context,
-    ) = of(name, agentContext.copy())
+    fun copy(agentContext: AgentContext = this.context) =
+        of(this.agentID, this.name, agentContext.copy())
 
     fun copy(
-        name: String = this.name,
         beliefBase: BeliefBase = this.context.beliefBase,
         events: EventQueue = this.context.events,
         planLibrary: PlanLibrary = this.context.planLibrary,
         perception: Perception = this.context.perception,
         intentions: IntentionPool = this.context.intentions,
         internalActions: Map<String, InternalAction> = this.context.internalActions,
-    ) = of(name, beliefBase, events, planLibrary, perception, intentions, internalActions)
+    ) = of(this.agentID, this.name, beliefBase, events, planLibrary, perception, intentions, internalActions)
 
     companion object {
         fun empty(): Agent = AgentImpl(AgentContext.of())
         fun of(
+            agentID: AgentID = AgentID(),
             name: String = "Agent-" + UUID.randomUUID(),
             beliefBase: BeliefBase = BeliefBase.empty(),
             events: EventQueue = emptyList(),
@@ -56,12 +56,14 @@ interface Agent {
             internalActions: Map<String, InternalAction> = InternalActions.default(),
         ): Agent = AgentImpl(
             AgentContext.of(beliefBase, events, planLibrary, perception, intentions, internalActions),
+            agentID,
             name,
         )
 
         fun of(
+            agentID: AgentID = AgentID(),
             name: String = "Agent-" + UUID.randomUUID(),
             agentContext: AgentContext,
-        ): Agent = AgentImpl(agentContext, name)
+        ): Agent = AgentImpl(agentContext, agentID, name)
     }
 }

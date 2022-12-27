@@ -1,34 +1,43 @@
 package io.github.anitvam.agents.bdi.environment
 
-import io.github.anitvam.agents.bdi.Agent
+import io.github.anitvam.agents.bdi.AgentID
+import io.github.anitvam.agents.bdi.Message
 import io.github.anitvam.agents.bdi.actions.ExternalAction
 import io.github.anitvam.agents.bdi.environment.impl.EnvironmentImpl
 import io.github.anitvam.agents.bdi.messages.MessageQueue
 import io.github.anitvam.agents.bdi.perception.Perception
 
 interface Environment {
-    val agents: Set<Agent>
-
-    val messageBoxes: Map<String, MessageQueue>
+    val agentIDs: Set<AgentID>
 
     val externalActions: Map<String, ExternalAction>
 
+    val messageBoxes: Map<AgentID, MessageQueue>
+
+    fun getNextMessage(agent: AgentID): Message?
+
+    fun submitMessage(agent: AgentID, message: Message)
+
+    fun addAgent(agentID: AgentID)
+
+    fun removeAgent(agentID: AgentID)
+
     fun percept(): Perception
 
-    fun runAgents()
-
     fun copy(
-        agents: Set<Agent> = this.agents,
+        agentIDs: Set<AgentID> = this.agentIDs,
         externalActions: Map<String, ExternalAction> = this.externalActions,
-        messageBoxes: Map<String, MessageQueue> = this.messageBoxes,
-    ) = of(agents, externalActions, messageBoxes) { this.percept() }
+        messageBoxes: Map<AgentID, MessageQueue> = this.messageBoxes,
+    ): Environment = EnvironmentImpl(
+        externalActions,
+        agentIDs,
+        messageBoxes,
+    ) { this.percept() }
 
     companion object {
         fun of(
-            agents: Set<Agent>,
             externalActions: Map<String, ExternalAction> = emptyMap(),
-            messageBoxes: Map<String, MessageQueue> = emptyMap(),
             perceptInvocation: () -> Perception = { Perception.empty() },
-        ): Environment = EnvironmentImpl(agents, externalActions, messageBoxes, perceptInvocation)
+        ): Environment = EnvironmentImpl(externalActions, perceptInvocation = perceptInvocation)
     }
 }
