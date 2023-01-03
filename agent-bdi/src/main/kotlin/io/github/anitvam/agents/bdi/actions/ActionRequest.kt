@@ -5,6 +5,7 @@ import io.github.anitvam.agents.bdi.actions.effects.AgentChange
 import io.github.anitvam.agents.bdi.actions.effects.EnvironmentChange
 import io.github.anitvam.agents.bdi.actions.effects.SideEffect
 import io.github.anitvam.agents.bdi.actions.impl.InternalRequestImpl
+import io.github.anitvam.agents.bdi.environment.Environment
 import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.core.Term
 
@@ -30,5 +31,5 @@ interface InternalRequest : ActionRequest<AgentChange, InternalResponse> {
 }
 
 interface ExternalRequest : ActionRequest<EnvironmentChange, ExternalResponse> {
-    // add fields to let the action observe the environment
+    val environment: Environment
 }

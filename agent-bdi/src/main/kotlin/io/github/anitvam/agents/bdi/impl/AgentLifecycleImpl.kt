@@ -125,7 +125,6 @@ internal data class AgentLifecycleImpl(
             )
             is Test -> {
                 val solution = context.beliefBase.solve(nextGoal.value)
-                println(solution)
                 when (solution.isYes) {
                     true -> context.copy(
                         intentions = context.intentions.updateIntention(
@@ -238,12 +237,9 @@ internal data class AgentLifecycleImpl(
 
             // STEP7: Determining the Applicable Plans.
             val applicablePlans = relevantPlans.plans.filter { isPlanApplicable(selectedEvent, it, newBeliefBase) }
-            println(selectedEvent)
 
             // STEP8: Selecting one Applicable Plan.
             val selectedPlan = selectApplicablePlan(applicablePlans)
-            println(selectedPlan)
-            println()
             // STEP9: Select an Intention for Further Execution.
             // Add plan to intentions
             if (selectedPlan != null) {
