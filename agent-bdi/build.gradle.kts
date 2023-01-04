@@ -23,7 +23,7 @@ dependencies {
     api(libs.tuprolog.theory)
     api(libs.tuprolog.solve.classic)
     implementation(libs.tuprolog.solve.classic)
-    testImplementation(libs.tuprolog.parser.core)
+    implementation(libs.tuprolog.parser.core)
 }
 
 kotlin {
