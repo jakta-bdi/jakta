@@ -7,43 +7,50 @@ import io.github.anitvam.agents.bdi.goals.Achieve
 import io.github.anitvam.agents.bdi.goals.ActInternally
 import io.github.anitvam.agents.bdi.plans.Plan
 import io.github.anitvam.agents.bdi.plans.PlanLibrary
-import io.kotest.core.spec.style.DescribeSpec
-import it.unibo.tuprolog.core.Atom
-import it.unibo.tuprolog.core.Struct
+import io.github.anitvam.agents.bdi.beliefs.Belief
+import io.github.anitvam.agents.bdi.beliefs.BeliefBase
+import io.github.anitvam.agents.bdi.JasonParser
 
-class TestEnvironment : DescribeSpec({
-    describe("An environment") {
-        it("should be shared between agents") {
-            val env = Environment.of()
+fun main() {
+    val env = Environment.of()
 
-            val start = Atom.of("start")
-            val alice = Agent.of(
-                events = listOf(Event.ofAchievementGoalInvocation(Achieve(start))),
-                planLibrary = PlanLibrary.of(
-                    Plan.ofAchievementGoalInvocation(
-                        value = start,
-                        goals = listOf(
-                            ActInternally(Struct.of("print", Atom.of("Hello, I'm Alice"))),
-                        ),
-                    ),
+    val start = JasonParser.parser.parseStruct("start(0, 10)")
+    val alice = Agent.of(
+        name = "alice",
+        beliefBase = BeliefBase.of(listOf(Belief.fromSelfSource(JasonParser.parser.parseStruct("run")))),
+        events = listOf(Event.ofAchievementGoalInvocation(Achieve.of(start))),
+        planLibrary = PlanLibrary.of(
+            Plan.ofAchievementGoalInvocation(
+                value = JasonParser.parser.parseStruct("start(N, N)"),
+                goals = listOf(
+                    ActInternally.of(JasonParser.parser.parseStruct("print(\"hello world\", N)")),
                 ),
-            )
-
-            val bob = Agent.of(
-                events = listOf(Event.ofAchievementGoalInvocation(Achieve(start))),
-                planLibrary = PlanLibrary.of(
-                    Plan.ofAchievementGoalInvocation(
-                        value = start,
-                        goals = listOf(
-                            ActInternally(Struct.of("print", Atom.of("Hello, I'm Bob"))),
-                        ),
-                    ),
+            ),
+            Plan.ofAchievementGoalInvocation(
+                value = JasonParser.parser.parseStruct("start(N, M)"),
+                guard = JasonParser.parser.parseStruct("N < M & S is N + 1"),
+                goals = listOf(
+                    ActInternally.of(JasonParser.parser.parseStruct("print(\"hello world\", N)")),
+                    Achieve.of(JasonParser.parser.parseStruct("start(S, M)")),
                 ),
-            )
+            ),
+        ),
+    )
 
-            val mas = Mas.of(SingleThreadedExecutionStrategy(), env, alice, bob)
+    val bob = Agent.of(
+        name = "bob",
+        events = listOf(Event.ofAchievementGoalInvocation(Achieve.of(start))),
+        planLibrary = PlanLibrary.of(
+            Plan.ofAchievementGoalInvocation(
+                value = start,
+                goals = listOf(
+                    ActInternally.of(JasonParser.parser.parseStruct("print('Hello, my name is Bob')")),
+                ),
+            ),
+        ),
+    )
 
-            mas.start()
-        }
-    }
-})
+    val mas = Mas.of(SingleThreadedExecutionStrategy(), env, alice, bob)
+
+    mas.start()
+}

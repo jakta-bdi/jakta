@@ -20,7 +20,11 @@ interface Plan {
     val guard: Struct
     val goals: List<Goal>
 
+    /** Determines if a plan is applicable */
     fun isApplicable(event: Event, beliefBase: BeliefBase): Boolean
+
+    /** Returns the computed applicable plan */
+    fun applicablePlan(event: Event, beliefBase: BeliefBase): Plan
 
     fun isRelevant(event: Event): Boolean
 

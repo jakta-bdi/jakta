@@ -38,9 +38,9 @@ import io.github.anitvam.agents.bdi.plans.Plan
 import io.github.anitvam.agents.bdi.plans.PlanLibrary
 
 internal data class AgentLifecycleImpl(
-    val agent: Agent,
+    private var agent: Agent,
 ) : AgentLifecycle {
-    private var context: AgentContext = agent.context
+    // private var context: AgentContext = agent.context
 
     override fun updateBelief(perceptions: BeliefBase, beliefBase: BeliefBase): RetrieveResult =
         when (perceptions == beliefBase) {
@@ -78,10 +78,13 @@ internal data class AgentLifecycleImpl(
     override fun assignPlanToIntention(event: Event, plan: Plan, intentions: IntentionPool) =
         when (event.isExternal()) {
             true -> Intention.of(plan)
-            false -> when (event.trigger) {
-                is AchievementGoalFailure, is TestGoalFailure ->
-                    event.intention!!.copy(recordStack = listOf(plan.toActivationRecord()))
-                else -> intentions[event.intention!!.id]!!.push(plan.toActivationRecord())
+            false -> {
+                when (event.trigger) {
+                    is AchievementGoalFailure, is TestGoalFailure ->
+                        event.intention!!.copy(recordStack = listOf(plan.toActivationRecord()))
+                    // else -> intentions[event.intention!!.id]!!.push(plan.toActivationRecord())
+                    else -> event.intention!!.pop().push(plan.toActivationRecord())
+                }
             }
         }
 
@@ -100,7 +103,7 @@ internal data class AgentLifecycleImpl(
                     } else {
                         // Execute Internal Action
                         val internalResponse = internalAction.execute(
-                            InternalRequest.of(this.context, nextGoal.action.args)
+                            InternalRequest.of(this.agent, nextGoal.action.args)
                         )
                         // Apply substitution
                         if (internalResponse.substitution.isSuccess) {
@@ -117,7 +120,7 @@ internal data class AgentLifecycleImpl(
                 is Act -> TODO()
             }
             is Spawn -> context.copy(
-                events = context.events + Event.ofAchievementGoalInvocation(Achieve(nextGoal.value)),
+                events = context.events + Event.ofAchievementGoalInvocation(Achieve.of(nextGoal.value)),
             )
             is Achieve -> context.copy(
                 events = context.events + Event.ofAchievementGoalInvocation(nextGoal, intention),
@@ -214,25 +217,25 @@ internal data class AgentLifecycleImpl(
 
     override fun reason(environment: Environment) {
         // STEP1: Perceive the Environment
-        val perceptions = context.perception.percept()
+        val perceptions = agent.context.perception.percept()
 
         // STEP2: Update the BeliefBase
-        val rr = updateBelief(perceptions, context.beliefBase)
+        val rr = updateBelief(perceptions, agent.context.beliefBase)
         val newBeliefBase = rr.updatedBeliefBase
         // println("pre-run -> $context")
         // Generate events related to BeliefBase revision
-        var newEvents = generateEvents(context.events, rr.modifiedBeliefs)
+        var newEvents = generateEvents(agent.context.events, rr.modifiedBeliefs)
         // STEP3: Receiving Communication from Other Agents --> in futuro
         // STEP4: Selecting "Socially Acceptable" Messages --> in futuro
 
         // STEP5: Selecting an Event.
         val selectedEvent = selectEvent(newEvents)
-        var newIntentionPool = context.intentions
+        var newIntentionPool = agent.context.intentions
         if (selectedEvent != null) {
             newEvents = newEvents - selectedEvent
 
             // STEP6: Retrieving all Relevant Plans.
-            val relevantPlans = selectRelevantPlans(selectedEvent, context.planLibrary)
+            val relevantPlans = selectRelevantPlans(selectedEvent, agent.context.planLibrary)
             // if the set of relevant plans is empty, the event is simply discarded.
 
             // STEP7: Determining the Applicable Plans.
@@ -243,8 +246,13 @@ internal data class AgentLifecycleImpl(
             // STEP9: Select an Intention for Further Execution.
             // Add plan to intentions
             if (selectedPlan != null) {
-                val updatedIntention = assignPlanToIntention(selectedEvent, selectedPlan, context.intentions)
-                newIntentionPool = context.intentions.updateIntention(updatedIntention)
+                // println("EVENT: $selectedEvent")
+                val updatedIntention = assignPlanToIntention(
+                    selectedEvent,
+                    selectedPlan.applicablePlan(selectedEvent, newBeliefBase),
+                    agent.context.intentions,
+                )
+                newIntentionPool = agent.context.intentions.updateIntention(updatedIntention)
             } else {
                 println("WARNING: There's no applicable plan for the event: $selectedEvent")
                 if (selectedEvent.isInternal()) {
@@ -253,26 +261,26 @@ internal data class AgentLifecycleImpl(
             }
         }
         // Select intention to execute
-        var newContext = context.copy(
+        var newAgent = agent.copy(
             events = newEvents,
             beliefBase = newBeliefBase,
             intentions = newIntentionPool,
         )
         // println("PREPARED CONTEXT -> $newContext")
-
+        // println(newIntentionPool)
         if (!newIntentionPool.isEmpty()) {
             val result = scheduleIntention(newIntentionPool)
             val scheduledIntention = result.intentionToExecute
             newIntentionPool = result.newIntentionPool
             // STEP10: Executing one Step on an Intention
-            newContext = if (scheduledIntention.recordStack.isEmpty()) {
-                newContext.copy(intentions = newIntentionPool)
+            newAgent = if (scheduledIntention.recordStack.isEmpty()) {
+                newAgent.copy(intentions = newIntentionPool)
             } else {
-                // println("RUN -> $scheduledIntention")
-                runIntention(scheduledIntention, newContext.copy(intentions = newIntentionPool))
+                println("RUN -> $scheduledIntention")
+                newAgent.copy(runIntention(scheduledIntention, newAgent.context.copy(intentions = newIntentionPool)))
             }
         }
         // println("post run -> $newContext")
-        this.context = newContext
+        this.agent = newAgent
     }
 }
