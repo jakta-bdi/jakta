@@ -1,6 +1,6 @@
 package io.github.anitvam.agents.bdi.actions
 
-import io.github.anitvam.agents.bdi.AgentContext
+import io.github.anitvam.agents.bdi.Agent
 import io.github.anitvam.agents.bdi.actions.effects.AgentChange
 import io.github.anitvam.agents.bdi.actions.effects.EnvironmentChange
 import io.github.anitvam.agents.bdi.actions.effects.SideEffect
@@ -19,14 +19,14 @@ sealed interface ActionRequest<C : SideEffect, Res : ActionResponse<C>> {
 }
 
 interface InternalRequest : ActionRequest<AgentChange, InternalResponse> {
-    val agent: AgentContext
+    val agent: Agent
 
     companion object {
-        fun of(context: AgentContext, arguments: Iterable<Term>): InternalRequest =
-            InternalRequestImpl(context, arguments.toList())
+        fun of(agent: Agent, arguments: Iterable<Term>): InternalRequest =
+            InternalRequestImpl(agent, arguments.toList())
 
-        fun of(context: AgentContext, vararg arguments: Term): InternalRequest =
-            of(context, arguments.asList())
+        fun of(agent: Agent, vararg arguments: Term): InternalRequest =
+            of(agent, arguments.asList())
     }
 }
 

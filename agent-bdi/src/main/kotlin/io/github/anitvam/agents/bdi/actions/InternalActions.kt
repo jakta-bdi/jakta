@@ -4,8 +4,9 @@ import it.unibo.tuprolog.core.Substitution
 
 interface InternalActions {
     companion object {
-        val PRINT: InternalAction = object : InternalAction("print", 1) {
-            override fun InternalRequest.action() = println(arguments.first())
+        val PRINT: InternalAction = object : InternalAction("print", 2) {
+            override fun InternalRequest.action() =
+                println("[${agent.name}] ${arguments.joinToString(separator = " ")}")
         }
 
         val FAIL: InternalAction = object : InternalAction("fail", 0) {
