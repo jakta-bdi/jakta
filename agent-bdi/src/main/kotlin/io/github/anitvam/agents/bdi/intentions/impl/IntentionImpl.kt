@@ -28,5 +28,5 @@ internal class IntentionImpl(
         return this.copy(recordStack = listOf(record.applySubstitution(substitution)) + recordStack - record)
     }
 
-    override fun toString(): String = "[$recordStack]"
+    override fun toString(): String = "$id { \n ${recordStack.joinToString(separator = "\n", prefix = "\t")} \n }"
 }

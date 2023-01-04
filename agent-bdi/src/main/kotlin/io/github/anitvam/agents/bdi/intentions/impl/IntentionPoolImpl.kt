@@ -17,4 +17,6 @@ internal data class IntentionPoolImpl(
 
     override fun deleteIntention(intentionID: IntentionID): IntentionPool =
         IntentionPoolImpl(this - intentionID)
+
+    override fun toString(): String = from.values.joinToString(separator = "\n")
 }
