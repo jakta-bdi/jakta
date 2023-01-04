@@ -46,7 +46,7 @@ class TestAgent : DescribeSpec({
     }
     val start = Atom.of("start")
     val agent = Agent.of(
-        events = listOf(Event.ofAchievementGoalInvocation(Achieve(start))),
+        events = listOf(Event.ofAchievementGoalInvocation(Achieve.of(start))),
         internalActions = InternalActions.default() +
             (TEST.signature.name to TEST) +
             (FAILTEST.signature.name to FAILTEST) +
@@ -61,7 +61,7 @@ class TestAgent : DescribeSpec({
                 planLibrary = PlanLibrary.of(
                     Plan.ofAchievementGoalInvocation(
                         value = start,
-                        goals = listOf(ActInternally(Struct.of("test", Atom.of("5"), Atom.of("5")))),
+                        goals = listOf(ActInternally.of(Struct.of("test", Atom.of("5"), Atom.of("5")))),
                     )
                 )
             )
@@ -82,8 +82,8 @@ class TestAgent : DescribeSpec({
                     Plan.ofAchievementGoalInvocation(
                         value = start,
                         goals = listOf(
-                            ActInternally(Struct.of("increment", Atom.of("5"), X)),
-                            ActInternally(Struct.of("test", X, Atom.of("6"))),
+                            ActInternally.of(Struct.of("increment", Atom.of("5"), X)),
+                            ActInternally.of(Struct.of("test", X, Atom.of("6"))),
                         )
                     )
                 ),
@@ -97,14 +97,14 @@ class TestAgent : DescribeSpec({
                     Plan.ofAchievementGoalInvocation(
                         value = start,
                         goals = listOf(
-                            ActInternally(Struct.of("fail")),
-                            ActInternally(Struct.of("failtest")),
+                            ActInternally.of(Struct.of("fail")),
+                            ActInternally.of(Struct.of("failtest")),
                         ),
                     ),
                     Plan.ofAchievementGoalFailure(
                         value = start,
                         goals = listOf(
-                            ActInternally(Struct.of("passtest")),
+                            ActInternally.of(Struct.of("passtest")),
                         ),
                     )
                 ),
@@ -117,14 +117,14 @@ class TestAgent : DescribeSpec({
                     Plan.ofAchievementGoalInvocation(
                         value = start,
                         goals = listOf(
-                            ActInternally(Struct.of("nonexistingaction")),
-                            ActInternally(Struct.of("failtest")),
+                            ActInternally.of(Struct.of("nonexistingaction")),
+                            ActInternally.of(Struct.of("failtest")),
                         ),
                     ),
                     Plan.ofAchievementGoalFailure(
                         value = start,
                         goals = listOf(
-                            ActInternally(Struct.of("passtest"))
+                            ActInternally.of(Struct.of("passtest"))
                         )
                     )
                 ),
@@ -135,7 +135,7 @@ class TestAgent : DescribeSpec({
             val needChocolate = Belief.fromSelfSource(Struct.of("need", Atom.of("chocolate")))
             val ADDBELIEF = object : InternalAction("add_belief", 1) {
                 override fun InternalRequest.action() {
-                    AddBelief(needChocolate)
+                    AddBelief.of(needChocolate)
                 }
             }
             val newAgent = agent.copy(
@@ -144,14 +144,14 @@ class TestAgent : DescribeSpec({
                     Plan.ofAchievementGoalInvocation(
                         value = start,
                         goals = listOf(
-                            ActInternally(Struct.of("add_belief")),
+                            ActInternally.of(Struct.of("add_belief")),
                         ),
                     ),
                     Plan.ofBeliefBaseAddition(
                         belief = needChocolate,
                         goals = listOf(
-                            Test(needChocolate),
-                            ActInternally(Struct.of("passtests"))
+                            Test.of(needChocolate),
+                            ActInternally.of(Struct.of("passtests"))
                         )
                     )
                 ),
@@ -170,20 +170,20 @@ fun main() {
     }
     val start = Atom.of("start")
     val agent = Agent.of(
-        events = listOf(Event.ofAchievementGoalInvocation(Achieve(start))),
+        events = listOf(Event.ofAchievementGoalInvocation(Achieve.of(start))),
         internalActions = InternalActions.default() + (ADDBELIEF.signature.name to ADDBELIEF),
         planLibrary = PlanLibrary.of(
             Plan.ofAchievementGoalInvocation(
                 value = start,
                 goals = listOf(
-                    ActInternally(Struct.of("add_belief", needChocolate.rule)),
+                    ActInternally.of(Struct.of("add_belief", needChocolate.rule)),
                 ),
             ),
             Plan.ofBeliefBaseAddition(
                 belief = needChocolate,
                 goals = listOf(
-                    Test(needChocolate),
-                    ActInternally(Struct.of("print", Atom.of("guacamole")))
+                    Test.of(needChocolate),
+                    ActInternally.of(Struct.of("print", Atom.of("guacamole")))
                 )
             )
         ),

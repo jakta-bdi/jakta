@@ -4,9 +4,9 @@ import io.github.anitvam.agents.bdi.goals.AddBelief
 import io.github.anitvam.agents.bdi.intentions.Intention
 import io.github.anitvam.agents.bdi.intentions.IntentionPool
 import io.github.anitvam.agents.bdi.plans.ActivationRecord
+import io.kotest.assertions.fail
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.types.shouldBeTypeOf
 import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
@@ -18,16 +18,17 @@ class TestIntentions : DescribeSpec({
     val eatSomething = Belief.fromSelfSource(Struct.of("eat", X))
 
     val activationRecord = ActivationRecord.of(
-        listOf(AddBelief(buySomething), AddBelief(eatSomething)),
+        listOf(AddBelief.of(buySomething), AddBelief.of(eatSomething)),
         Struct.of("test"),
     )
     val intention = Intention.of(listOf(activationRecord))
 
     describe("An intention") {
         it("should return the next goal to satisfy with nextGoal() invocation") {
-            val nextGoal = intention.nextGoal()
-            nextGoal.shouldBeTypeOf<AddBelief>()
-            nextGoal.belief shouldBe buySomething.rule.head
+            when (val nextGoal = intention.nextGoal()) {
+                is AddBelief -> nextGoal.belief shouldBe buySomething.rule.head
+                else -> fail("Next Goal has wrong type")
+            }
         }
 
         it("should remove the right goal with pop() invocation") {
@@ -39,11 +40,11 @@ class TestIntentions : DescribeSpec({
 
         it("should add on top of the record stack after a push() invocation") {
             val newActivationRecord = ActivationRecord.of(
-                listOf(Achieve(Atom.of("clean"))),
+                listOf(Achieve.of(Atom.of("clean"))),
                 Struct.of("test"),
             )
             val updatedIntention = intention.push(newActivationRecord)
-            updatedIntention.nextGoal() shouldBe Achieve(Atom.of("clean"))
+            updatedIntention.nextGoal() shouldBe Achieve.of(Atom.of("clean"))
         }
 
         it("should apply a substitution on the actual Activation Record") {
@@ -53,7 +54,7 @@ class TestIntentions : DescribeSpec({
             val newIntention = Intention.of(
                 intention.recordStack +
                     ActivationRecord.of(
-                        listOf(Achieve(Struct.of("clean", X))),
+                        listOf(Achieve.of(Struct.of("clean", X))),
                         Struct.of("test")
                     )
             )
@@ -74,7 +75,7 @@ class TestIntentions : DescribeSpec({
             listOf(
                 ActivationRecord.of(
                     listOf(
-                        Achieve(Struct.of("clean", Atom.of("home")))
+                        Achieve.of(Struct.of("clean", Atom.of("home")))
                     ),
                     Struct.of("test"),
                 )

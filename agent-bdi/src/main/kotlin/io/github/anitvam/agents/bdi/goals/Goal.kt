@@ -1,6 +1,14 @@
 package io.github.anitvam.agents.bdi.goals
 
 import io.github.anitvam.agents.bdi.beliefs.Belief
+import io.github.anitvam.agents.bdi.goals.impl.AchieveImpl
+import io.github.anitvam.agents.bdi.goals.impl.ActInternallyImpl
+import io.github.anitvam.agents.bdi.goals.impl.ActImpl
+import io.github.anitvam.agents.bdi.goals.impl.SpawnImpl
+import io.github.anitvam.agents.bdi.goals.impl.TestImpl
+import io.github.anitvam.agents.bdi.goals.impl.AddBeliefImpl
+import io.github.anitvam.agents.bdi.goals.impl.RemoveBeliefImpl
+import io.github.anitvam.agents.bdi.goals.impl.UpdateBeliefImpl
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
 
@@ -8,6 +16,8 @@ sealed interface Goal {
     val value: Struct
 
     fun applySubstitution(substitution: Substitution): Goal
+
+    fun copy(value: Struct = this.value): Goal
 }
 
 sealed interface BeliefGoal : Goal {
@@ -15,48 +25,40 @@ sealed interface BeliefGoal : Goal {
         get() = value
 }
 
-data class AddBelief(private val addedBelief: Belief) : BeliefGoal {
-    override val value: Struct
-        get() = addedBelief.rule.head
-    override fun applySubstitution(substitution: Substitution) =
-        AddBelief(addedBelief.applySubstitution(substitution))
-
-    override fun toString(): String = "AddBelief(value=$addedBelief)"
+interface AddBelief : BeliefGoal {
+    companion object {
+        fun of(belief: Belief): AddBelief = AddBeliefImpl(belief)
+    }
 }
 
-data class RemoveBelief(private val removedBelief: Belief) : BeliefGoal {
-    override val value: Struct
-        get() = removedBelief.rule.head
-    override fun applySubstitution(substitution: Substitution) =
-        RemoveBelief(removedBelief.applySubstitution(substitution))
-
-    override fun toString(): String = "RemoveBelief(value=$removedBelief)"
+interface RemoveBelief : BeliefGoal {
+    companion object {
+        fun of(belief: Belief): RemoveBelief = RemoveBeliefImpl(belief)
+    }
 }
 
-data class UpdateBelief(private val updatedBelief: Belief) : BeliefGoal {
-    override val value: Struct
-        get() = updatedBelief.rule.head
-    override fun applySubstitution(substitution: Substitution) =
-        UpdateBelief(updatedBelief.applySubstitution(substitution))
-
-    override fun toString(): String = "UpdateBelief(value=$updatedBelief)"
+interface UpdateBelief : BeliefGoal {
+    companion object {
+        fun of(belief: Belief): UpdateBelief = UpdateBeliefImpl(belief)
+    }
 }
 
-data class Achieve(override val value: Struct) : Goal {
-    override fun applySubstitution(substitution: Substitution) =
-        Achieve(value.apply(substitution).castToStruct())
+interface Achieve : Goal {
+    companion object {
+        fun of(value: Struct): Achieve = AchieveImpl(value)
+    }
 }
 
-data class Test(val belief: Belief) : Goal {
-    override val value: Struct
-        get() = belief.rule.head
-    override fun applySubstitution(substitution: Substitution) =
-        Test(belief.applySubstitution(substitution))
+interface Test : Goal {
+    companion object {
+        fun of(belief: Belief): Test = TestImpl(belief)
+    }
 }
 
-data class Spawn(override val value: Struct) : Goal {
-    override fun applySubstitution(substitution: Substitution) =
-        Spawn(value.apply(substitution).castToStruct())
+interface Spawn : Goal {
+    companion object {
+        fun of(value: Struct): Spawn = SpawnImpl(value)
+    }
 }
 
 sealed interface ActionGoal : Goal {
@@ -64,12 +66,14 @@ sealed interface ActionGoal : Goal {
         get() = value
 }
 
-data class Act(override val value: Struct) : ActionGoal {
-    override fun applySubstitution(substitution: Substitution) =
-        Act(value.apply(substitution).castToStruct())
+interface Act : ActionGoal {
+    companion object {
+        fun of(value: Struct): Act = ActImpl(value)
+    }
 }
 
-data class ActInternally(override val value: Struct) : ActionGoal {
-    override fun applySubstitution(substitution: Substitution) =
-        ActInternally(value.apply(substitution).castToStruct())
+interface ActInternally : ActionGoal {
+    companion object {
+        fun of(value: Struct): ActInternally = ActInternallyImpl(value)
+    }
 }
