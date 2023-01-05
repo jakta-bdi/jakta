@@ -243,6 +243,7 @@ internal data class AgentLifecycleImpl(
 
             // STEP8: Selecting one Applicable Plan.
             val selectedPlan = selectApplicablePlan(applicablePlans)
+
             // STEP9: Select an Intention for Further Execution.
             // Add plan to intentions
             if (selectedPlan != null) {
@@ -276,7 +277,7 @@ internal data class AgentLifecycleImpl(
             newAgent = if (scheduledIntention.recordStack.isEmpty()) {
                 newAgent.copy(intentions = newIntentionPool)
             } else {
-                println("RUN -> $scheduledIntention")
+                // println("RUN -> $scheduledIntention")
                 newAgent.copy(runIntention(scheduledIntention, newAgent.context.copy(intentions = newIntentionPool)))
             }
         }
