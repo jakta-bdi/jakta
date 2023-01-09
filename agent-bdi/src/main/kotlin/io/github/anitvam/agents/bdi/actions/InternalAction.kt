@@ -11,24 +11,12 @@ import io.github.anitvam.agents.bdi.actions.effects.EventChange
 import io.github.anitvam.agents.bdi.actions.effects.PlanChange
 import io.github.anitvam.agents.bdi.intentions.Intention
 import io.github.anitvam.agents.bdi.plans.Plan
-import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.solve.Signature
 
 abstract class InternalAction(override val signature: Signature) :
-    Action<AgentChange, InternalResponse, InternalRequest> {
+    AbstractAction<AgentChange, InternalResponse, InternalRequest>(signature) {
 
     constructor(name: String, arity: Int) : this(Signature(name, arity))
-
-    protected var result: Substitution = Substitution.empty()
-
-    protected val effects: MutableList<AgentChange> = mutableListOf()
-
-    override fun execute(request: InternalRequest): InternalResponse {
-        request.action()
-        return request.reply(result, effects)
-    }
-
-    abstract fun InternalRequest.action()
 
     protected fun addBelief(belief: Belief) = effects.add(BeliefChange(belief, ADDITION))
     protected fun removeBelief(belief: Belief) = effects.add(BeliefChange(belief, REMOVAL))
