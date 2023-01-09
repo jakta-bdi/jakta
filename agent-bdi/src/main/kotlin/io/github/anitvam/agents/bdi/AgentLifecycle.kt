@@ -12,6 +12,7 @@ import io.github.anitvam.agents.bdi.intentions.IntentionPool
 import io.github.anitvam.agents.bdi.intentions.SchedulingResult
 import io.github.anitvam.agents.bdi.plans.Plan
 import io.github.anitvam.agents.bdi.plans.PlanLibrary
+import io.github.anitvam.agents.bdi.actions.effects.EnvironmentChange
 
 /** BDI Agent definition*/
 interface AgentLifecycle {
@@ -89,10 +90,10 @@ interface AgentLifecycle {
      * @param intention: [Intention] on which the agent is currently focused
      * @return the updated [Intention] after agent execution
      */
-    fun runIntention(intention: Intention, context: AgentContext): AgentContext
+    fun runIntention(intention: Intention, context: AgentContext): ExecutionResult
 
     /** Performs the whole procedure (10 steps) of the BDI Agent's Reasoning Cycle. */
-    fun reason(environment: Environment)
+    fun reason(environment: Environment): Iterable<EnvironmentChange>
 
     companion object {
         fun of(agent: Agent): AgentLifecycle = AgentLifecycleImpl(agent)

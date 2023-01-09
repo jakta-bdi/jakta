@@ -5,6 +5,7 @@ import io.github.anitvam.agents.bdi.AgentContext
 import io.github.anitvam.agents.bdi.ContextUpdate.ADDITION
 import io.github.anitvam.agents.bdi.ContextUpdate.REMOVAL
 import io.github.anitvam.agents.bdi.AgentLifecycle
+import io.github.anitvam.agents.bdi.ExecutionResult
 import io.github.anitvam.agents.bdi.beliefs.Belief
 import io.github.anitvam.agents.bdi.beliefs.BeliefBase
 import io.github.anitvam.agents.bdi.beliefs.BeliefUpdate
@@ -28,6 +29,7 @@ import io.github.anitvam.agents.bdi.goals.UpdateBelief
 import io.github.anitvam.agents.bdi.actions.InternalRequest
 import io.github.anitvam.agents.bdi.actions.effects.AgentChange
 import io.github.anitvam.agents.bdi.actions.effects.BeliefChange
+import io.github.anitvam.agents.bdi.actions.effects.EnvironmentChange
 import io.github.anitvam.agents.bdi.actions.effects.EventChange
 import io.github.anitvam.agents.bdi.actions.effects.IntentionChange
 import io.github.anitvam.agents.bdi.actions.effects.PlanChange
@@ -90,7 +92,7 @@ internal data class AgentLifecycleImpl(
 
     override fun scheduleIntention(intentions: IntentionPool) = agent.scheduleIntention(intentions)
 
-    override fun runIntention(intention: Intention, context: AgentContext): AgentContext =
+    override fun runIntention(intention: Intention, context: AgentContext): ExecutionResult =
         when (val nextGoal = intention.nextGoal()) {
             is ActionGoal -> when (nextGoal) {
                 is ActInternally -> {
@@ -99,7 +101,7 @@ internal data class AgentLifecycleImpl(
 
                     if (internalAction == null) {
                         // Internal Action not found
-                        failAchievementGoal(intention, context)
+                        ExecutionResult(failAchievementGoal(intention, context))
                     } else {
                         // Execute Internal Action
                         val internalResponse = internalAction.execute(
@@ -111,55 +113,71 @@ internal data class AgentLifecycleImpl(
                                 newIntention = newIntention.applySubstitution(internalResponse.substitution)
                             }
                             val newContext = applyEffects(context, internalResponse.effects)
-                            newContext.copy(intentions = newContext.intentions.updateIntention(newIntention))
+                            ExecutionResult(
+                                newContext.copy(intentions = newContext.intentions.updateIntention(newIntention)),
+                            )
                         } else {
-                            failAchievementGoal(intention, context)
+                            ExecutionResult(failAchievementGoal(intention, context))
                         }
                     }
                 }
                 is Act -> TODO()
             }
-            is Spawn -> context.copy(
-                events = context.events + Event.ofAchievementGoalInvocation(Achieve.of(nextGoal.value)),
+            is Spawn -> ExecutionResult(
+                context.copy(
+                    events = context.events + Event.ofAchievementGoalInvocation(Achieve.of(nextGoal.value)),
+                )
             )
-            is Achieve -> context.copy(
-                events = context.events + Event.ofAchievementGoalInvocation(nextGoal, intention),
-                intentions = IntentionPool.of(context.intentions - intention.id),
+            is Achieve -> ExecutionResult(
+                context.copy(
+                    events = context.events + Event.ofAchievementGoalInvocation(nextGoal, intention),
+                    intentions = IntentionPool.of(context.intentions - intention.id),
+                )
             )
             is Test -> {
                 val solution = context.beliefBase.solve(nextGoal.value)
                 when (solution.isYes) {
-                    true -> context.copy(
-                        intentions = context.intentions.updateIntention(
-                            intention.pop().applySubstitution(solution.substitution)
+                    true -> ExecutionResult(
+                        context.copy(
+                            intentions = context.intentions.updateIntention(
+                                intention.pop().applySubstitution(solution.substitution)
+                            )
                         )
                     )
-                    else -> context.copy(
-                        events = context.events + Event.ofTestGoalFailure(intention.currentPlan(), intention)
+                    else -> ExecutionResult(
+                        context.copy(
+                            events = context.events + Event.ofTestGoalFailure(intention.currentPlan(), intention)
+                        )
                     )
                 }
             }
             is BeliefGoal -> when (nextGoal) {
                 is AddBelief -> {
                     val retrieveResult = context.beliefBase.add(Belief.fromSelfSource(nextGoal.value))
-                    context.copy(
-                        beliefBase = retrieveResult.updatedBeliefBase,
-                        events = generateEvents(context.events, retrieveResult.modifiedBeliefs),
+                    ExecutionResult(
+                        context.copy(
+                            beliefBase = retrieveResult.updatedBeliefBase,
+                            events = generateEvents(context.events, retrieveResult.modifiedBeliefs),
+                        )
                     )
                 }
                 is RemoveBelief -> {
                     val retrieveResult = context.beliefBase.remove(Belief.fromSelfSource(nextGoal.value))
-                    context.copy(
-                        beliefBase = retrieveResult.updatedBeliefBase,
-                        events = generateEvents(context.events, retrieveResult.modifiedBeliefs),
+                    ExecutionResult(
+                        context.copy(
+                            beliefBase = retrieveResult.updatedBeliefBase,
+                            events = generateEvents(context.events, retrieveResult.modifiedBeliefs),
+                        )
                     )
                 }
                 is UpdateBelief -> {
                     var retrieveResult = context.beliefBase.remove(Belief.fromSelfSource(nextGoal.value))
                     retrieveResult = retrieveResult.updatedBeliefBase.add(Belief.fromSelfSource(nextGoal.value))
-                    context.copy(
-                        beliefBase = retrieveResult.updatedBeliefBase,
-                        events = generateEvents(context.events, retrieveResult.modifiedBeliefs)
+                    ExecutionResult(
+                        context.copy(
+                            beliefBase = retrieveResult.updatedBeliefBase,
+                            events = generateEvents(context.events, retrieveResult.modifiedBeliefs)
+                        )
                     )
                 }
             }
@@ -215,7 +233,7 @@ internal data class AgentLifecycleImpl(
             }
         }
 
-    override fun reason(environment: Environment) {
+    override fun reason(environment: Environment): Iterable<EnvironmentChange> {
         // STEP1: Perceive the Environment
         val perceptions = agent.context.perception.percept()
 
@@ -269,6 +287,7 @@ internal data class AgentLifecycleImpl(
         )
         // println("PREPARED CONTEXT -> $newContext")
         // println(newIntentionPool)
+        var executionResult = ExecutionResult(AgentContext.of())
         if (!newIntentionPool.isEmpty()) {
             val result = scheduleIntention(newIntentionPool)
             val scheduledIntention = result.intentionToExecute
@@ -278,10 +297,15 @@ internal data class AgentLifecycleImpl(
                 newAgent.copy(intentions = newIntentionPool)
             } else {
                 // println("RUN -> $scheduledIntention")
-                newAgent.copy(runIntention(scheduledIntention, newAgent.context.copy(intentions = newIntentionPool)))
+                executionResult = runIntention(
+                    scheduledIntention,
+                    newAgent.context.copy(intentions = newIntentionPool),
+                )
+                newAgent.copy(executionResult.newAgentContext)
             }
         }
         // println("post run -> $newContext")
         this.agent = newAgent
+        return executionResult.environmentEffects
     }
 }
