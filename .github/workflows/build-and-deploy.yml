@@ -43,7 +43,7 @@ jobs:
       )
     steps:
       - name: Fetch sources
-        uses: actions/checkout@v3.0.2
+        uses: actions/checkout@v3.3.0
       - name: semver
         uses: anitvam/conventionalcommit-semantic-releasing@v0.3.6
         with:
