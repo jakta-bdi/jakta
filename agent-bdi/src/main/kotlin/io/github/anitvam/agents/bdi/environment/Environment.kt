@@ -16,11 +16,13 @@ interface Environment {
 
     fun getNextMessage(agent: AgentID): Message?
 
-    fun submitMessage(agent: AgentID, message: Message)
+    fun submitMessage(agent: AgentID, message: Message): Environment
 
-    fun addAgent(agentID: AgentID)
+    fun broadcastMessage(message: Message): Environment
 
-    fun removeAgent(agentID: AgentID)
+    fun addAgent(agentID: AgentID): Environment
+
+    fun removeAgent(agentID: AgentID): Environment
 
     fun percept(): Perception
 
