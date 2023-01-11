@@ -53,5 +53,8 @@ interface BeliefBase : Iterable<Belief> {
             beliefs.forEach { bb = bb.add(it).updatedBeliefBase }
             return bb
         }
+
+        fun of(vararg beliefs: Belief): BeliefBase =
+            of(beliefs.asList())
     }
 }

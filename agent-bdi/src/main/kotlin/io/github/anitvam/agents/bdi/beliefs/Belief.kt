@@ -27,6 +27,16 @@ interface Belief {
             )
         }
 
+        fun of(head: Struct, body: Iterable<Term>, from: String): Belief {
+            val headArguments = listOf(Struct.of("source", Atom.of(from))) + head.args
+            return BeliefImpl(
+                Rule.of(
+                    Struct.of(head.functor, headArguments),
+                    body,
+                )
+            )
+        }
+
         fun fromSelfSource(head: Struct, vararg body: Term): Belief =
             fromSelfSource(head, body.asIterable())
 
@@ -45,10 +55,21 @@ interface Belief {
         fun fromPerceptSource(head: Struct, body: Iterable<Term>): Belief =
             of(head, body, true)
 
+        fun fromMessageSource(from: String, head: Struct, vararg body: Term): Belief =
+            fromMessageSource(from, head, body.asIterable())
+
+        fun fromMessageSource(from: String, head: Struct, body: Sequence<Term>): Belief =
+            fromMessageSource(from, head, body.asIterable())
+
+        fun fromMessageSource(from: String, head: Struct, body: Iterable<Term>): Belief =
+            of(head, body, from)
+
         fun from(rule: Rule): Belief {
-            if (rule.head.args.first() != SOURCE_PERCEPT && rule.head.args.first() != SOURCE_SELF)
+            if (rule.head.args.first().castToStruct().functor != "source")
                 throw IllegalArgumentException("The rule is not a belief.")
             return BeliefImpl(rule)
         }
+
+        fun from(struct: Struct): Belief = from(Rule.of(struct))
     }
 }
