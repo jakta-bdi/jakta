@@ -90,7 +90,7 @@ interface AgentLifecycle {
      * @param intention: [Intention] on which the agent is currently focused
      * @return the updated [Intention] after agent execution
      */
-    fun runIntention(intention: Intention, context: AgentContext): ExecutionResult
+    fun runIntention(intention: Intention, context: AgentContext, environment: Environment): ExecutionResult
 
     /** Performs the whole procedure (10 steps) of the BDI Agent's Reasoning Cycle. */
     fun reason(environment: Environment): Iterable<EnvironmentChange>

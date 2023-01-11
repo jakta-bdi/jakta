@@ -17,6 +17,7 @@ abstract class ExternalAction(override val signature: Signature) :
 
     protected fun addAgent(agent: Agent) = effects.add(SpawnAgent(agent))
     protected fun removeAgent(agentID: AgentID) = effects.add(RemoveAgent(agentID))
-    protected fun sendMessage(agentID: AgentID, message: Message) = effects.add(SendMessage(message, agentID))
+    protected fun sendMessage(agentID: AgentID, message: Message) =
+        effects.add(SendMessage(message, agentID))
     protected fun broadcastMessage(message: Message) = effects.add(BroadcastMessage(message))
 }

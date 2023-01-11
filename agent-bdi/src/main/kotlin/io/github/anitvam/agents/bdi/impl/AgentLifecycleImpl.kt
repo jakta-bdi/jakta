@@ -6,6 +6,7 @@ import io.github.anitvam.agents.bdi.ContextUpdate.ADDITION
 import io.github.anitvam.agents.bdi.ContextUpdate.REMOVAL
 import io.github.anitvam.agents.bdi.AgentLifecycle
 import io.github.anitvam.agents.bdi.ExecutionResult
+import io.github.anitvam.agents.bdi.actions.ExternalRequest
 import io.github.anitvam.agents.bdi.beliefs.Belief
 import io.github.anitvam.agents.bdi.beliefs.BeliefBase
 import io.github.anitvam.agents.bdi.beliefs.BeliefUpdate
@@ -36,6 +37,7 @@ import io.github.anitvam.agents.bdi.actions.effects.PlanChange
 import io.github.anitvam.agents.bdi.environment.Environment
 import io.github.anitvam.agents.bdi.intentions.Intention
 import io.github.anitvam.agents.bdi.intentions.IntentionPool
+import io.github.anitvam.agents.bdi.messages.Tell
 import io.github.anitvam.agents.bdi.plans.Plan
 import io.github.anitvam.agents.bdi.plans.PlanLibrary
 
@@ -92,7 +94,7 @@ internal data class AgentLifecycleImpl(
 
     override fun scheduleIntention(intentions: IntentionPool) = agent.scheduleIntention(intentions)
 
-    override fun runIntention(intention: Intention, context: AgentContext): ExecutionResult =
+    override fun runIntention(intention: Intention, context: AgentContext, environment: Environment): ExecutionResult =
         when (val nextGoal = intention.nextGoal()) {
             is ActionGoal -> when (nextGoal) {
                 is ActInternally -> {
@@ -121,7 +123,29 @@ internal data class AgentLifecycleImpl(
                         }
                     }
                 }
-                is Act -> TODO()
+                is Act -> {
+                    var newIntention = intention.pop()
+                    val externalAction = environment.externalActions[nextGoal.action.functor]
+
+                    if (externalAction == null) {
+                        // Internal Action not found
+                        ExecutionResult(failAchievementGoal(intention, context))
+                    } else {
+                        // Execute Internal Action
+                        val externalResponse = externalAction.execute(
+                            ExternalRequest.of(environment, nextGoal.action.args)
+                        )
+                        // TODO("Is needed substitution for external actions execution?")
+                        if (externalResponse.substitution.isSuccess) {
+                            ExecutionResult(
+                                context.copy(intentions = context.intentions.updateIntention(newIntention)),
+                                externalResponse.effects,
+                            )
+                        } else {
+                            ExecutionResult(failAchievementGoal(intention, context))
+                        }
+                    }
+                }
             }
             is Spawn -> ExecutionResult(
                 context.copy(
@@ -153,7 +177,7 @@ internal data class AgentLifecycleImpl(
             }
             is BeliefGoal -> when (nextGoal) {
                 is AddBelief -> {
-                    val retrieveResult = context.beliefBase.add(Belief.fromSelfSource(nextGoal.value))
+                    val retrieveResult = context.beliefBase.add(Belief.from(nextGoal.value))
                     ExecutionResult(
                         context.copy(
                             beliefBase = retrieveResult.updatedBeliefBase,
@@ -162,7 +186,7 @@ internal data class AgentLifecycleImpl(
                     )
                 }
                 is RemoveBelief -> {
-                    val retrieveResult = context.beliefBase.remove(Belief.fromSelfSource(nextGoal.value))
+                    val retrieveResult = context.beliefBase.remove(Belief.from(nextGoal.value))
                     ExecutionResult(
                         context.copy(
                             beliefBase = retrieveResult.updatedBeliefBase,
@@ -171,8 +195,10 @@ internal data class AgentLifecycleImpl(
                     )
                 }
                 is UpdateBelief -> {
-                    var retrieveResult = context.beliefBase.remove(Belief.fromSelfSource(nextGoal.value))
-                    retrieveResult = retrieveResult.updatedBeliefBase.add(Belief.fromSelfSource(nextGoal.value))
+                    println("QUI ! ${nextGoal.value}")
+                    println("QUI ! ${Belief.from(nextGoal.value)}")
+                    var retrieveResult = context.beliefBase.remove(Belief.from(nextGoal.value))
+                    retrieveResult = retrieveResult.updatedBeliefBase.add(Belief.from(nextGoal.value))
                     ExecutionResult(
                         context.copy(
                             beliefBase = retrieveResult.updatedBeliefBase,
@@ -243,8 +269,20 @@ internal data class AgentLifecycleImpl(
         // println("pre-run -> $context")
         // Generate events related to BeliefBase revision
         var newEvents = generateEvents(agent.context.events, rr.modifiedBeliefs)
-        // STEP3: Receiving Communication from Other Agents --> in futuro
-        // STEP4: Selecting "Socially Acceptable" Messages --> in futuro
+
+        // STEP3: Receiving Communication from Other Agents
+        val message = environment.getNextMessage(agent.agentID)
+
+        // STEP4: Selecting "Socially Acceptable" Messages //TODO()
+
+        // Parse message
+        if (message != null) {
+            newEvents = newEvents + when (message.type) {
+                is io.github.anitvam.agents.bdi.messages.Achieve ->
+                    Event.ofAchievementGoalInvocation(Achieve.of(message.value))
+                is Tell -> Event.ofBeliefBaseUpdate(Belief.fromMessageSource(message.from, message.value))
+            }
+        }
 
         // STEP5: Selecting an Event.
         val selectedEvent = selectEvent(newEvents)
@@ -300,6 +338,7 @@ internal data class AgentLifecycleImpl(
                 executionResult = runIntention(
                     scheduledIntention,
                     newAgent.context.copy(intentions = newIntentionPool),
+                    environment,
                 )
                 newAgent.copy(executionResult.newAgentContext)
             }

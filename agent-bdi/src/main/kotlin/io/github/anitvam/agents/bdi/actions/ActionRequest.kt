@@ -4,6 +4,7 @@ import io.github.anitvam.agents.bdi.Agent
 import io.github.anitvam.agents.bdi.actions.effects.AgentChange
 import io.github.anitvam.agents.bdi.actions.effects.EnvironmentChange
 import io.github.anitvam.agents.bdi.actions.effects.SideEffect
+import io.github.anitvam.agents.bdi.actions.impl.ExternalRequestImpl
 import io.github.anitvam.agents.bdi.actions.impl.InternalRequestImpl
 import io.github.anitvam.agents.bdi.environment.Environment
 import it.unibo.tuprolog.core.Substitution
@@ -32,4 +33,12 @@ interface InternalRequest : ActionRequest<AgentChange, InternalResponse> {
 
 interface ExternalRequest : ActionRequest<EnvironmentChange, ExternalResponse> {
     val environment: Environment
+
+    companion object {
+        fun of(environment: Environment, arguments: Iterable<Term>): ExternalRequest =
+            ExternalRequestImpl(environment, arguments.toList())
+
+        fun of(environment: Environment, vararg arguments: Term): ExternalRequest =
+            ExternalRequestImpl(environment, arguments.asList())
+    }
 }
