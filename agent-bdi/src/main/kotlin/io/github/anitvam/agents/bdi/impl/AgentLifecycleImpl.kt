@@ -34,6 +34,7 @@ import io.github.anitvam.agents.bdi.actions.effects.EnvironmentChange
 import io.github.anitvam.agents.bdi.actions.effects.EventChange
 import io.github.anitvam.agents.bdi.actions.effects.IntentionChange
 import io.github.anitvam.agents.bdi.actions.effects.PlanChange
+import io.github.anitvam.agents.bdi.actions.effects.PopMessage
 import io.github.anitvam.agents.bdi.environment.Environment
 import io.github.anitvam.agents.bdi.intentions.Intention
 import io.github.anitvam.agents.bdi.intentions.IntentionPool
@@ -126,7 +127,6 @@ internal data class AgentLifecycleImpl(
                 is Act -> {
                     var newIntention = intention.pop()
                     val externalAction = environment.externalActions[nextGoal.action.functor]
-
                     if (externalAction == null) {
                         // Internal Action not found
                         ExecutionResult(failAchievementGoal(intention, context))
@@ -150,6 +150,7 @@ internal data class AgentLifecycleImpl(
             is Spawn -> ExecutionResult(
                 context.copy(
                     events = context.events + Event.ofAchievementGoalInvocation(Achieve.of(nextGoal.value)),
+                    intentions = context.intentions.updateIntention(intention.pop()),
                 )
             )
             is Achieve -> ExecutionResult(
@@ -175,37 +176,19 @@ internal data class AgentLifecycleImpl(
                     )
                 }
             }
-            is BeliefGoal -> when (nextGoal) {
-                is AddBelief -> {
-                    val retrieveResult = context.beliefBase.add(Belief.from(nextGoal.value))
-                    ExecutionResult(
-                        context.copy(
-                            beliefBase = retrieveResult.updatedBeliefBase,
-                            events = generateEvents(context.events, retrieveResult.modifiedBeliefs),
-                        )
-                    )
+            is BeliefGoal -> {
+                val retrieveResult = when (nextGoal) {
+                    is AddBelief -> context.beliefBase.add(Belief.from(nextGoal.value))
+                    is RemoveBelief -> context.beliefBase.remove(Belief.from(nextGoal.value))
+                    is UpdateBelief -> context.beliefBase.update(Belief.from(nextGoal.value))
                 }
-                is RemoveBelief -> {
-                    val retrieveResult = context.beliefBase.remove(Belief.from(nextGoal.value))
-                    ExecutionResult(
-                        context.copy(
-                            beliefBase = retrieveResult.updatedBeliefBase,
-                            events = generateEvents(context.events, retrieveResult.modifiedBeliefs),
-                        )
+                ExecutionResult(
+                    context.copy(
+                        beliefBase = retrieveResult.updatedBeliefBase,
+                        events = generateEvents(context.events, retrieveResult.modifiedBeliefs),
+                        intentions = context.intentions.updateIntention(intention.pop()),
                     )
-                }
-                is UpdateBelief -> {
-                    println("QUI ! ${nextGoal.value}")
-                    println("QUI ! ${Belief.from(nextGoal.value)}")
-                    var retrieveResult = context.beliefBase.remove(Belief.from(nextGoal.value))
-                    retrieveResult = retrieveResult.updatedBeliefBase.add(Belief.from(nextGoal.value))
-                    ExecutionResult(
-                        context.copy(
-                            beliefBase = retrieveResult.updatedBeliefBase,
-                            events = generateEvents(context.events, retrieveResult.modifiedBeliefs)
-                        )
-                    )
-                }
+                )
             }
         }
 
@@ -271,7 +254,7 @@ internal data class AgentLifecycleImpl(
         var newEvents = generateEvents(agent.context.events, rr.modifiedBeliefs)
 
         // STEP3: Receiving Communication from Other Agents
-        val message = environment.getNextMessage(agent.agentID)
+        val message = environment.getNextMessage(agent.name)
 
         // STEP4: Selecting "Socially Acceptable" Messages //TODO()
 
@@ -280,7 +263,7 @@ internal data class AgentLifecycleImpl(
             newEvents = newEvents + when (message.type) {
                 is io.github.anitvam.agents.bdi.messages.Achieve ->
                     Event.ofAchievementGoalInvocation(Achieve.of(message.value))
-                is Tell -> Event.ofBeliefBaseUpdate(Belief.fromMessageSource(message.from, message.value))
+                is Tell -> Event.ofBeliefBaseAddition(Belief.fromMessageSource(message.from, message.value))
             }
         }
 
@@ -311,7 +294,7 @@ internal data class AgentLifecycleImpl(
                 )
                 newIntentionPool = agent.context.intentions.updateIntention(updatedIntention)
             } else {
-                println("WARNING: There's no applicable plan for the event: $selectedEvent")
+                println("[${agent.name}]WARNING: There's no applicable plan for the event: $selectedEvent")
                 if (selectedEvent.isInternal()) {
                     newIntentionPool = newIntentionPool.deleteIntention(selectedEvent.intention!!.id)
                 }
@@ -340,11 +323,16 @@ internal data class AgentLifecycleImpl(
                     newAgent.context.copy(intentions = newIntentionPool),
                     environment,
                 )
+
                 newAgent.copy(executionResult.newAgentContext)
             }
         }
         // println("post run -> $newContext")
         this.agent = newAgent
-        return executionResult.environmentEffects
+        return if (message != null) {
+            executionResult.environmentEffects + PopMessage(this.agent.name)
+        } else {
+            executionResult.environmentEffects
+        }
     }
 }
