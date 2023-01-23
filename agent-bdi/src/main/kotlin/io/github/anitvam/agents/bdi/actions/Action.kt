@@ -19,7 +19,9 @@ abstract class AbstractAction<C : SideEffect, Res : ActionResponse<C>, Req : Act
 
     override fun execute(request: Req): Res {
         request.action()
-        return request.reply(result, effects)
+        val res = request.reply(result, effects.toMutableList())
+        effects.clear()
+        return res
     }
 
     abstract fun Req.action()
