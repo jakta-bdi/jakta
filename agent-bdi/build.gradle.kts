@@ -10,9 +10,20 @@ plugins {
     alias(libs.plugins.taskTree)
 }
 
+repositories {
+    mavenCentral()
+}
+
 dependencies {
     implementation(libs.kotlin.stdlib)
     testImplementation(libs.bundles.kotlin.testing)
+    api(project(":utils"))
+    api(project(":agent-fsm"))
+    api(libs.tuprolog.core)
+    api(libs.tuprolog.theory)
+    api(libs.tuprolog.solve.classic)
+    api(libs.tuprolog.solve.classic)
+    api(libs.tuprolog.parser.core)
 }
 
 kotlin {
@@ -34,5 +45,11 @@ tasks.test {
         showStackTraces = true
         events(*org.gradle.api.tasks.testing.logging.TestLogEvent.values())
         exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+    }
+}
+
+tasks.detekt {
+    onlyIf {
+        project.hasProperty("runDetect")
     }
 }

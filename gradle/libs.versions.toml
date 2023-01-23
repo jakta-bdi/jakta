@@ -1,7 +1,8 @@
 [versions]
-kotest = "5.4.2"
+kotest = "5.5.3"
 kotlin = "1.7.10"
 mockito = "4.7.0"
+tuprolog = "0.20.9"
 
 [libraries]
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
@@ -10,6 +11,19 @@ kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-stdlib-reflect", versio
 kotest-junit5-jvm = { module = "io.kotest:kotest-runner-junit5-jvm", version.ref = "kotest" }
 kotest-assertions-core-jvm = { module = "io.kotest:kotest-assertions-core-jvm", version.ref = "kotest" }
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
+tuprolog-full = { module = "it.unibo.tuprolog:2p-jvm", version.ref = "tuprolog" }
+tuprolog-ide = { module = "it.unibo.tuprolog:ide", version.ref = "tuprolog" }
+tuprolog-repl = { module = "it.unibo.tuprolog:repl-jvm", version.ref = "tuprolog" }
+tuprolog-core = { module = "it.unibo.tuprolog:core-jvm", version.ref = "tuprolog" }
+tuprolog-unify = { module = "it.unibo.tuprolog:unify-jvm", version.ref = "tuprolog" }
+tuprolog-theory = { module = "it.unibo.tuprolog:theory-jvm", version.ref = "tuprolog" }
+tuprolog-solve-classic = { module = "it.unibo.tuprolog:solve-classic-jvm", version.ref = "tuprolog" }
+tuprolog-parser-core = { module = "it.unibo.tuprolog:parser-core-jvm", version.ref = "tuprolog" }
+tuprolog-parser-theory = { module = "it.unibo.tuprolog:parser-theory-jvm", version.ref = "tuprolog" }
+tuprolog-dsl-core = { module = "it.unibo.tuprolog:dsl-core-jvm", version.ref = "tuprolog" }
+tuprolog-dsl-unify = { module = "it.unibo.tuprolog:dsl-unify-jvm", version.ref = "tuprolog" }
+tuprolog-dsl-theory = { module = "it.unibo.tuprolog:dsl-theory-jvm", version.ref = "tuprolog" }
+tuprolog-dsl-solve = { module = "it.unibo.tuprolog:dsl-solve-jvm", version.ref = "tuprolog" }
 
 [bundles]
 kotlin-testing = [ "kotest-junit5-jvm", "kotest-assertions-core-jvm", "mockito-core" ]
@@ -19,6 +33,6 @@ dokka = "org.jetbrains.dokka:1.7.10"
 gitSemVer = { id = "org.danilopianini.git-sensitive-semantic-versioning", version = "0.3.0" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-qa = { id = "org.danilopianini.gradle-kotlin-qa", version = "0.25.0" }
-multiJvmTesting = { id = "org.danilopianini.multi-jvm-test-plugin", version = "0.4.9" }
+multiJvmTesting = { id = "org.danilopianini.multi-jvm-test-plugin", version = "0.4.12" }
 publishOnCentral = { id = "org.danilopianini.publish-on-central", version = "2.0.6" }
 taskTree = { id = "com.dorongold.task-tree", version = "2.1.0" }
