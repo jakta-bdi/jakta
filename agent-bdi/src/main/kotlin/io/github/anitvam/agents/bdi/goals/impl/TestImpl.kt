@@ -5,7 +5,6 @@ import io.github.anitvam.agents.bdi.goals.Goal
 import io.github.anitvam.agents.bdi.goals.Test
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
-import it.unibo.tuprolog.core.Truth
 
 internal class TestImpl(private val belief: Belief) : Test {
     override val value: Struct
@@ -16,8 +15,7 @@ internal class TestImpl(private val belief: Belief) : Test {
 
     override fun toString(): String = "Test($value)"
 
-    override fun copy(value: Struct): Goal =
-        TestImpl(Belief.of(value, listOf(Truth.TRUE), true))
+    override fun copy(value: Struct): Goal = TestImpl(Belief.from(value))
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

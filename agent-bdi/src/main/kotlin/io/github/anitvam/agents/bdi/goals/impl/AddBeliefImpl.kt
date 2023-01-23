@@ -5,7 +5,6 @@ import io.github.anitvam.agents.bdi.goals.AddBelief
 import io.github.anitvam.agents.bdi.goals.Goal
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
-import it.unibo.tuprolog.core.Truth
 
 internal class AddBeliefImpl(private val addedBelief: Belief) : AddBelief {
     override val value: Struct
@@ -15,8 +14,7 @@ internal class AddBeliefImpl(private val addedBelief: Belief) : AddBelief {
 
     override fun toString(): String = "AddBelief($value)"
 
-    override fun copy(value: Struct): Goal =
-        AddBeliefImpl(Belief.of(value, listOf(Truth.TRUE), true))
+    override fun copy(value: Struct): Goal = AddBeliefImpl(Belief.from(value))
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
