@@ -1,3 +1,5 @@
+package io.github.anitvam.agents.examples
+
 import io.github.anitvam.agents.bdi.Agent
 import io.github.anitvam.agents.bdi.JasonParser
 import io.github.anitvam.agents.bdi.Mas

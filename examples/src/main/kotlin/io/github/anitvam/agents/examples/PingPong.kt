@@ -1,3 +1,5 @@
+package io.github.anitvam.agents.examples
+
 import io.github.anitvam.agents.bdi.Agent
 import io.github.anitvam.agents.bdi.JasonParser
 import io.github.anitvam.agents.bdi.Mas
@@ -65,9 +67,9 @@ fun main() {
                 guard = JasonParser.parser.parseStruct("turn(source(self), other) & other(source(self), Sender)"),
                 goals = listOf(
                     UpdateBelief.of(Belief.fromSelfSource(JasonParser.parser.parseStruct("turn(me)"))),
-                    RemoveBelief.of(Belief.from(JasonParser.parser.parseStruct("ball(source(Sender))"))),
                     ActInternally.of(JasonParser.parser.parseStruct("print(\"Received ball from\", Sender)")),
-                    ActInternally.of(JasonParser.parser.parseStruct("print(\"Done\")")),
+                    RemoveBelief.of(Belief.from(JasonParser.parser.parseStruct("ball(source(Sender))"))),
+                    ActInternally.of(JasonParser.parser.parseStruct("print(\"Pinger hasDone\")")),
                 ),
             ),
             Plan.ofAchievementGoalInvocation(
@@ -104,7 +106,7 @@ fun main() {
                 value = JasonParser.parser.parseStruct("handle_ping"),
                 goals = listOf(
                     UpdateBelief.of(Belief.fromSelfSource(JasonParser.parser.parseStruct("turn(other)"))),
-                    ActInternally.of(JasonParser.parser.parseStruct("print(\"Done\")")),
+                    ActInternally.of(JasonParser.parser.parseStruct("print(\"Ponger has Done\")")),
                 ),
             ),
             Plan.ofAchievementGoalInvocation(

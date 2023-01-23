@@ -15,3 +15,4 @@ rootProject.name = "ise-2022-project-baiardi"
 include(":utils")
 include(":agent-fsm")
 include(":agent-bdi")
+include("examples")

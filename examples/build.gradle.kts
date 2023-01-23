@@ -2,10 +2,8 @@
 plugins {
     `java-gradle-plugin`
     alias(libs.plugins.dokka)
-    alias(libs.plugins.gitSemVer)
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.qa)
-    alias(libs.plugins.publishOnCentral)
     alias(libs.plugins.multiJvmTesting)
     alias(libs.plugins.taskTree)
 }
@@ -17,13 +15,7 @@ repositories {
 dependencies {
     implementation(libs.kotlin.stdlib)
     testImplementation(libs.bundles.kotlin.testing)
-    api(project(":utils"))
-    api(project(":agent-fsm"))
-    api(libs.tuprolog.core)
-    api(libs.tuprolog.theory)
-    api(libs.tuprolog.solve.classic)
-    api(libs.tuprolog.solve.classic)
-    api(libs.tuprolog.parser.core)
+    api(project(":agent-bdi"))
 }
 
 kotlin {
