@@ -1,5 +1,6 @@
 package io.github.anitvam.agents.bdi.environment.impl
 
+import io.github.anitvam.agents.bdi.Agent
 import io.github.anitvam.agents.bdi.AgentID
 import io.github.anitvam.agents.bdi.Message
 import io.github.anitvam.agents.bdi.actions.ExternalAction
@@ -9,16 +10,29 @@ import io.github.anitvam.agents.bdi.perception.Perception
 
 internal data class EnvironmentImpl(
     override val externalActions: Map<String, ExternalAction>,
-    override val agentIDs: Set<AgentID> = emptySet(),
+    override val agentIDs: Map<String, AgentID> = emptyMap(),
     override val messageBoxes: Map<AgentID, MessageQueue> = mapOf(),
     private val perceptInvocation: () -> Perception
 ) : Environment {
-    override fun getNextMessage(agent: AgentID): Message? = messageBoxes[agent]?.lastOrNull()
+    override fun getNextMessage(agentName: String): Message? = messageBoxes[agentIDs[agentName]]?.lastOrNull()
 
-    override fun submitMessage(agent: AgentID, message: Message) =
-        if (messageBoxes.contains(agent)) {
+    override fun popMessage(agentName: String): Environment {
+        val message = getNextMessage(agentName)
+        return if (message != null) {
             copy(
-                messageBoxes = messageBoxes + mapOf(agent to messageBoxes[agent]!!.plus(message)),
+                messageBoxes = messageBoxes + mapOf(
+                    agentIDs[agentName]!! to messageBoxes[agentIDs[agentName]]!!.minus(message)
+                )
+            )
+        } else this
+    }
+
+    override fun submitMessage(agentName: String, message: Message) =
+        if (messageBoxes.contains(agentIDs[agentName])) {
+            copy(
+                messageBoxes = messageBoxes + mapOf(
+                    agentIDs[agentName]!! to messageBoxes[agentIDs[agentName]]!!.plus(message)
+                )
             )
         } else this
 
@@ -26,19 +40,19 @@ internal data class EnvironmentImpl(
         messageBoxes = messageBoxes.entries.associate { it.key to it.value + message },
     )
 
-    override fun addAgent(agentID: AgentID) =
-        if (!agentIDs.contains(agentID)) {
+    override fun addAgent(agent: Agent) =
+        if (!agentIDs.contains(agent.name)) {
             copy(
-                agentIDs = agentIDs + agentID,
-                messageBoxes = messageBoxes + mapOf(agentID to emptyList()),
+                agentIDs = agentIDs + mapOf(agent.name to agent.agentID),
+                messageBoxes = messageBoxes + mapOf(agent.agentID to emptyList()),
             )
         } else this
 
-    override fun removeAgent(agentID: AgentID) =
-        if (agentIDs.contains(agentID)) {
+    override fun removeAgent(agentName: String) =
+        if (agentIDs.contains(agentName)) {
             copy(
-                agentIDs = agentIDs - agentID,
-                messageBoxes = messageBoxes - agentID,
+                messageBoxes = messageBoxes - agentIDs[agentName]!!,
+                agentIDs = agentIDs - agentName,
             )
         } else this
 
