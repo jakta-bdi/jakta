@@ -14,7 +14,7 @@ jobs:
       cancel-in-progress: true
     steps:
       - name: Checkout
-        uses: DanySK/action-checkout@0.2.3
+        uses: DanySK/action-checkout@0.2.5
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
@@ -26,8 +26,6 @@ jobs:
         run: ./gradlew build
       - name: Lint Check
         run: ./gradlew ktlintCheck
-      - name: Test
-        run: ./gradlew test
   release:
     concurrency:
       # Only one release job at a time. Strictly sequential.
@@ -44,9 +42,9 @@ jobs:
       )
     steps:
       - name: Fetch sources
-        uses: actions/checkout@v3.0.2
+        uses: actions/checkout@v3.3.0
       - name: semver
-        uses: anitvam/conventionalcommit-semantic-releasing@v0.3.6
+        uses: anitvam/conventionalcommit-semantic-releasing@v0.4.0
         with:
           token: ${{ secrets.RELEASE_TOKEN }}
   success:
