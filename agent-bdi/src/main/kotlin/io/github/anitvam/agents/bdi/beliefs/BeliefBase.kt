@@ -35,6 +35,8 @@ interface BeliefBase : Iterable<Belief> {
      */
     fun removeAll(beliefs: BeliefBase): RetrieveResult
 
+    fun update(belief: Belief): RetrieveResult
+
     fun solve(struct: Struct): Solution
 
     fun solve(belief: Belief): Solution

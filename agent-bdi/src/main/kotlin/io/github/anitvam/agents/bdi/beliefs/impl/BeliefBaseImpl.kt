@@ -46,14 +46,24 @@ internal class BeliefBaseImpl(private val beliefs: ClauseMultiSet) : BeliefBase 
     override fun equals(other: Any?) = beliefs == other
 
     override fun remove(belief: Belief): RetrieveResult {
-        println("Element to remove $belief")
-        println("BeliefBase $beliefs")
         return if (beliefs.count(belief.rule) > 0) {
             RetrieveResult(listOf(BeliefUpdate.removal(first { it == belief })), BeliefBase.of(filter { it != belief }))
         } else {
             RetrieveResult(listOf(), this)
         }
     }
+
+    override fun update(belief: Belief): RetrieveResult {
+        val element = beliefs.find { it.head?.functor == belief.rule.head.functor }
+        return if (element != null) {
+            var retrieveResult = remove(Belief.from(element.head!!))
+            retrieveResult = retrieveResult.updatedBeliefBase.add(belief)
+            RetrieveResult(listOf(), retrieveResult.updatedBeliefBase)
+        } else {
+            RetrieveResult(listOf(), this)
+        }
+    }
+
     override fun removeAll(beliefs: BeliefBase): RetrieveResult {
         var removedBeliefs = emptyList<BeliefUpdate>()
         var bb: BeliefBase = this

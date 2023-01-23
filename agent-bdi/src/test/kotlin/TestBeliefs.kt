@@ -130,4 +130,13 @@ class TestBeliefs : DescribeSpec({
             rr.updatedBeliefBase.count() shouldBe 1
         }
     }
+
+    describe("A belief annotation") {
+        it("should be solved as well") {
+            val bb = BeliefBase.of(Belief.fromSelfSource(Struct.of("coffee", Atom.of("hot"))))
+            bb.solve(
+                Struct.of("coffee", Struct.of("source", Var.of("X")), Atom.of("hot"))
+            ).substitution.values.first() shouldBe Atom.of("self")
+        }
+    }
 })
