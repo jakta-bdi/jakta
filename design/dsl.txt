@@ -1,0 +1,36 @@
+fun main() {
+    mas {
+        environment = DefaultEnvironment("id", ...) {
+            actions {
+                "move" { exReq ->
+                    // produce exRes
+                }
+            }
+        }
+        executionStrategy = ...
+        agent("alice") {
+            beliefs {
+                "f"(X)
+            }
+            goals {
+                achieve("g"(X))
+            }
+            plans {
+                +/- achieve("g"(X)) iff { /* guard */ } then {
+                    achieve("g"(X))
+                    act("h"(X))
+                    iact()
+                    test()
+                    spawn(...)
+                }
+                +/- test(...) iff { } then { }
+                +/- "belief"(...)
+            }
+            actions {
+                "move" { intReq ->
+                    // produce intRes
+                }
+            }
+        }
+    }
+}

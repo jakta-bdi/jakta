@@ -1,0 +1,76 @@
+fun main() {
+    mas {
+        // -------------- ENVIRONMENT --------------
+        environment {
+            actions {
+                "send" { exReq -> {
+                        val sender = arguments[0].castToAtom()
+                        val receiver = arguments[1].castToAtom()
+                        val type = arguments[2].castToAtom()
+                        val message = arguments[3].castToStruct()
+
+                        when (type.value) {
+                            "tell" -> sendMessage(receiver.value, Message(sender.value, Tell, message))
+                            "achieve" -> sendMessage(receiver.value, Message(sender.value, io.github.anitvam.agents.bdi.messages.Achieve, message))
+                        }
+                    }
+                }
+            }
+        }
+
+        // -------------- Execution Strategy --------------
+        executionStrategy = SingleThreadedExecutionStrategy()
+
+        // -------------- PINGER --------------
+        agent("pinger") {
+            beliefs {
+                "turn"("me")
+                "other"("ponger")
+            }
+            goals {
+                achieve("send_ping")
+            }
+            plans {
+                + achieve("send_ping") iff { "turn"("me") & "other"(Receiver) } then {
+                    +- "turn"("other")
+                    achieve("sendMessageTo"("ball", Receiver))
+                }
+                + "ball" iff { "turn"("other") & "other"(Sender) } then {
+                    +- "turn"("me")
+                    iact("print"("Received ball from", Sender))
+                    - "ball"
+                    iact("print"("done"))
+                }
+                + achieve("sendMessageTo"(Message, Receiver)) {
+                    iact("print"("Sending ball to", Receiver))
+                    act("send"("pinger", Receiver, "tell", Message))
+                }
+            }
+        }
+
+        // -------------- PONGER --------------
+        agent("ponger") {
+            beliefs {
+                "turn"("other")
+                "other"("pinger")
+            }
+            plans {
+                + achieve("handle_ping") then {
+                    +- "turn"("other")
+                    iact("print"("done"))
+                }
+                + "ball" iff { "turn"("other") & "other"(Sender) } then {
+                    +- "turn"("me")
+                    iact("print"("Received ball from", Sender))
+                    - "ball"
+                    achieve("sendMessageTo"("ball", Sender))
+                    achieve("handle_ping")
+                }
+                + achieve("sendMessageTo"(Message, Receiver)) {
+                    iact("print"("Sending ball to", Receiver))
+                    act("send"("ponger", Receiver, "tell", Message))
+                }
+            }
+        }
+    }
+}
