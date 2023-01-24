@@ -248,7 +248,7 @@ internal data class AgentLifecycleImpl(
 
         // STEP2: Update the BeliefBase
         val rr = updateBelief(perceptions, agent.context.beliefBase)
-        val newBeliefBase = rr.updatedBeliefBase
+        var newBeliefBase = rr.updatedBeliefBase
         // println("pre-run -> $context")
         // Generate events related to BeliefBase revision
         var newEvents = generateEvents(agent.context.events, rr.modifiedBeliefs)
@@ -260,10 +260,14 @@ internal data class AgentLifecycleImpl(
 
         // Parse message
         if (message != null) {
-            newEvents = newEvents + when (message.type) {
+            newEvents = when (message.type) {
                 is io.github.anitvam.agents.bdi.messages.Achieve ->
-                    Event.ofAchievementGoalInvocation(Achieve.of(message.value))
-                is Tell -> Event.ofBeliefBaseAddition(Belief.fromMessageSource(message.from, message.value))
+                    newEvents + Event.ofAchievementGoalInvocation(Achieve.of(message.value))
+                is Tell -> {
+                    val retrieveResult = newBeliefBase.add(Belief.fromMessageSource(message.from, message.value))
+                    newBeliefBase = retrieveResult.updatedBeliefBase
+                    generateEvents(newEvents, retrieveResult.modifiedBeliefs)
+                }
             }
         }
 
@@ -306,7 +310,7 @@ internal data class AgentLifecycleImpl(
             beliefBase = newBeliefBase,
             intentions = newIntentionPool,
         )
-        // println("PREPARED CONTEXT -> $newContext")
+
         // println(newIntentionPool)
         var executionResult = ExecutionResult(AgentContext.of())
         if (!newIntentionPool.isEmpty()) {
