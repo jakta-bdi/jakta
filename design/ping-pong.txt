@@ -1,27 +1,23 @@
 fun main() {
     mas {
-        // -------------- ENVIRONMENT --------------
         environment {
             actions {
-                "send" { exReq -> {
-                        val sender = arguments[0].castToAtom()
-                        val receiver = arguments[1].castToAtom()
-                        val type = arguments[2].castToAtom()
-                        val message = arguments[3].castToStruct()
+                action("send", arity=3) {
+                    val receiver: Atom by argument(0)
+                    val type: Atom by argument(1)
+                    val message: Stuct by argument(2)
 
-                        when (type.value) {
-                            "tell" -> sendMessage(receiver.value, Message(sender.value, Tell, message))
-                            "achieve" -> sendMessage(receiver.value, Message(sender.value, io.github.anitvam.agents.bdi.messages.Achieve, message))
-                        }
+                    when (type.value) {
+                        "tell" -> dispatch(receiver, tell, message))
+                        "achieve" -> dispatch(receiver, achieve, message))
                     }
                 }
             }
         }
 
-        // -------------- Execution Strategy --------------
-        executionStrategy = SingleThreadedExecutionStrategy()
+        executionStrategy = OneThreadPerMas()
+        //executionStrategy = OneThreadPerAgent()
 
-        // -------------- PINGER --------------
         agent("pinger") {
             beliefs {
                 "turn"("me")
@@ -31,44 +27,43 @@ fun main() {
                 achieve("send_ping")
             }
             plans {
-                + achieve("send_ping") iff { "turn"("me") & "other"(Receiver) } then {
-                    +- "turn"("other")
-                    achieve("sendMessageTo"("ball", Receiver))
+                +achieve("send_ping") iff { "turn"("me") and "other"(R) } then {
+                    +-"turn"("other")
+                    achieve("sendMessageTo"("ball", R))
                 }
-                + "ball" iff { "turn"("other") & "other"(Sender) } then {
-                    +- "turn"("me")
-                    iact("print"("Received ball from", Sender))
-                    - "ball"
-                    iact("print"("done"))
+                +"ball" iff { "turn"("other") and "other"(S) } then {
+                    +-"turn"("me")
+                    self."print"("Received ball from", S)
+                    -"ball"
+                    self."print"("done")
                 }
-                + achieve("sendMessageTo"(Message, Receiver)) {
-                    iact("print"("Sending ball to", Receiver))
-                    act("send"("pinger", Receiver, "tell", Message))
+                +achieve("sendMessageTo"(M, R)) {
+                    self."print"("Sending ball to", R)
+                    env."send"(R, "tell", M)
                 }
             }
         }
 
-        // -------------- PONGER --------------
         agent("ponger") {
             beliefs {
                 "turn"("other")
                 "other"("pinger")
             }
             plans {
-                + achieve("handle_ping") then {
-                    +- "turn"("other")
-                    iact("print"("done"))
+                +achieve("handle_ping") then {
+                    +-"turn"("other")
+                    self."print"("done")
                 }
-                + "ball" iff { "turn"("other") & "other"(Sender) } then {
-                    +- "turn"("me")
-                    iact("print"("Received ball from", Sender))
-                    - "ball"
-                    achieve("sendMessageTo"("ball", Sender))
+                +"ball" iff { "turn"("other") & "other"(S) } then {
+                    +-"turn"("me")
+                    self."print"("Received ball from", S)
+                    -"ball"
+                    achieve("sendMessageTo"("ball", S))
                     achieve("handle_ping")
                 }
-                + achieve("sendMessageTo"(Message, Receiver)) {
-                    iact("print"("Sending ball to", Receiver))
-                    act("send"("ponger", Receiver, "tell", Message))
+                +achieve("sendMessageTo"(M, R)) {
+                    self."print"("Sending ball to", R)
+                    env."send"(R, "tell", M)
                 }
             }
         }
