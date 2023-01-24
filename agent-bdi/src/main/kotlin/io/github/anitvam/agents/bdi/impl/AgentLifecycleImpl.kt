@@ -298,7 +298,7 @@ internal data class AgentLifecycleImpl(
                 )
                 newIntentionPool = agent.context.intentions.updateIntention(updatedIntention)
             } else {
-                println("[${agent.name}]WARNING: There's no applicable plan for the event: $selectedEvent")
+                // println("[${agent.name}]WARNING: There's no applicable plan for the event: $selectedEvent")
                 if (selectedEvent.isInternal()) {
                     newIntentionPool = newIntentionPool.deleteIntention(selectedEvent.intention!!.id)
                 }
