@@ -20,7 +20,7 @@ internal class MasImpl(
         agents.forEach { environment = environment.addAgent(it) }
     }
 
-    override fun start() = agents.forEach { executionStrategy.dispatch(it, this).run() }
+    override fun start() = executionStrategy.dispatch(this)
 
     override fun applyEnvironmentEffects(effects: Iterable<EnvironmentChange>) = effects.forEach {
 
