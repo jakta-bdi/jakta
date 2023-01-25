@@ -3,7 +3,7 @@ package io.github.anitvam.agents.examples
 import io.github.anitvam.agents.bdi.Agent
 import io.github.anitvam.agents.bdi.JasonParser
 import io.github.anitvam.agents.bdi.Mas
-import io.github.anitvam.agents.bdi.SingleThreadedExecutionStrategy
+import io.github.anitvam.agents.bdi.OneThreadPerAgent
 import io.github.anitvam.agents.bdi.beliefs.Belief
 import io.github.anitvam.agents.bdi.beliefs.BeliefBase
 import io.github.anitvam.agents.bdi.environment.Environment
@@ -41,7 +41,7 @@ fun main() {
         ),
     )
 
-    val mas = Mas.of(SingleThreadedExecutionStrategy(), env, alice)
+    val mas = Mas.of(OneThreadPerAgent(), env, alice)
 
     mas.start()
 }

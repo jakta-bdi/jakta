@@ -4,7 +4,7 @@ import io.github.anitvam.agents.bdi.Agent
 import io.github.anitvam.agents.bdi.JasonParser
 import io.github.anitvam.agents.bdi.Mas
 import io.github.anitvam.agents.bdi.Message
-import io.github.anitvam.agents.bdi.SingleThreadedExecutionStrategy
+import io.github.anitvam.agents.bdi.OneThreadPerAgent
 import io.github.anitvam.agents.bdi.actions.ExternalAction
 import io.github.anitvam.agents.bdi.actions.ExternalRequest
 import io.github.anitvam.agents.bdi.beliefs.Belief
@@ -119,5 +119,5 @@ fun main() {
         ),
     )
 
-    Mas.of(SingleThreadedExecutionStrategy(), env, pinger, ponger).start()
+    Mas.of(OneThreadPerAgent(), env, pinger, ponger).start()
 }

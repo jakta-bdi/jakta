@@ -8,7 +8,7 @@ interface ExecutionStrategy {
     fun dispatch(agent: Agent, mas: Mas): Runner
 }
 
-class SingleThreadedExecutionStrategy() : ExecutionStrategy {
+class OneThreadPerAgent : ExecutionStrategy {
     override fun dispatch(agent: Agent, mas: Mas): Runner {
         val agentLC = AgentLifecycle.of(agent)
         return Runner.threadOf(

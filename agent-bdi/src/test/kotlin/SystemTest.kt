@@ -1,6 +1,6 @@
 import io.github.anitvam.agents.bdi.Agent
 import io.github.anitvam.agents.bdi.Mas
-import io.github.anitvam.agents.bdi.SingleThreadedExecutionStrategy
+import io.github.anitvam.agents.bdi.OneThreadPerAgent
 import io.github.anitvam.agents.bdi.environment.Environment
 
 fun main() {
@@ -9,7 +9,7 @@ fun main() {
     val alice = Agent.of()
     val bob = Agent.of()
 
-    val agentSystem = Mas.of(SingleThreadedExecutionStrategy(), e, alice, bob)
+    val agentSystem = Mas.of(OneThreadPerAgent(), e, alice, bob)
 
     agentSystem.start()
 }
