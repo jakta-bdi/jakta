@@ -1,7 +1,7 @@
 package io.github.anitvam.agents.bdi.impl
 
 import io.github.anitvam.agents.bdi.Agent
-import io.github.anitvam.agents.bdi.ExecutionStrategy
+import io.github.anitvam.agents.bdi.executionstrategies.ExecutionStrategy
 import io.github.anitvam.agents.bdi.Mas
 import io.github.anitvam.agents.bdi.actions.effects.BroadcastMessage
 import io.github.anitvam.agents.bdi.actions.effects.EnvironmentChange

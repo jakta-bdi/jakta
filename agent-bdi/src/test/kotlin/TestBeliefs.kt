@@ -1,6 +1,6 @@
 import io.github.anitvam.agents.bdi.Agent
 import io.github.anitvam.agents.bdi.AgentLifecycle
-import io.github.anitvam.agents.bdi.ContextUpdate
+import io.github.anitvam.agents.bdi.context.ContextUpdate
 import io.github.anitvam.agents.bdi.beliefs.Belief
 import io.github.anitvam.agents.bdi.beliefs.BeliefBase
 import io.kotest.core.spec.style.DescribeSpec

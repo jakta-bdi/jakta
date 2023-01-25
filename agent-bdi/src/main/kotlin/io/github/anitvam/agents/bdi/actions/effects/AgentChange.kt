@@ -1,6 +1,6 @@
 package io.github.anitvam.agents.bdi.actions.effects
 
-import io.github.anitvam.agents.bdi.ContextUpdate
+import io.github.anitvam.agents.bdi.context.ContextUpdate
 import io.github.anitvam.agents.bdi.beliefs.Belief
 import io.github.anitvam.agents.bdi.events.Event
 import io.github.anitvam.agents.bdi.intentions.Intention

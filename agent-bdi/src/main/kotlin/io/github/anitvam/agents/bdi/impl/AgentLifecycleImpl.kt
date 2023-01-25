@@ -1,11 +1,11 @@
 package io.github.anitvam.agents.bdi.impl
 
 import io.github.anitvam.agents.bdi.Agent
-import io.github.anitvam.agents.bdi.AgentContext
-import io.github.anitvam.agents.bdi.ContextUpdate.ADDITION
-import io.github.anitvam.agents.bdi.ContextUpdate.REMOVAL
+import io.github.anitvam.agents.bdi.context.AgentContext
+import io.github.anitvam.agents.bdi.context.ContextUpdate.ADDITION
+import io.github.anitvam.agents.bdi.context.ContextUpdate.REMOVAL
 import io.github.anitvam.agents.bdi.AgentLifecycle
-import io.github.anitvam.agents.bdi.ExecutionResult
+import io.github.anitvam.agents.bdi.executionstrategies.ExecutionResult
 import io.github.anitvam.agents.bdi.actions.ExternalRequest
 import io.github.anitvam.agents.bdi.beliefs.Belief
 import io.github.anitvam.agents.bdi.beliefs.BeliefBase

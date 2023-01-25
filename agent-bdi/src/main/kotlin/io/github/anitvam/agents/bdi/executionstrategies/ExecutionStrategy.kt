@@ -1,5 +1,8 @@
-package io.github.anitvam.agents.bdi
+package io.github.anitvam.agents.bdi.executionstrategies
 
+import io.github.anitvam.agents.bdi.Agent
+import io.github.anitvam.agents.bdi.AgentLifecycle
+import io.github.anitvam.agents.bdi.Mas
 import io.github.anitvam.agents.bdi.actions.effects.EnvironmentChange
 import io.github.anitvam.agents.fsm.Activity
 import io.github.anitvam.agents.fsm.Runner

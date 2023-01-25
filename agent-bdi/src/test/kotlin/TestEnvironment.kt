@@ -9,7 +9,7 @@ import io.github.anitvam.agents.bdi.plans.PlanLibrary
 import io.github.anitvam.agents.bdi.beliefs.Belief
 import io.github.anitvam.agents.bdi.beliefs.BeliefBase
 import io.github.anitvam.agents.bdi.JasonParser
-import io.github.anitvam.agents.bdi.OneThreadPerAgent
+import io.github.anitvam.agents.bdi.executionstrategies.OneThreadPerAgent
 
 fun main() {
     val env = Environment.of()

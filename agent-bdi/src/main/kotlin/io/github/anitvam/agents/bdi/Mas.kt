@@ -2,6 +2,7 @@ package io.github.anitvam.agents.bdi
 
 import io.github.anitvam.agents.bdi.actions.effects.EnvironmentChange
 import io.github.anitvam.agents.bdi.environment.Environment
+import io.github.anitvam.agents.bdi.executionstrategies.ExecutionStrategy
 import io.github.anitvam.agents.bdi.impl.MasImpl
 
 interface Mas {

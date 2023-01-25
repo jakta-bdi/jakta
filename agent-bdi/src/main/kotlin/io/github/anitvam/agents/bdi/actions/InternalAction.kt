@@ -1,7 +1,7 @@
 package io.github.anitvam.agents.bdi.actions
 
-import io.github.anitvam.agents.bdi.ContextUpdate.ADDITION
-import io.github.anitvam.agents.bdi.ContextUpdate.REMOVAL
+import io.github.anitvam.agents.bdi.context.ContextUpdate.ADDITION
+import io.github.anitvam.agents.bdi.context.ContextUpdate.REMOVAL
 import io.github.anitvam.agents.bdi.beliefs.Belief
 import io.github.anitvam.agents.bdi.events.Event
 import io.github.anitvam.agents.bdi.actions.effects.BeliefChange

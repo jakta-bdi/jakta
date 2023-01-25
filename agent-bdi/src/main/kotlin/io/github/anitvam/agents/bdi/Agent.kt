@@ -5,6 +5,7 @@ import io.github.anitvam.agents.bdi.events.Event
 import io.github.anitvam.agents.bdi.events.EventQueue
 import io.github.anitvam.agents.bdi.actions.InternalAction
 import io.github.anitvam.agents.bdi.actions.InternalActions
+import io.github.anitvam.agents.bdi.context.AgentContext
 import io.github.anitvam.agents.bdi.impl.AgentImpl
 import io.github.anitvam.agents.bdi.intentions.IntentionPool
 import io.github.anitvam.agents.bdi.intentions.SchedulingResult

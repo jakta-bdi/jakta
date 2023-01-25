@@ -13,6 +13,8 @@ import io.github.anitvam.agents.bdi.intentions.SchedulingResult
 import io.github.anitvam.agents.bdi.plans.Plan
 import io.github.anitvam.agents.bdi.plans.PlanLibrary
 import io.github.anitvam.agents.bdi.actions.effects.EnvironmentChange
+import io.github.anitvam.agents.bdi.context.AgentContext
+import io.github.anitvam.agents.bdi.executionstrategies.ExecutionResult
 
 /** BDI Agent definition*/
 interface AgentLifecycle {

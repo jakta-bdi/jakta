@@ -1,7 +1,7 @@
 package io.github.anitvam.agents.bdi.impl
 
 import io.github.anitvam.agents.bdi.Agent
-import io.github.anitvam.agents.bdi.AgentContext
+import io.github.anitvam.agents.bdi.context.AgentContext
 import io.github.anitvam.agents.bdi.AgentID
 import io.github.anitvam.agents.bdi.events.EventQueue
 import io.github.anitvam.agents.bdi.intentions.IntentionPool
