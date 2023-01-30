@@ -10,7 +10,7 @@ import io.github.anitvam.agents.bdi.beliefs.Belief
 import io.github.anitvam.agents.bdi.beliefs.BeliefBase
 import io.github.anitvam.agents.bdi.environment.Environment
 import io.github.anitvam.agents.bdi.events.Event
-import io.github.anitvam.agents.bdi.executionstrategies.OneThreadPerMas
+import io.github.anitvam.agents.bdi.executionstrategies.ExecutionStrategy
 import io.github.anitvam.agents.bdi.goals.Achieve
 import io.github.anitvam.agents.bdi.goals.Act
 import io.github.anitvam.agents.bdi.goals.ActInternally
@@ -119,5 +119,5 @@ fun main() {
         ),
     )
 
-    Mas.of(OneThreadPerMas(), env, pinger, ponger).start()
+    Mas.of(ExecutionStrategy.oneThreadPerAgent(), env, pinger, ponger).start()
 }

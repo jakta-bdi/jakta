@@ -1,7 +1,6 @@
 import io.github.anitvam.agents.bdi.Agent
 import io.github.anitvam.agents.bdi.Mas
-import io.github.anitvam.agents.bdi.executionstrategies.OneThreadPerAgent
-import io.github.anitvam.agents.bdi.beliefs.Belief
+import io.github.anitvam.agents.bdi.executionstrategies.ExecutionStrategy
 import io.github.anitvam.agents.bdi.events.Event
 import io.github.anitvam.agents.bdi.goals.Achieve
 import io.github.anitvam.agents.bdi.goals.ActInternally
@@ -10,6 +9,7 @@ import io.github.anitvam.agents.bdi.goals.Test
 import io.github.anitvam.agents.bdi.actions.InternalAction
 import io.github.anitvam.agents.bdi.actions.InternalActions
 import io.github.anitvam.agents.bdi.actions.InternalRequest
+import io.github.anitvam.agents.bdi.beliefs.Belief
 import io.github.anitvam.agents.bdi.environment.Environment
 import io.github.anitvam.agents.bdi.plans.Plan
 import io.github.anitvam.agents.bdi.plans.PlanLibrary
@@ -65,7 +65,7 @@ class TestAgent : DescribeSpec({
                     )
                 )
             )
-            Mas.of(OneThreadPerAgent(), environment, newAgent).start()
+            Mas.of(ExecutionStrategy.oneThreadPerAgent(), environment, newAgent).start()
         }
         it("can declare custom actions to be performed") {
             val INCREMENT = object : InternalAction("increment", 2) {
@@ -89,7 +89,7 @@ class TestAgent : DescribeSpec({
                 ),
                 internalActions = agent.context.internalActions + (INCREMENT.signature.name to INCREMENT),
             )
-            Mas.of(OneThreadPerAgent(), environment, newAgent).start()
+            Mas.of(ExecutionStrategy.oneThreadPerAgent(), environment, newAgent).start()
         }
         it("can fail its intention using the internal action fail") {
             val newAgent = agent.copy(
@@ -109,7 +109,7 @@ class TestAgent : DescribeSpec({
                     )
                 ),
             )
-            Mas.of(OneThreadPerAgent(), environment, newAgent).start()
+            Mas.of(ExecutionStrategy.oneThreadPerAgent(), environment, newAgent).start()
         }
         it("fails its intention if the action to execute is not found") {
             val newAgent = agent.copy(
@@ -129,7 +129,7 @@ class TestAgent : DescribeSpec({
                     )
                 ),
             )
-            Mas.of(OneThreadPerAgent(), environment, newAgent).start()
+            Mas.of(ExecutionStrategy.oneThreadPerAgent(), environment, newAgent).start()
         }
         it("can modify agent's context declaring custom actions") {
             val needChocolate = Belief.fromSelfSource(Struct.of("need", Atom.of("chocolate")))
@@ -156,7 +156,7 @@ class TestAgent : DescribeSpec({
                     )
                 ),
             )
-            Mas.of(OneThreadPerAgent(), environment, newAgent).start()
+            Mas.of(ExecutionStrategy.oneThreadPerAgent(), environment, newAgent).start()
         }
     }
 })
@@ -188,5 +188,5 @@ fun main() {
             )
         ),
     )
-    Mas.of(OneThreadPerAgent(), Environment.of(), agent).start()
+    Mas.of(ExecutionStrategy.oneThreadPerAgent(), Environment.of(), agent).start()
 }

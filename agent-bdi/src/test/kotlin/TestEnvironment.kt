@@ -9,7 +9,7 @@ import io.github.anitvam.agents.bdi.plans.PlanLibrary
 import io.github.anitvam.agents.bdi.beliefs.Belief
 import io.github.anitvam.agents.bdi.beliefs.BeliefBase
 import io.github.anitvam.agents.bdi.JasonParser
-import io.github.anitvam.agents.bdi.executionstrategies.OneThreadPerAgent
+import io.github.anitvam.agents.bdi.executionstrategies.ExecutionStrategy
 
 fun main() {
     val env = Environment.of()
@@ -50,7 +50,7 @@ fun main() {
         ),
     )
 
-    val mas = Mas.of(OneThreadPerAgent(), env, alice, bob)
+    val mas = Mas.of(ExecutionStrategy.oneThreadPerAgent(), env, alice, bob)
 
     mas.start()
 }

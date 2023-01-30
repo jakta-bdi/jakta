@@ -5,7 +5,7 @@ import io.github.anitvam.agents.bdi.actions.InternalAction
 import io.github.anitvam.agents.bdi.actions.InternalRequest
 import io.github.anitvam.agents.bdi.environment.Environment
 import io.github.anitvam.agents.bdi.events.Event
-import io.github.anitvam.agents.bdi.executionstrategies.OneThreadPerMas
+import io.github.anitvam.agents.bdi.executionstrategies.ExecutionStrategy
 import io.github.anitvam.agents.bdi.goals.Achieve
 import io.github.anitvam.agents.bdi.goals.ActInternally
 import io.github.anitvam.agents.bdi.plans.Plan
@@ -58,6 +58,5 @@ fun main() {
     )
     val environment = Environment.of()
 
-    Mas.of(OneThreadPerMas(), environment, alice, bob).start()
-    // Mas.of(OneThreadPerAgent(), environment, alice, bob).start()
+    Mas.of(ExecutionStrategy.oneThreadPerAgent(), environment, alice, bob).start()
 }

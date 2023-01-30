@@ -3,7 +3,7 @@ package io.github.anitvam.agents.examples
 import io.github.anitvam.agents.bdi.Agent
 import io.github.anitvam.agents.bdi.JasonParser
 import io.github.anitvam.agents.bdi.Mas
-import io.github.anitvam.agents.bdi.executionstrategies.OneThreadPerAgent
+import io.github.anitvam.agents.bdi.executionstrategies.ExecutionStrategy
 import io.github.anitvam.agents.bdi.environment.Environment
 import io.github.anitvam.agents.bdi.events.AchievementGoalInvocation
 import io.github.anitvam.agents.bdi.events.Event
@@ -45,5 +45,5 @@ fun main() {
     )
 
     val env = Environment.of()
-    Mas.of(OneThreadPerAgent(), env, agent).start()
+    Mas.of(ExecutionStrategy.oneThreadPerAgent(), env, agent).start()
 }

@@ -1,41 +1,24 @@
 package io.github.anitvam.agents.bdi.executionstrategies
 
-import io.github.anitvam.agents.bdi.AgentLifecycle
 import io.github.anitvam.agents.bdi.Mas
 import io.github.anitvam.agents.bdi.actions.effects.EnvironmentChange
-import io.github.anitvam.agents.fsm.Activity
-import io.github.anitvam.agents.fsm.Runner
+import io.github.anitvam.agents.bdi.executionstrategies.impl.OneThreadPerAgentImpl
+import io.github.anitvam.agents.bdi.executionstrategies.impl.OneThreadPerMasImpl
+import io.github.anitvam.agents.bdi.executionstrategies.impl.DiscreteEventExecutionImpl
+import io.github.anitvam.agents.bdi.executionstrategies.impl.DiscreteTimeExecutionImpl
 
 interface ExecutionStrategy {
     fun dispatch(mas: Mas)
 
     fun applySideEffects(effects: Iterable<EnvironmentChange>, mas: Mas) = mas.applyEnvironmentEffects(effects)
-}
 
-class OneThreadPerAgent : ExecutionStrategy {
-    override fun dispatch(mas: Mas) {
-        mas.agents.forEach {
-            val agentLC = AgentLifecycle.of(it)
-            Runner.threadOf(
-                Activity.of {
-                    val sideEffects = agentLC.reason(mas.environment)
-                    applySideEffects(sideEffects, mas)
-                }
-            ).run()
-        }
-    }
-}
+    companion object {
+        fun oneThreadPerAgent(): ExecutionStrategy = OneThreadPerAgentImpl()
 
-class OneThreadPerMas : ExecutionStrategy {
-    override fun dispatch(mas: Mas) {
-        val agentLCs = mas.agents.map { AgentLifecycle.of(it) }
-        Runner.threadOf(
-            Activity.of {
-                agentLCs.forEach {
-                    val sideEffects = it.reason(mas.environment)
-                    applySideEffects(sideEffects, mas)
-                }
-            }
-        ).run()
+        fun oneThreadPerMas(): ExecutionStrategy = OneThreadPerMasImpl()
+
+        fun discreteEventExecution(): ExecutionStrategy = DiscreteEventExecutionImpl()
+
+        fun discreteTimeExecution(): ExecutionStrategy = DiscreteTimeExecutionImpl()
     }
 }
