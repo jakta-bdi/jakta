@@ -33,19 +33,23 @@ import io.github.anitvam.agents.bdi.actions.effects.BeliefChange
 import io.github.anitvam.agents.bdi.actions.effects.EnvironmentChange
 import io.github.anitvam.agents.bdi.actions.effects.EventChange
 import io.github.anitvam.agents.bdi.actions.effects.IntentionChange
+import io.github.anitvam.agents.bdi.actions.effects.Pause
 import io.github.anitvam.agents.bdi.actions.effects.PlanChange
 import io.github.anitvam.agents.bdi.actions.effects.PopMessage
+import io.github.anitvam.agents.bdi.actions.effects.Sleep
+import io.github.anitvam.agents.bdi.actions.effects.Stop
 import io.github.anitvam.agents.bdi.environment.Environment
 import io.github.anitvam.agents.bdi.intentions.Intention
 import io.github.anitvam.agents.bdi.intentions.IntentionPool
 import io.github.anitvam.agents.bdi.messages.Tell
 import io.github.anitvam.agents.bdi.plans.Plan
 import io.github.anitvam.agents.bdi.plans.PlanLibrary
+import io.github.anitvam.agents.fsm.Activity
 
 internal data class AgentLifecycleImpl(
     private var agent: Agent,
 ) : AgentLifecycle {
-    // private var context: AgentContext = agent.context
+    private lateinit var controller: Activity.Controller
 
     override fun updateBelief(perceptions: BeliefBase, beliefBase: BeliefBase): RetrieveResult =
         when (perceptions == beliefBase) {
@@ -219,6 +223,10 @@ internal data class AgentLifecycleImpl(
                     ADDITION -> newPlans.addPlan(it.plan)
                     REMOVAL -> newPlans.removePlan(it.plan)
                 }
+
+                is Pause -> controller.pause()
+                is Sleep -> controller.sleep(it.millis)
+                is Stop -> controller.stop()
             }
         }
         return context.copy(
@@ -242,7 +250,9 @@ internal data class AgentLifecycleImpl(
             }
         }
 
-    override fun reason(environment: Environment): Iterable<EnvironmentChange> {
+    override fun reason(environment: Environment, controller: Activity.Controller): Iterable<EnvironmentChange> {
+        this.controller = controller
+
         // STEP1: Perceive the Environment
         val perceptions = agent.context.perception.percept()
 

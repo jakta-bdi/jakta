@@ -1,6 +1,7 @@
 package io.github.anitvam.agents.fsm.impl
 
 import io.github.anitvam.agents.fsm.Activity
+import io.github.anitvam.agents.fsm.time.Time
 import io.github.anitvam.agents.utils.Promise
 import java.util.concurrent.Semaphore
 
@@ -21,6 +22,9 @@ class ThreadRunner(override val activity: Activity) : AbstractRunner(activity) {
 
     override fun onPause() = mutex.acquire()
     override fun onResume() = mutex.release()
+
+    override fun getCurrentTime(): Time = Time.of(System.currentTimeMillis())
+
     override fun run(): Promise<Unit> {
         thread.start()
         return promise.thenApplyAsync {

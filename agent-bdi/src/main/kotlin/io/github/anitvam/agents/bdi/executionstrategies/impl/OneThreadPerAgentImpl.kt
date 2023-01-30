@@ -8,11 +8,11 @@ import io.github.anitvam.agents.fsm.Runner
 
 internal class OneThreadPerAgentImpl : ExecutionStrategy {
     override fun dispatch(mas: Mas) {
-        mas.agents.forEach {
-            val agentLC = AgentLifecycle.of(it)
+        mas.agents.forEach { agent ->
+            val agentLC = AgentLifecycle.of(agent)
             Runner.threadOf(
                 Activity.of {
-                    val sideEffects = agentLC.reason(mas.environment)
+                    val sideEffects = agentLC.reason(mas.environment, it)
                     applySideEffects(sideEffects, mas)
                 }
             ).run()

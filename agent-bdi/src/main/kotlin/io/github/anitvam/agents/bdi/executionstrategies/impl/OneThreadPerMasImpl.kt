@@ -11,8 +11,8 @@ internal class OneThreadPerMasImpl : ExecutionStrategy {
         val agentLCs = mas.agents.map { AgentLifecycle.of(it) }
         Runner.threadOf(
             Activity.of {
-                agentLCs.forEach {
-                    val sideEffects = it.reason(mas.environment)
+                agentLCs.forEach { agent ->
+                    val sideEffects = agent.reason(mas.environment, it)
                     applySideEffects(sideEffects, mas)
                 }
             }
