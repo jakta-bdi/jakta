@@ -11,6 +11,9 @@ import io.github.anitvam.agents.fsm.impl.AbstractRunner.Operation.PAUSE
 import io.github.anitvam.agents.fsm.impl.AbstractRunner.Operation.CONTINUE
 import io.github.anitvam.agents.fsm.impl.AbstractRunner.Operation.RESTART
 import io.github.anitvam.agents.fsm.impl.AbstractRunner.Operation.STOP
+import io.github.anitvam.agents.fsm.time.Time
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 /**
  * Abstract implementation of a FSM [Runner].
@@ -35,6 +38,14 @@ abstract class AbstractRunner(override val activity: Activity) : Runner {
         override fun stop() {
             nextOperation = STOP
             if (isPaused) onResume()
+        }
+
+        override fun currentTime(): Time = getCurrentTime()
+
+        override fun sleep(millis: Long) {
+            pause()
+            Executors.newScheduledThreadPool(1)
+                .schedule({ resume() }, millis, TimeUnit.MILLISECONDS)
         }
 
         override fun restart() {
@@ -137,4 +148,6 @@ abstract class AbstractRunner(override val activity: Activity) : Runner {
      * Runner's specific implementation actions to resume the FSM execution.
      */
     abstract fun onResume()
+
+    abstract fun getCurrentTime(): Time
 }

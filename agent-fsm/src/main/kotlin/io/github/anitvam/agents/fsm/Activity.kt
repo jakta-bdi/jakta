@@ -2,6 +2,8 @@ package io.github.anitvam.agents.fsm
 
 import io.github.anitvam.agents.fsm.impl.ActivityImpl
 import io.github.anitvam.agents.fsm.impl.State
+import io.github.anitvam.agents.fsm.time.Time
+
 /**
  * An [Activity] is something executed inside a final-state machine (FSM).
  */
@@ -50,6 +52,10 @@ interface Activity {
          * Triggers a FSM state transition into [State.STOPPED] when possible.
          */
         fun stop()
+
+        fun currentTime(): Time
+
+        fun sleep(millis: Long)
     }
 
     companion object {
