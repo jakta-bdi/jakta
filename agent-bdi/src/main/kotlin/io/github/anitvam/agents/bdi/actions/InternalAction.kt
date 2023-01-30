@@ -8,7 +8,10 @@ import io.github.anitvam.agents.bdi.actions.effects.BeliefChange
 import io.github.anitvam.agents.bdi.actions.effects.IntentionChange
 import io.github.anitvam.agents.bdi.actions.effects.AgentChange
 import io.github.anitvam.agents.bdi.actions.effects.EventChange
+import io.github.anitvam.agents.bdi.actions.effects.Pause
 import io.github.anitvam.agents.bdi.actions.effects.PlanChange
+import io.github.anitvam.agents.bdi.actions.effects.Sleep
+import io.github.anitvam.agents.bdi.actions.effects.Stop
 import io.github.anitvam.agents.bdi.intentions.Intention
 import io.github.anitvam.agents.bdi.plans.Plan
 import it.unibo.tuprolog.solve.Signature
@@ -26,4 +29,7 @@ abstract class InternalAction(override val signature: Signature) :
     protected fun removeEvent(event: Event) = effects.add(EventChange(event, REMOVAL))
     protected fun addPlan(plan: Plan) = effects.add(PlanChange(plan, ADDITION))
     protected fun removePlan(plan: Plan) = effects.add(PlanChange(plan, REMOVAL))
+    protected fun stopAgent() = effects.add(Stop())
+    protected fun sleepAgent(millis: Long) = effects.add(Sleep(millis))
+    protected fun pauseAgent() = effects.add(Pause())
 }

@@ -7,12 +7,13 @@ import io.github.anitvam.agents.bdi.actions.effects.SideEffect
 import io.github.anitvam.agents.bdi.actions.impl.ExternalRequestImpl
 import io.github.anitvam.agents.bdi.actions.impl.InternalRequestImpl
 import io.github.anitvam.agents.bdi.environment.Environment
+import io.github.anitvam.agents.fsm.time.Time
 import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.core.Term
 
 sealed interface ActionRequest<C : SideEffect, Res : ActionResponse<C>> {
     val arguments: List<Term>
-    // val data: Map<String, Any>
+    val requestTimestamp: Time
 
     fun reply(substitution: Substitution = Substitution.empty(), effects: Iterable<C>): Res
 
