@@ -45,6 +45,7 @@ import io.github.anitvam.agents.bdi.messages.Tell
 import io.github.anitvam.agents.bdi.plans.Plan
 import io.github.anitvam.agents.bdi.plans.PlanLibrary
 import io.github.anitvam.agents.fsm.Activity
+import java.lang.IllegalArgumentException
 
 internal data class AgentLifecycleImpl(
     private var agent: Agent,
@@ -111,19 +112,24 @@ internal data class AgentLifecycleImpl(
                         ExecutionResult(failAchievementGoal(intention, context))
                     } else {
                         // Execute Internal Action
-                        val internalResponse = internalAction.execute(
-                            InternalRequest.of(this.agent, controller.currentTime(), nextGoal.action.args)
-                        )
-                        // Apply substitution
-                        if (internalResponse.substitution.isSuccess) {
-                            if (newIntention.recordStack.isNotEmpty()) {
-                                newIntention = newIntention.applySubstitution(internalResponse.substitution)
-                            }
-                            val newContext = applyEffects(context, internalResponse.effects)
-                            ExecutionResult(
-                                newContext.copy(intentions = newContext.intentions.updateIntention(newIntention)),
+                        try {
+                            val internalResponse = internalAction.execute(
+                                InternalRequest.of(this.agent, controller.currentTime(), nextGoal.action.args)
                             )
-                        } else {
+                            // Apply substitution
+                            if (internalResponse.substitution.isSuccess) {
+                                if (newIntention.recordStack.isNotEmpty()) {
+                                    newIntention = newIntention.applySubstitution(internalResponse.substitution)
+                                }
+                                val newContext = applyEffects(context, internalResponse.effects)
+                                ExecutionResult(
+                                    newContext.copy(intentions = newContext.intentions.updateIntention(newIntention)),
+                                )
+                            } else {
+                                ExecutionResult(failAchievementGoal(intention, context))
+                            }
+                        } catch (e: IllegalArgumentException) {
+                            // Argument number mismatch from action definition
                             ExecutionResult(failAchievementGoal(intention, context))
                         }
                     }
@@ -136,16 +142,26 @@ internal data class AgentLifecycleImpl(
                         ExecutionResult(failAchievementGoal(intention, context))
                     } else {
                         // Execute Internal Action
-                        val externalResponse = externalAction.execute(
-                            ExternalRequest.of(environment, agent.name, controller.currentTime(), nextGoal.action.args)
-                        )
-                        // TODO("Is needed substitution for external actions execution?")
-                        if (externalResponse.substitution.isSuccess) {
-                            ExecutionResult(
-                                context.copy(intentions = context.intentions.updateIntention(newIntention)),
-                                externalResponse.effects,
+                        try {
+                            val externalResponse = externalAction.execute(
+                                ExternalRequest.of(
+                                    environment,
+                                    agent.name,
+                                    controller.currentTime(),
+                                    nextGoal.action.args
+                                )
                             )
-                        } else {
+                            // TODO("Is needed substitution for external actions execution?")
+                            if (externalResponse.substitution.isSuccess) {
+                                ExecutionResult(
+                                    context.copy(intentions = context.intentions.updateIntention(newIntention)),
+                                    externalResponse.effects,
+                                )
+                            } else {
+                                ExecutionResult(failAchievementGoal(intention, context))
+                            }
+                        } catch (e: IllegalArgumentException) {
+                            // Argument number mismatch from action definition
                             ExecutionResult(failAchievementGoal(intention, context))
                         }
                     }
