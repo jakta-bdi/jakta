@@ -11,7 +11,7 @@ import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.solve.Solution
 import it.unibo.tuprolog.solve.Solver
 import it.unibo.tuprolog.solve.classic.stdlib.DefaultBuiltins
-import it.unibo.tuprolog.solve.library.Libraries
+import it.unibo.tuprolog.solve.library.Runtime
 import it.unibo.tuprolog.theory.Theory
 
 internal class BeliefBaseImpl(private val beliefs: ClauseMultiSet) : BeliefBase {
@@ -78,10 +78,11 @@ internal class BeliefBaseImpl(private val beliefs: ClauseMultiSet) : BeliefBase 
     override fun iterator(): Iterator<Belief> = beliefs.filterIsInstance<Rule>().map { Belief.from(it) }.iterator()
 
     override fun solve(struct: Struct): Solution =
-        Solver.prolog.solverOf(
-            libraries = Libraries.of(DefaultBuiltins),
-            staticKb = operatorExtension + Theory.of(beliefs)
-        ).solveOnce(struct)
+        Solver.prolog.newBuilder()
+            .runtime(Runtime.of(DefaultBuiltins))
+            .staticKb(operatorExtension + Theory.of(beliefs))
+            .build()
+            .solveOnce(struct)
 
     override fun solve(belief: Belief): Solution = solve(belief.rule.head)
 
