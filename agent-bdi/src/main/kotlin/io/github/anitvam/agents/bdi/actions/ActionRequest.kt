@@ -24,11 +24,11 @@ interface InternalRequest : ActionRequest<AgentChange, InternalResponse> {
     val agent: Agent
 
     companion object {
-        fun of(agent: Agent, arguments: Iterable<Term>): InternalRequest =
-            InternalRequestImpl(agent, arguments.toList())
+        fun of(agent: Agent, requestTime: Time, arguments: Iterable<Term>): InternalRequest =
+            InternalRequestImpl(agent, requestTime, arguments.toList())
 
-        fun of(agent: Agent, vararg arguments: Term): InternalRequest =
-            of(agent, arguments.asList())
+        fun of(agent: Agent, requestTime: Time, vararg arguments: Term): InternalRequest =
+            of(agent, requestTime, arguments.asList())
     }
 }
 
@@ -37,10 +37,14 @@ interface ExternalRequest : ActionRequest<EnvironmentChange, ExternalResponse> {
     val sender: String
 
     companion object {
-        fun of(environment: Environment, sender: String, arguments: Iterable<Term>): ExternalRequest =
-            ExternalRequestImpl(environment, arguments.toList(), sender)
+        fun of(
+            environment: Environment,
+            sender: String,
+            requestTime: Time,
+            arguments: Iterable<Term>
+        ): ExternalRequest = ExternalRequestImpl(environment, sender, requestTime, arguments.toList())
 
-        fun of(environment: Environment, sender: String, vararg arguments: Term): ExternalRequest =
-            ExternalRequestImpl(environment, arguments.asList(), sender)
+        fun of(environment: Environment, sender: String, requestTime: Time, vararg arguments: Term): ExternalRequest =
+            ExternalRequestImpl(environment, sender, requestTime, arguments.asList())
     }
 }

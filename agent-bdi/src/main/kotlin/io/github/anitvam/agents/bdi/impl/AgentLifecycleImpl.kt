@@ -112,7 +112,7 @@ internal data class AgentLifecycleImpl(
                     } else {
                         // Execute Internal Action
                         val internalResponse = internalAction.execute(
-                            InternalRequest.of(this.agent, nextGoal.action.args)
+                            InternalRequest.of(this.agent, controller.currentTime(), nextGoal.action.args)
                         )
                         // Apply substitution
                         if (internalResponse.substitution.isSuccess) {
@@ -137,7 +137,7 @@ internal data class AgentLifecycleImpl(
                     } else {
                         // Execute Internal Action
                         val externalResponse = externalAction.execute(
-                            ExternalRequest.of(environment, agent.name, nextGoal.action.args)
+                            ExternalRequest.of(environment, agent.name, controller.currentTime(), nextGoal.action.args)
                         )
                         // TODO("Is needed substitution for external actions execution?")
                         if (externalResponse.substitution.isSuccess) {
