@@ -12,9 +12,10 @@ import io.github.anitvam.agents.bdi.intentions.SchedulingResult
 import io.github.anitvam.agents.bdi.plans.Plan
 import io.github.anitvam.agents.bdi.plans.PlanLibrary
 import io.github.anitvam.agents.bdi.perception.Perception
+import it.unibo.tuprolog.utils.Taggable
 import java.util.*
 
-interface Agent {
+interface Agent : Taggable<Agent> {
 
     val agentID: AgentID
 
