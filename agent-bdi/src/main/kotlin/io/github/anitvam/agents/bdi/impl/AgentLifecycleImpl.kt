@@ -137,7 +137,7 @@ internal data class AgentLifecycleImpl(
                     } else {
                         // Execute Internal Action
                         val externalResponse = externalAction.execute(
-                            ExternalRequest.of(environment, nextGoal.action.args)
+                            ExternalRequest.of(environment, agent.name, nextGoal.action.args)
                         )
                         // TODO("Is needed substitution for external actions execution?")
                         if (externalResponse.substitution.isSuccess) {

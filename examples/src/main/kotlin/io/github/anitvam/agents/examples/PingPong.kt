@@ -22,18 +22,16 @@ import io.github.anitvam.agents.bdi.plans.PlanLibrary
 
 fun main() {
 
-    val sendAction = object : ExternalAction("send", 4) {
+    val sendAction = object : ExternalAction("send", 3) {
         override fun ExternalRequest.action() {
-            val sender = arguments[0].castToAtom()
-            val receiver = arguments[1].castToAtom()
-            val type = arguments[2].castToAtom()
-            val message = arguments[3].castToStruct()
-
+            val receiver = arguments[0].castToAtom()
+            val type = arguments[1].castToAtom()
+            val message = arguments[2].castToStruct()
             when (type.value) {
-                "tell" -> sendMessage(receiver.value, Message(sender.value, Tell, message))
+                "tell" -> sendMessage(receiver.value, Message(this.sender, Tell, message))
                 "achieve" -> sendMessage(
                     receiver.value,
-                    Message(sender.value, io.github.anitvam.agents.bdi.messages.Achieve, message)
+                    Message(this.sender, io.github.anitvam.agents.bdi.messages.Achieve, message)
                 )
             }
         }
@@ -76,7 +74,7 @@ fun main() {
                 value = JasonParser.parser.parseStruct("sendMessageTo(Message, Receiver)"),
                 goals = listOf(
                     ActInternally.of(JasonParser.parser.parseStruct("print(\"Sending \", Message)")),
-                    Act.of(JasonParser.parser.parseStruct("send(pinger, Receiver, tell, Message)")),
+                    Act.of(JasonParser.parser.parseStruct("send(Receiver, tell, Message)")),
                 ),
             ),
 
@@ -113,7 +111,7 @@ fun main() {
                 value = JasonParser.parser.parseStruct("sendMessageTo(Message, Receiver)"),
                 goals = listOf(
                     ActInternally.of(JasonParser.parser.parseStruct("print(\"Sending \", Message)")),
-                    Act.of(JasonParser.parser.parseStruct("send(ponger, Receiver, tell, Message)")),
+                    Act.of(JasonParser.parser.parseStruct("send(Receiver, tell, Message)")),
                 ),
             ),
         ),

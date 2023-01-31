@@ -34,12 +34,13 @@ interface InternalRequest : ActionRequest<AgentChange, InternalResponse> {
 
 interface ExternalRequest : ActionRequest<EnvironmentChange, ExternalResponse> {
     val environment: Environment
+    val sender: String
 
     companion object {
-        fun of(environment: Environment, arguments: Iterable<Term>): ExternalRequest =
-            ExternalRequestImpl(environment, arguments.toList())
+        fun of(environment: Environment, sender: String, arguments: Iterable<Term>): ExternalRequest =
+            ExternalRequestImpl(environment, arguments.toList(), sender)
 
-        fun of(environment: Environment, vararg arguments: Term): ExternalRequest =
-            ExternalRequestImpl(environment, arguments.asList())
+        fun of(environment: Environment, sender: String, vararg arguments: Term): ExternalRequest =
+            ExternalRequestImpl(environment, arguments.asList(), sender)
     }
 }
