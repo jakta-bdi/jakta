@@ -43,6 +43,14 @@ fun main() {
         )
     )
 
+    val sendPlan = Plan.ofAchievementGoalInvocation(
+        value = JasonParser.parser.parseStruct("sendMessageTo(Message, Receiver)"),
+        goals = listOf(
+            ActInternally.of(JasonParser.parser.parseStruct("print(\"Sending \", Message)")),
+            Act.of(JasonParser.parser.parseStruct("send(Receiver, tell, Message)")),
+        ),
+    )
+
     val pinger = Agent.of(
         name = "pinger",
         beliefBase = BeliefBase.of(
@@ -70,14 +78,7 @@ fun main() {
                     ActInternally.of(JasonParser.parser.parseStruct("print(\"Pinger hasDone\")")),
                 ),
             ),
-            Plan.ofAchievementGoalInvocation(
-                value = JasonParser.parser.parseStruct("sendMessageTo(Message, Receiver)"),
-                goals = listOf(
-                    ActInternally.of(JasonParser.parser.parseStruct("print(\"Sending \", Message)")),
-                    Act.of(JasonParser.parser.parseStruct("send(Receiver, tell, Message)")),
-                ),
-            ),
-
+            sendPlan,
         ),
 
     )
@@ -107,13 +108,7 @@ fun main() {
                     ActInternally.of(JasonParser.parser.parseStruct("print(\"Ponger has Done\")")),
                 ),
             ),
-            Plan.ofAchievementGoalInvocation(
-                value = JasonParser.parser.parseStruct("sendMessageTo(Message, Receiver)"),
-                goals = listOf(
-                    ActInternally.of(JasonParser.parser.parseStruct("print(\"Sending \", Message)")),
-                    Act.of(JasonParser.parser.parseStruct("send(Receiver, tell, Message)")),
-                ),
-            ),
+            sendPlan,
         ),
     )
 

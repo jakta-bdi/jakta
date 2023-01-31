@@ -33,30 +33,7 @@ fun main() {
             }
         )
     )
-
-    val bob = Agent.of(
-        name = "Alice",
-        events = listOf(
-            Event.ofAchievementGoalInvocation(Achieve.of(JasonParser.parser.parseStruct("my_thread")))
-        ),
-        planLibrary = PlanLibrary.of(
-            Plan.ofAchievementGoalInvocation(
-                value = JasonParser.parser.parseStruct("my_thread"),
-                goals = listOf(
-                    ActInternally.of(JasonParser.parser.parseStruct("thread"))
-                )
-            )
-        ),
-        internalActions = mapOf(
-            "thread" to object : InternalAction("thread", 0) {
-                override fun InternalRequest.action() {
-                    println("Thread: ${Thread.currentThread().name}")
-                    System.out.flush()
-                }
-            }
-        )
-    )
     val environment = Environment.of()
 
-    Mas.of(ExecutionStrategy.oneThreadPerAgent(), environment, alice, bob).start()
+    Mas.of(ExecutionStrategy.oneThreadPerAgent(), environment, alice, alice.copy()).start()
 }
