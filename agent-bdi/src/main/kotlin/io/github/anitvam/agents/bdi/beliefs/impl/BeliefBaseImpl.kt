@@ -1,6 +1,6 @@
 package io.github.anitvam.agents.bdi.beliefs.impl
 
-import io.github.anitvam.agents.bdi.JasonParser
+import io.github.anitvam.agents.bdi.Jacop
 import io.github.anitvam.agents.bdi.beliefs.BeliefBase
 import io.github.anitvam.agents.bdi.beliefs.Belief
 import io.github.anitvam.agents.bdi.beliefs.BeliefUpdate
@@ -17,10 +17,10 @@ import it.unibo.tuprolog.theory.Theory
 internal class BeliefBaseImpl(private val beliefs: ClauseMultiSet) : BeliefBase {
 
     private val operatorExtension = Theory.of(
-        JasonParser.parser.parseClause("&(A, B) :- A, B"),
-        JasonParser.parser.parseClause("|(A, _) :- A"),
-        JasonParser.parser.parseClause("|(_, B) :- B"),
-        JasonParser.parser.parseClause("~(X) :- not(X)"),
+        Jacop.parseClause("&(A, B) :- A, B"),
+        Jacop.parseClause("|(A, _) :- A"),
+        Jacop.parseClause("|(_, B) :- B"),
+        Jacop.parseClause("~(X) :- not(X)"),
     )
 
     override fun add(belief: Belief) = when (beliefs.count(belief.rule)) {

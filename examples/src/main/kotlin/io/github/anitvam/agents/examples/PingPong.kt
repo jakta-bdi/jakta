@@ -1,7 +1,7 @@
 package io.github.anitvam.agents.examples
 
 import io.github.anitvam.agents.bdi.Agent
-import io.github.anitvam.agents.bdi.JasonParser
+import io.github.anitvam.agents.bdi.Jacop
 import io.github.anitvam.agents.bdi.Mas
 import io.github.anitvam.agents.bdi.Message
 import io.github.anitvam.agents.bdi.actions.ExternalAction
@@ -44,38 +44,38 @@ fun main() {
     )
 
     val sendPlan = Plan.ofAchievementGoalInvocation(
-        value = JasonParser.parser.parseStruct("sendMessageTo(Message, Receiver)"),
+        value = Jacop.parseStruct("sendMessageTo(Message, Receiver)"),
         goals = listOf(
-            ActInternally.of(JasonParser.parser.parseStruct("print(\"Sending \", Message)")),
-            Act.of(JasonParser.parser.parseStruct("send(Receiver, tell, Message)")),
+            ActInternally.of(Jacop.parseStruct("print(\"Sending \", Message)")),
+            Act.of(Jacop.parseStruct("send(Receiver, tell, Message)")),
         ),
     )
 
     val pinger = Agent.of(
         name = "pinger",
         beliefBase = BeliefBase.of(
-            Belief.fromSelfSource(JasonParser.parser.parseStruct("turn(me)")),
-            Belief.fromSelfSource(JasonParser.parser.parseStruct("other(ponger)")),
+            Belief.fromSelfSource(Jacop.parseStruct("turn(me)")),
+            Belief.fromSelfSource(Jacop.parseStruct("other(ponger)")),
         ),
-        events = listOf(Event.ofAchievementGoalInvocation(Achieve.of(JasonParser.parser.parseStruct("send_ping")))),
+        events = listOf(Event.ofAchievementGoalInvocation(Achieve.of(Jacop.parseStruct("send_ping")))),
 
         planLibrary = PlanLibrary.of(
             Plan.ofAchievementGoalInvocation(
-                value = JasonParser.parser.parseStruct("send_ping"),
-                guard = JasonParser.parser.parseStruct("turn(source(self), me) & other(source(self), Receiver)"),
+                value = Jacop.parseStruct("send_ping"),
+                guard = Jacop.parseStruct("turn(source(self), me) & other(source(self), Receiver)"),
                 goals = listOf(
-                    UpdateBelief.of(Belief.fromSelfSource(JasonParser.parser.parseStruct("turn(other)"))),
-                    Achieve.of(JasonParser.parser.parseStruct("sendMessageTo(ball, Receiver)")),
+                    UpdateBelief.of(Belief.fromSelfSource(Jacop.parseStruct("turn(other)"))),
+                    Achieve.of(Jacop.parseStruct("sendMessageTo(ball, Receiver)")),
                 ),
             ),
             Plan.ofBeliefBaseAddition(
-                belief = Belief.from(JasonParser.parser.parseStruct("ball(source(Sender))")),
-                guard = JasonParser.parser.parseStruct("turn(source(self), other) & other(source(self), Sender)"),
+                belief = Belief.from(Jacop.parseStruct("ball(source(Sender))")),
+                guard = Jacop.parseStruct("turn(source(self), other) & other(source(self), Sender)"),
                 goals = listOf(
-                    UpdateBelief.of(Belief.fromSelfSource(JasonParser.parser.parseStruct("turn(me)"))),
-                    ActInternally.of(JasonParser.parser.parseStruct("print(\"Received ball from\", Sender)")),
-                    RemoveBelief.of(Belief.from(JasonParser.parser.parseStruct("ball(source(Sender))"))),
-                    ActInternally.of(JasonParser.parser.parseStruct("print(\"Pinger hasDone\")")),
+                    UpdateBelief.of(Belief.fromSelfSource(Jacop.parseStruct("turn(me)"))),
+                    ActInternally.of(Jacop.parseStruct("print(\"Received ball from\", Sender)")),
+                    RemoveBelief.of(Belief.from(Jacop.parseStruct("ball(source(Sender))"))),
+                    ActInternally.of(Jacop.parseStruct("print(\"Pinger hasDone\")")),
                 ),
             ),
             sendPlan,
@@ -86,26 +86,26 @@ fun main() {
     val ponger = Agent.of(
         name = "ponger",
         beliefBase = BeliefBase.of(
-            Belief.fromSelfSource(JasonParser.parser.parseStruct("turn(other)")),
-            Belief.fromSelfSource(JasonParser.parser.parseStruct("other(pinger)")),
+            Belief.fromSelfSource(Jacop.parseStruct("turn(other)")),
+            Belief.fromSelfSource(Jacop.parseStruct("other(pinger)")),
         ),
         planLibrary = PlanLibrary.of(
             Plan.ofBeliefBaseAddition(
-                belief = Belief.from(JasonParser.parser.parseStruct("ball(source(Sender))")),
-                guard = JasonParser.parser.parseStruct("turn(source(self), other) & other(source(self), Sender)"),
+                belief = Belief.from(Jacop.parseStruct("ball(source(Sender))")),
+                guard = Jacop.parseStruct("turn(source(self), other) & other(source(self), Sender)"),
                 goals = listOf(
-                    UpdateBelief.of(Belief.fromSelfSource(JasonParser.parser.parseStruct("turn(me)"))),
-                    RemoveBelief.of(Belief.from(JasonParser.parser.parseStruct("ball(source(Sender))"))),
-                    ActInternally.of(JasonParser.parser.parseStruct("print(\"Received ball from\", Sender)")),
-                    Achieve.of(JasonParser.parser.parseStruct("sendMessageTo(ball, Sender)")),
-                    Achieve.of(JasonParser.parser.parseStruct("handle_ping")),
+                    UpdateBelief.of(Belief.fromSelfSource(Jacop.parseStruct("turn(me)"))),
+                    RemoveBelief.of(Belief.from(Jacop.parseStruct("ball(source(Sender))"))),
+                    ActInternally.of(Jacop.parseStruct("print(\"Received ball from\", Sender)")),
+                    Achieve.of(Jacop.parseStruct("sendMessageTo(ball, Sender)")),
+                    Achieve.of(Jacop.parseStruct("handle_ping")),
                 ),
             ),
             Plan.ofAchievementGoalInvocation(
-                value = JasonParser.parser.parseStruct("handle_ping"),
+                value = Jacop.parseStruct("handle_ping"),
                 goals = listOf(
-                    UpdateBelief.of(Belief.fromSelfSource(JasonParser.parser.parseStruct("turn(other)"))),
-                    ActInternally.of(JasonParser.parser.parseStruct("print(\"Ponger has Done\")")),
+                    UpdateBelief.of(Belief.fromSelfSource(Jacop.parseStruct("turn(other)"))),
+                    ActInternally.of(Jacop.parseStruct("print(\"Ponger has Done\")")),
                 ),
             ),
             sendPlan,

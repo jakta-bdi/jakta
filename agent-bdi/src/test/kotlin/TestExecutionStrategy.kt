@@ -1,5 +1,5 @@
 import io.github.anitvam.agents.bdi.Agent
-import io.github.anitvam.agents.bdi.JasonParser
+import io.github.anitvam.agents.bdi.Jacop
 import io.github.anitvam.agents.bdi.Mas
 import io.github.anitvam.agents.bdi.actions.InternalAction
 import io.github.anitvam.agents.bdi.actions.InternalRequest
@@ -15,13 +15,13 @@ fun main() {
     val alice = Agent.of(
         name = "Alice",
         events = listOf(
-            Event.ofAchievementGoalInvocation(Achieve.of(JasonParser.parser.parseStruct("my_thread")))
+            Event.ofAchievementGoalInvocation(Achieve.of(Jacop.parseStruct("my_thread")))
         ),
         planLibrary = PlanLibrary.of(
             Plan.ofAchievementGoalInvocation(
-                value = JasonParser.parser.parseStruct("my_thread"),
+                value = Jacop.parseStruct("my_thread"),
                 goals = listOf(
-                    ActInternally.of(JasonParser.parser.parseStruct("thread"))
+                    ActInternally.of(Jacop.parseStruct("thread"))
                 )
             )
         ),

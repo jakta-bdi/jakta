@@ -1,5 +1,5 @@
 import io.github.anitvam.agents.bdi.Agent
-import io.github.anitvam.agents.bdi.JasonParser
+import io.github.anitvam.agents.bdi.Jacop
 import io.github.anitvam.agents.bdi.Mas
 import io.github.anitvam.agents.bdi.beliefs.Belief
 import io.github.anitvam.agents.bdi.beliefs.BeliefBase
@@ -12,19 +12,19 @@ import io.github.anitvam.agents.bdi.plans.Plan
 import io.github.anitvam.agents.bdi.plans.PlanLibrary
 
 fun main() {
-    val start = JasonParser.parser.parseStruct("start")
+    val start = Jacop.parseStruct("start")
     val sleepingAgent = Agent.of(
         name = "Sleeping Agent",
-        beliefBase = BeliefBase.of(Belief.fromSelfSource(JasonParser.parser.parseStruct("run"))),
+        beliefBase = BeliefBase.of(Belief.fromSelfSource(Jacop.parseStruct("run"))),
         events = listOf(Event.ofAchievementGoalInvocation(Achieve.of(start))),
         planLibrary = PlanLibrary.of(
             Plan.ofAchievementGoalInvocation(
-                value = JasonParser.parser.parseStruct("start"),
+                value = Jacop.parseStruct("start"),
                 goals = listOf(
-                    ActInternally.of(JasonParser.parser.parseStruct("print(\"Before Sleep\")")),
-                    ActInternally.of(JasonParser.parser.parseStruct("sleep(5000)")),
-                    ActInternally.of(JasonParser.parser.parseStruct("print(\"After Sleep\")")),
-                    ActInternally.of(JasonParser.parser.parseStruct("stop")),
+                    ActInternally.of(Jacop.parseStruct("print(\"Before Sleep\")")),
+                    ActInternally.of(Jacop.parseStruct("sleep(5000)")),
+                    ActInternally.of(Jacop.parseStruct("print(\"After Sleep\")")),
+                    ActInternally.of(Jacop.parseStruct("stop")),
                 ),
             ),
         ),

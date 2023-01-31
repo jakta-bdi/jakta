@@ -1,7 +1,7 @@
 package io.github.anitvam.agents.examples
 
 import io.github.anitvam.agents.bdi.Agent
-import io.github.anitvam.agents.bdi.JasonParser
+import io.github.anitvam.agents.bdi.Jacop
 import io.github.anitvam.agents.bdi.Mas
 import io.github.anitvam.agents.bdi.executionstrategies.ExecutionStrategy
 import io.github.anitvam.agents.bdi.environment.Environment
@@ -17,28 +17,28 @@ fun main() {
     val agent = Agent.of(
         name = "agent",
         events = listOf(
-            Event.of(AchievementGoalInvocation(JasonParser.parser.parseStruct("count(0, 10, up)"))),
-            Event.of(AchievementGoalInvocation(JasonParser.parser.parseStruct("count(100, 90, down)"))),
+            Event.of(AchievementGoalInvocation(Jacop.parseStruct("count(0, 10, up)"))),
+            Event.of(AchievementGoalInvocation(Jacop.parseStruct("count(100, 90, down)"))),
         ),
         planLibrary = PlanLibrary.of(
             Plan.ofAchievementGoalInvocation(
-                value = JasonParser.parser.parseStruct("count(N, N, Dir)"),
-                goals = listOf(ActInternally.of(JasonParser.parser.parseStruct("print(\"End of\", Dir)")))
+                value = Jacop.parseStruct("count(N, N, Dir)"),
+                goals = listOf(ActInternally.of(Jacop.parseStruct("print(\"End of\", Dir)")))
             ),
             Plan.ofAchievementGoalInvocation(
-                value = JasonParser.parser.parseStruct("count(N, M, up)"),
-                guard = JasonParser.parser.parseStruct("N < M & S is N + 1"),
+                value = Jacop.parseStruct("count(N, M, up)"),
+                guard = Jacop.parseStruct("N < M & S is N + 1"),
                 goals = listOf(
-                    ActInternally.of(JasonParser.parser.parseStruct("print(\"Up\", N)")),
-                    Achieve.of(JasonParser.parser.parseStruct("count(S, M, up)")),
+                    ActInternally.of(Jacop.parseStruct("print(\"Up\", N)")),
+                    Achieve.of(Jacop.parseStruct("count(S, M, up)")),
                 )
             ),
             Plan.ofAchievementGoalInvocation(
-                value = JasonParser.parser.parseStruct("count(N, M, down)"),
-                guard = JasonParser.parser.parseStruct("N > M & S is N - 1"),
+                value = Jacop.parseStruct("count(N, M, down)"),
+                guard = Jacop.parseStruct("N > M & S is N - 1"),
                 goals = listOf(
-                    ActInternally.of(JasonParser.parser.parseStruct("print(\"Down\", N)")),
-                    Achieve.of(JasonParser.parser.parseStruct("count(S, M, down)")),
+                    ActInternally.of(Jacop.parseStruct("print(\"Down\", N)")),
+                    Achieve.of(Jacop.parseStruct("count(S, M, down)")),
                 )
             ),
         )

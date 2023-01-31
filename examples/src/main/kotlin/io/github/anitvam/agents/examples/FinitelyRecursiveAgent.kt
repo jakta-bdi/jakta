@@ -1,7 +1,7 @@
 package io.github.anitvam.agents.examples
 
 import io.github.anitvam.agents.bdi.Agent
-import io.github.anitvam.agents.bdi.JasonParser
+import io.github.anitvam.agents.bdi.Jacop
 import io.github.anitvam.agents.bdi.Mas
 import io.github.anitvam.agents.bdi.executionstrategies.ExecutionStrategy
 import io.github.anitvam.agents.bdi.beliefs.Belief
@@ -17,25 +17,25 @@ fun main() {
 
     val env = Environment.of()
 
-    val start = JasonParser.parser.parseStruct("start(0, 10)")
+    val start = Jacop.parseStruct("start(0, 10)")
 
     val alice = Agent.of(
         name = "alice",
-        beliefBase = BeliefBase.of(listOf(Belief.fromSelfSource(JasonParser.parser.parseStruct("run")))),
+        beliefBase = BeliefBase.of(listOf(Belief.fromSelfSource(Jacop.parseStruct("run")))),
         events = listOf(Event.ofAchievementGoalInvocation(Achieve.of(start))),
         planLibrary = PlanLibrary.of(
             Plan.ofAchievementGoalInvocation(
-                value = JasonParser.parser.parseStruct("start(N, N)"),
+                value = Jacop.parseStruct("start(N, N)"),
                 goals = listOf(
-                    ActInternally.of(JasonParser.parser.parseStruct("print(\"hello world\", N)")),
+                    ActInternally.of(Jacop.parseStruct("print(\"hello world\", N)")),
                 ),
             ),
             Plan.ofAchievementGoalInvocation(
-                value = JasonParser.parser.parseStruct("start(N, M)"),
-                guard = JasonParser.parser.parseStruct("N < M & S is N + 1"),
+                value = Jacop.parseStruct("start(N, M)"),
+                guard = Jacop.parseStruct("N < M & S is N + 1"),
                 goals = listOf(
-                    ActInternally.of(JasonParser.parser.parseStruct("print(\"hello world\", N)")),
-                    Achieve.of(JasonParser.parser.parseStruct("start(S, M)")),
+                    ActInternally.of(Jacop.parseStruct("print(\"hello world\", N)")),
+                    Achieve.of(Jacop.parseStruct("start(S, M)")),
                 ),
             ),
         ),
