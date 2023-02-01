@@ -1,3 +1,5 @@
+package io.github.anitvam.agents.bdi
+
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
 import it.unibo.tuprolog.core.Atom

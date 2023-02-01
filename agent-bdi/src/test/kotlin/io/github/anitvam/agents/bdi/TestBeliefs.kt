@@ -1,5 +1,5 @@
-import io.github.anitvam.agents.bdi.Agent
-import io.github.anitvam.agents.bdi.AgentLifecycle
+package io.github.anitvam.agents.bdi
+
 import io.github.anitvam.agents.bdi.context.ContextUpdate
 import io.github.anitvam.agents.bdi.beliefs.Belief
 import io.github.anitvam.agents.bdi.beliefs.BeliefBase

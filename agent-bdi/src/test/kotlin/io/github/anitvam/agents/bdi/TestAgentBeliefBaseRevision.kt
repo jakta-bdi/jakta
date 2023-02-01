@@ -1,4 +1,5 @@
-import io.github.anitvam.agents.bdi.Agent
+package io.github.anitvam.agents.bdi
+
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
 

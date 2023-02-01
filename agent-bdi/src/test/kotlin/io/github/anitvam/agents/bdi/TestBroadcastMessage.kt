@@ -1,7 +1,5 @@
-import io.github.anitvam.agents.bdi.Agent
-import io.github.anitvam.agents.bdi.Jacop
-import io.github.anitvam.agents.bdi.Mas
-import io.github.anitvam.agents.bdi.Message
+package io.github.anitvam.agents.bdi
+
 import io.github.anitvam.agents.bdi.actions.ExternalAction
 import io.github.anitvam.agents.bdi.actions.ExternalRequest
 import io.github.anitvam.agents.bdi.beliefs.Belief

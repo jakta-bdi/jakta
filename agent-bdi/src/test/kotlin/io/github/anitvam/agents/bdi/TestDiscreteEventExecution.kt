@@ -1,6 +1,5 @@
-import io.github.anitvam.agents.bdi.Agent
-import io.github.anitvam.agents.bdi.Jacop
-import io.github.anitvam.agents.bdi.Mas
+package io.github.anitvam.agents.bdi
+
 import io.github.anitvam.agents.bdi.actions.InternalAction
 import io.github.anitvam.agents.bdi.actions.InternalActions
 import io.github.anitvam.agents.bdi.actions.InternalRequest

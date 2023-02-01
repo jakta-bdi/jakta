@@ -1,5 +1,5 @@
-import io.github.anitvam.agents.bdi.Agent
-import io.github.anitvam.agents.bdi.Mas
+package io.github.anitvam.agents.bdi
+
 import io.github.anitvam.agents.bdi.environment.Environment
 import io.github.anitvam.agents.bdi.executionstrategies.ExecutionStrategy
 

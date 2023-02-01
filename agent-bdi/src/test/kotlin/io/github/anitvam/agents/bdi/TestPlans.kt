@@ -1,3 +1,5 @@
+package io.github.anitvam.agents.bdi
+
 import io.github.anitvam.agents.bdi.beliefs.Belief
 import io.github.anitvam.agents.bdi.beliefs.BeliefBase
 import io.github.anitvam.agents.bdi.events.Event
