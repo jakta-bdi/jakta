@@ -11,7 +11,6 @@ import io.github.anitvam.agents.bdi.intentions.IntentionPool
 import io.github.anitvam.agents.bdi.intentions.SchedulingResult
 import io.github.anitvam.agents.bdi.plans.Plan
 import io.github.anitvam.agents.bdi.plans.PlanLibrary
-import io.github.anitvam.agents.bdi.perception.Perception
 import it.unibo.tuprolog.utils.Taggable
 import java.util.*
 
@@ -40,10 +39,9 @@ interface Agent : Taggable<Agent> {
         beliefBase: BeliefBase = this.context.beliefBase,
         events: EventQueue = this.context.events,
         planLibrary: PlanLibrary = this.context.planLibrary,
-        perception: Perception = this.context.perception,
         intentions: IntentionPool = this.context.intentions,
         internalActions: Map<String, InternalAction> = this.context.internalActions,
-    ) = of(this.agentID, this.name, beliefBase, events, planLibrary, perception, intentions, internalActions)
+    ) = of(this.agentID, this.name, beliefBase, events, planLibrary, intentions, internalActions)
 
     companion object {
         fun empty(): Agent = AgentImpl(AgentContext.of())
@@ -53,11 +51,10 @@ interface Agent : Taggable<Agent> {
             beliefBase: BeliefBase = BeliefBase.empty(),
             events: EventQueue = emptyList(),
             planLibrary: PlanLibrary = PlanLibrary.empty(),
-            perception: Perception = Perception.empty(),
             intentions: IntentionPool = IntentionPool.empty(),
             internalActions: Map<String, InternalAction> = InternalActions.default(),
         ): Agent = AgentImpl(
-            AgentContext.of(beliefBase, events, planLibrary, perception, intentions, internalActions),
+            AgentContext.of(beliefBase, events, planLibrary, intentions, internalActions),
             agentID,
             name,
         )

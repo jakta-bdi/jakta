@@ -1,7 +1,8 @@
 package io.github.anitvam.agents.bdi.perception
 
+import io.github.anitvam.agents.bdi.beliefs.Belief
 import io.github.anitvam.agents.bdi.beliefs.BeliefBase
-import io.github.anitvam.agents.bdi.perception.impl.EmptyPerception
+import io.github.anitvam.agents.bdi.perception.impl.PerceptionImpl
 
 /** Component of a BDI Agent that let it perceive the environment. */
 interface Perception {
@@ -13,7 +14,10 @@ interface Perception {
     fun percept(): BeliefBase
 
     companion object {
-        /** @return a [EmptyPerception] */
-        fun empty(): Perception = EmptyPerception()
+        fun empty(): Perception = PerceptionImpl()
+
+        fun of(belief: Belief, vararg beliefs: Belief): Perception = of(listOf(belief, *beliefs))
+
+        fun of(beliefs: Iterable<Belief>): Perception = PerceptionImpl(beliefs)
     }
 }

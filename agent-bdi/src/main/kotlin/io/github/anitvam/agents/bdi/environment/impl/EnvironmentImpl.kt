@@ -4,15 +4,16 @@ import io.github.anitvam.agents.bdi.Agent
 import io.github.anitvam.agents.bdi.AgentID
 import io.github.anitvam.agents.bdi.Message
 import io.github.anitvam.agents.bdi.actions.ExternalAction
+import io.github.anitvam.agents.bdi.beliefs.BeliefBase
 import io.github.anitvam.agents.bdi.environment.Environment
 import io.github.anitvam.agents.bdi.messages.MessageQueue
 import io.github.anitvam.agents.bdi.perception.Perception
 
-internal data class EnvironmentImpl(
+internal class EnvironmentImpl(
     override val externalActions: Map<String, ExternalAction>,
     override val agentIDs: Map<String, AgentID> = emptyMap(),
     override val messageBoxes: Map<AgentID, MessageQueue> = mapOf(),
-    private val perceptInvocation: () -> Perception
+    override val perception: Perception,
 ) : Environment {
     override fun getNextMessage(agentName: String): Message? = messageBoxes[agentIDs[agentName]]?.lastOrNull()
 
@@ -56,5 +57,5 @@ internal data class EnvironmentImpl(
             )
         } else this
 
-    override fun percept(): Perception = perceptInvocation()
+    override fun percept(): BeliefBase = perception.percept()
 }

@@ -270,7 +270,7 @@ internal data class AgentLifecycleImpl(
         this.controller = controller
 
         // STEP1: Perceive the Environment
-        val perceptions = agent.context.perception.percept()
+        val perceptions = environment.percept()
 
         // STEP2: Update the BeliefBase
         val rr = updateBelief(perceptions, agent.context.beliefBase)
