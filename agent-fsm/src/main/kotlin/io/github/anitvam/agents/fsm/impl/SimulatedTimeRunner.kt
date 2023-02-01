@@ -4,7 +4,7 @@ import io.github.anitvam.agents.fsm.Activity
 import io.github.anitvam.agents.fsm.time.Time
 import io.github.anitvam.agents.utils.Promise
 
-class DiscreteTimeRunner(
+class SimulatedTimeRunner(
     override val activity: Activity,
     private val currentTime: () -> Time
 ) : AbstractRunner(activity) {

@@ -6,5 +6,5 @@ import io.github.anitvam.agents.bdi.events.Trigger
 internal fun beliefs(f: BeliefsScope.() -> Unit): BeliefBase =
     BeliefsScope().also(f).build()
 
-internal fun goals(f: InitalGoalsScope.() -> Unit): Iterable<Trigger> =
-    InitalGoalsScope().also(f).build()
+internal fun goals(f: InitialGoalsScope.() -> Unit): Iterable<Trigger> =
+    InitialGoalsScope().also(f).build()

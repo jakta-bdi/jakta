@@ -1,6 +1,5 @@
 package io.github.anitvam.agents.bdi.dsl
 
-import io.github.anitvam.agents.bdi.events.Trigger
 import io.github.anitvam.agents.bdi.goals.Goal
 import io.github.anitvam.agents.bdi.plans.Plan
 import it.unibo.tuprolog.core.Scope

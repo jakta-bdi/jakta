@@ -6,7 +6,7 @@ import io.github.anitvam.agents.bdi.events.Trigger
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.dsl.LogicProgrammingScope
 
-class InitalGoalsScope : Builder<Iterable<Trigger>>, LogicProgrammingScope by LogicProgrammingScope.empty() {
+class InitialGoalsScope : Builder<Iterable<Trigger>>, LogicProgrammingScope by LogicProgrammingScope.empty() {
 
     private val triggers = mutableListOf<Trigger>()
 

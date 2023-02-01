@@ -13,7 +13,7 @@ class SyncRunner(override val activity: Activity) : AbstractRunner(activity) {
 
     override fun onResume() = error("Is not possible to RESUME a SyncRunner")
 
-    override fun getCurrentTime(): Time = Time.of(System.currentTimeMillis())
+    override fun getCurrentTime(): Time = Time.real(System.currentTimeMillis())
 
     override fun run(): Promise<Unit> {
         val promise = Promise<Unit>()

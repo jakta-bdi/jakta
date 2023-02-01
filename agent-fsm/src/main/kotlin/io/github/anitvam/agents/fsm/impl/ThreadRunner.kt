@@ -23,7 +23,7 @@ class ThreadRunner(override val activity: Activity) : AbstractRunner(activity) {
     override fun onPause() = mutex.acquire()
     override fun onResume() = mutex.release()
 
-    override fun getCurrentTime(): Time = Time.of(System.currentTimeMillis())
+    override fun getCurrentTime(): Time = Time.real(System.currentTimeMillis())
 
     override fun run(): Promise<Unit> {
         thread.start()

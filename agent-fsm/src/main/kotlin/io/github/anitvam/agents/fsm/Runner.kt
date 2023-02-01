@@ -1,8 +1,10 @@
 package io.github.anitvam.agents.fsm
 
+import io.github.anitvam.agents.fsm.impl.SimulatedTimeRunner
 import io.github.anitvam.agents.fsm.impl.State
 import io.github.anitvam.agents.fsm.impl.SyncRunner
 import io.github.anitvam.agents.fsm.impl.ThreadRunner
+import io.github.anitvam.agents.fsm.time.Time
 import io.github.anitvam.agents.utils.Promise
 
 /**
@@ -40,5 +42,8 @@ interface Runner {
         fun syncOf(activity: Activity): Runner = SyncRunner(activity)
 
         fun threadOf(activity: Activity): Runner = ThreadRunner(activity)
+
+        fun simulatedOf(activity: Activity, currentTime: () -> Time): Runner =
+            SimulatedTimeRunner(activity, currentTime)
     }
 }
