@@ -1,7 +1,8 @@
-package io.github.anitvam.agents.bdi.dsl
+package io.github.anitvam.agents.bdi.dsl.beliefs
 
 import io.github.anitvam.agents.bdi.beliefs.Belief
 import io.github.anitvam.agents.bdi.beliefs.BeliefBase
+import io.github.anitvam.agents.bdi.dsl.Builder
 import it.unibo.tuprolog.core.Rule
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.dsl.LogicProgrammingScope

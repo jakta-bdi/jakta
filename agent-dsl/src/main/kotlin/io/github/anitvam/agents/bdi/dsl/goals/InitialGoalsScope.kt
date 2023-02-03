@@ -1,5 +1,6 @@
-package io.github.anitvam.agents.bdi.dsl
+package io.github.anitvam.agents.bdi.dsl.goals
 
+import io.github.anitvam.agents.bdi.dsl.Builder
 import io.github.anitvam.agents.bdi.events.AchievementGoalInvocation
 import io.github.anitvam.agents.bdi.events.TestGoalInvocation
 import io.github.anitvam.agents.bdi.events.Trigger

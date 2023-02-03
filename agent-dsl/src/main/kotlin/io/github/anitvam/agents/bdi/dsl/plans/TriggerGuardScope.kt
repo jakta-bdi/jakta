@@ -1,4 +1,4 @@
-package io.github.anitvam.agents.bdi.dsl
+package io.github.anitvam.agents.bdi.dsl.plans
 
 import io.github.anitvam.agents.bdi.goals.Goal
 import io.github.anitvam.agents.bdi.plans.Plan
@@ -13,6 +13,7 @@ class TriggerGuardScope(
 
     private lateinit var goals: List<Goal>
 
+    @Suppress("UNUSED_PARAMETER")
     infix fun then(body: BodyScope.() -> Unit) {
         goals = BodyScope(scope).build()
     }

@@ -1,4 +1,4 @@
-package io.github.anitvam.agents.bdi.dsl
+package io.github.anitvam.agents.bdi.dsl.beliefs
 
 import it.unibo.tuprolog.dsl.LogicProgrammingScope
 
