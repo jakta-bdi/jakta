@@ -11,8 +11,11 @@ import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.solve.Solution
 import it.unibo.tuprolog.solve.Solver
 import it.unibo.tuprolog.theory.Theory
+import it.unibo.tuprolog.unify.Unificator
 
-internal class BeliefBaseImpl(private val beliefs: ClauseMultiSet) : BeliefBase {
+internal class BeliefBaseImpl private constructor(private val beliefs: ClauseMultiSet) : BeliefBase {
+
+    constructor() : this(ClauseMultiSet.empty(Unificator.default))
 
     private val operatorExtension = Theory.of(
         Jacop.parseClause("&(A, B) :- A, B"),

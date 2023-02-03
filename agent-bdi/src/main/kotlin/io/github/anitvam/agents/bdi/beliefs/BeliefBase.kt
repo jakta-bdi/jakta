@@ -43,7 +43,7 @@ interface BeliefBase : Iterable<Belief> {
 
     companion object {
         /** @return an empty [BeliefBase] */
-        fun empty(): BeliefBase = BeliefBaseImpl(ClauseMultiSet.empty())
+        fun empty(): BeliefBase = BeliefBaseImpl()
 
         /**
          * Generates a [BeliefBase] from a collection of [Belief]
