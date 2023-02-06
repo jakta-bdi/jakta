@@ -65,9 +65,13 @@ interface Belief {
             of(head, body, from)
 
         fun from(rule: Rule): Belief {
-            if (rule.head.args.first().castToStruct().functor != "source")
-                throw IllegalArgumentException("The rule is not a belief.")
-            return BeliefImpl(rule)
+            if (rule.head.args.isNotEmpty() &&
+                rule.head.args.first() is Struct &&
+                rule.head.args.first().castToStruct().functor == "source"
+            ) {
+                return BeliefImpl(rule)
+            }
+            throw IllegalArgumentException("The rule is not a belief.")
         }
 
         fun from(struct: Struct): Belief = from(Rule.of(struct))

@@ -39,6 +39,7 @@ import io.github.anitvam.agents.bdi.actions.effects.PopMessage
 import io.github.anitvam.agents.bdi.actions.effects.Sleep
 import io.github.anitvam.agents.bdi.actions.effects.Stop
 import io.github.anitvam.agents.bdi.environment.Environment
+import io.github.anitvam.agents.bdi.goals.EmptyGoal
 import io.github.anitvam.agents.bdi.intentions.Intention
 import io.github.anitvam.agents.bdi.intentions.IntentionPool
 import io.github.anitvam.agents.bdi.messages.Tell
@@ -102,6 +103,9 @@ internal data class AgentLifecycleImpl(
 
     override fun runIntention(intention: Intention, context: AgentContext, environment: Environment): ExecutionResult =
         when (val nextGoal = intention.nextGoal()) {
+            is EmptyGoal -> ExecutionResult(
+                context.copy(intentions = context.intentions.updateIntention(intention.pop()))
+            )
             is ActionGoal -> when (nextGoal) {
                 is ActInternally -> {
                     var newIntention = intention.pop()

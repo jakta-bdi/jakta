@@ -11,6 +11,7 @@ import io.github.anitvam.agents.bdi.goals.impl.RemoveBeliefImpl
 import io.github.anitvam.agents.bdi.goals.impl.UpdateBeliefImpl
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
+import it.unibo.tuprolog.core.Truth
 
 sealed interface Goal {
     val value: Struct
@@ -18,6 +19,24 @@ sealed interface Goal {
     fun applySubstitution(substitution: Substitution): Goal
 
     fun copy(value: Struct = this.value): Goal
+}
+
+class EmptyGoal(override val value: Struct = Truth.TRUE) : Goal {
+    override fun applySubstitution(substitution: Substitution): Goal = this
+
+    override fun copy(value: Struct): Goal = EmptyGoal(value)
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as EmptyGoal
+
+        if (value != other.value) return false
+
+        return true
+    }
+
+    override fun hashCode() = value.hashCode()
 }
 
 sealed interface BeliefGoal : Goal {

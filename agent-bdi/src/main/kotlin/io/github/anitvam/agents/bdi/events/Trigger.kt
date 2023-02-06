@@ -7,12 +7,12 @@ import io.github.anitvam.agents.bdi.goals.Test
 import io.github.anitvam.agents.bdi.goals.Achieve
 
 /** [Trigger] denotes the change that took place for the [Event] generation. */
-sealed interface Trigger {
+interface Trigger {
     val value: Struct
 }
 
 /** [Trigger] generated after a [Belief] addition (or removal) from the [BeliefBase]. */
-sealed interface BeliefBaseRevision : Trigger {
+interface BeliefBaseRevision : Trigger {
 
     /** The head of the [Belief] that is inserted (or removed) from the [BeliefBase]. */
     val belief: Struct
@@ -41,7 +41,7 @@ data class BeliefBaseUpdate(private val removedBelief: Belief) : BeliefBaseRevis
 }
 
 /** [Trigger] of an event made by a [Test] Goal. */
-sealed interface TestGoalTrigger : Trigger {
+interface TestGoalTrigger : Trigger {
     val goal: Struct
         get() = value
 }
@@ -53,7 +53,7 @@ data class TestGoalInvocation(override val value: Struct) : TestGoalTrigger
 data class TestGoalFailure(override val value: Struct) : TestGoalTrigger
 
 /** [Trigger] of an event made by a [Achieve] Goal. */
-sealed interface AchievementGoalTrigger : Trigger {
+interface AchievementGoalTrigger : Trigger {
     val goal: Struct
         get() = value
 }
