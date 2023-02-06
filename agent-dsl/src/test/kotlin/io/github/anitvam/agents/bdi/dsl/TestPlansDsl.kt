@@ -148,14 +148,14 @@ class TestPlansDsl : DescribeSpec({
         it("can have a belief base removal goal") {
             val p1 = plans {
                 +achieve("send_ping"(R)) then {
-                    remove("send_ping"("source"("self")))
-                    -"send_ping"("source"("self"))
+                    remove("send_ping"("source"("other")))
+                    -"send_ping"("source"("other"))
                 }
             }.first()
             p1.goals.size shouldBe 2
             p1.goals.forEach {
                 it.value.equals(
-                    Struct.of("send_ping", Struct.of("source", Atom.of("self"))),
+                    Struct.of("send_ping", Struct.of("source", Atom.of("other"))),
                     false
                 ) shouldBe true
             }
@@ -166,13 +166,13 @@ class TestPlansDsl : DescribeSpec({
         it("can have a belief base update goal") {
             val p1 = plans {
                 +achieve("send_ping"(R)) then {
-                    update("send_ping"("source"("self")))
+                    update("send_ping"("source"("percept")))
                 }
             }.first()
             p1.goals.size shouldBe 1
             p1.goals.forEach {
                 it.value.equals(
-                    Struct.of("send_ping", Struct.of("source", Atom.of("self"))),
+                    Struct.of("send_ping", Struct.of("source", Atom.of("percept"))),
                     false
                 ) shouldBe true
             }
