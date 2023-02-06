@@ -15,8 +15,16 @@ class InitialGoalsScope : Builder<Iterable<Trigger>>, LogicProgrammingScope by L
         triggers += AchievementGoalInvocation(goal)
     }
 
+    fun achieve(goal: String) {
+        triggers += AchievementGoalInvocation(atomOf(goal))
+    }
+
     fun test(goal: Struct) {
         triggers += TestGoalInvocation(goal)
+    }
+
+    fun test(goal: String) {
+        triggers += TestGoalInvocation(atomOf(goal))
     }
 
     override fun build(): Iterable<Trigger> = triggers.toList()

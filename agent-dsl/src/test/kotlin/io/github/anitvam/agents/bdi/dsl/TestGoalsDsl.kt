@@ -7,6 +7,7 @@ class TestGoalsDsl : DescribeSpec({
         it("can be specified using the DSL") {
             val goals = goals {
                 achieve("send_ping"(E)) // Atoms are not converted to Structs from LogicProgrammingScope ???
+                achieve("send_ping") // Atoms are not converted to Structs from LogicProgrammingScope ???
                 test("sendMessageTo"("ball", R))
             }
 
