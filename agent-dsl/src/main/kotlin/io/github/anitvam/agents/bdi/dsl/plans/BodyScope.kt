@@ -33,9 +33,13 @@ class BodyScope(
         goals += Spawn.of(goal)
     }
 
+    operator fun Struct.unaryPlus() = add(this)
+
     fun add(belief: Struct) {
         goals += AddBelief.of(Belief.from(belief))
     }
+
+    operator fun Struct.unaryMinus() = remove(this)
 
     fun remove(belief: Struct) {
         goals += RemoveBelief.of(Belief.from(belief))
