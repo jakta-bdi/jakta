@@ -1,7 +1,6 @@
 package io.github.anitvam.agents.bdi.beliefs
 
 import io.github.anitvam.agents.bdi.beliefs.impl.BeliefBaseImpl
-import it.unibo.tuprolog.collections.ClauseMultiSet
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.solve.Solution
 

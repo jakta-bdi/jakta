@@ -17,7 +17,7 @@ import it.unibo.tuprolog.dsl.LogicProgrammingScope
 
 class BodyScope(
     private val scope: Scope
-) : Builder<List<Goal>>, LogicProgrammingScope by LogicProgrammingScope.empty() {
+) : Builder<List<Goal>>, LogicProgrammingScope by LogicProgrammingScope.of(scope) {
 
     private val goals = mutableListOf<Goal>()
 

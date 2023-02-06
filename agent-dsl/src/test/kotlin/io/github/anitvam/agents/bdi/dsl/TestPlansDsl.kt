@@ -215,4 +215,15 @@ class TestPlansDsl : DescribeSpec({
             }
         }
     }
+    describe("A Plan") {
+        it("should keep the scope of the variables") {
+            val p1 = plans {
+                +achieve("send_ping"(R)) then {
+                    achieve("sendMessage"(R, "ping"))
+                }
+            }.first()
+            p1.trigger.value.args.first().shouldBeInstanceOf<Var>()
+            p1.trigger.value.args.first() shouldBe p1.goals.first().value.args.first()
+        }
+    }
 })

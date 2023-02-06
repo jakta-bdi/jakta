@@ -20,6 +20,7 @@ dependencies {
     api(project(":utils"))
     api(project(":agent-bdi"))
     api(libs.tuprolog.dsl.theory)
+    api(libs.tuprolog.dsl.core)
 }
 
 kotlin {
