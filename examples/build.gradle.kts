@@ -8,6 +8,10 @@ plugins {
     alias(libs.plugins.taskTree)
 }
 
+multiJvm {
+    jvmVersionForCompilation.set(11)
+}
+
 repositories {
     mavenCentral()
 }

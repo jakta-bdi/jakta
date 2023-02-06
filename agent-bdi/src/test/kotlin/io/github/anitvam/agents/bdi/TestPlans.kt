@@ -8,9 +8,12 @@ import io.github.anitvam.agents.bdi.plans.PlanLibrary
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
 import it.unibo.tuprolog.core.Atom
+import it.unibo.tuprolog.core.Integer
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Truth
 import it.unibo.tuprolog.core.Var
+import it.unibo.tuprolog.solve.Solver
+import it.unibo.tuprolog.theory.Theory
 
 class TestPlans : DescribeSpec({
     val strawberryDesire = Belief.fromSelfSource(Struct.of("desire", Atom.of("strawberry")))
@@ -54,3 +57,17 @@ class TestPlans : DescribeSpec({
         }
     }
 })
+
+fun main() {
+
+    val operatorExtension = Theory.of(
+        Jacop.parseClause("&(A, B) :- A, B"),
+        Jacop.parseClause("|(A, _) :- A"),
+        Jacop.parseClause("|(_, B) :- B"),
+        Jacop.parseClause("~(X) :- not(X)"),
+    )
+    val solver = Solver.prolog.newBuilder()
+        .staticKb(operatorExtension)
+        .build()
+    println(solver.solveOnce(Struct.Companion.of("f", Integer.of(1))))
+}

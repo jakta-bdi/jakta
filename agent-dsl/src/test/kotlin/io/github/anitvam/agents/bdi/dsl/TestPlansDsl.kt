@@ -200,13 +200,13 @@ class TestPlansDsl : DescribeSpec({
         it("can perform an internal action") {
             val p1 = plans {
                 +achieve("send_ping"(R)) then {
-                    iact("send_ping"("source"("self")))
+                    iact("send_ping"("source"("pong")))
                 }
             }.first()
             p1.goals.size shouldBe 1
             p1.goals.forEach {
                 it.value.equals(
-                    Struct.of("send_ping", Struct.of("source", Atom.of("self"))),
+                    Struct.of("send_ping", Struct.of("source", Atom.of("pong"))),
                     false
                 ) shouldBe true
             }
