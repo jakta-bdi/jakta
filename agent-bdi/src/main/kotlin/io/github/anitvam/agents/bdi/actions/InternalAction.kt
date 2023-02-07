@@ -32,4 +32,6 @@ abstract class InternalAction(override val signature: Signature) :
     protected fun stopAgent() = effects.add(Stop())
     protected fun sleepAgent(millis: Long) = effects.add(Sleep(millis))
     protected fun pauseAgent() = effects.add(Pause())
+
+    override fun toString(): String = "InternalAction(${signature.name}, ${signature.arity})"
 }

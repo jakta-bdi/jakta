@@ -26,204 +26,273 @@ import it.unibo.tuprolog.core.Atom
 class TestPlansDsl : DescribeSpec({
     describe("An achievement trigger plan") {
         it("should be created with an invocation trigger") {
-            val p1 = plans {
-                +achieve("send_ping"(R)) iff { "turn"("source"("self"), "me") } then {
-                    +"turn"("source"("self"), "other")
+            val p1 = mas {
+                agent("test") {
+                    plans {
+                        +achieve("send_ping"(R)) iff { "turn"("source"("self"), "me") } then {
+                            +"turn"("source"("self"), "other")
+                        }
+                    }
                 }
-            }.first()
-            p1.trigger.value.equals(Struct.of("send_ping", Var.of("R")), false) shouldBe true
-            p1.trigger.shouldBeTypeOf<AchievementGoalInvocation>()
-            p1.goals.size shouldBe 1
-            p1.goals.first().value.equals(
+            }
+            val plan = p1.agents.first().context.planLibrary.plans.first()
+            plan.trigger.value.equals(Struct.of("send_ping", Var.of("R")), false) shouldBe true
+            plan.trigger.shouldBeTypeOf<AchievementGoalInvocation>()
+            plan.goals.size shouldBe 1
+            plan.goals.first().value.equals(
                 Struct.of("turn", Struct.of("source", Atom.of("self")), Atom.of("other")),
                 false
             ) shouldBe true
-            p1.guard.equals(
+            plan.guard.equals(
                 Struct.of("turn", Struct.of("source", Atom.of("self")), Atom.of("me")),
                 false
             ) shouldBe true
         }
         it("should be created with a failure trigger") {
-            val p1 = plans {
-                -achieve("send_ping"(R)) then { }
-            }.first()
-            p1.trigger.value.equals(Struct.of("send_ping", Var.of("R")), false) shouldBe true
-            p1.trigger.shouldBeTypeOf<AchievementGoalFailure>()
-            p1.goals.size shouldBe 1
-            p1.goals.first() shouldBe EmptyGoal()
-            p1.guard shouldBe Truth.TRUE
+            val p1 = mas {
+                agent("test") {
+                    plans {
+                        -achieve("send_ping"(R)) then { }
+                    }
+                }
+            }
+            val plan = p1.agents.first().context.planLibrary.plans.first()
+            plan.trigger.value.equals(Struct.of("send_ping", Var.of("R")), false) shouldBe true
+            plan.trigger.shouldBeTypeOf<AchievementGoalFailure>()
+            plan.goals.size shouldBe 1
+            plan.goals.first() shouldBe EmptyGoal()
+            plan.guard shouldBe Truth.TRUE
         }
     }
     describe("A test trigger plan") {
         it("should be created with an invocation trigger") {
-            val p1 = plans {
-                + test("send_ping") then { }
-            }.first()
-            p1.trigger.value.equals(Atom.of("send_ping"), false) shouldBe true
-            p1.trigger.shouldBeTypeOf<TestGoalInvocation>()
-            p1.goals.size shouldBe 1
-            p1.goals.first() shouldBe EmptyGoal()
-            p1.guard shouldBe Truth.TRUE
+            val p1 = mas {
+                agent("test") {
+                    plans {
+                        +test("send_ping") then { }
+                    }
+                }
+            }
+            val plan = p1.agents.first().context.planLibrary.plans.first()
+            plan.trigger.value.equals(Atom.of("send_ping"), false) shouldBe true
+            plan.trigger.shouldBeTypeOf<TestGoalInvocation>()
+            plan.goals.size shouldBe 1
+            plan.goals.first() shouldBe EmptyGoal()
+            plan.guard shouldBe Truth.TRUE
         }
         it("should be created with an failure trigger") {
-            val p1 = plans {
-                - test("send_ping") then { }
-            }.first()
-            p1.trigger.value.equals(Atom.of("send_ping"), false) shouldBe true
-            p1.trigger.shouldBeTypeOf<TestGoalFailure>()
+            val p1 = mas {
+                agent("test") {
+                    plans {
+                        -test("send_ping") then { }
+                    }
+                }
+            }
+            val plan = p1.agents.first().context.planLibrary.plans.first()
+            plan.trigger.value.equals(Atom.of("send_ping"), false) shouldBe true
+            plan.trigger.shouldBeTypeOf<TestGoalFailure>()
         }
     }
 
     describe("A belief trigger plan") {
         it("should be created with an addition trigger") {
-            val p1 = plans {
-                +"send_ping"("source"("self")) then { }
-            }.first()
-            println(p1.trigger.value)
-            p1.trigger.value.equals(
-                Struct.of("send_ping", Struct.of("source", Atom.of("self"))),
+            val p1 = mas {
+                agent("test") {
+                    plans {
+                        +"send_ping"("source"("me")) then { }
+                    }
+                }
+            }
+            val plan = p1.agents.first().context.planLibrary.plans.first()
+            plan.trigger.value.equals(
+                Struct.of("send_ping", Struct.of("source", Atom.of("me"))),
                 false
             ) shouldBe true
-            p1.trigger.shouldBeTypeOf<BeliefBaseAddition>()
-            p1.goals.size shouldBe 1
-            p1.goals.first() shouldBe EmptyGoal()
-            p1.guard shouldBe Truth.TRUE
+            plan.trigger.shouldBeTypeOf<BeliefBaseAddition>()
+            plan.goals.size shouldBe 1
+            plan.goals.first() shouldBe EmptyGoal()
+            plan.guard shouldBe Truth.TRUE
         }
         it("should be created with an removal trigger") {
-            val p1 = plans {
-                -"send_ping"("source"("self")) then { }
-            }.first()
-            p1.trigger.value.equals(
+            val p1 = mas {
+                agent("test") {
+                    plans {
+                        -"send_ping"("source"("self")) then { }
+                    }
+                }
+            }
+            val plan = p1.agents.first().context.planLibrary.plans.first()
+            plan.trigger.value.equals(
                 Struct.of("send_ping", Struct.of("source", Atom.of("self"))),
                 false
             ) shouldBe true
-            p1.trigger.shouldBeTypeOf<BeliefBaseRemoval>()
+            plan.trigger.shouldBeTypeOf<BeliefBaseRemoval>()
         }
     }
     describe("A Plan Body") {
         it("can have an achieve goal") {
-            val p1 = plans {
-                +achieve("send_ping"(R)) then {
-                    achieve("sendMessage"(R, "ping"))
+            val p1 = mas {
+                agent("test") {
+                    plans {
+                        +achieve("send_ping"(R)) then {
+                            achieve("sendMessage"(R, "ping"))
+                        }
+                    }
                 }
-            }.first()
-            p1.goals.size shouldBe 1
-            p1.goals.first().value.equals(
+            }
+            val plan = p1.agents.first().context.planLibrary.plans.first()
+            plan.goals.size shouldBe 1
+            plan.goals.first().value.equals(
                 Struct.of("sendMessage", Var.of("R"), Atom.of("ping")),
                 false
             ) shouldBe true
-            p1.goals.first().shouldBeInstanceOf<Achieve>()
+            plan.goals.first().shouldBeInstanceOf<Achieve>()
         }
         it("can have a test goal") {
-            val p1 = plans {
-                +achieve("send_ping"(R)) then {
-                    test("send_ping"("source"("self")))
+            val p1 = mas {
+                agent("test") {
+                    plans {
+                        +achieve("send_ping"(R)) then {
+                            test("send_ping"("source"("self")))
+                        }
+                    }
                 }
-            }.first()
-            p1.goals.size shouldBe 1
-            p1.goals.first().value.equals(
+            }
+            val plan = p1.agents.first().context.planLibrary.plans.first()
+            plan.goals.size shouldBe 1
+            plan.goals.first().value.equals(
                 Struct.of("send_ping", Struct.of("source", Atom.of("self"))),
                 false
             ) shouldBe true
-            p1.goals.first().shouldBeInstanceOf<Test>()
+            plan.goals.first().shouldBeInstanceOf<Test>()
         }
         it("can have a belief base addition goal") {
-            val p1 = plans {
-                +achieve("send_ping"(R)) then {
-                    add("send_ping"("source"("self")))
-                    +"send_ping"("source"("self"))
+            val p1 = mas {
+                agent("test") {
+                    plans {
+                        +achieve("send_ping"(R)) then {
+                            add("send_ping"("source"("self")))
+                            +"send_ping"("source"("self"))
+                        }
+                    }
                 }
-            }.first()
-            p1.goals.size shouldBe 2
-            p1.goals.forEach {
+            }
+            val plan = p1.agents.first().context.planLibrary.plans.first()
+            plan.goals.size shouldBe 2
+            plan.goals.forEach {
                 it.value.equals(
                     Struct.of("send_ping", Struct.of("source", Atom.of("self"))),
                     false
                 ) shouldBe true
             }
-            p1.goals.forEach {
+            plan.goals.forEach {
                 it.shouldBeInstanceOf<AddBelief>()
             }
         }
         it("can have a belief base removal goal") {
-            val p1 = plans {
-                +achieve("send_ping"(R)) then {
-                    remove("send_ping"("source"("other")))
-                    -"send_ping"("source"("other"))
+            val p1 = mas {
+                agent("test") {
+                    plans {
+                        +achieve("send_ping"(R)) then {
+                            remove("send_ping"("source"("other")))
+                            -"send_ping"("source"("other"))
+                        }
+                    }
                 }
-            }.first()
-            p1.goals.size shouldBe 2
-            p1.goals.forEach {
+            }
+            val plan = p1.agents.first().context.planLibrary.plans.first()
+            plan.goals.size shouldBe 2
+            plan.goals.forEach {
                 it.value.equals(
                     Struct.of("send_ping", Struct.of("source", Atom.of("other"))),
                     false
                 ) shouldBe true
             }
-            p1.goals.forEach {
+            plan.goals.forEach {
                 it.shouldBeInstanceOf<RemoveBelief>()
             }
         }
         it("can have a belief base update goal") {
-            val p1 = plans {
-                +achieve("send_ping"(R)) then {
-                    update("send_ping"("source"("percept")))
+            val p1 = mas {
+                agent("test") {
+                    plans {
+                        +achieve("send_ping"(R)) then {
+                            update("send_ping"("source"("percept")))
+                        }
+                    }
                 }
-            }.first()
-            p1.goals.size shouldBe 1
-            p1.goals.forEach {
+            }
+            val plan = p1.agents.first().context.planLibrary.plans.first()
+            plan.goals.size shouldBe 1
+            plan.goals.forEach {
                 it.value.equals(
                     Struct.of("send_ping", Struct.of("source", Atom.of("percept"))),
                     false
                 ) shouldBe true
             }
-            p1.goals.forEach {
+            plan.goals.forEach {
                 it.shouldBeInstanceOf<UpdateBelief>()
             }
         }
         it("can perform an external action") {
-            val p1 = plans {
-                +achieve("send_ping"(R)) then {
-                    act("send_ping"("source"("self")))
+            val p1 = mas {
+                agent("test") {
+                    plans {
+                        +achieve("send_ping"(R)) then {
+                            act("send_ping"("source"("self")))
+                        }
+                    }
                 }
-            }.first()
-            p1.goals.size shouldBe 1
-            p1.goals.forEach {
+            }
+            val plan = p1.agents.first().context.planLibrary.plans.first()
+            plan.goals.size shouldBe 1
+            plan.goals.forEach {
                 it.value.equals(
                     Struct.of("send_ping", Struct.of("source", Atom.of("self"))),
                     false
                 ) shouldBe true
             }
-            p1.goals.forEach {
+            plan.goals.forEach {
                 it.shouldBeInstanceOf<Act>()
             }
         }
         it("can perform an internal action") {
-            val p1 = plans {
-                +achieve("send_ping"(R)) then {
-                    iact("send_ping"("source"("pong")))
+            val p1 = mas {
+                agent("test") {
+                    plans {
+                        +achieve("send_ping"(R)) then {
+                            iact("send_ping"("source"("pong")))
+                        }
+                    }
                 }
-            }.first()
-            p1.goals.size shouldBe 1
-            p1.goals.forEach {
+            }
+            val plan = p1.agents.first().context.planLibrary.plans.first()
+            plan.goals.size shouldBe 1
+            plan.goals.forEach {
                 it.value.equals(
                     Struct.of("send_ping", Struct.of("source", Atom.of("pong"))),
                     false
                 ) shouldBe true
             }
-            p1.goals.forEach {
+            plan.goals.forEach {
                 it.shouldBeInstanceOf<ActInternally>()
             }
         }
     }
     describe("A Plan") {
         it("should keep the scope of the variables") {
-            val p1 = plans {
-                +achieve("send_ping"(R)) then {
-                    achieve("sendMessage"(R, "ping"))
+            val p1 = mas {
+                agent("test") {
+                    plans {
+                        +achieve("send_ping"(R)) then {
+                            achieve("sendMessage"(R, "ping"))
+                        }
+                    }
                 }
-            }.first()
-            p1.trigger.value.args.first().shouldBeInstanceOf<Var>()
-            p1.trigger.value.args.first() shouldBe p1.goals.first().value.args.first()
+            }
+            val plan = p1.agents.first().context.planLibrary.plans.first()
+            plan.trigger.value.args.first().shouldBeInstanceOf<Var>()
+            plan.trigger.value.args.first() shouldBe plan.goals.first().value.args.first()
         }
     }
 })

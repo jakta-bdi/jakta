@@ -19,4 +19,6 @@ abstract class ExternalAction(override val signature: Signature) :
     protected fun sendMessage(agentName: String, message: Message) =
         effects.add(SendMessage(message, agentName))
     protected fun broadcastMessage(message: Message) = effects.add(BroadcastMessage(message))
+
+    override fun toString(): String = "ExternalAction(${signature.name}, ${signature.arity})"
 }

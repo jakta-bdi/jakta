@@ -34,15 +34,14 @@ interface AgentContext {
         planLibrary: PlanLibrary = this.planLibrary,
         intentions: IntentionPool = this.intentions,
         internalActions: Map<String, InternalAction> = this.internalActions,
-    ): AgentContext = of(beliefBase, events, planLibrary, intentions, internalActions)
+    ): AgentContext = of(beliefBase, events, planLibrary, internalActions)
 
     companion object {
         fun of(
             beliefBase: BeliefBase = BeliefBase.empty(),
             events: EventQueue = emptyList(),
             planLibrary: PlanLibrary = PlanLibrary.empty(),
-            intentions: IntentionPool = IntentionPool.empty(),
             internalActions: Map<String, InternalAction> = InternalActions.default(),
-        ): AgentContext = AgentContextImpl(beliefBase, events, planLibrary, intentions, internalActions)
+        ): AgentContext = AgentContextImpl(beliefBase, events, planLibrary, internalActions)
     }
 }

@@ -12,8 +12,8 @@ internal class AgentContextImpl(
     override val beliefBase: BeliefBase,
     override val events: EventQueue,
     override val planLibrary: PlanLibrary,
-    override val intentions: IntentionPool,
     override val internalActions: Map<String, InternalAction>,
+    override val intentions: IntentionPool = IntentionPool.empty(),
 ) : AgentContext {
     override fun toString(): String {
         return """

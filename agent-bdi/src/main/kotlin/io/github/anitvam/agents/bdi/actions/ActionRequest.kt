@@ -11,7 +11,7 @@ import io.github.anitvam.agents.fsm.time.Time
 import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.core.Term
 
-sealed interface ActionRequest<C : SideEffect, Res : ActionResponse<C>> {
+interface ActionRequest<C : SideEffect, Res : ActionResponse<C>> {
     val arguments: List<Term>
     val requestTimestamp: Time
 

@@ -5,7 +5,7 @@ import io.github.anitvam.agents.bdi.actions.effects.EnvironmentChange
 import io.github.anitvam.agents.bdi.actions.effects.SideEffect
 import it.unibo.tuprolog.core.Substitution
 
-sealed interface ActionResponse<C : SideEffect> {
+interface ActionResponse<C : SideEffect> {
     val substitution: Substitution
     val effects: Iterable<C>
 }

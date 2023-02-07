@@ -41,7 +41,7 @@ interface Agent : Taggable<Agent> {
         planLibrary: PlanLibrary = this.context.planLibrary,
         intentions: IntentionPool = this.context.intentions,
         internalActions: Map<String, InternalAction> = this.context.internalActions,
-    ) = of(this.agentID, this.name, beliefBase, events, planLibrary, intentions, internalActions)
+    ) = of(this.agentID, this.name, beliefBase, events, planLibrary, internalActions)
 
     companion object {
         fun empty(): Agent = AgentImpl(AgentContext.of())
@@ -51,10 +51,9 @@ interface Agent : Taggable<Agent> {
             beliefBase: BeliefBase = BeliefBase.empty(),
             events: EventQueue = emptyList(),
             planLibrary: PlanLibrary = PlanLibrary.empty(),
-            intentions: IntentionPool = IntentionPool.empty(),
             internalActions: Map<String, InternalAction> = InternalActions.default(),
         ): Agent = AgentImpl(
-            AgentContext.of(beliefBase, events, planLibrary, intentions, internalActions),
+            AgentContext.of(beliefBase, events, planLibrary, internalActions),
             agentID,
             name,
         )

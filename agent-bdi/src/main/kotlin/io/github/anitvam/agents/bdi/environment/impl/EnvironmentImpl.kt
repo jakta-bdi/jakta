@@ -58,4 +58,13 @@ internal class EnvironmentImpl(
         } else this
 
     override fun percept(): BeliefBase = perception.percept()
+
+    override fun toString(): String = """
+        Environment(
+           actions=${externalActions.values},
+           agents=$agentIDs, 
+           messages=$messageBoxes,
+           perception=$perception
+        )
+    """.trimIndent()
 }
