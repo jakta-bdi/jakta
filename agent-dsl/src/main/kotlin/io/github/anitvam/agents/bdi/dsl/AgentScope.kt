@@ -22,22 +22,22 @@ class AgentScope(
     private val plansScope by lazy { PlansScope() }
     private val actionsScope by lazy { InternalActionsScope() }
 
-    internal fun beliefs(f: BeliefsScope.() -> Unit): AgentScope {
+    fun beliefs(f: BeliefsScope.() -> Unit): AgentScope {
         beliefsScope.also(f)
         return this
     }
 
-    internal fun goals(f: InitialGoalsScope.() -> Unit): AgentScope {
+    fun goals(f: InitialGoalsScope.() -> Unit): AgentScope {
         goalsScope.also(f)
         return this
     }
 
-    internal fun plans(f: PlansScope.() -> Unit): AgentScope {
+    fun plans(f: PlansScope.() -> Unit): AgentScope {
         plansScope.also(f)
         return this
     }
 
-    internal fun actions(f: InternalActionsScope.() -> Unit): AgentScope {
+    fun actions(f: InternalActionsScope.() -> Unit): AgentScope {
         actionsScope.also(f)
         return this
     }

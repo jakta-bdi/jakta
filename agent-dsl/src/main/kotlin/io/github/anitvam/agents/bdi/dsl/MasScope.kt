@@ -11,12 +11,12 @@ class MasScope : Builder<Mas> {
     var agents: List<Agent> = emptyList()
     var executionStrategy = ExecutionStrategy.oneThreadPerMas()
 
-    internal fun environment(f: EnvironmentScope.() -> Unit): MasScope {
+    fun environment(f: EnvironmentScope.() -> Unit): MasScope {
         env = EnvironmentScope().also(f).build()
         return this
     }
 
-    internal fun agent(name: String, f: AgentScope.() -> Unit): MasScope {
+    fun agent(name: String, f: AgentScope.() -> Unit): MasScope {
         agents += AgentScope(name).also(f).build()
         return this
     }

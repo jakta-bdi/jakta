@@ -7,20 +7,20 @@ import it.unibo.tuprolog.core.Rule
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.dsl.LogicProgrammingScope
 
-class BeliefsScope : Builder<BeliefBase> {
+class BeliefsScope : Builder<BeliefBase>, LogicProgrammingScope by LogicProgrammingScope.empty() {
 
     private val beliefs = mutableListOf<Belief>()
 
     private val lp = LogicProgrammingScope.empty()
 
-    fun fact(f: BeliefScope.() -> Struct) {
-        val struct = BeliefScope().f()
+    fun fact(struct: Struct) {
         val belief: Belief = Belief.fromSelfSource(struct)
         beliefs.add(belief)
     }
 
-    fun rule(f: BeliefScope.() -> Rule) {
-        val rule = BeliefScope().f()
+    fun fact(atom: String) = fact(atomOf(atom))
+
+    fun rule(rule: Rule) {
         val belief: Belief = Belief.fromSelfSource(rule.head, rule.bodyItems)
         beliefs.add(belief)
     }
