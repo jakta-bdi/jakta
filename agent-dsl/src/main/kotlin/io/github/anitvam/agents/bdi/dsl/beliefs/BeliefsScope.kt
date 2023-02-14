@@ -14,13 +14,15 @@ class BeliefsScope : Builder<BeliefBase>, LogicProgrammingScope by LogicProgramm
     private val lp = LogicProgrammingScope.empty()
 
     fun fact(struct: Struct) {
-        val belief: Belief = Belief.fromSelfSource(struct)
+        val belief: Belief = Belief.fromSelfSource(struct.freshCopy())
         beliefs.add(belief)
     }
 
     fun fact(atom: String) = fact(atomOf(atom))
 
     fun rule(rule: Rule) {
+        @Suppress("NAME_SHADOWING")
+        val rule = rule.freshCopy()
         val belief: Belief = Belief.fromSelfSource(rule.head, rule.bodyItems)
         beliefs.add(belief)
     }

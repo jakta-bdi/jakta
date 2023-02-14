@@ -19,7 +19,7 @@ repositories {
 dependencies {
     implementation(libs.kotlin.stdlib)
     testImplementation(libs.bundles.kotlin.testing)
-    api(project(":agent-bdi"))
+    api(project(":agent-dsl"))
 }
 
 kotlin {
