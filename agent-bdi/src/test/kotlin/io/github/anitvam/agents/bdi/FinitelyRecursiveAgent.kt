@@ -22,17 +22,17 @@ fun main() {
         events = listOf(Event.ofAchievementGoalInvocation(Achieve.of(start))),
         planLibrary = PlanLibrary.of(
             Plan.ofAchievementGoalInvocation(
-                value = Jacop.parseStruct("start(N, N)"),
+                value = Jacop.parseStruct("start(S, S)"),
                 goals = listOf(
-                    ActInternally.of(Jacop.parseStruct("print(\"hello world\", N)")),
+                    ActInternally.of(Jacop.parseStruct("print(\"hello world\", S)")),
                 ),
             ),
             Plan.ofAchievementGoalInvocation(
-                value = Jacop.parseStruct("start(N, M)"),
-                guard = Jacop.parseStruct("N < M & S is N + 1"),
+                value = Jacop.parseStruct("start(S, M)"),
+                guard = Jacop.parseStruct("S < M & N is S + 1"),
                 goals = listOf(
-                    ActInternally.of(Jacop.parseStruct("print(\"hello world\", N)")),
-                    Achieve.of(Jacop.parseStruct("start(S, M)")),
+                    ActInternally.of(Jacop.parseStruct("print(\"hello world\", S)")),
+                    Achieve.of(Jacop.parseStruct("start(N, M)")),
                 ),
             ),
         ),

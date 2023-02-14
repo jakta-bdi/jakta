@@ -6,8 +6,6 @@ import io.github.anitvam.agents.bdi.goals.Achieve
 import io.github.anitvam.agents.bdi.goals.ActInternally
 import io.github.anitvam.agents.bdi.plans.Plan
 import io.github.anitvam.agents.bdi.plans.PlanLibrary
-import io.github.anitvam.agents.bdi.beliefs.Belief
-import io.github.anitvam.agents.bdi.beliefs.BeliefBase
 import io.github.anitvam.agents.bdi.executionstrategies.ExecutionStrategy
 
 fun main() {
@@ -16,7 +14,6 @@ fun main() {
     val start = Jacop.parseStruct("start(0, 10)")
     val alice = Agent.of(
         name = "alice",
-        beliefBase = BeliefBase.of(listOf(Belief.fromSelfSource(Jacop.parseStruct("run")))),
         events = listOf(Event.ofAchievementGoalInvocation(Achieve.of(start))),
         planLibrary = PlanLibrary.of(
             Plan.ofAchievementGoalInvocation(

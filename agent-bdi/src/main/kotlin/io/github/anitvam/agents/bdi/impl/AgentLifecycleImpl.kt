@@ -357,7 +357,6 @@ internal data class AgentLifecycleImpl(
                     newAgent.context.copy(intentions = newIntentionPool),
                     environment,
                 )
-
                 newAgent.copy(executionResult.newAgentContext)
             }
         }
