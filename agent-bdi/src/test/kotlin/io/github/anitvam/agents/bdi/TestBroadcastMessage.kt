@@ -1,6 +1,6 @@
 package io.github.anitvam.agents.bdi
 
-import io.github.anitvam.agents.bdi.actions.ExternalAction
+import io.github.anitvam.agents.bdi.actions.impl.AbstractExternalAction
 import io.github.anitvam.agents.bdi.actions.ExternalRequest
 import io.github.anitvam.agents.bdi.beliefs.Belief
 import io.github.anitvam.agents.bdi.environment.Environment
@@ -14,14 +14,14 @@ import io.github.anitvam.agents.bdi.plans.Plan
 import io.github.anitvam.agents.bdi.plans.PlanLibrary
 
 fun main() {
-    val broadcastAction = object : ExternalAction("broadcast", 2) {
-        override fun ExternalRequest.action() {
-            val type = arguments[0].castToAtom()
-            val message = arguments[1].castToStruct()
+    val broadcastAction = object : AbstractExternalAction("broadcast", 2) {
+        override fun action(request: ExternalRequest) {
+            val type = request.arguments[0].castToAtom()
+            val message = request.arguments[1].castToStruct()
             when (type.value) {
-                "tell" -> broadcastMessage(Message(this.sender, Tell, message))
+                "tell" -> broadcastMessage(Message(request.sender, Tell, message))
                 "achieve" -> broadcastMessage(
-                    Message(this.sender, io.github.anitvam.agents.bdi.messages.Achieve, message)
+                    Message(request.sender, io.github.anitvam.agents.bdi.messages.Achieve, message)
                 )
             }
         }

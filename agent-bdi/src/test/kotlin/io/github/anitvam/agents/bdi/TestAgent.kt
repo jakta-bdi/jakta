@@ -6,7 +6,7 @@ import io.github.anitvam.agents.bdi.goals.Achieve
 import io.github.anitvam.agents.bdi.goals.ActInternally
 import io.github.anitvam.agents.bdi.goals.AddBelief
 import io.github.anitvam.agents.bdi.goals.Test
-import io.github.anitvam.agents.bdi.actions.InternalAction
+import io.github.anitvam.agents.bdi.actions.impl.AbstractInternalAction
 import io.github.anitvam.agents.bdi.actions.InternalActions
 import io.github.anitvam.agents.bdi.actions.InternalRequest
 import io.github.anitvam.agents.bdi.beliefs.Belief
@@ -23,24 +23,24 @@ import it.unibo.tuprolog.core.Var
 
 class TestAgent : DescribeSpec({
 
-    val TEST = object : InternalAction("test", 2) {
-        override fun InternalRequest.action() {
-            if (arguments[0].isAtom && arguments[1].isAtom) {
-                val first: Int = Integer.parseInt(arguments[0].castToAtom().value)
-                val second: Int = Integer.parseInt(arguments[1].castToAtom().value)
+    val TEST = object : AbstractInternalAction("test", 2) {
+        override fun action(request: InternalRequest) {
+            if (request.arguments[0].isAtom && request.arguments[1].isAtom) {
+                val first: Int = Integer.parseInt(request.arguments[0].castToAtom().value)
+                val second: Int = Integer.parseInt(request.arguments[1].castToAtom().value)
                 first shouldBe second
             } else {
                 fail("Wrong Arguments for test action")
             }
         }
     }
-    val FAILTEST = object : InternalAction("failtest", 0) {
-        override fun InternalRequest.action() {
+    val FAILTEST = object : AbstractInternalAction("failtest", 0) {
+        override fun action(request: InternalRequest) {
             fail("This action should not be executed by the agent")
         }
     }
-    val PASSTEST = object : InternalAction("passtest", 0) {
-        override fun InternalRequest.action() {
+    val PASSTEST = object : AbstractInternalAction("passtest", 0) {
+        override fun action(request: InternalRequest) {
             println("This should be shown")
         }
     }
@@ -68,10 +68,10 @@ class TestAgent : DescribeSpec({
             Mas.of(ExecutionStrategy.oneThreadPerAgent(), environment, newAgent).start()
         }
         it("can declare custom actions to be performed") {
-            val INCREMENT = object : InternalAction("increment", 2) {
-                override fun InternalRequest.action() {
-                    val first: Atom = arguments.first().castToAtom()
-                    val second: Var = arguments[1].castToVar()
+            val INCREMENT = object : AbstractInternalAction("increment", 2) {
+                override fun action(request: InternalRequest) {
+                    val first: Atom = request.arguments.first().castToAtom()
+                    val second: Var = request.arguments[1].castToVar()
                     val computation = Atom.of((Integer.parseInt(first.value) + 1).toString())
                     result = Substitution.of(second to computation)
                 }
@@ -133,8 +133,8 @@ class TestAgent : DescribeSpec({
         }
         it("can modify agent's context declaring custom actions") {
             val needChocolate = Belief.fromSelfSource(Struct.of("need", Atom.of("chocolate")))
-            val ADDBELIEF = object : InternalAction("add_belief", 1) {
-                override fun InternalRequest.action() {
+            val ADDBELIEF = object : AbstractInternalAction("add_belief", 1) {
+                override fun action(request: InternalRequest) {
                     AddBelief.of(needChocolate)
                 }
             }
@@ -163,9 +163,9 @@ class TestAgent : DescribeSpec({
 
 fun main() {
     val needChocolate = Belief.fromSelfSource(Struct.of("need", Atom.of("chocolate")))
-    val ADDBELIEF = object : InternalAction("add_belief", 1) {
-        override fun InternalRequest.action() {
-            addBelief(Belief.from(arguments.first().castToRule()))
+    val ADDBELIEF = object : AbstractInternalAction("add_belief", 1) {
+        override fun action(request: InternalRequest) {
+            addBelief(Belief.from(request.arguments.first().castToRule()))
         }
     }
     val start = Atom.of("start")

@@ -1,6 +1,6 @@
 package io.github.anitvam.agents.bdi
 
-import io.github.anitvam.agents.bdi.actions.InternalAction
+import io.github.anitvam.agents.bdi.actions.impl.AbstractInternalAction
 import io.github.anitvam.agents.bdi.actions.InternalRequest
 import io.github.anitvam.agents.bdi.environment.Environment
 import io.github.anitvam.agents.bdi.events.Event
@@ -25,8 +25,8 @@ fun main() {
             )
         ),
         internalActions = mapOf(
-            "thread" to object : InternalAction("thread", 0) {
-                override fun InternalRequest.action() {
+            "thread" to object : AbstractInternalAction("thread", 0) {
+                override fun action(request: InternalRequest) {
                     println("Thread: ${Thread.currentThread().name}")
                 }
             }

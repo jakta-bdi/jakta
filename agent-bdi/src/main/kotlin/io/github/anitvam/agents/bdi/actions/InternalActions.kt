@@ -1,36 +1,37 @@
 package io.github.anitvam.agents.bdi.actions
 
+import io.github.anitvam.agents.bdi.actions.impl.AbstractInternalAction
 import it.unibo.tuprolog.core.Substitution
 
 interface InternalActions {
     companion object {
-        val PRINT: InternalAction = object : InternalAction("print", 2) {
-            override fun InternalRequest.action() =
-                println("[${agent.name}] ${arguments.joinToString(separator = " ")}")
+        val PRINT: InternalAction = object : AbstractInternalAction("print", 2) {
+            override fun action(request: InternalRequest) =
+                println("[${request.agent.name}] ${request.arguments.joinToString(separator = " ")}")
         }
 
-        val FAIL: InternalAction = object : InternalAction("fail", 0) {
-            override fun InternalRequest.action() {
+        val FAIL: InternalAction = object : AbstractInternalAction("fail", 0) {
+            override fun action(request: InternalRequest) {
                 result = Substitution.failed()
             }
         }
 
-        val STOP: InternalAction = object : InternalAction("stop", 0) {
-            override fun InternalRequest.action() {
+        val STOP: InternalAction = object : AbstractInternalAction("stop", 0) {
+            override fun action(request: InternalRequest) {
                 stopAgent()
             }
         }
 
-        val PAUSE: InternalAction = object : InternalAction("pause", 0) {
-            override fun InternalRequest.action() {
+        val PAUSE: InternalAction = object : AbstractInternalAction("pause", 0) {
+            override fun action(request: InternalRequest) {
                 pauseAgent()
             }
         }
 
-        val SLEEP: InternalAction = object : InternalAction("sleep", 1) {
-            override fun InternalRequest.action() {
-                if (arguments[0].isInteger) {
-                    Thread.sleep(arguments[0].castToInteger().value.toLong())
+        val SLEEP: InternalAction = object : AbstractInternalAction("sleep", 1) {
+            override fun action(request: InternalRequest) {
+                if (request.arguments[0].isInteger) {
+                    Thread.sleep(request.arguments[0].castToInteger().value.toLong())
                 }
             }
         }

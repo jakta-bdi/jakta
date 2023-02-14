@@ -1,9 +1,9 @@
 package io.github.anitvam.agents.bdi.context.impl
 
+import io.github.anitvam.agents.bdi.actions.InternalAction
 import io.github.anitvam.agents.bdi.context.AgentContext
 import io.github.anitvam.agents.bdi.beliefs.BeliefBase
 import io.github.anitvam.agents.bdi.events.EventQueue
-import io.github.anitvam.agents.bdi.actions.InternalAction
 import io.github.anitvam.agents.bdi.intentions.IntentionPool
 import io.github.anitvam.agents.bdi.plans.PlanLibrary
 

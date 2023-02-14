@@ -1,6 +1,6 @@
 package io.github.anitvam.agents.bdi
 
-import io.github.anitvam.agents.bdi.actions.InternalAction
+import io.github.anitvam.agents.bdi.actions.impl.AbstractInternalAction
 import io.github.anitvam.agents.bdi.actions.InternalActions
 import io.github.anitvam.agents.bdi.actions.InternalRequest
 import io.github.anitvam.agents.bdi.environment.Environment
@@ -16,9 +16,9 @@ import io.github.anitvam.agents.fsm.time.Time
 
 fun main() {
 
-    val dummyAction = object : InternalAction("time", 0) {
-        override fun InternalRequest.action() {
-            println("time: $requestTimestamp}")
+    val dummyAction = object : AbstractInternalAction("time", 0) {
+        override fun action(request: InternalRequest) {
+            println("time: ${request.requestTimestamp}")
         }
     }
     val alice = Agent.of(
