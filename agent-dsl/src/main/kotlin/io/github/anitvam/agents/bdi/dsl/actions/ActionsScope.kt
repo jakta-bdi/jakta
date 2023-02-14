@@ -22,6 +22,10 @@ abstract class ActionsScope<
         actions += newAction(name, arity, f)
     }
 
+    fun action(action: A) {
+        actions += action
+    }
+
     protected abstract fun newAction(name: String, arity: Int, f: As.() -> Unit): A
 
     override fun build(): Map<String, A> = actions.associateBy { it.signature.name }

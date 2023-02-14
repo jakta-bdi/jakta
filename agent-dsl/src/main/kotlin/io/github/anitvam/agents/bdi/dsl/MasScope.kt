@@ -21,5 +21,10 @@ class MasScope : Builder<Mas> {
         return this
     }
 
+    fun executionStrategy(f: () -> ExecutionStrategy): MasScope {
+        executionStrategy = f()
+        return this
+    }
+
     override fun build(): Mas = Mas.of(executionStrategy, env, agents)
 }

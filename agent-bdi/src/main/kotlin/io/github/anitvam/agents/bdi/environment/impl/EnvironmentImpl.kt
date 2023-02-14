@@ -62,8 +62,8 @@ internal class EnvironmentImpl(
     override fun toString(): String = """
         Environment(
            actions=${externalActions.values},
-           agents=$agentIDs, 
-           messages=$messageBoxes,
+           agents=${agentIDs.values}, 
+           messages=${messageBoxes.keys},
            perception=$perception
         )
     """.trimIndent()

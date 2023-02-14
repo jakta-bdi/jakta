@@ -5,15 +5,11 @@ import io.github.anitvam.agents.bdi.dsl.mas
 fun main() {
     mas {
         agent("alice") {
-            beliefs {
-                fact("run"(X))
-                rule("fun"(X) impliedBy Y)
-            }
             goals {
-                achieve("start")
+                achieve("start"(0, 10))
             }
             plans {
-                + achieve("start"(N, M)) then {
+                + achieve("start"(N, N)) then {
                     iact("print"("Hello World!", N))
                 }
                 + achieve("start"(N, M)) iff { (N lowerThan M) and (S `is` (N + 1)) } then {

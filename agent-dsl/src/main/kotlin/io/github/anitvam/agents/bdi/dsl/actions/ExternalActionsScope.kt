@@ -8,7 +8,7 @@ import io.github.anitvam.agents.bdi.actions.impl.AbstractExternalAction
 
 class ExternalActionsScope :
     ActionsScope<EnvironmentChange, ExternalResponse, ExternalRequest, ExternalAction, ExternalActionScope>() {
-    override fun newAction(name: String, arity: Int, f: ExternalActionScope.() -> Unit): ExternalAction =
+    public override fun newAction(name: String, arity: Int, f: ExternalActionScope.() -> Unit): ExternalAction =
         object : AbstractExternalAction(name, arity) {
             override fun action(request: ExternalRequest) {
                 ExternalActionScope(this, request).f()

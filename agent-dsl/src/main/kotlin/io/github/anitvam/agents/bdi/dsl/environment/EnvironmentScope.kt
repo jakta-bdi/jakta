@@ -6,11 +6,13 @@ import io.github.anitvam.agents.bdi.environment.Environment
 
 class EnvironmentScope : Builder<Environment> {
 
-    private lateinit var actionsScopes: ExternalActionsScope
+    private val actionsScopes by lazy { ExternalActionsScope() }
 
     infix fun actions(actions: ExternalActionsScope.() -> Unit) {
-        actionsScopes = ExternalActionsScope().also(actions)
+        actionsScopes.also(actions)
     }
 
-    override fun build(): Environment = Environment.of(actionsScopes.build())
+    override fun build(): Environment = Environment.of(
+        externalActions = actionsScopes.build()
+    )
 }

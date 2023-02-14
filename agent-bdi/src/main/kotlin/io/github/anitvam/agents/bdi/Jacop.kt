@@ -2,10 +2,12 @@ package io.github.anitvam.agents.bdi
 
 import it.unibo.tuprolog.core.Clause
 import it.unibo.tuprolog.core.Struct
+import it.unibo.tuprolog.core.Term
 import it.unibo.tuprolog.core.operators.Operator
 import it.unibo.tuprolog.core.operators.OperatorSet
 import it.unibo.tuprolog.core.operators.Specifier
 import it.unibo.tuprolog.core.parsing.TermParser
+import it.unibo.tuprolog.core.visitors.DefaultTermVisitor
 
 object Jacop {
 
@@ -21,21 +23,21 @@ object Jacop {
 
     fun parseStruct(string: String): Struct = parser.parseStruct(string)
     fun parseClause(string: String): Clause = parser.parseClause(string)
+}
 
-//    private val jasonTo2p = object : DefaultTermVisitor<Term>() {
-//
-//        override fun defaultValue(term: Term): Term = term
-//
-//        override fun visitStruct(term: Struct): Term {
-//            return when {
-//                term.arity == 2 && term.functor == "&" ->
-//                    Struct.of(",", term.args.map { it.accept(this) })
-//                term.arity == 2 && term.functor == "|" ->
-//                    Struct.of(";", term.args.map { it.accept(this) })
-//                term.arity == 1 && term.functor == "~" ->
-//                    Struct.of("not", term.args.map { it.accept(this) })
-//                else -> super.visitStruct(term)
-//            }
-//        }
-//    }
+object Prolog2Jacop : DefaultTermVisitor<Term>() {
+
+    override fun defaultValue(term: Term): Term = term
+
+    override fun visitStruct(term: Struct): Term {
+        return when {
+            term.arity == 2 && term.functor == "," ->
+                Struct.of("&", term.args.map { it.accept(this) })
+            term.arity == 2 && term.functor == ";" ->
+                Struct.of("|", term.args.map { it.accept(this) })
+            term.arity == 1 && term.functor == "not" ->
+                Struct.of("~", term.args.map { it.accept(this) })
+            else -> super.visitStruct(term)
+        }
+    }
 }

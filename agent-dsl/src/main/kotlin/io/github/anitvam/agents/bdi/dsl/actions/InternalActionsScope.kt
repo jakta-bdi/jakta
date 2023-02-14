@@ -8,7 +8,7 @@ import io.github.anitvam.agents.bdi.actions.impl.AbstractInternalAction
 
 class InternalActionsScope :
     ActionsScope<AgentChange, InternalResponse, InternalRequest, InternalAction, InternalActionScope>() {
-    override fun newAction(name: String, arity: Int, f: InternalActionScope.() -> Unit): InternalAction =
+    public override fun newAction(name: String, arity: Int, f: InternalActionScope.() -> Unit): InternalAction =
         object : AbstractInternalAction(name, arity) {
             override fun action(request: InternalRequest) {
                 InternalActionScope(this, request).f()

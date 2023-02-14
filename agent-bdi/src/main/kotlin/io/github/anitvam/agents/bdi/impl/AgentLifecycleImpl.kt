@@ -139,7 +139,7 @@ internal data class AgentLifecycleImpl(
                     }
                 }
                 is Act -> {
-                    var newIntention = intention.pop()
+                    val newIntention = intention.pop()
                     val externalAction = environment.externalActions[nextGoal.action.functor]
                     if (externalAction == null) {
                         // Internal Action not found
@@ -360,7 +360,7 @@ internal data class AgentLifecycleImpl(
                 newAgent.copy(executionResult.newAgentContext)
             }
         }
-        // println("post run -> $newContext")
+        // println("post run -> ${newAgent.context}")
         this.agent = newAgent
         return if (message != null) {
             executionResult.environmentEffects + PopMessage(this.agent.name)

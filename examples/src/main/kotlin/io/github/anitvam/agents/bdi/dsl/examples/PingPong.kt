@@ -11,7 +11,7 @@ fun main() {
     mas {
         environment {
             actions {
-                action("send", 2) {
+                action("send", 3) {
                     val receiver: Atom = argument(0)
                     val type: Atom = argument(1)
                     val message: Struct = argument(2)
@@ -25,5 +25,62 @@ fun main() {
                 }
             }
         }
-    }
+        agent("pinger") {
+            beliefs {
+                fact("turn"("me"))
+                fact("other"("ponger"))
+            }
+            goals {
+                achieve("send_ping")
+            }
+            plans {
+                + achieve("send_ping") iff {
+                    "turn"("source"("self"), "me") and "other"("source"("self"), R)
+                } then {
+                    update("turn"("source"("self"), "other"))
+                    achieve("sendMessageTo"("ball", R))
+                }
+
+                + "ball"("source"(R)) iff {
+                    "turn"("source"("self"), "other") and "other"("source"("self"), R)
+                } then {
+                    update("turn"("source"("self"), "me"))
+                    iact("print"("Received ball from ", R))
+                    -"ball"("source"(R))
+                    iact("print"("Pinger hasDone"))
+                }
+
+                + achieve("sendMessageTo"(M, R)) then {
+                    iact("print"("Sending message ", M))
+                    act("send"(R, "tell", M))
+                }
+            }
+        }
+        agent("ponger") {
+            beliefs {
+                fact("turn"("other"))
+                fact("other"("pinger"))
+            }
+            plans {
+                + "ball"("source"(S)) iff {
+                    "turn"("source"("self"), "other") and "other"("source"("self"), S)
+                } then {
+                    update("turn"("source"("self"), "me"))
+                    -"ball"("source"(S))
+                    achieve("sendMessageTo"("ball", S))
+                    achieve("handle_ping")
+                }
+
+                + achieve("handle_ping") then {
+                    update("turn"("source"("self"), "other"))
+                    iact("print"("Ponger has Done"))
+                }
+
+                + achieve("sendMessageTo"(M, R)) then {
+                    iact("print"("Sending message ", M))
+                    act("send"(R, "tell", M))
+                }
+            }
+        }
+    }.start()
 }

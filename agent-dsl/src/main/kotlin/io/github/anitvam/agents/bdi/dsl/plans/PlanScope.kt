@@ -1,5 +1,6 @@
 package io.github.anitvam.agents.bdi.dsl.plans
 
+import io.github.anitvam.agents.bdi.Prolog2Jacop
 import io.github.anitvam.agents.bdi.beliefs.Belief
 import io.github.anitvam.agents.bdi.events.AchievementGoalTrigger
 import io.github.anitvam.agents.bdi.events.BeliefBaseRevision
@@ -13,7 +14,7 @@ import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Truth
 import kotlin.reflect.KClass
 
-class PlanScope(
+data class PlanScope(
     private val scope: Scope,
     private val trigger: Struct,
     private val triggerType: KClass<out Trigger>
@@ -24,6 +25,7 @@ class PlanScope(
 
     infix fun iff(guards: GuardScope.() -> Struct): PlanScope {
         guard = GuardScope(scope).let(guards)
+        guard = guard.accept(Prolog2Jacop).castToStruct()
         return this
     }
 

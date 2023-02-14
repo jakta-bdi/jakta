@@ -21,6 +21,8 @@ class BodyScope(
 
     private val goals = mutableListOf<Goal>()
 
+    fun achieve(goal: String) = achieve(atomOf(goal))
+
     fun achieve(goal: Struct) {
         goals += Achieve.of(goal)
     }
@@ -49,9 +51,13 @@ class BodyScope(
         goals += UpdateBelief.of(Belief.from(belief))
     }
 
+    fun act(struct: String) = act(atomOf(struct))
+
     fun act(struct: Struct) {
         goals += Act.of(struct)
     }
+
+    fun iact(struct: String) = iact(atomOf(struct))
 
     fun iact(struct: Struct) {
         goals += ActInternally.of(struct)
