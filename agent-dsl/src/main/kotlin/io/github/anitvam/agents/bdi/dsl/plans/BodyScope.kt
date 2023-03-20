@@ -31,9 +31,13 @@ class BodyScope(
         goals += Test.of(Belief.from(goal))
     }
 
+    fun test(goal: String) = test(atomOf(goal))
+
     fun spawn(goal: Struct) {
         goals += Spawn.of(goal)
     }
+
+    fun spawn(goal: String) = spawn(atomOf(goal))
 
     operator fun Struct.unaryPlus() = add(this)
 
