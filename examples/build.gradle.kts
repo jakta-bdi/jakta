@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.kotlin.qa)
     alias(libs.plugins.multiJvmTesting)
     alias(libs.plugins.taskTree)
+    id("jacoco-report-aggregation")
 }
 
 multiJvm {

@@ -33,8 +33,7 @@ fun main() {
             }
         }
         executionStrategy {
-            ExecutionStrategy.oneThreadPerMas()
-            // ExecutionStrategy.oneThreadPerAgent()
+            ExecutionStrategy.oneThreadPerAgent()
         }
     }.start()
 }
