@@ -10,6 +10,7 @@ import io.github.anitvam.agents.bdi.events.Event
 import io.github.anitvam.agents.bdi.executionstrategies.TimeDistribution
 import io.github.anitvam.agents.bdi.executionstrategies.setTimeDistribution
 import io.github.anitvam.agents.bdi.executionstrategies.timeDistribution
+import io.github.anitvam.agents.bdi.plans.Plan
 import io.github.anitvam.agents.bdi.plans.PlanLibrary
 
 class AgentScope(
@@ -19,7 +20,7 @@ class AgentScope(
     private val goalsScope by lazy { InitialGoalsScope() }
     private val plansScope by lazy { PlansScope() }
     private val actionsScope by lazy { InternalActionsScope() }
-
+    private var plans = emptyList<Plan>()
     private lateinit var time: TimeDistribution
 
     fun beliefs(f: BeliefsScope.() -> Unit): AgentScope {
@@ -34,6 +35,11 @@ class AgentScope(
 
     fun plans(f: PlansScope.() -> Unit): AgentScope {
         plansScope.also(f)
+        return this
+    }
+
+    fun plans(plansList: Iterable<Plan>): AgentScope {
+        plans = plans + plansList
         return this
     }
 
@@ -52,7 +58,7 @@ class AgentScope(
             name = name.orEmpty(),
             beliefBase = beliefsScope.build(),
             events = goalsScope.build().map { Event.of(it) },
-            planLibrary = PlanLibrary.of(plansScope.build().toList()),
+            planLibrary = PlanLibrary.of(plans + plansScope.build().toList()),
             internalActions = InternalActions.default() + actionsScope.build()
         )
         if (this::time.isInitialized) {
