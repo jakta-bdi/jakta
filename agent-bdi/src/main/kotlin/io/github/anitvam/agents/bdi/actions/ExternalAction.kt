@@ -9,4 +9,7 @@ interface ExternalAction : Action<EnvironmentChange, ExternalResponse, ExternalR
     fun removeAgent(agentName: String)
     fun sendMessage(agentName: String, message: Message)
     fun broadcastMessage(message: Message)
+    fun addData(key: String, value: Any)
+    fun removeData(key: String)
+    fun updateData(newData: Map<String, Any>)
 }

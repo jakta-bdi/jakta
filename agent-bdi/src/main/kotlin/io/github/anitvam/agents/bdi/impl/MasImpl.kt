@@ -7,8 +7,11 @@ import io.github.anitvam.agents.bdi.actions.effects.BroadcastMessage
 import io.github.anitvam.agents.bdi.actions.effects.EnvironmentChange
 import io.github.anitvam.agents.bdi.actions.effects.PopMessage
 import io.github.anitvam.agents.bdi.actions.effects.RemoveAgent
+import io.github.anitvam.agents.bdi.actions.effects.RemoveData
 import io.github.anitvam.agents.bdi.actions.effects.SendMessage
 import io.github.anitvam.agents.bdi.actions.effects.SpawnAgent
+import io.github.anitvam.agents.bdi.actions.effects.UpdateData
+import io.github.anitvam.agents.bdi.actions.effects.AddData
 import io.github.anitvam.agents.bdi.environment.Environment
 
 internal class MasImpl(
@@ -23,7 +26,6 @@ internal class MasImpl(
     override fun start() = executionStrategy.dispatch(this)
 
     override fun applyEnvironmentEffects(effects: Iterable<EnvironmentChange>) = effects.forEach {
-
         when (it) {
             is BroadcastMessage -> environment = environment.broadcastMessage(it.message)
             is RemoveAgent -> environment = environment.removeAgent(it.agentName)
@@ -32,6 +34,9 @@ internal class MasImpl(
                 agents += it.agent
                 environment = environment.addAgent(it.agent)
             }
+            is AddData -> environment = environment.addData(it.key, it.value)
+            is RemoveData -> environment = environment.removeData(it.key)
+            is UpdateData -> environment = environment.updateData(it.newData)
             is PopMessage -> environment = environment.popMessage(it.agentName)
         }
     }
