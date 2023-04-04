@@ -10,7 +10,7 @@ gitHooks {
     createHooks()
 }
 
-rootProject.name = "ise-2022-project-baiardi"
+rootProject.name = "jakta"
 
 include(":utils")
 include(":agent-fsm")
