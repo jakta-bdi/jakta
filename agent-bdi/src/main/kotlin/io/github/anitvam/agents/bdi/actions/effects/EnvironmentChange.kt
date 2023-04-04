@@ -14,4 +14,6 @@ data class BroadcastMessage(val message: Message) : EnvironmentChange
 
 data class PopMessage(val agentName: String) : EnvironmentChange
 
-// object Act : EnvironmentChange TODO("Serve?")
+data class AddData(val key: String, val value: Any) : EnvironmentChange
+data class RemoveData(val key: String) : EnvironmentChange
+data class UpdateData(val newData: Map<String, Any>) : EnvironmentChange

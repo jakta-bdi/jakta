@@ -9,11 +9,12 @@ import io.github.anitvam.agents.bdi.environment.Environment
 import io.github.anitvam.agents.bdi.messages.MessageQueue
 import io.github.anitvam.agents.bdi.perception.Perception
 
-internal class EnvironmentImpl(
+open class EnvironmentImpl(
     override val externalActions: Map<String, ExternalAction>,
     override val agentIDs: Map<String, AgentID> = emptyMap(),
     override val messageBoxes: Map<AgentID, MessageQueue> = mapOf(),
-    override val perception: Perception,
+    override var perception: Perception,
+    override val data: Map<String, Any> = emptyMap(),
 ) : Environment {
     override fun getNextMessage(agentName: String): Message? = messageBoxes[agentIDs[agentName]]?.lastOrNull()
 
@@ -41,7 +42,7 @@ internal class EnvironmentImpl(
         messageBoxes = messageBoxes.entries.associate { it.key to it.value + message },
     )
 
-    override fun addAgent(agent: Agent) =
+    override fun addAgent(agent: Agent): Environment =
         if (!agentIDs.contains(agent.name)) {
             copy(
                 agentIDs = agentIDs + mapOf(agent.name to agent.agentID),
@@ -49,7 +50,7 @@ internal class EnvironmentImpl(
             )
         } else this
 
-    override fun removeAgent(agentName: String) =
+    override fun removeAgent(agentName: String): Environment =
         if (agentIDs.contains(agentName)) {
             copy(
                 messageBoxes = messageBoxes - agentIDs[agentName]!!,
@@ -59,8 +60,28 @@ internal class EnvironmentImpl(
 
     override fun percept(): BeliefBase = perception.percept()
 
+    override fun addData(key: String, value: Any): Environment = copy(data = data + Pair(key, value))
+
+    override fun removeData(key: String): Environment = copy(data = data - key)
+
+    override fun updateData(newData: Map<String, Any>): Environment = copy(data = newData)
+    override fun copy(
+        agentIDs: Map<String, AgentID>,
+        externalActions: Map<String, ExternalAction>,
+        messageBoxes: Map<AgentID, MessageQueue>,
+        perception: Perception,
+        data: Map<String, Any>
+    ): Environment = EnvironmentImpl(
+        externalActions,
+        agentIDs,
+        messageBoxes,
+        perception,
+        data
+    )
+
     override fun toString(): String = """
         Environment(
+           class=${this.javaClass}
            actions=${externalActions.values},
            agents=${agentIDs.values}, 
            messages=${messageBoxes.keys},
