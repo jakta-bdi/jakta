@@ -82,7 +82,6 @@ class BlocksWorldEnvironment(
         messageBoxes: Map<AgentID, MessageQueue>,
         perception: Perception,
         data: Map<String, Any>
-    ): Environment {
-        return BlocksWorldEnvironment(agentIDs, externalActions, messageBoxes, perception, data)
-    }
+    ): BlocksWorldEnvironment =
+        BlocksWorldEnvironment(agentIDs, externalActions, messageBoxes, perception, data)
 }
