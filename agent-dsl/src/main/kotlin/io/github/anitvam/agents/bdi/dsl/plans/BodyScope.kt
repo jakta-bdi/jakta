@@ -67,5 +67,9 @@ class BodyScope(
         goals += ActInternally.of(struct)
     }
 
+    fun from(goalList: List<Goal>) = goalList.forEach {
+        goals += it
+    }
+
     override fun build(): List<Goal> = goals.toList()
 }
