@@ -38,10 +38,10 @@ fun getPlans(): Iterable<Plan> = plans {
     }
 }
 
-fun getInitialGoals(struct: Struct): List<Goal> {
+fun getPlanBody(solutionGoal: Struct): List<Goal> {
     var list = listOf<Goal>()
     // stack from the bottom of the pile
-    for (s in struct.args.reversed()) {
+    for (s in solutionGoal.args.reversed()) {
         list = list + Achieve.of(Struct.of("move", s.castToStruct().args))
     }
     return list
@@ -50,6 +50,7 @@ fun getInitialGoals(struct: Struct): List<Goal> {
 fun main() {
     val goal: Struct = Struct.of(
         "solve",
+        Struct.of("on", Atom.of("y"), Atom.of("x")),
         Struct.of("on", Atom.of("x"), Atom.of("a")),
         Struct.of("on", Atom.of("a"), Atom.of("b")),
         Struct.of("on", Atom.of("b"), Atom.of("c")),
@@ -76,8 +77,8 @@ fun main() {
             plans(getPlans())
             plans {
                 + achieve(goal) then {
-                    from(getInitialGoals(goal))
-                    iact("print"("End!"))
+                    from(getPlanBody(goal))
+                    iact("print"("Done!"))
                 }
             }
         }
