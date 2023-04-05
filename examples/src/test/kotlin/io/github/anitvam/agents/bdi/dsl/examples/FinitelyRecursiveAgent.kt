@@ -12,7 +12,7 @@ fun main() {
                 + achieve("start"(N, N)) then {
                     iact("print"("Hello World!", N))
                 }
-                + achieve("start"(N, M)) iff { (N lowerThan M) and (S `is` (N + 1)) } then {
+                + achieve("start"(N, M)) onlyIf { (N lowerThan M) and (S `is` (N + 1)) } then {
                     iact("print"("Hello World!", N))
                     achieve("start"(S, M))
                 }

@@ -34,14 +34,14 @@ fun main() {
                 achieve("send_ping")
             }
             plans {
-                + achieve("send_ping") iff {
+                + achieve("send_ping") onlyIf {
                     "turn"("source"("self"), "me") and "other"("source"("self"), R)
                 } then {
                     update("turn"("source"("self"), "other"))
                     achieve("sendMessageTo"("ball", R))
                 }
 
-                + "ball"("source"(R)) iff {
+                + "ball"("source"(R)) onlyIf {
                     "turn"("source"("self"), "other") and "other"("source"("self"), R)
                 } then {
                     update("turn"("source"("self"), "me"))
@@ -62,7 +62,7 @@ fun main() {
                 fact("other"("pinger"))
             }
             plans {
-                + "ball"("source"(S)) iff {
+                + "ball"("source"(S)) onlyIf {
                     "turn"("source"("self"), "other") and "other"("source"("self"), S)
                 } then {
                     update("turn"("source"("self"), "me"))

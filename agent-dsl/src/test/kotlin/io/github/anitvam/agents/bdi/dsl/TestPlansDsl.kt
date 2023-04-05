@@ -29,7 +29,7 @@ class TestPlansDsl : DescribeSpec({
             val p1 = mas {
                 agent("test") {
                     plans {
-                        +achieve("send_ping"(R)) iff { "turn"("source"("self"), "me") } then {
+                        +achieve("send_ping"(R)) onlyIf { "turn"("source"("self"), "me") } then {
                             +"turn"("source"("self"), "other")
                         }
                     }
