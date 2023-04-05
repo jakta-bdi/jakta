@@ -7,6 +7,8 @@ import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.Struct
 
 fun main() {
+    val nAgents = 5
+    val nMessages = 10
     mas {
         environment {
             actions {
@@ -17,13 +19,13 @@ fun main() {
                 }
             }
         }
-        for (i in 1..5) {
-            agent("agent$i") {
+        for (i in 1..nAgents) {
+            agent("ag$i") {
                 beliefs {
-                    if (i == 5) {
-                        fact("receiver"("agent1"))
+                    if (i == nAgents) {
+                        fact("receiver"("ag1"))
                     } else {
-                        fact("receiver"("agent${i + 1}"))
+                        fact("receiver"("ag${i + 1}"))
                     }
                 }
                 if (i == 1) {
@@ -36,13 +38,18 @@ fun main() {
                         "receiver"("source"("self"), R)
                     } then {
                         iact("print"("Starting..."))
-                        act("send"(R, "msg"(1)))
+                        act("send"(R, "count"(1)))
                     }
-                    + "msg"("source"(W), X) iff {
-                        (X notEqualsTo 10) and (M `is` (X + 1)) and "receiver"("source"("self"), R)
+                    + "count"("source"(`_`), X) iff {
+                        (X lowerThan nMessages) and (M `is` (X + 1)) and "receiver"("source"("self"), R)
                     } then {
                         iact("print"("Sending ", M))
-                        act("send"(R, "msg"(M)))
+                        act("send"(R, "count"(M)))
+                    }
+                    + "count"("source"(`_`), X) iff {
+                        X greaterThanOrEqualsTo nMessages
+                    } then {
+                        iact("print"("Done!"))
                     }
                 }
             }
