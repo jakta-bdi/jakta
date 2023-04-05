@@ -34,19 +34,19 @@ fun main() {
                     }
                 }
                 plans {
-                    + achieve("start") iff {
+                    + achieve("start") onlyIf {
                         "receiver"("source"("self"), R)
                     } then {
                         iact("print"("Starting..."))
                         act("send"(R, "count"(1)))
                     }
-                    + "count"("source"(`_`), X) iff {
+                    + "count"("source"(`_`), X) onlyIf {
                         (X lowerThan nMessages) and (M `is` (X + 1)) and "receiver"("source"("self"), R)
                     } then {
                         iact("print"("Sending ", M))
                         act("send"(R, "count"(M)))
                     }
-                    + "count"("source"(`_`), X) iff {
+                    + "count"("source"(`_`), X) onlyIf {
                         X greaterThanOrEqualsTo nMessages
                     } then {
                         iact("print"("Done!"))

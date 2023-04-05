@@ -10,31 +10,31 @@ object PlanFactory {
             achieve("move"(X, Y))
         }
 
-        +achieve("move"(X, Y)) iff {
+        +achieve("move"(X, Y)) onlyIf {
             "on"("source"("percept"), X, Y)
         }
 
-        +achieve("move"(X, Y)) iff {
+        +achieve("move"(X, Y)) onlyIf {
             "clear"("source"("self"), X) and "clear"("source"("self"), Y)
         } then {
             act("move"(X, Y))
         }
 
-        +achieve("move"(X, Y)) iff {
+        +achieve("move"(X, Y)) onlyIf {
             "clear"("source"("self"), X) and "on"("source"("percept"), W, Y)
         } then {
             achieve("move"(W, "table"))
             act("move"(X, Y))
         }
 
-        +achieve("move"(X, Y)) iff {
+        +achieve("move"(X, Y)) onlyIf {
             "on"("source"("percept"), W, X) and "clear"("source"("self"), Y)
         } then {
             achieve("move"(W, "table"))
             act("move"(X, Y))
         }
 
-        +achieve("move"(X, Y)) iff {
+        +achieve("move"(X, Y)) onlyIf {
             "on"("source"("percept"), W, X) and "on"("source"("percept"), V, Y)
         } then {
             achieve("move"(W, "table"))
@@ -53,17 +53,17 @@ object PlanFactory {
             act("move"(X, Y))
         }
 
-        +achieve("free"(X)) iff {
+        +achieve("free"(X)) onlyIf {
             "clear"("source"("self"), X)
         }
 
-        +achieve("free"(X)) iff {
+        +achieve("free"(X)) onlyIf {
             "on"("source"("percept"), Y, X) and "clear"("source"("self"), Y)
         } then {
             act("move"(Y, "table"))
         }
 
-        +achieve("free"(X)) iff {
+        +achieve("free"(X)) onlyIf {
             "on"("source"("percept"), Y, X) and not("clear"("source"("self"), Y))
         } then {
             achieve("free"(Y))

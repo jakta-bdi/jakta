@@ -21,7 +21,7 @@ fun main() {
                 achieve("eat"("ice-cream"))
             }
             plans {
-                + achieve("eat"("ice-cream")) iff { "good"("source"("self"), "ice-cream") } then {
+                + achieve("eat"("ice-cream")) onlyIf { "good"("source"("self"), "ice-cream") } then {
                     act("pluto"("YUMMY!"))
                 }
             }

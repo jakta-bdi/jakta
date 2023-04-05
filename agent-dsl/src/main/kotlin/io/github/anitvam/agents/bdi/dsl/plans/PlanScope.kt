@@ -23,7 +23,7 @@ data class PlanScope(
     private var goals: List<Goal> = mutableListOf()
     var failure: Boolean = false
 
-    infix fun iff(guards: GuardScope.() -> Struct): PlanScope {
+    infix fun onlyIf(guards: GuardScope.() -> Struct): PlanScope {
         guard = GuardScope(scope).let(guards)
         guard = guard.accept(Prolog2Jacop).castToStruct()
         return this

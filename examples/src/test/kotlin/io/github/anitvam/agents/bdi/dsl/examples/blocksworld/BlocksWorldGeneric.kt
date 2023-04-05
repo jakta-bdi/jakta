@@ -9,27 +9,27 @@ import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.Struct
 
 fun getPlans(): Iterable<Plan> = plans {
-    + achieve("move"(X, Y)) iff {
+    + achieve("move"(X, Y)) onlyIf {
         "on"("source"("percept"), X, Y)
     }
-    + achieve("move"(X, Y)) iff {
+    + achieve("move"(X, Y)) onlyIf {
         "clear"("source"("self"), X) and "clear"("source"("self"), Y)
     } then {
         act("move"(X, Y))
     }
-    + achieve("move"(X, Y)) iff {
+    + achieve("move"(X, Y)) onlyIf {
         "clear"("source"("self"), X) and "on"("source"("percept"), W, Y)
     } then {
         achieve("move"(W, "table"))
         act("move"(X, Y))
     }
-    + achieve("move"(X, Y)) iff {
+    + achieve("move"(X, Y)) onlyIf {
         "on"("source"("percept"), W, X) and "clear"("source"("self"), Y)
     } then {
         achieve("move"(W, "table"))
         act("move"(X, Y))
     }
-    + achieve("move"(X, Y)) iff {
+    + achieve("move"(X, Y)) onlyIf {
         "on"("source"("percept"), W, X) and "on"("source"("percept"), V, Y)
     } then {
         achieve("move"(W, "table"))
