@@ -64,17 +64,15 @@ class BlocksWorldEnvironment(
         return copy(data = updatedData)
     }
 
-    override fun percept(): BeliefBase {
-        val towers = getTableState()
-        var bb: List<Belief> = emptyList()
-        for (tower in towers) {
-            for ((up, down) in tower.zipWithNext()) {
-                bb = bb + Belief.fromPerceptSource(Struct.of("on", Atom.of(up), Atom.of(down)))
+    override fun percept() = BeliefBase.of(
+        getTableState().flatMap { tower ->
+            val stack = tower.zipWithNext().map { (above, below) ->
+                Belief.fromPerceptSource(Struct.of("on", Atom.of(above), Atom.of(below)))
             }
-            bb = bb + Belief.fromPerceptSource(Struct.of("on", Atom.of(tower.last()), Atom.of("table")))
+            val top = Belief.fromPerceptSource(Struct.of("on", Atom.of(tower.last()), Atom.of("table")))
+            stack + top
         }
-        return BeliefBase.of(bb)
-    }
+    )
 
     override fun copy(
         agentIDs: Map<String, AgentID>,
