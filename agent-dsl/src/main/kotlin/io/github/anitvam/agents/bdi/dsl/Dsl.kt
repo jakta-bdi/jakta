@@ -12,6 +12,10 @@ import io.github.anitvam.agents.bdi.plans.Plan
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Term
 
+@DslMarker
+annotation class JaktaDSL
+
+@JaktaDSL
 fun mas(f: MasScope.() -> Unit): Mas =
     MasScope().also(f).build()
 fun internalAction(name: String, arity: Int, f: InternalActionScope.() -> Unit) =
@@ -20,6 +24,7 @@ fun internalAction(name: String, arity: Int, f: InternalActionScope.() -> Unit) 
 fun externalAction(name: String, arity: Int, f: ExternalActionScope.() -> Unit) =
     ExternalActionsScope().newAction(name, arity, f)
 
+@JaktaDSL
 fun environment(f: EnvironmentScope.() -> Unit): Environment {
     return EnvironmentScope().also(f).build()
 }

@@ -19,20 +19,14 @@ fun main() {
                 }
             }
         }
-        for (i in 1..nAgents) {
-            agent("ag$i") {
+
+        repeat(nAgents) {id ->
+            agent("ag$id") {
                 beliefs {
-                    if (i == nAgents) {
-                        fact("receiver"("ag1"))
-                    } else {
-                        fact("receiver"("ag${i + 1}"))
-                    }
+                    if (id == (nAgents - 1)) fact("receiver"("ag0"))
+                    else fact("receiver"("ag${id + 1}"))
                 }
-                if (i == 1) {
-                    goals {
-                        achieve("start")
-                    }
-                }
+                if (id == 0) goals { achieve("start") }
                 plans {
                     + achieve("start") onlyIf {
                         "receiver"("source"("self"), R)
@@ -56,3 +50,4 @@ fun main() {
         }
     }.start()
 }
+
