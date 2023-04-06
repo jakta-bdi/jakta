@@ -6,6 +6,7 @@ import io.github.anitvam.agents.bdi.dsl.environment.EnvironmentScope
 import io.github.anitvam.agents.bdi.environment.Environment
 import io.github.anitvam.agents.bdi.executionstrategies.ExecutionStrategy
 
+@JaktaDSL
 class MasScope : Builder<Mas> {
     var env: Environment = Environment.of()
     var agents: List<Agent> = emptyList()

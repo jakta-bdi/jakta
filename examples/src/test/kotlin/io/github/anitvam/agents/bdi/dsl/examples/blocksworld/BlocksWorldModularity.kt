@@ -1,5 +1,6 @@
 package io.github.anitvam.agents.bdi.dsl.examples.blocksworld
 
+import io.github.anitvam.agents.bdi.dsl.environment
 import io.github.anitvam.agents.bdi.dsl.mas
 import it.unibo.tuprolog.core.Atom
 
@@ -19,6 +20,7 @@ fun main() {
             beliefs {
                 rule("clear"(X) impliedBy (not("on"("source"("percept"), `_`, X)) or "table"))
             }
+
             goals {
                 achieve("solve"("on"("a", "b"), "on"("b", "c"), "on"("c", "table")))
             }
