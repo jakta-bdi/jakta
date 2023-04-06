@@ -6,6 +6,7 @@ import io.github.anitvam.agents.bdi.actions.ActionResponse
 import io.github.anitvam.agents.bdi.actions.effects.SideEffect
 import io.github.anitvam.agents.bdi.dsl.Builder
 import it.unibo.tuprolog.core.Term
+import kotlin.reflect.KFunction
 import kotlin.reflect.KProperty
 
 abstract class ActionsScope<C, Res, Req, A, As> : Builder<Map<String, A>> where
@@ -19,6 +20,12 @@ abstract class ActionsScope<C, Res, Req, A, As> : Builder<Map<String, A>> where
 
     fun action(name: String, arity: Int, f: As.() -> Unit) {
         actions += newAction(name, arity, f)
+    }
+
+    fun action(method: KFunction<*>) {
+        actions += newAction(method.name, method.parameters.size) {
+            method.call(*arguments.toTypedArray())
+        }
     }
 
     fun action(action: A) {
