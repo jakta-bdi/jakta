@@ -38,13 +38,8 @@ fun getPlans(): Iterable<Plan> = plans {
     }
 }
 
-fun getPlanBody(solutionGoal: Struct): List<Goal> {
-    var list = listOf<Goal>()
-    // stack from the bottom of the pile
-    for (s in solutionGoal.args.reversed()) {
-        list = list + Achieve.of(Struct.of("move", s.castToStruct().args))
-    }
-    return list
+fun getPlanBody(solutionGoal: Struct): List<Goal> = solutionGoal.args.reversed().map { solution ->
+    Achieve.of(Struct.of("move", solution.castToStruct().args))
 }
 
 fun main() {
