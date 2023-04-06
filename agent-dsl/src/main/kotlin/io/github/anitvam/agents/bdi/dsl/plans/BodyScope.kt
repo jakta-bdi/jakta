@@ -14,6 +14,7 @@ import io.github.anitvam.agents.bdi.goals.UpdateBelief
 import it.unibo.tuprolog.core.Scope
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.dsl.LogicProgrammingScope
+import kotlin.reflect.KFunction
 
 class BodyScope(
     private val scope: Scope
@@ -59,6 +60,11 @@ class BodyScope(
 
     fun act(struct: Struct) {
         goals += Act.of(struct)
+    }
+
+    fun act(method: KFunction<*>, vararg args: Any) = when {
+        method.parameters.isEmpty() -> act(method.name)
+        else -> act(method.name.invoke(args[0], *args.drop(1).toTypedArray()))
     }
 
     fun iact(struct: String) = iact(atomOf(struct))
