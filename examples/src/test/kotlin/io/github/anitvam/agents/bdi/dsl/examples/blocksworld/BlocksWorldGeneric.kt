@@ -7,27 +7,44 @@ import io.github.anitvam.agents.bdi.goals.Goal
 import io.github.anitvam.agents.bdi.plans.Plan
 import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.Struct
+import it.unibo.tuprolog.dsl.lp
+import it.unibo.tuprolog.dsl.LogicProgrammingScope
+import io.github.anitvam.agents.bdi.dsl.examples.blocksworld.BlocksWorldLiterals.on
+import io.github.anitvam.agents.bdi.dsl.examples.blocksworld.BlocksWorldLiterals.source
+import io.github.anitvam.agents.bdi.dsl.examples.blocksworld.BlocksWorldLiterals.percept
+import io.github.anitvam.agents.bdi.dsl.examples.blocksworld.BlocksWorldLiterals.self
+import io.github.anitvam.agents.bdi.dsl.examples.blocksworld.BlocksWorldLiterals.move
+import io.github.anitvam.agents.bdi.dsl.examples.blocksworld.BlocksWorldLiterals.solve
+import io.github.anitvam.agents.bdi.dsl.examples.blocksworld.BlocksWorldLiterals.clear
+import io.github.anitvam.agents.bdi.dsl.examples.blocksworld.BlocksWorldLiterals.a
+import io.github.anitvam.agents.bdi.dsl.examples.blocksworld.BlocksWorldLiterals.b
+import io.github.anitvam.agents.bdi.dsl.examples.blocksworld.BlocksWorldLiterals.c
+import io.github.anitvam.agents.bdi.dsl.examples.blocksworld.BlocksWorldLiterals.x
+import io.github.anitvam.agents.bdi.dsl.examples.blocksworld.BlocksWorldLiterals.y
+import io.github.anitvam.agents.bdi.dsl.examples.blocksworld.BlocksWorldLiterals.z
+import io.github.anitvam.agents.bdi.dsl.examples.blocksworld.BlocksWorldLiterals.table
+
 
 fun getPlans(): Iterable<Plan> = plans {
-    + achieve("move"(X, Y)) onlyIf {
-        "on"("source"("percept"), X, Y)
+    + achieve(move(X, Y)) onlyIf {
+        on(source(percept), X, Y)
     }
-    + achieve("move"(X, Y)) onlyIf {
-        "clear"("source"("self"), X) and "clear"("source"("self"), Y)
+    + achieve(move(X, Y)) onlyIf {
+        clear(source(self), X) and clear(source(self), Y)
     } then {
-        act("move"(X, Y))
+        act(move(X, Y))
     }
-    + achieve("move"(X, Y)) onlyIf {
-        "clear"("source"("self"), X) and "on"("source"("percept"), W, Y)
+    + achieve(move(X, Y)) onlyIf {
+        clear(source(self), X) and on(source(percept), W, Y)
     } then {
-        achieve("move"(W, "table"))
-        act("move"(X, Y))
+        achieve(move(W, "table"))
+        act(move(X, Y))
     }
-    + achieve("move"(X, Y)) onlyIf {
-        "on"("source"("percept"), W, X) and "clear"("source"("self"), Y)
+    + achieve(move(X, Y)) onlyIf {
+        on(source(percept), W, X) and clear(source(self), Y)
     } then {
-        achieve("move"(W, "table"))
-        act("move"(X, Y))
+        achieve(move(W, table))
+        act(move(X, Y))
     }
     + achieve("move"(X, Y)) onlyIf {
         "on"("source"("percept"), W, X) and "on"("source"("percept"), V, Y)
@@ -43,14 +60,9 @@ fun getPlanBody(solutionGoal: Struct): List<Goal> = solutionGoal.args.reversed()
 }
 
 fun main() {
-    val goal: Struct = Struct.of(
-        "solve",
-        Struct.of("on", Atom.of("y"), Atom.of("x")),
-        Struct.of("on", Atom.of("x"), Atom.of("a")),
-        Struct.of("on", Atom.of("a"), Atom.of("b")),
-        Struct.of("on", Atom.of("b"), Atom.of("c")),
-        Struct.of("on", Atom.of("c"), Atom.of("table")),
-    )
+    val goal: Struct = lp {
+        solve(on(y, x), on(x, a), on(a, b), on(b, c), on(c, table))
+    }
     mas {
         environment {
             from(BlocksWorldEnvironment())
