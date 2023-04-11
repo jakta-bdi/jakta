@@ -9,8 +9,8 @@ import it.unibo.tuprolog.core.Term
 import kotlin.reflect.KFunction
 import kotlin.reflect.KProperty
 
-abstract class ActionsScope<C, Res, Req, A, As> : Builder<Map<String, A>> where
-    C : SideEffect,
+abstract class ActionsScope<C, Res, Req, A, As> : Builder<Map<String, A>>
+    where C : SideEffect,
     Res : ActionResponse<C>,
     Req : ActionRequest<C, Res>,
     A : Action<C, Res, Req>,
