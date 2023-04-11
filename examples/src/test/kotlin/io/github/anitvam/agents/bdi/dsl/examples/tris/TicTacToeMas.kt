@@ -45,11 +45,11 @@ fun ticTacToe(n: Int = 3) = mas {
         goals { achieve("turn"("self")) }
         plans {
             + achieve("turn"("self")) onlyIf {
-                "aligned"(listOf(cell(symbol="x"), cell(symbol="x"), cell(symbol="x")))
+                "aligned"((1..n).map { cell(symbol = "x") })
             } then {
                 iact("print"("I won!"))
             }
-            for (winningLine in allDistinctPermutationsOf(cell(X, Y, "e"), cell(symbol = "x"), n-1)) {
+            for (winningLine in allDistinctPermutationsOf(cell(X, Y, "e"), cell(symbol = "x"), n - 1)) {
                 + achieve("turn"("self")) onlyIf {"aligned"(winningLine) } then {
                     act("put"(X, Y, "x"))
                 }
@@ -64,7 +64,7 @@ fun ticTacToe(n: Int = 3) = mas {
 }
 
 fun main() {
-    val system = ticTacToe(4)
+    val system = ticTacToe(5)
     for (agent in system.agents) {
         println("% ${agent.name}")
         for (plan in agent.context.planLibrary.plans) {
