@@ -11,23 +11,23 @@ import io.github.anitvam.agents.bdi.executionstrategies.ExecutionStrategy
 fun main() {
     val env = Environment.of()
 
-    val start = Jacop.parseStruct("start(0, 10)")
+    val start = Jakta.parseStruct("start(0, 10)")
     val alice = Agent.of(
         name = "alice",
         events = listOf(Event.ofAchievementGoalInvocation(Achieve.of(start))),
         planLibrary = PlanLibrary.of(
             Plan.ofAchievementGoalInvocation(
-                value = Jacop.parseStruct("start(N, N)"),
+                value = Jakta.parseStruct("start(N, N)"),
                 goals = listOf(
-                    ActInternally.of(Jacop.parseStruct("print(\"hello world\", N)")),
+                    ActInternally.of(Jakta.parseStruct("print(\"hello world\", N)")),
                 ),
             ),
             Plan.ofAchievementGoalInvocation(
-                value = Jacop.parseStruct("start(N, M)"),
-                guard = Jacop.parseStruct("N < M & S is N + 1"),
+                value = Jakta.parseStruct("start(N, M)"),
+                guard = Jakta.parseStruct("N < M & S is N + 1"),
                 goals = listOf(
-                    ActInternally.of(Jacop.parseStruct("print(\"hello world\", N)")),
-                    Achieve.of(Jacop.parseStruct("start(S, M)")),
+                    ActInternally.of(Jakta.parseStruct("print(\"hello world\", N)")),
+                    Achieve.of(Jakta.parseStruct("start(S, M)")),
                 ),
             ),
         ),
@@ -40,7 +40,7 @@ fun main() {
             Plan.ofAchievementGoalInvocation(
                 value = start,
                 goals = listOf(
-                    ActInternally.of(Jacop.parseStruct("print('Hello, my name is Bob')")),
+                    ActInternally.of(Jakta.parseStruct("print('Hello, my name is Bob')")),
                 ),
             ),
         ),

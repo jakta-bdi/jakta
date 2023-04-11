@@ -11,19 +11,19 @@ import io.github.anitvam.agents.bdi.plans.Plan
 import io.github.anitvam.agents.bdi.plans.PlanLibrary
 
 fun main() {
-    val start = Jacop.parseStruct("start")
+    val start = Jakta.parseStruct("start")
     val sleepingAgent = Agent.of(
         name = "Sleeping Agent",
-        beliefBase = BeliefBase.of(Belief.fromSelfSource(Jacop.parseStruct("run"))),
+        beliefBase = BeliefBase.of(Belief.fromSelfSource(Jakta.parseStruct("run"))),
         events = listOf(Event.ofAchievementGoalInvocation(Achieve.of(start))),
         planLibrary = PlanLibrary.of(
             Plan.ofAchievementGoalInvocation(
-                value = Jacop.parseStruct("start"),
+                value = Jakta.parseStruct("start"),
                 goals = listOf(
-                    ActInternally.of(Jacop.parseStruct("print(\"Before Sleep\")")),
-                    ActInternally.of(Jacop.parseStruct("sleep(5000)")),
-                    ActInternally.of(Jacop.parseStruct("print(\"After Sleep\")")),
-                    ActInternally.of(Jacop.parseStruct("stop")),
+                    ActInternally.of(Jakta.parseStruct("print(\"Before Sleep\")")),
+                    ActInternally.of(Jakta.parseStruct("sleep(5000)")),
+                    ActInternally.of(Jakta.parseStruct("print(\"After Sleep\")")),
+                    ActInternally.of(Jakta.parseStruct("stop")),
                 ),
             ),
         ),
