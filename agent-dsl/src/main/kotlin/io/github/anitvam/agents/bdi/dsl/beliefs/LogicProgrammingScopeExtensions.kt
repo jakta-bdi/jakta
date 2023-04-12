@@ -5,7 +5,7 @@ import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.dsl.LogicProgrammingScope
 
 context(LogicProgrammingScope)
-fun Struct.source(name: String): Struct = addFirst(Atom.of(name))
+fun Struct.source(name: String): Struct = addFirst(Struct.of("source", Atom.of(name)))
 
 context(LogicProgrammingScope)
 val Struct.selfSourced

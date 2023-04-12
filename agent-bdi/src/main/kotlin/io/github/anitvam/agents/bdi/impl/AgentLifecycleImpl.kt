@@ -300,7 +300,6 @@ internal data class AgentLifecycleImpl(
                 }
             }
         }
-
         // STEP5: Selecting an Event.
         val selectedEvent = selectEvent(newEvents)
         var newIntentionPool = agent.context.intentions
