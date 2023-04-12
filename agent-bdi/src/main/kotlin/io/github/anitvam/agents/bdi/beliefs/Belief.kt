@@ -71,7 +71,7 @@ interface Belief {
             ) {
                 return BeliefImpl(rule)
             }
-            throw IllegalArgumentException("The rule is not a belief.")
+            throw IllegalArgumentException("The rule is not a belief: $rule")
         }
 
         fun from(struct: Struct): Belief = from(Rule.of(struct))

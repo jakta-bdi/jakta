@@ -14,25 +14,25 @@ fun main() {
 
     val env = Environment.of()
 
-    val start = Jacop.parseStruct("start(0, 10)")
+    val start = Jakta.parseStruct("start(0, 10)")
 
     val alice = Agent.of(
         name = "alice",
-        beliefBase = BeliefBase.of(listOf(Belief.fromSelfSource(Jacop.parseStruct("run")))),
+        beliefBase = BeliefBase.of(listOf(Belief.fromSelfSource(Jakta.parseStruct("run")))),
         events = listOf(Event.ofAchievementGoalInvocation(Achieve.of(start))),
         planLibrary = PlanLibrary.of(
             Plan.ofAchievementGoalInvocation(
-                value = Jacop.parseStruct("start(S, S)"),
+                value = Jakta.parseStruct("start(S, S)"),
                 goals = listOf(
-                    ActInternally.of(Jacop.parseStruct("print(\"hello world\", S)")),
+                    ActInternally.of(Jakta.parseStruct("print(\"hello world\", S)")),
                 ),
             ),
             Plan.ofAchievementGoalInvocation(
-                value = Jacop.parseStruct("start(S, M)"),
-                guard = Jacop.parseStruct("S < M & N is S + 1"),
+                value = Jakta.parseStruct("start(S, M)"),
+                guard = Jakta.parseStruct("S < M & N is S + 1"),
                 goals = listOf(
-                    ActInternally.of(Jacop.parseStruct("print(\"hello world\", S)")),
-                    Achieve.of(Jacop.parseStruct("start(N, M)")),
+                    ActInternally.of(Jakta.parseStruct("print(\"hello world\", S)")),
+                    Achieve.of(Jakta.parseStruct("start(N, M)")),
                 ),
             ),
         ),

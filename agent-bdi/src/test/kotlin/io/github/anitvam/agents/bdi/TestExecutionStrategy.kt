@@ -14,13 +14,13 @@ fun main() {
     val alice = Agent.of(
         name = "Alice",
         events = listOf(
-            Event.ofAchievementGoalInvocation(Achieve.of(Jacop.parseStruct("my_thread")))
+            Event.ofAchievementGoalInvocation(Achieve.of(Jakta.parseStruct("my_thread")))
         ),
         planLibrary = PlanLibrary.of(
             Plan.ofAchievementGoalInvocation(
-                value = Jacop.parseStruct("my_thread"),
+                value = Jakta.parseStruct("my_thread"),
                 goals = listOf(
-                    ActInternally.of(Jacop.parseStruct("thread"))
+                    ActInternally.of(Jakta.parseStruct("thread"))
                 )
             )
         ),

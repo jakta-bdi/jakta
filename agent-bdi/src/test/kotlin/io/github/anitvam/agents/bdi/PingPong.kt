@@ -40,38 +40,38 @@ fun main() {
     )
 
     val sendPlan = Plan.ofAchievementGoalInvocation(
-        value = Jacop.parseStruct("sendMessageTo(Message, Receiver)"),
+        value = Jakta.parseStruct("sendMessageTo(Message, Receiver)"),
         goals = listOf(
-            ActInternally.of(Jacop.parseStruct("print(\"Sending \", Message)")),
-            Act.of(Jacop.parseStruct("send(Receiver, tell, Message)")),
+            ActInternally.of(Jakta.parseStruct("print(\"Sending \", Message)")),
+            Act.of(Jakta.parseStruct("send(Receiver, tell, Message)")),
         ),
     )
 
     val pinger = Agent.of(
         name = "pinger",
         beliefBase = BeliefBase.of(
-            Belief.fromSelfSource(Jacop.parseStruct("turn(me)")),
-            Belief.fromSelfSource(Jacop.parseStruct("other(ponger)")),
+            Belief.fromSelfSource(Jakta.parseStruct("turn(me)")),
+            Belief.fromSelfSource(Jakta.parseStruct("other(ponger)")),
         ),
-        events = listOf(Event.ofAchievementGoalInvocation(Achieve.of(Jacop.parseStruct("send_ping")))),
+        events = listOf(Event.ofAchievementGoalInvocation(Achieve.of(Jakta.parseStruct("send_ping")))),
 
         planLibrary = PlanLibrary.of(
             Plan.ofAchievementGoalInvocation(
-                value = Jacop.parseStruct("send_ping"),
-                guard = Jacop.parseStruct("turn(source(self), me) & other(source(self), Receiver)"),
+                value = Jakta.parseStruct("send_ping"),
+                guard = Jakta.parseStruct("turn(source(self), me) & other(source(self), Receiver)"),
                 goals = listOf(
-                    UpdateBelief.of(Belief.fromSelfSource(Jacop.parseStruct("turn(other)"))),
-                    Achieve.of(Jacop.parseStruct("sendMessageTo(ball, Receiver)")),
+                    UpdateBelief.of(Belief.fromSelfSource(Jakta.parseStruct("turn(other)"))),
+                    Achieve.of(Jakta.parseStruct("sendMessageTo(ball, Receiver)")),
                 ),
             ),
             Plan.ofBeliefBaseAddition(
-                belief = Belief.from(Jacop.parseStruct("ball(source(Sender))")),
-                guard = Jacop.parseStruct("turn(source(self), other) & other(source(self), Sender)"),
+                belief = Belief.from(Jakta.parseStruct("ball(source(Sender))")),
+                guard = Jakta.parseStruct("turn(source(self), other) & other(source(self), Sender)"),
                 goals = listOf(
-                    UpdateBelief.of(Belief.fromSelfSource(Jacop.parseStruct("turn(me)"))),
-                    ActInternally.of(Jacop.parseStruct("print(\"Received ball from\", Sender)")),
-                    RemoveBelief.of(Belief.from(Jacop.parseStruct("ball(source(Sender))"))),
-                    ActInternally.of(Jacop.parseStruct("print(\"Pinger hasDone\")")),
+                    UpdateBelief.of(Belief.fromSelfSource(Jakta.parseStruct("turn(me)"))),
+                    ActInternally.of(Jakta.parseStruct("print(\"Received ball from\", Sender)")),
+                    RemoveBelief.of(Belief.from(Jakta.parseStruct("ball(source(Sender))"))),
+                    ActInternally.of(Jakta.parseStruct("print(\"Pinger hasDone\")")),
                 ),
             ),
             sendPlan,
@@ -82,26 +82,26 @@ fun main() {
     val ponger = Agent.of(
         name = "ponger",
         beliefBase = BeliefBase.of(
-            Belief.fromSelfSource(Jacop.parseStruct("turn(other)")),
-            Belief.fromSelfSource(Jacop.parseStruct("other(pinger)")),
+            Belief.fromSelfSource(Jakta.parseStruct("turn(other)")),
+            Belief.fromSelfSource(Jakta.parseStruct("other(pinger)")),
         ),
         planLibrary = PlanLibrary.of(
             Plan.ofBeliefBaseAddition(
-                belief = Belief.from(Jacop.parseStruct("ball(source(Sender))")),
-                guard = Jacop.parseStruct("turn(source(self), other) & other(source(self), Sender)"),
+                belief = Belief.from(Jakta.parseStruct("ball(source(Sender))")),
+                guard = Jakta.parseStruct("turn(source(self), other) & other(source(self), Sender)"),
                 goals = listOf(
-                    UpdateBelief.of(Belief.fromSelfSource(Jacop.parseStruct("turn(me)"))),
-                    RemoveBelief.of(Belief.from(Jacop.parseStruct("ball(source(Sender))"))),
-                    ActInternally.of(Jacop.parseStruct("print(\"Received ball from\", Sender)")),
-                    Achieve.of(Jacop.parseStruct("sendMessageTo(ball, Sender)")),
-                    Achieve.of(Jacop.parseStruct("handle_ping")),
+                    UpdateBelief.of(Belief.fromSelfSource(Jakta.parseStruct("turn(me)"))),
+                    RemoveBelief.of(Belief.from(Jakta.parseStruct("ball(source(Sender))"))),
+                    ActInternally.of(Jakta.parseStruct("print(\"Received ball from\", Sender)")),
+                    Achieve.of(Jakta.parseStruct("sendMessageTo(ball, Sender)")),
+                    Achieve.of(Jakta.parseStruct("handle_ping")),
                 ),
             ),
             Plan.ofAchievementGoalInvocation(
-                value = Jacop.parseStruct("handle_ping"),
+                value = Jakta.parseStruct("handle_ping"),
                 goals = listOf(
-                    UpdateBelief.of(Belief.fromSelfSource(Jacop.parseStruct("turn(other)"))),
-                    ActInternally.of(Jacop.parseStruct("print(\"Ponger has Done\")")),
+                    UpdateBelief.of(Belief.fromSelfSource(Jakta.parseStruct("turn(other)"))),
+                    ActInternally.of(Jakta.parseStruct("print(\"Ponger has Done\")")),
                 ),
             ),
             sendPlan,

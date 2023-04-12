@@ -61,10 +61,10 @@ class TestPlans : DescribeSpec({
 fun main() {
 
     val operatorExtension = Theory.of(
-        Jacop.parseClause("&(A, B) :- A, B"),
-        Jacop.parseClause("|(A, _) :- A"),
-        Jacop.parseClause("|(_, B) :- B"),
-        Jacop.parseClause("~(X) :- not(X)"),
+        Jakta.parseClause("&(A, B) :- A, B"),
+        Jakta.parseClause("|(A, _) :- A"),
+        Jakta.parseClause("|(_, B) :- B"),
+        Jakta.parseClause("~(X) :- not(X)"),
     )
     val solver = Solver.prolog.newBuilder()
         .staticKb(operatorExtension)
