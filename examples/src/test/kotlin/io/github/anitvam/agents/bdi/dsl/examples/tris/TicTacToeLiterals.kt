@@ -11,6 +11,9 @@ object TicTacToeLiterals {
         symbol: Any
     ) = structOf("cell", x.toTerm(), y.toTerm(), symbol.toTerm())
 
-    fun allDistinctPermutationsOf(cell: Struct, other: Struct, repetitions: Int): Sequence<List<Struct>> =
-        ((1..repetitions).map { other } + cell).permutations().distinct()
+    fun allDistinctPermutationsOf(cell: Struct, other: Struct, otherRepetitions: Int): Sequence<List<Struct>> =
+        ((1..otherRepetitions).map { other } + cell).permutations().distinct()
+
+    fun allDistinctPermutationsOf(cell: Struct, vararg others: Struct): Sequence<List<Struct>> =
+        (others.asList() + cell).permutations().distinct()
 }
