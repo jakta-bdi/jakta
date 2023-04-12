@@ -37,5 +37,6 @@ fun collatzMas(number: Int) = mas {
 }
 
 fun main() {
-    collatzMas(10).start()
+    println("Starting Collatz Conjecture verification for 33...")
+    collatzMas(33).start()
 }
