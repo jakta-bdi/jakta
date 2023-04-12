@@ -22,8 +22,14 @@ class GridEnvironment(
 ) : EnvironmentImpl(externalActions, agentIDs, messageBoxes, perception, data) {
 
     companion object {
-        internal fun createGrid(n: Int): Array<CharArray> =
+        internal fun createGrid(n: Int): Array<CharArray> {
             Array(n) { CharArray(n) { 'e' } }
+            return arrayOf(
+                charArrayOf('e', 'e', 'e'),
+                charArrayOf('x', 'x', 'e'),
+                charArrayOf('e', 'e', 'e')
+            )
+        }
 
         internal fun Array<CharArray>.copy() =
             Array(size) { i -> CharArray(this[i].size) { j -> this[i][j] } }
