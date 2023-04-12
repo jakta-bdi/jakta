@@ -12,4 +12,7 @@ interface ExternalAction : Action<EnvironmentChange, ExternalResponse, ExternalR
     fun addData(key: String, value: Any)
     fun removeData(key: String)
     fun updateData(newData: Map<String, Any>)
+
+    fun updateData(keyValue: Pair<String, Any>, vararg others: Pair<String, Any>) =
+        updateData(mapOf(keyValue, *others))
 }

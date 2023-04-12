@@ -1,6 +1,6 @@
 package io.github.anitvam.agents.bdi.beliefs.impl
 
-import io.github.anitvam.agents.bdi.Jacop
+import io.github.anitvam.agents.bdi.Jakta
 import io.github.anitvam.agents.bdi.beliefs.BeliefBase
 import io.github.anitvam.agents.bdi.beliefs.Belief
 import io.github.anitvam.agents.bdi.beliefs.BeliefUpdate
@@ -19,10 +19,10 @@ internal class BeliefBaseImpl private constructor(private val beliefs: ClauseMul
     constructor() : this(ClauseMultiSet.empty(Unificator.default))
 
     private val operatorExtension = Theory.of(
-        Jacop.parseClause("&(A, B) :- A, B"),
-        Jacop.parseClause("|(A, _) :- A"),
-        Jacop.parseClause("|(_, B) :- B"),
-        Jacop.parseClause("~(X) :- not(X)"),
+        Jakta.parseClause("&(A, B) :- A, B"),
+        Jakta.parseClause("|(A, _) :- A"),
+        Jakta.parseClause("|(_, B) :- B"),
+        Jakta.parseClause("~(X) :- not(X)"),
     )
 
     override fun add(belief: Belief) = when (beliefs.count(belief.rule)) {

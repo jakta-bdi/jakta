@@ -22,14 +22,14 @@ fun main() {
         }
     }
     val alice = Agent.of(
-        events = listOf(Event.ofAchievementGoalInvocation(Achieve.of(Jacop.parseStruct("time")))),
+        events = listOf(Event.ofAchievementGoalInvocation(Achieve.of(Jakta.parseStruct("time")))),
         internalActions = InternalActions.default() + (dummyAction.signature.name to dummyAction),
         planLibrary = PlanLibrary.of(
             Plan.ofAchievementGoalInvocation(
-                value = Jacop.parseStruct("time"),
+                value = Jakta.parseStruct("time"),
                 goals = listOf(
-                    ActInternally.of(Jacop.parseStruct("time")),
-                    Achieve.of(Jacop.parseStruct("time"))
+                    ActInternally.of(Jakta.parseStruct("time")),
+                    Achieve.of(Jakta.parseStruct("time"))
                 ),
             ),
         ),

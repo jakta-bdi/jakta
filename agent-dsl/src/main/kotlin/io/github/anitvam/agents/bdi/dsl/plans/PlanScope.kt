@@ -1,6 +1,6 @@
 package io.github.anitvam.agents.bdi.dsl.plans
 
-import io.github.anitvam.agents.bdi.Prolog2Jacop
+import io.github.anitvam.agents.bdi.Prolog2Jakta
 import io.github.anitvam.agents.bdi.beliefs.Belief
 import io.github.anitvam.agents.bdi.events.AchievementGoalTrigger
 import io.github.anitvam.agents.bdi.events.BeliefBaseRevision
@@ -25,7 +25,7 @@ data class PlanScope(
 
     infix fun onlyIf(guards: GuardScope.() -> Struct): PlanScope {
         guard = GuardScope(scope).let(guards)
-        guard = guard.accept(Prolog2Jacop).castToStruct()
+        guard = guard.accept(Prolog2Jakta).castToStruct()
         return this
     }
 

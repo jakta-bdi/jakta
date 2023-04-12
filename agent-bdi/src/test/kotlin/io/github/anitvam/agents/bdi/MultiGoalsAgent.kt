@@ -14,28 +14,28 @@ fun main() {
     val agent = Agent.of(
         name = "agent",
         events = listOf(
-            Event.of(AchievementGoalInvocation(Jacop.parseStruct("count(0, 10, up)"))),
-            Event.of(AchievementGoalInvocation(Jacop.parseStruct("count(100, 90, down)"))),
+            Event.of(AchievementGoalInvocation(Jakta.parseStruct("count(0, 10, up)"))),
+            Event.of(AchievementGoalInvocation(Jakta.parseStruct("count(100, 90, down)"))),
         ),
         planLibrary = PlanLibrary.of(
             Plan.ofAchievementGoalInvocation(
-                value = Jacop.parseStruct("count(N, N, Dir)"),
-                goals = listOf(ActInternally.of(Jacop.parseStruct("print(\"End of\", Dir)")))
+                value = Jakta.parseStruct("count(N, N, Dir)"),
+                goals = listOf(ActInternally.of(Jakta.parseStruct("print(\"End of\", Dir)")))
             ),
             Plan.ofAchievementGoalInvocation(
-                value = Jacop.parseStruct("count(N, M, up)"),
-                guard = Jacop.parseStruct("N < M & S is N + 1"),
+                value = Jakta.parseStruct("count(N, M, up)"),
+                guard = Jakta.parseStruct("N < M & S is N + 1"),
                 goals = listOf(
-                    ActInternally.of(Jacop.parseStruct("print(\"Up\", N)")),
-                    Achieve.of(Jacop.parseStruct("count(S, M, up)")),
+                    ActInternally.of(Jakta.parseStruct("print(\"Up\", N)")),
+                    Achieve.of(Jakta.parseStruct("count(S, M, up)")),
                 )
             ),
             Plan.ofAchievementGoalInvocation(
-                value = Jacop.parseStruct("count(N, M, down)"),
-                guard = Jacop.parseStruct("N > M & S is N - 1"),
+                value = Jakta.parseStruct("count(N, M, down)"),
+                guard = Jakta.parseStruct("N > M & S is N - 1"),
                 goals = listOf(
-                    ActInternally.of(Jacop.parseStruct("print(\"Down\", N)")),
-                    Achieve.of(Jacop.parseStruct("count(S, M, down)")),
+                    ActInternally.of(Jakta.parseStruct("print(\"Down\", N)")),
+                    Achieve.of(Jakta.parseStruct("count(S, M, down)")),
                 )
             ),
         )

@@ -36,15 +36,15 @@ fun main() {
     val sender = Agent.of(
         name = "sender",
         events = listOf(
-            Event.ofAchievementGoalInvocation(Achieve.of(Jacop.parseStruct("broadcast")))
+            Event.ofAchievementGoalInvocation(Achieve.of(Jakta.parseStruct("broadcast")))
         ),
 
         planLibrary = PlanLibrary.of(
             Plan.ofAchievementGoalInvocation(
-                value = Jacop.parseStruct("broadcast"),
+                value = Jakta.parseStruct("broadcast"),
                 goals = listOf(
-                    ActInternally.of(Jacop.parseStruct("print(\"Broadcast message\")")),
-                    Act.of(Jacop.parseStruct("broadcast(tell, greetings)"))
+                    ActInternally.of(Jakta.parseStruct("print(\"Broadcast message\")")),
+                    Act.of(Jakta.parseStruct("broadcast(tell, greetings)"))
                 )
             )
         ),
@@ -54,9 +54,9 @@ fun main() {
         name = "alice",
         planLibrary = PlanLibrary.of(
             Plan.ofBeliefBaseAddition(
-                belief = Belief.from(Jacop.parseStruct("greetings(source(Sender))")),
+                belief = Belief.from(Jakta.parseStruct("greetings(source(Sender))")),
                 goals = listOf(
-                    ActInternally.of(Jacop.parseStruct("print(\"Received message from: \", Sender)"))
+                    ActInternally.of(Jakta.parseStruct("print(\"Received message from: \", Sender)"))
                 )
             )
         ),
