@@ -1,6 +1,7 @@
 package io.github.anitvam.agents.bdi.dsl.examples.tris
 
 import io.github.anitvam.agents.bdi.Message
+import io.github.anitvam.agents.bdi.beliefs.BeliefBase
 import io.github.anitvam.agents.bdi.dsl.MasScope
 import io.github.anitvam.agents.bdi.dsl.beliefs.BeliefsScope
 import io.github.anitvam.agents.bdi.dsl.beliefs.fromPercept
@@ -10,19 +11,21 @@ import io.github.anitvam.agents.bdi.dsl.examples.tris.TicTacToeLiterals.cell
 import io.github.anitvam.agents.bdi.dsl.mas
 import io.github.anitvam.agents.bdi.messages.Tell
 import it.unibo.tuprolog.core.Atom
+import it.unibo.tuprolog.core.Struct
+import it.unibo.tuprolog.dsl.lp
 
 fun BeliefsScope.alignment(name: String, dx: Int, dy: Int) {
-    rule { name(listOf(cell(X, Y, Z))) impliedBy (cell(X, Y, Z).fromPercept) }
-    rule {
-        val second = cell(X, Y, Z)
-        name(listFrom(cell(A, B, C), second, last = W)) .impliedBy(
-            cell(A, B, C).fromPercept,
-            second.fromPercept,
-            (X - A) arithEq dx,
-            (Y - B) arithEq dy,
-            name(listFrom(second, last = W))
-        )
-    }
+    val second = cell(X, Y, Z).fromPercept
+    val first = cell(A, B, C).fromPercept
+    rule(name(listOf(second)) impliedBy second)
+    rule(name(listFrom(first, second, last = W)) .impliedBy(
+        first,
+        second,
+        (X - A) arithEq dx,
+        (Y - B) arithEq dy,
+        name(listFrom(second, last = W))
+    ))
+
 }
 
 fun ticTacToe(n: Int = 3) = mas {
@@ -56,7 +59,7 @@ fun MasScope.generatePlayer(mySymbol: String, otherSymbol: String, gridDimension
         alignment("diagonal", dx = 1, dy = 1)
         alignment("antidiagonal", dx = 1, dy = -1)
         for (direction in arrayOf("vertical", "horizontal", "diagonal", "antidiagonal")) {
-            rule { "aligned"(L) impliedBy direction(L) }
+            rule("aligned"(L) impliedBy direction(L).selfSourced)
         }
         if (mySymbol=="x") fact("turn"("self")) else fact("turn"("other"))
     }
@@ -64,15 +67,15 @@ fun MasScope.generatePlayer(mySymbol: String, otherSymbol: String, gridDimension
     plans {
         arrayOf(mySymbol, otherSymbol).map { symbol ->
             + achieve("play") onlyIf {
-                "aligned"((1..gridDimension).map { cell(symbol = symbol) }) and "turn"("self").selfSourced
+                "aligned"((1..gridDimension).map { cell(symbol = symbol).fromPercept }) and "turn"("self").selfSourced
             } then {
                 iact("print"(if (symbol == mySymbol) "I won!" else "I lost!"))
                 iact("stop")
             }
         }
-        for (winningLine in allPossibleCombinationsOf(cell(X, Y, "e"), cell(symbol = mySymbol), cell(symbol = "e"), gridDimension - 1 )) {
+        for (winningLine in allPossibleCombinationsOf(cell(X, Y, "e").fromPercept, cell(symbol = mySymbol).fromPercept, cell(symbol = "e").fromPercept, gridDimension - 1 )) {
             + achieve("play") onlyIf {
-                "aligned"(winningLine) and "turn"("self").selfSourced
+                "aligned"(winningLine).selfSourced and "turn"("self").selfSourced
             } then {
                 act("put"(X, Y, mySymbol))
                 act("printGrid")
@@ -110,5 +113,11 @@ fun main() {
 //                    "<- ${plan.goals.joinToString("; "){ formatter.format(it.value) }}")
 //        }
 //    }
+
+//    val bb = system.agents.first().context.beliefBase.addAll(system.environment.percept()).updatedBeliefBase
+//    println(bb.joinToString("\n"))
+//    println(bb.solve(lp<Struct> {
+//        "aligned"(listOf(cell(`_`,`_`,"x").fromPercept, cell(`_`,`_`,"x").fromPercept, cell(X, Y, "e").fromPercept))
+//    }))
     system.start()
 }

@@ -26,7 +26,7 @@ class GridEnvironment(
             Array(n) { CharArray(n) { 'e' } }
             return arrayOf(
                 charArrayOf('e', 'e', 'e'),
-                charArrayOf('x', 'x', 'e'),
+                charArrayOf('x', 'x', 'x'),
                 charArrayOf('e', 'e', 'e')
             )
         }
