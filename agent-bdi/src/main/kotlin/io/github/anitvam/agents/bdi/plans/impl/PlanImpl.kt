@@ -17,6 +17,10 @@ internal data class PlanImpl(
     override fun isApplicable(event: Event, beliefBase: BeliefBase): Boolean {
         val mgu = event.trigger.value mguWith this.trigger.value
         val actualGuard = guard.apply(mgu).castToStruct()
+        // println("guard: $actualGuard")
+
+        println("BB: ${ beliefBase.joinToString("\n") }")
+        println("SOLUTION: ${beliefBase.solve(actualGuard)}\n ")
         return isRelevant(event) && beliefBase.solve(actualGuard).isYes
     }
 
