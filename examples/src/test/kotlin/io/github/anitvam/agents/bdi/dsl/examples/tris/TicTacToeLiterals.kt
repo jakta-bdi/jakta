@@ -52,4 +52,5 @@ object TicTacToeLiterals {
     val x by OwnName
     val e by OwnName
     val o by OwnName
+
 }

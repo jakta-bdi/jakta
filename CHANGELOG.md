@@ -1,3 +1,49 @@
+# [0.2.0](https://github.com/pikalab-unibo-students/ise-2022-project-baiardi/compare/v0.1.0...v0.2.0) (2023-02-14)
+
+
+### Bug Fixes
+
+* add check for parameters number in Action execution ([83052ef](https://github.com/pikalab-unibo-students/ise-2022-project-baiardi/commit/83052efa9a707376ca247bc0e7470f52071345fe))
+* Change strategy name into OneThreadPerAgent ([a756d25](https://github.com/pikalab-unibo-students/ise-2022-project-baiardi/commit/a756d25aa23b7213bac8d053fd8c61f555a99aba))
+* correct time retrieval in ActionRequests ([d5f756d](https://github.com/pikalab-unibo-students/ise-2022-project-baiardi/commit/d5f756d41316ce1d3e5afdb03f71d572eee4ca9e))
+* delete code duplications ([e608e6c](https://github.com/pikalab-unibo-students/ise-2022-project-baiardi/commit/e608e6c83cc6fe0ac47d3dc9517005ead4db2914))
+* fixed copy of AgentContext ([120c45a](https://github.com/pikalab-unibo-students/ise-2022-project-baiardi/commit/120c45a2ecb0dacc98f8448d4406d99164de17d9))
+* fixed implementation of Goals DSL ([62d02b1](https://github.com/pikalab-unibo-students/ise-2022-project-baiardi/commit/62d02b1191ba81c6e187aa6e4151793fffab9801))
+* fixed message management in agent lifecycle ([cc35c89](https://github.com/pikalab-unibo-students/ise-2022-project-baiardi/commit/cc35c898b956893059b70bae0e4567df6c6cee30))
+* improve of dsl example ([43c6122](https://github.com/pikalab-unibo-students/ise-2022-project-baiardi/commit/43c61226b7cfed57aa448c8c761e9b2161ee3b67))
+* refactor implementation of DiscreteEventExecution and add test ([8f97e43](https://github.com/pikalab-unibo-students/ise-2022-project-baiardi/commit/8f97e436d8e20e6f0bfc95733f330833ab708efb))
+* refactor of Library parser object ([5c80a3e](https://github.com/pikalab-unibo-students/ise-2022-project-baiardi/commit/5c80a3e98769876025a6d9e756e020bdcd8909f2))
+* refactor of package structure ([5aac31a](https://github.com/pikalab-unibo-students/ise-2022-project-baiardi/commit/5aac31a71032ab69c6bae8eb5b091e2e11a12dcc))
+* refactor of project structure ([cedafd2](https://github.com/pikalab-unibo-students/ise-2022-project-baiardi/commit/cedafd2a039319604db3cf6882ae5000164f087f))
+* refactoring of dsl implementation ([97e48a4](https://github.com/pikalab-unibo-students/ise-2022-project-baiardi/commit/97e48a46bb6e33f42113ed659b844a83b89b098b))
+* remove debug println in AgentLifecycle implementation ([dac752d](https://github.com/pikalab-unibo-students/ise-2022-project-baiardi/commit/dac752de5935f12cebe8d904e59e0c153967c48d))
+* remove perception from Agent and correction of AgentLifecycle implementation ([b361447](https://github.com/pikalab-unibo-students/ise-2022-project-baiardi/commit/b361447e1af9079ce99a3cd7974ee03d88e07642))
+* remove useless file ([b9f3b88](https://github.com/pikalab-unibo-students/ise-2022-project-baiardi/commit/b9f3b885f0be9c26d1b427466cd3f2b713fb8047))
+* typo correction ([e28299d](https://github.com/pikalab-unibo-students/ise-2022-project-baiardi/commit/e28299d5cf0493dde0bf3ba043e475085e944534))
+* update minimum version of jvm to 11 ([04f4461](https://github.com/pikalab-unibo-students/ise-2022-project-baiardi/commit/04f44613eaeeabf892ea91c0582c339980f7da14))
+* usage of the same scope in Plans body ([3aef077](https://github.com/pikalab-unibo-students/ise-2022-project-baiardi/commit/3aef0779cd113f92e8c348b246929d72d30788f4))
+
+
+### Features
+
+* add broadcast tests ([4d64c24](https://github.com/pikalab-unibo-students/ise-2022-project-baiardi/commit/4d64c241150e22461cd6af3492b7f6541429d9f1))
+* add examples of dsl + minor fixes of dsl scopes ([26a9e3f](https://github.com/pikalab-unibo-students/ise-2022-project-baiardi/commit/26a9e3f67d783ecee74570f83f44985d0c0da551))
+* add first implementation of examples using dsl ([14c004a](https://github.com/pikalab-unibo-students/ise-2022-project-baiardi/commit/14c004a4a87ee84156bb4613375fc25315ebe86a))
+* add implementation of DiscreteEventExecution ([0e9e214](https://github.com/pikalab-unibo-students/ise-2022-project-baiardi/commit/0e9e214f584527795c18a9ae7f0db9d055e97542))
+* add implementation of OneThreadPerAgent and OneThreadPerMas ExecutionStrategy ([c16dcef](https://github.com/pikalab-unibo-students/ise-2022-project-baiardi/commit/c16dcef741c30bc53bc2342145dfe86b556cd4c5))
+* add internal actions to manage Activity ([8f1b4a1](https://github.com/pikalab-unibo-students/ise-2022-project-baiardi/commit/8f1b4a1ef005a222b0ec8aac7266cd6718ff7183))
+* add OneThreadPerMas() ExecutionStrategy implementation and tests ([465c32e](https://github.com/pikalab-unibo-students/ise-2022-project-baiardi/commit/465c32e7f3a52dcb5d30db15d2a41fc47bcc216a))
+* add sender in ExternalActionRequest ([4a2a1e4](https://github.com/pikalab-unibo-students/ise-2022-project-baiardi/commit/4a2a1e430c706acf7eb6024363738f17e5a680ed))
+* Add Time abstraction on agent fsm and sleep implementation in Activity.Controller ([e0fabf2](https://github.com/pikalab-unibo-students/ise-2022-project-baiardi/commit/e0fabf213751d722e2cce4e99b8e9231905ddf7d))
+* DSL definition for Agents Plans ([b688418](https://github.com/pikalab-unibo-students/ise-2022-project-baiardi/commit/b688418856fbb908adaa11ff2db03653631a16c0))
+* first definition of Jacop DSL ([9751ed3](https://github.com/pikalab-unibo-students/ise-2022-project-baiardi/commit/9751ed35d47fec9b1f42c9b1ef6ada16d4b4ac35))
+* fist definition of Environment DSL ([87af2fa](https://github.com/pikalab-unibo-students/ise-2022-project-baiardi/commit/87af2fad3683a13cf38a780326a2a87854756ed8))
+* improve action dsl ([beb5c76](https://github.com/pikalab-unibo-students/ise-2022-project-baiardi/commit/beb5c7676058a1988caa00d678c2f95baa340f18))
+* manage Activity.Controller actions on agent lifecycle ([2e3d9b8](https://github.com/pikalab-unibo-students/ise-2022-project-baiardi/commit/2e3d9b84d14c713683a1de1d2e63391faee9ea46))
+* refactor of bdi model and addition of EmptyGoal() ([97b47f8](https://github.com/pikalab-unibo-students/ise-2022-project-baiardi/commit/97b47f8bc54f8da3f4955643796856ab47483afc))
+* wip on dsl ([17caba2](https://github.com/pikalab-unibo-students/ise-2022-project-baiardi/commit/17caba2a43cd3c751b73a790ab3d0c66a302ab23))
+* wip on Simulation Executors ([f890f77](https://github.com/pikalab-unibo-students/ise-2022-project-baiardi/commit/f890f77d9cb83a70aaf32524e6eacf9584b31c38))
+
 # [0.1.0](https://github.com/pikalab-unibo-students/ise-2022-project-baiardi/compare/v0.0.1...v0.1.0) (2023-01-23)
 
 

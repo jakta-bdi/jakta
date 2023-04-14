@@ -36,5 +36,7 @@ class BeliefsScope(
         beliefs.add(belief)
     }
 
+    fun rule(f: LogicProgrammingScope.() -> Rule) = rule(f())
+
     override fun build(): BeliefBase = BeliefBase.of(beliefs)
 }
