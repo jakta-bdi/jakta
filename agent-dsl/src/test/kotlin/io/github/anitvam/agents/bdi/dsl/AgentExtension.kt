@@ -11,7 +11,7 @@ fun AgentScope.planExtension(vararg goals: Struct) {
             for (goal in goals) {
                 achieve("move".invoke(goal.args))
             }
-            act("finished")
+            execute("finished")
         }
     }
 }

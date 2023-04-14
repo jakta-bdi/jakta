@@ -22,7 +22,7 @@ fun main() {
             }
             plans {
                 + achieve("eat"("ice-cream")) onlyIf { "good"("source"("self"), "ice-cream") } then {
-                    act("pluto"("YUMMY!"))
+                    execute("pluto"("YUMMY!"))
                 }
             }
         }

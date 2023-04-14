@@ -20,11 +20,11 @@ internal data class PlanImpl(
 //        println("guard: $actualGuard")
 //        println("BB: ${ beliefBase.joinToString("\n") }")
 //        println("SOLUTION: ${beliefBase.solve(actualGuard)} ")
-        val ex = beliefBase.solve(actualGuard)
-        if ((ex.exception != null)) {
-            println("LOGIC STACK TRACE: ${ ex.exception?.logicStackTrace}")
-        }
-        println()
+//        val ex = beliefBase.solve(actualGuard)
+//        if ((ex.exception != null)) {
+//            println("LOGIC STACK TRACE: ${ ex.exception?.logicStackTrace}")
+//        }
+//        println()
         return isRelevant(event) && beliefBase.solve(actualGuard).isYes
     }
 
