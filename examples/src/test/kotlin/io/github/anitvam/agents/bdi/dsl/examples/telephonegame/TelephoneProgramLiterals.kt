@@ -1,10 +1,6 @@
 package io.github.anitvam.agents.bdi.dsl.examples.telephonegame
 
-import kotlin.reflect.KProperty
-
-object OwnName {
-    operator fun getValue(thisRef: Any?, property: KProperty<*>) = property.name
-}
+import io.github.anitvam.agents.bdi.dsl.examples.OwnName
 
 object TelephoneProgramLiterals {
     val receiver: String by OwnName

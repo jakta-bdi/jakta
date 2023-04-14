@@ -1,6 +1,6 @@
 package io.github.anitvam.agents.bdi.dsl.examples.blocksworld
 
-import io.github.anitvam.agents.bdi.dsl.examples.telephonegame.OwnName
+import io.github.anitvam.agents.bdi.dsl.examples.OwnName
 
 object BlocksWorldLiterals {
     val solve: String by OwnName
