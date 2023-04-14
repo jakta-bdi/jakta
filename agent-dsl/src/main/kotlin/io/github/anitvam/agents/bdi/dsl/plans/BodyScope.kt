@@ -22,12 +22,6 @@ class BodyScope(
 
     private val goals = mutableListOf<Goal>()
 
-    fun achieve(goal: String) = achieve(atomOf(goal))
-
-    fun achieve(goal: Struct) {
-        goals += Achieve.of(goal)
-    }
-
     fun test(goal: Struct) {
         goals += Test.of(Belief.from(goal))
     }
@@ -37,6 +31,12 @@ class BodyScope(
     fun spawn(goal: Struct) {
         goals += Spawn.of(goal)
     }
+
+    fun achieve(goal: Struct, parallel: Boolean = false) {
+        goals += if (parallel) Spawn.of(goal) else Achieve.of(goal)
+    }
+
+    fun achieve(goal: String, parallel: Boolean = false) = achieve(atomOf(goal), parallel)
 
     fun spawn(goal: String) = spawn(atomOf(goal))
 
