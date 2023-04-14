@@ -26,7 +26,7 @@ class GridEnvironment(
             Array(n) { CharArray(n) { 'e' } }
             return arrayOf(
                 charArrayOf('e', 'e', 'e'),
-                charArrayOf('x', 'x', 'x'),
+                charArrayOf('x', 'x', 'e'),
                 charArrayOf('e', 'e', 'e')
             )
         }
@@ -41,13 +41,19 @@ class GridEnvironment(
 
     @Suppress("UNCHECKED_CAST")
     override fun updateData(newData: Map<String, Any>): Environment {
+        var newEnv = this
         if ("cell" in newData) {
             val cell = newData["cell"] as Triple<Int, Int, Char>
             val result = copy(data = mapOf("grid" to grid.copy()))
             result.grid[cell.first][cell.second] = cell.third
-            return result
+            newEnv = result
         }
-        return this
+        if ("turn" in newData) {
+            newEnv = newEnv.copy(perception =
+                Perception.of(Belief.fromPerceptSource(Struct.of("turn", Atom.of(newData["turn"] as String)))
+            ))
+        }
+        return newEnv
     }
 
     override fun percept(): BeliefBase =
@@ -63,7 +69,7 @@ class GridEnvironment(
                     }
                 }
             }
-        )
+        ).addAll(perception.percept()).updatedBeliefBase
 
     override fun copy(
         agentIDs: Map<String, AgentID>,
