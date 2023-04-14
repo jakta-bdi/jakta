@@ -18,7 +18,7 @@ fun main() {
             }
             plans {
                 + achieve("my_thread") then {
-                    act("thread")
+                    execute("thread")
                 }
             }
         }
@@ -28,7 +28,7 @@ fun main() {
             }
             plans {
                 + achieve("print_thread") then {
-                    act("thread")
+                    execute("thread")
                 }
             }
         }

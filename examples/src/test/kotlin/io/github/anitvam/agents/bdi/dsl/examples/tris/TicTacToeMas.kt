@@ -1,24 +1,14 @@
 package io.github.anitvam.agents.bdi.dsl.examples.tris
 
-import io.github.anitvam.agents.bdi.Jakta
-import io.github.anitvam.agents.bdi.Message
-import io.github.anitvam.agents.bdi.beliefs.BeliefBase
 import io.github.anitvam.agents.bdi.dsl.MasScope
 import io.github.anitvam.agents.bdi.dsl.beliefs.BeliefsScope
-import io.github.anitvam.agents.bdi.dsl.beliefs.fromPercept
 import io.github.anitvam.agents.bdi.dsl.beliefs.selfSourced
 import io.github.anitvam.agents.bdi.dsl.examples.tris.TicTacToeLiterals.aligned
 import io.github.anitvam.agents.bdi.dsl.examples.tris.TicTacToeLiterals.allPossibleCombinationsOf
 import io.github.anitvam.agents.bdi.dsl.examples.tris.TicTacToeLiterals.cell
 import io.github.anitvam.agents.bdi.dsl.examples.tris.TicTacToeLiterals.turn
 import io.github.anitvam.agents.bdi.dsl.mas
-import io.github.anitvam.agents.bdi.messages.Tell
-import it.unibo.tuprolog.core.Atom
-import it.unibo.tuprolog.core.Struct
-import it.unibo.tuprolog.core.TermFormatter
-import it.unibo.tuprolog.core.operators.OperatorSet
 import it.unibo.tuprolog.dsl.LogicProgrammingScope
-import it.unibo.tuprolog.dsl.lp
 
 fun BeliefsScope.alignment(name: String, dx: Int, dy: Int) {
     rule(name(listOf(cell(X, Y, Z))) impliedBy cell(X, Y, Z))
@@ -79,15 +69,15 @@ fun MasScope.generatePlayer(mySymbol: String, otherSymbol: String, gridDimension
             + achieve("play") onlyIf {
                 aligned(winningLine)
             } then {
-                act("put"(X, Y, mySymbol, otherSymbol))
-                act("printGrid")
+                execute("put"(X, Y, mySymbol, otherSymbol))
+                execute("printGrid")
             }
         }
         + achieve("play") onlyIf {
             cell(X, Y, "e")
         } then {
-            act("put"(X, Y, mySymbol, otherSymbol))
-            act("printGrid")
+            execute("put"(X, Y, mySymbol, otherSymbol))
+            execute("printGrid")
         }
 
         + turn("$mySymbol-agent") then {

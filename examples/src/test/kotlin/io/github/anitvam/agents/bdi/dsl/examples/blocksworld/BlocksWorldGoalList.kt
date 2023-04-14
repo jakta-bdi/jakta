@@ -67,21 +67,21 @@ fun main() {
                 + achieve("move"(X, Y)) onlyIf {
                     "clear"("source"("self"), X) and "clear"("source"("self"), Y)
                 } then {
-                    act("move"(X, Y))
+                    execute("move"(X, Y))
                 }
 
                 + achieve("move"(X, Y)) onlyIf {
                     "clear"("source"("self"), X) and "on"("source"("percept"), W, Y)
                 } then {
                     achieve("move"(W, "table"))
-                    act("move"(X, Y))
+                    execute("move"(X, Y))
                 }
 
                 + achieve("move"(X, Y)) onlyIf {
                     "on"("source"("percept"), W, X) and "clear"("source"("self"), Y)
                 } then {
                     achieve("move"(W, "table"))
-                    act("move"(X, Y))
+                    execute("move"(X, Y))
                 }
 
                 + achieve("move"(X, Y)) onlyIf {
@@ -89,7 +89,7 @@ fun main() {
                 } then {
                     achieve("move"(W, "table"))
                     achieve("move"(V, "table"))
-                    act("move"(X, Y))
+                    execute("move"(X, Y))
                 }
             }
         }

@@ -32,7 +32,7 @@ fun main() {
             }
             plans {
                 + achieve("run_external_action") then {
-                    act("ex_action")
+                    execute("ex_action")
                     iact("in_action")
                 }
             }

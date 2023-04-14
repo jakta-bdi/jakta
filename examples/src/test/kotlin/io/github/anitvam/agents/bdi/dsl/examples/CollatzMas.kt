@@ -11,8 +11,8 @@ fun collatzMas(number: Int) = mas {
             + achieve("verify"(X)) onlyIf {
                 (X arithEq 4) and "explored"("source"("self"), 4)
             } then {
-                iact("print"("Collatz Conjecture verified!"))
-                iact("stop")
+                execute("print"("Collatz Conjecture verified!"))
+                execute("stop")
             }
 
             + achieve("collatz"(X)) onlyIf {
@@ -20,7 +20,7 @@ fun collatzMas(number: Int) = mas {
             } then {
                 spawn("verify"(R))
                 + "explored"("source"("self"), X)
-                iact("print"(R))
+                execute("print"(R))
                 achieve("collatz"(R))
             }
 
@@ -29,7 +29,7 @@ fun collatzMas(number: Int) = mas {
             } then {
                 spawn("verify"(R))
                 + "explored"("source"("self"), X)
-                iact("print"(R))
+                execute("print"(R))
                 achieve("collatz"(R))
             }
         }

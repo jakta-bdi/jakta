@@ -239,7 +239,7 @@ class TestPlansDsl : DescribeSpec({
                 agent("test") {
                     plans {
                         +achieve("send_ping"(R)) then {
-                            act("send_ping"("source"("self")))
+                            execute("send_ping"("source"("self")))
                         }
                     }
                 }

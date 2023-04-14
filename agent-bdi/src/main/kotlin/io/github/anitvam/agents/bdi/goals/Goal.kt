@@ -2,6 +2,7 @@ package io.github.anitvam.agents.bdi.goals
 
 import io.github.anitvam.agents.bdi.beliefs.Belief
 import io.github.anitvam.agents.bdi.goals.impl.AchieveImpl
+import io.github.anitvam.agents.bdi.goals.impl.ActExternallyImpl
 import io.github.anitvam.agents.bdi.goals.impl.ActInternallyImpl
 import io.github.anitvam.agents.bdi.goals.impl.ActImpl
 import io.github.anitvam.agents.bdi.goals.impl.SpawnImpl
@@ -94,5 +95,11 @@ interface Act : ActionGoal {
 interface ActInternally : ActionGoal {
     companion object {
         fun of(value: Struct): ActInternally = ActInternallyImpl(value)
+    }
+}
+
+interface ActExternally : ActionGoal {
+    companion object {
+        fun of(value: Struct): ActExternally = ActExternallyImpl(value)
     }
 }
