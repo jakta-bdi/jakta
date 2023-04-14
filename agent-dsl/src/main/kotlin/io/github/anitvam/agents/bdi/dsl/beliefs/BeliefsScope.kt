@@ -20,12 +20,16 @@ class BeliefsScope : Builder<BeliefBase>, LogicProgrammingScope by LogicProgramm
 
     fun fact(atom: String) = fact(atomOf(atom))
 
+    fun fact(f: LogicProgrammingScope.() -> Struct) = fact(f())
+
     fun rule(rule: Rule) {
         @Suppress("NAME_SHADOWING")
         val rule = rule.freshCopy()
         val belief: Belief = Belief.fromSelfSource(rule.head, rule.bodyItems)
         beliefs.add(belief)
     }
+
+    fun rule(f: LogicProgrammingScope.() -> Rule) = rule(f())
 
     override fun build(): BeliefBase = BeliefBase.of(beliefs)
 }

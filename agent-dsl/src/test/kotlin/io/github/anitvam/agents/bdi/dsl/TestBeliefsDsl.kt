@@ -1,11 +1,12 @@
 package io.github.anitvam.agents.bdi.dsl
 
 import io.kotest.core.spec.style.DescribeSpec
+import io.kotest.matchers.shouldBe
 
 class TestBeliefsDsl : DescribeSpec({
-    describe("...") {
-        it("...") {
-            mas {
+    describe("An agent beliefs") {
+        it("can be described through functions") {
+            val mas = mas {
                 agent("test") {
                     beliefs {
                         fact { "turn"("me") }
@@ -14,6 +15,8 @@ class TestBeliefsDsl : DescribeSpec({
                     }
                 }
             }
+            val bb = mas.agents.first().context.beliefBase
+            bb.count() shouldBe 3
         }
     }
 })
