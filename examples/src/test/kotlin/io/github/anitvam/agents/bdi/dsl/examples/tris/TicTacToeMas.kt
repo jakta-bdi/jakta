@@ -1,11 +1,10 @@
 package io.github.anitvam.agents.bdi.dsl.examples.tris
 
 import io.github.anitvam.agents.bdi.Jakta
-import io.github.anitvam.agents.bdi.actions.InternalActions
 import io.github.anitvam.agents.bdi.actions.InternalActions.Print
 import io.github.anitvam.agents.bdi.dsl.MasScope
 import io.github.anitvam.agents.bdi.dsl.beliefs.BeliefsScope
-import io.github.anitvam.agents.bdi.dsl.beliefs.fromPercept
+import io.github.anitvam.agents.bdi.dsl.beliefs.fromSelf
 import io.github.anitvam.agents.bdi.dsl.examples.tris.TicTacToeLiterals.aligned
 import io.github.anitvam.agents.bdi.dsl.examples.tris.TicTacToeLiterals.allPossibleCombinationsOf
 import io.github.anitvam.agents.bdi.dsl.examples.tris.TicTacToeLiterals.antidiagonal
@@ -25,8 +24,8 @@ import it.unibo.tuprolog.core.TermFormatter
 import it.unibo.tuprolog.core.operators.OperatorSet
 
 fun BeliefsScope.alignment(name: String, dx: Int, dy: Int) {
-    val first = cell(A, B, C).fromPercept
-    val second = cell(X, Y, Z).fromPercept
+    val first = cell(A, B, C)
+    val second = cell(X, Y, Z)
     rule { name(listOf(second)) impliedBy second }
     rule {
         name(listFrom(first, second, last = W)) .impliedBy(
@@ -34,7 +33,7 @@ fun BeliefsScope.alignment(name: String, dx: Int, dy: Int) {
             second,
             (X - A) arithEq dx,
             (Y - B) arithEq dy,
-            name(listFrom(second, last = W))
+            name(listFrom(second, last = W)).fromSelf
         )
     }
 }
@@ -56,7 +55,7 @@ fun MasScope.player(mySymbol: String, otherSymbol: String, gridSize: Int) = agen
         alignment(diagonal, dx=1, dy=1)
         alignment(antidiagonal, dx=1, dy=-1)
         for (direction in arrayOf(vertical, horizontal, diagonal, antidiagonal)) {
-            rule { aligned(L) impliedBy direction(L) }
+            rule { aligned(L) impliedBy direction(L).fromSelf }
         }
     }
     plans {

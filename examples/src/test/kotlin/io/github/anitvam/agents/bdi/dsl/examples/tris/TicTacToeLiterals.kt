@@ -3,7 +3,7 @@ package io.github.anitvam.agents.bdi.dsl.examples.tris
 import io.github.anitvam.agents.bdi.actions.ExternalAction
 import io.github.anitvam.agents.bdi.actions.InternalAction
 import io.github.anitvam.agents.bdi.dsl.beliefs.fromPercept
-import io.github.anitvam.agents.bdi.dsl.beliefs.selfSourced
+import io.github.anitvam.agents.bdi.dsl.beliefs.fromSelf
 import io.github.anitvam.agents.bdi.dsl.examples.OwnName
 import io.github.anitvam.agents.bdi.dsl.plans.BodyScope
 import it.unibo.tuprolog.core.Struct
@@ -16,7 +16,7 @@ object TicTacToeLiterals {
         x: Any?,
         y: Any?,
         symbol: Any
-    ) = structOf("cell", (x ?: `_`).toTerm(), (y ?: `_`).toTerm(), symbol.toTerm())
+    ) = structOf("cell", (x ?: `_`).toTerm(), (y ?: `_`).toTerm(), symbol.toTerm()).fromPercept
 
     fun LogicProgrammingScope.cell(symbol: Any) = cell(null, null, symbol)
 
@@ -26,10 +26,14 @@ object TicTacToeLiterals {
 
     fun LogicProgrammingScope.aligned(
         symbol: Any
-    ) = structOf("aligned", symbol.toTerm()).selfSourced
+    ) = structOf("aligned", symbol.toTerm()).fromSelf
 
     fun allPossibleCombinationsOf(cell: Struct, other: Struct, repetitions: Int): Sequence<List<Struct>> =
-        (1..repetitions).map { other }.plus(cell).permutations().distinct()
+        (1..repetitions).map { other }
+            .plus(cell)
+            .permutations()
+            .distinct()
+            .map { permutation -> permutation.map { it.freshCopy() } }
 
     context (BodyScope)
     operator fun <T : ExternalAction> T.invoke(arg: Any, vararg args: Any) {
