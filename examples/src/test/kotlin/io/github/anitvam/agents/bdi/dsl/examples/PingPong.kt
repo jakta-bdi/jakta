@@ -52,7 +52,7 @@ fun main() {
 
                 + achieve("sendMessageTo"(M, R)) then {
                     iact("print"("Sending message ", M))
-                    act("send"(R, "tell", M))
+                    execute("send"(R, "tell", M))
                 }
             }
         }
@@ -78,7 +78,7 @@ fun main() {
 
                 + achieve("sendMessageTo"(M, R)) then {
                     iact("print"("Sending message ", M))
-                    act("send"(R, "tell", M))
+                    execute("send"(R, "tell", M))
                 }
             }
         }

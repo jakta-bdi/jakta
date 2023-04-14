@@ -4,6 +4,7 @@ import io.github.anitvam.agents.bdi.beliefs.Belief
 import io.github.anitvam.agents.bdi.dsl.Builder
 import io.github.anitvam.agents.bdi.goals.Achieve
 import io.github.anitvam.agents.bdi.goals.Act
+import io.github.anitvam.agents.bdi.goals.ActExternally
 import io.github.anitvam.agents.bdi.goals.ActInternally
 import io.github.anitvam.agents.bdi.goals.AddBelief
 import io.github.anitvam.agents.bdi.goals.Goal
@@ -22,12 +23,6 @@ class BodyScope(
 
     private val goals = mutableListOf<Goal>()
 
-    fun achieve(goal: String) = achieve(atomOf(goal))
-
-    fun achieve(goal: Struct) {
-        goals += Achieve.of(goal)
-    }
-
     fun test(goal: Struct) {
         goals += Test.of(Belief.from(goal))
     }
@@ -37,6 +32,12 @@ class BodyScope(
     fun spawn(goal: Struct) {
         goals += Spawn.of(goal)
     }
+
+    fun achieve(goal: Struct, parallel: Boolean = false) {
+        goals += if (parallel) Spawn.of(goal) else Achieve.of(goal)
+    }
+
+    fun achieve(goal: String, parallel: Boolean = false) = achieve(atomOf(goal), parallel)
 
     fun spawn(goal: String) = spawn(atomOf(goal))
 
@@ -56,15 +57,15 @@ class BodyScope(
         goals += UpdateBelief.of(Belief.from(belief))
     }
 
-    fun act(struct: String) = act(atomOf(struct))
+    fun execute(struct: String, externalOnly: Boolean = false) = execute(atomOf(struct), externalOnly)
 
-    fun act(struct: Struct) {
-        goals += Act.of(struct)
+    fun execute(struct: Struct, externalOnly: Boolean = false) {
+        goals += if (externalOnly) ActExternally.of(struct) else Act.of(struct)
     }
 
-    fun act(method: KFunction<*>, vararg args: Any) = when {
-        method.parameters.isEmpty() -> act(method.name)
-        else -> act(method.name.invoke(args[0], *args.drop(1).toTypedArray()))
+    fun execute(method: KFunction<*>, vararg args: Any) = when {
+        method.parameters.isEmpty() -> execute(method.name)
+        else -> execute(method.name.invoke(args[0], *args.drop(1).toTypedArray()))
     }
 
     fun iact(struct: String) = iact(atomOf(struct))

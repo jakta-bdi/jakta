@@ -13,6 +13,7 @@ class BeliefsScope(
 ) : Builder<BeliefBase>, LogicProgrammingScope by lp {
 
     private val beliefs = mutableListOf<Belief>()
+
     fun fact(struct: Struct) {
         val belief: Belief = Belief.fromSelfSource(struct.freshCopy())
         beliefs.add(belief)

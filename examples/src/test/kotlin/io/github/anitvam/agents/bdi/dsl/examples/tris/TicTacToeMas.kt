@@ -74,11 +74,11 @@ fun PlansScope.detectDefeat(mySymbol: String, otherSymbol: String, gridSize: Int
     detectLine(mySymbol, otherSymbol, gridSize) { Print("I lost!") }
 
 fun PlansScope.detectLine(mySymbol: String, symbol: String, size: Int, action: BodyScope.() -> Unit) =
-    +turn(mySymbol).fromPercept onlyIf { aligned((1..size).map { cell(symbol) }) } then(action)
+    +turn(mySymbol) onlyIf { aligned((1..size).map { cell(symbol) }) } then(action)
 
 fun PlansScope.makeWinningMove(mySymbol: String, gridSize: Int, symbol: String = mySymbol) {
     for (winningLine in allPossibleCombinationsOf(cell(X, Y, e), cell(symbol), gridSize - 1)) {
-        +turn(mySymbol).fromPercept onlyIf { aligned(winningLine) } then { Put(X, Y, mySymbol) }
+        +turn(mySymbol) onlyIf { aligned(winningLine) } then { Put(X, Y, mySymbol) }
     }
 }
 
@@ -86,7 +86,7 @@ fun PlansScope.preventOtherFromWinning(mySymbol: String, otherSymbol: String, gr
     makeWinningMove(mySymbol, gridSize, otherSymbol)
 
 fun PlansScope.randomMove(mySymbol: String) =
-    +turn(mySymbol).fromPercept onlyIf { cell(X, Y, e) } then { Put(X, Y, mySymbol) }
+    +turn(mySymbol) onlyIf { cell(X, Y, e) } then { Put(X, Y, mySymbol) }
 
 
 fun main() {

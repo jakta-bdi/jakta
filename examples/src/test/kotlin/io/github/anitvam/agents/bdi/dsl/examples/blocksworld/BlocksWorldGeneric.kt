@@ -8,7 +8,6 @@ import io.github.anitvam.agents.bdi.plans.Plan
 import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.dsl.lp
-import it.unibo.tuprolog.dsl.LogicProgrammingScope
 import io.github.anitvam.agents.bdi.dsl.examples.blocksworld.BlocksWorldLiterals.on
 import io.github.anitvam.agents.bdi.dsl.examples.blocksworld.BlocksWorldLiterals.source
 import io.github.anitvam.agents.bdi.dsl.examples.blocksworld.BlocksWorldLiterals.percept
@@ -21,7 +20,6 @@ import io.github.anitvam.agents.bdi.dsl.examples.blocksworld.BlocksWorldLiterals
 import io.github.anitvam.agents.bdi.dsl.examples.blocksworld.BlocksWorldLiterals.c
 import io.github.anitvam.agents.bdi.dsl.examples.blocksworld.BlocksWorldLiterals.x
 import io.github.anitvam.agents.bdi.dsl.examples.blocksworld.BlocksWorldLiterals.y
-import io.github.anitvam.agents.bdi.dsl.examples.blocksworld.BlocksWorldLiterals.z
 import io.github.anitvam.agents.bdi.dsl.examples.blocksworld.BlocksWorldLiterals.table
 
 
@@ -32,26 +30,26 @@ fun getPlans(): Iterable<Plan> = plans {
     + achieve(move(X, Y)) onlyIf {
         clear(source(self), X) and clear(source(self), Y)
     } then {
-        act(move(X, Y))
+        execute(move(X, Y))
     }
     + achieve(move(X, Y)) onlyIf {
         clear(source(self), X) and on(source(percept), W, Y)
     } then {
         achieve(move(W, "table"))
-        act(move(X, Y))
+        execute(move(X, Y))
     }
     + achieve(move(X, Y)) onlyIf {
         on(source(percept), W, X) and clear(source(self), Y)
     } then {
         achieve(move(W, table))
-        act(move(X, Y))
+        execute(move(X, Y))
     }
     + achieve("move"(X, Y)) onlyIf {
         "on"("source"("percept"), W, X) and "on"("source"("percept"), V, Y)
     } then {
         achieve("move"(W, "table"))
         achieve("move"(V, "table"))
-        act("move"(X, Y))
+        execute("move"(X, Y))
     }
 }
 

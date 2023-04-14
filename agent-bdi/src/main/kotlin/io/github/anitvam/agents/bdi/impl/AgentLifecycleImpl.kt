@@ -5,8 +5,10 @@ import io.github.anitvam.agents.bdi.context.AgentContext
 import io.github.anitvam.agents.bdi.context.ContextUpdate.ADDITION
 import io.github.anitvam.agents.bdi.context.ContextUpdate.REMOVAL
 import io.github.anitvam.agents.bdi.AgentLifecycle
+import io.github.anitvam.agents.bdi.actions.ExternalAction
 import io.github.anitvam.agents.bdi.executionstrategies.ExecutionResult
 import io.github.anitvam.agents.bdi.actions.ExternalRequest
+import io.github.anitvam.agents.bdi.actions.InternalAction
 import io.github.anitvam.agents.bdi.beliefs.Belief
 import io.github.anitvam.agents.bdi.beliefs.BeliefBase
 import io.github.anitvam.agents.bdi.beliefs.BeliefUpdate
@@ -39,6 +41,7 @@ import io.github.anitvam.agents.bdi.actions.effects.PopMessage
 import io.github.anitvam.agents.bdi.actions.effects.Sleep
 import io.github.anitvam.agents.bdi.actions.effects.Stop
 import io.github.anitvam.agents.bdi.environment.Environment
+import io.github.anitvam.agents.bdi.goals.ActExternally
 import io.github.anitvam.agents.bdi.goals.EmptyGoal
 import io.github.anitvam.agents.bdi.intentions.Intention
 import io.github.anitvam.agents.bdi.intentions.IntentionPool
@@ -101,6 +104,68 @@ internal data class AgentLifecycleImpl(
 
     override fun scheduleIntention(intentions: IntentionPool) = agent.scheduleIntention(intentions)
 
+    private fun executeInternalAction(
+        intention: Intention,
+        action: InternalAction,
+        context: AgentContext,
+        goal: ActionGoal
+    ): ExecutionResult {
+        var newIntention = intention.pop()
+        try {
+            val internalResponse = action.execute(
+                InternalRequest.of(this.agent, controller.currentTime(), goal.action.args)
+            )
+            // Apply substitution
+            return if (internalResponse.substitution.isSuccess) {
+                if (newIntention.recordStack.isNotEmpty()) {
+                    newIntention = newIntention.applySubstitution(internalResponse.substitution)
+                }
+                val newContext = applyEffects(context, internalResponse.effects)
+                ExecutionResult(
+                    newContext.copy(intentions = newContext.intentions.updateIntention(newIntention)),
+                )
+            } else {
+                ExecutionResult(failAchievementGoal(intention, context))
+            }
+        } catch (e: IllegalArgumentException) {
+            // Argument number mismatch from action definition
+            return ExecutionResult(failAchievementGoal(intention, context))
+        }
+    }
+
+    private fun executeExternalAction(
+        intention: Intention,
+        action: ExternalAction,
+        context: AgentContext,
+        environment: Environment,
+        goal: ActionGoal
+    ): ExecutionResult {
+        var newIntention = intention.pop()
+        try {
+            val externalResponse = action.execute(
+                ExternalRequest.of(
+                    environment,
+                    agent.name,
+                    controller.currentTime(),
+                    goal.action.args
+                )
+            )
+            return if (externalResponse.substitution.isSuccess) {
+                if (newIntention.recordStack.isNotEmpty()) {
+                    newIntention = newIntention.applySubstitution(externalResponse.substitution)
+                }
+                ExecutionResult(
+                    context.copy(intentions = context.intentions.updateIntention(newIntention)),
+                    externalResponse.effects,
+                )
+            } else {
+                ExecutionResult(failAchievementGoal(intention, context))
+            }
+        } catch (e: IllegalArgumentException) {
+            // Argument number mismatch from action definition
+            return ExecutionResult(failAchievementGoal(intention, context))
+        }
+    }
     override fun runIntention(intention: Intention, context: AgentContext, environment: Environment): ExecutionResult =
         when (val nextGoal = intention.nextGoal()) {
             is EmptyGoal -> ExecutionResult(
@@ -108,7 +173,6 @@ internal data class AgentLifecycleImpl(
             )
             is ActionGoal -> when (nextGoal) {
                 is ActInternally -> {
-                    var newIntention = intention.pop()
                     val internalAction = context.internalActions[nextGoal.action.functor]
 
                     if (internalAction == null) {
@@ -116,57 +180,33 @@ internal data class AgentLifecycleImpl(
                         ExecutionResult(failAchievementGoal(intention, context))
                     } else {
                         // Execute Internal Action
-                        try {
-                            val internalResponse = internalAction.execute(
-                                InternalRequest.of(this.agent, controller.currentTime(), nextGoal.action.args)
-                            )
-                            // Apply substitution
-                            if (internalResponse.substitution.isSuccess) {
-                                if (newIntention.recordStack.isNotEmpty()) {
-                                    newIntention = newIntention.applySubstitution(internalResponse.substitution)
-                                }
-                                val newContext = applyEffects(context, internalResponse.effects)
-                                ExecutionResult(
-                                    newContext.copy(intentions = newContext.intentions.updateIntention(newIntention)),
-                                )
-                            } else {
-                                ExecutionResult(failAchievementGoal(intention, context))
-                            }
-                        } catch (e: IllegalArgumentException) {
-                            // Argument number mismatch from action definition
-                            ExecutionResult(failAchievementGoal(intention, context))
-                        }
+                        executeInternalAction(intention, internalAction, context, nextGoal)
                     }
                 }
-                is Act -> {
-                    val newIntention = intention.pop()
+                is ActExternally -> {
                     val externalAction = environment.externalActions[nextGoal.action.functor]
                     if (externalAction == null) {
                         // Internal Action not found
                         ExecutionResult(failAchievementGoal(intention, context))
                     } else {
-                        // Execute Internal Action
-                        try {
-                            val externalResponse = externalAction.execute(
-                                ExternalRequest.of(
-                                    environment,
-                                    agent.name,
-                                    controller.currentTime(),
-                                    nextGoal.action.args
-                                )
-                            )
-                            // TODO("Is needed substitution for external actions execution?")
-                            if (externalResponse.substitution.isSuccess) {
-                                ExecutionResult(
-                                    context.copy(intentions = context.intentions.updateIntention(newIntention)),
-                                    externalResponse.effects,
-                                )
-                            } else {
-                                ExecutionResult(failAchievementGoal(intention, context))
-                            }
-                        } catch (e: IllegalArgumentException) {
-                            // Argument number mismatch from action definition
-                            ExecutionResult(failAchievementGoal(intention, context))
+                        // Execute External Action
+                        executeExternalAction(intention, externalAction, context, environment, nextGoal)
+                    }
+                }
+                is Act -> {
+                    val action = (environment.externalActions + context.internalActions)[nextGoal.action.functor]
+                    if (action == null) {
+                        // Internal Action not found
+                        ExecutionResult(failAchievementGoal(intention, context))
+                    } else {
+                        // Execute Action
+                        when (action) {
+                            is InternalAction -> executeInternalAction(intention, action, context, nextGoal)
+                            is ExternalAction ->
+                                executeExternalAction(intention, action, context, environment, nextGoal)
+                            else ->
+                                throw
+                                IllegalStateException("The Action to execute is neither internal nor external")
                         }
                     }
                 }

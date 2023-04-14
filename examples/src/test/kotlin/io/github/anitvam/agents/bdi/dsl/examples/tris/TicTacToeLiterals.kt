@@ -2,6 +2,8 @@ package io.github.anitvam.agents.bdi.dsl.examples.tris
 
 import io.github.anitvam.agents.bdi.actions.ExternalAction
 import io.github.anitvam.agents.bdi.actions.InternalAction
+import io.github.anitvam.agents.bdi.dsl.beliefs.fromPercept
+import io.github.anitvam.agents.bdi.dsl.beliefs.selfSourced
 import io.github.anitvam.agents.bdi.dsl.examples.OwnName
 import io.github.anitvam.agents.bdi.dsl.plans.BodyScope
 import it.unibo.tuprolog.core.Struct
@@ -18,12 +20,20 @@ object TicTacToeLiterals {
 
     fun LogicProgrammingScope.cell(symbol: Any) = cell(null, null, symbol)
 
+    fun LogicProgrammingScope.turn(
+        symbol: Any
+    ) = structOf("turn", symbol.toTerm()).fromPercept
+
+    fun LogicProgrammingScope.aligned(
+        symbol: Any
+    ) = structOf("aligned", symbol.toTerm()).selfSourced
+
     fun allPossibleCombinationsOf(cell: Struct, other: Struct, repetitions: Int): Sequence<List<Struct>> =
         (1..repetitions).map { other }.plus(cell).permutations().distinct()
 
     context (BodyScope)
     operator fun <T : ExternalAction> T.invoke(arg: Any, vararg args: Any) {
-        act(signature.name(arg, *args))
+        execute(signature.name(arg, *args))
     }
 
     context (BodyScope)
@@ -31,12 +41,10 @@ object TicTacToeLiterals {
         iact(signature.name(arg, *args))
     }
 
-    val aligned by OwnName
     val vertical by OwnName
     val horizontal by OwnName
     val diagonal by OwnName
     val antidiagonal by OwnName
-    val turn by OwnName
     val x by OwnName
     val e by OwnName
     val o by OwnName

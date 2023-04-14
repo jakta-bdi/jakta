@@ -28,7 +28,7 @@ fun main() {
             }
             plans {
                 + achieve("send_message") then {
-                    act("send"("bob", "message"))
+                    execute("send"("bob", "message"))
                 }
                 + "message"("source"(S)) then {
                     iact("print"("Received message from ", S))
@@ -39,7 +39,7 @@ fun main() {
             plans {
                 + "message"("source"(S)) then {
                     iact("print"("Received message from ", S))
-                    act("send"(S, "message"))
+                    execute("send"(S, "message"))
                 }
             }
         }
