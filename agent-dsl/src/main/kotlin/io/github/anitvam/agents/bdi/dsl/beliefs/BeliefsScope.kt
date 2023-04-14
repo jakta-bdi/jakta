@@ -15,7 +15,7 @@ class BeliefsScope(
     private val beliefs = mutableListOf<Belief>()
 
     fun fact(struct: Struct) {
-        val belief: Belief = Belief.fromSelfSource(struct.freshCopy())
+        val belief: Belief = Belief.wrap(struct.freshCopy())
         beliefs.add(belief)
     }
 
@@ -32,7 +32,7 @@ class BeliefsScope(
     fun rule(rule: Rule) {
         @Suppress("NAME_SHADOWING")
         val rule = rule.freshCopy()
-        val belief: Belief = Belief.fromSelfSource(rule.head, rule.bodyItems)
+        val belief: Belief = Belief.wrap(rule.head, rule.bodyItems)
         beliefs.add(belief)
     }
 

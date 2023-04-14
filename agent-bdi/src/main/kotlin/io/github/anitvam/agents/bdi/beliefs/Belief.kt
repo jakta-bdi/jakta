@@ -5,6 +5,7 @@ import it.unibo.tuprolog.core.Rule
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.core.Term
+import it.unibo.tuprolog.core.Var
 import io.github.anitvam.agents.bdi.beliefs.impl.BeliefImpl
 
 interface Belief {
@@ -16,6 +17,13 @@ interface Belief {
 
         val SOURCE_PERCEPT: Term = Struct.of("source", Atom.of("percept"))
         val SOURCE_SELF: Term = Struct.of("source", Atom.of("self"))
+
+        fun wrap(head: Struct, body: Iterable<Term> = emptyList()): Belief {
+            if (head.arity >= 1 && head[0].let { it is Struct && it.arity == 1 && it.functor == "source" }) {
+                return BeliefImpl(Rule.of(head, body))
+            }
+            return BeliefImpl(Rule.of(head.addFirst(Struct.of("source", Var.of("Source"))), body))
+        }
 
         fun of(head: Struct, body: Iterable<Term>, isFromPerceptSource: Boolean): Belief {
             val headArguments = (if (isFromPerceptSource) listOf(SOURCE_PERCEPT) else listOf(SOURCE_SELF)) + head.args
