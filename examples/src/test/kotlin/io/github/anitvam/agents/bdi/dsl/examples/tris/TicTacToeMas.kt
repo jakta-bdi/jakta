@@ -1,123 +1,108 @@
 package io.github.anitvam.agents.bdi.dsl.examples.tris
 
-import io.github.anitvam.agents.bdi.Message
-import io.github.anitvam.agents.bdi.beliefs.BeliefBase
+import io.github.anitvam.agents.bdi.Jakta
+import io.github.anitvam.agents.bdi.actions.InternalActions
+import io.github.anitvam.agents.bdi.actions.InternalActions.Print
 import io.github.anitvam.agents.bdi.dsl.MasScope
 import io.github.anitvam.agents.bdi.dsl.beliefs.BeliefsScope
 import io.github.anitvam.agents.bdi.dsl.beliefs.fromPercept
-import io.github.anitvam.agents.bdi.dsl.beliefs.selfSourced
+import io.github.anitvam.agents.bdi.dsl.examples.tris.TicTacToeLiterals.aligned
 import io.github.anitvam.agents.bdi.dsl.examples.tris.TicTacToeLiterals.allPossibleCombinationsOf
+import io.github.anitvam.agents.bdi.dsl.examples.tris.TicTacToeLiterals.antidiagonal
 import io.github.anitvam.agents.bdi.dsl.examples.tris.TicTacToeLiterals.cell
+import io.github.anitvam.agents.bdi.dsl.examples.tris.TicTacToeLiterals.diagonal
+import io.github.anitvam.agents.bdi.dsl.examples.tris.TicTacToeLiterals.e
+import io.github.anitvam.agents.bdi.dsl.examples.tris.TicTacToeLiterals.horizontal
+import io.github.anitvam.agents.bdi.dsl.examples.tris.TicTacToeLiterals.invoke
+import io.github.anitvam.agents.bdi.dsl.examples.tris.TicTacToeLiterals.o
+import io.github.anitvam.agents.bdi.dsl.examples.tris.TicTacToeLiterals.turn
+import io.github.anitvam.agents.bdi.dsl.examples.tris.TicTacToeLiterals.vertical
+import io.github.anitvam.agents.bdi.dsl.examples.tris.TicTacToeLiterals.x
 import io.github.anitvam.agents.bdi.dsl.mas
-import io.github.anitvam.agents.bdi.messages.Tell
-import it.unibo.tuprolog.core.Atom
-import it.unibo.tuprolog.core.Struct
-import it.unibo.tuprolog.dsl.lp
+import io.github.anitvam.agents.bdi.dsl.plans.BodyScope
+import io.github.anitvam.agents.bdi.dsl.plans.PlansScope
+import it.unibo.tuprolog.core.TermFormatter
+import it.unibo.tuprolog.core.operators.OperatorSet
 
 fun BeliefsScope.alignment(name: String, dx: Int, dy: Int) {
-    val second = cell(X, Y, Z).fromPercept
     val first = cell(A, B, C).fromPercept
-    rule(name(listOf(second)) impliedBy second)
-    rule(name(listFrom(first, second, last = W)) .impliedBy(
-        first,
-        second,
-        (X - A) arithEq dx,
-        (Y - B) arithEq dy,
-        name(listFrom(second, last = W))
-    ))
-
+    val second = cell(X, Y, Z).fromPercept
+    rule { name(listOf(second)) impliedBy second }
+    rule {
+        name(listFrom(first, second, last = W)) .impliedBy(
+            first,
+            second,
+            (X - A) arithEq dx,
+            (Y - B) arithEq dy,
+            name(listFrom(second, last = W))
+        )
+    }
 }
 
 fun ticTacToe(n: Int = 3) = mas {
+    require(n > 0)
     environment {
         from(GridEnvironment(n))
-        actions {
-            action(Put)
-            action("printGrid", 0) {
-                for(row in environment.data["grid"] as Array<*>) {
-                    for(cell in row as CharArray) {
-                        print("$cell \t")
-                    }
-                    println()
-                }
-            }
-            action("passTurn", 1) {
-                val other: Atom = argument(0)
-                println("End of $sender turn, passing to $other")
-                this.sendMessage(other.value, Message(this.sender, Tell, Atom.of("endTurn")))
-            }
-        }
+        actions { action(Put) }
     }
-    generatePlayer("x", "o", n)
-    generatePlayer("o", "x", n)
+    player(mySymbol=o, otherSymbol=x, gridSize=n)
+    player(mySymbol=x, otherSymbol=o, gridSize=n)
 }
 
-fun MasScope.generatePlayer(mySymbol: String, otherSymbol: String, gridDimension: Int) = agent("$mySymbol-agent") {
+fun MasScope.player(mySymbol: String, otherSymbol: String, gridSize: Int) = agent("${mySymbol}-agent") {
     beliefs {
-        alignment("vertical", dx = 0, dy = 1)
-        alignment("horizontal", dx = 1, dy = 0)
-        alignment("diagonal", dx = 1, dy = 1)
-        alignment("antidiagonal", dx = 1, dy = -1)
-        for (direction in arrayOf("vertical", "horizontal", "diagonal", "antidiagonal")) {
-            rule("aligned"(L) impliedBy direction(L).selfSourced)
+        alignment(vertical, dx=0, dy=1)
+        alignment(horizontal, dx=1, dy=0)
+        alignment(diagonal, dx=1, dy=1)
+        alignment(antidiagonal, dx=1, dy=-1)
+        for (direction in arrayOf(vertical, horizontal, diagonal, antidiagonal)) {
+            rule { aligned(L) impliedBy direction(L) }
         }
-        if (mySymbol=="x") fact("turn"("self")) else fact("turn"("other"))
     }
-    goals { if (mySymbol=="x") achieve("play") }
     plans {
-        arrayOf(mySymbol, otherSymbol).map { symbol ->
-            + achieve("play") onlyIf {
-                "aligned"((1..gridDimension).map { cell(symbol = symbol).fromPercept }) and "turn"("self").selfSourced
-            } then {
-                iact("print"(if (symbol == mySymbol) "I won!" else "I lost!"))
-                iact("stop")
-            }
-        }
-        for (winningLine in allPossibleCombinationsOf(cell(X, Y, "e").fromPercept, cell(symbol = mySymbol).fromPercept, cell(symbol = "e").fromPercept, gridDimension - 1 )) {
-            + achieve("play") onlyIf {
-                "aligned"(winningLine).selfSourced and "turn"("self").selfSourced
-            } then {
-                act("put"(X, Y, mySymbol))
-                act("printGrid")
-                update("turn"("other").selfSourced)
-                act("passTurn"("$otherSymbol-agent"))
-            }
-        }
-        + achieve("play") onlyIf {
-            cell(X, Y, "e").fromPercept and "turn"("self").selfSourced
-        } then {
-            act("put"(X, Y, mySymbol))
-            act("printGrid")
-            update("turn"("other").selfSourced)
-            act("passTurn"("$otherSymbol-agent"))
-        }
-
-        + "endTurn"("source"("$otherSymbol-agent")) onlyIf {
-            "turn"("other").selfSourced
-        } then {
-            - "endTurn"("source"("$otherSymbol-agent"))
-            update("turn"("self").selfSourced)
-            achieve("play")
-        }
+        detectVictory(mySymbol, gridSize)                           // plan 1
+        detectDefeat(mySymbol, otherSymbol, gridSize)               // plan 2
+        makeWinningMove(mySymbol, gridSize)                         // plan 3
+        preventOtherFromWinning(mySymbol, otherSymbol, gridSize)    // plan 4
+        randomMove(mySymbol)                                        // plan 5
     }
 }
+
+fun PlansScope.detectVictory(mySymbol: String, gridSize: Int) =
+    detectLine(mySymbol, mySymbol, gridSize) { Print("I won!") }
+fun PlansScope.detectDefeat(mySymbol: String, otherSymbol: String, gridSize: Int) =
+    detectLine(mySymbol, otherSymbol, gridSize) { Print("I lost!") }
+
+fun PlansScope.detectLine(mySymbol: String, symbol: String, size: Int, action: BodyScope.() -> Unit) =
+    +turn(mySymbol).fromPercept onlyIf { aligned((1..size).map { cell(symbol) }) } then(action)
+
+fun PlansScope.makeWinningMove(mySymbol: String, gridSize: Int, symbol: String = mySymbol) {
+    for (winningLine in allPossibleCombinationsOf(cell(X, Y, e), cell(symbol), gridSize - 1)) {
+        +turn(mySymbol).fromPercept onlyIf { aligned(winningLine) } then { Put(X, Y, mySymbol) }
+    }
+}
+
+fun PlansScope.preventOtherFromWinning(mySymbol: String, otherSymbol: String, gridSize: Int) =
+    makeWinningMove(mySymbol, gridSize, otherSymbol)
+
+fun PlansScope.randomMove(mySymbol: String) =
+    +turn(mySymbol).fromPercept onlyIf { cell(X, Y, e) } then { Put(X, Y, mySymbol) }
+
 
 fun main() {
     val system = ticTacToe(3)
-//    for (agent in system.agents) {
-//        println("% ${agent.name}")
-//        for (plan in agent.context.planLibrary.plans) {
-//            val formatter = TermFormatter.prettyExpressions(operatorSet = OperatorSet.DEFAULT + Jakta.operators)
-//            println("+!${formatter.format(plan.trigger.value)} " +
-//                    ": ${formatter.format(plan.guard)} " +
-//                    "<- ${plan.goals.joinToString("; "){ formatter.format(it.value) }}")
-//        }
-//    }
-
-//    val bb = system.agents.first().context.beliefBase.addAll(system.environment.percept()).updatedBeliefBase
-//    println(bb.joinToString("\n"))
-//    println(bb.solve(lp<Struct> {
-//        "aligned"(listOf(cell(`_`,`_`,"x").fromPercept, cell(`_`,`_`,"x").fromPercept, cell(X, Y, "e").fromPercept))
-//    }))
-    system.start()
+    for (agent in system.agents) {
+        println("% ${agent.name}")
+        for (belief in agent.context.beliefBase) {
+            val formatter = TermFormatter.prettyExpressions(operatorSet = OperatorSet.DEFAULT + Jakta.operators)
+            println(formatter.format(belief.rule))
+        }
+        for (plan in agent.context.planLibrary.plans) {
+            val formatter = TermFormatter.prettyExpressions(operatorSet = OperatorSet.DEFAULT + Jakta.operators)
+            println("+!${formatter.format(plan.trigger.value)} " +
+                    ": ${formatter.format(plan.guard)} " +
+                    "<- ${plan.goals.joinToString("; "){ formatter.format(it.value) }}")
+        }
+    }
+//    system.start()
 }
