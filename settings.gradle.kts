@@ -1,5 +1,6 @@
 plugins {
-    id("org.danilopianini.gradle-pre-commit-git-hooks") version "1.0.25"
+    id("org.danilopianini.gradle-pre-commit-git-hooks") version "1.1.5"
+    id("org.gradle.toolchains.foojay-resolver-convention") version "0.4.0"
 }
 
 gitHooks {
@@ -10,7 +11,7 @@ gitHooks {
     createHooks()
 }
 
-rootProject.name = "ise-2022-project-baiardi"
+rootProject.name = "jakta"
 
 include(":utils")
 include(":agent-fsm")

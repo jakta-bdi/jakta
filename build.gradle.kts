@@ -1,4 +1,4 @@
-group = "io.github.anitvam"
+group = "it.unibo.jakta"
 
 allprojects {
     group = rootProject.group
