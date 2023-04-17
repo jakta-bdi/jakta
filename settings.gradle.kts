@@ -14,7 +14,7 @@ gitHooks {
 rootProject.name = "jakta"
 
 include(":utils")
-include(":agent-fsm")
-include(":agent-bdi")
-include("examples")
-include("agent-dsl")
+include(":jakta-state-machine")
+include(":jakta-bdi")
+include(":jakta-examples")
+include(":jakta-dsl")

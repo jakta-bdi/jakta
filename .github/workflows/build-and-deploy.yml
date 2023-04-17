@@ -26,6 +26,8 @@ jobs:
         run: ./gradlew build
       - name: Lint Check
         run: ./gradlew ktlintCheck
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
   release:
     concurrency:
       # Only one release job at a time. Strictly sequential.
