@@ -1,4 +1,7 @@
-# JaKtA (Jason-like Kotlin Agents) 
+
+| <img src="/site/static/images/logo.svg"  width="100"> | <h1>JaKtA (Jason-like Kotlin Agents)</h1> |
+|:-:|:-:|
+
 
 JaKtA is a Kotlin internal DSL adding support for the definition of BDI agents in the spirit of the well-known Jason language.
 
@@ -8,3 +11,10 @@ JaKtA is a Kotlin internal DSL adding support for the definition of BDI agents i
 [![GitHub pull requests](https://img.shields.io/github/issues-pr-raw/jakta-bdi/jakta?style=plastic)](https://github.com/jakta-bdi/jakta/pulls)
 [![GitHub](https://img.shields.io/github/license/jakta-bdi/jakta?style=plastic)](/LICENSE)
 [![GitHub release (latest SemVer including pre-releases)](https://img.shields.io/github/v/release/jakta-bdi/jakta?include_prereleases&style=plastic)](https://github.com/jakta-bdi/jakta/releases)
+
+
+### Contributors
+
+<a href="https://github.com/jakta-bdi/jakta/graphs/contributors">
+	<img src="https://contributors-img.web.app/image?repo=jakta-bdi/jakta" />
+</a>
