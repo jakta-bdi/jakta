@@ -22,7 +22,7 @@ dependencies {
     implementation(libs.kotlin.stdlib)
     testImplementation(libs.bundles.kotlin.testing)
     api(project(":utils"))
-    api(project(":agent-bdi"))
+    api(project(":jakta-bdi"))
     api(libs.tuprolog.dsl.theory)
     api(libs.tuprolog.dsl.core)
 }
