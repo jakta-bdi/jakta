@@ -1,3 +1,10 @@
+# [0.4.0](https://github.com/jakta-bdi/jakta/compare/v0.3.0...v0.4.0) (2023-04-17)
+
+
+### Features
+
+* rename jakta modules ([5d91623](https://github.com/jakta-bdi/jakta/commit/5d91623862766bf1b812585a05573f306e0f27e2))
+
 # [0.3.0](https://github.com/jakta-bdi/jakta/compare/v0.2.0...v0.3.0) (2023-04-15)
 
 
