@@ -1,3 +1,10 @@
+## [0.4.1](https://github.com/jakta-bdi/jakta/compare/v0.4.0...v0.4.1) (2023-04-18)
+
+
+### Bug Fixes
+
+* correct configuration of central publishing plugin ([4621ee7](https://github.com/jakta-bdi/jakta/commit/4621ee797ddb4fbe42c40e23210e29f0f5349435))
+
 # [0.4.0](https://github.com/jakta-bdi/jakta/compare/v0.3.0...v0.4.0) (2023-04-17)
 
 
