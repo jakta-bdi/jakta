@@ -48,13 +48,14 @@ jobs:
         with:
           fetch-depth: 0
       - name: semver
-        uses: anitvam/conventionalcommit-semantic-releasing@v0.5.4
+        uses: anitvam/conventionalcommit-semantic-releasing@v0.5.5
         env:
           ORG_GRADLE_PROJECT_mavenRepo: "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
           ORG_GRADLE_PROJECT_mavenUsername: "anitvam"
           ORG_GRADLE_PROJECT_mavenPassword: ${{ secrets.MAVEN_PASSWORD }}
           ORG_GRADLE_PROJECT_signingKey: ${{ inputs.SIGNING_KEY }}
           ORG_GRADLE_PROJECT_signingPassword: ${{ inputs.SIGNING_PASSWORD }}
+          ENV: "myenvvar"
         with:
           token: ${{ secrets.RELEASE_TOKEN }}
           publish-command: "./gradlew uploadKotlin"
