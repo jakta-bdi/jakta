@@ -2,10 +2,8 @@
 plugins {
     `java-gradle-plugin`
     alias(libs.plugins.dokka)
-    alias(libs.plugins.gitSemVer)
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.qa)
-    alias(libs.plugins.publishOnCentral)
     alias(libs.plugins.multiJvmTesting)
     alias(libs.plugins.taskTree)
 }
