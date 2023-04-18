@@ -1,3 +1,10 @@
+## [0.4.2](https://github.com/jakta-bdi/jakta/compare/v0.4.1...v0.4.2) (2023-04-18)
+
+
+### Bug Fixes
+
+* add environment variable to debug execution ([6dfea90](https://github.com/jakta-bdi/jakta/commit/6dfea90b882a510787df2fa9c7e9eb978bcc0a6f))
+
 ## [0.4.1](https://github.com/jakta-bdi/jakta/compare/v0.4.0...v0.4.1) (2023-04-18)
 
 
