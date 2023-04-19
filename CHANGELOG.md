@@ -1,3 +1,10 @@
+## [0.4.6](https://github.com/jakta-bdi/jakta/compare/v0.4.5...v0.4.6) (2023-04-19)
+
+
+### Bug Fixes
+
+* fix configuration of maven pom in release ([6c143c6](https://github.com/jakta-bdi/jakta/commit/6c143c64556afb80d4187ef1e9aac77c91540224))
+
 ## [0.4.5](https://github.com/jakta-bdi/jakta/compare/v0.4.4...v0.4.5) (2023-04-19)
 
 
