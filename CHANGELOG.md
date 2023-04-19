@@ -1,3 +1,12 @@
+## [0.4.8](https://github.com/jakta-bdi/jakta/compare/v0.4.7...v0.4.8) (2023-04-19)
+
+
+### Bug Fixes
+
+* correct typo in gradle configuration ([ef4e665](https://github.com/jakta-bdi/jakta/commit/ef4e665a12d76d9fbfdde8362027bb1b6aef380a))
+* correct typo in gradle configuration ([761382f](https://github.com/jakta-bdi/jakta/commit/761382f15090347137af7558d4e2711c0d1f05ad))
+* correct typo in gradle configuration ([4347b95](https://github.com/jakta-bdi/jakta/commit/4347b955f8f97a89eb4c838278b5e2924c84356e))
+
 ## [0.4.7](https://github.com/jakta-bdi/jakta/compare/v0.4.6...v0.4.7) (2023-04-19)
 
 
