@@ -34,16 +34,16 @@ allprojects {
     publishOnCentral {
         projectLongName.set("JaKtA")
         projectDescription.set("A Kotlin internal DSL for the definition of BDI agents")
-        projectUrl.set("https://github.com/jakta-bdi/${project.name}")
-        scmConnection.set("git:git@github.com:jakta-bdi/${project.name}")
+        projectUrl.set("https://github.com/jakta-bdi/jakta")
+        scmConnection.set("git:git@github.com:jakta-bdi/jakta")
         publishing {
             publications {
                 withType<MavenPublication>().configureEach {
                     pom {
                         scm {
-                            connection.set("git:git@github.com:jakta-bdi/${rootProject.name}")
-                            developerConnection.set("git:git@github.com:jakta-bdi/${rootProject.name}")
-                            url.set("https://github.com/jakta-bdi/${rootProject.name}")
+                            connection.set("git:git@github.com:jakta-bdi/jakta")
+                            developerConnection.set("git:git@github.com:jakta-bdi/jakta")
+                            url.set("https://github.com/jakta-bdi/jakta")
                         }
                         developers {
                             developer {
