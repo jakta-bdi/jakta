@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.gitSemVer)
     alias(libs.plugins.publishOnCentral)
 }
+
 val Provider<PluginDependency>.id: String get() = get().pluginId
 
 allprojects {
@@ -16,6 +17,12 @@ allprojects {
     }
     repositories {
         mavenCentral()
+    }
+
+    gitSemVer {
+        versionPrefix.set("v")
+        excludeLightweightTags()
+        assignGitSemanticVersion()
     }
 
     signing {
