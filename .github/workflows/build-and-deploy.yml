@@ -52,8 +52,8 @@ jobs:
         env:
           MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
           MAVEN_CENTRAL_USERNAME: "anitvam"
-          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
-          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingKey: ${{ secrets.SIGNING_KEY }}
+          ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.SIGNING_PASSWORD }}
         with:
           token: ${{ secrets.RELEASE_TOKEN }}
           publish-command: "./gradlew uploadKotlin"
