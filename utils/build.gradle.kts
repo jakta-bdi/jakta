@@ -30,13 +30,18 @@ kotlin {
     }
 }
 
-tasks.test {
-    useJUnitPlatform()
-    testLogging {
-        showStandardStreams = true
-        showCauses = true
-        showStackTraces = true
-        events(*org.gradle.api.tasks.testing.logging.TestLogEvent.values())
-        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+tasks {
+    withType<AbstractPublishToMaven>().configureEach {
+        enabled = false
+    }
+    test {
+        useJUnitPlatform()
+        testLogging {
+            showStandardStreams = true
+            showCauses = true
+            showStackTraces = true
+            events(*org.gradle.api.tasks.testing.logging.TestLogEvent.values())
+            exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+        }
     }
 }
