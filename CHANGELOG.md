@@ -1,3 +1,10 @@
+## [0.4.5](https://github.com/jakta-bdi/jakta/compare/v0.4.4...v0.4.5) (2023-04-19)
+
+
+### Bug Fixes
+
+* update version of gitsemver gradle plugin and correct its configuration ([ab3f7c5](https://github.com/jakta-bdi/jakta/commit/ab3f7c5f68239b56ab1e06c0cc33cecb9ad939cb))
+
 ## [0.4.4](https://github.com/jakta-bdi/jakta/compare/v0.4.3...v0.4.4) (2023-04-19)
 
 
