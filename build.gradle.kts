@@ -34,7 +34,7 @@ allprojects {
     publishOnCentral {
         projectLongName.set("JaKtA")
         projectDescription.set("A Kotlin internal DSL for the definition of BDI agents")
-        projectUrl.set("https://github.com/jakta-bsi/${project.name}")
+        projectUrl.set("https://github.com/jakta-bdi/${project.name}")
         scmConnection.set("git:git@github.com:jakta-bdi/${project.name}")
         publishing {
             publications {
