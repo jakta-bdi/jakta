@@ -1,3 +1,10 @@
+## [0.4.7](https://github.com/jakta-bdi/jakta/compare/v0.4.6...v0.4.7) (2023-04-19)
+
+
+### Bug Fixes
+
+* add configuration of project url for maven publication ([082cd34](https://github.com/jakta-bdi/jakta/commit/082cd3475f15506a0a7fd18e9b8a7d54c00c71b5))
+
 ## [0.4.6](https://github.com/jakta-bdi/jakta/compare/v0.4.5...v0.4.6) (2023-04-19)
 
 
