@@ -56,7 +56,7 @@ jobs:
           ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.SIGNING_PASSWORD }}
         with:
           token: ${{ secrets.RELEASE_TOKEN }}
-          publish-command: "./gradlew uploadKotlin"
+          publish-command: "./gradlew uploadKotlin release"
   success:
     runs-on: ubuntu-latest
     needs:

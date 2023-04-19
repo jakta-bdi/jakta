@@ -36,7 +36,7 @@ allprojects {
         projectDescription.set("A Kotlin internal DSL for the definition of BDI agents")
         publishing {
             publications {
-                withType<MavenPublication> {
+                withType<MavenPublication>().configureEach {
                     pom {
                         scm {
                             connection.set("git:git@github.com:jakta-bdi/${rootProject.name}")
