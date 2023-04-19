@@ -6,6 +6,8 @@ plugins {
     alias(libs.plugins.publishOnCentral)
 }
 
+val scmDeveloperConnection = "git:git@github.com:jakta-bdi/jakta"
+val repoUrl = "https://github.com/jakta-bdi/jakta"
 val Provider<PluginDependency>.id: String get() = get().pluginId
 
 allprojects {
@@ -34,16 +36,16 @@ allprojects {
     publishOnCentral {
         projectLongName.set("JaKtA")
         projectDescription.set("A Kotlin internal DSL for the definition of BDI agents")
-        projectUrl.set("https://github.com/jakta-bdi/jakta")
-        scmConnection.set("git:git@github.com:jakta-bdi/jakta")
+        projectUrl.set(repoUrl)
+        scmConnection.set(scmDeveloperConnection)
         publishing {
             publications {
                 withType<MavenPublication>().configureEach {
                     pom {
                         scm {
-                            connection.set("git:git@github.com:jakta-bdi/jakta")
-                            developerConnection.set("git:git@github.com:jakta-bdi/jakta")
-                            url.set("https://github.com/jakta-bdi/jakta")
+                            connection.set(scmDeveloperConnection)
+                            developerConnection.set(scmDeveloperConnection)
+                            url.set(repoUrl)
                         }
                         developers {
                             developer {
