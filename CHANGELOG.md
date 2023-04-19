@@ -1,3 +1,11 @@
+## [0.4.4](https://github.com/jakta-bdi/jakta/compare/v0.4.3...v0.4.4) (2023-04-19)
+
+
+### Bug Fixes
+
+* add signing key and signing password as gradle properties env vars ([32172d6](https://github.com/jakta-bdi/jakta/commit/32172d6a460d02acd09155b73c6bc5656fdb0da3))
+* update version of semantic-release action and remove utils package from release ([c63757c](https://github.com/jakta-bdi/jakta/commit/c63757c15cdaa564ec81b8b26b89506ed901594d))
+
 ## [0.4.3](https://github.com/jakta-bdi/jakta/compare/v0.4.2...v0.4.3) (2023-04-19)
 
 
