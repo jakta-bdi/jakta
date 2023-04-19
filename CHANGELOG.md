@@ -1,3 +1,11 @@
+## [0.4.3](https://github.com/jakta-bdi/jakta/compare/v0.4.2...v0.4.3) (2023-04-19)
+
+
+### Bug Fixes
+
+* add more env variables for publish task execution ([af767f1](https://github.com/jakta-bdi/jakta/commit/af767f1c2ab022ea7932168006159e18beb78652))
+* update ci configuration for release on central ([398eb12](https://github.com/jakta-bdi/jakta/commit/398eb1200ee07b381920d3fada314d6ab4f94998))
+
 ## [0.4.2](https://github.com/jakta-bdi/jakta/compare/v0.4.1...v0.4.2) (2023-04-18)
 
 
