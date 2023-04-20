@@ -1,3 +1,10 @@
+## [0.4.10](https://github.com/jakta-bdi/jakta/compare/v0.4.9...v0.4.10) (2023-04-20)
+
+
+### Bug Fixes
+
+* move utils submodule into a package and refactor of build.gradle ([34c41f5](https://github.com/jakta-bdi/jakta/commit/34c41f5e7b8752b6c9c2937f11556ff948221c30))
+
 ## [0.4.9](https://github.com/jakta-bdi/jakta/compare/v0.4.8...v0.4.9) (2023-04-20)
 
 
