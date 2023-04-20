@@ -1,3 +1,10 @@
+## [0.4.9](https://github.com/jakta-bdi/jakta/compare/v0.4.8...v0.4.9) (2023-04-20)
+
+
+### Bug Fixes
+
+* refactor gradle build files and dependencies ([7bd8981](https://github.com/jakta-bdi/jakta/commit/7bd89815bd915aa3fb957acd02c8f41843f9a9e2))
+
 ## [0.4.8](https://github.com/jakta-bdi/jakta/compare/v0.4.7...v0.4.8) (2023-04-19)
 
 
