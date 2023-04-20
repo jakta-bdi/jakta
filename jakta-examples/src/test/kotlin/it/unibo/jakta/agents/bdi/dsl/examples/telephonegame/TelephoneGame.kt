@@ -27,7 +27,7 @@ fun main() {
             }
         }
 
-        repeat(nAgents) {id ->
+        repeat(nAgents) { id ->
             agent("ag$id") {
                 beliefs {
                     fact(receiver("ag${(id + 1) % nAgents}"))
@@ -52,4 +52,3 @@ fun main() {
         }
     }.start()
 }
-

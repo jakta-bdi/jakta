@@ -49,9 +49,12 @@ class GridEnvironment(
             newEnv = result
         }
         if ("turn" in newData) {
-            newEnv = newEnv.copy(perception =
-                Perception.of(Belief.fromPerceptSource(Struct.of("turn", Atom.of(newData["turn"] as String)))
-            ))
+            newEnv = newEnv.copy(
+                perception =
+                Perception.of(
+                    Belief.fromPerceptSource(Struct.of("turn", Atom.of(newData["turn"] as String)))
+                )
+            )
         }
         return newEnv
     }

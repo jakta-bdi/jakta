@@ -28,7 +28,7 @@ fun BeliefsScope.alignment(name: String, dx: Int, dy: Int) {
     val second = cell(X, Y, Z)
     rule { name(listOf(second)) impliedBy second }
     rule {
-        name(listFrom(first, second, last = W)) .impliedBy(
+        name(listFrom(first, second, last = W)).impliedBy(
             first,
             second,
             (X - A) arithEq dx,
@@ -44,26 +44,26 @@ fun ticTacToe(n: Int = 3) = mas {
         from(GridEnvironment(n))
         actions { action(Put) }
     }
-    player(mySymbol=o, otherSymbol=x, gridSize=n)
-    player(mySymbol=x, otherSymbol=o, gridSize=n)
+    player(mySymbol = o, otherSymbol = x, gridSize = n)
+    player(mySymbol = x, otherSymbol = o, gridSize = n)
 }
 
-fun MasScope.player(mySymbol: String, otherSymbol: String, gridSize: Int) = agent("${mySymbol}-agent") {
+fun MasScope.player(mySymbol: String, otherSymbol: String, gridSize: Int) = agent("$mySymbol-agent") {
     beliefs {
-        alignment(vertical, dx=0, dy=1)
-        alignment(horizontal, dx=1, dy=0)
-        alignment(diagonal, dx=1, dy=1)
-        alignment(antidiagonal, dx=1, dy=-1)
+        alignment(vertical, dx = 0, dy = 1)
+        alignment(horizontal, dx = 1, dy = 0)
+        alignment(diagonal, dx = 1, dy = 1)
+        alignment(antidiagonal, dx = 1, dy = -1)
         for (direction in arrayOf(vertical, horizontal, diagonal, antidiagonal)) {
             rule { aligned(L) impliedBy direction(L).fromSelf }
         }
     }
     plans {
-        detectVictory(mySymbol, gridSize)                           // plan 1
-        detectDefeat(mySymbol, otherSymbol, gridSize)               // plan 2
-        makeWinningMove(mySymbol, gridSize)                         // plan 3
-        preventOtherFromWinning(mySymbol, otherSymbol, gridSize)    // plan 4
-        randomMove(mySymbol)                                        // plan 5
+        detectVictory(mySymbol, gridSize) // plan 1
+        detectDefeat(mySymbol, otherSymbol, gridSize) // plan 2
+        makeWinningMove(mySymbol, gridSize) // plan 3
+        preventOtherFromWinning(mySymbol, otherSymbol, gridSize) // plan 4
+        randomMove(mySymbol) // plan 5
     }
 }
 
@@ -87,7 +87,6 @@ fun PlansScope.preventOtherFromWinning(mySymbol: String, otherSymbol: String, gr
 fun PlansScope.randomMove(mySymbol: String) =
     +turn(mySymbol) onlyIf { cell(X, Y, e) } then { Put(X, Y, mySymbol) }
 
-
 fun main() {
     val system = ticTacToe(3)
     for (agent in system.agents) {
@@ -98,9 +97,11 @@ fun main() {
         }
         for (plan in agent.context.planLibrary.plans) {
             val formatter = TermFormatter.prettyExpressions(operatorSet = OperatorSet.DEFAULT + Jakta.operators)
-            println("+!${formatter.format(plan.trigger.value)} " +
+            println(
+                "+!${formatter.format(plan.trigger.value)} " +
                     ": ${formatter.format(plan.guard)} " +
-                    "<- ${plan.goals.joinToString("; "){ formatter.format(it.value) }}")
+                    "<- ${plan.goals.joinToString("; "){ formatter.format(it.value) }}"
+            )
         }
     }
 //    system.start()

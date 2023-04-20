@@ -4,10 +4,13 @@ group = "it.unibo.jakta"
 plugins {
     alias(libs.plugins.gitSemVer)
     alias(libs.plugins.publishOnCentral)
+    alias(libs.plugins.dokka)
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.taskTree)
+    alias(libs.plugins.multiJvmTesting)
+    alias(libs.plugins.kotlin.qa)
 }
 
-val scmDeveloperConnection = "git:git@github.com:jakta-bdi/jakta"
-val repoUrl = "https://github.com/jakta-bdi/jakta"
 val Provider<PluginDependency>.id: String get() = get().pluginId
 
 allprojects {
@@ -16,7 +19,13 @@ allprojects {
     with(rootProject.libs.plugins) {
         apply(plugin = publishOnCentral.id)
         apply(plugin = gitSemVer.id)
+        apply(plugin = dokka.id)
+        apply(plugin = kotlin.jvm.id)
+        apply(plugin = taskTree.id)
+        apply(plugin = multiJvmTesting.id)
+        apply(plugin = kotlin.qa.id)
     }
+
     repositories {
         mavenCentral()
     }
@@ -25,6 +34,21 @@ allprojects {
         versionPrefix.set("v")
         excludeLightweightTags()
         assignGitSemanticVersion()
+    }
+
+    kotlin {
+        target {
+            compilations.all {
+                kotlinOptions {
+                    allWarningsAsErrors = true
+                    freeCompilerArgs = listOf("-opt-in=kotlin.RequiresOptIn", "-Xcontext-receivers")
+                }
+            }
+        }
+    }
+
+    multiJvm {
+        jvmVersionForCompilation.set(11)
     }
 
     signing {
@@ -36,19 +60,16 @@ allprojects {
     publishOnCentral {
         projectLongName.set("JaKtA")
         projectDescription.set("A Kotlin internal DSL for the definition of BDI agents")
-        projectUrl.set(repoUrl)
-        scmConnection.set(scmDeveloperConnection)
+        val repoOwner = "jakta-bdi"
+        scmConnection.set("scm:git:https://github.com/$repoOwner/${rootProject.name}")
+        projectUrl.set("https://github.com/$repoOwner/${rootProject.name}")
         publishing {
             publications {
                 withType<MavenPublication>().configureEach {
                     pom {
-                        scm {
-                            connection.set(scmDeveloperConnection)
-                            developerConnection.set(scmDeveloperConnection)
-                            url.set(repoUrl)
-                        }
                         developers {
                             developer {
+                                id.set("anitvam")
                                 name.set("Martina Baiardi")
                                 email.set("m.baiardi@unibo.it")
                             }
@@ -59,5 +80,22 @@ allprojects {
         }
     }
 
-}
+    tasks {
+        test {
+            useJUnitPlatform()
+            testLogging {
+                showStandardStreams = true
+                showCauses = true
+                showStackTraces = true
+                events(*org.gradle.api.tasks.testing.logging.TestLogEvent.values())
+                exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+            }
+        }
+    }
 
+    tasks.detekt {
+        onlyIf {
+            project.hasProperty("runDetect")
+        }
+    }
+}

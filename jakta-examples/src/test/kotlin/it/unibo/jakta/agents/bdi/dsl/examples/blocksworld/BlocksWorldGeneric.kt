@@ -22,7 +22,6 @@ import it.unibo.jakta.agents.bdi.dsl.examples.blocksworld.BlocksWorldLiterals.x
 import it.unibo.jakta.agents.bdi.dsl.examples.blocksworld.BlocksWorldLiterals.y
 import it.unibo.jakta.agents.bdi.dsl.examples.blocksworld.BlocksWorldLiterals.table
 
-
 fun getPlans(): Iterable<Plan> = plans {
     + achieve(move(X, Y)) onlyIf {
         on(source(percept), X, Y)
