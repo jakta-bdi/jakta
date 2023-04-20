@@ -1,6 +1,4 @@
 dependencies {
-    implementation(libs.kotlin.stdlib)
-    testImplementation(libs.bundles.kotlin.testing)
     api(project(":jakta-dsl"))
 }
 

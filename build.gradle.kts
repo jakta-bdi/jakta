@@ -36,6 +36,11 @@ allprojects {
         assignGitSemanticVersion()
     }
 
+    dependencies {
+        implementation(rootProject.libs.kotlin.stdlib)
+        testImplementation(rootProject.libs.bundles.kotlin.testing)
+    }
+
     kotlin {
         target {
             compilations.all {
