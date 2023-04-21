@@ -11,6 +11,12 @@ plugins {
     alias(libs.plugins.kotlin.qa)
 }
 
+dependencies {
+    implementation(project(":jakta-state-machine"))
+    implementation(project(":jakta-bdi"))
+    implementation(project(":jakta-dsl"))
+}
+
 val Provider<PluginDependency>.id: String get() = get().pluginId
 
 allprojects {
