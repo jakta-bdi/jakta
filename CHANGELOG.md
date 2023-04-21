@@ -1,3 +1,10 @@
+## [0.4.11](https://github.com/jakta-bdi/jakta/compare/v0.4.10...v0.4.11) (2023-04-21)
+
+
+### Bug Fixes
+
+* update README.md and update jakta main project dependencies ([d2e6b13](https://github.com/jakta-bdi/jakta/commit/d2e6b13d1698cd97fa6fb77d54c9e952cd5b4d4d))
+
 ## [0.4.10](https://github.com/jakta-bdi/jakta/compare/v0.4.9...v0.4.10) (2023-04-20)
 
 
