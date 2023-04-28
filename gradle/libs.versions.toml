@@ -1,7 +1,7 @@
 [versions]
 kotest = "5.5.5"
 kotlin = "1.8.21"
-mockito = "5.2.0"
+mockito = "5.3.1"
 tuprolog = "0.31.3"
 
 [libraries]
