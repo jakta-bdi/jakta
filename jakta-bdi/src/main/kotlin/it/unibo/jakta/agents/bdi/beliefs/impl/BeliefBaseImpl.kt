@@ -10,6 +10,7 @@ import it.unibo.tuprolog.core.Rule
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.solve.Solution
 import it.unibo.tuprolog.solve.Solver
+import it.unibo.tuprolog.solve.flags.TrackVariables
 import it.unibo.tuprolog.theory.Theory
 import it.unibo.tuprolog.unify.Unificator
 
@@ -82,6 +83,7 @@ internal class BeliefBaseImpl private constructor(private val beliefs: ClauseMul
         Solver.prolog.newBuilder()
             // .flag(Unknown, Unknown.FAIL)
             .staticKb(operatorExtension + Theory.of(beliefs))
+            .flag(TrackVariables) { ON }
             .build()
             .solveOnce(struct)
 
