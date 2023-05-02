@@ -1,3 +1,11 @@
+## [0.4.12](https://github.com/jakta-bdi/jakta/compare/v0.4.11...v0.4.12) (2023-05-02)
+
+
+### Bug Fixes
+
+* Add BeliefBase solver optimization ([7ca0c5f](https://github.com/jakta-bdi/jakta/commit/7ca0c5f6311f1b270544d36a48d2c5835eb8fd7c))
+* refactor Plan implementation ([fd72c53](https://github.com/jakta-bdi/jakta/commit/fd72c53048d30b6133c30e518fb7a455e96fd313))
+
 ## [0.4.11](https://github.com/jakta-bdi/jakta/compare/v0.4.10...v0.4.11) (2023-04-21)
 
 
