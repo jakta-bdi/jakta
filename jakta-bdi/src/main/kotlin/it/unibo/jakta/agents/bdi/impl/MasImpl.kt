@@ -28,10 +28,15 @@ internal class MasImpl(
     override fun applyEnvironmentEffects(effects: Iterable<EnvironmentChange>) = effects.forEach {
         when (it) {
             is BroadcastMessage -> environment = environment.broadcastMessage(it.message)
-            is RemoveAgent -> environment = environment.removeAgent(it.agentName)
+            is RemoveAgent -> {
+                agents = agents.filter { agent -> agent.name != it.agentName }
+                executionStrategy.removeAgent(it.agentName)
+                environment = environment.removeAgent(it.agentName)
+            }
             is SendMessage -> environment = environment.submitMessage(it.recipient, it.message)
             is SpawnAgent -> {
                 agents += it.agent
+                executionStrategy.spawnAgent(it.agent)
                 environment = environment.addAgent(it.agent)
             }
             is AddData -> environment = environment.addData(it.key, it.value)
