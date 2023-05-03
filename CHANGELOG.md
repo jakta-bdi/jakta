@@ -1,3 +1,17 @@
+# [0.5.0](https://github.com/jakta-bdi/jakta/compare/v0.4.12...v0.5.0) (2023-05-03)
+
+
+### Bug Fixes
+
+* disable prolog warning flag in BeliefBase solver ([9e19915](https://github.com/jakta-bdi/jakta/commit/9e19915315f0af0fffda1e1c97b3d8be5438d454))
+* remove Jakta examples module ([c196f91](https://github.com/jakta-bdi/jakta/commit/c196f915c32e45473d9e7bce0c97d2ec0914d8d0))
+
+
+### Features
+
+* add Jakta method for ASL syntax translation ([dd460da](https://github.com/jakta-bdi/jakta/commit/dd460dabd48d53a0e1b24e57c88a53613a0c381f))
+* improve implementation of execution strategies, improve agents removal from environment ([a7a445a](https://github.com/jakta-bdi/jakta/commit/a7a445afd1289b8ab72a8abe9e904c7416f5177b))
+
 ## [0.4.12](https://github.com/jakta-bdi/jakta/compare/v0.4.11...v0.4.12) (2023-05-02)
 
 
