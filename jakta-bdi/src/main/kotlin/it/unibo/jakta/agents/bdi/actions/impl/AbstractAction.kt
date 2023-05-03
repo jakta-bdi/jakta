@@ -25,5 +25,9 @@ abstract class AbstractAction<C : SideEffect, Res : ActionResponse<C>, Req : Act
         return res
     }
 
+    override fun addResults(substitution: Substitution) {
+        result = substitution
+    }
+
     abstract fun action(request: Req)
 }
