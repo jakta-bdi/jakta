@@ -7,7 +7,6 @@ import it.unibo.jakta.agents.bdi.actions.effects.SideEffect
 import it.unibo.jakta.agents.bdi.dsl.Builder
 import it.unibo.tuprolog.core.Term
 import kotlin.reflect.KFunction
-import kotlin.reflect.KProperty
 
 abstract class ActionsScope<C, Res, Req, A, As> : Builder<Map<String, A>>
     where C : SideEffect,
@@ -36,13 +35,6 @@ abstract class ActionsScope<C, Res, Req, A, As> : Builder<Map<String, A>>
 
     override fun build(): Map<String, A> = actions.associateBy { it.signature.name }
 
-    inner class ArgumentGetterDelegate<T : Term>(private val index: Int) {
-        @Suppress("UNCHECKED_CAST")
-        operator fun getValue(thisRef: Req?, property: KProperty<*>): T {
-            println("Getting argument $thisRef") // null
-            return thisRef?.arguments?.get(index) as T
-        }
-    }
     @Suppress("UNCHECKED_CAST")
     fun <T : Term> Req.argument(index: Int): T {
         // return ArgumentGetterDelegate(index)
