@@ -8,7 +8,7 @@ import it.unibo.jakta.agents.bdi.executionstrategies.impl.DiscreteEventExecution
 import it.unibo.jakta.agents.bdi.executionstrategies.impl.DiscreteTimeExecutionImpl
 
 interface ExecutionStrategy {
-    fun dispatch(mas: Mas)
+    fun dispatch(mas: Mas, debugEnabled: Boolean)
 
     fun spawnAgent(agent: Agent)
 

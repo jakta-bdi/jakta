@@ -9,7 +9,7 @@ import it.unibo.jakta.agents.fsm.time.Time
 
 internal class DiscreteEventExecutionImpl : AbstractSingleRunnerExecutionStrategy() {
 
-    override fun dispatch(mas: Mas) {
+    override fun dispatch(mas: Mas, debugEnabled: Boolean) {
         mas.agents.forEach {
             if (!it.hasTimeDistribution) {
                 error("ERROR: Can't run a DiscreteEventExecution for agents without a time distribution")
@@ -31,7 +31,7 @@ internal class DiscreteEventExecutionImpl : AbstractSingleRunnerExecutionStrateg
                 synchronizedAgents.getAgents()
                     .filter { (agent, _) -> agentsToExecute.contains(agent.agentID) }
                     .forEach { (_, agentLC) ->
-                        val sideEffects = agentLC.reason(mas.environment, it)
+                        val sideEffects = agentLC.reason(mas.environment, it, debugEnabled)
                         mas.applyEnvironmentEffects(sideEffects)
                     }
                 synchronizedAgents.getAgents().ifEmpty { it.stop() }

@@ -96,7 +96,11 @@ interface AgentLifecycle {
     fun runIntention(intention: Intention, context: AgentContext, environment: Environment): ExecutionResult
 
     /** Performs the whole procedure (10 steps) of the BDI Agent's Reasoning Cycle. */
-    fun reason(environment: Environment, controller: Activity.Controller): Iterable<EnvironmentChange>
+    fun reason(
+        environment: Environment,
+        controller: Activity.Controller,
+        debugEnabled: Boolean = false,
+    ): Iterable<EnvironmentChange>
 
     companion object {
         fun of(agent: Agent): AgentLifecycle = AgentLifecycleImpl(agent)

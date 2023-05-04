@@ -10,7 +10,7 @@ interface Mas {
     val agents: Iterable<Agent>
     val executionStrategy: ExecutionStrategy
 
-    fun start()
+    fun start(debugEnabled: Boolean = false)
 
     fun applyEnvironmentEffects(effects: Iterable<EnvironmentChange>)
 

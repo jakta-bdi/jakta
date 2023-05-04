@@ -310,7 +310,11 @@ internal data class AgentLifecycleImpl(
             }
         }
 
-    override fun reason(environment: Environment, controller: Activity.Controller): Iterable<EnvironmentChange> {
+    override fun reason(
+        environment: Environment,
+        controller: Activity.Controller,
+        debugEnabled: Boolean,
+    ): Iterable<EnvironmentChange> {
         this.controller = controller
 
         // STEP1: Perceive the Environment
@@ -360,7 +364,7 @@ internal data class AgentLifecycleImpl(
             // STEP9: Select an Intention for Further Execution.
             // Add plan to intentions
             if (selectedPlan != null) {
-                // println("EVENT: $selectedEvent")
+                if (debugEnabled) println("[${agent.name}] Selected the event: $selectedEvent")
                 val updatedIntention = assignPlanToIntention(
                     selectedEvent,
                     selectedPlan.applicablePlan(selectedEvent, newBeliefBase),
@@ -368,7 +372,8 @@ internal data class AgentLifecycleImpl(
                 )
                 newIntentionPool = agent.context.intentions.updateIntention(updatedIntention)
             } else {
-                // println("[${agent.name}]WARNING: There's no applicable plan for the event: $selectedEvent")
+                if (debugEnabled)
+                    println("[${agent.name}] WARNING: There's no applicable plan for the event: $selectedEvent")
                 if (selectedEvent.isInternal()) {
                     newIntentionPool = newIntentionPool.deleteIntention(selectedEvent.intention!!.id)
                 }

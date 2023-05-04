@@ -23,7 +23,7 @@ internal class MasImpl(
         agents.forEach { environment = environment.addAgent(it) }
     }
 
-    override fun start() = executionStrategy.dispatch(this)
+    override fun start(debugEnabled: Boolean) = executionStrategy.dispatch(this, debugEnabled)
 
     override fun applyEnvironmentEffects(effects: Iterable<EnvironmentChange>) = effects.forEach {
         when (it) {

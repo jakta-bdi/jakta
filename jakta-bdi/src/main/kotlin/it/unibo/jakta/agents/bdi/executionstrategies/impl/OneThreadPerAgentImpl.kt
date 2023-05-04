@@ -9,16 +9,17 @@ import it.unibo.jakta.agents.fsm.Runner
 
 internal class OneThreadPerAgentImpl : ExecutionStrategy {
     private lateinit var executionMas: Mas
+    private var debug: Boolean = false
     private val agentsRunners: MutableMap<Agent, Activity.Controller> = mutableMapOf()
-
-    override fun dispatch(mas: Mas) {
+    override fun dispatch(mas: Mas, debugEnabled: Boolean) {
         executionMas = mas
+        debug = debugEnabled
         mas.agents.forEach { agent ->
             val agentLC = AgentLifecycle.of(agent)
             Runner.threadOf(
                 Activity.of {
                     agentsRunners += agent to it
-                    val sideEffects = agentLC.reason(executionMas.environment, it)
+                    val sideEffects = agentLC.reason(executionMas.environment, it, debug)
                     executionMas.applyEnvironmentEffects(sideEffects)
                 }
             ).run()
@@ -30,7 +31,7 @@ internal class OneThreadPerAgentImpl : ExecutionStrategy {
         Runner.threadOf(
             Activity.of {
                 agentsRunners += agent to it
-                val sideEffects = agentLC.reason(executionMas.environment, it)
+                val sideEffects = agentLC.reason(executionMas.environment, it, debug)
                 executionMas.applyEnvironmentEffects(sideEffects)
             }
         ).run()
