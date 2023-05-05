@@ -1,3 +1,18 @@
+# [0.6.0](https://github.com/jakta-bdi/jakta/compare/v0.5.0...v0.6.0) (2023-05-05)
+
+
+### Bug Fixes
+
+* definition of AddResults method in Action and implementation of it in AbstractAction ([68324f2](https://github.com/jakta-bdi/jakta/commit/68324f23f9f3d7b93752c813a4f5ccf125e797e6))
+* fix facts generation in beliefs dsl ([0d8366f](https://github.com/jakta-bdi/jakta/commit/0d8366f43bcba13de10c10a28a3612f519553d6a))
+* refactor of unused code ([f60deb5](https://github.com/jakta-bdi/jakta/commit/f60deb55ce1801d13857b09ce3ab5cd63d84040e))
+* remove unused typealias ([3e3cf83](https://github.com/jakta-bdi/jakta/commit/3e3cf8370741e00eb8e9d8292efdec9325056ab2))
+
+
+### Features
+
+* add debug log option when run mas execution ([662d780](https://github.com/jakta-bdi/jakta/commit/662d7804a1c81b694e4eab16eb66741d7ae830e2))
+
 # [0.5.0](https://github.com/jakta-bdi/jakta/compare/v0.4.12...v0.5.0) (2023-05-03)
 
 
