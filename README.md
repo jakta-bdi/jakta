@@ -29,8 +29,8 @@ Gradle (KTS) dependency:
 implementation("it.unibo.jakta:jakta-dsl:<VERSION>")
 ```
 
-### Contributors
+<!--### Contributors
 
 <a href="https://github.com/jakta-bdi/jakta/graphs/contributors">
 	<img src="https://contributors-img.web.app/image?repo=jakta-bdi/jakta" />
-</a>
+</a>-->
