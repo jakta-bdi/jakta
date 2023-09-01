@@ -29,7 +29,7 @@ tuprolog-dsl-solve = { module = "it.unibo.tuprolog:dsl-solve-jvm", version.ref =
 kotlin-testing = [ "kotest-junit5-jvm", "kotest-assertions-core-jvm", "mockito-core" ]
 
 [plugins]
-dokka = "org.jetbrains.dokka:1.8.20"
+dokka = "org.jetbrains.dokka:1.9.0"
 gitSemVer = { id = "org.danilopianini.git-sensitive-semantic-versioning", version = "1.1.10" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-qa = { id = "org.danilopianini.gradle-kotlin-qa", version = "0.25.1" }
