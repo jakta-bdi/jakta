@@ -1,5 +1,5 @@
 [versions]
-kotest = "5.7.1"
+kotest = "5.7.2"
 kotlin = "1.9.10"
 mockito = "5.5.0"
 tuprolog = "0.31.13"
