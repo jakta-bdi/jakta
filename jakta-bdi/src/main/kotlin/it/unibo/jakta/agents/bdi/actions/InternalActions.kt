@@ -5,8 +5,10 @@ import it.unibo.tuprolog.core.Substitution
 
 object InternalActions {
     object Print : AbstractInternalAction("print", 2) {
-        override fun action(request: InternalRequest) =
-            println("[${request.agent.name}] ${request.arguments.joinToString(separator = " ")}")
+        override fun action(request: InternalRequest) {
+            val payload = request.arguments.map { it.asAtom()?.value }.joinToString(" ")
+            println("[${request.agent.name}] $payload")
+        }
     }
 
     object Fail : AbstractInternalAction("fail", 0) {
