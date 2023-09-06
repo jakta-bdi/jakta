@@ -1,3 +1,10 @@
+# [0.7.0](https://github.com/jakta-bdi/jakta/compare/v0.6.0...v0.7.0) (2023-09-06)
+
+
+### Features
+
+* improve 'print' internal action implementation ([0714d0f](https://github.com/jakta-bdi/jakta/commit/0714d0f09e2d4e476e4c0755cf55a87fe9501255))
+
 # [0.6.0](https://github.com/jakta-bdi/jakta/compare/v0.5.0...v0.6.0) (2023-05-05)
 
 
