@@ -1,3 +1,15 @@
+## [0.7.1](https://github.com/jakta-bdi/jakta/compare/v0.7.0...v0.7.1) (2023-09-27)
+
+
+### Bug Fixes
+
+* **ci:** downgrade codecov action to v3 ([5819aa6](https://github.com/jakta-bdi/jakta/commit/5819aa6185986a95733ca1aff994d1b697ffe450))
+* **deps:** update actions/checkout action to v4.1.0 ([cf11f2e](https://github.com/jakta-bdi/jakta/commit/cf11f2ee1af7b4e0132ca002c0c0daa85474b039))
+* **deps:** update anitvam/conventionalcommit-semantic-releasing action to v0.5.11 ([af66020](https://github.com/jakta-bdi/jakta/commit/af66020c47f0b2bfacfec15dff165b1e00701345))
+* **deps:** update danysk/action-checkout action to v0.2.13 ([77e6fc3](https://github.com/jakta-bdi/jakta/commit/77e6fc3bf69d0194648948f359d70abdd61654ab))
+* **deps:** update plugin publishoncentral to v5.0.14 ([c8cd248](https://github.com/jakta-bdi/jakta/commit/c8cd248798ec4184804ae941b0941c3a7bf79cfb))
+* **deps:** update tuprolog to v0.31.15 ([5ed935a](https://github.com/jakta-bdi/jakta/commit/5ed935a6ff0b4aed666ab0f651f1036cec9dc69d))
+
 # [0.7.0](https://github.com/jakta-bdi/jakta/compare/v0.6.0...v0.7.0) (2023-09-06)
 
 
