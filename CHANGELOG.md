@@ -1,3 +1,10 @@
+## [0.7.6](https://github.com/jakta-bdi/jakta/compare/v0.7.5...v0.7.6) (2023-10-16)
+
+
+### Bug Fixes
+
+* **deps:** update plugin dokka to v1.9.10 ([a5271fd](https://github.com/jakta-bdi/jakta/commit/a5271fdc4e8173b640f935685fcee2c491febf91))
+
 ## [0.7.5](https://github.com/jakta-bdi/jakta/compare/v0.7.4...v0.7.5) (2023-10-13)
 
 
