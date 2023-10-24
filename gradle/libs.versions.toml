@@ -2,7 +2,7 @@
 kotest = "5.7.2"
 kotlin = "1.9.10"
 mockito = "5.6.0"
-tuprolog = "0.31.17"
+tuprolog = "0.31.18"
 
 [libraries]
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
