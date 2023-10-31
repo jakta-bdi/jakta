@@ -1,3 +1,10 @@
+## [0.7.23](https://github.com/jakta-bdi/jakta/compare/v0.7.22...v0.7.23) (2023-10-31)
+
+
+### Bug Fixes
+
+* **core-deps:** update dependency org.jetbrains.kotlin.jvm to v1.9.20 ([4ad2a76](https://github.com/jakta-bdi/jakta/commit/4ad2a76137db504063cf685d5e28b6846a1c138b))
+
 ## [0.7.22](https://github.com/jakta-bdi/jakta/compare/v0.7.21...v0.7.22) (2023-10-26)
 
 
