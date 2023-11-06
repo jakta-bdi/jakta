@@ -5,7 +5,7 @@ plugins {
 }
 
 application {
-    mainClass.set("it.unibo.jakta.agents.bdi.distributed_broker.Application")
+    mainClass.set("it.unibo.jakta.agents.distributed.broker.Application")
 }
 
 repositories {
