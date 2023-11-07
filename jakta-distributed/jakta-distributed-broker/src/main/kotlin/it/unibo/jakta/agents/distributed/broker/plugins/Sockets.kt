@@ -7,10 +7,6 @@ import io.ktor.server.websocket.WebSockets
 import io.ktor.server.websocket.pingPeriod
 import io.ktor.server.websocket.timeout
 import io.ktor.server.websocket.webSocket
-import io.ktor.websocket.CloseReason
-import io.ktor.websocket.Frame
-import io.ktor.websocket.close
-import io.ktor.websocket.readText
 import java.time.Duration
 
 const val PERIOD: Long = 15
@@ -22,17 +18,7 @@ fun Application.configureSockets() {
         masking = false
     }
     routing {
-        webSocket("/echo") {
-            send(Frame.Text("Please enter your name"))
-            for (frame in incoming) {
-                frame as? Frame.Text ?: continue
-                val receivedText = frame.readText()
-                if (receivedText.equals("bye", ignoreCase = true)) {
-                    close(CloseReason(CloseReason.Codes.NORMAL, "Client said BYE"))
-                } else {
-                    send(Frame.Text("Hi, $receivedText!"))
-                }
-            }
+        webSocket("/") {
         }
     }
 }
