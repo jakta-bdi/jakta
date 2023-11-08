@@ -16,6 +16,7 @@ import kotlin.collections.LinkedHashMap
 import kotlin.collections.LinkedHashSet
 
 const val PERIOD: Long = 15
+
 fun Application.configureSockets() {
     install(WebSockets) {
         pingPeriod = Duration.ofSeconds(PERIOD)
