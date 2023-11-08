@@ -6,7 +6,7 @@ plugins {
 }
 
 application {
-    mainClass.set("it.unibo.jakta.agents.distributed.broker.Application")
+    mainClass.set("io.ktor.server.netty.EngineMain")
 }
 
 repositories {
@@ -19,7 +19,7 @@ dependencies {
     implementation(libs.ktor.server.netty.jvm)
     implementation(libs.ktor.server.websockets)
     implementation(libs.logback.classic)
-    implementation(libs.ktor.serialization.kotlinx.cbor)
+    implementation(libs.ktor.serialization.kotlinx.json)
     testImplementation(libs.ktor.server.tests.jvm)
     testImplementation(libs.ktor.server.test.host.jvm)
     testImplementation(libs.kotlin.test.junit)

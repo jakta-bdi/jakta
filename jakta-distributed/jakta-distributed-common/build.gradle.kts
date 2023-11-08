@@ -9,5 +9,5 @@ repositories {
 
 dependencies {
     implementation(project(mapOf("path" to ":jakta-bdi")))
-    implementation(libs.ktor.serialization.kotlinx.cbor)
+    implementation(libs.ktor.serialization.kotlinx.json)
 }
