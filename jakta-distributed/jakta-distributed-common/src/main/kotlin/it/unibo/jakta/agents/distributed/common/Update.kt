@@ -1,5 +1,6 @@
 package it.unibo.jakta.agents.distributed.common
 
-import it.unibo.jakta.agents.bdi.actions.effects.EnvironmentChange
+import kotlinx.serialization.Serializable
 
-data class Update(val topics: Set<Topic>, val effects: Iterable<EnvironmentChange>)
+@Serializable
+data class Update(val topic: Topic, val message: SerializableMessage)
