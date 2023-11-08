@@ -17,7 +17,7 @@ import kotlin.collections.LinkedHashSet
 
 const val PERIOD: Long = 15
 
-fun Application.configureSockets() {
+fun Application.configureWebSockets() {
     install(WebSockets) {
         pingPeriod = Duration.ofSeconds(PERIOD)
         timeout = Duration.ofSeconds(PERIOD)
