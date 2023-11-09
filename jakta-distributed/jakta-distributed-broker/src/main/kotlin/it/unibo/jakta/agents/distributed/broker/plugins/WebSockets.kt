@@ -9,6 +9,8 @@ import io.ktor.server.websocket.pingPeriod
 import io.ktor.server.websocket.timeout
 import io.ktor.server.websocket.webSocket
 import io.ktor.websocket.DefaultWebSocketSession
+import io.ktor.websocket.Frame
+import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.serialization.json.Json
 import java.time.Duration
 import java.util.*
@@ -27,25 +29,47 @@ fun Application.configureWebSockets() {
     }
     routing {
 
-        val subscriptions = Collections.synchronizedMap<String, Set<DefaultWebSocketSession>>(LinkedHashMap())
+        val subscribers = Collections.synchronizedMap<String, Set<DefaultWebSocketSession>>(LinkedHashMap())
+        val publishers = Collections.synchronizedMap<String, Set<DefaultWebSocketSession>>(LinkedHashMap())
 
-        webSocket("/topic/{topic}") {
+        webSocket("/subscribe/{topic}") {
             call.application.environment.log.info("New connection: $this")
-            val thisSession = this
             val topic = call.parameters["topic"] ?: "all"
-            if (subscriptions[topic].isNullOrEmpty()) subscriptions[topic] = LinkedHashSet()
-            subscriptions[topic] = subscriptions[topic]?.plus(thisSession)
+            if (subscribers[topic].isNullOrEmpty()) subscribers[topic] = LinkedHashSet()
+            subscribers[topic] = subscribers[topic]?.plus(this)
             try {
                 for (frame in incoming) {
-                    subscriptions[topic]
-                        ?.filter { it != thisSession }
+                    this.send(Frame.Text("400"))
+                }
+            } catch (e: ClosedReceiveChannelException) {
+                call.application.environment.log.info("onClose ${closeReason.await()}")
+            } catch (e: Throwable) {
+                call.application.environment.log.error("onError ${closeReason.await()}")
+                call.application.environment.log.error(e.printStackTrace().toString())
+            } finally {
+                call.application.environment.log.info("Removing $this")
+                subscribers[topic]?.minus(this)
+            }
+        }
+
+        webSocket("/publish/{topic}") {
+            call.application.environment.log.info("New connection: $this")
+            val topic = call.parameters["topic"] ?: "all"
+            if (publishers[topic].isNullOrEmpty()) publishers[topic] = LinkedHashSet()
+            publishers[topic] = publishers[topic]?.plus(this)
+            try {
+                for (frame in incoming) {
+                    subscribers[topic]
                         ?.forEach { it.send(frame.copy()) }
                 }
-            } catch (e: Exception) {
-                call.application.environment.log.error(e.localizedMessage)
+            } catch (e: ClosedReceiveChannelException) {
+                call.application.environment.log.info("onClose ${closeReason.await()}")
+            } catch (e: Throwable) {
+                call.application.environment.log.error("onError ${closeReason.await()}")
+                call.application.environment.log.error(e.printStackTrace().toString())
             } finally {
-                call.application.environment.log.info("Removing $thisSession")
-                subscriptions[topic]?.minus(thisSession)
+                call.application.environment.log.info("Removing $this")
+                publishers[topic]?.minus(this)
             }
         }
     }
