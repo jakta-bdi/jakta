@@ -1,6 +1,7 @@
 package it.unibo.jakta.agents.distributed.remoteagent
 
 import it.unibo.jakta.agents.bdi.AgentID
+import it.unibo.jakta.agents.distributed.dmas.MasID
 import it.unibo.jakta.agents.distributed.remoteagent.impl.RemoteAgentImpl
 import it.unibo.tuprolog.utils.Taggable
 import java.util.*
@@ -15,8 +16,9 @@ interface RemoteAgent : Taggable<RemoteAgent> {
 
     companion object {
         fun of(
+            masID: MasID = MasID(),
             agentID: AgentID = AgentID(),
-            name: String = "Agent-" + UUID.randomUUID()
+            name: String = "Agent-" + masID.id + "/" + UUID.randomUUID(),
         ): RemoteAgent = RemoteAgentImpl(agentID, name)
     }
 }
