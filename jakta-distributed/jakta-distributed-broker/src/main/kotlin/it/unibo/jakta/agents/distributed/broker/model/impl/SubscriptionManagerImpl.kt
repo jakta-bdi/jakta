@@ -1,19 +1,17 @@
 package it.unibo.jakta.agents.distributed.broker.model.impl
 
-import it.unibo.jakta.agents.distributed.broker.model.IDNotPresentException
-import it.unibo.jakta.agents.distributed.broker.model.InvalidTopicException
+import it.unibo.jakta.agents.distributed.broker.model.InvalidIDException
 import it.unibo.jakta.agents.distributed.broker.model.MasID
+import it.unibo.jakta.agents.distributed.broker.model.PublisherAlreadyPresentException
+import it.unibo.jakta.agents.distributed.broker.model.PublisherNotPresentException
 import it.unibo.jakta.agents.distributed.broker.model.SubscriberAlreadyPresentException
 import it.unibo.jakta.agents.distributed.broker.model.SubscriberNotPresentException
 import it.unibo.jakta.agents.distributed.broker.model.SubscriptionManager
-import it.unibo.jakta.agents.distributed.broker.model.Topic
-import it.unibo.jakta.agents.distributed.broker.model.TopicAlreadyPresentException
-import it.unibo.jakta.agents.distributed.broker.model.TopicNotPresentException
 import java.util.*
 
 class SubscriptionManagerImpl : SubscriptionManager {
 
-    private val topicsSubscribers: MutableMap<Topic, MutableSet<MasID>> =
+    private val subscriptions: MutableMap<MasID, MutableSet<MasID>> =
         Collections.synchronizedMap(LinkedHashMap())
     private val assignedIDs = Collections.synchronizedSet<MasID>(LinkedHashSet())
 
@@ -23,48 +21,51 @@ class SubscriptionManagerImpl : SubscriptionManager {
         return newID
     }
 
-    override fun addTopic(topic: Topic) {
+    override fun addPublisher(publisher: MasID) {
         when {
-            !assignedIDs.contains(topic) -> throw InvalidTopicException()
-            topicsSubscribers.containsKey(topic) -> throw TopicAlreadyPresentException()
-            else -> topicsSubscribers[topic] = Collections.synchronizedSet(LinkedHashSet())
+            !assignedIDs.contains(publisher) -> throw InvalidIDException()
+            subscriptions.containsKey(publisher) -> throw PublisherAlreadyPresentException()
+            else -> subscriptions[publisher] = Collections.synchronizedSet(LinkedHashSet())
         }
     }
 
-    override fun removeTopic(topic: Topic) {
+    override fun removePublisher(publisher: MasID) {
         when {
-            !assignedIDs.contains(topic) -> throw InvalidTopicException()
-            !topicsSubscribers.containsKey(topic) -> throw TopicNotPresentException()
-            else -> topicsSubscribers.remove(topic)
+            !assignedIDs.contains(publisher) -> throw InvalidIDException()
+            !subscriptions.containsKey(publisher) -> throw PublisherNotPresentException()
+            else -> subscriptions.remove(publisher)
         }
     }
 
-    override fun availableTopics(): Set<Topic> {
-        return topicsSubscribers.keys
+    override fun availablePublishers(): Set<MasID> {
+        return subscriptions.keys
     }
 
-    override fun addSubscriber(id: MasID, topic: Topic) {
+    override fun addSubscriber(subscriber: MasID, publisher: MasID) {
         when {
-            !assignedIDs.contains(id) -> throw IDNotPresentException()
-            !topicsSubscribers.containsKey(topic) -> throw TopicNotPresentException()
-            topicsSubscribers[topic]?.contains(id) == true -> throw SubscriberAlreadyPresentException()
-            else -> topicsSubscribers[topic]?.add(id)
+            !assignedIDs.contains(subscriber) -> throw InvalidIDException()
+            !assignedIDs.contains(publisher) -> throw InvalidIDException()
+            !subscriptions.containsKey(publisher) -> throw PublisherNotPresentException()
+            subscriptions[publisher]?.contains(subscriber) == true -> throw SubscriberAlreadyPresentException()
+            else -> subscriptions[publisher]?.add(subscriber)
         }
     }
 
-    override fun removeSubscriber(id: MasID, topic: Topic) {
+    override fun removeSubscriber(subscriber: MasID, publisher: MasID) {
         when {
-            !assignedIDs.contains(id) -> throw IDNotPresentException()
-            !topicsSubscribers.containsKey(topic) -> throw TopicNotPresentException()
-            topicsSubscribers[topic]?.contains(id) == false -> throw SubscriberNotPresentException()
-            else -> topicsSubscribers[topic]?.remove(id)
+            !assignedIDs.contains(subscriber) -> throw InvalidIDException()
+            !assignedIDs.contains(publisher) -> throw InvalidIDException()
+            !subscriptions.containsKey(publisher) -> throw PublisherNotPresentException()
+            subscriptions[publisher]?.contains(subscriber) == false -> throw SubscriberNotPresentException()
+            else -> subscriptions[publisher]?.remove(subscriber)
         }
     }
 
-    override fun getSubscribers(topic: Topic): Set<MasID> {
+    override fun subscribers(publisher: MasID): Set<MasID> {
         when {
-            !topicsSubscribers.containsKey(topic) -> throw TopicNotPresentException()
-            else -> return topicsSubscribers[topic]?.toSet() ?: emptySet()
+            !assignedIDs.contains(publisher) -> throw InvalidIDException()
+            !subscriptions.containsKey(publisher) -> throw PublisherNotPresentException()
+            else -> return subscriptions[publisher]?.toSet() ?: emptySet()
         }
     }
 }

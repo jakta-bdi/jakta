@@ -2,23 +2,21 @@ package it.unibo.jakta.agents.distributed.broker.model
 
 import it.unibo.jakta.agents.distributed.broker.model.impl.SubscriptionManagerImpl
 
-typealias Topic = MasID
-
 interface SubscriptionManager {
 
     fun generateUniqueID(): MasID
 
-    fun addTopic(topic: Topic)
+    fun addPublisher(publisher: MasID)
 
-    fun removeTopic(topic: Topic)
+    fun removePublisher(publisher: MasID)
 
-    fun availableTopics(): Set<Topic>
+    fun availablePublishers(): Set<MasID>
 
-    fun addSubscriber(id: MasID, topic: Topic)
+    fun addSubscriber(subscriber: MasID, publisher: MasID)
 
-    fun removeSubscriber(id: MasID, topic: Topic)
+    fun removeSubscriber(subscriber: MasID, publisher: MasID)
 
-    fun getSubscribers(topic: Topic): Set<MasID>
+    fun subscribers(publisher: MasID): Set<MasID>
 
     companion object {
         operator fun invoke(): SubscriptionManager = SubscriptionManagerImpl()

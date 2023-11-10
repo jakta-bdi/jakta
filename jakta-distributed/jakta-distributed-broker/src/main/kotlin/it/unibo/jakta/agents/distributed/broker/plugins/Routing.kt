@@ -18,7 +18,7 @@ fun Application.configureRouting(subscriptionManager: SubscriptionManager) {
     routing {
         route("/topics") {
             get {
-                call.respond(subscriptionManager.availableTopics())
+                call.respond(subscriptionManager.availablePublishers())
             }
         }
 

@@ -48,27 +48,27 @@ fun Application.configureWebSockets(subscriptionManager: SubscriptionManager) {
         webSocket("/publish/{topic}") {
             call.application.environment.log.info("New publish channel open: $this")
             val topic = MasID(call.parameters["topic"] ?: "")
-            subscriptionManager.addTopic(topic)
+            subscriptionManager.addPublisher(topic)
             for (frame in incoming) {
-                subscriptionManager.getSubscribers(topic)
+                subscriptionManager.subscribers(topic)
                     .map { subscribersSessions[it] }
                     .forEach { it?.send(frame.copy()) }
             }
             call.application.environment.log.info("Removing $this")
-            subscriptionManager.removeTopic(topic)
+            subscriptionManager.removePublisher(topic)
         }
 
         webSocket("/subscribe-all/{id}{except...}") {
             call.application.environment.log.info("New subscription: $this")
             val id = MasID(call.parameters["id"] ?: "")
             val except = call.parameters.getAll("except")?.map { MasID(it) } ?: emptyList()
-            subscriptionManager.availableTopics().minus(except.toSet())
+            subscriptionManager.availablePublishers().minus(except.toSet())
                 .forEach { subscriptionManager.addSubscriber(id, it) }
             subscribersSessions[id] = this
             for (frame in incoming) {
                 this.send(Frame.Text(Error.BAD_REQUEST.toString()))
             }
-            subscriptionManager.availableTopics().minus(except.toSet())
+            subscriptionManager.availablePublishers().minus(except.toSet())
                 .forEach { subscriptionManager.removeSubscriber(id, it) }
             subscribersSessions.remove(id)
         }
