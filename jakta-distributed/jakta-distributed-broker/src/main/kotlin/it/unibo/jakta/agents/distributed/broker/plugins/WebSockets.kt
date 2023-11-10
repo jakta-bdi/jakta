@@ -10,16 +10,16 @@ import io.ktor.server.websocket.timeout
 import io.ktor.server.websocket.webSocket
 import io.ktor.websocket.DefaultWebSocketSession
 import io.ktor.websocket.Frame
-import kotlinx.coroutines.channels.ClosedReceiveChannelException
+import it.unibo.jakta.agents.distributed.broker.model.Error
+import it.unibo.jakta.agents.distributed.broker.model.SubscriptionManager
+import it.unibo.jakta.agents.distributed.broker.model.UniqueID
 import kotlinx.serialization.json.Json
 import java.time.Duration
 import java.util.*
-import kotlin.collections.LinkedHashMap
-import kotlin.collections.LinkedHashSet
 
 const val PERIOD: Long = 15
 
-fun Application.configureWebSockets() {
+fun Application.configureWebSockets(subscriptionManager: SubscriptionManager) {
     install(WebSockets) {
         pingPeriod = Duration.ofSeconds(PERIOD)
         timeout = Duration.ofSeconds(PERIOD)
@@ -29,48 +29,48 @@ fun Application.configureWebSockets() {
     }
     routing {
 
-        val subscribers = Collections.synchronizedMap<String, Set<DefaultWebSocketSession>>(LinkedHashMap())
-        val publishers = Collections.synchronizedMap<String, Set<DefaultWebSocketSession>>(LinkedHashMap())
+        val subscribersSessions: MutableMap<UniqueID, DefaultWebSocketSession> =
+            Collections.synchronizedMap(LinkedHashMap())
 
-        webSocket("/subscribe/{topic}") {
-            call.application.environment.log.info("New connection: $this")
-            val topic = call.parameters["topic"] ?: "all"
-            if (subscribers[topic].isNullOrEmpty()) subscribers[topic] = LinkedHashSet()
-            subscribers[topic] = subscribers[topic]?.plus(this)
-            try {
-                for (frame in incoming) {
-                    this.send(Frame.Text("400"))
-                }
-            } catch (e: ClosedReceiveChannelException) {
-                call.application.environment.log.info("onClose ${closeReason.await()}")
-            } catch (e: Throwable) {
-                call.application.environment.log.error("onError ${closeReason.await()}")
-                call.application.environment.log.error(e.printStackTrace().toString())
-            } finally {
-                call.application.environment.log.info("Removing $this")
-                subscribers[topic]?.minus(this)
+        webSocket("/subscribe/{id}{topic}") {
+            call.application.environment.log.info("New subscription: $this")
+            val topic = UniqueID(call.parameters["topic"] ?: "")
+            val id = UniqueID(call.parameters["id"] ?: "")
+            subscriptionManager.addSubscriber(id, topic)
+            subscribersSessions[id] = this
+            for (frame in incoming) {
+                this.send(Frame.Text(Error.BAD_REQUEST.toString()))
             }
+            subscriptionManager.removeSubscriber(id, topic)
+            subscribersSessions.remove(id)
         }
 
         webSocket("/publish/{topic}") {
-            call.application.environment.log.info("New connection: $this")
-            val topic = call.parameters["topic"] ?: "all"
-            if (publishers[topic].isNullOrEmpty()) publishers[topic] = LinkedHashSet()
-            publishers[topic] = publishers[topic]?.plus(this)
-            try {
-                for (frame in incoming) {
-                    subscribers[topic]
-                        ?.forEach { it.send(frame.copy()) }
-                }
-            } catch (e: ClosedReceiveChannelException) {
-                call.application.environment.log.info("onClose ${closeReason.await()}")
-            } catch (e: Throwable) {
-                call.application.environment.log.error("onError ${closeReason.await()}")
-                call.application.environment.log.error(e.printStackTrace().toString())
-            } finally {
-                call.application.environment.log.info("Removing $this")
-                publishers[topic]?.minus(this)
+            call.application.environment.log.info("New publish channel open: $this")
+            val topic = UniqueID(call.parameters["topic"] ?: "")
+            subscriptionManager.addTopic(topic)
+            for (frame in incoming) {
+                subscriptionManager.getSubscribers(topic)
+                    .map { subscribersSessions[it] }
+                    .forEach { it?.send(frame.copy()) }
             }
+            call.application.environment.log.info("Removing $this")
+            subscriptionManager.removeTopic(topic)
+        }
+
+        webSocket("/subscribe-all/{id}{except...}") {
+            call.application.environment.log.info("New subscription: $this")
+            val id = UniqueID(call.parameters["id"] ?: "")
+            val except = call.parameters.getAll("except")?.map { UniqueID(it) } ?: emptyList()
+            subscriptionManager.availableTopics().minus(except.toSet())
+                .forEach { subscriptionManager.addSubscriber(id, it) }
+            subscribersSessions[id] = this
+            for (frame in incoming) {
+                this.send(Frame.Text(Error.BAD_REQUEST.toString()))
+            }
+            subscriptionManager.availableTopics().minus(except.toSet())
+                .forEach { subscriptionManager.removeSubscriber(id, it) }
+            subscribersSessions.remove(id)
         }
     }
 }
