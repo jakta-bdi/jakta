@@ -4,8 +4,8 @@ import kotlinx.serialization.Serializable
 import java.util.concurrent.atomic.AtomicInteger
 
 @Serializable
-class UniqueID(val id: String = "Mas${UniqueIDGenerator.lastId.getAndIncrement()}")
+data class MasID(val id: String = "Mas${UniqueMasIDGenerator.lastId.getAndIncrement()}")
 
-internal object UniqueIDGenerator {
+internal object UniqueMasIDGenerator {
     val lastId = AtomicInteger(0)
 }

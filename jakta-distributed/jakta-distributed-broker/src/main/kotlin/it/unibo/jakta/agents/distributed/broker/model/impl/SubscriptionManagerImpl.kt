@@ -2,23 +2,23 @@ package it.unibo.jakta.agents.distributed.broker.model.impl
 
 import it.unibo.jakta.agents.distributed.broker.model.IDNotPresentException
 import it.unibo.jakta.agents.distributed.broker.model.InvalidTopicException
+import it.unibo.jakta.agents.distributed.broker.model.MasID
 import it.unibo.jakta.agents.distributed.broker.model.SubscriberAlreadyPresentException
 import it.unibo.jakta.agents.distributed.broker.model.SubscriberNotPresentException
 import it.unibo.jakta.agents.distributed.broker.model.SubscriptionManager
 import it.unibo.jakta.agents.distributed.broker.model.Topic
 import it.unibo.jakta.agents.distributed.broker.model.TopicAlreadyPresentException
 import it.unibo.jakta.agents.distributed.broker.model.TopicNotPresentException
-import it.unibo.jakta.agents.distributed.broker.model.UniqueID
 import java.util.*
 
 class SubscriptionManagerImpl : SubscriptionManager {
 
-    private val topicsSubscribers: MutableMap<Topic, MutableSet<UniqueID>> =
+    private val topicsSubscribers: MutableMap<Topic, MutableSet<MasID>> =
         Collections.synchronizedMap(LinkedHashMap())
-    private val assignedIDs = Collections.synchronizedSet<UniqueID>(LinkedHashSet())
+    private val assignedIDs = Collections.synchronizedSet<MasID>(LinkedHashSet())
 
-    override fun generateUniqueID(): UniqueID {
-        val newID = UniqueID()
+    override fun generateUniqueID(): MasID {
+        val newID = MasID()
         assignedIDs.add(newID)
         return newID
     }
@@ -43,7 +43,7 @@ class SubscriptionManagerImpl : SubscriptionManager {
         return topicsSubscribers.keys
     }
 
-    override fun addSubscriber(id: UniqueID, topic: Topic) {
+    override fun addSubscriber(id: MasID, topic: Topic) {
         when {
             !assignedIDs.contains(id) -> throw IDNotPresentException()
             !topicsSubscribers.containsKey(topic) -> throw TopicNotPresentException()
@@ -52,7 +52,7 @@ class SubscriptionManagerImpl : SubscriptionManager {
         }
     }
 
-    override fun removeSubscriber(id: UniqueID, topic: Topic) {
+    override fun removeSubscriber(id: MasID, topic: Topic) {
         when {
             !assignedIDs.contains(id) -> throw IDNotPresentException()
             !topicsSubscribers.containsKey(topic) -> throw TopicNotPresentException()
@@ -61,7 +61,7 @@ class SubscriptionManagerImpl : SubscriptionManager {
         }
     }
 
-    override fun getSubscribers(topic: Topic): Set<UniqueID> {
+    override fun getSubscribers(topic: Topic): Set<MasID> {
         when {
             !topicsSubscribers.containsKey(topic) -> throw TopicNotPresentException()
             else -> return topicsSubscribers[topic]?.toSet() ?: emptySet()
