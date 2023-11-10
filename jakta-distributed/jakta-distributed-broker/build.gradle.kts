@@ -20,6 +20,7 @@ dependencies {
     implementation(libs.ktor.server.websockets)
     implementation(libs.logback.classic)
     implementation(libs.ktor.serialization.kotlinx.json)
+    implementation(libs.ktor.server.content.negotiation)
     testImplementation(libs.ktor.server.tests.jvm)
     testImplementation(libs.ktor.server.test.host.jvm)
     testImplementation(libs.kotlin.test.junit)
