@@ -11,8 +11,8 @@ import io.ktor.server.websocket.webSocket
 import io.ktor.websocket.DefaultWebSocketSession
 import io.ktor.websocket.Frame
 import it.unibo.jakta.agents.distributed.broker.model.Error
+import it.unibo.jakta.agents.distributed.broker.model.MasID
 import it.unibo.jakta.agents.distributed.broker.model.SubscriptionManager
-import it.unibo.jakta.agents.distributed.broker.model.UniqueID
 import kotlinx.serialization.json.Json
 import java.time.Duration
 import java.util.*
@@ -29,13 +29,13 @@ fun Application.configureWebSockets(subscriptionManager: SubscriptionManager) {
     }
     routing {
 
-        val subscribersSessions: MutableMap<UniqueID, DefaultWebSocketSession> =
+        val subscribersSessions: MutableMap<MasID, DefaultWebSocketSession> =
             Collections.synchronizedMap(LinkedHashMap())
 
         webSocket("/subscribe/{id}{topic}") {
             call.application.environment.log.info("New subscription: $this")
-            val topic = UniqueID(call.parameters["topic"] ?: "")
-            val id = UniqueID(call.parameters["id"] ?: "")
+            val topic = MasID(call.parameters["topic"] ?: "")
+            val id = MasID(call.parameters["id"] ?: "")
             subscriptionManager.addSubscriber(id, topic)
             subscribersSessions[id] = this
             for (frame in incoming) {
@@ -47,7 +47,7 @@ fun Application.configureWebSockets(subscriptionManager: SubscriptionManager) {
 
         webSocket("/publish/{topic}") {
             call.application.environment.log.info("New publish channel open: $this")
-            val topic = UniqueID(call.parameters["topic"] ?: "")
+            val topic = MasID(call.parameters["topic"] ?: "")
             subscriptionManager.addTopic(topic)
             for (frame in incoming) {
                 subscriptionManager.getSubscribers(topic)
@@ -60,8 +60,8 @@ fun Application.configureWebSockets(subscriptionManager: SubscriptionManager) {
 
         webSocket("/subscribe-all/{id}{except...}") {
             call.application.environment.log.info("New subscription: $this")
-            val id = UniqueID(call.parameters["id"] ?: "")
-            val except = call.parameters.getAll("except")?.map { UniqueID(it) } ?: emptyList()
+            val id = MasID(call.parameters["id"] ?: "")
+            val except = call.parameters.getAll("except")?.map { MasID(it) } ?: emptyList()
             subscriptionManager.availableTopics().minus(except.toSet())
                 .forEach { subscriptionManager.addSubscriber(id, it) }
             subscribersSessions[id] = this
