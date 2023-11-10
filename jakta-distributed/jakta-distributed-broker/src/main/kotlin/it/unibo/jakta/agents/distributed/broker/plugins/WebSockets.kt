@@ -32,19 +32,6 @@ fun Application.configureWebSockets(subscriptionManager: SubscriptionManager) {
         val subscribersSessions: MutableMap<MasID, DefaultWebSocketSession> =
             Collections.synchronizedMap(LinkedHashMap())
 
-        webSocket("/subscribe/{id}{topic}") {
-            call.application.environment.log.info("New subscription: $this")
-            val topic = MasID(call.parameters["topic"] ?: "")
-            val id = MasID(call.parameters["id"] ?: "")
-            subscriptionManager.addSubscriber(id, topic)
-            subscribersSessions[id] = this
-            for (frame in incoming) {
-                this.send(Frame.Text(Error.BAD_REQUEST.toString()))
-            }
-            subscriptionManager.removeSubscriber(id, topic)
-            subscribersSessions.remove(id)
-        }
-
         webSocket("/publish/{topic}") {
             call.application.environment.log.info("New publish channel open: $this")
             val topic = MasID(call.parameters["topic"] ?: "")
@@ -56,6 +43,19 @@ fun Application.configureWebSockets(subscriptionManager: SubscriptionManager) {
             }
             call.application.environment.log.info("Removing $this")
             subscriptionManager.removePublisher(topic)
+        }
+
+        webSocket("/subscribe/{id}{topic}") {
+            call.application.environment.log.info("New subscription: $this")
+            val topic = MasID(call.parameters["topic"] ?: "")
+            val id = MasID(call.parameters["id"] ?: "")
+            subscriptionManager.addSubscriber(id, topic)
+            subscribersSessions[id] = this
+            for (frame in incoming) {
+                this.send(Frame.Text(Error.BAD_REQUEST.toString()))
+            }
+            subscriptionManager.removeSubscriber(id, topic)
+            subscribersSessions.remove(id)
         }
 
         webSocket("/subscribe-all/{id}{except...}") {
