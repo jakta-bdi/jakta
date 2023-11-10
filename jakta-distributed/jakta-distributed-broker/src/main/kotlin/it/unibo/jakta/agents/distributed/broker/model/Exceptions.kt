@@ -1,13 +1,13 @@
 package it.unibo.jakta.agents.distributed.broker.model
 
-class IDNotPresentException : Exception()
+class InvalidIDException : Exception()
 
-class TopicNotPresentException : Exception()
+class PublisherNotPresentException : Exception()
 
 class SubscriberAlreadyPresentException : Exception()
 
 class SubscriberNotPresentException : Exception()
 
-class TopicAlreadyPresentException : Exception()
+class PublisherAlreadyPresentException : Exception()
 
 class InvalidTopicException : Exception()
