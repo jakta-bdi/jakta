@@ -36,7 +36,7 @@ internal class DMasImpl(
             when (it) {
                 is BroadcastMessage -> {
                     network.send(it)
-                    environment.broadcastMessage(it.message)
+                    environment = environment.broadcastMessage(it.message)
                 }
 
                 is RemoveAgent -> {
@@ -48,9 +48,8 @@ internal class DMasImpl(
                 is SendMessage -> {
                     if (remoteAgents.map { rA -> rA.name }.contains(it.recipient)) {
                         network.send(it)
-                        environment
                     } else {
-                        environment.submitMessage(it.recipient, it.message)
+                        environment = environment.submitMessage(it.recipient, it.message)
                     }
                 }
 
