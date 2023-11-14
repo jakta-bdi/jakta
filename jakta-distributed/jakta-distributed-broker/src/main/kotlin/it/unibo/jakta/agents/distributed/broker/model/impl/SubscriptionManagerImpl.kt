@@ -1,71 +1,41 @@
 package it.unibo.jakta.agents.distributed.broker.model.impl
 
-import it.unibo.jakta.agents.distributed.broker.model.InvalidIDException
-import it.unibo.jakta.agents.distributed.broker.model.MasID
-import it.unibo.jakta.agents.distributed.broker.model.PublisherAlreadyPresentException
-import it.unibo.jakta.agents.distributed.broker.model.PublisherNotPresentException
-import it.unibo.jakta.agents.distributed.broker.model.SubscriberAlreadyPresentException
-import it.unibo.jakta.agents.distributed.broker.model.SubscriberNotPresentException
+import io.ktor.websocket.DefaultWebSocketSession
 import it.unibo.jakta.agents.distributed.broker.model.SubscriptionManager
+import it.unibo.jakta.agents.distributed.broker.model.Topic
 import java.util.*
 
 class SubscriptionManagerImpl : SubscriptionManager {
 
-    private val subscriptions: MutableMap<MasID, MutableSet<MasID>> =
+    private val subscribers: MutableMap<Topic, MutableSet<DefaultWebSocketSession>> =
         Collections.synchronizedMap(LinkedHashMap())
-    private val assignedIDs = Collections.synchronizedSet<MasID>(LinkedHashSet())
 
-    override fun generateUniqueID(): MasID {
-        val newID = MasID()
-        assignedIDs.add(newID)
-        return newID
+    private val publishers: MutableMap<Topic, MutableSet<DefaultWebSocketSession>> =
+        Collections.synchronizedMap(LinkedHashMap())
+
+    override fun addPublisher(publisher: DefaultWebSocketSession, topic: Topic) {
+        if (publishers[topic].isNullOrEmpty()) publishers[topic] = Collections.synchronizedSet(LinkedHashSet())
+        publishers[topic]?.add(publisher)
     }
 
-    override fun addPublisher(publisher: MasID) {
-        when {
-            !assignedIDs.contains(publisher) -> throw InvalidIDException()
-            subscriptions.containsKey(publisher) -> throw PublisherAlreadyPresentException()
-            else -> subscriptions[publisher] = Collections.synchronizedSet(LinkedHashSet())
-        }
+    override fun removePublisher(publisher: DefaultWebSocketSession, topic: Topic) {
+        publishers[topic]?.remove(publisher)
     }
 
-    override fun removePublisher(publisher: MasID) {
-        when {
-            !assignedIDs.contains(publisher) -> throw InvalidIDException()
-            !subscriptions.containsKey(publisher) -> throw PublisherNotPresentException()
-            else -> subscriptions.remove(publisher)
-        }
+    override fun availableTopics(): Set<Topic> {
+        return publishers.keys
     }
 
-    override fun availablePublishers(): Set<MasID> {
-        return subscriptions.keys
+    override fun addSubscriber(subscriber: DefaultWebSocketSession, topic: Topic) {
+        if (subscribers[topic].isNullOrEmpty()) subscribers[topic] = Collections.synchronizedSet(LinkedHashSet())
+        subscribers[topic]?.add(subscriber)
     }
 
-    override fun addSubscriber(subscriber: MasID, publisher: MasID) {
-        when {
-            !assignedIDs.contains(subscriber) -> throw InvalidIDException()
-            !assignedIDs.contains(publisher) -> throw InvalidIDException()
-            !subscriptions.containsKey(publisher) -> throw PublisherNotPresentException()
-            subscriptions[publisher]?.contains(subscriber) == true -> throw SubscriberAlreadyPresentException()
-            else -> subscriptions[publisher]?.add(subscriber)
-        }
+    override fun removeSubscriber(subscriber: DefaultWebSocketSession, topic: Topic) {
+        subscribers[topic]?.remove(subscriber)
     }
 
-    override fun removeSubscriber(subscriber: MasID, publisher: MasID) {
-        when {
-            !assignedIDs.contains(subscriber) -> throw InvalidIDException()
-            !assignedIDs.contains(publisher) -> throw InvalidIDException()
-            !subscriptions.containsKey(publisher) -> throw PublisherNotPresentException()
-            subscriptions[publisher]?.contains(subscriber) == false -> throw SubscriberNotPresentException()
-            else -> subscriptions[publisher]?.remove(subscriber)
-        }
-    }
-
-    override fun subscribers(publisher: MasID): Set<MasID> {
-        when {
-            !assignedIDs.contains(publisher) -> throw InvalidIDException()
-            !subscriptions.containsKey(publisher) -> throw PublisherNotPresentException()
-            else -> return subscriptions[publisher]?.toSet() ?: emptySet()
-        }
+    override fun subscribers(topic: Topic): Set<DefaultWebSocketSession> {
+        return subscribers[topic]?.toSet() ?: emptySet()
     }
 }
