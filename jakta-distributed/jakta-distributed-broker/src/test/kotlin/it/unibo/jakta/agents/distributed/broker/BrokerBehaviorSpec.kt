@@ -8,10 +8,9 @@ import io.ktor.client.request.get
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.testing.testApplication
 import io.ktor.websocket.Frame
-import it.unibo.jakta.agents.distributed.broker.model.MasID
+import it.unibo.jakta.agents.distributed.broker.model.Topic
 import org.junit.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotEquals
 
 class BrokerBehaviorSpec {
     @Test
@@ -30,20 +29,19 @@ class BrokerBehaviorSpec {
                 install(WebSockets)
             }
 
-            val mas0ID: MasID = mas0.get("/uniqueID").body()
-            val mas1ID: MasID = mas1.get("/uniqueID").body()
-            assertNotEquals(mas0ID, mas1ID)
+            val topic1 = "topic1"
+            val topic2 = "topic2"
 
-            mas0.webSocket("/publish/${mas0ID.id}") {
+            mas0.webSocket("/publish/$topic1") {
                 send(Frame.Text("message0"))
             }
 
-            mas1.webSocket("/publish/${mas1ID.id}") {
+            mas1.webSocket("/publish/$topic2") {
                 send(Frame.Text("message1"))
             }
 
-            val availableTopics: Set<MasID> = mas0.get("/topics").body()
-            assertEquals(emptySet(), availableTopics)
+            val availableTopics: Set<Topic> = mas0.get("/topics").body()
+            assertEquals(setOf(topic1, topic2), availableTopics)
         }
     }
 }
