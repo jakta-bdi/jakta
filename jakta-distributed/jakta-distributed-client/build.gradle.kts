@@ -1,3 +1,5 @@
+val ktorVersion = "2.3.6"
+
 plugins {
     application
     alias(libs.plugins.kotlin.jvm)
@@ -14,4 +16,11 @@ repositories {
 }
 
 dependencies {
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.cio)
+    implementation(libs.ktor.client.cio.jvm)
+    implementation(libs.ktor.client.logging)
+    implementation(libs.ktor.client.websockets)
+    implementation(libs.ktor.serialization.kotlinx.json)
+    implementation(project(mapOf("path" to ":jakta-distributed:jakta-distributed-common")))
 }
