@@ -1,22 +1,23 @@
 package it.unibo.jakta.agents.distributed.broker.model
 
+import io.ktor.websocket.DefaultWebSocketSession
 import it.unibo.jakta.agents.distributed.broker.model.impl.SubscriptionManagerImpl
+
+typealias Topic = String
 
 interface SubscriptionManager {
 
-    fun generateUniqueID(): MasID
+    fun addPublisher(publisher: DefaultWebSocketSession, topic: Topic)
 
-    fun addPublisher(publisher: MasID)
+    fun removePublisher(publisher: DefaultWebSocketSession, topic: Topic)
 
-    fun removePublisher(publisher: MasID)
+    fun availableTopics(): Set<Topic>
 
-    fun availablePublishers(): Set<MasID>
+    fun addSubscriber(subscriber: DefaultWebSocketSession, topic: Topic)
 
-    fun addSubscriber(subscriber: MasID, publisher: MasID)
+    fun removeSubscriber(subscriber: DefaultWebSocketSession, topic: Topic)
 
-    fun removeSubscriber(subscriber: MasID, publisher: MasID)
-
-    fun subscribers(publisher: MasID): Set<MasID>
+    fun subscribers(topic: Topic): Set<DefaultWebSocketSession>
 
     companion object {
         operator fun invoke(): SubscriptionManager = SubscriptionManagerImpl()

@@ -18,13 +18,7 @@ fun Application.configureRouting(subscriptionManager: SubscriptionManager) {
     routing {
         route("/topics") {
             get {
-                call.respond(subscriptionManager.availablePublishers())
-            }
-        }
-
-        route("/uniqueID") {
-            get {
-                call.respond(subscriptionManager.generateUniqueID())
+                call.respond(subscriptionManager.availableTopics())
             }
         }
     }

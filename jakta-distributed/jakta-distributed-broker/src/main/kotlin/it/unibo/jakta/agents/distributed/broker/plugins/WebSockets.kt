@@ -8,14 +8,11 @@ import io.ktor.server.websocket.WebSockets
 import io.ktor.server.websocket.pingPeriod
 import io.ktor.server.websocket.timeout
 import io.ktor.server.websocket.webSocket
-import io.ktor.websocket.DefaultWebSocketSession
 import io.ktor.websocket.Frame
 import it.unibo.jakta.agents.distributed.broker.model.Error
-import it.unibo.jakta.agents.distributed.broker.model.MasID
 import it.unibo.jakta.agents.distributed.broker.model.SubscriptionManager
 import kotlinx.serialization.json.Json
 import java.time.Duration
-import java.util.*
 
 const val PERIOD: Long = 15
 
@@ -29,48 +26,38 @@ fun Application.configureWebSockets(subscriptionManager: SubscriptionManager) {
     }
     routing {
 
-        val subscribersSessions: MutableMap<MasID, DefaultWebSocketSession> =
-            Collections.synchronizedMap(LinkedHashMap())
-
         webSocket("/publish/{topic}") {
             call.application.environment.log.info("New publish channel open: $this")
-            val topic = MasID(call.parameters["topic"] ?: "")
-            subscriptionManager.addPublisher(topic)
+            val topic = call.parameters["topic"] ?: ""
+            subscriptionManager.addPublisher(this, topic)
             for (frame in incoming) {
                 subscriptionManager.subscribers(topic)
-                    .map { subscribersSessions[it] }
-                    .forEach { it?.send(frame.copy()) }
+                    .forEach { it.send(frame.copy()) }
             }
             call.application.environment.log.info("Removing $this")
-            subscriptionManager.removePublisher(topic)
+            subscriptionManager.removePublisher(this, topic)
         }
 
-        webSocket("/subscribe/{id}{topic}") {
+        webSocket("/subscribe/{topic}") {
             call.application.environment.log.info("New subscription: $this")
-            val topic = MasID(call.parameters["topic"] ?: "")
-            val id = MasID(call.parameters["id"] ?: "")
-            subscriptionManager.addSubscriber(id, topic)
-            subscribersSessions[id] = this
+            val topic = call.parameters["topic"] ?: ""
+            subscriptionManager.addSubscriber(this, topic)
             for (frame in incoming) {
                 this.send(Frame.Text(Error.BAD_REQUEST.toString()))
             }
-            subscriptionManager.removeSubscriber(id, topic)
-            subscribersSessions.remove(id)
+            subscriptionManager.removeSubscriber(this, topic)
         }
 
-        webSocket("/subscribe-all/{id}{except...}") {
+        webSocket("/subscribe-all/{except...}") {
             call.application.environment.log.info("New subscription: $this")
-            val id = MasID(call.parameters["id"] ?: "")
-            val except = call.parameters.getAll("except")?.map { MasID(it) } ?: emptyList()
-            subscriptionManager.availablePublishers().minus(except.toSet())
-                .forEach { subscriptionManager.addSubscriber(id, it) }
-            subscribersSessions[id] = this
+            val except = call.parameters.getAll("except") ?: emptyList()
+            subscriptionManager.availableTopics().minus(except.toSet())
+                .forEach { subscriptionManager.addSubscriber(this, it) }
             for (frame in incoming) {
                 this.send(Frame.Text(Error.BAD_REQUEST.toString()))
             }
-            subscriptionManager.availablePublishers().minus(except.toSet())
-                .forEach { subscriptionManager.removeSubscriber(id, it) }
-            subscribersSessions.remove(id)
+            subscriptionManager.availableTopics().minus(except.toSet())
+                .forEach { subscriptionManager.removeSubscriber(this, it) }
         }
     }
 }
