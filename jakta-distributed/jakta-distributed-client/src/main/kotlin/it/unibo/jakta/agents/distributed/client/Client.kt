@@ -8,6 +8,6 @@ interface Client {
     val incomingData: MutableMap<String, Any>
 
     companion object {
-        fun webSocketClient(): Client = WebSocketsClient()
+        fun webSocketClient(host: String, port: Int): Client = WebSocketsClient(host, port)
     }
 }
