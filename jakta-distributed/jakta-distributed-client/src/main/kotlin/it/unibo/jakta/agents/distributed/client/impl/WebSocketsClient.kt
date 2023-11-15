@@ -11,7 +11,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import java.util.*
 
-class WebSocketsClient : Client {
+class WebSocketsClient(private val host: String, private val port: Int) : Client {
     override val incomingData: MutableMap<String, Any> = Collections.synchronizedMap(LinkedHashMap())
     private val client = HttpClient(CIO) {
         install(WebSockets) {
@@ -22,6 +22,8 @@ class WebSocketsClient : Client {
     override fun publish(topic: String, data: Any) {
         runBlocking {
             client.webSocket(
+                host = host,
+                port = port,
                 path = "/publish/$topic",
             ) {
                 sendSerialized(data)
@@ -32,6 +34,8 @@ class WebSocketsClient : Client {
     override fun subscribe(topic: String) {
         runBlocking {
             client.webSocket(
+                host = host,
+                port = port,
                 path = "/subscribe/$topic",
             ) {
                 for (frame in incoming) {
