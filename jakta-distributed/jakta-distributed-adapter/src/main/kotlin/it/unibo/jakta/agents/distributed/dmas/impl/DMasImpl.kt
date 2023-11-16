@@ -12,21 +12,20 @@ import it.unibo.jakta.agents.bdi.actions.effects.UpdateData
 import it.unibo.jakta.agents.bdi.actions.effects.AddData
 import it.unibo.jakta.agents.bdi.environment.Environment
 import it.unibo.jakta.agents.bdi.executionstrategies.ExecutionStrategy
+import it.unibo.jakta.agents.distributed.RemoteService
 import it.unibo.jakta.agents.distributed.dmas.DMas
 import it.unibo.jakta.agents.distributed.network.Network
-import it.unibo.jakta.agents.distributed.remoteagent.RemoteAgent
 
 internal class DMasImpl(
     override val executionStrategy: ExecutionStrategy,
     override var environment: Environment,
     override var agents: Iterable<Agent>,
-    override val remoteAgents: Iterable<RemoteAgent>,
+    override val services: Iterable<RemoteService>,
     override val network: Network,
 ) : DMas {
     override fun start(debugEnabled: Boolean) {
         // Here the DMas should subscribe to the broker and start listening for messages
         // this function could return the MasIDs of all the agents in the cluster
-        network.subscribeToCluster()
         executionStrategy.dispatch(this, debugEnabled)
     }
 
@@ -46,7 +45,7 @@ internal class DMasImpl(
                 }
 
                 is SendMessage -> {
-                    if (remoteAgents.map { rA -> rA.name }.contains(it.recipient)) {
+                    if (services.map { it.serviceName }.contains(it.recipient)) {
                         network.send(it)
                     } else {
                         environment = environment.submitMessage(it.recipient, it.message)
