@@ -25,7 +25,9 @@ internal class DMasImpl(
 ) : DMas {
     override fun start(debugEnabled: Boolean) {
         // Here the DMas should subscribe to the broker and start listening for messages
-        // this function could return the MasIDs of all the agents in the cluster
+        services.forEach { service ->
+            network.subscribe(service)
+        }
         executionStrategy.dispatch(this, debugEnabled)
     }
 
@@ -34,7 +36,6 @@ internal class DMasImpl(
         (effects + externalEffects).forEach {
             when (it) {
                 is BroadcastMessage -> {
-                    network.send(it)
                     environment = environment.broadcastMessage(it.message)
                 }
 
