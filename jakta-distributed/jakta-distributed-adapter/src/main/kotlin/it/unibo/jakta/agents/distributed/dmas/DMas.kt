@@ -29,6 +29,8 @@ interface DMas : Mas {
             environment: Environment,
             agents: Iterable<Agent>,
             services: Iterable<RemoteService>,
-        ): DMas = DMasImpl(executionStrategy, environment, agents, services, Network.websocketNetwork())
+            host: String,
+            port: Int,
+        ): DMas = DMasImpl(executionStrategy, environment, agents, services, Network.websocketNetwork(host, port))
     }
 }
