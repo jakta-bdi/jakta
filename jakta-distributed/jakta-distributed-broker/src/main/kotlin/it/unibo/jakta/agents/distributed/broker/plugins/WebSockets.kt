@@ -45,6 +45,7 @@ fun Application.configureWebSockets(subscriptionManager: SubscriptionManager) {
             for (frame in incoming) {
                 this.send(Frame.Text(Error.BAD_REQUEST.toString()))
             }
+            call.application.environment.log.info("Removing $this")
             subscriptionManager.removeSubscriber(this, topic)
         }
 
@@ -56,6 +57,7 @@ fun Application.configureWebSockets(subscriptionManager: SubscriptionManager) {
             for (frame in incoming) {
                 this.send(Frame.Text(Error.BAD_REQUEST.toString()))
             }
+            call.application.environment.log.info("Removing $this")
             subscriptionManager.availableTopics().minus(except.toSet())
                 .forEach { subscriptionManager.removeSubscriber(this, it) }
         }
