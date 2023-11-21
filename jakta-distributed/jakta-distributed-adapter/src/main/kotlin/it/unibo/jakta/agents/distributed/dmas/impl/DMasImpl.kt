@@ -41,40 +41,40 @@ internal class DMasImpl(
 
     override fun applyEnvironmentEffects(effects: Iterable<EnvironmentChange>) {
         val externalEffects = network.getMessagesAsEnvironmentChanges()
-        (effects + externalEffects).forEach {
-            when (it) {
+        (effects + externalEffects).forEach { environmentChange ->
+            when (environmentChange) {
                 is BroadcastMessage -> {
-                    environment = environment.broadcastMessage(it.message)
+                    environment = environment.broadcastMessage(environmentChange.message)
                 }
 
                 is RemoveAgent -> {
-                    agents = agents.filter { agent -> agent.name != it.agentName }
-                    executionStrategy.removeAgent(it.agentName)
-                    environment = environment.removeAgent(it.agentName)
+                    agents = agents.filter { agent -> agent.name != environmentChange.agentName }
+                    executionStrategy.removeAgent(environmentChange.agentName)
+                    environment = environment.removeAgent(environmentChange.agentName)
                 }
 
                 is SendMessage -> {
-                    if (services.map { it.serviceName }.contains(it.recipient)) {
+                    if (services.map { it.serviceName }.contains(environmentChange.recipient)) {
                         runBlocking {
                             launch {
-                                network.send(it)
+                                network.send(environmentChange)
                             }
                         }
                     } else {
-                        environment = environment.submitMessage(it.recipient, it.message)
+                        environment = environment.submitMessage(environmentChange.recipient, environmentChange.message)
                     }
                 }
 
                 is SpawnAgent -> {
-                    agents += it.agent
-                    executionStrategy.spawnAgent(it.agent)
-                    environment = environment.addAgent(it.agent)
+                    agents += environmentChange.agent
+                    executionStrategy.spawnAgent(environmentChange.agent)
+                    environment = environment.addAgent(environmentChange.agent)
                 }
 
-                is AddData -> environment = environment.addData(it.key, it.value)
-                is RemoveData -> environment = environment.removeData(it.key)
-                is UpdateData -> environment = environment.updateData(it.newData)
-                is PopMessage -> environment = environment.popMessage(it.agentName)
+                is AddData -> environment = environment.addData(environmentChange.key, environmentChange.value)
+                is RemoveData -> environment = environment.removeData(environmentChange.key)
+                is UpdateData -> environment = environment.updateData(environmentChange.newData)
+                is PopMessage -> environment = environment.popMessage(environmentChange.agentName)
             }
         }
     }
