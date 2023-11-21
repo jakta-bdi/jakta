@@ -8,11 +8,11 @@ import it.unibo.jakta.agents.distributed.network.Network
 
 class WebsocketNetwork(host: String, port: Int) : Network {
     private val client: Client = Client.webSocketClient(host, port)
-    override fun subscribe(remoteService: RemoteService) {
+    override suspend fun subscribe(remoteService: RemoteService) {
         client.subscribe(remoteService.serviceName)
     }
 
-    override fun send(event: SendMessage) {
+    override suspend fun send(event: SendMessage) {
         client.publish(event.recipient, event)
     }
     override fun getMessagesAsEnvironmentChanges(): Iterable<EnvironmentChange> =
