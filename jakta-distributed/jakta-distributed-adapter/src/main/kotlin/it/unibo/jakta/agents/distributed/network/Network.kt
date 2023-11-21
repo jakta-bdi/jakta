@@ -10,11 +10,11 @@ interface Network {
     /**
      * Subscribes the DMas to a remote service.
      */
-    fun subscribe(remoteService: RemoteService)
+    suspend fun subscribe(remoteService: RemoteService)
     /**
      * Sends a message with a specified recipient.
      */
-    fun send(event: SendMessage)
+    suspend fun send(event: SendMessage)
     /**
      * Returns all the messages received by the network as EnvironmentChange.
      * In this way a DMas can apply the effects of the messages to the environment by simply appending these changes to

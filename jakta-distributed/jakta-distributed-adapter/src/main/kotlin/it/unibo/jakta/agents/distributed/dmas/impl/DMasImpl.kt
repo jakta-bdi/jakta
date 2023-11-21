@@ -15,6 +15,9 @@ import it.unibo.jakta.agents.bdi.executionstrategies.ExecutionStrategy
 import it.unibo.jakta.agents.distributed.RemoteService
 import it.unibo.jakta.agents.distributed.dmas.DMas
 import it.unibo.jakta.agents.distributed.network.Network
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 internal class DMasImpl(
     override val executionStrategy: ExecutionStrategy,
@@ -24,11 +27,16 @@ internal class DMasImpl(
     override val network: Network,
 ) : DMas {
     override fun start(debugEnabled: Boolean) {
-        // Here the DMas should subscribe to the broker and start listening for messages
-        services.forEach { service ->
-            network.subscribe(service)
+        val self = this
+        runBlocking {
+            // Here the DMas should subscribe to the broker and start listening for messages
+            launch(Dispatchers.Default) {
+                services.forEach { service ->
+                    network.subscribe(service)
+                }
+            }
+            executionStrategy.dispatch(self, debugEnabled)
         }
-        executionStrategy.dispatch(this, debugEnabled)
     }
 
     override fun applyEnvironmentEffects(effects: Iterable<EnvironmentChange>) {
@@ -47,7 +55,7 @@ internal class DMasImpl(
 
                 is SendMessage -> {
                     if (services.map { it.serviceName }.contains(it.recipient)) {
-                        network.send(it)
+                        runBlocking { network.send(it) }
                     } else {
                         environment = environment.submitMessage(it.recipient, it.message)
                     }
