@@ -55,7 +55,11 @@ internal class DMasImpl(
 
                 is SendMessage -> {
                     if (services.map { it.serviceName }.contains(it.recipient)) {
-                        runBlocking { network.send(it) }
+                        runBlocking {
+                            launch {
+                                network.send(it)
+                            }
+                        }
                     } else {
                         environment = environment.submitMessage(it.recipient, it.message)
                     }
