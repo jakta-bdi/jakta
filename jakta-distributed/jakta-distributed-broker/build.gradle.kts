@@ -6,7 +6,7 @@ plugins {
 }
 
 application {
-    mainClass.set("it.unibo.jakta.agents.distributed.broker.Application")
+    mainClass.set("io.ktor.server.netty.EngineMain")
 }
 
 repositories {
