@@ -4,10 +4,13 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.websocket.DefaultClientWebSocketSession
 import io.ktor.client.plugins.websocket.WebSockets
+import io.ktor.client.plugins.websocket.receiveDeserialized
 import io.ktor.client.plugins.websocket.sendSerialized
 import io.ktor.client.plugins.websocket.webSocketSession
 import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter
+import it.unibo.jakta.agents.bdi.actions.effects.SendMessage
 import it.unibo.jakta.agents.distributed.client.Client
+import it.unibo.jakta.agents.distributed.common.SerializableSendMessage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -15,7 +18,7 @@ import kotlinx.serialization.json.Json
 import java.util.*
 
 class WebSocketsClient(private val host: String, private val port: Int) : Client {
-    override val incomingData: MutableMap<String, Any> = Collections.synchronizedMap(LinkedHashMap())
+    private val incomingData: MutableMap<String, SerializableSendMessage> = Collections.synchronizedMap(LinkedHashMap())
     private val publishSessions: MutableMap<String, DefaultClientWebSocketSession> =
         Collections.synchronizedMap(LinkedHashMap())
     private val subscribeSessions: MutableMap<String, DefaultClientWebSocketSession> =
@@ -26,7 +29,7 @@ class WebSocketsClient(private val host: String, private val port: Int) : Client
         }
     }
 
-    override suspend fun publish(topic: String, data: Any) {
+    override suspend fun publish(topic: String, data: SendMessage) {
         coroutineScope {
             launch(Dispatchers.Default) {
                 if (!publishSessions.containsKey(topic)) {
@@ -37,7 +40,7 @@ class WebSocketsClient(private val host: String, private val port: Int) : Client
                     )
                 }
                 try {
-                    publishSessions[topic]?.sendSerialized(data)
+                    publishSessions[topic]?.sendSerialized(SerializableSendMessage.fromSendMessage(data))
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
@@ -57,12 +60,16 @@ class WebSocketsClient(private val host: String, private val port: Int) : Client
                 }
                 try {
                     for (frame in subscribeSessions[topic]?.incoming!!) {
-                        incomingData[topic] = frame
+                        incomingData[topic] = subscribeSessions[topic]!!.receiveDeserialized<SerializableSendMessage>()
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
             }
         }
+    }
+
+    override fun incomingData(): Map<String, SendMessage> {
+        return incomingData.mapValues { SerializableSendMessage.toSendMessage(it.value) }
     }
 }
