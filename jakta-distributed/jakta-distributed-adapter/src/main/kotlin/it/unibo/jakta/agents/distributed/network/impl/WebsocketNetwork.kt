@@ -13,8 +13,9 @@ class WebsocketNetwork(host: String, port: Int) : Network {
     }
 
     override suspend fun send(event: SendMessage) {
-        client.publish(event.recipient, event)
+        client.publish(event.message.from, event)
     }
+
     override fun getMessagesAsEnvironmentChanges(): Iterable<EnvironmentChange> =
         client.incomingData().values.asIterable()
 }
