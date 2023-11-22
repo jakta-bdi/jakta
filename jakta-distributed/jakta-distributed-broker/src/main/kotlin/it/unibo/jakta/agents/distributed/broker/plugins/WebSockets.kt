@@ -27,8 +27,8 @@ fun Application.configureWebSockets(subscriptionManager: SubscriptionManager) {
     routing {
 
         webSocket("/publish/{topic}") {
-            call.application.environment.log.info("New publish channel open: $this")
             val topic = call.parameters["topic"] ?: ""
+            call.application.environment.log.info("New publish channel open: $topic")
             subscriptionManager.addPublisher(this, topic)
             for (frame in incoming) {
                 subscriptionManager.subscribers(topic)
@@ -39,8 +39,8 @@ fun Application.configureWebSockets(subscriptionManager: SubscriptionManager) {
         }
 
         webSocket("/subscribe/{topic}") {
-            call.application.environment.log.info("New subscription: $this")
             val topic = call.parameters["topic"] ?: ""
+            call.application.environment.log.info("New subscription on: $topic")
             subscriptionManager.addSubscriber(this, topic)
             for (frame in incoming) {
                 this.send(Frame.Text(Error.BAD_REQUEST.toString()))
