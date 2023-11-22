@@ -35,8 +35,8 @@ internal class DMasImpl(
         val self = this
         runBlocking {
             // Here the DMas should subscribe to the broker and start listening for messages
-            launch(Dispatchers.Default) {
-                services.forEach { service ->
+            services.map { service ->
+                launch(Dispatchers.Default) {
                     network.subscribe(service)
                 }
             }
