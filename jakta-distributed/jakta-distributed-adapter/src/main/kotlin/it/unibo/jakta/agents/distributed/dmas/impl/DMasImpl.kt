@@ -26,6 +26,11 @@ internal class DMasImpl(
     override val services: Iterable<RemoteService>,
     override val network: Network,
 ) : DMas {
+
+    init {
+        agents.forEach { environment = environment.addAgent(it) }
+    }
+
     override fun start(debugEnabled: Boolean) {
         val self = this
         runBlocking {
