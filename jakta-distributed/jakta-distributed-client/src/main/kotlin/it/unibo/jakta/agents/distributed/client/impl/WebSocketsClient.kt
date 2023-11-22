@@ -13,6 +13,7 @@ import it.unibo.jakta.agents.distributed.client.Client
 import it.unibo.jakta.agents.distributed.common.SerializableSendMessage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import java.util.*
@@ -59,7 +60,7 @@ class WebSocketsClient(private val host: String, private val port: Int) : Client
                     )
                 }
                 try {
-                    for (frame in subscribeSessions[topic]?.incoming!!) {
+                    while (isActive) {
                         incomingData[topic] = subscribeSessions[topic]!!.receiveDeserialized<SerializableSendMessage>()
                     }
                 } catch (e: Exception) {
