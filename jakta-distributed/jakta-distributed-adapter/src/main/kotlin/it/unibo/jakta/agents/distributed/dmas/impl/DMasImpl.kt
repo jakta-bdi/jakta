@@ -61,7 +61,7 @@ internal class DMasImpl(
                 is SendMessage -> {
                     if (services.map { it.serviceName }.contains(environmentChange.recipient)) {
                         runBlocking {
-                            launch {
+                            launch(Dispatchers.Default) {
                                 network.send(environmentChange)
                             }
                         }
