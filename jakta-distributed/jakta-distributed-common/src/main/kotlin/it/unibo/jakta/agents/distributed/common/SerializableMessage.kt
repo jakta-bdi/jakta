@@ -15,13 +15,18 @@ data class SerializableMessage(
 ) {
     companion object {
         fun fromMessage(message: Message): SerializableMessage {
-            return SerializableMessage(message.from, message.type.toString(), message.value.toString())
+            val type = when (message.type) {
+                Achieve -> "Achieve"
+                Tell -> "Tell"
+                else -> throw Exception()
+            }
+            return SerializableMessage(message.from, type, message.value.toString())
         }
 
         fun toMessage(serializableMessage: SerializableMessage): Message {
             val type = when (serializableMessage.type) {
-                Achieve.toString() -> Achieve
-                Tell.toString() -> Tell
+                "Achieve" -> Achieve
+                "Tell" -> Tell
                 else -> throw Exception()
             }
             return Message(serializableMessage.from, type, Struct.parse(serializableMessage.value))
