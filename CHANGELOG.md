@@ -1,3 +1,12 @@
+## [0.7.33](https://github.com/jakta-bdi/jakta/compare/v0.7.32...v0.7.33) (2023-11-24)
+
+
+### Bug Fixes
+
+* **core-deps:** update dependency org.jetbrains.kotlin.jvm to v1.9.21 ([729e6b0](https://github.com/jakta-bdi/jakta/commit/729e6b097fefd16bac06df418199b5554727117b))
+* **core-deps:** update kotlin monorepo to v1.9.21 ([b65e716](https://github.com/jakta-bdi/jakta/commit/b65e7165c9575510f1e6d3171e224db1d3743928))
+* **deps:** update plugin publishoncentral to v5.0.20 ([dbf6a7f](https://github.com/jakta-bdi/jakta/commit/dbf6a7f6d14f320d884c8d97a66a52b3fa17f8e3))
+
 ## [0.7.32](https://github.com/jakta-bdi/jakta/compare/v0.7.31...v0.7.32) (2023-11-24)
 
 
