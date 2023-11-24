@@ -3,9 +3,10 @@ on:
   workflow_call:
   workflow_dispatch:
 
+permissions:
+    contents: write
+
 jobs:
-  permissions:
-    actions: write
   build:
     strategy:
       matrix:
