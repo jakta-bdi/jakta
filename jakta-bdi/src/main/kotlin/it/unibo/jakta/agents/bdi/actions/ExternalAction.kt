@@ -1,8 +1,8 @@
 package it.unibo.jakta.agents.bdi.actions
 
 import it.unibo.jakta.agents.bdi.Agent
-import it.unibo.jakta.agents.bdi.messages.Message
 import it.unibo.jakta.agents.bdi.actions.effects.EnvironmentChange
+import it.unibo.jakta.agents.bdi.messages.Message
 
 interface ExternalAction : Action<EnvironmentChange, ExternalResponse, ExternalRequest> {
     fun addAgent(agent: Agent)

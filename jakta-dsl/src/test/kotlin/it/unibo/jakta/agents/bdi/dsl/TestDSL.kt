@@ -4,7 +4,6 @@ import it.unibo.jakta.agents.bdi.dsl.beliefs.fromSelf
 import it.unibo.tuprolog.core.Struct
 
 fun main() {
-
     mas {
         environment {
             actions {
@@ -25,7 +24,7 @@ fun main() {
                 achieve("eat"("ice-cream"))
             }
             plans {
-                + achieve("eat"("ice-cream")) onlyIf { "good"("ice-cream").fromSelf } then {
+                +achieve("eat"("ice-cream")) onlyIf { "good"("ice-cream").fromSelf } then {
                     execute("pluto"("YUMMY!"))
                 }
             }

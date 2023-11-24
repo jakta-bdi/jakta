@@ -2,9 +2,9 @@ package it.unibo.jakta.agents.bdi.events
 
 import it.unibo.jakta.agents.bdi.beliefs.Belief
 import it.unibo.jakta.agents.bdi.beliefs.BeliefBase
-import it.unibo.tuprolog.core.Struct
-import it.unibo.jakta.agents.bdi.goals.Test
 import it.unibo.jakta.agents.bdi.goals.Achieve
+import it.unibo.jakta.agents.bdi.goals.Test
+import it.unibo.tuprolog.core.Struct
 
 /** [Trigger] denotes the change that took place for the [Event] generation. */
 interface Trigger {

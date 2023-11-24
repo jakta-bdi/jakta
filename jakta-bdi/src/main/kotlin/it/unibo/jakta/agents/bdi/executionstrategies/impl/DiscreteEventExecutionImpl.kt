@@ -36,7 +36,7 @@ internal class DiscreteEventExecutionImpl : AbstractSingleRunnerExecutionStrateg
                     }
                 synchronizedAgents.getAgents().ifEmpty { it.stop() }
             },
-            currentTime = { time }
+            currentTime = { time },
         ).run()
     }
 }

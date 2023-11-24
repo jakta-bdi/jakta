@@ -1,7 +1,7 @@
 package it.unibo.jakta.agents.bdi.actions.effects
 
-import it.unibo.jakta.agents.bdi.context.ContextUpdate
 import it.unibo.jakta.agents.bdi.beliefs.Belief
+import it.unibo.jakta.agents.bdi.context.ContextUpdate
 import it.unibo.jakta.agents.bdi.events.Event
 import it.unibo.jakta.agents.bdi.intentions.Intention
 import it.unibo.jakta.agents.bdi.plans.Plan

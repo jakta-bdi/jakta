@@ -1,20 +1,21 @@
 package it.unibo.jakta.agents.bdi
 
+import io.kotest.assertions.fail
+import io.kotest.core.spec.style.DescribeSpec
+import io.kotest.matchers.shouldBe
 import it.unibo.jakta.agents.bdi.beliefs.Belief
 import it.unibo.jakta.agents.bdi.goals.Achieve
 import it.unibo.jakta.agents.bdi.goals.AddBelief
 import it.unibo.jakta.agents.bdi.intentions.Intention
 import it.unibo.jakta.agents.bdi.intentions.IntentionPool
 import it.unibo.jakta.agents.bdi.plans.ActivationRecord
-import io.kotest.assertions.fail
-import io.kotest.core.spec.style.DescribeSpec
-import io.kotest.matchers.shouldBe
 import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.core.Var
 
 class TestIntentions : DescribeSpec({
+    @Suppress("VariableNaming")
     val X = Var.of("X")
     val buySomething = Belief.fromSelfSource(Struct.of("buy", X))
     val eatSomething = Belief.fromSelfSource(Struct.of("eat", X))
@@ -57,8 +58,8 @@ class TestIntentions : DescribeSpec({
                 intention.recordStack +
                     ActivationRecord.of(
                         listOf(Achieve.of(Struct.of("clean", X))),
-                        Struct.of("test")
-                    )
+                        Struct.of("test"),
+                    ),
             )
             newIntention.recordStack.size shouldBe 2
             val computedIntention = newIntention.applySubstitution(substitution)
@@ -77,11 +78,11 @@ class TestIntentions : DescribeSpec({
             listOf(
                 ActivationRecord.of(
                     listOf(
-                        Achieve.of(Struct.of("clean", Atom.of("home")))
+                        Achieve.of(Struct.of("clean", Atom.of("home"))),
                     ),
                     Struct.of("test"),
-                )
-            )
+                ),
+            ),
         )
         val intentionPool = IntentionPool.of(listOf(intention, intention2))
 

@@ -17,7 +17,7 @@ import kotlin.reflect.KClass
 data class PlanScope(
     private val scope: Scope,
     private val trigger: Struct,
-    private val triggerType: KClass<out Trigger>
+    private val triggerType: KClass<out Trigger>,
 ) {
     private var guard: Struct = Truth.TRUE
     private var goals: List<Goal> = mutableListOf()
@@ -40,17 +40,17 @@ data class PlanScope(
                 BeliefBaseRevision::class -> Plan.ofBeliefBaseRemoval(
                     Belief.from(trigger),
                     goals.ifEmpty { listOf(EmptyGoal()) },
-                    guard
+                    guard,
                 )
                 TestGoalTrigger::class -> Plan.ofTestGoalFailure(
                     trigger,
                     goals.ifEmpty { listOf(EmptyGoal()) },
-                    guard
+                    guard,
                 )
                 AchievementGoalTrigger::class -> Plan.ofAchievementGoalFailure(
                     trigger,
                     goals.ifEmpty { listOf(EmptyGoal()) },
-                    guard
+                    guard,
                 )
                 else -> throw IllegalArgumentException("Unknown trigger type: $triggerType")
             }
@@ -59,17 +59,17 @@ data class PlanScope(
                 BeliefBaseRevision::class -> Plan.ofBeliefBaseAddition(
                     Belief.from(trigger),
                     goals.ifEmpty { listOf(EmptyGoal()) },
-                    guard
+                    guard,
                 )
                 TestGoalTrigger::class -> Plan.ofTestGoalInvocation(
                     trigger,
                     goals.ifEmpty { listOf(EmptyGoal()) },
-                    guard
+                    guard,
                 )
                 AchievementGoalTrigger::class -> Plan.ofAchievementGoalInvocation(
                     trigger,
                     goals.ifEmpty { listOf(EmptyGoal()) },
-                    guard
+                    guard,
                 )
                 else -> throw IllegalArgumentException("Unknown trigger type: $triggerType")
             }

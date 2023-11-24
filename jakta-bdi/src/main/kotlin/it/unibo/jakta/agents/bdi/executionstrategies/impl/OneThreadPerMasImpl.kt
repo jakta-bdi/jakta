@@ -14,7 +14,7 @@ internal class OneThreadPerMasImpl : AbstractSingleRunnerExecutionStrategy() {
                     mas.applyEnvironmentEffects(sideEffects)
                 }
                 synchronizedAgents.getAgents().ifEmpty { it.stop() }
-            }
+            },
         ).run()
     }
 }

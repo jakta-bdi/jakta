@@ -1,7 +1,7 @@
 package it.unibo.jakta.agents.bdi
 
-import it.unibo.jakta.agents.bdi.actions.impl.AbstractExternalAction
 import it.unibo.jakta.agents.bdi.actions.ExternalRequest
+import it.unibo.jakta.agents.bdi.actions.impl.AbstractExternalAction
 import it.unibo.jakta.agents.bdi.beliefs.Belief
 import it.unibo.jakta.agents.bdi.environment.Environment
 import it.unibo.jakta.agents.bdi.executionstrategies.ExecutionStrategy
@@ -21,7 +21,7 @@ fun main() {
             when (type.value) {
                 "tell" -> broadcastMessage(Message(request.sender, Tell, message))
                 "achieve" -> broadcastMessage(
-                    Message(request.sender, it.unibo.jakta.agents.bdi.messages.Achieve, message)
+                    Message(request.sender, it.unibo.jakta.agents.bdi.messages.Achieve, message),
                 )
             }
         }
@@ -29,8 +29,8 @@ fun main() {
 
     val env = Environment.of(
         externalActions = mapOf(
-            broadcastAction.signature.name to broadcastAction
-        )
+            broadcastAction.signature.name to broadcastAction,
+        ),
     )
 
     val sender = Agent.of(
@@ -42,9 +42,9 @@ fun main() {
                 value = Jakta.parseStruct("broadcast"),
                 goals = listOf(
                     ActInternally.of(Jakta.parseStruct("print(\"Broadcast message\")")),
-                    Act.of(Jakta.parseStruct("broadcast(tell, greetings)"))
-                )
-            )
+                    Act.of(Jakta.parseStruct("broadcast(tell, greetings)")),
+                ),
+            ),
         ),
     )
 
@@ -54,9 +54,9 @@ fun main() {
             Plan.ofBeliefBaseAddition(
                 belief = Belief.from(Jakta.parseStruct("greetings(source(Sender))")),
                 goals = listOf(
-                    ActInternally.of(Jakta.parseStruct("print(\"Received message from: \", Sender)"))
-                )
-            )
+                    ActInternally.of(Jakta.parseStruct("print(\"Received message from: \", Sender)")),
+                ),
+            ),
         ),
     )
 

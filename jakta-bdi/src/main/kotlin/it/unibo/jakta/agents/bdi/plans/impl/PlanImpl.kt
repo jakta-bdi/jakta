@@ -1,10 +1,10 @@
 package it.unibo.jakta.agents.bdi.plans.impl
 
-import it.unibo.jakta.agents.bdi.plans.ActivationRecord
 import it.unibo.jakta.agents.bdi.beliefs.BeliefBase
 import it.unibo.jakta.agents.bdi.events.Event
 import it.unibo.jakta.agents.bdi.events.Trigger
 import it.unibo.jakta.agents.bdi.goals.Goal
+import it.unibo.jakta.agents.bdi.plans.ActivationRecord
 import it.unibo.jakta.agents.bdi.plans.Plan
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.unify.Unificator.Companion.mguWith
@@ -30,7 +30,7 @@ internal data class PlanImpl(
                     it.value
                         .apply(mgu)
                         .apply(solvedGuard.substitution)
-                        .castToStruct()
+                        .castToStruct(),
                 )
             }
 

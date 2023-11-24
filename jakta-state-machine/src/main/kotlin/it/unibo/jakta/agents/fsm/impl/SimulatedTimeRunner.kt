@@ -6,7 +6,7 @@ import it.unibo.jakta.agents.utils.Promise
 
 class SimulatedTimeRunner(
     override val activity: Activity,
-    private val currentTime: () -> Time
+    private val currentTime: () -> Time,
 ) : AbstractRunner(activity) {
 
     override fun onPause() = error("Is not possible to PAUSE a DiscreteTimeRunner")

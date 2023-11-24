@@ -1,11 +1,11 @@
 package it.unibo.jakta.agents.bdi.events
 
 import it.unibo.jakta.agents.bdi.beliefs.Belief
-import it.unibo.jakta.agents.bdi.intentions.IntentionID
 import it.unibo.jakta.agents.bdi.events.impl.EventImpl
 import it.unibo.jakta.agents.bdi.goals.Achieve
 import it.unibo.jakta.agents.bdi.goals.Test
 import it.unibo.jakta.agents.bdi.intentions.Intention
+import it.unibo.jakta.agents.bdi.intentions.IntentionID
 import it.unibo.tuprolog.core.Struct
 
 /**

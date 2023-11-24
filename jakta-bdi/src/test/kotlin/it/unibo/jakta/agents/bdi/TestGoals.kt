@@ -1,12 +1,12 @@
 package it.unibo.jakta.agents.bdi
 
+import io.kotest.assertions.fail
+import io.kotest.core.spec.style.DescribeSpec
+import io.kotest.matchers.shouldBe
 import it.unibo.jakta.agents.bdi.beliefs.Belief
 import it.unibo.jakta.agents.bdi.beliefs.BeliefBase
 import it.unibo.jakta.agents.bdi.goals.Achieve
 import it.unibo.jakta.agents.bdi.goals.ActInternally
-import io.kotest.assertions.fail
-import io.kotest.core.spec.style.DescribeSpec
-import io.kotest.matchers.shouldBe
 import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Var

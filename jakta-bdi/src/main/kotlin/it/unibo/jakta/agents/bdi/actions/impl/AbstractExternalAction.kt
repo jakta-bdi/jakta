@@ -1,7 +1,6 @@
 package it.unibo.jakta.agents.bdi.actions.impl
 
 import it.unibo.jakta.agents.bdi.Agent
-import it.unibo.jakta.agents.bdi.messages.Message
 import it.unibo.jakta.agents.bdi.actions.ExternalAction
 import it.unibo.jakta.agents.bdi.actions.ExternalRequest
 import it.unibo.jakta.agents.bdi.actions.ExternalResponse
@@ -13,6 +12,7 @@ import it.unibo.jakta.agents.bdi.actions.effects.RemoveData
 import it.unibo.jakta.agents.bdi.actions.effects.SendMessage
 import it.unibo.jakta.agents.bdi.actions.effects.SpawnAgent
 import it.unibo.jakta.agents.bdi.actions.effects.UpdateData
+import it.unibo.jakta.agents.bdi.messages.Message
 import it.unibo.tuprolog.solve.Signature
 
 abstract class AbstractExternalAction(override val signature: Signature) : ExternalAction,

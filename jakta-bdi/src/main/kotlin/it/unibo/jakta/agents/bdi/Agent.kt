@@ -1,11 +1,11 @@
 package it.unibo.jakta.agents.bdi
 
 import it.unibo.jakta.agents.bdi.actions.InternalAction
+import it.unibo.jakta.agents.bdi.actions.InternalActions
 import it.unibo.jakta.agents.bdi.beliefs.BeliefBase
+import it.unibo.jakta.agents.bdi.context.AgentContext
 import it.unibo.jakta.agents.bdi.events.Event
 import it.unibo.jakta.agents.bdi.events.EventQueue
-import it.unibo.jakta.agents.bdi.actions.InternalActions
-import it.unibo.jakta.agents.bdi.context.AgentContext
 import it.unibo.jakta.agents.bdi.impl.AgentImpl
 import it.unibo.jakta.agents.bdi.intentions.IntentionPool
 import it.unibo.jakta.agents.bdi.intentions.SchedulingResult
@@ -47,7 +47,7 @@ interface Agent : Taggable<Agent> {
         beliefBase,
         events,
         planLibrary,
-        internalActions
+        internalActions,
     )
 
     companion object {

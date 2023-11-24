@@ -1,9 +1,10 @@
 package it.unibo.jakta.agents.fsm
 
-import it.unibo.jakta.agents.fsm.impl.State
-import it.unibo.jakta.agents.utils.Promise
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
+import it.unibo.jakta.agents.fsm.impl.State
+import it.unibo.jakta.agents.utils.Promise
+import kotlinx.coroutines.delay
 import org.junit.jupiter.api.assertThrows
 import java.util.concurrent.ExecutionException
 
@@ -18,7 +19,7 @@ class TestAgentFSM : DescribeSpec({
                     onBeginProcedure = { runner.state shouldBe State.CREATED },
                     onStepProcedure = { it.stop() },
                     onEndProcedure = { runner.state shouldBe State.RUNNING },
-                )
+                ),
             )
 
             runner.isOver shouldBe false
@@ -36,16 +37,16 @@ class TestAgentFSM : DescribeSpec({
                 Activity.of(
                     onBeginProcedure = { c = it },
                     onStepProcedure = { it.pause() },
-                )
+                ),
             )
 
             runner.isOver shouldBe false
             runner.state shouldBe State.CREATED
             runner.run()
-            Thread.sleep(2000)
+            delay(2000)
             runner.state shouldBe State.PAUSED
             c.resume()
-            Thread.sleep(1000)
+            delay(2000)
             runner.state shouldBe State.PAUSED
             c.stop()
         }
@@ -61,12 +62,12 @@ class TestAgentFSM : DescribeSpec({
                         beginCounter++
                     },
                     onStepProcedure = { it.pause() },
-                )
+                ),
             ).run()
 
-            Thread.sleep(2000)
+            delay(2000)
             c.restart()
-            Thread.sleep(1000)
+            delay(2000)
             c.stop()
             beginCounter shouldBe 2
         }
@@ -76,7 +77,7 @@ class TestAgentFSM : DescribeSpec({
                 Activity.of(
                     onStepProcedure = { it.stop() },
                     onEndProcedure = { it.pause() },
-                )
+                ),
             ).run()
             assertThrows<ExecutionException> { promise.get() }
         }
@@ -85,7 +86,7 @@ class TestAgentFSM : DescribeSpec({
     describe("A Sync Agent") {
         it("should not go on paused state") {
             val promise = Runner.syncOf(
-                Activity.of { it.pause() }
+                Activity.of { it.pause() },
             ).run()
             assertThrows<ExecutionException> { promise.get() }
         }
@@ -96,7 +97,7 @@ class TestAgentFSM : DescribeSpec({
                 Activity.of {
                     Thread.currentThread() shouldBe invokerThread
                     it.stop()
-                }
+                },
             ).run()
         }
     }

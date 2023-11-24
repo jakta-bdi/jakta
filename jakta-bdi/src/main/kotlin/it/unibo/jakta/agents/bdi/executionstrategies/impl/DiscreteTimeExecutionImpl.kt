@@ -18,7 +18,7 @@ internal class DiscreteTimeExecutionImpl : AbstractSingleRunnerExecutionStrategy
                 synchronizedAgents.getAgents().ifEmpty { it.stop() }
                 time++
             },
-            currentTime = { Time.discrete(time) }
+            currentTime = { Time.discrete(time) },
         ).run()
     }
 }

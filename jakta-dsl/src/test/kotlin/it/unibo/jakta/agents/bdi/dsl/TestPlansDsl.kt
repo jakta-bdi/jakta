@@ -1,5 +1,9 @@
 package it.unibo.jakta.agents.bdi.dsl
 
+import io.kotest.core.spec.style.DescribeSpec
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
+import io.kotest.matchers.types.shouldBeTypeOf
 import it.unibo.jakta.agents.bdi.events.AchievementGoalFailure
 import it.unibo.jakta.agents.bdi.events.AchievementGoalInvocation
 import it.unibo.jakta.agents.bdi.events.BeliefBaseAddition
@@ -14,14 +18,10 @@ import it.unibo.jakta.agents.bdi.goals.EmptyGoal
 import it.unibo.jakta.agents.bdi.goals.RemoveBelief
 import it.unibo.jakta.agents.bdi.goals.Test
 import it.unibo.jakta.agents.bdi.goals.UpdateBelief
-import io.kotest.core.spec.style.DescribeSpec
-import io.kotest.matchers.shouldBe
-import io.kotest.matchers.types.shouldBeInstanceOf
-import io.kotest.matchers.types.shouldBeTypeOf
+import it.unibo.tuprolog.core.Atom
+import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Truth
 import it.unibo.tuprolog.core.Var
-import it.unibo.tuprolog.core.Struct
-import it.unibo.tuprolog.core.Atom
 
 class TestPlansDsl : DescribeSpec({
     describe("An achievement trigger plan") {
@@ -41,11 +41,11 @@ class TestPlansDsl : DescribeSpec({
             plan.goals.size shouldBe 1
             plan.goals.first().value.equals(
                 Struct.of("turn", Struct.of("source", Atom.of("self")), Atom.of("other")),
-                false
+                false,
             ) shouldBe true
             plan.guard.equals(
                 Struct.of("turn", Struct.of("source", Atom.of("self")), Atom.of("me")),
-                false
+                false,
             ) shouldBe true
         }
         it("should be created with a failure trigger") {
@@ -106,7 +106,7 @@ class TestPlansDsl : DescribeSpec({
             val plan = p1.agents.first().context.planLibrary.plans.first()
             plan.trigger.value.equals(
                 Struct.of("send_ping", Struct.of("source", Atom.of("me"))),
-                false
+                false,
             ) shouldBe true
             plan.trigger.shouldBeTypeOf<BeliefBaseAddition>()
             plan.goals.size shouldBe 1
@@ -124,7 +124,7 @@ class TestPlansDsl : DescribeSpec({
             val plan = p1.agents.first().context.planLibrary.plans.first()
             plan.trigger.value.equals(
                 Struct.of("send_ping", Struct.of("source", Atom.of("self"))),
-                false
+                false,
             ) shouldBe true
             plan.trigger.shouldBeTypeOf<BeliefBaseRemoval>()
         }
@@ -144,7 +144,7 @@ class TestPlansDsl : DescribeSpec({
             plan.goals.size shouldBe 1
             plan.goals.first().value.equals(
                 Struct.of("sendMessage", Var.of("R"), Atom.of("ping")),
-                false
+                false,
             ) shouldBe true
             plan.goals.first().shouldBeInstanceOf<Achieve>()
         }
@@ -162,7 +162,7 @@ class TestPlansDsl : DescribeSpec({
             plan.goals.size shouldBe 1
             plan.goals.first().value.equals(
                 Struct.of("send_ping", Struct.of("source", Atom.of("self"))),
-                false
+                false,
             ) shouldBe true
             plan.goals.first().shouldBeInstanceOf<Test>()
         }
@@ -182,7 +182,7 @@ class TestPlansDsl : DescribeSpec({
             plan.goals.forEach {
                 it.value.equals(
                     Struct.of("send_ping", Struct.of("source", Atom.of("self"))),
-                    false
+                    false,
                 ) shouldBe true
             }
             plan.goals.forEach {
@@ -205,7 +205,7 @@ class TestPlansDsl : DescribeSpec({
             plan.goals.forEach {
                 it.value.equals(
                     Struct.of("send_ping", Struct.of("source", Atom.of("other"))),
-                    false
+                    false,
                 ) shouldBe true
             }
             plan.goals.forEach {
@@ -227,7 +227,7 @@ class TestPlansDsl : DescribeSpec({
             plan.goals.forEach {
                 it.value.equals(
                     Struct.of("send_ping", Struct.of("source", Atom.of("percept"))),
-                    false
+                    false,
                 ) shouldBe true
             }
             plan.goals.forEach {
@@ -249,7 +249,7 @@ class TestPlansDsl : DescribeSpec({
             plan.goals.forEach {
                 it.value.equals(
                     Struct.of("send_ping", Struct.of("source", Atom.of("self"))),
-                    false
+                    false,
                 ) shouldBe true
             }
             plan.goals.forEach {
@@ -271,7 +271,7 @@ class TestPlansDsl : DescribeSpec({
             plan.goals.forEach {
                 it.value.equals(
                     Struct.of("send_ping", Struct.of("source", Atom.of("pong"))),
-                    false
+                    false,
                 ) shouldBe true
             }
             plan.goals.forEach {

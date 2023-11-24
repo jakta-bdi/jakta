@@ -15,7 +15,7 @@ interface ExternalRequest : ActionRequest<EnvironmentChange, ExternalResponse> {
             environment: Environment,
             sender: String,
             requestTime: Time,
-            arguments: Iterable<Term>
+            arguments: Iterable<Term>,
         ): ExternalRequest = ExternalRequestImpl(environment, sender, requestTime, arguments.toList())
 
         fun of(environment: Environment, sender: String, requestTime: Time, vararg arguments: Term): ExternalRequest =
