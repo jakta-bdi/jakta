@@ -1,3 +1,15 @@
+## [0.7.31](https://github.com/jakta-bdi/jakta/compare/v0.7.30...v0.7.31) (2023-11-24)
+
+
+### Bug Fixes
+
+* add write permission to release ([8070659](https://github.com/jakta-bdi/jakta/commit/8070659fa3cb12a5ffd9f94c446ad1703c1cf464))
+* **deps:** update anitvam/conventionalcommit-semantic-releasing action to v0.7.0 ([9e22cf1](https://github.com/jakta-bdi/jakta/commit/9e22cf15ae8a18c141b6122db8af92bce4a6c454))
+* **deps:** update anitvam/conventionalcommit-semantic-releasing action to v0.7.1 ([7a58901](https://github.com/jakta-bdi/jakta/commit/7a58901bdb9b742328ebce0e46d179d3c66ffa52))
+* **deps:** update plugin gitsemver to v2.0.3 ([36b7849](https://github.com/jakta-bdi/jakta/commit/36b784999ef408ae25edb97fa059863b3bb82e7f))
+* **deps:** update plugin org.danilopianini.gradle-pre-commit-git-hooks to v1.1.15 ([74c1a3d](https://github.com/jakta-bdi/jakta/commit/74c1a3d8b4df6cc093775451131fb24a360eba60))
+* update permissions ([ccb244d](https://github.com/jakta-bdi/jakta/commit/ccb244da89dacb66734b447d81bbc9bd4f9c95c1))
+
 ## [0.7.30](https://github.com/jakta-bdi/jakta/compare/v0.7.29...v0.7.30) (2023-11-16)
 
 
