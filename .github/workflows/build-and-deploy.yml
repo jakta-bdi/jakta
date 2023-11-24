@@ -2,10 +2,10 @@ name: CI/CD Process
 on:
   workflow_call:
   workflow_dispatch:
-  permissions:
-    actions: write
 
 jobs:
+  permissions:
+    actions: write
   build:
     strategy:
       matrix:
