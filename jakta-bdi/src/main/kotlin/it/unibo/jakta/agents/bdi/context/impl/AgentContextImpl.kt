@@ -1,8 +1,8 @@
 package it.unibo.jakta.agents.bdi.context.impl
 
 import it.unibo.jakta.agents.bdi.actions.InternalAction
-import it.unibo.jakta.agents.bdi.context.AgentContext
 import it.unibo.jakta.agents.bdi.beliefs.BeliefBase
+import it.unibo.jakta.agents.bdi.context.AgentContext
 import it.unibo.jakta.agents.bdi.events.EventQueue
 import it.unibo.jakta.agents.bdi.intentions.IntentionPool
 import it.unibo.jakta.agents.bdi.plans.PlanLibrary

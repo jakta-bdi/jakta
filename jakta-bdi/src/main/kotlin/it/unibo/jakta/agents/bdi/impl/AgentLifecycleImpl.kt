@@ -1,34 +1,10 @@
 package it.unibo.jakta.agents.bdi.impl
 
 import it.unibo.jakta.agents.bdi.Agent
-import it.unibo.jakta.agents.bdi.context.AgentContext
-import it.unibo.jakta.agents.bdi.context.ContextUpdate.ADDITION
-import it.unibo.jakta.agents.bdi.context.ContextUpdate.REMOVAL
 import it.unibo.jakta.agents.bdi.AgentLifecycle
 import it.unibo.jakta.agents.bdi.actions.ExternalAction
-import it.unibo.jakta.agents.bdi.executionstrategies.ExecutionResult
 import it.unibo.jakta.agents.bdi.actions.ExternalRequest
 import it.unibo.jakta.agents.bdi.actions.InternalAction
-import it.unibo.jakta.agents.bdi.beliefs.Belief
-import it.unibo.jakta.agents.bdi.beliefs.BeliefBase
-import it.unibo.jakta.agents.bdi.beliefs.BeliefUpdate
-import it.unibo.jakta.agents.bdi.beliefs.RetrieveResult
-import it.unibo.jakta.agents.bdi.events.AchievementGoalFailure
-import it.unibo.jakta.agents.bdi.events.BeliefBaseAddition
-import it.unibo.jakta.agents.bdi.events.BeliefBaseRemoval
-import it.unibo.jakta.agents.bdi.events.Event
-import it.unibo.jakta.agents.bdi.events.EventQueue
-import it.unibo.jakta.agents.bdi.events.TestGoalFailure
-import it.unibo.jakta.agents.bdi.goals.Achieve
-import it.unibo.jakta.agents.bdi.goals.Act
-import it.unibo.jakta.agents.bdi.goals.ActInternally
-import it.unibo.jakta.agents.bdi.goals.ActionGoal
-import it.unibo.jakta.agents.bdi.goals.AddBelief
-import it.unibo.jakta.agents.bdi.goals.BeliefGoal
-import it.unibo.jakta.agents.bdi.goals.RemoveBelief
-import it.unibo.jakta.agents.bdi.goals.Spawn
-import it.unibo.jakta.agents.bdi.goals.Test
-import it.unibo.jakta.agents.bdi.goals.UpdateBelief
 import it.unibo.jakta.agents.bdi.actions.InternalRequest
 import it.unibo.jakta.agents.bdi.actions.effects.AgentChange
 import it.unibo.jakta.agents.bdi.actions.effects.BeliefChange
@@ -40,9 +16,33 @@ import it.unibo.jakta.agents.bdi.actions.effects.PlanChange
 import it.unibo.jakta.agents.bdi.actions.effects.PopMessage
 import it.unibo.jakta.agents.bdi.actions.effects.Sleep
 import it.unibo.jakta.agents.bdi.actions.effects.Stop
+import it.unibo.jakta.agents.bdi.beliefs.Belief
+import it.unibo.jakta.agents.bdi.beliefs.BeliefBase
+import it.unibo.jakta.agents.bdi.beliefs.BeliefUpdate
+import it.unibo.jakta.agents.bdi.beliefs.RetrieveResult
+import it.unibo.jakta.agents.bdi.context.AgentContext
+import it.unibo.jakta.agents.bdi.context.ContextUpdate.ADDITION
+import it.unibo.jakta.agents.bdi.context.ContextUpdate.REMOVAL
 import it.unibo.jakta.agents.bdi.environment.Environment
+import it.unibo.jakta.agents.bdi.events.AchievementGoalFailure
+import it.unibo.jakta.agents.bdi.events.BeliefBaseAddition
+import it.unibo.jakta.agents.bdi.events.BeliefBaseRemoval
+import it.unibo.jakta.agents.bdi.events.Event
+import it.unibo.jakta.agents.bdi.events.EventQueue
+import it.unibo.jakta.agents.bdi.events.TestGoalFailure
+import it.unibo.jakta.agents.bdi.executionstrategies.ExecutionResult
+import it.unibo.jakta.agents.bdi.goals.Achieve
+import it.unibo.jakta.agents.bdi.goals.Act
 import it.unibo.jakta.agents.bdi.goals.ActExternally
+import it.unibo.jakta.agents.bdi.goals.ActInternally
+import it.unibo.jakta.agents.bdi.goals.ActionGoal
+import it.unibo.jakta.agents.bdi.goals.AddBelief
+import it.unibo.jakta.agents.bdi.goals.BeliefGoal
 import it.unibo.jakta.agents.bdi.goals.EmptyGoal
+import it.unibo.jakta.agents.bdi.goals.RemoveBelief
+import it.unibo.jakta.agents.bdi.goals.Spawn
+import it.unibo.jakta.agents.bdi.goals.Test
+import it.unibo.jakta.agents.bdi.goals.UpdateBelief
 import it.unibo.jakta.agents.bdi.intentions.Intention
 import it.unibo.jakta.agents.bdi.intentions.IntentionPool
 import it.unibo.jakta.agents.bdi.messages.Tell
@@ -108,12 +108,12 @@ internal data class AgentLifecycleImpl(
         intention: Intention,
         action: InternalAction,
         context: AgentContext,
-        goal: ActionGoal
+        goal: ActionGoal,
     ): ExecutionResult {
         var newIntention = intention.pop()
         try {
             val internalResponse = action.execute(
-                InternalRequest.of(this.agent, controller.currentTime(), goal.action.args)
+                InternalRequest.of(this.agent, controller.currentTime(), goal.action.args),
             )
             // Apply substitution
             return if (internalResponse.substitution.isSuccess) {
@@ -138,7 +138,7 @@ internal data class AgentLifecycleImpl(
         action: ExternalAction,
         context: AgentContext,
         environment: Environment,
-        goal: ActionGoal
+        goal: ActionGoal,
     ): ExecutionResult {
         var newIntention = intention.pop()
         try {
@@ -147,8 +147,8 @@ internal data class AgentLifecycleImpl(
                     environment,
                     agent.name,
                     controller.currentTime(),
-                    goal.action.args
-                )
+                    goal.action.args,
+                ),
             )
             return if (externalResponse.substitution.isSuccess) {
                 if (newIntention.recordStack.isNotEmpty()) {
@@ -169,7 +169,7 @@ internal data class AgentLifecycleImpl(
     override fun runIntention(intention: Intention, context: AgentContext, environment: Environment): ExecutionResult =
         when (val nextGoal = intention.nextGoal()) {
             is EmptyGoal -> ExecutionResult(
-                context.copy(intentions = context.intentions.updateIntention(intention.pop()))
+                context.copy(intentions = context.intentions.updateIntention(intention.pop())),
             )
             is ActionGoal -> when (nextGoal) {
                 is ActInternally -> {
@@ -215,13 +215,13 @@ internal data class AgentLifecycleImpl(
                 context.copy(
                     events = context.events + Event.ofAchievementGoalInvocation(Achieve.of(nextGoal.value)),
                     intentions = context.intentions.updateIntention(intention.pop()),
-                )
+                ),
             )
             is Achieve -> ExecutionResult(
                 context.copy(
                     events = context.events + Event.ofAchievementGoalInvocation(nextGoal, intention),
                     intentions = IntentionPool.of(context.intentions - intention.id),
-                )
+                ),
             )
             is Test -> {
                 val solution = context.beliefBase.solve(nextGoal.value)
@@ -229,14 +229,14 @@ internal data class AgentLifecycleImpl(
                     true -> ExecutionResult(
                         context.copy(
                             intentions = context.intentions.updateIntention(
-                                intention.pop().applySubstitution(solution.substitution)
-                            )
-                        )
+                                intention.pop().applySubstitution(solution.substitution),
+                            ),
+                        ),
                     )
                     else -> ExecutionResult(
                         context.copy(
-                            events = context.events + Event.ofTestGoalFailure(intention.currentPlan(), intention)
-                        )
+                            events = context.events + Event.ofTestGoalFailure(intention.currentPlan(), intention),
+                        ),
                     )
                 }
             }
@@ -251,7 +251,7 @@ internal data class AgentLifecycleImpl(
                         beliefBase = retrieveResult.updatedBeliefBase,
                         events = generateEvents(context.events, retrieveResult.modifiedBeliefs),
                         intentions = context.intentions.updateIntention(intention.pop()),
-                    )
+                    ),
                 )
             }
         }
@@ -372,8 +372,9 @@ internal data class AgentLifecycleImpl(
                 )
                 newIntentionPool = agent.context.intentions.updateIntention(updatedIntention)
             } else {
-                if (debugEnabled)
+                if (debugEnabled) {
                     println("[${agent.name}] WARNING: There's no applicable plan for the event: $selectedEvent")
+                }
                 if (selectedEvent.isInternal()) {
                     newIntentionPool = newIntentionPool.deleteIntention(selectedEvent.intention!!.id)
                 }

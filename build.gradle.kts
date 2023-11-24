@@ -109,4 +109,10 @@ allprojects {
             project.hasProperty("runDetect")
         }
     }
+
+    tasks.detektMain {
+        onlyIf {
+            project.hasProperty("runDetect")
+        }
+    }
 }

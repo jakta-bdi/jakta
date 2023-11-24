@@ -2,10 +2,10 @@ package it.unibo.jakta.agents.bdi.environment.impl
 
 import it.unibo.jakta.agents.bdi.Agent
 import it.unibo.jakta.agents.bdi.AgentID
-import it.unibo.jakta.agents.bdi.messages.Message
 import it.unibo.jakta.agents.bdi.actions.ExternalAction
 import it.unibo.jakta.agents.bdi.beliefs.BeliefBase
 import it.unibo.jakta.agents.bdi.environment.Environment
+import it.unibo.jakta.agents.bdi.messages.Message
 import it.unibo.jakta.agents.bdi.messages.MessageQueue
 import it.unibo.jakta.agents.bdi.perception.Perception
 
@@ -23,20 +23,24 @@ open class EnvironmentImpl(
         return if (message != null) {
             copy(
                 messageBoxes = messageBoxes + mapOf(
-                    agentIDs[agentName]!! to messageBoxes[agentIDs[agentName]]!!.minus(message)
-                )
+                    agentIDs[agentName]!! to messageBoxes[agentIDs[agentName]]!!.minus(message),
+                ),
             )
-        } else this
+        } else {
+            this
+        }
     }
 
     override fun submitMessage(agentName: String, message: Message) =
         if (messageBoxes.contains(agentIDs[agentName])) {
             copy(
                 messageBoxes = messageBoxes + mapOf(
-                    agentIDs[agentName]!! to messageBoxes[agentIDs[agentName]]!!.plus(message)
-                )
+                    agentIDs[agentName]!! to messageBoxes[agentIDs[agentName]]!!.plus(message),
+                ),
             )
-        } else this
+        } else {
+            this
+        }
 
     override fun broadcastMessage(message: Message): Environment = copy(
         messageBoxes = messageBoxes.entries.associate { it.key to it.value + message },
@@ -48,7 +52,9 @@ open class EnvironmentImpl(
                 agentIDs = agentIDs + mapOf(agent.name to agent.agentID),
                 messageBoxes = messageBoxes + mapOf(agent.agentID to emptyList()),
             )
-        } else this
+        } else {
+            this
+        }
 
     override fun removeAgent(agentName: String): Environment =
         if (agentIDs.contains(agentName)) {
@@ -56,7 +62,9 @@ open class EnvironmentImpl(
                 messageBoxes = messageBoxes - agentIDs[agentName]!!,
                 agentIDs = agentIDs - agentName,
             )
-        } else this
+        } else {
+            this
+        }
 
     override fun percept(): BeliefBase = perception.percept()
 
@@ -70,13 +78,13 @@ open class EnvironmentImpl(
         externalActions: Map<String, ExternalAction>,
         messageBoxes: Map<AgentID, MessageQueue>,
         perception: Perception,
-        data: Map<String, Any>
+        data: Map<String, Any>,
     ): Environment = EnvironmentImpl(
         externalActions,
         agentIDs,
         messageBoxes,
         perception,
-        data
+        data,
     )
 
     override fun toString(): String = """

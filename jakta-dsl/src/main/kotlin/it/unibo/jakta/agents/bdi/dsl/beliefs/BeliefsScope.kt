@@ -10,7 +10,7 @@ import it.unibo.tuprolog.dsl.LogicProgrammingScope
 import it.unibo.tuprolog.solve.stdlib.rule.SetPrologFlag.head
 
 class BeliefsScope(
-    private val lp: LogicProgrammingScope = LogicProgrammingScope.empty()
+    private val lp: LogicProgrammingScope = LogicProgrammingScope.empty(),
 ) : Builder<BeliefBase>, LogicProgrammingScope by lp {
 
     private val beliefs = mutableListOf<Belief>()

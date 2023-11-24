@@ -1,9 +1,9 @@
 package it.unibo.jakta.agents.bdi.actions.impl
 
 import it.unibo.jakta.agents.bdi.Agent
-import it.unibo.jakta.agents.bdi.actions.effects.AgentChange
 import it.unibo.jakta.agents.bdi.actions.InternalRequest
 import it.unibo.jakta.agents.bdi.actions.InternalResponse
+import it.unibo.jakta.agents.bdi.actions.effects.AgentChange
 import it.unibo.jakta.agents.fsm.time.Time
 import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.core.Term

@@ -10,10 +10,10 @@ import kotlin.reflect.KFunction
 
 abstract class ActionsScope<C, Res, Req, A, As> : Builder<Map<String, A>>
     where C : SideEffect,
-    Res : ActionResponse<C>,
-    Req : ActionRequest<C, Res>,
-    A : Action<C, Res, Req>,
-    As : ActionScope<C, Res, Req, A> {
+          Res : ActionResponse<C>,
+          Req : ActionRequest<C, Res>,
+          A : Action<C, Res, Req>,
+          As : ActionScope<C, Res, Req, A> {
 
     private val actions = mutableListOf<A>()
 

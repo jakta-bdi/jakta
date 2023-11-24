@@ -1,28 +1,28 @@
 package it.unibo.jakta.agents.bdi
 
-import it.unibo.jakta.agents.bdi.executionstrategies.ExecutionStrategy
+import io.kotest.assertions.fail
+import io.kotest.core.spec.style.DescribeSpec
+import io.kotest.matchers.shouldBe
+import it.unibo.jakta.agents.bdi.actions.InternalActions
+import it.unibo.jakta.agents.bdi.actions.InternalRequest
+import it.unibo.jakta.agents.bdi.actions.impl.AbstractInternalAction
+import it.unibo.jakta.agents.bdi.beliefs.Belief
+import it.unibo.jakta.agents.bdi.environment.Environment
 import it.unibo.jakta.agents.bdi.events.Event
+import it.unibo.jakta.agents.bdi.executionstrategies.ExecutionStrategy
 import it.unibo.jakta.agents.bdi.goals.Achieve
 import it.unibo.jakta.agents.bdi.goals.ActInternally
 import it.unibo.jakta.agents.bdi.goals.AddBelief
 import it.unibo.jakta.agents.bdi.goals.Test
-import it.unibo.jakta.agents.bdi.actions.impl.AbstractInternalAction
-import it.unibo.jakta.agents.bdi.actions.InternalActions
-import it.unibo.jakta.agents.bdi.actions.InternalRequest
-import it.unibo.jakta.agents.bdi.beliefs.Belief
-import it.unibo.jakta.agents.bdi.environment.Environment
 import it.unibo.jakta.agents.bdi.plans.Plan
 import it.unibo.jakta.agents.bdi.plans.PlanLibrary
-import io.kotest.assertions.fail
-import io.kotest.core.spec.style.DescribeSpec
-import io.kotest.matchers.shouldBe
 import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.core.Var
 
 class TestAgent : DescribeSpec({
-
+    @Suppress("VariableNaming")
     val TEST = object : AbstractInternalAction("test", 2) {
         override fun action(request: InternalRequest) {
             if (request.arguments[0].isAtom && request.arguments[1].isAtom) {
@@ -34,11 +34,15 @@ class TestAgent : DescribeSpec({
             }
         }
     }
+
+    @Suppress("VariableNaming")
     val FAILTEST = object : AbstractInternalAction("failtest", 0) {
         override fun action(request: InternalRequest) {
             fail("This action should not be executed by the agent")
         }
     }
+
+    @Suppress("VariableNaming")
     val PASSTEST = object : AbstractInternalAction("passtest", 0) {
         override fun action(request: InternalRequest) {
             println("This should be shown")
@@ -62,12 +66,13 @@ class TestAgent : DescribeSpec({
                     Plan.ofAchievementGoalInvocation(
                         value = start,
                         goals = listOf(ActInternally.of(Struct.of("test", Atom.of("5"), Atom.of("5")))),
-                    )
-                )
+                    ),
+                ),
             )
             Mas.of(ExecutionStrategy.oneThreadPerAgent(), environment, newAgent).start()
         }
         it("can declare custom actions to be performed") {
+            @Suppress("VariableNaming")
             val INCREMENT = object : AbstractInternalAction("increment", 2) {
                 override fun action(request: InternalRequest) {
                     val first: Atom = request.arguments.first().castToAtom()
@@ -76,6 +81,8 @@ class TestAgent : DescribeSpec({
                     result = Substitution.of(second to computation)
                 }
             }
+
+            @Suppress("VariableNaming")
             val X = Var.of("X")
             val newAgent = agent.copy(
                 planLibrary = PlanLibrary.of(
@@ -84,8 +91,8 @@ class TestAgent : DescribeSpec({
                         goals = listOf(
                             ActInternally.of(Struct.of("increment", Atom.of("5"), X)),
                             ActInternally.of(Struct.of("test", X, Atom.of("6"))),
-                        )
-                    )
+                        ),
+                    ),
                 ),
                 internalActions = agent.context.internalActions + (INCREMENT.signature.name to INCREMENT),
             )
@@ -106,7 +113,7 @@ class TestAgent : DescribeSpec({
                         goals = listOf(
                             ActInternally.of(Struct.of("passtest")),
                         ),
-                    )
+                    ),
                 ),
             )
             Mas.of(ExecutionStrategy.oneThreadPerAgent(), environment, newAgent).start()
@@ -118,21 +125,23 @@ class TestAgent : DescribeSpec({
                         value = start,
                         goals = listOf(
                             ActInternally.of(Struct.of("nonexistingaction")),
-                            ActInternally.of(Struct.of("failtest")),
+                            ActInternally.of(Atom.of("failtest")),
                         ),
                     ),
                     Plan.ofAchievementGoalFailure(
                         value = start,
                         goals = listOf(
-                            ActInternally.of(Struct.of("passtest"))
-                        )
-                    )
+                            ActInternally.of(Struct.of("passtest")),
+                        ),
+                    ),
                 ),
             )
             Mas.of(ExecutionStrategy.oneThreadPerAgent(), environment, newAgent).start()
         }
         it("can modify agent's context declaring custom actions") {
             val needChocolate = Belief.fromSelfSource(Struct.of("need", Atom.of("chocolate")))
+
+            @Suppress("VariableNaming")
             val ADDBELIEF = object : AbstractInternalAction("add_belief", 1) {
                 override fun action(request: InternalRequest) {
                     AddBelief.of(needChocolate)
@@ -151,9 +160,9 @@ class TestAgent : DescribeSpec({
                         belief = needChocolate,
                         goals = listOf(
                             Test.of(needChocolate),
-                            ActInternally.of(Struct.of("passtests"))
-                        )
-                    )
+                            ActInternally.of(Struct.of("passtests")),
+                        ),
+                    ),
                 ),
             )
             Mas.of(ExecutionStrategy.oneThreadPerAgent(), environment, newAgent).start()
@@ -163,6 +172,8 @@ class TestAgent : DescribeSpec({
 
 fun main() {
     val needChocolate = Belief.fromSelfSource(Struct.of("need", Atom.of("chocolate")))
+
+    @Suppress("VariableNaming")
     val ADDBELIEF = object : AbstractInternalAction("add_belief", 1) {
         override fun action(request: InternalRequest) {
             addBelief(Belief.from(request.arguments.first().castToRule()))
@@ -183,9 +194,9 @@ fun main() {
                 belief = needChocolate,
                 goals = listOf(
                     Test.of(needChocolate),
-                    ActInternally.of(Struct.of("print", Atom.of("guacamole")))
-                )
-            )
+                    ActInternally.of(Struct.of("print", Atom.of("guacamole"))),
+                ),
+            ),
         ),
     )
     Mas.of(ExecutionStrategy.oneThreadPerAgent(), Environment.of(), agent).start()

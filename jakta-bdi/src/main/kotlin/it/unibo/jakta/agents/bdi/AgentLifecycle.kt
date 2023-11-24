@@ -1,20 +1,20 @@
 package it.unibo.jakta.agents.bdi
 
-import it.unibo.jakta.agents.bdi.beliefs.BeliefBase
+import it.unibo.jakta.agents.bdi.actions.effects.EnvironmentChange
 import it.unibo.jakta.agents.bdi.beliefs.Belief
+import it.unibo.jakta.agents.bdi.beliefs.BeliefBase
 import it.unibo.jakta.agents.bdi.beliefs.RetrieveResult
+import it.unibo.jakta.agents.bdi.context.AgentContext
 import it.unibo.jakta.agents.bdi.environment.Environment
 import it.unibo.jakta.agents.bdi.events.Event
 import it.unibo.jakta.agents.bdi.events.EventQueue
+import it.unibo.jakta.agents.bdi.executionstrategies.ExecutionResult
 import it.unibo.jakta.agents.bdi.impl.AgentLifecycleImpl
 import it.unibo.jakta.agents.bdi.intentions.Intention
 import it.unibo.jakta.agents.bdi.intentions.IntentionPool
 import it.unibo.jakta.agents.bdi.intentions.SchedulingResult
 import it.unibo.jakta.agents.bdi.plans.Plan
 import it.unibo.jakta.agents.bdi.plans.PlanLibrary
-import it.unibo.jakta.agents.bdi.actions.effects.EnvironmentChange
-import it.unibo.jakta.agents.bdi.context.AgentContext
-import it.unibo.jakta.agents.bdi.executionstrategies.ExecutionResult
 import it.unibo.jakta.agents.fsm.Activity
 
 /** BDI Agent definition*/

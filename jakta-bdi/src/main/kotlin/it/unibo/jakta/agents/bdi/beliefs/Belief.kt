@@ -1,12 +1,12 @@
 package it.unibo.jakta.agents.bdi.beliefs
 
+import it.unibo.jakta.agents.bdi.beliefs.impl.BeliefImpl
 import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.Rule
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.core.Term
 import it.unibo.tuprolog.core.Var
-import it.unibo.jakta.agents.bdi.beliefs.impl.BeliefImpl
 
 interface Belief {
     val rule: Rule
@@ -31,7 +31,7 @@ interface Belief {
                 Rule.of(
                     Struct.of(head.functor, headArguments),
                     body,
-                )
+                ),
             )
         }
 
@@ -41,7 +41,7 @@ interface Belief {
                 Rule.of(
                     Struct.of(head.functor, headArguments),
                     body,
-                )
+                ),
             )
         }
 

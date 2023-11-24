@@ -1,10 +1,10 @@
 package it.unibo.jakta.agents.bdi
 
-import it.unibo.jakta.agents.bdi.context.ContextUpdate
-import it.unibo.jakta.agents.bdi.beliefs.Belief
-import it.unibo.jakta.agents.bdi.beliefs.BeliefBase
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
+import it.unibo.jakta.agents.bdi.beliefs.Belief
+import it.unibo.jakta.agents.bdi.beliefs.BeliefBase
+import it.unibo.jakta.agents.bdi.context.ContextUpdate
 import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Var
@@ -135,7 +135,7 @@ class TestBeliefs : DescribeSpec({
         it("should be solved as well") {
             val bb = BeliefBase.of(Belief.fromSelfSource(Struct.of("coffee", Atom.of("hot"))))
             bb.solve(
-                Struct.of("coffee", Struct.of("source", Var.of("X")), Atom.of("hot"))
+                Struct.of("coffee", Struct.of("source", Var.of("X")), Atom.of("hot")),
             ).substitution.values.first() shouldBe Atom.of("self")
         }
     }

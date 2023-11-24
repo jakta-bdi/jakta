@@ -18,7 +18,7 @@ import it.unibo.tuprolog.dsl.LogicProgrammingScope
 import kotlin.reflect.KFunction
 
 class BodyScope(
-    private val scope: Scope
+    private val scope: Scope,
 ) : Builder<List<Goal>>, LogicProgrammingScope by LogicProgrammingScope.of(scope) {
 
     private val goals = mutableListOf<Goal>()

@@ -1,7 +1,7 @@
 package it.unibo.jakta.agents.bdi
 
-import it.unibo.jakta.agents.bdi.actions.impl.AbstractExternalAction
 import it.unibo.jakta.agents.bdi.actions.ExternalRequest
+import it.unibo.jakta.agents.bdi.actions.impl.AbstractExternalAction
 import it.unibo.jakta.agents.bdi.beliefs.Belief
 import it.unibo.jakta.agents.bdi.beliefs.BeliefBase
 import it.unibo.jakta.agents.bdi.environment.Environment
@@ -12,13 +12,12 @@ import it.unibo.jakta.agents.bdi.goals.Act
 import it.unibo.jakta.agents.bdi.goals.ActInternally
 import it.unibo.jakta.agents.bdi.goals.RemoveBelief
 import it.unibo.jakta.agents.bdi.goals.UpdateBelief
-import it.unibo.jakta.agents.bdi.messages.Tell
 import it.unibo.jakta.agents.bdi.messages.Message
+import it.unibo.jakta.agents.bdi.messages.Tell
 import it.unibo.jakta.agents.bdi.plans.Plan
 import it.unibo.jakta.agents.bdi.plans.PlanLibrary
 
 fun main() {
-
     val sendAction = object : AbstractExternalAction("send", 3) {
         override fun action(request: ExternalRequest) {
             val receiver = request.arguments[0].castToAtom()
@@ -28,7 +27,7 @@ fun main() {
                 "tell" -> sendMessage(receiver.value, Message(request.sender, Tell, message))
                 "achieve" -> sendMessage(
                     receiver.value,
-                    Message(request.sender, it.unibo.jakta.agents.bdi.messages.Achieve, message)
+                    Message(request.sender, it.unibo.jakta.agents.bdi.messages.Achieve, message),
                 )
             }
         }
@@ -36,8 +35,8 @@ fun main() {
 
     val env = Environment.of(
         externalActions = mapOf(
-            sendAction.signature.name to sendAction
-        )
+            sendAction.signature.name to sendAction,
+        ),
     )
 
     val sendPlan = Plan.ofAchievementGoalInvocation(

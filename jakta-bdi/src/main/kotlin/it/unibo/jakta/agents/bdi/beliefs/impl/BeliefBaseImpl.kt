@@ -1,8 +1,8 @@
 package it.unibo.jakta.agents.bdi.beliefs.impl
 
 import it.unibo.jakta.agents.bdi.Jakta
-import it.unibo.jakta.agents.bdi.beliefs.BeliefBase
 import it.unibo.jakta.agents.bdi.beliefs.Belief
+import it.unibo.jakta.agents.bdi.beliefs.BeliefBase
 import it.unibo.jakta.agents.bdi.beliefs.BeliefUpdate
 import it.unibo.jakta.agents.bdi.beliefs.RetrieveResult
 import it.unibo.tuprolog.collections.ClauseMultiSet

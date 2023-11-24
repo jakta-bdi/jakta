@@ -3,12 +3,12 @@ package it.unibo.jakta.agents.bdi.goals
 import it.unibo.jakta.agents.bdi.beliefs.Belief
 import it.unibo.jakta.agents.bdi.goals.impl.AchieveImpl
 import it.unibo.jakta.agents.bdi.goals.impl.ActExternallyImpl
-import it.unibo.jakta.agents.bdi.goals.impl.ActInternallyImpl
 import it.unibo.jakta.agents.bdi.goals.impl.ActImpl
-import it.unibo.jakta.agents.bdi.goals.impl.SpawnImpl
-import it.unibo.jakta.agents.bdi.goals.impl.TestImpl
+import it.unibo.jakta.agents.bdi.goals.impl.ActInternallyImpl
 import it.unibo.jakta.agents.bdi.goals.impl.AddBeliefImpl
 import it.unibo.jakta.agents.bdi.goals.impl.RemoveBeliefImpl
+import it.unibo.jakta.agents.bdi.goals.impl.SpawnImpl
+import it.unibo.jakta.agents.bdi.goals.impl.TestImpl
 import it.unibo.jakta.agents.bdi.goals.impl.UpdateBeliefImpl
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution

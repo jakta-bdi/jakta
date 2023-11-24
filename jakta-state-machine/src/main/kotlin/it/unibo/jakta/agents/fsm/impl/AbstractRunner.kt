@@ -1,16 +1,16 @@
 package it.unibo.jakta.agents.fsm.impl
 
-import it.unibo.jakta.agents.fsm.impl.State.PAUSED
-import it.unibo.jakta.agents.fsm.impl.State.RUNNING
-import it.unibo.jakta.agents.fsm.impl.State.CREATED
-import it.unibo.jakta.agents.fsm.impl.State.STARTED
-import it.unibo.jakta.agents.fsm.impl.State.STOPPED
 import it.unibo.jakta.agents.fsm.Activity
 import it.unibo.jakta.agents.fsm.Runner
-import it.unibo.jakta.agents.fsm.impl.AbstractRunner.Operation.PAUSE
 import it.unibo.jakta.agents.fsm.impl.AbstractRunner.Operation.CONTINUE
+import it.unibo.jakta.agents.fsm.impl.AbstractRunner.Operation.PAUSE
 import it.unibo.jakta.agents.fsm.impl.AbstractRunner.Operation.RESTART
 import it.unibo.jakta.agents.fsm.impl.AbstractRunner.Operation.STOP
+import it.unibo.jakta.agents.fsm.impl.State.CREATED
+import it.unibo.jakta.agents.fsm.impl.State.PAUSED
+import it.unibo.jakta.agents.fsm.impl.State.RUNNING
+import it.unibo.jakta.agents.fsm.impl.State.STARTED
+import it.unibo.jakta.agents.fsm.impl.State.STOPPED
 import it.unibo.jakta.agents.fsm.time.Time
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
