@@ -49,6 +49,11 @@ internal class DMasImpl(
         (effects + externalEffects).forEach { environmentChange ->
             when (environmentChange) {
                 is BroadcastMessage -> {
+                    runBlocking {
+                        launch(Dispatchers.Default) {
+                            network.broadcast(environmentChange)
+                        }
+                    }
                     environment = environment.broadcastMessage(environmentChange.message)
                 }
 
