@@ -1,5 +1,6 @@
 package it.unibo.jakta.agents.distributed.client
 
+import it.unibo.jakta.agents.bdi.actions.effects.BroadcastMessage
 import it.unibo.jakta.agents.bdi.actions.effects.SendMessage
 import it.unibo.jakta.agents.distributed.client.impl.WebSocketsClient
 
@@ -7,6 +8,8 @@ interface Client {
     suspend fun publish(topic: String, data: SendMessage)
 
     suspend fun subscribe(topic: String)
+
+    suspend fun broadcast(data: BroadcastMessage)
 
     fun incomingData(): Map<String, SendMessage>
 

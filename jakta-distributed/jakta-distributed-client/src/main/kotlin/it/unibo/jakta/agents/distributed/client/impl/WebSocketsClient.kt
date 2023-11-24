@@ -8,6 +8,7 @@ import io.ktor.client.plugins.websocket.receiveDeserialized
 import io.ktor.client.plugins.websocket.sendSerialized
 import io.ktor.client.plugins.websocket.webSocketSession
 import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter
+import it.unibo.jakta.agents.bdi.actions.effects.BroadcastMessage
 import it.unibo.jakta.agents.bdi.actions.effects.SendMessage
 import it.unibo.jakta.agents.distributed.client.Client
 import it.unibo.jakta.agents.distributed.common.SerializableSendMessage
@@ -68,6 +69,10 @@ class WebSocketsClient(private val host: String, private val port: Int) : Client
                 }
             }
         }
+    }
+
+    override suspend fun broadcast(data: BroadcastMessage) {
+        TODO("Not yet implemented")
     }
 
     override fun incomingData(): Map<String, SendMessage> {

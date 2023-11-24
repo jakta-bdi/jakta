@@ -1,5 +1,6 @@
 package it.unibo.jakta.agents.distributed.network.impl
 
+import it.unibo.jakta.agents.bdi.actions.effects.BroadcastMessage
 import it.unibo.jakta.agents.bdi.actions.effects.EnvironmentChange
 import it.unibo.jakta.agents.bdi.actions.effects.SendMessage
 import it.unibo.jakta.agents.distributed.RemoteService
@@ -14,6 +15,10 @@ class WebsocketNetwork(host: String, port: Int) : Network {
 
     override suspend fun send(event: SendMessage) {
         client.publish(event.message.from, event)
+    }
+
+    override suspend fun broadcast(event: BroadcastMessage) {
+        client.broadcast(event)
     }
 
     override fun getMessagesAsEnvironmentChanges(): Iterable<EnvironmentChange> =
