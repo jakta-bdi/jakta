@@ -16,7 +16,7 @@ data class SerializableSendMessage(
         fun toSendMessage(serializableSendMessage: SerializableSendMessage): SendMessage {
             return SendMessage(
                 SerializableMessage.toMessage(serializableSendMessage.message),
-                serializableSendMessage.recipient
+                serializableSendMessage.recipient,
             )
         }
     }
