@@ -1,10 +1,11 @@
-package pingpong
+package it.unibo.jakta.agents.distributed.pingpong
 
 import it.unibo.jakta.agents.bdi.Agent
 import it.unibo.jakta.agents.bdi.Jakta
 import it.unibo.jakta.agents.bdi.beliefs.Belief
 import it.unibo.jakta.agents.bdi.beliefs.BeliefBase
 import it.unibo.jakta.agents.bdi.environment.Environment
+import it.unibo.jakta.agents.bdi.events.Event
 import it.unibo.jakta.agents.bdi.executionstrategies.ExecutionStrategy
 import it.unibo.jakta.agents.bdi.goals.Achieve
 import it.unibo.jakta.agents.bdi.goals.ActInternally
@@ -22,41 +23,44 @@ fun main() {
         )
     )
 
-    val ponger = Agent.of(
-        name = "ponger",
+    val pinger = Agent.of(
+        name = "pinger",
         beliefBase = BeliefBase.of(
-            Belief.fromSelfSource(Jakta.parseStruct("turn(other)")),
-            Belief.fromSelfSource(Jakta.parseStruct("other(pinger)")),
+            Belief.fromSelfSource(Jakta.parseStruct("turn(me)")),
+            Belief.fromSelfSource(Jakta.parseStruct("other(ponger)")),
         ),
+        events = listOf(Event.ofAchievementGoalInvocation(Achieve.of(Jakta.parseStruct("send_ping")))),
+
         planLibrary = PlanLibrary.of(
-            Plan.ofBeliefBaseAddition(
-                belief = Belief.from(Jakta.parseStruct("ball(source(Sender))")),
-                guard = Jakta.parseStruct("turn(source(self), other) & other(source(self), Sender)"),
-                goals = listOf(
-                    UpdateBelief.of(Belief.fromSelfSource(Jakta.parseStruct("turn(me)"))),
-                    RemoveBelief.of(Belief.from(Jakta.parseStruct("ball(source(Sender))"))),
-                    ActInternally.of(Jakta.parseStruct("print(\"Received ball from\", Sender)")),
-                    Achieve.of(Jakta.parseStruct("sendMessageTo(ball, Sender)")),
-                    Achieve.of(Jakta.parseStruct("handle_ping")),
-                ),
-            ),
             Plan.ofAchievementGoalInvocation(
-                value = Jakta.parseStruct("handle_ping"),
+                value = Jakta.parseStruct("send_ping"),
+                guard = Jakta.parseStruct("turn(source(self), me) & other(source(self), Receiver)"),
                 goals = listOf(
                     UpdateBelief.of(Belief.fromSelfSource(Jakta.parseStruct("turn(other)"))),
-                    ActInternally.of(Jakta.parseStruct("print(\"Ponger has Done\")")),
+                    Achieve.of(Jakta.parseStruct("sendMessageTo(ball, Receiver)")),
+                ),
+            ),
+            Plan.ofBeliefBaseAddition(
+                guard = Jakta.parseStruct("turn(source(self), other) & other(source(self), Sender)"),
+                belief = Belief.from(Jakta.parseStruct("ball(source(Sender))")),
+                goals = listOf(
+                    UpdateBelief.of(Belief.fromSelfSource(Jakta.parseStruct("turn(me)"))),
+                    ActInternally.of(Jakta.parseStruct("print(\"Received ball from\", Sender)")),
+                    RemoveBelief.of(Belief.from(Jakta.parseStruct("ball(source(Sender))"))),
+                    ActInternally.of(Jakta.parseStruct("print(\"Pinger hasDone\")")),
                 ),
             ),
             sendPlan,
         ),
     )
 
-    val pinger = RemoteService("pinger")
+    val ponger = RemoteService("ponger")
+
     val dmas = DMas.fromWebSocketNetwork(
         ExecutionStrategy.oneThreadPerAgent(),
         env,
-        listOf(ponger),
         listOf(pinger),
+        listOf(ponger),
         "localhost",
         8080,
     )
