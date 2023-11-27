@@ -12,6 +12,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
     implementation(project(mapOf("path" to ":jakta-bdi")))
     implementation(project(mapOf("path" to ":jakta-distributed:jakta-distributed-adapter")))
+    implementation(project(mapOf("path" to ":jakta-distributed:jakta-distributed-broker")))
 }
 
 tasks.register<JavaExec>("runPonger") {

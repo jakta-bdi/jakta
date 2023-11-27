@@ -13,5 +13,4 @@ dependencies {
     implementation(project(mapOf("path" to ":jakta-bdi")))
     implementation(project(mapOf("path" to ":jakta-distributed:jakta-distributed-client")))
     implementation(project(mapOf("path" to ":jakta-distributed:jakta-distributed-common")))
-    testImplementation(project(mapOf("path" to ":jakta-distributed:jakta-distributed-broker")))
 }
