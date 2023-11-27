@@ -1,5 +1,6 @@
 package it.unibo.jakta.agents.distributed.client.impl
 
+import arrow.core.Either
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.websocket.DefaultClientWebSocketSession
@@ -10,6 +11,7 @@ import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter
 import io.ktor.websocket.Frame
 import io.ktor.websocket.readText
 import it.unibo.jakta.agents.bdi.actions.effects.BroadcastMessage
+import it.unibo.jakta.agents.bdi.actions.effects.EnvironmentChange
 import it.unibo.jakta.agents.bdi.actions.effects.SendMessage
 import it.unibo.jakta.agents.distributed.client.Client
 import it.unibo.jakta.agents.distributed.common.SerializableBroadcastMessage
@@ -22,7 +24,8 @@ import kotlinx.serialization.json.Json
 import java.util.*
 
 class WebSocketsClient(private val host: String, private val port: Int) : Client {
-    private val incomingData: MutableMap<String, SerializableSendMessage> = Collections.synchronizedMap(LinkedHashMap())
+    private val incomingData: MutableMap<String, Either<SerializableSendMessage, SerializableBroadcastMessage>> =
+        Collections.synchronizedMap(LinkedHashMap())
     private val publishSessions: MutableMap<String, DefaultClientWebSocketSession> =
         Collections.synchronizedMap(LinkedHashMap())
     private val subscribeSessions: MutableMap<String, DefaultClientWebSocketSession> =
@@ -89,8 +92,11 @@ class WebSocketsClient(private val host: String, private val port: Int) : Client
                         message as? Frame.Text ?: continue
                         val receivedText = message.readText()
                         val x = checkDeserialization<SerializableSendMessage>(receivedText)
-                        if (x != null) {
-                            incomingData[topic] = x
+                            ?: checkDeserialization<SerializableBroadcastMessage>(receivedText)
+                        when (x) {
+                            is SerializableSendMessage -> incomingData[topic] = Either.Left(x)
+                            is SerializableBroadcastMessage -> incomingData[topic] = Either.Right(x)
+                            else -> {}
                         }
                     }
                 } catch (e: Exception) {
@@ -100,8 +106,13 @@ class WebSocketsClient(private val host: String, private val port: Int) : Client
         }
     }
 
-    override fun incomingData(): Map<String, SendMessage> {
-        return incomingData.mapValues { SerializableSendMessage.toSendMessage(it.value) }
+    override fun incomingData(): Map<String, EnvironmentChange> {
+        return incomingData.mapValues { entry ->
+            when (val message = entry.value) {
+                is Either.Right -> SerializableBroadcastMessage.toBroadcastMessage(message.value)
+                is Either.Left -> SerializableSendMessage.toSendMessage(message.value)
+            }
+        }
     }
 
     private inline fun <reified T> checkDeserialization(string: String): T? {
