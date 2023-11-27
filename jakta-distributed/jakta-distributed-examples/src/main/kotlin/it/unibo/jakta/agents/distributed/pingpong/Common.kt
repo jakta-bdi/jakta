@@ -1,4 +1,4 @@
-package pingpong
+package it.unibo.jakta.agents.distributed.pingpong
 
 import it.unibo.jakta.agents.bdi.Jakta
 import it.unibo.jakta.agents.bdi.actions.ExternalRequest
