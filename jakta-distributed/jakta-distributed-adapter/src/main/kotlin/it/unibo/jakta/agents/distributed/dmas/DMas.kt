@@ -4,9 +4,9 @@ import it.unibo.jakta.agents.bdi.Agent
 import it.unibo.jakta.agents.bdi.Mas
 import it.unibo.jakta.agents.bdi.environment.Environment
 import it.unibo.jakta.agents.bdi.executionstrategies.ExecutionStrategy
+import it.unibo.jakta.agents.distributed.RemoteService
 import it.unibo.jakta.agents.distributed.dmas.impl.DMasImpl
 import it.unibo.jakta.agents.distributed.network.Network
-import it.unibo.jakta.agents.distributed.RemoteService
 
 /**
  * A DistributedMas is a Mas with networking capabilities: it can send and receive messages from other DMas' over the
@@ -15,6 +15,7 @@ import it.unibo.jakta.agents.distributed.RemoteService
 interface DMas : Mas {
     val network: Network
     val services: Iterable<RemoteService>
+
     companion object {
         fun of(
             executionStrategy: ExecutionStrategy,

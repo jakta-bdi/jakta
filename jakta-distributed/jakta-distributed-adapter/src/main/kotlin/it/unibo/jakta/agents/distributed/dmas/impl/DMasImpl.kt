@@ -1,6 +1,7 @@
 package it.unibo.jakta.agents.distributed.dmas.impl
 
 import it.unibo.jakta.agents.bdi.Agent
+import it.unibo.jakta.agents.bdi.actions.effects.AddData
 import it.unibo.jakta.agents.bdi.actions.effects.BroadcastMessage
 import it.unibo.jakta.agents.bdi.actions.effects.EnvironmentChange
 import it.unibo.jakta.agents.bdi.actions.effects.PopMessage
@@ -9,7 +10,6 @@ import it.unibo.jakta.agents.bdi.actions.effects.RemoveData
 import it.unibo.jakta.agents.bdi.actions.effects.SendMessage
 import it.unibo.jakta.agents.bdi.actions.effects.SpawnAgent
 import it.unibo.jakta.agents.bdi.actions.effects.UpdateData
-import it.unibo.jakta.agents.bdi.actions.effects.AddData
 import it.unibo.jakta.agents.bdi.environment.Environment
 import it.unibo.jakta.agents.bdi.executionstrategies.ExecutionStrategy
 import it.unibo.jakta.agents.distributed.RemoteService
