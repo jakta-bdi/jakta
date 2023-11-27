@@ -40,6 +40,9 @@ internal class DMasImpl(
                     network.subscribe(service)
                 }
             }
+            launch(Dispatchers.Default) {
+                network.subscribe(RemoteService("broadcast"))
+            }
             executionStrategy.dispatch(self, debugEnabled)
         }
     }
