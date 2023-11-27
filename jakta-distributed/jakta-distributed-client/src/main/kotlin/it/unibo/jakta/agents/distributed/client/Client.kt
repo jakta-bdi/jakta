@@ -1,6 +1,7 @@
 package it.unibo.jakta.agents.distributed.client
 
 import it.unibo.jakta.agents.bdi.actions.effects.BroadcastMessage
+import it.unibo.jakta.agents.bdi.actions.effects.EnvironmentChange
 import it.unibo.jakta.agents.bdi.actions.effects.SendMessage
 import it.unibo.jakta.agents.distributed.client.impl.WebSocketsClient
 
@@ -11,7 +12,7 @@ interface Client {
 
     suspend fun broadcast(data: BroadcastMessage)
 
-    fun incomingData(): Map<String, SendMessage>
+    fun incomingData(): Map<String, EnvironmentChange>
 
     companion object {
         fun webSocketClient(host: String, port: Int): Client = WebSocketsClient(host, port)

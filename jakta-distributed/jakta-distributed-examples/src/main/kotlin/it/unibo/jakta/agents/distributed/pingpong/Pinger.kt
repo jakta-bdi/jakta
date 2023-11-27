@@ -19,8 +19,8 @@ import it.unibo.jakta.agents.distributed.dmas.DMas
 fun main() {
     val env = Environment.of(
         externalActions = mapOf(
-            sendAction.signature.name to sendAction
-        )
+            sendAction.signature.name to sendAction,
+        ),
     )
 
     val pinger = Agent.of(
