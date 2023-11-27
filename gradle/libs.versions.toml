@@ -8,6 +8,7 @@ logback-classic = "1.2.11"
 kotlinx = "1.5.2"
 
 [libraries]
+arrow = "io.arrow-kt:arrow-core:1.2.1"
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
 kotlin-stdlib-jdk8 = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version.ref = "kotlin" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-stdlib-reflect", version.ref = "kotlin" }
