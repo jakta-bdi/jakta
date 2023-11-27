@@ -12,6 +12,7 @@ import io.ktor.websocket.readText
 import it.unibo.jakta.agents.bdi.actions.effects.BroadcastMessage
 import it.unibo.jakta.agents.bdi.actions.effects.SendMessage
 import it.unibo.jakta.agents.distributed.client.Client
+import it.unibo.jakta.agents.distributed.common.SerializableBroadcastMessage
 import it.unibo.jakta.agents.distributed.common.SerializableSendMessage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
@@ -51,6 +52,27 @@ class WebSocketsClient(private val host: String, private val port: Int) : Client
         }
     }
 
+    override suspend fun broadcast(data: BroadcastMessage) {
+        coroutineScope {
+            launch(Dispatchers.Default) {
+                if (!publishSessions.containsKey("broadcast")) {
+                    publishSessions["broadcast"] = client.webSocketSession(
+                        host = host,
+                        port = port,
+                        path = "/publish/broadcast",
+                    )
+                }
+                try {
+                    publishSessions["broadcast"]?.sendSerialized(
+                        SerializableBroadcastMessage.fromBroadcastMessage(data),
+                    )
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
+    }
+
     override suspend fun subscribe(topic: String) {
         coroutineScope {
             launch(Dispatchers.Default) {
@@ -76,10 +98,6 @@ class WebSocketsClient(private val host: String, private val port: Int) : Client
                 }
             }
         }
-    }
-
-    override suspend fun broadcast(data: BroadcastMessage) {
-        TODO("Not yet implemented")
     }
 
     override fun incomingData(): Map<String, SendMessage> {
