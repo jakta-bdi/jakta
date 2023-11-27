@@ -71,10 +71,10 @@ fun Application.configureWebSockets(subscriptionManager: SubscriptionManager) {
 private suspend fun websocketLogic(
     call: ApplicationCall,
     tryBlock: suspend () -> Unit,
-    finallyBlock: suspend () -> Unit
+    finallyBlock: suspend () -> Unit,
 ) {
     call.application.environment.log.info(
-        "New connection: ${call.request.origin.remoteAddress}:${call.request.origin.remotePort}"
+        "New connection: ${call.request.origin.remoteAddress}:${call.request.origin.remotePort}",
     )
     try {
         tryBlock()
@@ -83,7 +83,7 @@ private suspend fun websocketLogic(
     } finally {
         finallyBlock()
         call.application.environment.log.info(
-            "Removing ${call.request.origin.remoteAddress}:${call.request.origin.remotePort}"
+            "Removing ${call.request.origin.remoteAddress}:${call.request.origin.remotePort}",
         )
     }
 }

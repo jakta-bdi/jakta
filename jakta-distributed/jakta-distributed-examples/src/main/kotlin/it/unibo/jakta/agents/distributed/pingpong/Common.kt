@@ -18,7 +18,7 @@ val sendAction = object : AbstractExternalAction("send", 3) {
             "tell" -> sendMessage(receiver.value, Message(request.sender, Tell, message))
             "achieve" -> sendMessage(
                 receiver.value,
-                Message(request.sender, it.unibo.jakta.agents.bdi.messages.Achieve, message)
+                Message(request.sender, it.unibo.jakta.agents.bdi.messages.Achieve, message),
             )
         }
     }
