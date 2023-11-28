@@ -5,7 +5,9 @@ import it.unibo.jakta.agents.bdi.Mas
 import it.unibo.jakta.agents.bdi.environment.Environment
 import it.unibo.jakta.agents.bdi.executionstrategies.ExecutionStrategy
 import it.unibo.jakta.agents.distributed.RemoteService
+import it.unibo.jakta.agents.distributed.broker.embedded.EmbeddedBroker
 import it.unibo.jakta.agents.distributed.dmas.impl.DMasImpl
+import it.unibo.jakta.agents.distributed.dmas.impl.DMasWithEmbeddedBroker
 import it.unibo.jakta.agents.distributed.network.Network
 
 /**
@@ -33,5 +35,20 @@ interface DMas : Mas {
             host: String,
             port: Int,
         ): DMas = DMasImpl(executionStrategy, environment, agents, services, Network.websocketNetwork(host, port))
+
+        fun withEmbeddedBroker(
+            executionStrategy: ExecutionStrategy,
+            environment: Environment,
+            agents: Iterable<Agent>,
+            services: Iterable<RemoteService>,
+            port: Int = 8080,
+        ): DMas = DMasWithEmbeddedBroker(
+            environment,
+            agents,
+            executionStrategy,
+            Network.websocketNetwork("localhost", port),
+            services,
+            EmbeddedBroker(port),
+        )
     }
 }
