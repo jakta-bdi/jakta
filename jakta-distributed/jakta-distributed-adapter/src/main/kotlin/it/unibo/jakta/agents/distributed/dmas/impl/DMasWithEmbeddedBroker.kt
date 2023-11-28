@@ -40,11 +40,7 @@ internal class DMasWithEmbeddedBroker(
     override fun start(debugEnabled: Boolean) {
         val self = this
 
-        try {
-            broker.start()
-        } catch (e: BindException) {
-            println("Broker already started")
-        }
+        startEmbeddedBroker()
 
         runBlocking {
             // Here the DMas should subscribe to the broker and start listening for messages
@@ -102,6 +98,14 @@ internal class DMasWithEmbeddedBroker(
                 is UpdateData -> environment = environment.updateData(environmentChange.newData)
                 is PopMessage -> environment = environment.popMessage(environmentChange.agentName)
             }
+        }
+    }
+
+    private fun startEmbeddedBroker() {
+        try {
+            broker.start()
+        } catch (e: BindException) {
+            println("Broker already started")
         }
     }
 }
