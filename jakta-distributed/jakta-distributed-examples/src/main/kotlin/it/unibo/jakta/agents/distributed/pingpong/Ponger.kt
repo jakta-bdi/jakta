@@ -62,13 +62,11 @@ fun main() {
         )
 
         val pinger = RemoteService("pinger")
-        val dmas = DMas.fromWebSocketNetwork(
+        val dmas = DMas.withEmbeddedBroker(
             ExecutionStrategy.oneThreadPerAgent(),
             env,
             listOf(ponger),
             listOf(pinger),
-            "localhost",
-            8080,
         )
         dmas.start()
     }
