@@ -21,6 +21,7 @@ dependencies {
     implementation(libs.logback.classic)
     implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.ktor.server.content.negotiation)
+    implementation(project(mapOf("path" to ":jakta-distributed:jakta-distributed-common")))
     testImplementation(libs.ktor.server.tests.jvm)
     testImplementation(libs.ktor.server.test.host.jvm)
     testImplementation(libs.kotlin.test.junit)

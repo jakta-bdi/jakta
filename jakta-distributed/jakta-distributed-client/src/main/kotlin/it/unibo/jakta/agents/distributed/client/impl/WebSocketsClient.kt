@@ -13,8 +13,8 @@ import io.ktor.websocket.readText
 import it.unibo.jakta.agents.bdi.actions.effects.BroadcastMessage
 import it.unibo.jakta.agents.bdi.actions.effects.EnvironmentChange
 import it.unibo.jakta.agents.bdi.actions.effects.SendMessage
-import it.unibo.jakta.agents.distributed.broker.model.Error
 import it.unibo.jakta.agents.distributed.client.Client
+import it.unibo.jakta.agents.distributed.common.Error
 import it.unibo.jakta.agents.distributed.common.SerializableBroadcastMessage
 import it.unibo.jakta.agents.distributed.common.SerializableSendMessage
 import it.unibo.tuprolog.utils.addFirst

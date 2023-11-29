@@ -11,8 +11,8 @@ import io.ktor.server.websocket.pingPeriod
 import io.ktor.server.websocket.timeout
 import io.ktor.server.websocket.webSocket
 import io.ktor.websocket.Frame
-import it.unibo.jakta.agents.distributed.broker.model.Error
 import it.unibo.jakta.agents.distributed.broker.model.SubscriptionManager
+import it.unibo.jakta.agents.distributed.common.Error
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.time.Duration
