@@ -112,7 +112,7 @@ class WebSocketsClient(private val host: String, private val port: Int) : Client
                     e.printStackTrace()
                 } finally {
                     // connection is lost
-                    // TODO()
+                    disconnectedSessions.addFirst("broker")
                 }
             }
         }
