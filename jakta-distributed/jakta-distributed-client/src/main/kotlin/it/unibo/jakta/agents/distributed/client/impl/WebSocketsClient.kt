@@ -22,6 +22,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import java.util.*
+import kotlin.collections.LinkedHashMap
 
 class WebSocketsClient(private val host: String, private val port: Int) : Client {
     private val incomingData: MutableMap<String, Either<SerializableSendMessage, SerializableBroadcastMessage>> =
@@ -29,6 +30,8 @@ class WebSocketsClient(private val host: String, private val port: Int) : Client
     private val publishSessions: MutableMap<String, DefaultClientWebSocketSession> =
         Collections.synchronizedMap(LinkedHashMap())
     private val subscribeSessions: MutableMap<String, DefaultClientWebSocketSession> =
+        Collections.synchronizedMap(LinkedHashMap())
+    private val disconnectedSessions: MutableMap<String, DefaultClientWebSocketSession> =
         Collections.synchronizedMap(LinkedHashMap())
     private val client = HttpClient(CIO) {
         install(WebSockets) {
@@ -101,6 +104,9 @@ class WebSocketsClient(private val host: String, private val port: Int) : Client
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
+                } finally {
+                    // connection is lost
+                    // TODO()
                 }
             }
         }

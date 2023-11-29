@@ -49,6 +49,9 @@ fun Application.configureWebSockets(subscriptionManager: SubscriptionManager) {
                 }
             }, {
                 subscriptionManager.removeSubscriber(this, topic)
+                subscriptionManager.subscribers(topic).forEach {
+                    it.send(Frame.Text(Error.CLIENT_DISCONNECTED.toString()))
+                }
             })
         }
 
