@@ -17,9 +17,9 @@ import it.unibo.jakta.agents.distributed.broker.embedded.EmbeddedBroker
 import it.unibo.jakta.agents.distributed.dmas.DMas
 import it.unibo.jakta.agents.distributed.network.Network
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import java.net.BindException
 
 /**
  * This implementation has an embedded Broker for communication between DMas'.
@@ -40,9 +40,9 @@ internal class DMasWithEmbeddedBroker(
     override fun start(debugEnabled: Boolean) {
         val self = this
 
-        startEmbeddedBroker()
-
         runBlocking {
+            launch(Dispatchers.Default) { startEmbeddedBroker() }
+            delay(3000)
             // Here the DMas should subscribe to the broker and start listening for messages
             services.map { service ->
                 launch(Dispatchers.Default) {
@@ -104,8 +104,6 @@ internal class DMasWithEmbeddedBroker(
     private fun startEmbeddedBroker() {
         try {
             broker.start()
-        } catch (e: BindException) {
-            println("Broker already started")
-        }
+        } catch (_: Exception) { }
     }
 }
