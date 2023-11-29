@@ -18,6 +18,9 @@ interface Network {
      */
     suspend fun send(event: SendMessage)
 
+    /**
+     * Broadcasts a message to all the agents in the network.
+     */
     suspend fun broadcast(event: BroadcastMessage)
 
     /**
@@ -26,6 +29,13 @@ interface Network {
      * the local ones.
      */
     fun getMessagesAsEnvironmentChanges(): Iterable<EnvironmentChange>
+
+    /**
+     * Returns all the disconnections received by the network as RemoteService.
+     * In this way a DMas can apply the effects of the disconnections to the environment by simply removing the
+     * corresponding remote services.
+     */
+    fun getDisconnections(): Iterable<RemoteService>
 
     companion object {
         fun websocketNetwork(host: String, port: Int) = WebsocketNetwork(host, port)

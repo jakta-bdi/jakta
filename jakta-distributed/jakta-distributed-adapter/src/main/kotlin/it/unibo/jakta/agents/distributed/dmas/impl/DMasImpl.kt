@@ -12,9 +12,13 @@ import it.unibo.jakta.agents.bdi.actions.effects.SpawnAgent
 import it.unibo.jakta.agents.bdi.actions.effects.UpdateData
 import it.unibo.jakta.agents.bdi.environment.Environment
 import it.unibo.jakta.agents.bdi.executionstrategies.ExecutionStrategy
+import it.unibo.jakta.agents.bdi.messages.Message
+import it.unibo.jakta.agents.bdi.messages.Tell
 import it.unibo.jakta.agents.distributed.RemoteService
 import it.unibo.jakta.agents.distributed.dmas.DMas
 import it.unibo.jakta.agents.distributed.network.Network
+import it.unibo.tuprolog.core.Struct
+import it.unibo.tuprolog.core.parsing.parse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -48,8 +52,22 @@ internal class DMasImpl(
     }
 
     override fun applyEnvironmentEffects(effects: Iterable<EnvironmentChange>) {
+        // Create a list of SendMessages for every agent for each disconnected remote service
+        val disconnectedAgents: Iterable<EnvironmentChange> =
+            network.getDisconnections().toList().flatMap { disconnectedService ->
+                agents.map { agent ->
+                    SendMessage(
+                        Message(
+                            "broker",
+                            Tell,
+                            Struct.parse("disconnected(${disconnectedService.serviceName})"),
+                        ),
+                        agent.name,
+                    )
+                }
+            }
         val externalEffects = network.getMessagesAsEnvironmentChanges()
-        (effects + externalEffects).forEach { environmentChange ->
+        (effects + externalEffects + disconnectedAgents).forEach { environmentChange ->
             when (environmentChange) {
                 is BroadcastMessage -> {
                     runBlocking {

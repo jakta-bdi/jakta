@@ -23,4 +23,7 @@ class WebsocketNetwork(host: String, port: Int) : Network {
 
     override fun getMessagesAsEnvironmentChanges(): Iterable<EnvironmentChange> =
         client.incomingData().values.asIterable()
+
+    override fun getDisconnections(): Iterable<RemoteService> =
+        client.disconnections().map { RemoteService(it) }
 }

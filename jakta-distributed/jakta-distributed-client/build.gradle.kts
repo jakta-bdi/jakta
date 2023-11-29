@@ -25,4 +25,5 @@ dependencies {
     implementation(libs.ktor.serialization.kotlinx.json)
     implementation(project(mapOf("path" to ":jakta-distributed:jakta-distributed-common")))
     implementation(project(mapOf("path" to ":jakta-bdi")))
+    implementation(project(mapOf("path" to ":jakta-distributed:jakta-distributed-broker")))
 }

@@ -14,6 +14,8 @@ interface Client {
 
     fun incomingData(): Map<String, EnvironmentChange>
 
+    fun disconnections(): List<String>
+
     companion object {
         fun webSocketClient(host: String, port: Int): Client = WebSocketsClient(host, port)
     }

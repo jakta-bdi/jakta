@@ -13,6 +13,7 @@ import io.ktor.server.websocket.webSocket
 import io.ktor.websocket.Frame
 import it.unibo.jakta.agents.distributed.broker.model.Error
 import it.unibo.jakta.agents.distributed.broker.model.SubscriptionManager
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.time.Duration
 
@@ -37,6 +38,9 @@ fun Application.configureWebSockets(subscriptionManager: SubscriptionManager) {
                 }
             }, {
                 subscriptionManager.removePublisher(this, topic)
+                subscriptionManager.subscribers(topic).forEach {
+                    it.send(Frame.Text(Json.encodeToString(Error.CLIENT_DISCONNECTED)))
+                }
             })
         }
 
@@ -45,13 +49,10 @@ fun Application.configureWebSockets(subscriptionManager: SubscriptionManager) {
             subscriptionManager.addSubscriber(this, topic)
             websocketLogic(call, {
                 for (frame in incoming) {
-                    this.send(Frame.Text(Error.BAD_REQUEST.toString()))
+                    this.send(Frame.Text(Json.encodeToString(Error.BAD_REQUEST)))
                 }
             }, {
                 subscriptionManager.removeSubscriber(this, topic)
-                subscriptionManager.subscribers(topic).forEach {
-                    it.send(Frame.Text(Error.CLIENT_DISCONNECTED.toString()))
-                }
             })
         }
 
@@ -61,7 +62,7 @@ fun Application.configureWebSockets(subscriptionManager: SubscriptionManager) {
                 .forEach { subscriptionManager.addSubscriber(this, it) }
             websocketLogic(call, {
                 for (frame in incoming) {
-                    this.send(Frame.Text(Error.BAD_REQUEST.toString()))
+                    this.send(Frame.Text(Json.encodeToString(Error.BAD_REQUEST)))
                 }
             }, {
                 subscriptionManager.availableTopics().minus(except.toSet())

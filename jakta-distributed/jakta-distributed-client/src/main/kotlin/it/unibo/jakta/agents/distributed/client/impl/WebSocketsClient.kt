@@ -13,16 +13,17 @@ import io.ktor.websocket.readText
 import it.unibo.jakta.agents.bdi.actions.effects.BroadcastMessage
 import it.unibo.jakta.agents.bdi.actions.effects.EnvironmentChange
 import it.unibo.jakta.agents.bdi.actions.effects.SendMessage
+import it.unibo.jakta.agents.distributed.broker.model.Error
 import it.unibo.jakta.agents.distributed.client.Client
 import it.unibo.jakta.agents.distributed.common.SerializableBroadcastMessage
 import it.unibo.jakta.agents.distributed.common.SerializableSendMessage
+import it.unibo.tuprolog.utils.addFirst
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import java.util.*
-import kotlin.collections.LinkedHashMap
 
 class WebSocketsClient(private val host: String, private val port: Int) : Client {
     private val incomingData: MutableMap<String, Either<SerializableSendMessage, SerializableBroadcastMessage>> =
@@ -31,8 +32,7 @@ class WebSocketsClient(private val host: String, private val port: Int) : Client
         Collections.synchronizedMap(LinkedHashMap())
     private val subscribeSessions: MutableMap<String, DefaultClientWebSocketSession> =
         Collections.synchronizedMap(LinkedHashMap())
-    private val disconnectedSessions: MutableMap<String, DefaultClientWebSocketSession> =
-        Collections.synchronizedMap(LinkedHashMap())
+    private val disconnectedSessions: MutableList<String> = Collections.synchronizedList(LinkedList())
     private val client = HttpClient(CIO) {
         install(WebSockets) {
             contentConverter = KotlinxWebsocketSerializationConverter(Json)
@@ -96,9 +96,15 @@ class WebSocketsClient(private val host: String, private val port: Int) : Client
                         val receivedText = message.readText()
                         val x = checkDeserialization<SerializableSendMessage>(receivedText)
                             ?: checkDeserialization<SerializableBroadcastMessage>(receivedText)
+                            ?: checkDeserialization<Error>(receivedText)
                         when (x) {
                             is SerializableSendMessage -> incomingData[topic] = Either.Left(x)
                             is SerializableBroadcastMessage -> incomingData[topic] = Either.Right(x)
+                            is Error -> {
+                                if (x == Error.CLIENT_DISCONNECTED) {
+                                    disconnectedSessions.addFirst(topic)
+                                }
+                            }
                             else -> {}
                         }
                     }
@@ -119,6 +125,10 @@ class WebSocketsClient(private val host: String, private val port: Int) : Client
                 is Either.Left -> SerializableSendMessage.toSendMessage(message.value)
             }
         }
+    }
+
+    override fun disconnections(): List<String> {
+        return disconnectedSessions.toList()
     }
 
     private inline fun <reified T> checkDeserialization(string: String): T? {
