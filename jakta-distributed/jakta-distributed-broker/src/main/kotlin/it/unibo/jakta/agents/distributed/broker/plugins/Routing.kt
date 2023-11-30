@@ -9,9 +9,10 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.get
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
+import io.ktor.websocket.DefaultWebSocketSession
 import it.unibo.jakta.agents.distributed.broker.model.SubscriptionManager
 
-fun Application.configureRouting(subscriptionManager: SubscriptionManager) {
+fun Application.configureRouting(subscriptionManager: SubscriptionManager<DefaultWebSocketSession>) {
     install(ContentNegotiation) {
         json()
     }

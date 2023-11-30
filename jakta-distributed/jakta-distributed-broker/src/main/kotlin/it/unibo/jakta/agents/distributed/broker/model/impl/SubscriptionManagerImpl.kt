@@ -1,41 +1,42 @@
 package it.unibo.jakta.agents.distributed.broker.model.impl
 
-import io.ktor.websocket.DefaultWebSocketSession
 import it.unibo.jakta.agents.distributed.broker.model.SubscriptionManager
 import it.unibo.jakta.agents.distributed.broker.model.Topic
 import java.util.*
 
-class SubscriptionManagerImpl : SubscriptionManager {
+internal class SubscriptionManagerImpl<T> : SubscriptionManager<T> {
 
-    private val subscribers: MutableMap<Topic, MutableSet<DefaultWebSocketSession>> =
+    private val subscribers: MutableMap<Topic, MutableSet<T>> =
         Collections.synchronizedMap(LinkedHashMap())
 
-    private val publishers: MutableMap<Topic, MutableSet<DefaultWebSocketSession>> =
+    private val publishers: MutableMap<Topic, MutableSet<T>> =
         Collections.synchronizedMap(LinkedHashMap())
 
-    override fun addPublisher(publisher: DefaultWebSocketSession, topic: Topic) {
+    override fun addPublisher(publisher: T, topic: Topic) {
         if (publishers[topic].isNullOrEmpty()) publishers[topic] = Collections.synchronizedSet(LinkedHashSet())
         publishers[topic]?.add(publisher)
     }
 
-    override fun removePublisher(publisher: DefaultWebSocketSession, topic: Topic) {
+    override fun removePublisher(publisher: T, topic: Topic) {
         publishers[topic]?.remove(publisher)
+        if (publishers[topic] == emptySet<T>()) publishers.remove(topic)
     }
 
     override fun availableTopics(): Set<Topic> {
         return publishers.keys
     }
 
-    override fun addSubscriber(subscriber: DefaultWebSocketSession, topic: Topic) {
+    override fun addSubscriber(subscriber: T, topic: Topic) {
         if (subscribers[topic].isNullOrEmpty()) subscribers[topic] = Collections.synchronizedSet(LinkedHashSet())
         subscribers[topic]?.add(subscriber)
     }
 
-    override fun removeSubscriber(subscriber: DefaultWebSocketSession, topic: Topic) {
+    override fun removeSubscriber(subscriber: T, topic: Topic) {
         subscribers[topic]?.remove(subscriber)
+        if (subscribers[topic] == emptySet<T>()) subscribers.remove(topic)
     }
 
-    override fun subscribers(topic: Topic): Set<DefaultWebSocketSession> {
+    override fun subscribers(topic: Topic): Set<T> {
         return subscribers[topic]?.toSet() ?: emptySet()
     }
 }

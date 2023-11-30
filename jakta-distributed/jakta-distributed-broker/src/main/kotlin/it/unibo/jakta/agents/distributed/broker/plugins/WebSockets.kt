@@ -10,6 +10,7 @@ import io.ktor.server.websocket.WebSockets
 import io.ktor.server.websocket.pingPeriod
 import io.ktor.server.websocket.timeout
 import io.ktor.server.websocket.webSocket
+import io.ktor.websocket.DefaultWebSocketSession
 import io.ktor.websocket.Frame
 import it.unibo.jakta.agents.distributed.broker.model.SubscriptionManager
 import it.unibo.jakta.agents.distributed.common.Error
@@ -19,7 +20,7 @@ import java.time.Duration
 
 const val PERIOD: Long = 15
 
-fun Application.configureWebSockets(subscriptionManager: SubscriptionManager) {
+fun Application.configureWebSockets(subscriptionManager: SubscriptionManager<DefaultWebSocketSession>) {
     install(WebSockets) {
         pingPeriod = Duration.ofSeconds(PERIOD)
         timeout = Duration.ofSeconds(PERIOD)
