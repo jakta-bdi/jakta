@@ -1,3 +1,11 @@
+## [0.7.39](https://github.com/jakta-bdi/jakta/compare/v0.7.38...v0.7.39) (2023-11-30)
+
+
+### Bug Fixes
+
+* **deps:** update actions/setup-java action to v4 ([4439e0e](https://github.com/jakta-bdi/jakta/commit/4439e0e64aa27389112ac492f55af08d410deaee))
+* **deps:** update dependency gradle to v8.5 ([02d5f31](https://github.com/jakta-bdi/jakta/commit/02d5f3130505e0745dc80c831a489ebd83118aed))
+
 ## [0.7.38](https://github.com/jakta-bdi/jakta/compare/v0.7.37...v0.7.38) (2023-11-30)
 
 
