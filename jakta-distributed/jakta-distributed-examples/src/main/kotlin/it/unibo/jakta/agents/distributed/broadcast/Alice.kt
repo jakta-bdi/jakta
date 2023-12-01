@@ -4,11 +4,9 @@ import it.unibo.jakta.agents.bdi.Agent
 import it.unibo.jakta.agents.bdi.Jakta
 import it.unibo.jakta.agents.bdi.actions.ExternalRequest
 import it.unibo.jakta.agents.bdi.actions.impl.AbstractExternalAction
+import it.unibo.jakta.agents.bdi.beliefs.Belief
 import it.unibo.jakta.agents.bdi.environment.Environment
-import it.unibo.jakta.agents.bdi.events.Event
 import it.unibo.jakta.agents.bdi.executionstrategies.ExecutionStrategy
-import it.unibo.jakta.agents.bdi.goals.Achieve
-import it.unibo.jakta.agents.bdi.goals.Act
 import it.unibo.jakta.agents.bdi.goals.ActInternally
 import it.unibo.jakta.agents.bdi.messages.Message
 import it.unibo.jakta.agents.bdi.messages.Tell
@@ -31,29 +29,25 @@ fun main() {
         }
     }
 
+    val alice = Agent.of(
+        name = "alice",
+        planLibrary = PlanLibrary.of(
+            Plan.ofBeliefBaseAddition(
+                belief = Belief.from(Jakta.parseStruct("greetings(source(Sender))")),
+                goals = listOf(
+                    ActInternally.of(Jakta.parseStruct("print(\"Received message from: \", Sender)")),
+                ),
+            ),
+        ),
+    )
+
     val env = Environment.of(
         externalActions = mapOf(
             broadcastAction.signature.name to broadcastAction,
         ),
     )
 
-    val sender = Agent.of(
-        name = "sender",
-        events = listOf(
-            Event.ofAchievementGoalInvocation(Achieve.of(Jakta.parseStruct("broadcast"))),
-        ),
-        planLibrary = PlanLibrary.of(
-            Plan.ofAchievementGoalInvocation(
-                value = Jakta.parseStruct("broadcast"),
-                goals = listOf(
-                    ActInternally.of(Jakta.parseStruct("print(\"Broadcast message\")")),
-                    Act.of(Jakta.parseStruct("broadcast(tell, greetings)")),
-                ),
-            ),
-        ),
-    )
+    val sender = RemoteService("sender")
 
-    val alice = RemoteService("alice")
-
-    DMas.withEmbeddedBroker(ExecutionStrategy.oneThreadPerAgent(), env, listOf(sender), listOf(alice)).start()
+    DMas.withEmbeddedBroker(ExecutionStrategy.oneThreadPerAgent(), env, listOf(alice), listOf(sender)).start()
 }

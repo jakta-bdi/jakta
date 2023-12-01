@@ -5,7 +5,6 @@ import it.unibo.jakta.agents.bdi.actions.ExternalRequest
 import it.unibo.jakta.agents.bdi.actions.impl.AbstractExternalAction
 import it.unibo.jakta.agents.bdi.goals.Act
 import it.unibo.jakta.agents.bdi.goals.ActInternally
-import it.unibo.jakta.agents.bdi.messages.Achieve
 import it.unibo.jakta.agents.bdi.messages.Message
 import it.unibo.jakta.agents.bdi.messages.Tell
 import it.unibo.jakta.agents.bdi.plans.Plan
