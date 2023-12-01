@@ -105,7 +105,9 @@ class WebSocketsClient(private val host: String, private val port: Int) : Client
                                     disconnectedSessions.addFirst(topic)
                                 }
                             }
-                            else -> {}
+                            else -> {
+                                println("COULDN'T DESERIALIZE")
+                            }
                         }
                     }
                 } catch (e: Exception) {
