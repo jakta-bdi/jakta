@@ -4,6 +4,7 @@ import it.unibo.jakta.agents.bdi.actions.ExternalRequest
 import it.unibo.jakta.agents.bdi.actions.impl.AbstractExternalAction
 import it.unibo.jakta.agents.bdi.beliefs.Belief
 import it.unibo.jakta.agents.bdi.environment.Environment
+import it.unibo.jakta.agents.bdi.events.Event
 import it.unibo.jakta.agents.bdi.executionstrategies.ExecutionStrategy
 import it.unibo.jakta.agents.bdi.goals.Achieve
 import it.unibo.jakta.agents.bdi.goals.Act
@@ -35,8 +36,9 @@ fun main() {
 
     val sender = Agent.of(
         name = "sender",
-        events = listOf(),
-
+        events = listOf(
+            Event.ofAchievementGoalInvocation(Achieve.of(Jakta.parseStruct("broadcast"))),
+        ),
         planLibrary = PlanLibrary.of(
             Plan.ofAchievementGoalInvocation(
                 value = Jakta.parseStruct("broadcast"),
