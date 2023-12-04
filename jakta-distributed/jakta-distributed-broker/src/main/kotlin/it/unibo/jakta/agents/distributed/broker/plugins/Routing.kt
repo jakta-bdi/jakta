@@ -11,6 +11,7 @@ import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import io.ktor.websocket.DefaultWebSocketSession
 import it.unibo.jakta.agents.distributed.broker.model.SubscriptionManager
+import it.unibo.jakta.agents.distributed.broker.model.Topic
 
 fun Application.configureRouting(subscriptionManager: SubscriptionManager<DefaultWebSocketSession>) {
     install(ContentNegotiation) {
@@ -19,7 +20,7 @@ fun Application.configureRouting(subscriptionManager: SubscriptionManager<Defaul
     routing {
         route("/topics") {
             get {
-                call.respond(subscriptionManager.availableTopics())
+                call.respond<Set<Topic>>(subscriptionManager.availableTopics())
             }
         }
     }
