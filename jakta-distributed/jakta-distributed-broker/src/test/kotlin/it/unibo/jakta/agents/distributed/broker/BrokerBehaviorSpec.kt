@@ -3,12 +3,15 @@ package it.unibo.jakta.agents.distributed.broker
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.websocket.WebSockets
-import io.ktor.client.plugins.websocket.webSocket
+import io.ktor.client.plugins.websocket.webSocketSession
 import io.ktor.client.request.get
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.testing.testApplication
 import io.ktor.websocket.Frame
+import io.ktor.websocket.readText
 import it.unibo.jakta.agents.distributed.broker.model.Topic
+import it.unibo.jakta.agents.distributed.common.Error
+import kotlinx.serialization.json.Json
 import org.junit.Test
 import kotlin.test.assertEquals
 
@@ -16,32 +19,40 @@ class BrokerBehaviorSpec {
     @Test
     fun testTopicPublication() {
         testApplication {
-            val mas0 = createClient {
+            val fooMas = createClient {
                 install(ContentNegotiation) {
                     json()
                 }
                 install(WebSockets)
             }
-            val mas1 = createClient {
+            val barMas = createClient {
                 install(ContentNegotiation) {
                     json()
                 }
                 install(WebSockets)
             }
+            val fooTopic = "fooTopic"
+            val barTopic = "barTopic"
+            val message = "testMessage"
+            val fooSubscribeSession = fooMas.webSocketSession("/subscribe/$barTopic")
+            val barSubscribeSession = barMas.webSocketSession("/subscribe/$fooTopic")
+            val fooPublishSession = fooMas.webSocketSession("/publish/$fooTopic")
+            val barPublishSession = barMas.webSocketSession("/publish/$barTopic")
+            val availableTopics: Set<Topic> = fooMas.get("/topics").body()
 
-            val topic1 = "topic1"
-            val topic2 = "topic2"
+            assertEquals(setOf(fooTopic, barTopic), availableTopics)
 
-            mas0.webSocket("/publish/$topic1") {
-                send(Frame.Text("message0"))
-            }
+            fooSubscribeSession.send(Frame.Text(message))
+            val response = fooSubscribeSession.incoming.receive()
+            assertEquals(Error.BAD_REQUEST, Json.decodeFromString((response as Frame.Text).readText()))
 
-            mas1.webSocket("/publish/$topic2") {
-                send(Frame.Text("message1"))
-            }
+            fooPublishSession.send(Frame.Text(message))
+            val response2 = barSubscribeSession.incoming.receive()
+            assertEquals(message, (response2 as Frame.Text).readText())
 
-            val availableTopics: Set<Topic> = mas0.get("/topics").body()
-            assertEquals(setOf(topic1, topic2), availableTopics)
+            barPublishSession.send(Frame.Text(message))
+            val response3 = fooSubscribeSession.incoming.receive()
+            assertEquals(message, (response3 as Frame.Text).readText())
         }
     }
 }
