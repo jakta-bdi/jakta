@@ -1,62 +1,68 @@
+@file:JvmName("Ponger")
+
 package it.unibo.jakta.agents.distributed.pingpong
 
-import it.unibo.jakta.agents.bdi.Agent
-import it.unibo.jakta.agents.bdi.Jakta
-import it.unibo.jakta.agents.bdi.beliefs.Belief
-import it.unibo.jakta.agents.bdi.beliefs.BeliefBase
-import it.unibo.jakta.agents.bdi.environment.Environment
-import it.unibo.jakta.agents.bdi.executionstrategies.ExecutionStrategy
-import it.unibo.jakta.agents.bdi.goals.Achieve
-import it.unibo.jakta.agents.bdi.goals.ActInternally
-import it.unibo.jakta.agents.bdi.goals.RemoveBelief
-import it.unibo.jakta.agents.bdi.goals.UpdateBelief
-import it.unibo.jakta.agents.bdi.plans.Plan
-import it.unibo.jakta.agents.bdi.plans.PlanLibrary
-import it.unibo.jakta.agents.distributed.RemoteService
-import it.unibo.jakta.agents.distributed.dmas.DMas
+import it.unibo.jakta.agents.bdi.messages.Achieve
+import it.unibo.jakta.agents.bdi.messages.Message
+import it.unibo.jakta.agents.bdi.messages.Tell
+import it.unibo.jakta.agents.distributed.broker.embedded.EmbeddedBroker
+import it.unibo.jakta.agents.distributed.dsl.dmas
+import it.unibo.jakta.agents.distributed.network.impl.WebsocketNetwork
+import it.unibo.tuprolog.core.Atom
+import it.unibo.tuprolog.core.Struct
 
 fun main() {
-    val env = Environment.of(
-        externalActions = mapOf(
-            sendAction.signature.name to sendAction,
-        ),
-    )
+    dmas {
+        environment {
+            actions {
+                action("send", 3) {
+                    val receiver: Atom = argument(0)
+                    val type: Atom = argument(1)
+                    val message: Struct = argument(2)
+                    when (type.value) {
+                        "tell" -> sendMessage(receiver.value, Message(this.sender, Tell, message))
+                        "achieve" -> sendMessage(
+                            receiver.value,
+                            Message(this.sender, Achieve, message),
+                        )
+                    }
+                }
+            }
+        }
+        agent("ponger") {
+            beliefs {
+                fact { "turn"("other") }
+                fact { "other"("pinger") }
+            }
+            plans {
+                +"ball"("source"(S)) onlyIf {
+                    "turn"("source"("self"), "other") and "other"("source"("self"), S)
+                } then {
+                    update("turn"("source"("self"), "me"))
+                    -"ball"("source"(S))
+                    achieve("sendMessageTo"("ball", S))
+                    achieve("handle_ping")
+                }
 
-    val ponger = Agent.of(
-        name = "ponger",
-        beliefBase = BeliefBase.of(
-            Belief.fromSelfSource(Jakta.parseStruct("turn(other)")),
-            Belief.fromSelfSource(Jakta.parseStruct("other(pinger)")),
-        ),
-        planLibrary = PlanLibrary.of(
-            Plan.ofBeliefBaseAddition(
-                belief = Belief.from(Jakta.parseStruct("ball(source(Sender))")),
-                guard = Jakta.parseStruct("turn(source(self), other) & other(source(self), Sender)"),
-                goals = listOf(
-                    UpdateBelief.of(Belief.fromSelfSource(Jakta.parseStruct("turn(me)"))),
-                    RemoveBelief.of(Belief.from(Jakta.parseStruct("ball(source(Sender))"))),
-                    ActInternally.of(Jakta.parseStruct("print(\"Received ball from\", Sender)")),
-                    Achieve.of(Jakta.parseStruct("sendMessageTo(ball, Sender)")),
-                    Achieve.of(Jakta.parseStruct("handle_ping")),
-                ),
-            ),
-            Plan.ofAchievementGoalInvocation(
-                value = Jakta.parseStruct("handle_ping"),
-                goals = listOf(
-                    UpdateBelief.of(Belief.fromSelfSource(Jakta.parseStruct("turn(other)"))),
-                    ActInternally.of(Jakta.parseStruct("print(\"Ponger has Done\")")),
-                ),
-            ),
-            sendPlan,
-        ),
-    )
+                +achieve("handle_ping") then {
+                    update("turn"("source"("self"), "other"))
+                    iact("print"("Ponger has Done"))
+                }
 
-    val pinger = RemoteService("pinger")
-
-    DMas.withEmbeddedBroker(
-        ExecutionStrategy.oneThreadPerAgent(),
-        env,
-        listOf(ponger),
-        listOf(pinger),
-    ).start()
+                +achieve("sendMessageTo"(M, R)) then {
+                    iact("print"("Sending message ", M))
+                    execute("send"(R, "tell", M))
+                }
+            }
+        }
+        network {
+            WebsocketNetwork("localhost", 8080)
+        }
+        service {
+            name("pinger")
+        }
+        embeddedBroker {
+            EmbeddedBroker()
+        }
+    }.start()
 }
