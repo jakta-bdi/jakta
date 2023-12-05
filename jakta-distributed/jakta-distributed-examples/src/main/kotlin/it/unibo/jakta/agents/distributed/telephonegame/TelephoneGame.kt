@@ -20,8 +20,8 @@ fun main(args: Array<String>) {
     val host: String = args[0]
     val port: Int = args[1].toInt()
     val id: Int = args[2].toInt()
-    val nAgents = args[3].toInt()
-    val nMessages = 5
+    val nAgents: Int = args[3].toInt()
+    val nMessages = nAgents * 2
     dmas {
         environment {
             actions {
