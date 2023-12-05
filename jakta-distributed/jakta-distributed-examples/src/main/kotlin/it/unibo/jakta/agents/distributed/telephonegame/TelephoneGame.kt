@@ -57,7 +57,7 @@ fun main(args: Array<String>) {
         }
 
         service {
-            name("ag${(id + 1) % nAgents}")
+            name("ag${(id + nAgents - 1) % nAgents}")
         }
 
         network {
