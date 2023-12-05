@@ -17,9 +17,11 @@ import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.Struct
 
 fun main(args: Array<String>) {
-    val id: Int = args[0].toInt()
-    val nAgents = args[1].toInt()
-    val nMessages = 2
+    val host: String = args[0]
+    val port: Int = args[1].toInt()
+    val id: Int = args[2].toInt()
+    val nAgents = args[3].toInt()
+    val nMessages = 5
     dmas {
         environment {
             actions {
@@ -59,7 +61,7 @@ fun main(args: Array<String>) {
         }
 
         network {
-            websocketNetwork("localhost", 8080)
+            websocketNetwork(host, port)
         }
     }.start()
 }
