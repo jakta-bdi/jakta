@@ -12,6 +12,7 @@ import io.ktor.server.websocket.timeout
 import io.ktor.server.websocket.webSocket
 import io.ktor.websocket.DefaultWebSocketSession
 import io.ktor.websocket.Frame
+import it.unibo.jakta.agents.distributed.broker.model.Cache
 import it.unibo.jakta.agents.distributed.broker.model.SubscriptionManager
 import it.unibo.jakta.agents.distributed.common.Error
 import kotlinx.serialization.encodeToString
@@ -29,6 +30,8 @@ fun Application.configureWebSockets(subscriptionManager: SubscriptionManager<Def
         contentConverter = KotlinxWebsocketSerializationConverter(Json)
     }
     routing {
+        val cache: Cache<Frame> = Cache()
+
         webSocket("/publish/{topic}") {
             val topic = call.parameters["topic"] ?: ""
             subscriptionManager.addPublisher(this, topic)
@@ -36,6 +39,7 @@ fun Application.configureWebSockets(subscriptionManager: SubscriptionManager<Def
                 for (frame in incoming) {
                     subscriptionManager.subscribers(topic)
                         .forEach { it.send(frame.copy()) }
+                    cache.register(frame.copy(), topic)
                 }
             }, {
                 subscriptionManager.removePublisher(this, topic)
@@ -49,6 +53,7 @@ fun Application.configureWebSockets(subscriptionManager: SubscriptionManager<Def
             val topic = call.parameters["topic"] ?: ""
             subscriptionManager.addSubscriber(this, topic)
             websocketLogic(call, {
+                cache.read(topic)?.let { this.send(it.copy()) }
                 for (frame in incoming) {
                     this.send(Frame.Text(Json.encodeToString(Error.BAD_REQUEST)))
                 }
@@ -62,6 +67,10 @@ fun Application.configureWebSockets(subscriptionManager: SubscriptionManager<Def
             subscriptionManager.availableTopics().minus(except.toSet())
                 .forEach { subscriptionManager.addSubscriber(this, it) }
             websocketLogic(call, {
+                subscriptionManager.availableTopics().minus(except.toSet())
+                    .forEach { topic ->
+                        cache.read(topic)?.let { this.send(it.copy()) }
+                    }
                 for (frame in incoming) {
                     this.send(Frame.Text(Json.encodeToString(Error.BAD_REQUEST)))
                 }
