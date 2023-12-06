@@ -63,7 +63,8 @@ abstract class AbstractDMas(
                 }
             }
         val externalEffects = network.getMessagesAsEnvironmentChanges()
-        (effects + externalEffects + disconnectedAgents).forEach { environmentChange ->
+        val changes = effects + externalEffects + disconnectedAgents
+        changes.forEach { environmentChange ->
             when (environmentChange) {
                 is BroadcastMessage -> {
                     runBlocking {
@@ -81,7 +82,8 @@ abstract class AbstractDMas(
                 }
 
                 is SendMessage -> {
-                    if (services.map { it.serviceName }.contains(environmentChange.recipient)) {
+                    println(services)
+                    if (!agents.map { it.name }.contains(environmentChange.recipient)) {
                         runBlocking {
                             launch(Dispatchers.Default) {
                                 network.send(environmentChange)
