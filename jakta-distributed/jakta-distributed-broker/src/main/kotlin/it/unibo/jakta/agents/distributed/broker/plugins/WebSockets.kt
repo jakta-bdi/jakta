@@ -36,6 +36,7 @@ fun Application.configureWebSockets(subscriptionManager: SubscriptionManager<Def
             val topic = call.parameters["topic"] ?: ""
             subscriptionManager.addPublisher(this, topic)
             websocketLogic(call, {
+                call.application.environment.log.info("publishing on $topic")
                 for (frame in incoming) {
                     subscriptionManager.subscribers(topic)
                         .forEach { it.send(frame.copy()) }
@@ -53,6 +54,7 @@ fun Application.configureWebSockets(subscriptionManager: SubscriptionManager<Def
             val topic = call.parameters["topic"] ?: ""
             subscriptionManager.addSubscriber(this, topic)
             websocketLogic(call, {
+                call.application.environment.log.info("subscribing to $topic")
                 cache.read(topic)?.let { this.send(it.copy()) }
                 for (frame in incoming) {
                     this.send(Frame.Text(Json.encodeToString(Error.BAD_REQUEST)))
