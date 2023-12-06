@@ -121,16 +121,20 @@ class WebSocketsClient(private val host: String, private val port: Int) : Client
     }
 
     override fun incomingData(): Map<String, EnvironmentChange> {
-        return incomingData.mapValues { entry ->
+        val list = incomingData.mapValues { entry ->
             when (val message = entry.value) {
                 is Either.Right -> SerializableBroadcastMessage.toBroadcastMessage(message.value)
                 is Either.Left -> SerializableSendMessage.toSendMessage(message.value)
             }
         }
+        incomingData.clear()
+        return list
     }
 
     override fun disconnections(): List<String> {
-        return disconnectedSessions.toList()
+        val list = disconnectedSessions.toList()
+        disconnectedSessions.clear()
+        return list
     }
 
     private inline fun <reified T> checkDeserialization(string: String): T? {
