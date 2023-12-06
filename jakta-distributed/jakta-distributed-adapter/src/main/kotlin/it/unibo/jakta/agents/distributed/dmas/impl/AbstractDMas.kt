@@ -63,7 +63,11 @@ abstract class AbstractDMas(
                 }
             }
         val externalEffects = network.getMessagesAsEnvironmentChanges()
-        val changes = effects + externalEffects + disconnectedAgents
+        // filter out every EnvironmentChange that is a SendMessage that is not addressed to an agent in the DMas
+        val effectsFiltered = externalEffects.filter { environmentChange ->
+            environmentChange is SendMessage && agents.map { agent -> agent.name }.contains(environmentChange.recipient)
+        }
+        val changes = effects + effectsFiltered + disconnectedAgents
         changes.forEach { environmentChange ->
             when (environmentChange) {
                 is BroadcastMessage -> {
