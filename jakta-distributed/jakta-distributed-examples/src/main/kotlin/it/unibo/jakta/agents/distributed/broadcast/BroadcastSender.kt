@@ -14,7 +14,6 @@ import it.unibo.jakta.agents.bdi.messages.Message
 import it.unibo.jakta.agents.bdi.messages.Tell
 import it.unibo.jakta.agents.bdi.plans.Plan
 import it.unibo.jakta.agents.bdi.plans.PlanLibrary
-import it.unibo.jakta.agents.distributed.RemoteService
 import it.unibo.jakta.agents.distributed.dmas.DMas
 
 fun main() {
@@ -53,7 +52,5 @@ fun main() {
         ),
     )
 
-    val alice = RemoteService("alice")
-
-    DMas.withEmbeddedBroker(ExecutionStrategy.oneThreadPerAgent(), env, listOf(sender), listOf(alice)).start()
+    DMas.withEmbeddedBroker(ExecutionStrategy.oneThreadPerAgent(), env, listOf(sender), emptyList()).start()
 }
