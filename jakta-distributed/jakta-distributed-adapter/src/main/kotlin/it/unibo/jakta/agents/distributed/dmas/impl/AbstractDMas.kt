@@ -72,7 +72,7 @@ abstract class AbstractDMas(
             when (environmentChange) {
                 is BroadcastMessage -> {
                     // Prevent the DMas from broadcasting another time the BroadcastMessage
-                    if (!agents.map { it.name }.contains(environmentChange.message.from)) {
+                    if (agents.map { it.name }.contains(environmentChange.message.from)) {
                         runBlocking {
                             launch(Dispatchers.Default) {
                                 network.broadcast(environmentChange)
