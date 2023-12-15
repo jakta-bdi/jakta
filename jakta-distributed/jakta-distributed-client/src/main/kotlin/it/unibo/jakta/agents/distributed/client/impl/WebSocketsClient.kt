@@ -3,10 +3,15 @@ package it.unibo.jakta.agents.distributed.client.impl
 import arrow.core.Either
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
+import io.ktor.client.plugins.logging.DEFAULT
+import io.ktor.client.plugins.logging.LogLevel
+import io.ktor.client.plugins.logging.Logger
+import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.plugins.websocket.DefaultClientWebSocketSession
 import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.client.plugins.websocket.sendSerialized
 import io.ktor.client.plugins.websocket.webSocketSession
+import io.ktor.http.HttpHeaders
 import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter
 import io.ktor.websocket.Frame
 import io.ktor.websocket.readText
@@ -36,6 +41,11 @@ class WebSocketsClient(private val host: String, private val port: Int) : Client
     private val client = HttpClient(CIO) {
         install(WebSockets) {
             contentConverter = KotlinxWebsocketSerializationConverter(Json)
+        }
+        install(Logging) {
+            logger = Logger.DEFAULT
+            level = LogLevel.HEADERS
+            sanitizeHeader { header -> header == HttpHeaders.Authorization }
         }
     }
 
@@ -93,21 +103,14 @@ class WebSocketsClient(private val host: String, private val port: Int) : Client
                     while (isActive) {
                         val message = subscribeSessions[topic]?.incoming?.receive()
                         message as? Frame.Text ?: continue
-                        val receivedText = message.readText()
-                        val x = checkDeserialization<SerializableSendMessage>(receivedText)
-                            ?: checkDeserialization<SerializableBroadcastMessage>(receivedText)
-                            ?: checkDeserialization<Error>(receivedText)
-                        when (x) {
-                            is SerializableSendMessage -> incomingData[topic] = Either.Left(x)
-                            is SerializableBroadcastMessage -> incomingData[topic] = Either.Right(x)
-                            is Error -> {
-                                if (x == Error.CLIENT_DISCONNECTED) {
-                                    disconnectedSessions.addFirst(topic)
-                                }
-                            }
-                            else -> {
-                                println("COULDN'T DESERIALIZE")
-                            }
+                        val serializedMessage = message.readText()
+                        val deserializedMessage = tryDeserialization<SerializableSendMessage>(serializedMessage)
+                            ?: tryDeserialization<SerializableBroadcastMessage>(serializedMessage)
+                            ?: tryDeserialization<Error>(serializedMessage)
+                        when (deserializedMessage) {
+                            is SerializableSendMessage -> incomingData[topic] = Either.Left(deserializedMessage)
+                            is SerializableBroadcastMessage -> incomingData[topic] = Either.Right(deserializedMessage)
+                            Error.CLIENT_DISCONNECTED -> disconnectedSessions.addFirst(topic)
                         }
                     }
                 } catch (e: Exception) {
@@ -137,7 +140,7 @@ class WebSocketsClient(private val host: String, private val port: Int) : Client
         return list
     }
 
-    private inline fun <reified T> checkDeserialization(string: String): T? {
+    private inline fun <reified T> tryDeserialization(string: String): T? {
         return try {
             Json.decodeFromString<T>(string)
         } catch (e: Exception) {
