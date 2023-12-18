@@ -1,5 +1,3 @@
-val ktorVersion = "2.3.6"
-
 plugins {
     application
     alias(libs.plugins.kotlin.jvm)
