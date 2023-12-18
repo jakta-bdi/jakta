@@ -1,3 +1,5 @@
+@file:JvmName("Alice")
+
 package it.unibo.jakta.agents.distributed.broadcast
 
 import it.unibo.jakta.agents.bdi.Agent
