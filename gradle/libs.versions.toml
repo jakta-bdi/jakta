@@ -3,7 +3,7 @@ kotest = "5.8.0"
 kotlin = "1.9.21"
 mockito = "5.8.0"
 tuprolog = "0.31.19"
-ktor = "2.3.5"
+ktor = "2.3.7"
 logback-classic = "1.2.11"
 kotlinx = "1.5.2"
 
