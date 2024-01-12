@@ -1,5 +1,6 @@
 package it.unibo.jakta.agents.distributed.broker.model.impl
 
+import it.unibo.jakta.agents.distributed.broker.model.ReservedTopics
 import it.unibo.jakta.agents.distributed.broker.model.SubscriptionManager
 import it.unibo.jakta.agents.distributed.broker.model.Topic
 import java.util.*
@@ -13,8 +14,12 @@ internal class SubscriptionManagerImpl<T> : SubscriptionManager<T> {
         Collections.synchronizedMap(LinkedHashMap())
 
     override fun addPublisher(publisher: T, topic: Topic) {
-        if (publishers[topic].isNullOrEmpty()) publishers[topic] = Collections.synchronizedSet(LinkedHashSet())
-        publishers[topic]?.add(publisher)
+        if ((publishers[topic]?.size ?: 0) > 0 && !ReservedTopics.topics.contains(topic)) {
+            throw PublisherAlreadyPresentException()
+        } else {
+            publishers[topic] = Collections.synchronizedSet(LinkedHashSet())
+            publishers[topic]?.add(publisher)
+        }
     }
 
     override fun removePublisher(publisher: T, topic: Topic) {

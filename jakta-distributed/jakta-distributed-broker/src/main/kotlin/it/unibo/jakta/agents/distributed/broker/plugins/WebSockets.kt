@@ -10,10 +10,13 @@ import io.ktor.server.websocket.WebSockets
 import io.ktor.server.websocket.pingPeriod
 import io.ktor.server.websocket.timeout
 import io.ktor.server.websocket.webSocket
+import io.ktor.websocket.CloseReason
 import io.ktor.websocket.DefaultWebSocketSession
 import io.ktor.websocket.Frame
+import io.ktor.websocket.close
 import it.unibo.jakta.agents.distributed.broker.model.Cache
 import it.unibo.jakta.agents.distributed.broker.model.SubscriptionManager
+import it.unibo.jakta.agents.distributed.broker.model.impl.PublisherAlreadyPresentException
 import it.unibo.jakta.agents.distributed.common.Error
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -34,7 +37,11 @@ fun Application.configureWebSockets(subscriptionManager: SubscriptionManager<Def
 
         webSocket("/publish/{topic}") {
             val topic = call.parameters["topic"] ?: ""
-            subscriptionManager.addPublisher(this, topic)
+            try {
+                subscriptionManager.addPublisher(this, topic)
+            } catch (e: PublisherAlreadyPresentException) {
+                this.close(CloseReason(CloseReason.Codes.CANNOT_ACCEPT, "Publisher already present!"))
+            }
             websocketLogic(call, {
                 call.application.environment.log.info("publishing on $topic")
                 for (frame in incoming) {
