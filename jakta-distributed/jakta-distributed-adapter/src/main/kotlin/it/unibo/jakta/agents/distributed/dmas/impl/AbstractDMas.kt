@@ -15,6 +15,7 @@ import it.unibo.jakta.agents.bdi.executionstrategies.ExecutionStrategy
 import it.unibo.jakta.agents.bdi.messages.Message
 import it.unibo.jakta.agents.bdi.messages.Tell
 import it.unibo.jakta.agents.distributed.RemoteService
+import it.unibo.jakta.agents.distributed.common.NonUniquePublisherException
 import it.unibo.jakta.agents.distributed.dmas.DMas
 import it.unibo.jakta.agents.distributed.network.Network
 import it.unibo.tuprolog.core.Struct
@@ -22,6 +23,7 @@ import it.unibo.tuprolog.core.parsing.parse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlin.system.exitProcess
 
 abstract class AbstractDMas(
     override val executionStrategy: ExecutionStrategy,
@@ -95,7 +97,15 @@ abstract class AbstractDMas(
                     if (!agents.map { it.name }.contains(environmentChange.recipient)) {
                         runBlocking {
                             launch(Dispatchers.Default) {
-                                network.send(environmentChange)
+                                try {
+                                    network.send(environmentChange)
+                                } catch (nu: NonUniquePublisherException) {
+                                    println(
+                                        "There already is a publisher for this topic: " +
+                                            environmentChange.message.from,
+                                    )
+                                    exitProcess(1)
+                                }
                             }
                         }
                     } else {

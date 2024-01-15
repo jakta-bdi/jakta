@@ -20,9 +20,11 @@ import it.unibo.jakta.agents.bdi.actions.effects.EnvironmentChange
 import it.unibo.jakta.agents.bdi.actions.effects.SendMessage
 import it.unibo.jakta.agents.distributed.client.Client
 import it.unibo.jakta.agents.distributed.common.Error
+import it.unibo.jakta.agents.distributed.common.NonUniquePublisherException
 import it.unibo.jakta.agents.distributed.common.SerializableBroadcastMessage
 import it.unibo.jakta.agents.distributed.common.SerializableSendMessage
 import it.unibo.tuprolog.utils.addFirst
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.isActive
@@ -61,6 +63,8 @@ class WebSocketsClient(private val host: String, private val port: Int) : Client
                 }
                 try {
                     publishSessions[topic]?.sendSerialized(SerializableSendMessage.fromSendMessage(data))
+                } catch (ce: CancellationException) {
+                    throw NonUniquePublisherException()
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
