@@ -1,3 +1,11 @@
+## [0.7.57](https://github.com/jakta-bdi/jakta/compare/v0.7.56...v0.7.57) (2024-01-19)
+
+
+### Bug Fixes
+
+* **deps:** update dependency org.mockito:mockito-core to v5.9.0 ([0840f80](https://github.com/jakta-bdi/jakta/commit/0840f8024289240ae376c7bbd551f9d0a3b90a3c))
+* **deps:** update plugin org.gradle.toolchains.foojay-resolver-convention to v0.8.0 ([51c3db8](https://github.com/jakta-bdi/jakta/commit/51c3db86e664a40ef737eee2b677c9658f0fcc26))
+
 ## [0.7.56](https://github.com/jakta-bdi/jakta/compare/v0.7.55...v0.7.56) (2024-01-10)
 
 
