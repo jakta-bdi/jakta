@@ -1,3 +1,11 @@
+## [0.7.59](https://github.com/jakta-bdi/jakta/compare/v0.7.58...v0.7.59) (2024-01-25)
+
+
+### Bug Fixes
+
+* **deps:** update dependency org.mockito:mockito-core to v5.10.0 ([f86cf5c](https://github.com/jakta-bdi/jakta/commit/f86cf5ceb977af5e6af772fcbd826c4498594c1f))
+* **deps:** update plugin gitsemver to v3.1.0 ([c10c23d](https://github.com/jakta-bdi/jakta/commit/c10c23dced8b89985023b493796a233bff4635d4))
+
 ## [0.7.58](https://github.com/jakta-bdi/jakta/compare/v0.7.57...v0.7.58) (2024-01-21)
 
 
