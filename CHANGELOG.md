@@ -1,3 +1,10 @@
+## [0.7.60](https://github.com/jakta-bdi/jakta/compare/v0.7.59...v0.7.60) (2024-01-27)
+
+
+### Bug Fixes
+
+* **deps:** update gradle/gradle-build-action action to v3 ([4656254](https://github.com/jakta-bdi/jakta/commit/46562546c5636f2b885201cd585309f1ba9ed4db))
+
 ## [0.7.59](https://github.com/jakta-bdi/jakta/compare/v0.7.58...v0.7.59) (2024-01-25)
 
 
