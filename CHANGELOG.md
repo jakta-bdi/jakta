@@ -1,3 +1,10 @@
+## [0.7.62](https://github.com/jakta-bdi/jakta/compare/v0.7.61...v0.7.62) (2024-01-31)
+
+
+### Bug Fixes
+
+* **deps:** update codecov/codecov-action action to v4 ([ded0649](https://github.com/jakta-bdi/jakta/commit/ded06493c85609ffc5abb751cfc64ce7bf2a6ca2))
+
 ## [0.7.61](https://github.com/jakta-bdi/jakta/compare/v0.7.60...v0.7.61) (2024-01-31)
 
 
