@@ -1,3 +1,10 @@
+## [0.7.71](https://github.com/jakta-bdi/jakta/compare/v0.7.70...v0.7.71) (2024-02-09)
+
+
+### Bug Fixes
+
+* **deps:** update plugin kotlin-qa to v0.60.1 ([4b7f4cd](https://github.com/jakta-bdi/jakta/commit/4b7f4cddad7ffa178354dea14268703181414329))
+
 ## [0.7.70](https://github.com/jakta-bdi/jakta/compare/v0.7.69...v0.7.70) (2024-02-09)
 
 
