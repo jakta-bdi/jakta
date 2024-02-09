@@ -1,3 +1,10 @@
+## [0.7.70](https://github.com/jakta-bdi/jakta/compare/v0.7.69...v0.7.70) (2024-02-09)
+
+
+### Bug Fixes
+
+* **deps:** update tuprolog to v0.32.1 ([bf680ae](https://github.com/jakta-bdi/jakta/commit/bf680ae4e1651410199606a54e466aa782f73b8b))
+
 ## [0.7.69](https://github.com/jakta-bdi/jakta/compare/v0.7.68...v0.7.69) (2024-02-07)
 
 
