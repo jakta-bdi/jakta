@@ -1,7 +1,5 @@
 package it.unibo.jakta.agents.bdi
 
-import it.unibo.jakta.agents.bdi.beliefs.Belief
-import it.unibo.jakta.agents.bdi.beliefs.BeliefBase
 import it.unibo.jakta.agents.bdi.environment.Environment
 import it.unibo.jakta.agents.bdi.events.Event
 import it.unibo.jakta.agents.bdi.executionstrategies.ExecutionStrategy
@@ -17,7 +15,6 @@ fun main() {
 
     val alice = Agent.of(
         name = "alice",
-        beliefBase = BeliefBase.of(listOf(Belief.fromSelfSource(Jakta.parseStruct("run")))),
         events = listOf(Event.ofAchievementGoalInvocation(Achieve.of(start))),
         planLibrary = PlanLibrary.of(
             Plan.ofAchievementGoalInvocation(
@@ -38,6 +35,6 @@ fun main() {
     )
 
     val mas = Mas.of(ExecutionStrategy.oneThreadPerAgent(), env, alice)
-
+    // println(Jakta.printAslSyntax(alice))
     mas.start()
 }

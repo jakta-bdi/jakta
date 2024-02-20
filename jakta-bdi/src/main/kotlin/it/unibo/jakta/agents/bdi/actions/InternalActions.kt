@@ -6,7 +6,12 @@ import it.unibo.tuprolog.core.Substitution
 object InternalActions {
     object Print : AbstractInternalAction("print", 2) {
         override fun action(request: InternalRequest) {
-            val payload = request.arguments.map { it.asAtom()?.value }.joinToString(" ")
+            val payload = request.arguments.joinToString(" ") {
+                when {
+                    it.isAtom -> it.castToAtom().value
+                    else -> it.toString()
+                }
+            }
             println("[${request.agent.name}] $payload")
         }
     }

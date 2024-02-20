@@ -5,6 +5,8 @@ import io.kotest.matchers.shouldBe
 import it.unibo.jakta.agents.bdi.beliefs.Belief
 import it.unibo.jakta.agents.bdi.beliefs.BeliefBase
 import it.unibo.jakta.agents.bdi.events.Event
+import it.unibo.jakta.agents.bdi.goals.Achieve
+import it.unibo.jakta.agents.bdi.goals.ActInternally
 import it.unibo.jakta.agents.bdi.plans.Plan
 import it.unibo.jakta.agents.bdi.plans.PlanLibrary
 import it.unibo.tuprolog.core.Atom
@@ -51,6 +53,33 @@ class TestPlans : DescribeSpec({
 
             val plan3 = Plan.ofBeliefBaseRemoval(genericDesire, emptyList())
             plan3.isApplicable(event, bb) shouldBe false
+        }
+
+        it("should unify the triggering event variables") {
+            val event = Event.ofAchievementGoalInvocation(Achieve.of(Jakta.parseStruct("start(0, 10)")))
+            val p = Plan.ofAchievementGoalInvocation(
+                value = Jakta.parseStruct("start(S, M)"),
+                goals = listOf(ActInternally.of(Jakta.parseStruct("print(S)"))),
+            )
+            p.isApplicable(event, BeliefBase.of()) shouldBe true
+            val ap = p.applicablePlan(event, BeliefBase.of())
+            ap.trigger.value shouldBe event.trigger.value
+            ap.goals.first().value shouldBe Jakta.parseStruct("print(0)")
+        }
+
+        it("should run if and only if the context is valid, and unify those values") {
+            val event = Event.ofAchievementGoalInvocation(Achieve.of(Jakta.parseStruct("pippo(0)")))
+            val p = Plan.ofAchievementGoalInvocation(
+                value = Jakta.parseStruct("pippo(S)"),
+                guard = Jakta.parseStruct("S < 5 & N is S + 1"),
+                goals = listOf(
+                    ActInternally.of(Jakta.parseStruct("print(S)")),
+                    ActInternally.of(Jakta.parseStruct("print(N)")),
+                ),
+            )
+            val ap = p.applicablePlan(event, BeliefBase.of())
+            ap.goals.first().value shouldBe Jakta.parseStruct("print(0)")
+            ap.goals[1].value shouldBe Jakta.parseStruct("print(1)")
         }
     }
 })
