@@ -166,6 +166,7 @@ internal data class AgentLifecycleImpl(
             return ExecutionResult(failAchievementGoal(intention, context))
         }
     }
+
     override fun runIntention(intention: Intention, context: AgentContext, environment: Environment): ExecutionResult =
         when (val nextGoal = intention.nextGoal()) {
             is EmptyGoal -> ExecutionResult(
@@ -365,11 +366,13 @@ internal data class AgentLifecycleImpl(
             // Add plan to intentions
             if (selectedPlan != null) {
                 if (debugEnabled) println("[${agent.name}] Selected the event: $selectedEvent")
+                // if (debugEnabled) println("[${agent.name}] Selected the plan: $selectedPlan")
                 val updatedIntention = assignPlanToIntention(
                     selectedEvent,
                     selectedPlan.applicablePlan(selectedEvent, newBeliefBase),
                     agent.context.intentions,
                 )
+                // if (debugEnabled) println("[${agent.name}] Updated Intention: $updatedIntention")
                 newIntentionPool = agent.context.intentions.updateIntention(updatedIntention)
             } else {
                 if (debugEnabled) {
@@ -387,7 +390,6 @@ internal data class AgentLifecycleImpl(
             intentions = newIntentionPool,
         )
 
-        // println(newIntentionPool)
         var executionResult = ExecutionResult(AgentContext.of())
         if (!newIntentionPool.isEmpty()) {
             val result = scheduleIntention(newIntentionPool)
@@ -397,7 +399,7 @@ internal data class AgentLifecycleImpl(
             newAgent = if (scheduledIntention.recordStack.isEmpty()) {
                 newAgent.copy(intentions = newIntentionPool)
             } else {
-                // println("RUN -> $scheduledIntention")
+                // if (debugEnabled) println("[${agent.name}] RUN -> $scheduledIntention")
                 executionResult = runIntention(
                     scheduledIntention,
                     newAgent.context.copy(intentions = newIntentionPool),
@@ -405,8 +407,8 @@ internal data class AgentLifecycleImpl(
                 )
                 newAgent.copy(executionResult.newAgentContext)
             }
+            // println("post run -> ${newAgent.context}")
         }
-        // println("post run -> ${newAgent.context}")
         this.agent = newAgent
         return if (message != null) {
             executionResult.environmentEffects + PopMessage(this.agent.name)

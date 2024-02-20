@@ -44,10 +44,7 @@ interface Agent : Taggable<Agent> {
     ) = of(
         this.agentID,
         this.name,
-        beliefBase,
-        events,
-        planLibrary,
-        internalActions,
+        context.copy(beliefBase, events, planLibrary, intentions, internalActions),
     )
 
     companion object {
