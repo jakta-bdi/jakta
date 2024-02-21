@@ -11,7 +11,7 @@ import it.unibo.jakta.agents.bdi.plans.PlanLibrary
 fun main() {
     val env = Environment.of()
 
-    val start = Jakta.parseStruct("start(0, 10)")
+    val start = Jakta.parseStruct("start(0, 120)")
 
     val alice = Agent.of(
         name = "alice",
