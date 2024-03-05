@@ -1,3 +1,10 @@
+## [0.7.74](https://github.com/jakta-bdi/jakta/compare/v0.7.73...v0.7.74) (2024-03-05)
+
+
+### Bug Fixes
+
+* **deps:** update plugin gitsemver to v3.1.2 ([0f260fc](https://github.com/jakta-bdi/jakta/commit/0f260fc91938d5f619b20ad926008b38dac939c4))
+
 ## [0.7.73](https://github.com/jakta-bdi/jakta/compare/v0.7.72...v0.7.73) (2024-03-04)
 
 
