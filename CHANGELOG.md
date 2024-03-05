@@ -1,3 +1,16 @@
+# [0.8.0](https://github.com/jakta-bdi/jakta/compare/v0.7.76...v0.8.0) (2024-03-05)
+
+
+### Bug Fixes
+
+* correct implementation of agent's constructor ([e90cfa8](https://github.com/jakta-bdi/jakta/commit/e90cfa8bb0c353d73e741d83429b94f8d9a5fb4a))
+* correct implementation of print internal action and add tests for plans ([0fd2f07](https://github.com/jakta-bdi/jakta/commit/0fd2f070cd18f316cd223f4c52474727392a98be))
+
+
+### Features
+
+* add RecursiveAgent test in dsl module ([0966301](https://github.com/jakta-bdi/jakta/commit/0966301eec88621cec33a14513b7cb642c573d39))
+
 ## [0.7.76](https://github.com/jakta-bdi/jakta/compare/v0.7.75...v0.7.76) (2024-03-05)
 
 
