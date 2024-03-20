@@ -27,6 +27,7 @@ tuprolog-dsl-core = { module = "it.unibo.tuprolog:dsl-core-jvm", version.ref = "
 tuprolog-dsl-unify = { module = "it.unibo.tuprolog:dsl-unify-jvm", version.ref = "tuprolog" }
 tuprolog-dsl-theory = { module = "it.unibo.tuprolog:dsl-theory-jvm", version.ref = "tuprolog" }
 tuprolog-dsl-solve = { module = "it.unibo.tuprolog:dsl-solve-jvm", version.ref = "tuprolog" }
+tuprolog-oop-lib = { module = "it.unibo.tuprolog:oop-lib-jvm", version.ref = "tuprolog" }
 
 [bundles]
 kotlin-testing = [ "kotest-junit5-jvm", "kotest-assertions-core-jvm", "mockito-core" ]
