@@ -1,5 +1,6 @@
 package it.unibo.jakta.agents.bdi.dsl.plans
 
+import it.unibo.jakta.agents.bdi.actions.ExternalAction
 import it.unibo.jakta.agents.bdi.beliefs.Belief
 import it.unibo.jakta.agents.bdi.dsl.Builder
 import it.unibo.jakta.agents.bdi.goals.Achieve
@@ -16,6 +17,8 @@ import it.unibo.tuprolog.core.Scope
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.dsl.LogicProgrammingScope
 import kotlin.reflect.KFunction
+import kotlin.reflect.jvm.ExperimentalReflectionOnLambdas
+import kotlin.reflect.jvm.reflect
 
 class BodyScope(
     private val scope: Scope,
@@ -63,7 +66,13 @@ class BodyScope(
         goals += if (externalOnly) ActExternally.of(struct) else Act.of(struct)
     }
 
-    fun execute(method: KFunction<*>, vararg args: Any) = when {
+//    @OptIn(ExperimentalReflectionOnLambdas::class)
+//    fun execute(method: () -> Unit) = execute(checkNotNull(method.reflect()))
+//
+    fun execute(externalAction: ExternalAction, vararg args: Any): Unit =
+        execute(externalAction.signature.name.invoke(args[0], *args.drop(1).toTypedArray()))
+
+    fun execute(method: KFunction<*>, vararg args: Any): Unit = when {
         method.parameters.isEmpty() -> execute(method.name)
         else -> execute(method.name.invoke(args[0], *args.drop(1).toTypedArray()))
     }
