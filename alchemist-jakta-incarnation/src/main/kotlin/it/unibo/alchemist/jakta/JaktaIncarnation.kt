@@ -7,70 +7,82 @@ import it.unibo.alchemist.model.Environment
 import it.unibo.alchemist.model.Incarnation
 import it.unibo.alchemist.model.Molecule
 import it.unibo.alchemist.model.Node
+import it.unibo.alchemist.model.Node.Companion.asProperty
 import it.unibo.alchemist.model.Position
 import it.unibo.alchemist.model.Reaction
 import it.unibo.alchemist.model.TimeDistribution
+import it.unibo.alchemist.model.molecules.SimpleMolecule
+import it.unibo.alchemist.model.nodes.GenericNode
+import it.unibo.alchemist.model.reactions.Event
+import it.unibo.alchemist.model.timedistributions.DiracComb
 import org.apache.commons.math3.random.RandomGenerator
 
 class JaktaIncarnation<P> : Incarnation<Any?, P> where P : Position<P> {
-    override fun getProperty(p0: Node<Any?>?, p1: Molecule?, p2: String?): Double {
+    override fun getProperty(node: Node<Any?>?, molecule: Molecule?, property: String?): Double {
         TODO("Not yet implemented")
     }
 
-    override fun createMolecule(p0: String?): Molecule {
-        TODO("Not yet implemented")
-    }
+    override fun createMolecule(s: String): Molecule = SimpleMolecule(s)
 
-    override fun createConcentration(p0: String?): Any? {
-        TODO("Not yet implemented")
-    }
+    override fun createConcentration(s: String?): Any? = s
 
-    override fun createConcentration(): Any? {
-        TODO("Not yet implemented")
-    }
+    override fun createConcentration(): Any? = null
 
     override fun createAction(
-        p0: RandomGenerator?,
-        p1: Environment<Any?, P>?,
-        p2: Node<Any?>?,
-        p3: TimeDistribution<Any?>?,
-        p4: Actionable<Any?>?,
-        p5: Any?,
+        randomGenerator: RandomGenerator,
+        environment: Environment<Any?, P>,
+        node: Node<Any?>?,
+        time: TimeDistribution<Any?>,
+        actionable: Actionable<Any?>,
+        additionalParameters: Any?
     ): Action<Any?> {
-        TODO("Not yet implemented")
+        /*
+         * additionalParameters will contain everything that was passed as `program`
+         *
+         *       agent-factory: it.unibo.jakta.test.SharedToken.entrypoint
+         *       parameters: []
+         */
+        val jaktaEnvironment = requireNotNull(node).asProperty<Any?, JaktaEnvironmentForAlchemist<P>>()
+        TODO()
     }
 
     override fun createCondition(
-        p0: RandomGenerator?,
-        p1: Environment<Any?, P>?,
-        p2: Node<Any?>?,
-        p3: TimeDistribution<Any?>?,
-        p4: Actionable<Any?>?,
-        p5: Any?,
-    ): Condition<Any?> {
-        TODO("Not yet implemented")
-    }
+        randomGenerator: RandomGenerator?,
+        environment: Environment<Any?, P>?,
+        node: Node<Any?>?,
+        time: TimeDistribution<Any?>?,
+        actionable: Actionable<Any?>?,
+        additionalParameters: Any?
+    ): Condition<Any?> = error("No conditions in Jakta")
 
     override fun createReaction(
-        p0: RandomGenerator?,
-        p1: Environment<Any?, P>?,
-        p2: Node<Any?>?,
-        p3: TimeDistribution<Any?>?,
-        p4: Any?,
-    ): Reaction<Any?> {
-        TODO("Not yet implemented")
+        randomGenerator: RandomGenerator?,
+        environment: Environment<Any?, P>?,
+        node: Node<Any?>?,
+        timeDistribution: TimeDistribution<Any?>?,
+        parameter: Any?
+    ): Reaction<Any?> = Event(node, timeDistribution).also {
+        it.actions = listOf(createAction(randomGenerator, environment, node, timeDistribution, it, parameter))
     }
 
     override fun createTimeDistribution(
-        p0: RandomGenerator?,
-        p1: Environment<Any?, P>?,
-        p2: Node<Any?>?,
-        p3: Any?,
-    ): TimeDistribution<Any?> {
-        TODO("Not yet implemented")
-    }
+        randomGenerator: RandomGenerator?,
+        environment: Environment<Any?, P>?,
+        node: Node<Any?>?,
+        parameter: Any?
+    ): TimeDistribution<Any?> = DiracComb(
+        when(parameter) {
+            is Number -> parameter.toDouble()
+            is String -> parameter.toDouble()
+            else -> error("Invalid frequency: $parameter")
+        }
+    )
 
-    override fun createNode(p0: RandomGenerator?, p1: Environment<Any?, P>?, p2: Any?): Node<Any?> {
-        TODO("Not yet implemented")
+    override fun createNode(
+        randomGenerator: RandomGenerator,
+        environment: Environment<Any?, P>,
+        parameter: Any?
+    ): Node<Any?> = GenericNode(this, environment).also {
+        it.addProperty(JaktaEnvironmentForAlchemist(environment, randomGenerator, it))
     }
 }
