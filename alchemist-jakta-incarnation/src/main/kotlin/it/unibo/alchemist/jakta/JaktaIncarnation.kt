@@ -62,8 +62,8 @@ class JaktaIncarnation<P> : Incarnation<Any?, P> where P : Position<P> {
         randomGenerator: RandomGenerator?,
         environment: Environment<Any?, P>?,
         node: Node<Any?>?,
-        timeDistribution: TimeDistribution<Any?>?,
-        parameter: Any?
+        timeDistribution: TimeDistribution<Any?>,
+        parameter: Any?,
     ): Reaction<Any?> = Event(node, timeDistribution).also {
         it.actions = listOf(createAction(randomGenerator, environment, node, timeDistribution, it, parameter))
     }
@@ -74,7 +74,7 @@ class JaktaIncarnation<P> : Incarnation<Any?, P> where P : Position<P> {
         node: Node<Any?>?,
         parameter: Any?,
     ): TimeDistribution<Any?> = DiracComb(
-        when(parameter) {
+        when (parameter) {
             is Number -> parameter.toDouble()
             is String -> parameter.toDouble()
             else -> error("Invalid frequency: $parameter")
