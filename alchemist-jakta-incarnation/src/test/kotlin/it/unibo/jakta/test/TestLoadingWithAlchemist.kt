@@ -19,6 +19,7 @@ class TestLoadingWithAlchemist : StringSpec({
             simulation.environment.addTerminator(AfterTime(DoubleTime(10.0)))
             simulation.play()
             simulation.run()
+            simulation.error.ifPresent { throw it }
         }
     }
 })

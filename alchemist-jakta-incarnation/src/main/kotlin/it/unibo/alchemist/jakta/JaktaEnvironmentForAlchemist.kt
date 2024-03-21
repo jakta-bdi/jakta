@@ -71,9 +71,7 @@ class JaktaEnvironmentForAlchemist<P : Position<P>>(
             },
         )
 
-    override fun getNextMessage(agentName: String): Message? {
-        TODO("Not yet implemented")
-    }
+    override fun getNextMessage(agentName: String): Message? = null // TODO()
 
     override fun popMessage(agentName: String): Environment {
         TODO("Not yet implemented")
