@@ -20,6 +20,7 @@ class JaktaAgentForAlchemist<P : Position<P>>(
     val agent: Agent,
 ) : AbstractAction<Any?>(jaktaEnvironment.node) {
 
+    private val agentLifecycle = AgentLifecycle.of(agent)
     constructor(
         node: Node<Any?>,
         agentFactory: String,
@@ -69,9 +70,10 @@ class JaktaAgentForAlchemist<P : Position<P>>(
     }
 
     override fun execute() {
-        AgentLifecycle.of(agent).reason(
+        agentLifecycle.reason(
             environment = jaktaEnvironment,
             controller = null,
+            debugEnabled = true,
         )
     }
 

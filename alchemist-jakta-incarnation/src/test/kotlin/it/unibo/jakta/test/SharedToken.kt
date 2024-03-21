@@ -16,12 +16,16 @@ import it.unibo.tuprolog.solve.libs.oop.ObjectRef
 import java.awt.Color
 
 val knownAgents = SimpleMolecule("knownAgents")
-const val PASS_THE_BALL = "passTheBall"
 
 @OptIn(ExperimentalStdlibApi::class)
 fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.entrypoint(): Agent {
     val myColor = randomGenerator::nextFloat.let { Color.getHSBColor(it(), it(), it()) }
     return tokenPassAgent("Agent#${myColor.rgb.toHexString()}@${node.id}", myColor)
+}
+
+@OptIn(ExperimentalStdlibApi::class)
+fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.entrypointWithColor(color: Color): Agent {
+    return tokenPassAgent("Agent#${color.rgb.toHexString()}@${node.id}", color)
 }
 
 fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.tokenPassAgent(name: String, color: Color): Agent =
@@ -36,7 +40,6 @@ fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.tokenPassAgent(name: Strin
         // [ColoredAgent("foo", red)])
         goals {
             achieve("init")
-            achieve(PASS_THE_BALL)
         }
         plans {
             +achieve("init") then {
@@ -55,8 +58,8 @@ fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.tokenPassAgent(name: Strin
                 })
             }
 
-            +achieve(PASS_THE_BALL) onlyIf {
-                "myColor"(X).fromSelf and "ball"(`_`, X).fromPercept and A `is` knownAgents.name(A).fromPercept
+            +"ball"(`_`).fromPercept onlyIf {
+                "myColor"(X).fromSelf and "ball"(X).fromPercept and A `is` knownAgents.name(A).fromPercept
             } then {
                 execute(run, {
                     val known = A.fix<Set<ColoredAgent>>() subtract setOf(myColor)
