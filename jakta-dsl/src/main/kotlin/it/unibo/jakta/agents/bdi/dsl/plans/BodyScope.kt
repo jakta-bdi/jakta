@@ -17,8 +17,6 @@ import it.unibo.tuprolog.core.Scope
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.dsl.LogicProgrammingScope
 import kotlin.reflect.KFunction
-import kotlin.reflect.jvm.ExperimentalReflectionOnLambdas
-import kotlin.reflect.jvm.reflect
 
 class BodyScope(
     private val scope: Scope,
@@ -66,9 +64,6 @@ class BodyScope(
         goals += if (externalOnly) ActExternally.of(struct) else Act.of(struct)
     }
 
-//    @OptIn(ExperimentalReflectionOnLambdas::class)
-//    fun execute(method: () -> Unit) = execute(checkNotNull(method.reflect()))
-//
     fun execute(externalAction: ExternalAction, vararg args: Any): Unit =
         execute(externalAction.signature.name.invoke(args[0], *args.drop(1).toTypedArray()))
 
