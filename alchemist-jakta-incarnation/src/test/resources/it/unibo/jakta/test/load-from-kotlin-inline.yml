@@ -16,11 +16,6 @@ _pool: &program
     program:
       agent-factory: it.unibo.jakta.test.SharedToken.entrypoint
       parameters: []
-_pool2: &program2
-  - time-distribution: 1
-    program:
-      agent-factory: it.unibo.jakta.test.SharedToken.entrypointWithColor
-      parameters: [*initialColor ]
 
 deployments:
   - type: Rectangle
@@ -30,8 +25,10 @@ deployments:
   - type: Point
     parameters: [ 2, 2 ]
     programs:
-      - *program
-      - *program2
+      - time-distribution: 1
+        program:
+          agent-factory: it.unibo.jakta.test.SharedToken.entrypointWithColor
+          parameters: [ *initialColor ]
     contents:
       - molecule: ball
         concentration: *initialColor

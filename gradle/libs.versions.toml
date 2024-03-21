@@ -5,6 +5,7 @@ mockito = "5.12.0"
 tuprolog = "0.32.5"
 alchemist = "34.0.6"
 
+
 [libraries]
 alchemist-api = { module = "it.unibo.alchemist:alchemist-api", version.ref = "alchemist" }
 alchemist = { module = "it.unibo.alchemist:alchemist", version.ref = "alchemist" }
