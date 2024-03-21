@@ -18,9 +18,12 @@ import it.unibo.alchemist.model.timedistributions.DiracComb
 import org.apache.commons.math3.random.RandomGenerator
 
 class JaktaIncarnation<P> : Incarnation<Any?, P> where P : Position<P> {
-    override fun getProperty(node: Node<Any?>?, molecule: Molecule?, property: String?): Double {
-        TODO("Not yet implemented")
-    }
+    override fun getProperty(node: Node<Any?>, molecule: Molecule, property: String): Double =
+        when (val concentration = node.getConcentration(molecule)) {
+            is Number -> concentration.toDouble()
+            is String -> concentration.toDoubleOrNull()
+            else -> null
+        } ?: Double.NaN
 
     override fun createMolecule(s: String): Molecule = SimpleMolecule(s)
 
