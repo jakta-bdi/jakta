@@ -37,7 +37,7 @@ class JaktaIncarnation<P> : Incarnation<Any?, P> where P : Position<P> {
         node: Node<Any?>?,
         time: TimeDistribution<Any?>,
         actionable: Actionable<Any?>,
-        additionalParameters: Any?
+        additionalParameters: Any?,
     ): Action<Any?> {
         /*
          * additionalParameters will contain everything that was passed as `program`
@@ -55,7 +55,7 @@ class JaktaIncarnation<P> : Incarnation<Any?, P> where P : Position<P> {
         node: Node<Any?>?,
         time: TimeDistribution<Any?>?,
         actionable: Actionable<Any?>?,
-        additionalParameters: Any?
+        additionalParameters: Any?,
     ): Condition<Any?> = error("No conditions in Jakta")
 
     override fun createReaction(
@@ -72,19 +72,19 @@ class JaktaIncarnation<P> : Incarnation<Any?, P> where P : Position<P> {
         randomGenerator: RandomGenerator?,
         environment: Environment<Any?, P>?,
         node: Node<Any?>?,
-        parameter: Any?
+        parameter: Any?,
     ): TimeDistribution<Any?> = DiracComb(
         when(parameter) {
             is Number -> parameter.toDouble()
             is String -> parameter.toDouble()
             else -> error("Invalid frequency: $parameter")
-        }
+        },
     )
 
     override fun createNode(
         randomGenerator: RandomGenerator,
         environment: Environment<Any?, P>,
-        parameter: Any?
+        parameter: Any?,
     ): Node<Any?> = GenericNode(this, environment).also {
         it.addProperty(JaktaEnvironmentForAlchemist(environment, randomGenerator, it))
     }
