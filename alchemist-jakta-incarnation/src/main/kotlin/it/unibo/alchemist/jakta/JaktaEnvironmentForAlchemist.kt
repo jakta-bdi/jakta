@@ -41,8 +41,11 @@ class JaktaEnvironmentForAlchemist<P : Position<P>>(
 
     private val ExternalAction.named: Pair<String, ExternalAction> get() = signature.name to this
 
-    override val agentIDs: Map<String, AgentID>
-        get() = TODO("Not yet implemented")
+    override val agentIDs: Map<String, AgentID> get() =
+        node.reactions.asSequence()
+            .flatMap { it.actions }
+            .filterIsInstance<JaktaAgentForAlchemist<*>>()
+            .associate { it.agent.name to it.agent.agentID }
 
     val writeData by ExternalActionFor(2) {
         node.setConcentration(SimpleMolecule(arguments[0].asAtom()!!.value), arguments[1].`as`<ObjectRef>()?.`object`)
