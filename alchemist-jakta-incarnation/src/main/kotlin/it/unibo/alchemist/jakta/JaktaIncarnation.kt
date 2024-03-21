@@ -7,7 +7,6 @@ import it.unibo.alchemist.model.Environment
 import it.unibo.alchemist.model.Incarnation
 import it.unibo.alchemist.model.Molecule
 import it.unibo.alchemist.model.Node
-import it.unibo.alchemist.model.Node.Companion.asProperty
 import it.unibo.alchemist.model.Position
 import it.unibo.alchemist.model.Reaction
 import it.unibo.alchemist.model.TimeDistribution
@@ -45,8 +44,25 @@ class JaktaIncarnation<P> : Incarnation<Any?, P> where P : Position<P> {
          *       agent-factory: it.unibo.jakta.test.SharedToken.entrypoint
          *       parameters: []
          */
-        val jaktaEnvironment = requireNotNull(node).asProperty<Any?, JaktaEnvironmentForAlchemist<P>>()
-        TODO()
+        val (entrypoint: String, parameters: List<Any?>) = when (additionalParameters) {
+            is Map<*, *> ->
+                additionalParameters[factoryKey].toString() to (additionalParameters[parametersKey] as List<Any?>)
+            is String -> additionalParameters to emptyList()
+            else -> error(
+                """
+                |Invalid JaKtA parameters $additionalParameters, expected either:
+                |- a String with the agent factory method name, or
+                |- a Map with the following keys:
+                |   - $factoryKey: the agent factory method name
+                |   - $parametersKey: the list of parameters to pass to the agent factory method
+                """.trimMargin(),
+            )
+        }
+        return JaktaAgentForAlchemist(
+            requireNotNull(node) { "Jakta can not execute as global reaction" },
+            entrypoint,
+            parameters,
+        )
     }
 
     override fun createCondition(
@@ -87,5 +103,10 @@ class JaktaIncarnation<P> : Incarnation<Any?, P> where P : Position<P> {
         parameter: Any?,
     ): Node<Any?> = GenericNode(this, environment).also {
         it.addProperty(JaktaEnvironmentForAlchemist(environment, randomGenerator, it))
+    }
+
+    companion object {
+        const val factoryKey = "agent-factory"
+        const val parametersKey = "parameters"
     }
 }
