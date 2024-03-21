@@ -54,7 +54,7 @@ import kotlin.IllegalArgumentException
 internal data class AgentLifecycleImpl(
     private var agent: Agent,
 ) : AgentLifecycle {
-    private lateinit var controller: Activity.Controller
+    private var controller: Activity.Controller? = null
 
     override fun updateBelief(perceptions: BeliefBase, beliefBase: BeliefBase): RetrieveResult =
         when (perceptions == beliefBase) {
@@ -113,7 +113,7 @@ internal data class AgentLifecycleImpl(
         var newIntention = intention.pop()
         try {
             val internalResponse = action.execute(
-                InternalRequest.of(this.agent, controller.currentTime(), goal.action.args),
+                InternalRequest.of(this.agent, controller?.currentTime(), goal.action.args),
             )
             // Apply substitution
             return if (internalResponse.substitution.isSuccess) {
@@ -146,7 +146,7 @@ internal data class AgentLifecycleImpl(
                 ExternalRequest.of(
                     environment,
                     agent.name,
-                    controller.currentTime(),
+                    controller?.currentTime(),
                     goal.action.args,
                 ),
             )
@@ -285,9 +285,9 @@ internal data class AgentLifecycleImpl(
                     REMOVAL -> newPlans.removePlan(it.plan)
                 }
 
-                is Pause -> controller.pause()
-                is Sleep -> controller.sleep(it.millis)
-                is Stop -> controller.stop()
+                is Pause -> controller?.pause()
+                is Sleep -> controller?.sleep(it.millis)
+                is Stop -> controller?.stop()
             }
         }
         return context.copy(
@@ -313,7 +313,7 @@ internal data class AgentLifecycleImpl(
 
     override fun reason(
         environment: Environment,
-        controller: Activity.Controller,
+        controller: Activity.Controller?,
         debugEnabled: Boolean,
     ): Iterable<EnvironmentChange> {
         this.controller = controller

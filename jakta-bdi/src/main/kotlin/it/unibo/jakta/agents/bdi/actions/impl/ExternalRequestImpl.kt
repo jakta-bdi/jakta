@@ -11,7 +11,7 @@ import it.unibo.tuprolog.core.Term
 class ExternalRequestImpl(
     override val environment: Environment,
     override val sender: String,
-    override val requestTimestamp: Time,
+    override val requestTimestamp: Time?,
     override val arguments: List<Term>,
 ) : ExternalRequest {
     override fun reply(substitution: Substitution, effects: Iterable<EnvironmentChange>) =
