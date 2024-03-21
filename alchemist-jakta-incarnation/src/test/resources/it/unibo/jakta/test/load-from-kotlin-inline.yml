@@ -2,6 +2,13 @@ network-model:
   type: ConnectWithinDistance
   parameters: [ 5 ]
 
+variables:
+  initialColor: &initialColor
+    formula: |
+      java.awt.Color(72, 124, 133)
+    language: kotlin
+
+
 incarnation: jakta
 
 _pool: &program
@@ -9,22 +16,22 @@ _pool: &program
     program:
       agent-factory: it.unibo.jakta.test.SharedToken.entrypoint
       parameters: []
+_pool2: &program2
+  - time-distribution: 1
+    program:
+      agent-factory: it.unibo.jakta.test.SharedToken.entrypointWithColor
+      parameters: [*initialColor ]
 
 deployments:
   - type: Rectangle
-    parameters: [ 200, 0, 0, 20, 20 ]
+    parameters: [ 10, 0, 0, 20, 20 ]
     programs:
       - *program
-      - *program
-      - *program
-    contents:
-      - molecule: source
-        concentration: false
   - type: Point
     parameters: [ 2, 2 ]
     programs:
       - *program
-      - *program
+      - *program2
     contents:
-      - molecule: source
-        concentration: true
+      - molecule: ball
+        concentration: *initialColor
