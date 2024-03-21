@@ -63,7 +63,6 @@ class JaktaIncarnation<P> : Incarnation<Any?, P> where P : Position<P> {
             entrypoint,
             parameters,
         )
-
     }
 
     override fun createCondition(

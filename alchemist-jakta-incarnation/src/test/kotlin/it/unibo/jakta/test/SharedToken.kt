@@ -29,7 +29,9 @@ fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.tokenPassAgent(name: Strin
         data class ColoredAgent(val name: String, val location: Node<Any?>, val color: Color)
         val myColor = ColoredAgent(name, node, color)
         beliefs {
-            fact("myColor"(ObjectRef.of(color)))
+            fact {
+                "myColor"(ObjectRef.of(color))
+            }
         } // [myColor(source(self), $color), ball(source(percept), nodeX, red), knownAgents(source(percept),
         // [ColoredAgent("foo", red)])
         goals {
@@ -40,7 +42,12 @@ fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.tokenPassAgent(name: Strin
             +achieve("init") then {
                 execute(run, {
                     val listOfAgents = node.getConcentration(knownAgents) as? Set<*>
-                    fun Node<Any?>.update() = setConcentration(knownAgents, listOfAgents.orEmpty() + myColor)
+
+                    // Cannot convert class it.unibo.jakta.test.SharedToken$tokenPassAgent$1$ColoredAgent into class it.unibo.tuprolog.core.Term
+                    fun Node<Any?>.update() = setConcentration(
+                        knownAgents,
+                        arrayListOf<Any>(myColor).also { it.addAll(listOfAgents.orEmpty().filterNotNull()) },
+                    )
                     alchemistEnvironment.getNeighborhood(node).forEach {
                         it.update()
                     }
@@ -56,6 +63,7 @@ fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.tokenPassAgent(name: Strin
                     if (known.isNotEmpty()) {
                         val (_, destination, newColor) = known.randomElement(randomGenerator)
                         destination.setConcentration(SimpleMolecule("ball"), newColor)
+                        println("sent ball to $destination with color $newColor")
                     }
                 })
             }

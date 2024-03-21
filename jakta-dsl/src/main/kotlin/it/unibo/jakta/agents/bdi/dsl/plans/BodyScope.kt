@@ -16,6 +16,7 @@ import it.unibo.jakta.agents.bdi.goals.UpdateBelief
 import it.unibo.tuprolog.core.Scope
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.dsl.LogicProgrammingScope
+import it.unibo.tuprolog.solve.libs.oop.ObjectRef
 import kotlin.reflect.KFunction
 
 class BodyScope(
@@ -64,8 +65,25 @@ class BodyScope(
         goals += if (externalOnly) ActExternally.of(struct) else Act.of(struct)
     }
 
-    fun execute(externalAction: ExternalAction, vararg args: Any): Unit =
-        execute(externalAction.signature.name.invoke(args[0], *args.drop(1).toTypedArray()))
+    data class NamedWrapperForLambdas(val backingLambda: () -> Unit) : () -> Unit by backingLambda
+
+    fun execute(externalAction: ExternalAction, vararg args: Any): Unit = when {
+        externalAction.signature.arity == 0 -> {
+            check(args.isEmpty()) { "External action ${externalAction.signature.name} does not accept parameters" }
+            execute(externalAction.signature.name)
+        }
+        else -> {
+            val argRefs = args.map {
+                @Suppress("UNCHECKED_CAST")
+                when {
+                    it::class.qualifiedName != null -> ObjectRef.of(it)
+                    it is Function<*> -> NamedWrapperForLambdas(it as () -> Unit)
+                    else -> error("Unsupported argument type: ${it::class.simpleName}")
+                }
+            }
+            execute(externalAction.signature.name.invoke(ObjectRef.of(argRefs[0]), *argRefs.drop(1).toTypedArray()))
+        }
+    }
 
     fun execute(method: KFunction<*>, vararg args: Any): Unit = when {
         method.parameters.isEmpty() -> execute(method.name)

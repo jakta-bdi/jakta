@@ -141,7 +141,7 @@ internal data class AgentLifecycleImpl(
         goal: ActionGoal,
     ): ExecutionResult {
         var newIntention = intention.pop()
-        try {
+        if (action.signature.arity == goal.action.args.size) {
             val externalResponse = action.execute(
                 ExternalRequest.of(
                     environment,
@@ -161,7 +161,7 @@ internal data class AgentLifecycleImpl(
             } else {
                 ExecutionResult(failAchievementGoal(intention, context))
             }
-        } catch (e: IllegalArgumentException) {
+        } else {
             // Argument number mismatch from action definition
             return ExecutionResult(failAchievementGoal(intention, context))
         }
