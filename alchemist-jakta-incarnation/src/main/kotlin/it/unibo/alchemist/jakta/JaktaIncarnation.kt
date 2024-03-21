@@ -59,8 +59,8 @@ class JaktaIncarnation<P> : Incarnation<Any?, P> where P : Position<P> {
     ): Condition<Any?> = error("No conditions in Jakta")
 
     override fun createReaction(
-        randomGenerator: RandomGenerator?,
-        environment: Environment<Any?, P>?,
+        randomGenerator: RandomGenerator,
+        environment: Environment<Any?, P>,
         node: Node<Any?>?,
         timeDistribution: TimeDistribution<Any?>,
         parameter: Any?,
