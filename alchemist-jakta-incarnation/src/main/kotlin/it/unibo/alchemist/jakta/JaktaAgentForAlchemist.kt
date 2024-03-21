@@ -1,15 +1,19 @@
 package it.unibo.alchemist.jakta
 
-import it.unibo.alchemist.model.*
+import it.unibo.alchemist.model.Action
+import it.unibo.alchemist.model.Context
+import it.unibo.alchemist.model.Dependency
+import it.unibo.alchemist.model.Node
+import it.unibo.alchemist.model.Position
+import it.unibo.alchemist.model.Reaction
 import it.unibo.alchemist.model.actions.AbstractAction
 import it.unibo.jakta.agents.bdi.Agent
 import it.unibo.jakta.agents.bdi.AgentLifecycle
-import org.danilopianini.util.ListSet
 
-class JaktaAgentForAlchemist<P: Position<P>>(
+class JaktaAgentForAlchemist<P : Position<P>>(
     val jaktaEnvironment: JaktaEnvironmentForAlchemist<P>,
-    val agent: Agent
-) : AbstractAction<Any?>(jaktaEnvironment.node){
+    val agent: Agent,
+) : AbstractAction<Any?>(jaktaEnvironment.node) {
 
     init {
         declareDependencyTo(Dependency.EVERYTHING)
