@@ -17,8 +17,8 @@ import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.solve.libs.oop.ObjectRef
 import org.apache.commons.math3.random.RandomGenerator
 import kotlin.reflect.KProperty
-import it.unibo.jakta.agents.bdi.environment.Environment as JaktaEnvironment
 import it.unibo.alchemist.model.Environment as AlchemistEnvironment
+import it.unibo.jakta.agents.bdi.environment.Environment as JaktaEnvironment
 
 class JaktaEnvironmentForAlchemist<P : Position<P>>(
     val alchemistEnvironment: AlchemistEnvironment<Any?, P>,
@@ -68,7 +68,7 @@ class JaktaEnvironmentForAlchemist<P : Position<P>>(
         get() = Perception.of(
             node.contents.map { (name, value) ->
                 Belief.Companion.fromPerceptSource(Struct.of(name.name, ObjectRef.of(value)))
-            }
+            },
         )
 
     override fun getNextMessage(agentName: String): Message? {
@@ -112,7 +112,7 @@ class JaktaEnvironmentForAlchemist<P : Position<P>>(
         externalActions: Map<String, ExternalAction>,
         messageBoxes: Map<AgentID, MessageQueue>,
         perception: Perception,
-        data: Map<String, Any>
+        data: Map<String, Any>,
     ): Environment = this
 
     override fun cloneOnNewNode(node: Node<Any?>): NodeProperty<Any?> =
