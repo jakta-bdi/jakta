@@ -10,10 +10,10 @@ interface InternalRequest : ActionRequest<AgentChange, InternalResponse> {
     val agent: Agent
 
     companion object {
-        fun of(agent: Agent, requestTime: Time, arguments: Iterable<Term>): InternalRequest =
+        fun of(agent: Agent, requestTime: Time?, arguments: Iterable<Term>): InternalRequest =
             InternalRequestImpl(agent, requestTime, arguments.toList())
 
-        fun of(agent: Agent, requestTime: Time, vararg arguments: Term): InternalRequest =
+        fun of(agent: Agent, requestTime: Time?, vararg arguments: Term): InternalRequest =
             of(agent, requestTime, arguments.asList())
     }
 }

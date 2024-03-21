@@ -7,7 +7,7 @@ import it.unibo.tuprolog.core.Term
 
 interface ActionRequest<C : SideEffect, Res : ActionResponse<C>> {
     val arguments: List<Term>
-    val requestTimestamp: Time
+    val requestTimestamp: Time?
 
     fun reply(substitution: Substitution = Substitution.empty(), effects: Iterable<C>): Res
 

@@ -16,7 +16,7 @@ import it.unibo.tuprolog.solve.libs.oop.ObjectRef
 import java.awt.Color
 
 val knownAgents = SimpleMolecule("knownAgents")
-const val passTheBall = "passTheBall"
+const val PASS_THE_BALL = "passTheBall"
 
 @OptIn(ExperimentalStdlibApi::class)
 fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.entrypoint(): Agent {
@@ -30,10 +30,11 @@ fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.tokenPassAgent(name: Strin
         val myColor = ColoredAgent(name, node, color)
         beliefs {
             fact("myColor"(ObjectRef.of(color)))
-        } // [myColor(source(self), $color), ball(source(percept), nodeX, red), knownAgents(source(percept), [ColoredAgent("foo", red)])
+        } // [myColor(source(self), $color), ball(source(percept), nodeX, red), knownAgents(source(percept),
+        // [ColoredAgent("foo", red)])
         goals {
             achieve("init")
-            achieve(passTheBall)
+            achieve(PASS_THE_BALL)
         }
         plans {
             +achieve("init") then {
@@ -46,7 +47,8 @@ fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.tokenPassAgent(name: Strin
                     node.update()
                 })
             }
-            +achieve(passTheBall) onlyIf {
+
+            +achieve(PASS_THE_BALL) onlyIf {
                 "myColor"(X).fromSelf and "ball"(`_`, X).fromPercept and A `is` knownAgents.name(A).fromPercept
             } then {
                 execute(run, {

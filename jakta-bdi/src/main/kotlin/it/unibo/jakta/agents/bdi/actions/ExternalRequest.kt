@@ -14,11 +14,11 @@ interface ExternalRequest : ActionRequest<EnvironmentChange, ExternalResponse> {
         fun of(
             environment: Environment,
             sender: String,
-            requestTime: Time,
+            requestTime: Time?,
             arguments: Iterable<Term>,
         ): ExternalRequest = ExternalRequestImpl(environment, sender, requestTime, arguments.toList())
 
-        fun of(environment: Environment, sender: String, requestTime: Time, vararg arguments: Term): ExternalRequest =
+        fun of(environment: Environment, sender: String, requestTime: Time?, vararg arguments: Term): ExternalRequest =
             ExternalRequestImpl(environment, sender, requestTime, arguments.asList())
     }
 }
