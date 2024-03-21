@@ -10,7 +10,10 @@ import it.unibo.alchemist.model.Reaction
 import it.unibo.alchemist.model.actions.AbstractAction
 import it.unibo.jakta.agents.bdi.Agent
 import it.unibo.jakta.agents.bdi.AgentLifecycle
+import it.unibo.tuprolog.solve.libs.oop.formalParameterTypes
 import kotlin.reflect.KCallable
+import kotlin.reflect.full.starProjectedType
+import kotlin.reflect.jvm.kotlinFunction
 
 class JaktaAgentForAlchemist<P : Position<P>>(
     val jaktaEnvironment: JaktaEnvironmentForAlchemist<P>,
@@ -23,7 +26,38 @@ class JaktaAgentForAlchemist<P : Position<P>>(
         parameters: List<Any?>,
     ) : this(
         node.asProperty<Any?, JaktaEnvironmentForAlchemist<P>>(),
-        agentFactory.reflectMethod().call(*parameters.toTypedArray()),
+        agentFactory.reflectMethod(),
+        parameters,
+    )
+
+    constructor(
+        jaktaEnvironment: JaktaEnvironmentForAlchemist<P>,
+        agentFactory: KCallable<Agent>,
+        parameters: List<Any?>,
+    ) : this(
+        jaktaEnvironment,
+        with(agentFactory) {
+            var parameterIndex = 0
+            val supportedTypes = listOf(
+                jaktaEnvironment,
+                jaktaEnvironment.node,
+                jaktaEnvironment.randomGenerator,
+                jaktaEnvironment.alchemistEnvironment,
+            )
+            val actualParameters = formalParameterTypes.map { type ->
+                val implicitParameter = supportedTypes.firstOrNull { type.isInstance(it) }
+                if (implicitParameter == null) {
+                    check(parameterIndex < parameters.size) {
+                        "Invalid number of parameters for $agentFactory: " +
+                            "expected at least $parameterIndex parameters, got ${parameters.size}"
+                    }
+                    parameters[parameterIndex++]
+                } else {
+                    implicitParameter
+                }
+            }
+            call(*actualParameters.toTypedArray())
+        },
     )
 
     init {
@@ -46,8 +80,15 @@ class JaktaAgentForAlchemist<P : Position<P>>(
     companion object {
         fun String.reflectMethod(): KCallable<Agent> {
             val method = substringAfterLast('.')
-            val `class` = substringBeforeLast('.')
-            return Class.forName(`class`).kotlin.members
+            val className = substringBeforeLast('.')
+            check(method.isNotEmpty() && className.isNotEmpty() && method != className) {
+                "Invalid class $className or method $method"
+            }
+            val `class` = Class.forName(className)
+            return `class`.methods
+                .asSequence()
+                .mapNotNull { it.kotlinFunction }
+                .filter { it.returnType == Agent::class.starProjectedType }
                 .filterIsInstance<KCallable<Agent>>()
                 .first { it.name == method }
         }
