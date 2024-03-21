@@ -26,7 +26,7 @@ class JaktaIncarnation<P> : Incarnation<Any?, P> where P : Position<P> {
 
     override fun createMolecule(s: String): Molecule = SimpleMolecule(s)
 
-    override fun createConcentration(s: String?): Any? = s
+    override fun createConcentration(s: Any?): Any? = s
 
     override fun createConcentration(): Any? = null
 
