@@ -98,7 +98,7 @@ interface AgentLifecycle {
     /** Performs the whole procedure (10 steps) of the BDI Agent's Reasoning Cycle. */
     fun reason(
         environment: Environment,
-        controller: Activity.Controller,
+        controller: Activity.Controller? = null,
         debugEnabled: Boolean = false,
     ): Iterable<EnvironmentChange>
 
