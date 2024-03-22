@@ -16,7 +16,7 @@ class TestLoadingWithAlchemist : StringSpec({
             loader shouldNot beNull()
             val simulation = loader.getDefault<Any, Nothing>()
             simulation shouldNot beNull()
-            simulation.environment.addTerminator(AfterTime(DoubleTime(10.0)))
+            simulation.environment.addTerminator(AfterTime(DoubleTime(20.0)))
             simulation.play()
             simulation.run()
             simulation.error.ifPresent { throw it }
