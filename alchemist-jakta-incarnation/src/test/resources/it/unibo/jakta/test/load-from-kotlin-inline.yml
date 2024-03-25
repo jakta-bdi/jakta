@@ -19,7 +19,7 @@ _pool: &program
 
 deployments:
   - type: Rectangle
-    parameters: [ 10, 0, 0, 20, 20 ]
+    parameters: [ 1, 0, 0, 20, 20 ]
     programs:
       - *program
   - type: Point

@@ -52,9 +52,11 @@ class JaktaEnvironmentForAlchemist<P : Position<P>>(
     fun Any?.valueOrEmptyMolecule(): Any = this ?: EmptyMolecule
 
     override val data: Map<String, Any> get() =
-        node.contents.map { (name, content) ->
-            name.name to content.valueOrEmptyMolecule()
-        }.toMap()
+        alchemistEnvironment.nodes
+            .flatMap { it.contents.toList() }
+            .associate { (name, content) ->
+                name.name to content.valueOrEmptyMolecule()
+            }
 
     override val perception: Perception
         get() = Perception.of(
@@ -81,16 +83,19 @@ class JaktaEnvironmentForAlchemist<P : Position<P>>(
 
     override fun removeAgent(agentName: String): Environment = TODO()
 
-    override fun addData(key: String, value: Any): Environment = also {
-        node.setConcentration(SimpleMolecule(key), value)
-    }
+    override fun addData(key: String, value: Any): Environment = error("Not existing in Alchemist simulation")
 
     override fun removeData(key: String): Environment = also {
         node.contents.keys.firstOrNull { it.name.equals(key) }?.let { node.removeConcentration(it) }
     }
 
-    override fun updateData(newData: Map<String, Any>): Environment = also {
+    override fun updateData(newData: Map<String, Any>): Environment {
         newData.forEach { node.setConcentration(SimpleMolecule(it.key), it.value) }
+        return this
+    }
+
+    override fun toString(): String {
+        return "T"
     }
 
     override fun copy(
@@ -123,16 +128,26 @@ class JaktaEnvironmentForAlchemist<P : Position<P>>(
     }
 
     /**
-     * External action that writes information into the environment.
+     * External action that writes information into the Alchemist environment.
      */
     val writeData = object : AbstractExternalAction("writeData", 2) {
         override fun action(request: ExternalRequest) {
-            addData(
-                request.arguments[0].castToAtom().value,
-                request.arguments[1].`as`<ObjectRef>()?.`object`.valueOrEmptyMolecule(),
-            )
+            println("Before: $data")
+            val name = request.arguments[0].castToAtom().value
+            println(name)
+            val concentration = request.arguments[1].`as`<ObjectRef>()?.`object`.valueOrEmptyMolecule()
+            node.setConcentration(SimpleMolecule(name), concentration)
+            println("After: $data")
         }
     }
+
+//    val sendTo = object : AbstractExternalAction("sendTo", 2) {
+//        override fun action(request: ExternalRequest) {
+//            val agent = request.arguments[0].castToAtom().value
+//            val destinationNode = alchemistEnvironment.nodes.filter { it.id }
+//        }
+//
+//    }
 
     /**
      * External action that runs arbitrary lambdas defined into the Jakta DSL.
@@ -145,5 +160,6 @@ class JaktaEnvironmentForAlchemist<P : Position<P>>(
     override var externalActions: Map<String, ExternalAction> = mapOf(
         run.named,
         writeData.named,
+        // sendTo.named
     )
 }

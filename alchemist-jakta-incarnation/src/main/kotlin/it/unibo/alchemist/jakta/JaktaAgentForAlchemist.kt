@@ -73,7 +73,7 @@ class JaktaAgentForAlchemist<P : Position<P>>(
         agentLifecycle.reason(
             environment = jaktaEnvironment,
             controller = null,
-            debugEnabled = true,
+            debugEnabled = false,
         )
     }
 
