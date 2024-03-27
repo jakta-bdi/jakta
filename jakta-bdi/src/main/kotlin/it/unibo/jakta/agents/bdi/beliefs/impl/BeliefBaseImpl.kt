@@ -46,7 +46,12 @@ internal class BeliefBaseImpl private constructor(private val beliefs: ClauseMul
 
     override fun hashCode() = beliefs.hashCode()
 
-    override fun equals(other: Any?) = beliefs == other
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        other as BeliefBaseImpl
+        return beliefs == other.beliefs
+    }
 
     override fun remove(belief: Belief): RetrieveResult {
         return if (beliefs.count(belief.rule) > 0) {
