@@ -17,12 +17,13 @@ interface Belief {
 
         val SOURCE_PERCEPT: Term = Struct.of("source", Atom.of("percept"))
         val SOURCE_SELF: Term = Struct.of("source", Atom.of("self"))
+        val SOURCE_UNKNOWN: Term = Struct.of("source", Var.of("Source"))
 
-        fun wrap(head: Struct, body: Iterable<Term> = emptyList()): Belief {
+        fun wrap(head: Struct, body: Iterable<Term> = emptyList(), wrappingTag: Term = SOURCE_UNKNOWN): Belief {
             if (head.arity >= 1 && head[0].let { it is Struct && it.arity == 1 && it.functor == "source" }) {
                 return BeliefImpl(Rule.of(head, body))
             }
-            return BeliefImpl(Rule.of(head.addFirst(Struct.of("source", Var.of("Source"))), body))
+            return BeliefImpl(Rule.of(head.addFirst(wrappingTag), body))
         }
 
         fun of(head: Struct, body: Iterable<Term>, isFromPerceptSource: Boolean): Belief {

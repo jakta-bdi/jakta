@@ -23,7 +23,7 @@ class BeliefsScope(
      * @param struct the [Struct] that represents the [Belief].
      */
     fun fact(struct: Struct) =
-        beliefs.add(Belief.fromSelfSource(struct.freshCopy()))
+        beliefs.add(Belief.wrap(struct.freshCopy(), wrappingTag = Belief.SOURCE_SELF))
 
     /**
      * Handler for the addition of a fact [Belief] into the agent's [BeliefBase].
@@ -51,7 +51,7 @@ class BeliefsScope(
      */
     fun rule(rule: Rule) {
         val freshRule = rule.freshCopy()
-        val belief: Belief = Belief.fromSelfSource(freshRule.head, freshRule.bodyItems)
+        val belief: Belief = Belief.wrap(freshRule.head, freshRule.bodyItems, wrappingTag = Belief.SOURCE_SELF)
         beliefs.add(belief)
     }
 
