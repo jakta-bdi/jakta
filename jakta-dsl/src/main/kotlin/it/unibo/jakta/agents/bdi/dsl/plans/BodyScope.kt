@@ -85,12 +85,21 @@ class BodyScope(
      */
     operator fun Struct.unaryPlus() = add(this)
 
+    operator fun String.unaryPlus() = add(atomOf(this))
+
     /**
      * Handler for the creation of a [Belief] in the [BeliefBase] annotated with self source.
+     * @param belief the [Struct] from which the [Belief] is created.
      */
     fun add(belief: Struct) {
-        goals += AddBelief.of(Belief.fromSelfSource(belief))
+        goals += AddBelief.of(Belief.wrap(belief, wrappingTag = Belief.SOURCE_SELF))
     }
+
+    /**
+     * Handler for the creation of a [Belief] in the [BeliefBase] annotated with self source.
+     * @param belief the [String] from which the [Belief] is created.
+     */
+    fun add(belief: String) = add(atomOf(belief))
 
     /**
      * Handler for the removal of a [Belief] from the [BeliefBase].
