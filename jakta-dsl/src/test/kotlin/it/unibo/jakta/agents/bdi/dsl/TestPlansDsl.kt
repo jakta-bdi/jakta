@@ -4,6 +4,7 @@ import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.kotest.matchers.types.shouldBeTypeOf
+import it.unibo.jakta.agents.bdi.dsl.plans.PlansScope
 import it.unibo.jakta.agents.bdi.events.AchievementGoalFailure
 import it.unibo.jakta.agents.bdi.events.AchievementGoalInvocation
 import it.unibo.jakta.agents.bdi.events.BeliefBaseAddition
@@ -18,24 +19,22 @@ import it.unibo.jakta.agents.bdi.goals.EmptyGoal
 import it.unibo.jakta.agents.bdi.goals.RemoveBelief
 import it.unibo.jakta.agents.bdi.goals.Test
 import it.unibo.jakta.agents.bdi.goals.UpdateBelief
+import it.unibo.jakta.agents.bdi.plans.Plan
 import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Truth
 import it.unibo.tuprolog.core.Var
 
 class TestPlansDsl : DescribeSpec({
+    fun testingPlans(function: PlansScope.() -> Unit): Iterable<Plan> = PlansScope().also { it.function() }.build()
+
     describe("An achievement trigger plan") {
         it("should be created with an invocation trigger") {
-            val p1 = mas {
-                agent("test") {
-                    plans {
-                        +achieve("send_ping"(R)) onlyIf { "turn"("source"("self"), "me") } then {
-                            +"turn"("source"("self"), "other")
-                        }
-                    }
+            val plan = testingPlans {
+                +achieve("send_ping"(R)) onlyIf { "turn"("source"("self"), "me") } then {
+                    +"turn"("source"("self"), "other")
                 }
-            }
-            val plan = p1.agents.first().context.planLibrary.plans.first()
+            }.first()
             plan.trigger.value.equals(Struct.of("send_ping", Var.of("R")), false) shouldBe true
             plan.trigger.shouldBeTypeOf<AchievementGoalInvocation>()
             plan.goals.size shouldBe 1
@@ -48,15 +47,11 @@ class TestPlansDsl : DescribeSpec({
                 false,
             ) shouldBe true
         }
+
         it("should be created with a failure trigger") {
-            val p1 = mas {
-                agent("test") {
-                    plans {
-                        -achieve("send_ping"(R)) then { }
-                    }
-                }
-            }
-            val plan = p1.agents.first().context.planLibrary.plans.first()
+            val plan = testingPlans {
+                -achieve("send_ping"(R)) then { }
+            }.first()
             plan.trigger.value.equals(Struct.of("send_ping", Var.of("R")), false) shouldBe true
             plan.trigger.shouldBeTypeOf<AchievementGoalFailure>()
             plan.goals.size shouldBe 1
@@ -66,29 +61,20 @@ class TestPlansDsl : DescribeSpec({
     }
     describe("A test trigger plan") {
         it("should be created with an invocation trigger") {
-            val p1 = mas {
-                agent("test") {
-                    plans {
-                        +test("send_ping") then { }
-                    }
-                }
-            }
-            val plan = p1.agents.first().context.planLibrary.plans.first()
+            val plan = testingPlans {
+                +test("send_ping") then { }
+            }.first()
             plan.trigger.value.equals(Atom.of("send_ping"), false) shouldBe true
             plan.trigger.shouldBeTypeOf<TestGoalInvocation>()
             plan.goals.size shouldBe 1
             plan.goals.first() shouldBe EmptyGoal()
             plan.guard shouldBe Truth.TRUE
         }
+
         it("should be created with an failure trigger") {
-            val p1 = mas {
-                agent("test") {
-                    plans {
-                        -test("send_ping") then { }
-                    }
-                }
-            }
-            val plan = p1.agents.first().context.planLibrary.plans.first()
+            val plan = testingPlans {
+                -test("send_ping") then { }
+            }.first()
             plan.trigger.value.equals(Atom.of("send_ping"), false) shouldBe true
             plan.trigger.shouldBeTypeOf<TestGoalFailure>()
         }
@@ -96,14 +82,9 @@ class TestPlansDsl : DescribeSpec({
 
     describe("A belief trigger plan") {
         it("should be created with an addition trigger") {
-            val p1 = mas {
-                agent("test") {
-                    plans {
-                        +"send_ping"("source"("me")) then { }
-                    }
-                }
-            }
-            val plan = p1.agents.first().context.planLibrary.plans.first()
+            val plan = testingPlans {
+                +"send_ping"("source"("me")) then { }
+            }.first()
             plan.trigger.value.equals(
                 Struct.of("send_ping", Struct.of("source", Atom.of("me"))),
                 false,
@@ -114,14 +95,9 @@ class TestPlansDsl : DescribeSpec({
             plan.guard shouldBe Truth.TRUE
         }
         it("should be created with an removal trigger") {
-            val p1 = mas {
-                agent("test") {
-                    plans {
-                        -"send_ping"("source"("self")) then { }
-                    }
-                }
-            }
-            val plan = p1.agents.first().context.planLibrary.plans.first()
+            val plan = testingPlans {
+                -"send_ping"("source"("self")) then { }
+            }.first()
             plan.trigger.value.equals(
                 Struct.of("send_ping", Struct.of("source", Atom.of("self"))),
                 false,
@@ -131,16 +107,11 @@ class TestPlansDsl : DescribeSpec({
     }
     describe("A Plan Body") {
         it("can have an achieve goal") {
-            val p1 = mas {
-                agent("test") {
-                    plans {
-                        +achieve("send_ping"(R)) then {
-                            achieve("sendMessage"(R, "ping"))
-                        }
-                    }
+            val plan = testingPlans {
+                +achieve("send_ping"(R)) then {
+                    achieve("sendMessage"(R, "ping"))
                 }
-            }
-            val plan = p1.agents.first().context.planLibrary.plans.first()
+            }.first()
             plan.goals.size shouldBe 1
             plan.goals.first().value.equals(
                 Struct.of("sendMessage", Var.of("R"), Atom.of("ping")),
@@ -148,17 +119,13 @@ class TestPlansDsl : DescribeSpec({
             ) shouldBe true
             plan.goals.first().shouldBeInstanceOf<Achieve>()
         }
+
         it("can have a test goal") {
-            val p1 = mas {
-                agent("test") {
-                    plans {
-                        +achieve("send_ping"(R)) then {
-                            test("send_ping"("source"("self")))
-                        }
-                    }
+            val plan = testingPlans {
+                +achieve("send_ping"(R)) then {
+                    test("send_ping"("source"("self")))
                 }
-            }
-            val plan = p1.agents.first().context.planLibrary.plans.first()
+            }.first()
             plan.goals.size shouldBe 1
             plan.goals.first().value.equals(
                 Struct.of("send_ping", Struct.of("source", Atom.of("self"))),
@@ -166,18 +133,14 @@ class TestPlansDsl : DescribeSpec({
             ) shouldBe true
             plan.goals.first().shouldBeInstanceOf<Test>()
         }
+
         it("can have a belief base addition goal") {
-            val p1 = mas {
-                agent("test") {
-                    plans {
-                        +achieve("send_ping"(R)) then {
-                            add("send_ping"("source"("self")))
-                            +"send_ping"("source"("self"))
-                        }
-                    }
+            val plan = testingPlans {
+                +achieve("send_ping"(R)) then {
+                    add("send_ping"("source"("self")))
+                    +"send_ping"("source"("self"))
                 }
-            }
-            val plan = p1.agents.first().context.planLibrary.plans.first()
+            }.first()
             plan.goals.size shouldBe 2
             plan.goals.forEach {
                 it.value.equals(
@@ -189,18 +152,39 @@ class TestPlansDsl : DescribeSpec({
                 it.shouldBeInstanceOf<AddBelief>()
             }
         }
-        it("can have a belief base removal goal") {
-            val p1 = mas {
-                agent("test") {
-                    plans {
-                        +achieve("send_ping"(R)) then {
-                            remove("send_ping"("source"("other")))
-                            -"send_ping"("source"("other"))
-                        }
-                    }
+
+        it("can both specify the source or not of the belief base addition goal") {
+            val planExplicit = testingPlans {
+                +achieve("send_ping"(R)) then {
+                    add("send_ping"("source"("self")))
+                    +"send_ping"("source"("self"))
                 }
+            }.first()
+            val planImplicit = testingPlans {
+                +achieve("send_ping"(R)) then {
+                    add("send_ping")
+                    +"send_ping"
+                }
+            }.first()
+            planExplicit.goals.size shouldBe planImplicit.goals.size
+            (planExplicit.goals + planImplicit.goals).forEach {
+                it.value.equals(
+                    Struct.of("send_ping", Struct.of("source", Atom.of("self"))),
+                    false,
+                ) shouldBe true
             }
-            val plan = p1.agents.first().context.planLibrary.plans.first()
+            (planExplicit.goals + planImplicit.goals).forEach {
+                it.shouldBeInstanceOf<AddBelief>()
+            }
+        }
+
+        it("can have a belief base removal goal") {
+            val plan = testingPlans {
+                +achieve("send_ping"(R)) then {
+                    remove("send_ping"("source"("other")))
+                    -"send_ping"("source"("other"))
+                }
+            }.first()
             plan.goals.size shouldBe 2
             plan.goals.forEach {
                 it.value.equals(
@@ -213,16 +197,11 @@ class TestPlansDsl : DescribeSpec({
             }
         }
         it("can have a belief base update goal") {
-            val p1 = mas {
-                agent("test") {
-                    plans {
-                        +achieve("send_ping"(R)) then {
-                            update("send_ping"("source"("percept")))
-                        }
-                    }
+            val plan = testingPlans {
+                +achieve("send_ping"(R)) then {
+                    update("send_ping"("source"("percept")))
                 }
-            }
-            val plan = p1.agents.first().context.planLibrary.plans.first()
+            }.first()
             plan.goals.size shouldBe 1
             plan.goals.forEach {
                 it.value.equals(
@@ -235,16 +214,11 @@ class TestPlansDsl : DescribeSpec({
             }
         }
         it("can perform an external action") {
-            val p1 = mas {
-                agent("test") {
-                    plans {
-                        +achieve("send_ping"(R)) then {
-                            execute("send_ping"("source"("self")))
-                        }
-                    }
+            val plan = testingPlans {
+                +achieve("send_ping"(R)) then {
+                    execute("send_ping"("source"("self")))
                 }
-            }
-            val plan = p1.agents.first().context.planLibrary.plans.first()
+            }.first()
             plan.goals.size shouldBe 1
             plan.goals.forEach {
                 it.value.equals(
@@ -257,16 +231,11 @@ class TestPlansDsl : DescribeSpec({
             }
         }
         it("can perform an internal action") {
-            val p1 = mas {
-                agent("test") {
-                    plans {
-                        +achieve("send_ping"(R)) then {
-                            iact("send_ping"("source"("pong")))
-                        }
-                    }
+            val plan = testingPlans {
+                +achieve("send_ping"(R)) then {
+                    iact("send_ping"("source"("pong")))
                 }
-            }
-            val plan = p1.agents.first().context.planLibrary.plans.first()
+            }.first()
             plan.goals.size shouldBe 1
             plan.goals.forEach {
                 it.value.equals(
@@ -281,16 +250,11 @@ class TestPlansDsl : DescribeSpec({
     }
     describe("A Plan") {
         it("should keep the scope of the variables") {
-            val p1 = mas {
-                agent("test") {
-                    plans {
-                        +achieve("send_ping"(R)) then {
-                            achieve("sendMessage"(R, "ping"))
-                        }
-                    }
+            val plan = testingPlans {
+                +achieve("send_ping"(R)) then {
+                    achieve("sendMessage"(R, "ping"))
                 }
-            }
-            val plan = p1.agents.first().context.planLibrary.plans.first()
+            }.first()
             plan.trigger.value.args.first().shouldBeInstanceOf<Var>()
             plan.trigger.value.args.first() shouldBe plan.goals.first().value.args.first()
         }
