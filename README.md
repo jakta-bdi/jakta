@@ -2,6 +2,8 @@
 | <img src="/site/static/images/logo.svg"  width="100"> | <h1>JaKtA (Jason-like Kotlin Agents)</h1> |
 |:-:|:-:|
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10945579.svg)](https://doi.org/10.5281/zenodo.10945579)
+
 
 JaKtA is a Kotlin internal DSL adding support for the definition of BDI agents in the spirit of the well-known Jason language.
 
