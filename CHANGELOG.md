@@ -1,3 +1,10 @@
+# [0.9.0](https://github.com/jakta-bdi/jakta/compare/v0.8.21...v0.9.0) (2024-04-09)
+
+
+### Features
+
+* Create CITATION ([4efea6c](https://github.com/jakta-bdi/jakta/commit/4efea6cee4219078a0ac5691cb489a35e475f79f))
+
 ## [0.8.21](https://github.com/jakta-bdi/jakta/compare/v0.8.20...v0.8.21) (2024-04-08)
 
 
