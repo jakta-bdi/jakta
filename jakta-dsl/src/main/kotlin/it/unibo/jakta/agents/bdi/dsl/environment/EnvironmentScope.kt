@@ -18,6 +18,6 @@ class EnvironmentScope : Builder<Environment> {
     }
 
     override fun build(): Environment = environment.copy(
-        externalActions = actionsScopes.build(),
+        externalActions = actionsScopes.value.build(),
     )
 }
