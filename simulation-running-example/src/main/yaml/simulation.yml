@@ -1,0 +1,38 @@
+network-model:
+  type: ConnectWithinDistance
+  parameters: [ 5 ]
+
+variables:
+  initialColor: &initialColor
+    formula: |
+      java.awt.Color(72, 124, 133)
+    language: kotlin
+
+
+incarnation: jakta
+
+_pool: &program
+  - time-distribution: 1
+    program:
+      agent-factory: it.unibo.jakta.examples.simulation.littlethumb.Entrypoint.entrypoint
+      parameters: [0.5]
+
+deployments:
+  - type: Rectangle
+    parameters: [ 1, 0, 0, 5, 5 ]
+    programs:
+      - *program
+  - type: Point
+    parameters: [ 2, 2 ]
+    programs:
+      - time-distribution: 1
+        program:
+          agent-factory: it.unibo.jakta.examples.simulation.littlethumb.Entrypoint.entrypointWithColor
+          parameters: [ *initialColor, 1.0 ]
+    contents:
+      - molecule: ball
+        concentration: *initialColor
+
+terminate:
+  - type: AfterTime
+    parameters: [ 1800 ]
