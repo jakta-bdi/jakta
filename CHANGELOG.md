@@ -1,3 +1,10 @@
+## [0.9.6](https://github.com/jakta-bdi/jakta/compare/v0.9.5...v0.9.6) (2024-04-25)
+
+
+### Bug Fixes
+
+* **deps:** update actions/checkout action to v4.1.4 ([155dbcf](https://github.com/jakta-bdi/jakta/commit/155dbcf5d7b6f2b79fc6252f7aade7bb44464fc6))
+
 ## [0.9.5](https://github.com/jakta-bdi/jakta/compare/v0.9.4...v0.9.5) (2024-04-23)
 
 
