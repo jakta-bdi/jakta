@@ -44,6 +44,7 @@ fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.tokenPassAgent(
     with(AgentScope(name)) {
         val myColor = ColoredAgent(name, node.id, color)
         node.setConcentration(SimpleMolecule("sightRadius"), sightRadius)
+
         beliefs {
             fact("myColor"(ObjectRef.of(color)))
         }
@@ -54,7 +55,7 @@ fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.tokenPassAgent(
             +achieve("init") then {
                 execute("writeData"(name, ObjectRef.of(myColor)))
                 execute("print"("Hello world!"))
-                achieve("checkBall")
+                achieve("randomMovement")
             }
 
             +"ball"(`_`).fromPercept onlyIf {
@@ -78,6 +79,11 @@ fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.tokenPassAgent(
                         println("Additional colours not found!")
                     }
                 })
+            }
+
+            +achieve("randomMovement") then {
+                execute("brownianMove")
+                achieve("randomMovement")
             }
         }.build()
     }
