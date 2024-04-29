@@ -14,8 +14,8 @@ incarnation: jakta
 _pool: &program
   - time-distribution: 1
     program:
-      agent-factory: it.unibo.jakta.examples.simulation.littlethumb.Entrypoint.entrypoint
-      parameters: [0.5]
+      agent-factory: it.unibo.jakta.examples.simulation.pingpong.Entrypoint.pinger
+      parameters: []
 
 deployments:
   - type: Rectangle
@@ -27,8 +27,8 @@ deployments:
     programs:
       - time-distribution: 1
         program:
-          agent-factory: it.unibo.jakta.examples.simulation.littlethumb.Entrypoint.entrypointWithColor
-          parameters: [ *initialColor, 1.0 ]
+          agent-factory: it.unibo.jakta.examples.simulation.pingpong.Entrypoint.ponger
+          parameters: []
     contents:
       - molecule: ball
         concentration: *initialColor
@@ -40,4 +40,4 @@ terminate:
 monitors:
   type: SwingGui
   parameters:
-    graphics: effects/simulation.json
+    graphics: effects/ping-pong.json
