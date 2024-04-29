@@ -1,4 +1,4 @@
-package it.unibo.alchemist.jakta
+package it.unibo.alchemist.jakta.utils
 
 import it.unibo.tuprolog.core.Term
 import it.unibo.tuprolog.solve.libs.oop.ObjectRef
