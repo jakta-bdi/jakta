@@ -10,6 +10,14 @@ import it.unibo.alchemist.model.Reaction
 import it.unibo.alchemist.model.actions.AbstractAction
 import it.unibo.jakta.agents.bdi.Agent
 import it.unibo.jakta.agents.bdi.AgentLifecycle
+import it.unibo.jakta.agents.bdi.actions.effects.AddData
+import it.unibo.jakta.agents.bdi.actions.effects.BroadcastMessage
+import it.unibo.jakta.agents.bdi.actions.effects.PopMessage
+import it.unibo.jakta.agents.bdi.actions.effects.RemoveAgent
+import it.unibo.jakta.agents.bdi.actions.effects.RemoveData
+import it.unibo.jakta.agents.bdi.actions.effects.SendMessage
+import it.unibo.jakta.agents.bdi.actions.effects.SpawnAgent
+import it.unibo.jakta.agents.bdi.actions.effects.UpdateData
 import it.unibo.tuprolog.solve.libs.oop.formalParameterTypes
 import kotlin.reflect.KCallable
 import kotlin.reflect.full.starProjectedType
@@ -70,11 +78,24 @@ class JaktaAgentForAlchemist<P : Position<P>>(
     }
 
     override fun execute() {
-        agentLifecycle.reason(
+        val environmentSideEffects = agentLifecycle.reason(
             environment = jaktaEnvironment,
             controller = null,
             debugEnabled = false,
         )
+
+        environmentSideEffects.forEach {
+            when (it) {
+                is BroadcastMessage -> jaktaEnvironment.broadcastMessage(it.message)
+                is RemoveAgent -> jaktaEnvironment.removeAgent(it.agentName)
+                is SendMessage -> jaktaEnvironment.submitMessage(it.recipient, it.message)
+                is SpawnAgent -> jaktaEnvironment.addAgent(it.agent)
+                is AddData -> jaktaEnvironment.addData(it.key, it.value)
+                is RemoveData -> jaktaEnvironment.removeData(it.key)
+                is UpdateData -> jaktaEnvironment.updateData(it.newData)
+                is PopMessage -> jaktaEnvironment.popMessage(it.agentName)
+            }
+        }
     }
 
     override fun getContext() = Context.GLOBAL
