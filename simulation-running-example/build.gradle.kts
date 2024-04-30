@@ -61,8 +61,8 @@ File("${project.projectDir.absolutePath}/src/main/yaml").listFiles()
         val graphic by basetask("run${capitalizedName}Graphic") {
             args(
                 "--override",
-                "monitors: { type: SwingGUI, parameters: { graphics: +" +
-                    "${project.projectDir.absolutePath}/effects/${it.nameWithoutExtension}.json } }",
+                "monitors: { type: SwingGUI, parameters: { graphics: " +
+                    "effects/${it.nameWithoutExtension}.json } }",
                 "--override",
                 "launcher: { parameters: { batch: [], autoStart: false } }",
             )
