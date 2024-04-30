@@ -1,6 +1,5 @@
 package it.unibo.alchemist.jakta
 
-import it.unibo.alchemist.jakta.JaktaEnvironmentForAlchemist.Companion.BROKER_MOLECULE
 import it.unibo.alchemist.model.Action
 import it.unibo.alchemist.model.Actionable
 import it.unibo.alchemist.model.Condition
@@ -103,8 +102,9 @@ class JaktaIncarnation<P> : Incarnation<Any?, P> where P : Position<P> {
         environment: Environment<Any?, P>,
         parameter: Any?,
     ): Node<Any?> = GenericNode(this, environment).also {
-        it.addProperty(JaktaEnvironmentForAlchemist(environment, randomGenerator, it))
-        it.setConcentration(BROKER_MOLECULE, JaktaForAlchemistMessageBroker(environment))
+        it.addProperty(
+            JaktaEnvironmentForAlchemist(environment, randomGenerator, it, JaktaForAlchemistMessageBroker(environment)),
+        )
     }
 
     companion object {

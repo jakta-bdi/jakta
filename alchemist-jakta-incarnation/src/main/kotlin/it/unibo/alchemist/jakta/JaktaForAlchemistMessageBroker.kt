@@ -1,6 +1,5 @@
 package it.unibo.alchemist.jakta
 
-import it.unibo.alchemist.jakta.JaktaEnvironmentForAlchemist.Companion.BROKER_MOLECULE
 import it.unibo.alchemist.model.Position
 import it.unibo.jakta.agents.bdi.distributed.MessageBroker
 import it.unibo.jakta.agents.bdi.messages.Message
@@ -21,10 +20,12 @@ class JaktaForAlchemistMessageBroker<P : Position<P>>(
     }
 
     override fun send(receiver: String, host: String, message: Message) {
-        val mbox = alchemistEnvironment.nodes
+        val jaktaEnv = alchemistEnvironment.nodes
             .find { it.id.toString() == host }
-            ?.getConcentration(BROKER_MOLECULE)
-        if (mbox != null) (mbox as JaktaForAlchemistMessageBroker<*>).putInMessageBox(receiver, message)
+            ?.properties
+            ?.filterIsInstance<JaktaEnvironmentForAlchemist<*>>()
+
+        if (!jaktaEnv.isNullOrEmpty()) jaktaEnv.first().messageBroker.putInMessageBox(receiver, message)
     }
 
     fun send(receiverWithHost: String, message: Message) {
