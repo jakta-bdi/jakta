@@ -36,8 +36,3 @@ deployments:
 terminate:
   - type: AfterTime
     parameters: [ 1800 ]
-
-monitors:
-  type: SwingGui
-  parameters:
-    graphics: effects/simulation.json
