@@ -27,8 +27,6 @@ class JaktaEnvironmentForAlchemist<P : Position<P>>(
     val randomGenerator: RandomGenerator,
     // Alchemist NodeProperty inheritance
     override val node: Node<Any?>,
-    // Message Broker
-    val messageBroker: JaktaForAlchemistMessageBroker<P>,
     // Jakta Environment inheritance
     override val messageBoxes: Map<AgentID, MessageQueue> = emptyMap(),
 ) : JaktaEnvironment, NodeProperty<Any?> {
@@ -55,20 +53,24 @@ class JaktaEnvironmentForAlchemist<P : Position<P>>(
 
     // --------------- Messages ---------------
 
+    @Suppress("UNCHECKED_CAST")
+    private fun getMessageBroker(): JaktaForAlchemistMessageBroker<P> =
+        node.getConcentration(BROKER_MOLECULE) as JaktaForAlchemistMessageBroker<P>
+
     override fun getNextMessage(agentName: String): Message? {
-        return messageBroker.nextMessage(agentName, node.id.toString())
+        return getMessageBroker().nextMessage(agentName, node.id.toString())
     }
 
     override fun popMessage(agentName: String): Environment = this.also {
-        messageBroker.pop(agentName, node.id.toString())
+        getMessageBroker().pop(agentName, node.id.toString())
     }
 
     override fun submitMessage(agentName: String, message: Message): Environment = this.also {
-        messageBroker.send(agentName, message)
+        getMessageBroker().send(agentName, message)
     }
 
     override fun broadcastMessage(message: Message): Environment = this.also {
-        messageBroker.broadcast(message)
+        getMessageBroker().broadcast(message)
     }
 
     // ----------------------------------------
@@ -103,7 +105,7 @@ class JaktaEnvironmentForAlchemist<P : Position<P>>(
     ): Environment = this
 
     override fun cloneOnNewNode(node: Node<Any?>): NodeProperty<Any?> =
-        JaktaEnvironmentForAlchemist(alchemistEnvironment, randomGenerator, node, messageBroker)
+        JaktaEnvironmentForAlchemist(alchemistEnvironment, randomGenerator, node)
 
     /**
      * External action that runs arbitrary lambdas defined into the Jakta DSL.
@@ -115,4 +117,8 @@ class JaktaEnvironmentForAlchemist<P : Position<P>>(
 
     override var externalActions: Map<String, ExternalAction> = JaktaForAlchemistLibrary(this).api() +
         ("run" to run)
+
+    companion object {
+        val BROKER_MOLECULE = SimpleMolecule("MessageBroker")
+    }
 }
