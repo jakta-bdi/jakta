@@ -111,7 +111,7 @@ internal data class AgentLifecycleImpl(
         goal: ActionGoal,
     ): ExecutionResult {
         var newIntention = intention.pop()
-        if (action.signature.arity != goal.action.args.size) { // Arguments number mismatch
+        if (action.signature.arity < goal.action.args.size) { // Arguments number mismatch
             return ExecutionResult(failAchievementGoal(intention, context))
         } else {
             val internalResponse = action.execute(
@@ -140,7 +140,10 @@ internal data class AgentLifecycleImpl(
         goal: ActionGoal,
     ): ExecutionResult {
         var newIntention = intention.pop()
-        if (action.signature.arity == goal.action.args.size) {
+        if (action.signature.arity < goal.action.args.size) {
+            // Argument number mismatch from action definition
+            return ExecutionResult(failAchievementGoal(intention, context))
+        } else {
             val externalResponse = action.execute(
                 ExternalRequest.of(
                     environment,
@@ -160,9 +163,6 @@ internal data class AgentLifecycleImpl(
             } else {
                 ExecutionResult(failAchievementGoal(intention, context))
             }
-        } else {
-            // Argument number mismatch from action definition
-            return ExecutionResult(failAchievementGoal(intention, context))
         }
     }
 
