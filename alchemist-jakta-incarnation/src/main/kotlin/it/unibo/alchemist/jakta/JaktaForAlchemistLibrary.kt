@@ -6,8 +6,6 @@ import it.unibo.alchemist.model.molecules.SimpleMolecule
 import it.unibo.jakta.agents.bdi.actions.ExternalAction
 import it.unibo.jakta.agents.bdi.actions.ExternalRequest
 import it.unibo.jakta.agents.bdi.actions.impl.AbstractExternalAction
-import it.unibo.jakta.agents.bdi.messages.Message
-import it.unibo.jakta.agents.bdi.messages.Tell
 import it.unibo.tuprolog.solve.libs.oop.ObjectRef
 import kotlin.reflect.KProperty
 
@@ -57,27 +55,6 @@ class JaktaForAlchemistLibrary<P : Position<P>>(private val env: JaktaEnvironmen
         }
     }
 
-    val moveToPosition = object : AbstractExternalAction("moveToPosition", 2) {
-        override fun action(request: ExternalRequest) {
-            val x = request.arguments[0].castToAtom().value.toInt()
-            val y = request.arguments[0].castToAtom().value.toInt()
-
-            env.alchemistEnvironment.moveNodeToPosition(
-                env.node,
-                env.alchemistEnvironment.makePosition(x, y),
-            )
-        }
-    }
-
-    val sendTo = object : AbstractExternalAction("sendTo", 3) {
-        override fun action(request: ExternalRequest) {
-            val agent = request.arguments[0].castToAtom().value
-            val destinationNode = request.arguments[1].castToAtom().value
-            val message = request.arguments[2].castToStruct()
-            sendMessage("$agent@$destinationNode", Message(request.sender, Tell, message))
-        }
-    }
-
     /**
      * Generates the [Pair] containing the external action name and the [ExternalAction] object itself.
      */
@@ -86,7 +63,5 @@ class JaktaForAlchemistLibrary<P : Position<P>>(private val env: JaktaEnvironmen
     fun api() = mapOf(
         writeData.named,
         brownianMove.named,
-        moveToPosition.named,
-        sendTo.named,
     )
 }

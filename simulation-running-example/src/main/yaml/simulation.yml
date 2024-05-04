@@ -14,21 +14,21 @@ incarnation: jakta
 _pool: &program
   - time-distribution: 1
     program:
-      agent-factory: it.unibo.jakta.examples.simulation.littlethumb.Entrypoint.entrypoint
-      parameters: [0.5]
+      agent-factory: it.unibo.jakta.examples.simulation.littlethumb.Entrypoint.catching
+      parameters: [ 0.5 ]
 
 deployments:
-  - type: Rectangle
-    parameters: [ 1, -0.5, -0.5, 0.5, 0.5 ]
+  - type: Point
+    parameters: [ 0.0, 0.5 ]
     programs:
       - *program
   - type: Point
-    parameters: [ 0.5, 0.5 ]
+    parameters: [ 2.5, 0.5 ]
     programs:
       - time-distribution: 1
         program:
-          agent-factory: it.unibo.jakta.examples.simulation.littlethumb.Entrypoint.entrypointWithColor
-          parameters: [ *initialColor, 1.0 ]
+          agent-factory: it.unibo.jakta.examples.simulation.littlethumb.Entrypoint.releasing
+          parameters: []
     contents:
       - molecule: ball
         concentration: *initialColor

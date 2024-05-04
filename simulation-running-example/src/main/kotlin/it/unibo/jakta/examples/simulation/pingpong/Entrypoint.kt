@@ -5,10 +5,28 @@ package it.unibo.jakta.examples.simulation.pingpong
 import it.unibo.alchemist.jakta.JaktaEnvironmentForAlchemist
 import it.unibo.alchemist.model.Position
 import it.unibo.jakta.agents.bdi.Agent
+import it.unibo.jakta.agents.bdi.actions.ExternalRequest
+import it.unibo.jakta.agents.bdi.actions.impl.AbstractExternalAction
+import it.unibo.jakta.agents.bdi.messages.Message
+import it.unibo.jakta.agents.bdi.messages.Tell
 import it.unibo.jakta.agents.dsl.alchemistmas
+
+val sendTo = object : AbstractExternalAction("sendTo", 3) {
+    override fun action(request: ExternalRequest) {
+        val agent = request.arguments[0].castToAtom().value
+        val destinationNode = request.arguments[1].castToAtom().value
+        val message = request.arguments[2].castToStruct()
+        sendMessage("$agent@$destinationNode", Message(request.sender, Tell, message))
+    }
+}
 
 fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.pinger(): Agent =
     alchemistmas {
+        environment {
+            actions {
+                action(sendTo)
+            }
+        }
         agent("pinger") {
             beliefs {
                 fact { "turn"("me") }
@@ -45,6 +63,11 @@ fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.pinger(): Agent =
 
 fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.ponger(): Agent =
     alchemistmas {
+        environment {
+            actions {
+                action(sendTo)
+            }
+        }
         agent("ponger") {
             beliefs {
                 fact { "turn"("other") }

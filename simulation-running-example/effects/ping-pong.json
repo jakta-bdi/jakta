@@ -60,6 +60,6 @@
     }
   },
   {
-    "type": "class it.unibo.alchemist.boundary.gui.effects.DrawAgent"
+    "type": "class it.unibo.alchemist.boundary.gui.effects.DrawJaktaNodes"
   }
 ]
