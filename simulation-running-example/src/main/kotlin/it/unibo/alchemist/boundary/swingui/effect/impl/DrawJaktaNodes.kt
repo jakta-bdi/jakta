@@ -33,28 +33,28 @@ class DrawJaktaNodes : it.unibo.alchemist.boundary.swingui.effect.api.Effect {
         zoom: Double,
         point: Point,
     ) {
-        println("node ${node.id} has properties ${node.properties}")
         if (node.properties.filterIsInstance<JaktaEnvironmentForAlchemist<*>>().isNotEmpty()) {
             // Is an agent
             if (node.contents.keys.contains(SimpleMolecule("sightRadius"))) {
                 val sightRadius: Double = node.contents[SimpleMolecule("sightRadius")] as Double
                 graphics.color = colorSummary
-                val size = sightRadius * zoom
+                val radius = sightRadius * zoom
+                val diameter = radius * 2
                 graphics.draw(
                     Ellipse2D.Double(
-                        point.x - size / 2,
-                        point.y - size / 2,
-                        size,
-                        size,
+                        point.x - radius,
+                        point.y - radius,
+                        diameter,
+                        diameter,
                     ),
                 )
-                graphics.color = Color.BLACK
-                graphics.fill(cicleOfSize(point, 20.0))
             }
+            graphics.color = Color.BLACK
+            graphics.fill(cicleOfSize(point, 20.0))
         } else {
             // Is an object in the environment
             graphics.color = Color.BLUE
-            graphics.fill(cicleOfSize(point, 20.0))
+            graphics.fill(cicleOfSize(point, 10.0))
         }
     }
 

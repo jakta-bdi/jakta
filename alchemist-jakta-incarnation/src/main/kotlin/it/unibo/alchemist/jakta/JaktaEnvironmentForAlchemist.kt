@@ -38,7 +38,8 @@ class JaktaEnvironmentForAlchemist<P : Position<P>>(
             .associate { it.agent.name to it.agent.agentID }
 
     override val data: Map<String, Any> get() =
-        alchemistEnvironment.nodes
+        alchemistEnvironment.getNeighborhood(node)
+//        alchemistEnvironment.nodes
             .flatMap { it.contents.toList() }
             .associate { (name, content) ->
                 name.name to content.valueOrEmptyMolecule()

@@ -14,6 +14,7 @@ class JaktaForAlchemistMessageBroker<P : Position<P>>(
 
     override fun putInMessageBox(receiver: String, message: Message) {
         if (messageBoxes.contains(receiver)) {
+            println("Message $message in messagebox $receiver")
             messageBoxes[receiver]!!.add(message)
         } else {
             messageBoxes += receiver to mutableListOf(message)
@@ -24,7 +25,12 @@ class JaktaForAlchemistMessageBroker<P : Position<P>>(
         val mbox = alchemistEnvironment.nodes
             .find { it.id.toString() == host }
             ?.getConcentration(BROKER_MOLECULE)
-        if (mbox != null) (mbox as JaktaForAlchemistMessageBroker<*>).putInMessageBox(receiver, message)
+        println("Sending $message to $receiver at $host")
+        if (mbox != null) {
+            (mbox as JaktaForAlchemistMessageBroker<*>).putInMessageBox(receiver, message)
+        } else {
+            println("Casella non trovata")
+        }
     }
 
     fun send(receiverWithHost: String, message: Message) {
