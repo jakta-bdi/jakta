@@ -1,6 +1,6 @@
 network-model:
   type: ConnectWithinDistance
-  parameters: [ 2 ]
+  parameters: [ 0.5 ]
 
 
 variables:
@@ -19,11 +19,11 @@ _pool: &program
 
 deployments:
   - type: Point
-    parameters: [ 0.0, 0.5 ]
+    parameters: [ 0.0, 0.7 ]
     programs:
       - *program
   - type: Point
-    parameters: [ 2.5, 0.5 ]
+    parameters: [ 1.5, 0.5 ]
     programs:
       - time-distribution: 1
         program:
@@ -35,4 +35,4 @@ deployments:
 
 terminate:
   - type: AfterTime
-    parameters: [ 1800 ]
+    parameters: [ 180000 ]
