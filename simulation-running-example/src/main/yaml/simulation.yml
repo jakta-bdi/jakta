@@ -1,5 +1,5 @@
 network-model:
-  type: ConnectWithinDistance
+  type: CustomLinking
   parameters: [ 0.5 ]
 
 

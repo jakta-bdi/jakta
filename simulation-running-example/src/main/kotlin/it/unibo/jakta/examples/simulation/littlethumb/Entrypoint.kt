@@ -72,7 +72,7 @@ fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.releasing(): Agent =
                     if (castEnv.randomGenerator.nextDouble() < 0.15) {
                         alchemistEnv.addNode(
                             GenericNode(alchemistEnv).also {
-                                it.setConcentration(SimpleMolecule("bread-crumb"), it.id to position)
+                                it.setConcentration(SimpleMolecule("breadCrumb"), it.id to position)
                             },
                             position,
                         )
@@ -91,32 +91,28 @@ fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.releasing(): Agent =
             }
         }
         agent("pollicina") {
-            actions {
-                action("kill", 0) {
-                    this.agent.context.events.forEach { removeEvent(it) }
-                    this.agent.context.intentions.forEach { removeIntention(it.value) }
-                }
-            }
-
             node.setConcentration(SimpleMolecule("agent"), "pollicina")
+            beliefs {
+                fact { "state"("running") }
+            }
             goals {
                 achieve("run")
                 achieve("releaseObject")
             }
             plans {
-                +achieve("run") then {
+                +achieve("run") onlyIf { "state"("running").fromSelf } then {
                     execute("move")
                     achieve("run")
                 }
 
-                +achieve("releaseObject") then {
+                +achieve("releaseObject") onlyIf { "state"("running").fromSelf } then {
                     execute("put")
                     achieve("releaseObject")
                 }
 
                 +"stop"("source"(P)) then {
                     execute("print"("STOP"))
-                    execute("kill")
+                    -"state"("running").fromSelf
                 }
             }
         }
@@ -138,14 +134,20 @@ fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.catching(sightRadius: Doub
                     val arg = arguments.first().fix<Pair<Int, Position<*>>>()
                     val nodeId = arg.first
                     val position = arg.second
-                    alchemistEnvironment.removeNode(alchemistEnvironment.getNodeByID(nodeId))
-                    alchemistEnvironment.moveNodeToPosition(
-                        node,
-                        alchemistEnvironment.makePosition(
-                            position.getCoordinate(0),
-                            position.getCoordinate(1),
-                        ),
-                    )
+                    if (alchemistEnvironment.getNodeByID(nodeId).contents.isNotEmpty()) {
+                        println("Removing node $nodeId")
+                        //   alchemistEnvironment.removeNode(alchemistEnvironment.getNodeByID(nodeId))
+                        alchemistEnvironment.getNodeByID(nodeId).removeConcentration(SimpleMolecule("breadCrumb"))
+                        alchemistEnvironment.moveNodeToPosition(
+                            node,
+                            alchemistEnvironment.makePosition(
+                                position.getCoordinate(0),
+                                position.getCoordinate(1),
+                            ),
+                        )
+                    } else {
+                        println("I'm trying to remove not existing node $nodeId")
+                    }
                 }
                 action("stopPollicina", 1) {
                     val name = arguments.first().fix<String>()
@@ -154,37 +156,36 @@ fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.catching(sightRadius: Doub
                 }
             }
         }
+
         agent("pollicino") {
             node.setConcentration(SimpleMolecule("sightRadius"), sightRadius)
-            actions {
-                action("kill", 0) {
-                    this.agent.context.events.forEach { removeEvent(it) }
-                    this.agent.context.intentions.forEach { removeIntention(it.value) }
-                }
+            beliefs {
+                fact { "state"("running") }
             }
-            goals {
-                achieve("catch")
-            }
+            goals { achieve("catch") }
             plans {
-                +achieve("catch") onlyIf { "found"(P).fromSelf } then {
+                +achieve("catch") onlyIf {
+                    "state"("running").fromSelf and "found"(P).fromSelf
+                } then {
                     execute("goTo"(P))
                     -"found"(P).fromSelf
                     achieve("catch")
                 }
 
-                +achieve("catch") then {
+                +achieve("catch") onlyIf { "state"("running").fromSelf } then {
                     execute("move")
                     achieve("catch")
                 }
 
-                +"bread-crumb"(P).fromPercept then {
-                    execute("print"("FUNZIONA!"))
+                +"breadCrumb"(P).fromPercept then {
+                    execute("print"("Individuata briciola", P))
+                    -"breadCrumb"(P).fromPercept
                     +"found"(P)
                 }
 
                 +"agent"(N).fromPercept then {
                     execute("stopPollicina"(N))
-                    execute("kill")
+                    -"state"("running").fromSelf
                 }
             }
         }

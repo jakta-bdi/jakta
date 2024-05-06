@@ -51,9 +51,12 @@ class DrawJaktaNodes : it.unibo.alchemist.boundary.swingui.effect.api.Effect {
             }
             graphics.color = Color.BLACK
             graphics.fill(cicleOfSize(point, 20.0))
-        } else {
+        } else if (node.contains(SimpleMolecule("breadCrumb"))) {
             // Is an object in the environment
             graphics.color = Color.BLUE
+            graphics.fill(cicleOfSize(point, 10.0))
+        } else {
+            graphics.color = Color.GRAY
             graphics.fill(cicleOfSize(point, 10.0))
         }
     }
