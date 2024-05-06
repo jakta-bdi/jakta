@@ -1,37 +1,39 @@
-network-model:
-  type: CustomLinking
-  parameters: [ 0.5 ]
-
-
 variables:
-  initialColor: &initialColor
-    formula: |
-      java.awt.Color(72, 124, 133)
-    language: kotlin
+  sightRadius: &sightRadius
+    formula: 0.5
 
 incarnation: jakta
+network-model:
+  type: CustomLinking
+  parameters: [ *sightRadius ]
 
 _pool: &program
   - time-distribution: 1
     program:
-      agent-factory: it.unibo.jakta.examples.simulation.littlethumb.Entrypoint.catching
-      parameters: [ 0.5 ]
+      agent-factory: it.unibo.jakta.examples.simulation.littlethumb.Catching.catching
+      parameters: []
 
 deployments:
   - type: Point
     parameters: [ 0.0, 0.7 ]
     programs:
       - *program
+    contents:
+      - molecule: sightRadius
+        concentration: *sightRadius
+      - molecule: agent
+        concentration: "pollicino"
   - type: Point
     parameters: [ 1.5, 0.5 ]
     programs:
       - time-distribution: 1
         program:
-          agent-factory: it.unibo.jakta.examples.simulation.littlethumb.Entrypoint.releasing
+          agent-factory: it.unibo.jakta.examples.simulation.littlethumb.Releasing.releasing
           parameters: []
     contents:
-      - molecule: ball
-        concentration: *initialColor
+      - molecule: agent
+        concentration: "pollicina"
+
 
 terminate:
   - type: AfterTime
