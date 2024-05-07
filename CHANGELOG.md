@@ -1,3 +1,10 @@
+## [0.9.9](https://github.com/jakta-bdi/jakta/compare/v0.9.8...v0.9.9) (2024-05-07)
+
+
+### Bug Fixes
+
+* **core-deps:** update kotlin monorepo to v1.9.24 ([f4a2c7a](https://github.com/jakta-bdi/jakta/commit/f4a2c7a32f3c876f831a0a2b842115b5cd85fedd))
+
 ## [0.9.8](https://github.com/jakta-bdi/jakta/compare/v0.9.7...v0.9.8) (2024-04-26)
 
 
