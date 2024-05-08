@@ -50,3 +50,9 @@ fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.alchemistmas(f: JaktaForAl
     this.externalActions += wa.actions
     return wa.agent
 }
+
+@JaktaDSL
+fun alchemistmas(f: JaktaForAlchemistMasScope.() -> Unit): Agent {
+    val wa = JaktaForAlchemistMasScope().also(f).build()
+    return wa.agent
+}
