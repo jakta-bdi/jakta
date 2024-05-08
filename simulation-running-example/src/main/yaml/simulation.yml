@@ -10,7 +10,7 @@ network-model:
 _pool: &program
   - time-distribution: 1
     program:
-      agent-factory: it.unibo.jakta.examples.simulation.littlethumb.Catching.catching
+      agent-factory: it.unibo.jakta.examples.simulation.littlethumb.Catching.catchingEntrypoint
       parameters: []
 
 deployments:
@@ -28,7 +28,7 @@ deployments:
     programs:
       - time-distribution: 1
         program:
-          agent-factory: it.unibo.jakta.examples.simulation.littlethumb.Releasing.releasing
+          agent-factory: it.unibo.jakta.examples.simulation.littlethumb.Releasing.releasingEntrypoint
           parameters: []
     contents:
       - molecule: agent

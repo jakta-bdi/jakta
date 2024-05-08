@@ -4,35 +4,15 @@ package it.unibo.jakta.examples.simulation.littlethumb
 
 import it.unibo.alchemist.jakta.JaktaEnvironmentForAlchemist
 import it.unibo.alchemist.model.Position
-import it.unibo.alchemist.model.molecules.SimpleMolecule
-import it.unibo.alchemist.model.nodes.GenericNode
 import it.unibo.jakta.agents.bdi.Agent
 import it.unibo.jakta.agents.bdi.dsl.beliefs.fromSelf
 import it.unibo.jakta.agents.dsl.alchemistmas
 
-fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.releasing(): Agent =
+fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.releasingEntrypoin(): Agent =
+    CustomEnvironmentForEventDrivenSimulation(this).releasing()
+
+fun <P : Position<P>> CustomEnvironmentForEventDrivenSimulation<P>.releasing(): Agent =
     alchemistmas {
-        environment {
-            actions {
-                action("put", 0) {
-                    val position = alchemistEnvironment.getPosition(node)
-                    if (randomGenerator.nextDouble() < 0.15) {
-                        alchemistEnvironment.addNode(
-                            GenericNode(alchemistEnvironment).also {
-                                it.setConcentration(SimpleMolecule("breadCrumb"), it.id to position)
-                            },
-                            position,
-                        )
-                    }
-                }
-                action("move", 0) {
-                    alchemistEnvironment.moveNodeToPosition(
-                        node,
-                        movementInGrid(this@releasing, pollicinaDirections),
-                    )
-                }
-            }
-        }
         agent("pollicina") {
             beliefs {
                 fact { "state"("running") }
