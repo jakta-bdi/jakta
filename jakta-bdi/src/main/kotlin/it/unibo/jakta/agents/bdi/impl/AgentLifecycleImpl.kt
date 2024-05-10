@@ -55,6 +55,7 @@ internal data class AgentLifecycleImpl(
     private var agent: Agent,
 ) : AgentLifecycle {
     private var controller: Activity.Controller? = null
+    private var debugEnabled = false
 
     override fun updateBelief(perceptions: BeliefBase, beliefBase: BeliefBase): RetrieveResult =
         when (perceptions == beliefBase) {
@@ -177,6 +178,9 @@ internal data class AgentLifecycleImpl(
 
                     if (internalAction == null) {
                         // Internal Action not found
+                        if (debugEnabled) {
+                            println("[${agent.name}] WARNING: ${nextGoal.action.functor} Internal Action not found.")
+                        }
                         ExecutionResult(failAchievementGoal(intention, context))
                     } else {
                         // Execute Internal Action
@@ -187,6 +191,9 @@ internal data class AgentLifecycleImpl(
                     val externalAction = environment.externalActions[nextGoal.action.functor]
                     if (externalAction == null) {
                         // Internal Action not found
+                        if (debugEnabled) {
+                            println("[${agent.name}] WARNING: ${nextGoal.action.functor} External Action not found.")
+                        }
                         ExecutionResult(failAchievementGoal(intention, context))
                     } else {
                         // Execute External Action
@@ -196,7 +203,9 @@ internal data class AgentLifecycleImpl(
                 is Act -> {
                     val action = (environment.externalActions + context.internalActions)[nextGoal.action.functor]
                     if (action == null) {
-                        // Internal Action not found
+                        if (debugEnabled) {
+                            println("[${agent.name}] WARNING: ${nextGoal.action.functor} Action not found.")
+                        }
                         ExecutionResult(failAchievementGoal(intention, context))
                     } else {
                         // Execute Action
@@ -316,6 +325,7 @@ internal data class AgentLifecycleImpl(
         debugEnabled: Boolean,
     ): Iterable<EnvironmentChange> {
         this.controller = controller
+        this.debugEnabled = debugEnabled
 
         // STEP1: Perceive the Environment
         val perceptions = environment.percept()

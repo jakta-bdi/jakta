@@ -9,7 +9,7 @@ import it.unibo.jakta.agents.bdi.actions.ExternalRequest
 import it.unibo.jakta.agents.bdi.actions.impl.AbstractExternalAction
 import it.unibo.jakta.agents.bdi.messages.Message
 import it.unibo.jakta.agents.bdi.messages.Tell
-import it.unibo.jakta.agents.dsl.alchemistmas
+import it.unibo.jakta.agents.dsl.mas
 
 val sendTo = object : AbstractExternalAction("sendTo", 3) {
     override fun action(request: ExternalRequest) {
@@ -21,7 +21,7 @@ val sendTo = object : AbstractExternalAction("sendTo", 3) {
 }
 
 fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.pinger(): Agent =
-    alchemistmas {
+    mas {
         environment {
             actions {
                 action(sendTo)
@@ -62,7 +62,7 @@ fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.pinger(): Agent =
     }
 
 fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.ponger(): Agent =
-    alchemistmas {
+    mas {
         environment {
             actions {
                 action(sendTo)
