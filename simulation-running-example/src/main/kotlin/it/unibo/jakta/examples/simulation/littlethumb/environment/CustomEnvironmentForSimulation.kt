@@ -1,4 +1,4 @@
-package it.unibo.jakta.examples.simulation.littlethumb
+package it.unibo.jakta.examples.simulation.littlethumb.environment
 
 import it.unibo.alchemist.jakta.JaktaEnvironmentForAlchemist
 import it.unibo.alchemist.jakta.utils.fix
@@ -14,16 +14,9 @@ import it.unibo.jakta.agents.bdi.messages.Tell
 import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.Struct
 
-interface LittleThumbEnvironment {
-    fun move(): ExternalAction
-    fun goTo(): ExternalAction
-    fun stopMessage(): ExternalAction
-    fun put(): ExternalAction
-}
-
-class CustomEnvironmentForEventDrivenSimulation<P : Position<P>>(
+class CustomEnvironmentForSimulation<P : Position<P>>(
     val jaktaForAlchemistEnvironment: JaktaEnvironmentForAlchemist<P>,
-) : LittleThumbEnvironment, Environment by jaktaForAlchemistEnvironment {
+) : LittlethumbActions, Environment by jaktaForAlchemistEnvironment {
 
     override fun move(): ExternalAction = object : AbstractExternalAction("move", 0) {
         override fun action(request: ExternalRequest) {
@@ -77,11 +70,12 @@ class CustomEnvironmentForEventDrivenSimulation<P : Position<P>>(
         }
     }
 
+    override fun greet(): ExternalAction = object : AbstractExternalAction("greet", 0) {
+        override fun action(request: ExternalRequest) {
+            println("Hi, my name is ${request.sender} and I'm running on node ${jaktaForAlchemistEnvironment.node.id}")
+        }
+    }
+
     override val externalActions: Map<String, ExternalAction> = jaktaForAlchemistEnvironment.externalActions +
-        mapOf(
-            goTo().let { it.signature.name to it },
-            stopMessage().let { it.signature.name to it },
-            move().let { it.signature.name to it },
-            put().let { it.signature.name to it },
-        )
+        generateExternalActions()
 }

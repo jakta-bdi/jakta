@@ -1,4 +1,4 @@
-package it.unibo.jakta.examples.simulation.littlethumb
+package it.unibo.jakta.examples.simulation.littlethumb.environment
 
 import it.unibo.alchemist.jakta.JaktaEnvironmentForAlchemist
 import it.unibo.alchemist.model.Environment

@@ -8,6 +8,7 @@ import it.unibo.jakta.agents.bdi.dsl.AgentScope
 import it.unibo.jakta.agents.bdi.dsl.Builder
 import it.unibo.jakta.agents.bdi.dsl.JaktaDSL
 import it.unibo.jakta.agents.bdi.dsl.actions.ExternalActionsScope
+import it.unibo.jakta.agents.bdi.environment.Environment
 
 class WrappedAgent(
     val agent: Agent,
@@ -19,7 +20,12 @@ class JaktaForAlchemistMasScope : Builder<WrappedAgent> {
     var actions: Map<String, ExternalAction> = emptyMap()
 
     fun environment(f: JaktaForAlchemistEnvironmentScope.() -> Unit): JaktaForAlchemistMasScope {
-        actions = JaktaForAlchemistEnvironmentScope().also(f).build()
+        actions += JaktaForAlchemistEnvironmentScope().also(f).build()
+        return this
+    }
+
+    fun environment(e: Environment): JaktaForAlchemistMasScope {
+        actions += e.externalActions
         return this
     }
 
@@ -45,14 +51,8 @@ class JaktaForAlchemistEnvironmentScope : Builder<Map<String, ExternalAction>> {
 
 // TODO("This DSL entrypoint can create more than one agent, the simulation must know how to handle it.")
 @JaktaDSL
-fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.alchemistmas(f: JaktaForAlchemistMasScope.() -> Unit): Agent {
+fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.mas(f: JaktaForAlchemistMasScope.() -> Unit): Agent {
     val wa = JaktaForAlchemistMasScope().also(f).build()
     this.externalActions += wa.actions
-    return wa.agent
-}
-
-@JaktaDSL
-fun alchemistmas(f: JaktaForAlchemistMasScope.() -> Unit): Agent {
-    val wa = JaktaForAlchemistMasScope().also(f).build()
     return wa.agent
 }
