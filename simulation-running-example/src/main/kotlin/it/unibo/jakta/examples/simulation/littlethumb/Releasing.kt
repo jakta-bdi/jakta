@@ -43,6 +43,7 @@ fun pollicina(): Agent =
 
             +"stop"("source"(P)) then {
                 -"state"("running").fromSelf
+                // execute("stop")
             }
         }
     }
