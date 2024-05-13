@@ -1,7 +1,7 @@
 package it.unibo.alchemist.boundary.swingui.effect.impl
 
 import it.unibo.alchemist.boundary.ui.api.Wormhole2D
-import it.unibo.alchemist.jakta.JaktaEnvironmentForAlchemist
+import it.unibo.alchemist.jakta.properties.JaktaEnvironmentForAlchemist
 import it.unibo.alchemist.model.Environment
 import it.unibo.alchemist.model.Node
 import it.unibo.alchemist.model.Position2D

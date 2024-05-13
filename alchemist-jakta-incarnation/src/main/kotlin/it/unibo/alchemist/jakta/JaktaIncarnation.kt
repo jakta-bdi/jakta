@@ -1,6 +1,8 @@
 package it.unibo.alchemist.jakta
 
-import it.unibo.alchemist.jakta.JaktaEnvironmentForAlchemist.Companion.BROKER_MOLECULE
+import it.unibo.alchemist.jakta.actions.JaktaAgentForAlchemist
+import it.unibo.alchemist.jakta.properties.JaktaEnvironmentForAlchemist
+import it.unibo.alchemist.jakta.properties.JaktaEnvironmentForAlchemist.Companion.BROKER_MOLECULE
 import it.unibo.alchemist.model.Action
 import it.unibo.alchemist.model.Actionable
 import it.unibo.alchemist.model.Condition

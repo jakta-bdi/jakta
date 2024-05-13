@@ -1,6 +1,9 @@
-package it.unibo.alchemist.jakta
+package it.unibo.alchemist.jakta.properties
+import it.unibo.alchemist.jakta.JaktaForAlchemistLibrary
 import it.unibo.alchemist.jakta.JaktaForAlchemistLibrary.ExternalActionFor
-import it.unibo.alchemist.jakta.utils.valueOrEmptyMolecule
+import it.unibo.alchemist.jakta.JaktaForAlchemistMessageBroker
+import it.unibo.alchemist.jakta.actions.JaktaAgentForAlchemist
+import it.unibo.alchemist.jakta.util.valueOrEmptyMolecule
 import it.unibo.alchemist.model.Node
 import it.unibo.alchemist.model.NodeProperty
 import it.unibo.alchemist.model.Position

@@ -1,7 +1,7 @@
 package it.unibo.jakta.examples.simulation.littlethumb.environment
 
-import it.unibo.alchemist.jakta.JaktaEnvironmentForAlchemist
-import it.unibo.alchemist.jakta.utils.fix
+import it.unibo.alchemist.jakta.properties.JaktaEnvironmentForAlchemist
+import it.unibo.alchemist.jakta.util.fix
 import it.unibo.alchemist.model.Position
 import it.unibo.alchemist.model.molecules.SimpleMolecule
 import it.unibo.alchemist.model.nodes.GenericNode
