@@ -10,7 +10,7 @@ internal class OneThreadPerMasImpl : AbstractSingleRunnerExecutionStrategy() {
         Runner.threadOf(
             Activity.of {
                 synchronizedAgents.getAgents().forEach { (_, agentLC) ->
-                    val sideEffects = agentLC.reason(mas.environment, it, debugEnabled)
+                    val sideEffects = agentLC.deliberate(mas.environment, it, debugEnabled)
                     mas.applyEnvironmentEffects(sideEffects)
                 }
                 synchronizedAgents.getAgents().ifEmpty { it.stop() }

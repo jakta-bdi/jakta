@@ -100,11 +100,15 @@ interface AgentLifecycle {
      *  @param controller [Activity.Controller] that manages agent's execution
      *  @param debugEnabled [Boolean] specifies wether debug logs are needed or not
      */
-    fun reason(
+    fun deliberate(
         environment: Environment,
         controller: Activity.Controller? = null,
         debugEnabled: Boolean = false,
-    ): Iterable<EnvironmentChange>
+    ): Iterable<EnvironmentChange> {
+        sense(environment, controller, debugEnabled)
+        deliberate()
+        return act(environment)
+    }
 
     /**
      * Performs the sensing phase of the reasoning cycle, in particular:
@@ -116,7 +120,7 @@ interface AgentLifecycle {
      *  @param controller [Activity.Controller] that manages agent's execution
      *  @param debugEnabled [Boolean] specifies wether debug logs are needed or not
      */
-    fun sense(environment: Environment, controller: Activity.Controller?, debugEnabled: Boolean): Unit
+    fun sense(environment: Environment, controller: Activity.Controller?, debugEnabled: Boolean)
 
     /** Performs the reason phase of the reasoning cycle, in particular:
      *  - STEP5: Selecting an Event
@@ -124,7 +128,7 @@ interface AgentLifecycle {
      *  - STEP7: Determining the Applicable Plans
      *  - STEP8: Selecting one Applicable Plan
      */
-    fun reason(): Unit
+    fun deliberate()
 
     /**
      * Performs the reason phase of the reasoning cycle, in particular:
