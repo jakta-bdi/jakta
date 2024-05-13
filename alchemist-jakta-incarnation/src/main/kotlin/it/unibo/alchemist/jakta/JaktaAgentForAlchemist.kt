@@ -18,6 +18,8 @@ import it.unibo.jakta.agents.bdi.actions.effects.RemoveData
 import it.unibo.jakta.agents.bdi.actions.effects.SendMessage
 import it.unibo.jakta.agents.bdi.actions.effects.SpawnAgent
 import it.unibo.jakta.agents.bdi.actions.effects.UpdateData
+import it.unibo.jakta.agents.fsm.Activity
+import it.unibo.jakta.agents.fsm.time.Time
 import it.unibo.tuprolog.solve.libs.oop.formalParameterTypes
 import kotlin.reflect.KCallable
 import kotlin.reflect.full.starProjectedType
@@ -78,22 +80,56 @@ class JaktaAgentForAlchemist<P : Position<P>>(
     }
 
     override fun execute() {
-        val environmentSideEffects = agentLifecycle.reason(
-            environment = jaktaEnvironment,
-            controller = null,
-            debugEnabled = false,
-        )
+        val jaktaController = object : Activity.Controller {
+            var isPaused = false
+            override fun restart() = error("Cannot be performed during Alchemist execution")
 
-        environmentSideEffects.forEach {
-            when (it) {
-                is BroadcastMessage -> jaktaEnvironment.broadcastMessage(it.message)
-                is RemoveAgent -> jaktaEnvironment.removeAgent(it.agentName)
-                is SendMessage -> jaktaEnvironment.submitMessage(it.recipient, it.message)
-                is SpawnAgent -> jaktaEnvironment.addAgent(it.agent)
-                is AddData -> jaktaEnvironment.addData(it.key, it.value)
-                is RemoveData -> jaktaEnvironment.removeData(it.key)
-                is UpdateData -> jaktaEnvironment.updateData(it.newData)
-                is PopMessage -> jaktaEnvironment.popMessage(it.agentName)
+            override fun pause() {
+                isPaused = true
+            }
+
+            override fun resume() {
+                isPaused = false
+            }
+
+            override fun stop() {
+                jaktaEnvironment.node.reactions
+                    .filter { it.actions.filterIsInstance<JaktaAgentForAlchemist<*>>().isNotEmpty() }
+                    .also { println(it) }
+                    .forEach { re ->
+                        jaktaEnvironment.node.removeReaction(re)
+                        jaktaEnvironment.alchemistEnvironment.simulation.reactionRemoved(re)
+                    }
+                TODO("BROKEN")
+            }
+
+            override fun currentTime(): Time = Time.continuous(
+                jaktaEnvironment.alchemistEnvironment.simulation.time.toDouble(),
+            )
+
+            override fun sleep(millis: Long) {
+                TODO("Not yet implemented")
+            }
+        }
+
+        if (!jaktaController.isPaused) {
+            val environmentSideEffects = agentLifecycle.reason(
+                environment = jaktaEnvironment,
+                controller = jaktaController,
+                debugEnabled = false,
+            )
+
+            environmentSideEffects.forEach {
+                when (it) {
+                    is BroadcastMessage -> jaktaEnvironment.broadcastMessage(it.message)
+                    is RemoveAgent -> jaktaEnvironment.removeAgent(it.agentName)
+                    is SendMessage -> jaktaEnvironment.submitMessage(it.recipient, it.message)
+                    is SpawnAgent -> jaktaEnvironment.addAgent(it.agent)
+                    is AddData -> jaktaEnvironment.addData(it.key, it.value)
+                    is RemoveData -> jaktaEnvironment.removeData(it.key)
+                    is UpdateData -> jaktaEnvironment.updateData(it.newData)
+                    is PopMessage -> jaktaEnvironment.popMessage(it.agentName)
+                }
             }
         }
     }

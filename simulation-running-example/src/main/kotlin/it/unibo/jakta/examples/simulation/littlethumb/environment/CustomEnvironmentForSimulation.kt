@@ -72,7 +72,11 @@ class CustomEnvironmentForSimulation<P : Position<P>>(
 
     override fun greet(): ExternalAction = object : AbstractExternalAction("greet", 0) {
         override fun action(request: ExternalRequest) {
-            println("Hi, my name is ${request.sender} and I'm running on node ${jaktaForAlchemistEnvironment.node.id}")
+            println(
+                "Hi, my name is ${request.sender}," +
+                    " I'm running on node ${jaktaForAlchemistEnvironment.node.id}," +
+                    " Time is ${request.requestTimestamp}",
+            )
         }
     }
 
