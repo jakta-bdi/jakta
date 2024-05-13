@@ -113,7 +113,7 @@ class JaktaAgentForAlchemist<P : Position<P>>(
         }
 
         if (!jaktaController.isPaused) {
-            val environmentSideEffects = agentLifecycle.reason(
+            val environmentSideEffects = agentLifecycle.deliberate(
                 environment = jaktaEnvironment,
                 controller = jaktaController,
                 debugEnabled = false,

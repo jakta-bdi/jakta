@@ -354,7 +354,7 @@ internal data class AgentLifecycleImpl(
         this.agent = this.agent.copy(newBeliefBase, newEvents)
     }
 
-    override fun reason() {
+    override fun deliberate() {
         // STEP5: Selecting an Event.
         var newEvents = this.agent.context.events
         val selectedEvent = selectEvent(this.agent.context.events)
@@ -433,13 +433,13 @@ internal data class AgentLifecycleImpl(
         }
     }
 
-    override fun reason(
+    override fun deliberate(
         environment: Environment,
         controller: Activity.Controller?,
         debugEnabled: Boolean,
     ): Iterable<EnvironmentChange> {
         sense(environment, controller, debugEnabled)
-        reason()
+        deliberate()
         return act(environment)
     }
 }
