@@ -1,6 +1,6 @@
 package it.unibo.alchemist.jakta
 
-import it.unibo.alchemist.jakta.JaktaEnvironmentForAlchemist.Companion.BROKER_MOLECULE
+import it.unibo.alchemist.jakta.properties.JaktaEnvironmentForAlchemist.Companion.BROKER_MOLECULE
 import it.unibo.alchemist.model.Position
 import it.unibo.jakta.agents.bdi.distributed.MessageBroker
 import it.unibo.jakta.agents.bdi.messages.Message

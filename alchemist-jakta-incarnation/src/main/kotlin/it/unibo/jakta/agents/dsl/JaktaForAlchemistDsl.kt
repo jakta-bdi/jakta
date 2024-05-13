@@ -1,6 +1,6 @@
 package it.unibo.jakta.agents.dsl
 
-import it.unibo.alchemist.jakta.JaktaEnvironmentForAlchemist
+import it.unibo.alchemist.jakta.properties.JaktaEnvironmentForAlchemist
 import it.unibo.alchemist.model.Position
 import it.unibo.jakta.agents.bdi.Agent
 import it.unibo.jakta.agents.bdi.actions.ExternalAction

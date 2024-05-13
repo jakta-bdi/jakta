@@ -1,5 +1,6 @@
-package it.unibo.alchemist.jakta
+package it.unibo.alchemist.jakta.actions
 
+import it.unibo.alchemist.jakta.properties.JaktaEnvironmentForAlchemist
 import it.unibo.alchemist.model.Action
 import it.unibo.alchemist.model.Context
 import it.unibo.alchemist.model.Dependency

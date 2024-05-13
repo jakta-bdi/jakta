@@ -1,4 +1,4 @@
-package it.unibo.alchemist.jakta.utils
+package it.unibo.alchemist.jakta.util
 
 /**
  * Object that represents an Alchemist empty molecule.

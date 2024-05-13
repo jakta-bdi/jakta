@@ -1,6 +1,6 @@
 package it.unibo.jakta.examples.simulation.littlethumb.environment
 
-import it.unibo.alchemist.jakta.JaktaEnvironmentForAlchemist
+import it.unibo.alchemist.jakta.properties.JaktaEnvironmentForAlchemist
 import it.unibo.alchemist.model.Environment
 import it.unibo.alchemist.model.Position
 

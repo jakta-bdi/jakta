@@ -2,7 +2,7 @@
 
 package it.unibo.jakta.test
 
-import it.unibo.alchemist.jakta.JaktaEnvironmentForAlchemist
+import it.unibo.alchemist.jakta.properties.JaktaEnvironmentForAlchemist
 import it.unibo.alchemist.model.Position
 import it.unibo.alchemist.model.molecules.SimpleMolecule
 import it.unibo.alchemist.util.Iterables.randomElement
