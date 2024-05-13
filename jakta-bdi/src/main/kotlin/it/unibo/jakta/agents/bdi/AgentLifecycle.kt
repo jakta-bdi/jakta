@@ -95,12 +95,45 @@ interface AgentLifecycle {
      */
     fun runIntention(intention: Intention, context: AgentContext, environment: Environment): ExecutionResult
 
-    /** Performs the whole procedure (10 steps) of the BDI Agent's Reasoning Cycle. */
+    /** Performs the whole procedure (10 steps) of the BDI Agent's Reasoning Cycle.
+     *  @param environment the [Environment]
+     *  @param controller [Activity.Controller] that manages agent's execution
+     *  @param debugEnabled [Boolean] specifies wether debug logs are needed or not
+     */
     fun reason(
         environment: Environment,
         controller: Activity.Controller? = null,
         debugEnabled: Boolean = false,
     ): Iterable<EnvironmentChange>
+
+    /**
+     * Performs the sensing phase of the reasoning cycle, in particular:
+     *  - STEP1: Perceive the Environment
+     *  - STEP2: Update the BeliefBase
+     *  - STEP3: Receiving Communication from Other Agents
+     *  - STEP4: Selecting "Socially Acceptable" Messages
+     *  @param environment the [Environment]
+     *  @param controller [Activity.Controller] that manages agent's execution
+     *  @param debugEnabled [Boolean] specifies wether debug logs are needed or not
+     */
+    fun sense(environment: Environment, controller: Activity.Controller?, debugEnabled: Boolean): Unit
+
+    /** Performs the reason phase of the reasoning cycle, in particular:
+     *  - STEP5: Selecting an Event
+     *  - STEP6: Retrieving all Relevant Plans
+     *  - STEP7: Determining the Applicable Plans
+     *  - STEP8: Selecting one Applicable Plan
+     */
+    fun reason(): Unit
+
+    /**
+     * Performs the reason phase of the reasoning cycle, in particular:
+     *  - STEP9: Select an Intention for Further Execution
+     *  - STEP10: Executing one Step on an Intention
+     *  @param environment [Environment]
+     *  @return an Iterable of [EnvironmentChange] that need to be scheduled for the application in the environment.
+     */
+    fun act(environment: Environment): Iterable<EnvironmentChange>
 
     companion object {
         fun of(agent: Agent): AgentLifecycle = AgentLifecycleImpl(agent)

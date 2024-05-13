@@ -319,11 +319,7 @@ internal data class AgentLifecycleImpl(
             }
         }
 
-    override fun reason(
-        environment: Environment,
-        controller: Activity.Controller?,
-        debugEnabled: Boolean,
-    ): Iterable<EnvironmentChange> {
+    override fun sense(environment: Environment, controller: Activity.Controller?, debugEnabled: Boolean) {
         this.controller = controller
         this.debugEnabled = debugEnabled
 
@@ -355,8 +351,13 @@ internal data class AgentLifecycleImpl(
                 else -> throw IllegalArgumentException("Unknown message type")
             }
         }
+        this.agent = this.agent.copy(newBeliefBase, newEvents)
+    }
+
+    override fun reason() {
         // STEP5: Selecting an Event.
-        val selectedEvent = selectEvent(newEvents)
+        var newEvents = this.agent.context.events
+        val selectedEvent = selectEvent(this.agent.context.events)
         var newIntentionPool = agent.context.intentions
         if (selectedEvent != null) {
             newEvents = newEvents - selectedEvent
@@ -366,19 +367,20 @@ internal data class AgentLifecycleImpl(
             // if the set of relevant plans is empty, the event is simply discarded.
 
             // STEP7: Determining the Applicable Plans.
-            val applicablePlans = relevantPlans.plans.filter { isPlanApplicable(selectedEvent, it, newBeliefBase) }
+            val applicablePlans = relevantPlans.plans.filter {
+                isPlanApplicable(selectedEvent, it, this.agent.context.beliefBase)
+            }
 
             // STEP8: Selecting one Applicable Plan.
             val selectedPlan = selectApplicablePlan(applicablePlans)
 
-            // STEP9: Select an Intention for Further Execution.
             // Add plan to intentions
             if (selectedPlan != null) {
                 if (debugEnabled) println("[${agent.name}] Selected the event: $selectedEvent")
                 // if (debugEnabled) println("[${agent.name}] Selected the plan: $selectedPlan")
                 val updatedIntention = assignPlanToIntention(
                     selectedEvent,
-                    selectedPlan.applicablePlan(selectedEvent, newBeliefBase),
+                    selectedPlan.applicablePlan(selectedEvent, this.agent.context.beliefBase),
                     agent.context.intentions,
                 )
                 // if (debugEnabled) println("[${agent.name}] Updated Intention: $updatedIntention")
@@ -393,36 +395,51 @@ internal data class AgentLifecycleImpl(
             }
         }
         // Select intention to execute
-        var newAgent = agent.copy(
+        this.agent = this.agent.copy(
             events = newEvents,
-            beliefBase = newBeliefBase,
             intentions = newIntentionPool,
         )
+    }
 
+    override fun act(environment: Environment): Iterable<EnvironmentChange> {
         var executionResult = ExecutionResult(AgentContext.of())
+
+        var newIntentionPool = agent.context.intentions
         if (!newIntentionPool.isEmpty()) {
+            // STEP9: Select an Intention for Further Execution.
             val result = scheduleIntention(newIntentionPool)
             val scheduledIntention = result.intentionToExecute
             newIntentionPool = result.newIntentionPool
             // STEP10: Executing one Step on an Intention
-            newAgent = if (scheduledIntention.recordStack.isEmpty()) {
-                newAgent.copy(intentions = newIntentionPool)
+            this.agent = if (scheduledIntention.recordStack.isEmpty()) {
+                this.agent.copy(intentions = newIntentionPool)
             } else {
                 // if (debugEnabled) println("[${agent.name}] RUN -> $scheduledIntention")
                 executionResult = runIntention(
                     scheduledIntention,
-                    newAgent.context.copy(intentions = newIntentionPool),
+                    this.agent.context.copy(intentions = newIntentionPool),
                     environment,
                 )
-                newAgent.copy(executionResult.newAgentContext)
+                this.agent.copy(executionResult.newAgentContext)
             }
             // println("post run -> ${newAgent.context}")
         }
-        this.agent = newAgent
-        return if (message != null) {
+
+        // Generate Environment Changes
+        return if (environment.getNextMessage(agent.name) != null) {
             executionResult.environmentEffects + PopMessage(this.agent.name)
         } else {
             executionResult.environmentEffects
         }
+    }
+
+    override fun reason(
+        environment: Environment,
+        controller: Activity.Controller?,
+        debugEnabled: Boolean,
+    ): Iterable<EnvironmentChange> {
+        sense(environment, controller, debugEnabled)
+        reason()
+        return act(environment)
     }
 }
