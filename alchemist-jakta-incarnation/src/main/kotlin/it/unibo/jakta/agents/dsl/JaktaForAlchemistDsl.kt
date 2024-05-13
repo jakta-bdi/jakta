@@ -52,7 +52,7 @@ class JaktaForAlchemistEnvironmentScope : Builder<Map<String, ExternalAction>> {
 // TODO("This DSL entrypoint can create more than one agent, the simulation must know how to handle it.")
 @JaktaDSL
 fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.mas(f: JaktaForAlchemistMasScope.() -> Unit): Agent {
-    val wa = JaktaForAlchemistMasScope().also(f).build()
-    this.externalActions += wa.actions
-    return wa.agent
+    val wrappedAgent = JaktaForAlchemistMasScope().also(f).build()
+    this.externalActions += wrappedAgent.actions
+    return wrappedAgent.agent
 }
