@@ -40,6 +40,7 @@ fun pollicino(): Agent =
 
             +achieve("catch") onlyIf { "state"("running").fromSelf } then {
                 execute("move")
+                execute("sleep"(1e9.toLong()))
                 achieve("catch")
             }
 

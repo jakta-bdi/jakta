@@ -15,11 +15,11 @@ internal class OneThreadPerAgentImpl : ExecutionStrategy {
         executionMas = mas
         debug = debugEnabled
         mas.agents.forEach { agent ->
-            val agentLC = AgentLifecycle.of(agent)
+            val agentLC = AgentLifecycle.newLifecycleFor(agent)
             Runner.threadOf(
                 Activity.of {
                     agentsRunners += agent to it
-                    val sideEffects = agentLC.deliberate(executionMas.environment, it, debug)
+                    val sideEffects = agentLC.runOneCycle(executionMas.environment, it, debug)
                     executionMas.applyEnvironmentEffects(sideEffects)
                 },
             ).run()
@@ -27,11 +27,11 @@ internal class OneThreadPerAgentImpl : ExecutionStrategy {
     }
 
     override fun spawnAgent(agent: Agent) {
-        val agentLC = AgentLifecycle.of(agent)
+        val agentLC = AgentLifecycle.newLifecycleFor(agent)
         Runner.threadOf(
             Activity.of {
                 agentsRunners += agent to it
-                val sideEffects = agentLC.deliberate(executionMas.environment, it, debug)
+                val sideEffects = agentLC.runOneCycle(executionMas.environment, it, debug)
                 executionMas.applyEnvironmentEffects(sideEffects)
             },
         ).run()

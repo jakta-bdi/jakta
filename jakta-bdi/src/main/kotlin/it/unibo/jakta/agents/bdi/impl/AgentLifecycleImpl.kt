@@ -433,7 +433,7 @@ internal data class AgentLifecycleImpl(
         }
     }
 
-    override fun deliberate(
+    override fun runOneCycle(
         environment: Environment,
         controller: Activity.Controller?,
         debugEnabled: Boolean,

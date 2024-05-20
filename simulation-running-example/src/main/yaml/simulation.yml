@@ -26,7 +26,18 @@ deployments:
   - type: Point
     parameters: [ 1.5, 0.5 ]
     programs:
-      - time-distribution: 1
+      - time-distribution:
+          type: JaktaTimeDistribution
+          parameters:
+            sense:
+              type: WeibullTime
+              parameters: [1, 1]
+            deliberate:
+              type: DiracComb
+              parameters: 0.1
+            act:
+              type: ExponentialTime
+              parameters: 1
         program:
           agent-factory: it.unibo.jakta.examples.simulation.littlethumb.Releasing.simulationReleasing
           parameters: []

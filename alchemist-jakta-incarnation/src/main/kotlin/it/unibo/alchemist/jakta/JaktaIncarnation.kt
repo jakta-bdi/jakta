@@ -1,8 +1,8 @@
 package it.unibo.alchemist.jakta
 
-import it.unibo.alchemist.jakta.actions.JaktaAgentForAlchemist
 import it.unibo.alchemist.jakta.properties.JaktaEnvironmentForAlchemist
 import it.unibo.alchemist.jakta.properties.JaktaEnvironmentForAlchemist.Companion.BROKER_MOLECULE
+import it.unibo.alchemist.jakta.reactions.JaktaAgentForAlchemist
 import it.unibo.alchemist.model.Action
 import it.unibo.alchemist.model.Actionable
 import it.unibo.alchemist.model.Condition
@@ -15,7 +15,6 @@ import it.unibo.alchemist.model.Reaction
 import it.unibo.alchemist.model.TimeDistribution
 import it.unibo.alchemist.model.molecules.SimpleMolecule
 import it.unibo.alchemist.model.nodes.GenericNode
-import it.unibo.alchemist.model.reactions.Event
 import it.unibo.alchemist.model.timedistributions.DiracComb
 import org.apache.commons.math3.random.RandomGenerator
 
@@ -40,7 +39,24 @@ class JaktaIncarnation<P> : Incarnation<Any?, P> where P : Position<P> {
         time: TimeDistribution<Any?>,
         actionable: Actionable<Any?>,
         additionalParameters: Any?,
-    ): Action<Any?> {
+    ): Action<Any?> = error("No actions in Jakta")
+
+    override fun createCondition(
+        randomGenerator: RandomGenerator?,
+        environment: Environment<Any?, P>?,
+        node: Node<Any?>?,
+        time: TimeDistribution<Any?>?,
+        actionable: Actionable<Any?>?,
+        additionalParameters: Any?,
+    ): Condition<Any?> = error("No conditions in Jakta")
+
+    override fun createReaction(
+        randomGenerator: RandomGenerator,
+        environment: Environment<Any?, P>,
+        node: Node<Any?>?,
+        timeDistribution: TimeDistribution<Any?>,
+        additionalParameters: Any?,
+    ): Reaction<Any?> {
         /*
          * additionalParameters will contain everything that was passed as `program`
          *
@@ -63,28 +79,10 @@ class JaktaIncarnation<P> : Incarnation<Any?, P> where P : Position<P> {
         }
         return JaktaAgentForAlchemist(
             requireNotNull(node) { "Jakta can not execute as global reaction" },
+            timeDistribution,
             entrypoint,
             parameters,
         )
-    }
-
-    override fun createCondition(
-        randomGenerator: RandomGenerator?,
-        environment: Environment<Any?, P>?,
-        node: Node<Any?>?,
-        time: TimeDistribution<Any?>?,
-        actionable: Actionable<Any?>?,
-        additionalParameters: Any?,
-    ): Condition<Any?> = error("No conditions in Jakta")
-
-    override fun createReaction(
-        randomGenerator: RandomGenerator,
-        environment: Environment<Any?, P>,
-        node: Node<Any?>?,
-        timeDistribution: TimeDistribution<Any?>,
-        parameter: Any?,
-    ): Reaction<Any?> = Event(node, timeDistribution).also {
-        it.actions = listOf(createAction(randomGenerator, environment, node, timeDistribution, it, parameter))
     }
 
     override fun createTimeDistribution(
