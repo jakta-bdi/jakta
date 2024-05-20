@@ -100,7 +100,7 @@ interface AgentLifecycle {
      *  @param controller [Activity.Controller] that manages agent's execution
      *  @param debugEnabled [Boolean] specifies wether debug logs are needed or not
      */
-    fun deliberate(
+    fun runOneCycle(
         environment: Environment,
         controller: Activity.Controller? = null,
         debugEnabled: Boolean = false,
@@ -140,6 +140,6 @@ interface AgentLifecycle {
     fun act(environment: Environment): Iterable<EnvironmentChange>
 
     companion object {
-        fun of(agent: Agent): AgentLifecycle = AgentLifecycleImpl(agent)
+        fun newLifecycleFor(agent: Agent): AgentLifecycle = AgentLifecycleImpl(agent)
     }
 }

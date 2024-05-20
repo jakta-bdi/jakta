@@ -33,6 +33,7 @@ fun pollicina(): Agent =
             }
             +achieve("run") onlyIf { "state"("running").fromSelf } then {
                 execute("move")
+                execute("sleep"(1e10.toLong()))
                 achieve("run")
             }
 

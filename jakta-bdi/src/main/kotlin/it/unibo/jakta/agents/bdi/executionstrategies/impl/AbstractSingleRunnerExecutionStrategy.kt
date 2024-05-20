@@ -21,7 +21,7 @@ abstract class AbstractSingleRunnerExecutionStrategy : ExecutionStrategy {
 
         @Synchronized
         fun addAgent(agent: Agent) {
-            agents = agents + (agent to AgentLifecycle.of(agent))
+            agents = agents + (agent to AgentLifecycle.newLifecycleFor(agent))
         }
 
         @Synchronized
