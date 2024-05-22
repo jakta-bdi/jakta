@@ -37,7 +37,7 @@ object InternalActions {
     object Sleep : AbstractInternalAction("sleep", 1) {
         override fun action(request: InternalRequest) {
             if (request.arguments[0].isInteger) {
-                Thread.sleep(request.arguments[0].castToInteger().value.toLong())
+                sleepAgent(request.arguments[0].castToInteger().value.toLong())
             }
         }
     }

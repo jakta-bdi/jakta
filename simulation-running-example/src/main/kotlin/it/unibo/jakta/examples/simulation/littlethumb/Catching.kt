@@ -40,7 +40,7 @@ fun pollicino(): Agent =
 
             +achieve("catch") onlyIf { "state"("running").fromSelf } then {
                 execute("move")
-                execute("sleep"(1e9.toLong()))
+                // execute("sleep"(5000.toLong()))
                 achieve("catch")
             }
 
@@ -51,6 +51,7 @@ fun pollicino(): Agent =
 
             +"agent"(N).fromPercept then {
                 execute("stopAgent"(N))
+                execute("print"("mandato messaggio"))
                 -"state"("running").fromSelf
             }
             -achieve("catch") then {
