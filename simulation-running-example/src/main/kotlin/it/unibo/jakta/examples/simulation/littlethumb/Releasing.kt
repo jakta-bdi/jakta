@@ -22,18 +22,13 @@ fun pollicina(): Agent =
             fact { "state"("running") }
         }
         goals {
-            achieve("greet")
             achieve("run")
             achieve("releaseObject")
         }
         plans {
-            +achieve("greet") then {
-                execute("print"("HELOOOOOOOOOOO"))
-                execute("greet")
-            }
             +achieve("run") onlyIf { "state"("running").fromSelf } then {
                 execute("move")
-                execute("sleep"(1e10.toLong()))
+                // execute("sleep"(1e10.toLong()))
                 achieve("run")
             }
 
@@ -43,8 +38,9 @@ fun pollicina(): Agent =
             }
 
             +"stop"("source"(P)) then {
-                -"state"("running").fromSelf
-                // execute("stop")
+                execute("print"("RICEVUTO"))
+                // -"state"("running").fromSelf
+                execute("stop")
             }
         }
     }
