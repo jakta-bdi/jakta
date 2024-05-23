@@ -8,7 +8,9 @@ network-model:
   parameters: [ *sightRadius ]
 
 _pool: &program
-  - time-distribution: 1
+  - time-distribution:
+      type: DiracComb
+      parameters: [0, 1]
     program:
       agent-factory: it.unibo.jakta.examples.simulation.littlethumb.Catching.simulationCatching
       parameters: []
@@ -27,17 +29,8 @@ deployments:
     parameters: [ 1.5, 0.5 ]
     programs:
       - time-distribution:
-          type: JaktaTimeDistribution
-          parameters:
-            sense:
-              type: WeibullTime
-              parameters: [1, 1]
-            deliberate:
-              type: DiracComb
-              parameters: 0.1
-            act:
-              type: ExponentialTime
-              parameters: 1
+          type: DiracComb
+          parameters: [0, 1]
         program:
           agent-factory: it.unibo.jakta.examples.simulation.littlethumb.Releasing.simulationReleasing
           parameters: []
@@ -45,6 +38,10 @@ deployments:
       - molecule: agent
         concentration: "pollicina"
 
+monitors:
+  type: SwingGUI
+  parameters:
+    graphics: effects/simulation.json
 
 terminate:
   - type: AfterTime
