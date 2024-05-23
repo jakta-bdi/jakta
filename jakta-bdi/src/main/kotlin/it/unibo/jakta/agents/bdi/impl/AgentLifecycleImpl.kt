@@ -56,6 +56,7 @@ internal data class AgentLifecycleImpl(
 ) : AgentLifecycle {
     private var controller: Activity.Controller? = null
     private var debugEnabled = false
+    private var cachedEffects = emptyList<EnvironmentChange>()
 
     override fun updateBelief(perceptions: BeliefBase, beliefBase: BeliefBase): RetrieveResult =
         when (perceptions == beliefBase) {
@@ -350,6 +351,7 @@ internal data class AgentLifecycleImpl(
                 }
                 else -> throw IllegalArgumentException("Unknown message type")
             }
+            cachedEffects = cachedEffects + PopMessage(this.agent.name)
         }
         this.agent = this.agent.copy(newBeliefBase, newEvents)
     }
@@ -426,11 +428,9 @@ internal data class AgentLifecycleImpl(
         }
 
         // Generate Environment Changes
-        return if (environment.getNextMessage(agent.name) != null) {
-            executionResult.environmentEffects + PopMessage(this.agent.name)
-        } else {
-            executionResult.environmentEffects
-        }
+        val environmentChangesToApply = executionResult.environmentEffects + cachedEffects
+        cachedEffects = emptyList()
+        return environmentChangesToApply
     }
 
     override fun runOneCycle(
