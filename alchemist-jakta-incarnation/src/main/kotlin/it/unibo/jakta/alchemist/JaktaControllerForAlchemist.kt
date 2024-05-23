@@ -26,7 +26,6 @@ data class JaktaControllerForAlchemist(
                 jaktaEnvironment.node.removeReaction(reaction)
                 jaktaEnvironment.alchemistEnvironment.simulation.reactionRemoved(reaction)
             }
-        TODO("BROKEN")
     }
 
     override fun currentTime(): JaktaTime = JaktaTime.continuous(alchemistTime.toDouble())

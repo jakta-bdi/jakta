@@ -19,26 +19,17 @@ fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.simulationCatching(): Agen
 
 fun pollicino(): Agent =
     agent("pollicino") {
-        beliefs {
-            fact { "state"("running") }
-        }
         goals {
-            achieve("greet")
             achieve("catch")
         }
         plans {
-            +achieve("greet") then {
-                execute("greet")
-            }
-            +achieve("catch") onlyIf {
-                "state"("running").fromSelf and "found"(P).fromSelf
-            } then {
+            +achieve("catch") onlyIf { "found"(P).fromSelf } then {
                 execute("goTo"(P))
                 -"found"(P).fromSelf
                 achieve("catch")
             }
 
-            +achieve("catch") onlyIf { "state"("running").fromSelf } then {
+            +achieve("catch") then {
                 execute("move")
                 // execute("sleep"(5000.toLong()))
                 achieve("catch")
@@ -51,11 +42,7 @@ fun pollicino(): Agent =
 
             +"agent"(N).fromPercept then {
                 execute("stopAgent"(N))
-                execute("print"("mandato messaggio"))
-                -"state"("running").fromSelf
-            }
-            -achieve("catch") then {
-                execute("print"("An error occurred during the implementation of the catch goal"))
+                execute("stop")
             }
         }
     }
