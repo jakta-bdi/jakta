@@ -25,6 +25,7 @@ fun pollicina(): Agent =
             +achieve("run") then {
                 execute("move")
                 // execute("sleep"(1e10.toLong()))
+                execute("sleep"(5000.toLong()))
                 achieve("run")
             }
 

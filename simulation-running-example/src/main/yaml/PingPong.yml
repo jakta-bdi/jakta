@@ -33,6 +33,11 @@ deployments:
       - molecule: ball
         concentration: *initialColor
 
+monitors:
+  type: SwingGUI
+  parameters:
+    graphics: effects/ping-pong.json
+
 terminate:
   - type: AfterTime
     parameters: [ 1800 ]

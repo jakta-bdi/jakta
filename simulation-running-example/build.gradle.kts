@@ -60,9 +60,9 @@ File("${project.projectDir.absolutePath}/src/main/yaml").listFiles()
         val capitalizedName = it.nameWithoutExtension.capitalized()
         val graphic by basetask("run${capitalizedName}Graphic") {
             args(
-                "--override",
-                "monitors: { type: SwingGUI, parameters: { graphics: " +
-                    "effects/${it.nameWithoutExtension}.json } }",
+                // "--override",
+                // "monitors: { type: SwingGUI, parameters: { graphics: " +
+                //    "effects/${it.nameWithoutExtension}.json } }",
                 "--override",
                 "launcher: { parameters: { batch: [], autoStart: false } }",
             )

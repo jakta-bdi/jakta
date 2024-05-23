@@ -31,7 +31,7 @@ fun pollicino(): Agent =
 
             +achieve("catch") then {
                 execute("move")
-                // execute("sleep"(5000.toLong()))
+                execute("sleep"(5000.toLong()))
                 achieve("catch")
             }
 
