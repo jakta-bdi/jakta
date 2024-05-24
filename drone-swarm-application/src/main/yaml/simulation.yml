@@ -1,0 +1,49 @@
+variables:
+  sightRadius: &sightRadius
+    formula: 2.0
+
+incarnation: jakta
+network-model:
+  type: ConnectWithinDistance
+  parameters: [ *sightRadius ]
+
+_pool: &leader
+  - time-distribution: 1
+    program:
+      agent-factory: it.unibo.jakta.examples.swarm.LeaderDrone.leader
+      parameters: []
+
+_program: &drone
+  - time-distribution: 1
+    program:
+      agent-factory: it.unibo.jakta.examples.swarm.Drone.drone
+      parameters: [ ]
+
+deployments:
+  - type: Rectangle
+    parameters: [ 1, -2, -2, 2, 2 ]
+    programs:
+      - *leader
+    contents:
+      - molecule: radius
+        concentration: *sightRadius
+      - molecule: sightRadius
+        concentration: *sightRadius
+  - type: Point
+    parameters: [ 2.0, 0.0 ]
+    programs:
+      - *drone
+  - type: Point
+    parameters: [ 2.0, -2.0 ]
+    programs:
+      - *drone
+
+
+monitors:
+  type: SwingGUI
+  parameters:
+    graphics: effects/simulation.json
+
+terminate:
+  - type: AfterTime
+    parameters: [ 180000 ]

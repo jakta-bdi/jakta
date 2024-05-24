@@ -40,17 +40,22 @@ class JaktaEnvironmentForAlchemist<P : Position<P>>(
             .filterIsInstance<JaktaAgentForAlchemist<*>>()
             .associate { it.agent.name to it.agent.agentID }
 
-    override val data: Map<String, Any> get() =
-        alchemistEnvironment.getNeighborhood(node)
-//        alchemistEnvironment.nodes
-            .flatMap { it.contents.toList() }
-            .associate { (name, content) ->
-                name.name to content.valueOrEmptyMolecule()
-            }
+    private fun neighborhoodData(): Map<String, Any> = alchemistEnvironment.getNeighborhood(node)
+        .flatMap { it.contents.toList() }
+        .associate { (name, content) ->
+            name.name to content.valueOrEmptyMolecule()
+        }
+
+    private fun myNodeData(): Map<String, Any> = node.contents.toList()
+        .associate { (name, content) ->
+            name.name to content.valueOrEmptyMolecule()
+        }
+
+    override val data: Map<String, Any> get() = myNodeData()
 
     override val perception: Perception
         get() = Perception.of(
-            data.map {
+            neighborhoodData().map {
                 Belief.fromPerceptSource(Struct.of(it.key, ObjectRef.of(it.value)))
             },
         )
@@ -85,12 +90,14 @@ class JaktaEnvironmentForAlchemist<P : Position<P>>(
 
     // --------------- Data manipulation in node ---------------
 
-    override fun addData(key: String, value: Any): Environment = this.also {
+    override fun addData(key: String, value: Any): Environment {
         node.setConcentration(SimpleMolecule(key), value)
+        return this
     }
 
-    override fun removeData(key: String): Environment = also {
+    override fun removeData(key: String): Environment {
         node.contents.keys.firstOrNull { it.name.equals(key) }?.let { node.removeConcentration(it) }
+        return this
     }
 
     override fun updateData(newData: Map<String, Any>): Environment {
