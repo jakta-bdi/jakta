@@ -7,12 +7,12 @@ import it.unibo.alchemist.jakta.util.fix
 import it.unibo.alchemist.model.Position
 import it.unibo.jakta.agents.bdi.Agent
 import it.unibo.jakta.agents.bdi.dsl.beliefs.fromPercept
+import it.unibo.jakta.agents.bdi.messages.Achieve
 import it.unibo.jakta.agents.bdi.messages.Message
-import it.unibo.jakta.agents.bdi.messages.Tell
 import it.unibo.jakta.agents.dsl.mas
-import it.unibo.jakta.examples.swarm.CircleMovementManager.createCircleCenter
-import it.unibo.jakta.examples.swarm.CircleMovementManager.degreesToRadians
-import it.unibo.jakta.examples.swarm.CircleMovementManager.positionInCircumference
+import it.unibo.jakta.examples.swarm.CircleMovement.createCircleCenter
+import it.unibo.jakta.examples.swarm.CircleMovement.degreesToRadians
+import it.unibo.jakta.examples.swarm.CircleMovement.positionInCircumference
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.solve.libs.oop.ObjectRef
 
@@ -47,7 +47,6 @@ fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.leader(): Agent =
                     val dest = arguments.first().fix<String>()
                     var participants = (data["participants"] ?: setOf<String>()) as Set<*>
                     participants = participants + dest.split("@")[1]
-                    println(participants)
                     updateData("participants" to participants)
                     val payload: Struct = Struct.of(
                         "joinCircle",
@@ -55,7 +54,7 @@ fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.leader(): Agent =
                         ObjectRef.of(data["radius"]),
                         ObjectRef.of(participants),
                     )
-                    sendMessage(dest, Message(sender, Tell, payload))
+                    sendMessage(dest, Message(sender, Achieve, payload))
                 }
             }
         }
@@ -73,6 +72,7 @@ fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.leader(): Agent =
 
                 +"agent"(N).fromPercept then {
                     execute("notifyAgent"(N))
+                    -"agent"(N).fromPercept
                 }
             }
         }

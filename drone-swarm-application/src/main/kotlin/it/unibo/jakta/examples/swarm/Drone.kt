@@ -5,10 +5,8 @@ package it.unibo.jakta.examples.swarm
 import it.unibo.alchemist.jakta.properties.JaktaEnvironmentForAlchemist
 import it.unibo.alchemist.jakta.util.fix
 import it.unibo.alchemist.model.Position
-import it.unibo.jakta.agents.bdi.dsl.beliefs.fromSelf
-import it.unibo.jakta.agents.bdi.dsl.beliefs.source
 import it.unibo.jakta.agents.dsl.mas
-import it.unibo.jakta.examples.swarm.CircleMovementManager.positionInCircumference
+import it.unibo.jakta.examples.swarm.CircleMovement.positionInCircumference
 import it.unibo.tuprolog.solve.libs.oop.ObjectRef
 import kotlin.math.PI
 import kotlin.math.atan2
@@ -27,20 +25,18 @@ fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.drone() =
                     // Compute my destination in the circle
                     val angles = (2 * PI) / otherNodes.count()
                     val destinationAngle = otherNodes.sorted().indexOf(node.id.toString()) * angles
-                    val destinationPosition = CircleMovementManager.positionInCircumference(
+                    val destinationPosition = CircleMovement.positionInCircumference(
                         radius,
                         destinationAngle,
                         center,
                     )
 
                     // Compute the movement to perform
-                    val movement = SwarmPosition(
-                        destinationPosition.x - myPosition.x,
-                        destinationPosition.y - myPosition.y,
-                    )
+                    val movement = destinationPosition - myPosition
+
                     val distanceToMove = hypot(movement.x, movement.y)
-                    val maxPossibleMovementRadius = 0.05
-                    if (maxPossibleMovementRadius <= distanceToMove) {
+                    val maxPossibleMovementRadius = 0.15
+                    if (maxPossibleMovementRadius >= distanceToMove) {
                         alchemistEnvironment.moveNodeToPosition(
                             node,
                             destinationPosition.toPosition(alchemistEnvironment),
@@ -63,16 +59,9 @@ fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.drone() =
         agent("drone") {
             addData("agent", "drone@${node.id}")
             plans {
-                +"joinCircle"(C, R, N).source("leader") then {
-                    +"destination"(C, R, N)
-                    achieve("followLeader")
-                }
-                +"destination"(C, R, N).fromSelf then {
-                    execute("print"("Destination added!, center: ", C))
-                }
-                +achieve("followLeader") onlyIf { "destination"(C, R, N).fromSelf } then {
+                +achieve("joinCircle"(C, R, N)) then {
+                    // execute("print"("I'm node ${node.id} and I'm joining cluster"))
                     execute("follow"(C, R, N))
-                    achieve("followLeader")
                 }
             }
         }

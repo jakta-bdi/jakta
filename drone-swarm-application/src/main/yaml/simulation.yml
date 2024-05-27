@@ -14,27 +14,34 @@ _pool: &leader
       parameters: []
 
 _program: &drone
-  - time-distribution: 1
+  - time-distribution:
+      type: JaktaTimeDistribution
+      parameters:
+        sense:
+          type: DiracComb
+          parameters: 3
+        deliberate:
+          type: DiracComb
+          parameters: 1
+        act:
+          type: DiracComb
+          parameters: 1
     program:
       agent-factory: it.unibo.jakta.examples.swarm.Drone.drone
       parameters: [ ]
 
 deployments:
-  - type: Rectangle
-    parameters: [ 1, -2, -2, 2, 2 ]
+  - type: Point
+    parameters: [ -5.0, -3.0 ]
     programs:
       - *leader
     contents:
       - molecule: radius
-        concentration: *sightRadius
+        concentration: 1.0
       - molecule: sightRadius
         concentration: *sightRadius
-  - type: Point
-    parameters: [ 2.0, 0.0 ]
-    programs:
-      - *drone
-  - type: Point
-    parameters: [ 2.0, -2.0 ]
+  - type: Rectangle
+    parameters: [ 7.0, -6.0, -6.0, 6.0, 6.0 ]
     programs:
       - *drone
 

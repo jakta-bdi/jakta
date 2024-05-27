@@ -6,11 +6,11 @@ import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
 
-object CircleMovementManager {
-    fun createCircleCenter(position: SwarmPosition, radius: Double): SwarmPosition =
+object CircleMovement {
+    fun createCircleCenter(leaderPosition: SwarmPosition, radius: Double): SwarmPosition =
         SwarmPosition(
-            position.x + radius,
-            position.y,
+            leaderPosition.x + radius,
+            leaderPosition.y,
         )
 
     fun positionInCircumference(
@@ -23,13 +23,17 @@ object CircleMovementManager {
     )
 
     fun degreesToRadians(degrees: Int): Double {
-        return degrees * (PI / 180)
+        return degrees * PI / 180
     }
 }
 
 data class SwarmPosition(val x: Double, val y: Double) {
     fun <P : Position<P>> toPosition(alchemistEnvironment: Environment<*, P>): P =
         alchemistEnvironment.makePosition(x, y)
+
+    operator fun plus(other: SwarmPosition): SwarmPosition = SwarmPosition(x + other.x, y + other.y)
+
+    operator fun minus(other: SwarmPosition): SwarmPosition = SwarmPosition(x - other.x, y - other.y)
 
     companion object {
         fun fromDoubleArray(doubleArray: DoubleArray): SwarmPosition =
