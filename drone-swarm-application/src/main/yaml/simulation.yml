@@ -19,7 +19,7 @@ _program: &drone
       parameters:
         sense:
           type: DiracComb
-          parameters: 3
+          parameters: 0.5
         deliberate:
           type: DiracComb
           parameters: 1

@@ -30,10 +30,9 @@ fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.drone() =
                         destinationAngle,
                         center,
                     )
-
                     // Compute the movement to perform
                     val movement = destinationPosition - myPosition
-
+                    addData("velocity", doubleArrayOf(movement.x, movement.y))
                     val distanceToMove = hypot(movement.x, movement.y)
                     val maxPossibleMovementRadius = 0.15
                     if (maxPossibleMovementRadius >= distanceToMove) {
@@ -57,6 +56,7 @@ fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.drone() =
             }
         }
         agent("drone") {
+            addData("id", node.id)
             addData("agent", "drone@${node.id}")
             plans {
                 +achieve("joinCircle"(C, R, N)) then {

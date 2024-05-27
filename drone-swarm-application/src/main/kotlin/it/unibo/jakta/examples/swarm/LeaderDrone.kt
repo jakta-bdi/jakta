@@ -23,7 +23,7 @@ fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.leader(): Agent =
         environment {
             actions {
                 action("circleMovementStep", 0) {
-                    val initialPosition = alchemistEnvironment.getPosition(node)
+                    val initialPosition = SwarmPosition.fromPosition(alchemistEnvironment.getPosition(node))
                     val radius = data["radius"] ?: error("Missing radius as Node molecule. $data")
                     var center = data["centerPosition"]
                     if (center == null) {
@@ -37,6 +37,9 @@ fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.leader(): Agent =
                         },
                         SwarmPosition.fromPosition(center),
                     )
+
+                    val movement = nextPosition - initialPosition
+                    addData("velocity", doubleArrayOf(movement.x, movement.y))
 
                     alchemistEnvironment.moveNodeToPosition(
                         node,
@@ -59,6 +62,7 @@ fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.leader(): Agent =
             }
         }
         agent("leader") {
+            addData("id", node.id)
             goals {
                 achieve("move")
             }
