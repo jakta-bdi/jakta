@@ -49,7 +49,6 @@ import it.unibo.jakta.agents.bdi.messages.Tell
 import it.unibo.jakta.agents.bdi.plans.Plan
 import it.unibo.jakta.agents.bdi.plans.PlanLibrary
 import it.unibo.jakta.agents.fsm.Activity
-import kotlin.IllegalArgumentException
 
 internal data class AgentLifecycleImpl(
     private var agent: Agent,
@@ -342,14 +341,13 @@ internal data class AgentLifecycleImpl(
         // Parse message
         if (message != null) {
             newEvents = when (message.type) {
-                is Achieve ->
+                is it.unibo.jakta.agents.bdi.messages.Achieve ->
                     newEvents + Event.ofAchievementGoalInvocation(Achieve.of(message.value))
                 is Tell -> {
                     val retrieveResult = newBeliefBase.add(Belief.fromMessageSource(message.from, message.value))
                     newBeliefBase = retrieveResult.updatedBeliefBase
                     generateEvents(newEvents, retrieveResult.modifiedBeliefs)
                 }
-                else -> throw IllegalArgumentException("Unknown message type")
             }
             cachedEffects = cachedEffects + PopMessage(this.agent.name)
         }
