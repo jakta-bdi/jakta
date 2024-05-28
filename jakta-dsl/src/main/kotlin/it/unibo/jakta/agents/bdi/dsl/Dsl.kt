@@ -1,5 +1,6 @@
 package it.unibo.jakta.agents.bdi.dsl
 
+import it.unibo.jakta.agents.bdi.Agent
 import it.unibo.jakta.agents.bdi.Mas
 import it.unibo.jakta.agents.bdi.dsl.actions.ExternalActionScope
 import it.unibo.jakta.agents.bdi.dsl.actions.ExternalActionsScope
@@ -25,9 +26,10 @@ fun externalAction(name: String, arity: Int, f: ExternalActionScope.() -> Unit) 
     ExternalActionsScope().newAction(name, arity, f)
 
 @JaktaDSL
-fun environment(f: EnvironmentScope.() -> Unit): Environment {
-    return EnvironmentScope().also(f).build()
-}
+fun environment(f: EnvironmentScope.() -> Unit): Environment = EnvironmentScope().also(f).build()
+
+@JaktaDSL
+fun agent(name: String, f: AgentScope.() -> Unit): Agent = AgentScope(name).also(f).build()
 
 fun plans(f: PlansScope.() -> Unit): Iterable<Plan> = PlansScope().also(f).build()
 

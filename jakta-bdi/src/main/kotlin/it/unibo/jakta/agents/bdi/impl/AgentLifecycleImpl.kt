@@ -49,12 +49,13 @@ import it.unibo.jakta.agents.bdi.messages.Tell
 import it.unibo.jakta.agents.bdi.plans.Plan
 import it.unibo.jakta.agents.bdi.plans.PlanLibrary
 import it.unibo.jakta.agents.fsm.Activity
-import kotlin.IllegalArgumentException
 
 internal data class AgentLifecycleImpl(
     private var agent: Agent,
 ) : AgentLifecycle {
-    private lateinit var controller: Activity.Controller
+    private var controller: Activity.Controller? = null
+    private var debugEnabled = false
+    private var cachedEffects = emptyList<EnvironmentChange>()
 
     override fun updateBelief(perceptions: BeliefBase, beliefBase: BeliefBase): RetrieveResult =
         when (perceptions == beliefBase) {
@@ -111,9 +112,11 @@ internal data class AgentLifecycleImpl(
         goal: ActionGoal,
     ): ExecutionResult {
         var newIntention = intention.pop()
-        try {
+        if (action.signature.arity < goal.action.args.size) { // Arguments number mismatch
+            return ExecutionResult(failAchievementGoal(intention, context))
+        } else {
             val internalResponse = action.execute(
-                InternalRequest.of(this.agent, controller.currentTime(), goal.action.args),
+                InternalRequest.of(this.agent, controller?.currentTime(), goal.action.args),
             )
             // Apply substitution
             return if (internalResponse.substitution.isSuccess) {
@@ -127,9 +130,6 @@ internal data class AgentLifecycleImpl(
             } else {
                 ExecutionResult(failAchievementGoal(intention, context))
             }
-        } catch (e: IllegalArgumentException) {
-            // Argument number mismatch from action definition
-            return ExecutionResult(failAchievementGoal(intention, context))
         }
     }
 
@@ -141,12 +141,15 @@ internal data class AgentLifecycleImpl(
         goal: ActionGoal,
     ): ExecutionResult {
         var newIntention = intention.pop()
-        try {
+        if (action.signature.arity < goal.action.args.size) {
+            // Argument number mismatch from action definition
+            return ExecutionResult(failAchievementGoal(intention, context))
+        } else {
             val externalResponse = action.execute(
                 ExternalRequest.of(
                     environment,
                     agent.name,
-                    controller.currentTime(),
+                    controller?.currentTime(),
                     goal.action.args,
                 ),
             )
@@ -161,9 +164,6 @@ internal data class AgentLifecycleImpl(
             } else {
                 ExecutionResult(failAchievementGoal(intention, context))
             }
-        } catch (e: IllegalArgumentException) {
-            // Argument number mismatch from action definition
-            return ExecutionResult(failAchievementGoal(intention, context))
         }
     }
 
@@ -178,6 +178,9 @@ internal data class AgentLifecycleImpl(
 
                     if (internalAction == null) {
                         // Internal Action not found
+                        if (debugEnabled) {
+                            println("[${agent.name}] WARNING: ${nextGoal.action.functor} Internal Action not found.")
+                        }
                         ExecutionResult(failAchievementGoal(intention, context))
                     } else {
                         // Execute Internal Action
@@ -188,6 +191,9 @@ internal data class AgentLifecycleImpl(
                     val externalAction = environment.externalActions[nextGoal.action.functor]
                     if (externalAction == null) {
                         // Internal Action not found
+                        if (debugEnabled) {
+                            println("[${agent.name}] WARNING: ${nextGoal.action.functor} External Action not found.")
+                        }
                         ExecutionResult(failAchievementGoal(intention, context))
                     } else {
                         // Execute External Action
@@ -197,7 +203,9 @@ internal data class AgentLifecycleImpl(
                 is Act -> {
                     val action = (environment.externalActions + context.internalActions)[nextGoal.action.functor]
                     if (action == null) {
-                        // Internal Action not found
+                        if (debugEnabled) {
+                            println("[${agent.name}] WARNING: ${nextGoal.action.functor} Action not found.")
+                        }
                         ExecutionResult(failAchievementGoal(intention, context))
                     } else {
                         // Execute Action
@@ -285,9 +293,9 @@ internal data class AgentLifecycleImpl(
                     REMOVAL -> newPlans.removePlan(it.plan)
                 }
 
-                is Pause -> controller.pause()
-                is Sleep -> controller.sleep(it.millis)
-                is Stop -> controller.stop()
+                is Pause -> controller?.pause()
+                is Sleep -> controller?.sleep(it.millis)
+                is Stop -> controller?.stop()
             }
         }
         return context.copy(
@@ -311,12 +319,9 @@ internal data class AgentLifecycleImpl(
             }
         }
 
-    override fun reason(
-        environment: Environment,
-        controller: Activity.Controller,
-        debugEnabled: Boolean,
-    ): Iterable<EnvironmentChange> {
+    override fun sense(environment: Environment, controller: Activity.Controller?, debugEnabled: Boolean) {
         this.controller = controller
+        this.debugEnabled = debugEnabled
 
         // STEP1: Perceive the Environment
         val perceptions = environment.percept()
@@ -336,18 +341,23 @@ internal data class AgentLifecycleImpl(
         // Parse message
         if (message != null) {
             newEvents = when (message.type) {
-                is Achieve ->
+                is it.unibo.jakta.agents.bdi.messages.Achieve ->
                     newEvents + Event.ofAchievementGoalInvocation(Achieve.of(message.value))
                 is Tell -> {
                     val retrieveResult = newBeliefBase.add(Belief.fromMessageSource(message.from, message.value))
                     newBeliefBase = retrieveResult.updatedBeliefBase
                     generateEvents(newEvents, retrieveResult.modifiedBeliefs)
                 }
-                else -> throw IllegalArgumentException("Unknown message type")
             }
+            cachedEffects = cachedEffects + PopMessage(this.agent.name)
         }
+        this.agent = this.agent.copy(newBeliefBase, newEvents)
+    }
+
+    override fun deliberate() {
         // STEP5: Selecting an Event.
-        val selectedEvent = selectEvent(newEvents)
+        var newEvents = this.agent.context.events
+        val selectedEvent = selectEvent(this.agent.context.events)
         var newIntentionPool = agent.context.intentions
         if (selectedEvent != null) {
             newEvents = newEvents - selectedEvent
@@ -357,19 +367,20 @@ internal data class AgentLifecycleImpl(
             // if the set of relevant plans is empty, the event is simply discarded.
 
             // STEP7: Determining the Applicable Plans.
-            val applicablePlans = relevantPlans.plans.filter { isPlanApplicable(selectedEvent, it, newBeliefBase) }
+            val applicablePlans = relevantPlans.plans.filter {
+                isPlanApplicable(selectedEvent, it, this.agent.context.beliefBase)
+            }
 
             // STEP8: Selecting one Applicable Plan.
             val selectedPlan = selectApplicablePlan(applicablePlans)
 
-            // STEP9: Select an Intention for Further Execution.
             // Add plan to intentions
             if (selectedPlan != null) {
                 if (debugEnabled) println("[${agent.name}] Selected the event: $selectedEvent")
                 // if (debugEnabled) println("[${agent.name}] Selected the plan: $selectedPlan")
                 val updatedIntention = assignPlanToIntention(
                     selectedEvent,
-                    selectedPlan.applicablePlan(selectedEvent, newBeliefBase),
+                    selectedPlan.applicablePlan(selectedEvent, this.agent.context.beliefBase),
                     agent.context.intentions,
                 )
                 // if (debugEnabled) println("[${agent.name}] Updated Intention: $updatedIntention")
@@ -384,36 +395,49 @@ internal data class AgentLifecycleImpl(
             }
         }
         // Select intention to execute
-        var newAgent = agent.copy(
+        this.agent = this.agent.copy(
             events = newEvents,
-            beliefBase = newBeliefBase,
             intentions = newIntentionPool,
         )
+    }
 
+    override fun act(environment: Environment): Iterable<EnvironmentChange> {
         var executionResult = ExecutionResult(AgentContext.of())
+
+        var newIntentionPool = agent.context.intentions
         if (!newIntentionPool.isEmpty()) {
+            // STEP9: Select an Intention for Further Execution.
             val result = scheduleIntention(newIntentionPool)
             val scheduledIntention = result.intentionToExecute
             newIntentionPool = result.newIntentionPool
             // STEP10: Executing one Step on an Intention
-            newAgent = if (scheduledIntention.recordStack.isEmpty()) {
-                newAgent.copy(intentions = newIntentionPool)
+            this.agent = if (scheduledIntention.recordStack.isEmpty()) {
+                this.agent.copy(intentions = newIntentionPool)
             } else {
                 // if (debugEnabled) println("[${agent.name}] RUN -> $scheduledIntention")
                 executionResult = runIntention(
                     scheduledIntention,
-                    newAgent.context.copy(intentions = newIntentionPool),
+                    this.agent.context.copy(intentions = newIntentionPool),
                     environment,
                 )
-                newAgent.copy(executionResult.newAgentContext)
+                this.agent.copy(executionResult.newAgentContext)
             }
             // println("post run -> ${newAgent.context}")
         }
-        this.agent = newAgent
-        return if (message != null) {
-            executionResult.environmentEffects + PopMessage(this.agent.name)
-        } else {
-            executionResult.environmentEffects
-        }
+
+        // Generate Environment Changes
+        val environmentChangesToApply = executionResult.environmentEffects + cachedEffects
+        cachedEffects = emptyList()
+        return environmentChangesToApply
+    }
+
+    override fun runOneCycle(
+        environment: Environment,
+        controller: Activity.Controller?,
+        debugEnabled: Boolean,
+    ): Iterable<EnvironmentChange> {
+        sense(environment, controller, debugEnabled)
+        deliberate()
+        return act(environment)
     }
 }

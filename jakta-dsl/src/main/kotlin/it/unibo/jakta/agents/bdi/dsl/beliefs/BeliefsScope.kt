@@ -9,35 +9,51 @@ import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.dsl.LogicProgrammingScope
 import it.unibo.tuprolog.solve.stdlib.rule.SetPrologFlag.head
 
+/**
+ * Builder for Jakta Agents's [BeliefBase].
+ */
 class BeliefsScope(
     private val lp: LogicProgrammingScope = LogicProgrammingScope.empty(),
 ) : Builder<BeliefBase>, LogicProgrammingScope by lp {
 
     private val beliefs = mutableListOf<Belief>()
 
-    fun fact(struct: Struct) {
-        val s = struct.castToRule().head
-        val belief: Belief = Belief.wrap(s.freshCopy())
-        beliefs.add(belief)
-    }
+    /**
+     * Handler for the addition of a fact [Belief] into the agent's [BeliefBase].
+     * @param struct the [Struct] that represents the [Belief].
+     */
+    fun fact(struct: Struct) =
+        beliefs.add(Belief.wrap(struct.freshCopy(), wrappingTag = Belief.SOURCE_SELF))
 
-    override fun fact(function: LogicProgrammingScope.() -> Any): Fact {
-        return lp.fact(function).also { fact(it) }
-    }
+    /**
+     * Handler for the addition of a fact [Belief] into the agent's [BeliefBase].
+     * @param function executed in the [LogicProgrammingScope] context to describe agent's [Belief].
+     */
+    override fun fact(function: LogicProgrammingScope.() -> Any): Fact =
+        lp.fact { function() }.also { fact(it.head) }
 
+    /**
+     * Handler for the addition of a fact [Belief] into the agent's [BeliefBase].
+     * @param atom the [String] representing the [Atom] the agent is going to believe.
+     */
     fun fact(atom: String) = fact(atomOf(atom))
 
-    override fun rule(function: LogicProgrammingScope.() -> Any): Rule {
-        return lp.rule(function).also { rule(it) }
-    }
+    /**
+     * Handler for the addition of a rule [Belief] into the agent's [BeliefBase].
+     * @param function executed in the [LogicProgrammingScope] context to describe agent's [Belief].
+     */
+    override fun rule(function: LogicProgrammingScope.() -> Any): Rule =
+        lp.rule(function).also { rule(it) }
 
+    /**
+     * Handler for the addition of a rule [Belief] into the agent's [BeliefBase].
+     * @param rule the [Rule] the agent is going to believe.
+     */
     fun rule(rule: Rule) {
         val freshRule = rule.freshCopy()
-        val belief: Belief = Belief.wrap(freshRule.head, freshRule.bodyItems)
+        val belief: Belief = Belief.wrap(freshRule.head, freshRule.bodyItems, wrappingTag = Belief.SOURCE_SELF)
         beliefs.add(belief)
     }
-
-    fun rule(f: LogicProgrammingScope.() -> Rule) = rule(f())
 
     override fun build(): BeliefBase = BeliefBase.of(beliefs)
 }

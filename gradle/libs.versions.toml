@@ -3,8 +3,16 @@ kotest = "5.9.0"
 kotlin = "2.0.0"
 mockito = "5.12.0"
 tuprolog = "0.32.5"
+alchemist = "34.0.6"
 
 [libraries]
+alchemist-api = { module = "it.unibo.alchemist:alchemist-api", version.ref = "alchemist" }
+alchemist = { module = "it.unibo.alchemist:alchemist", version.ref = "alchemist" }
+alchemist-swingui = { module = "it.unibo.alchemist:alchemist-swingui", version.ref = "alchemist" }
+alchemist-ui-tooling = {module = "it.unibo.alchemist:alchemist-ui-tooling", version.ref = "alchemist" }
+alchemist-euclidean-geometry = {module = "it.unibo.alchemist:alchemist-euclidean-geometry", version.ref = "alchemist" }
+alchemist-maps = {module = "it.unibo.alchemist:alchemist-maps", version.ref = "alchemist" }
+alchemist-physics = {module = "it.unibo.alchemist:alchemist-physics", version.ref = "alchemist" }
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
 kotlin-stdlib-jdk8 = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version.ref = "kotlin" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-stdlib-reflect", version.ref = "kotlin" }
@@ -24,9 +32,22 @@ tuprolog-dsl-core = { module = "it.unibo.tuprolog:dsl-core-jvm", version.ref = "
 tuprolog-dsl-unify = { module = "it.unibo.tuprolog:dsl-unify-jvm", version.ref = "tuprolog" }
 tuprolog-dsl-theory = { module = "it.unibo.tuprolog:dsl-theory-jvm", version.ref = "tuprolog" }
 tuprolog-dsl-solve = { module = "it.unibo.tuprolog:dsl-solve-jvm", version.ref = "tuprolog" }
+tuprolog-oop-lib = { module = "it.unibo.tuprolog:oop-lib-jvm", version.ref = "tuprolog" }
 
 [bundles]
 kotlin-testing = [ "kotest-junit5-jvm", "kotest-assertions-core-jvm", "mockito-core" ]
+alchemist-api = [
+    "alchemist",
+    "alchemist-api"
+]
+
+alchemist-dev = [
+    "alchemist-euclidean-geometry",
+    "alchemist-maps",
+    "alchemist-physics",
+    "alchemist-ui-tooling",
+    "alchemist-swingui"
+]
 
 [plugins]
 dokka = "org.jetbrains.dokka:1.9.20"
