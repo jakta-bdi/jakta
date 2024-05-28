@@ -8,7 +8,18 @@ network-model:
   parameters: [ *sightRadius ]
 
 _pool: &leader
-  - time-distribution: 1
+  - time-distribution:
+      type: JaktaTimeDistribution
+      parameters:
+        sense:
+          type: DiracComb
+          parameters: 0.5
+        deliberate:
+          type: DiracComb
+          parameters: 1
+        act:
+          type: DiracComb
+          parameters: 1
     program:
       agent-factory: it.unibo.jakta.examples.swarm.LeaderDrone.leader
       parameters: []
@@ -36,6 +47,8 @@ deployments:
     programs:
       - *leader
     contents:
+      - molecule: leader
+        concentration: true
       - molecule: radius
         concentration: 1.0
       - molecule: sightRadius
@@ -45,12 +58,14 @@ deployments:
     programs:
       - *drone
 
-
-monitors:
-  type: SwingGUI
-  parameters:
-    graphics: effects/simulation.json
+export:
+  - type: CSVExporter
+    parameters:
+      fileNameRoot: "exported-data"
+      exportPath: "data"
+    data:
+      - type: DistanceError
 
 terminate:
   - type: AfterTime
-    parameters: [ 180000 ]
+    parameters: [ 18000 ]

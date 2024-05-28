@@ -1,0 +1,49 @@
+variables:
+  sightRadius: &sightRadius
+    formula: 2.0
+
+incarnation: jakta
+network-model:
+  type: ConnectWithinDistance
+  parameters: [ *sightRadius ]
+
+_pool: &leader
+  - time-distribution: 1
+    program:
+      agent-factory: it.unibo.jakta.examples.swarm.LeaderDrone.leader
+      parameters: []
+
+_program: &drone
+  - time-distribution: 1
+    program:
+      agent-factory: it.unibo.jakta.examples.swarm.Drone.drone
+      parameters: [ ]
+
+deployments:
+  - type: Point
+    parameters: [ -5.0, -3.0 ]
+    programs:
+      - *leader
+    contents:
+      - molecule: leader
+        concentration: true
+      - molecule: radius
+        concentration: 1.0
+      - molecule: sightRadius
+        concentration: *sightRadius
+  - type: Rectangle
+    parameters: [ 7.0, -6.0, -6.0, 6.0, 6.0 ]
+    programs:
+      - *drone
+
+export:
+  - type: CSVExporter
+    parameters:
+      file-name-root: "exported-data"
+      export-path: "data"
+    data:
+      - type: DistanceError
+
+terminate:
+  - type: AfterTime
+    parameters: [ 18000 ]
