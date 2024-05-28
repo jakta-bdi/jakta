@@ -15,3 +15,4 @@ rootProject.name = "jakta"
 include(":jakta-state-machine")
 include(":jakta-bdi")
 include(":jakta-dsl")
+include("alchemist-jakta-incarnation")
