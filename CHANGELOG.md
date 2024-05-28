@@ -1,3 +1,12 @@
+# [0.10.0](https://github.com/jakta-bdi/jakta/compare/v0.9.29...v0.10.0) (2024-05-28)
+
+
+### Features
+
+* add jakta for alchemist incarnation ([b2a753c](https://github.com/jakta-bdi/jakta/commit/b2a753c905bcc11c4af0f0751a575994397ca081))
+* improvement of jakta dsl ([99cbe1f](https://github.com/jakta-bdi/jakta/commit/99cbe1f99ea7a5991e88c99e3c549e60dc9d79ce))
+* improvement of the bdi lifecycle implementation ([96c4f8a](https://github.com/jakta-bdi/jakta/commit/96c4f8a7af6deb6dcb1325e765fc0fc273272c0d))
+
 ## [0.9.29](https://github.com/jakta-bdi/jakta/compare/v0.9.28...v0.9.29) (2024-05-26)
 
 
