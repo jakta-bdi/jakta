@@ -1,3 +1,10 @@
+## [0.10.2](https://github.com/jakta-bdi/jakta/compare/v0.10.1...v0.10.2) (2024-05-31)
+
+
+### Performance Improvements
+
+* performance boost ([cf80772](https://github.com/jakta-bdi/jakta/commit/cf80772aa2dbbf50ce860b16c7ab17c4ebf3572e))
+
 ## [0.10.1](https://github.com/jakta-bdi/jakta/compare/v0.10.0...v0.10.1) (2024-05-30)
 
 
