@@ -1,3 +1,10 @@
+## [0.10.14](https://github.com/jakta-bdi/jakta/compare/v0.10.13...v0.10.14) (2024-06-06)
+
+
+### Bug Fixes
+
+* **deps:** update kotest to v5.9.1 ([e59bccb](https://github.com/jakta-bdi/jakta/commit/e59bccb2c404323a88cfacd9e7a4c9a6811d505f))
+
 ## [0.10.13](https://github.com/jakta-bdi/jakta/compare/v0.10.12...v0.10.13) (2024-06-06)
 
 
