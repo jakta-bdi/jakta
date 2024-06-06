@@ -1,3 +1,10 @@
+## [0.10.12](https://github.com/jakta-bdi/jakta/compare/v0.10.11...v0.10.12) (2024-06-06)
+
+
+### Bug Fixes
+
+* **deps:** update plugin kotlin-qa to v0.62.3 ([48f3330](https://github.com/jakta-bdi/jakta/commit/48f3330523dbc57d25c05d96acfb445db772b63e))
+
 ## [0.10.11](https://github.com/jakta-bdi/jakta/compare/v0.10.10...v0.10.11) (2024-06-06)
 
 
