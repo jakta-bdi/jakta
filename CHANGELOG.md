@@ -1,3 +1,10 @@
+# [0.11.0](https://github.com/jakta-bdi/jakta/compare/v0.10.16...v0.11.0) (2024-06-10)
+
+
+### Features
+
+* change jakta entrypoint for alchemist incarnation from `mas` to `device` ([886be0d](https://github.com/jakta-bdi/jakta/commit/886be0dcd3f6ea4a8c67a2250012d8f7233b10f1))
+
 ## [0.10.16](https://github.com/jakta-bdi/jakta/compare/v0.10.15...v0.10.16) (2024-06-08)
 
 
