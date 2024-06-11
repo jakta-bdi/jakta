@@ -1,3 +1,10 @@
+## [0.11.1](https://github.com/jakta-bdi/jakta/compare/v0.11.0...v0.11.1) (2024-06-11)
+
+
+### Bug Fixes
+
+* **deps:** update plugin tasktree to v4 ([b02ffa8](https://github.com/jakta-bdi/jakta/commit/b02ffa8e71039901a5db52b4f0fc43db9f1e89c4))
+
 # [0.11.0](https://github.com/jakta-bdi/jakta/compare/v0.10.16...v0.11.0) (2024-06-10)
 
 
