@@ -50,7 +50,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: semver
-        uses: anitvam/conventionalcommit-semantic-releasing@v0.7.29
+        uses: anitvam/conventionalcommit-semantic-releasing@v0.7.30
         env:
           MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
           MAVEN_CENTRAL_USERNAME: "anitvam"
