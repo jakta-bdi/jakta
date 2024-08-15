@@ -1,3 +1,10 @@
+## [0.11.40](https://github.com/jakta-bdi/jakta/compare/v0.11.39...v0.11.40) (2024-08-15)
+
+
+### Bug Fixes
+
+* **deps:** update plugin publishoncentral to v5.1.6 ([cc8c92a](https://github.com/jakta-bdi/jakta/commit/cc8c92a7badc7af0b5961aa7c32ad41ee84b234d))
+
 ## [0.11.39](https://github.com/jakta-bdi/jakta/compare/v0.11.38...v0.11.39) (2024-08-15)
 
 
