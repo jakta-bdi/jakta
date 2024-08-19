@@ -1,3 +1,11 @@
+## [0.11.42](https://github.com/jakta-bdi/jakta/compare/v0.11.41...v0.11.42) (2024-08-19)
+
+
+### Bug Fixes
+
+* **deps:** update anitvam/conventionalcommit-semantic-releasing action to v0.7.36 ([a5a3c69](https://github.com/jakta-bdi/jakta/commit/a5a3c691b877a1b3277baa8589e7d52251c64b30))
+* **deps:** update dependency gradle to v8.10 ([255ce80](https://github.com/jakta-bdi/jakta/commit/255ce80d583f03c02f1cfc1d88397e5eec7190dc))
+
 ## [0.11.41](https://github.com/jakta-bdi/jakta/compare/v0.11.40...v0.11.41) (2024-08-18)
 
 
