@@ -1,3 +1,11 @@
+## [0.11.54](https://github.com/jakta-bdi/jakta/compare/v0.11.53...v0.11.54) (2024-09-12)
+
+
+### Bug Fixes
+
+* **deps:** update dependency gradle to v8.10.1 ([6248b2d](https://github.com/jakta-bdi/jakta/commit/6248b2de2a5a6387379f69de827295f3f5f4d9d5))
+* **deps:** update plugin org.danilopianini.gradle-pre-commit-git-hooks to v2.0.12 ([51e229b](https://github.com/jakta-bdi/jakta/commit/51e229ba395e6a0381680c21841312c8f02e55b6))
+
 ## [0.11.53](https://github.com/jakta-bdi/jakta/compare/v0.11.52...v0.11.53) (2024-09-09)
 
 
