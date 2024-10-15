@@ -1,7 +1,7 @@
 [versions]
 kotest = "5.9.1"
 kotlin = "2.0.10"
-mockito = "5.14.1"
+mockito = "5.14.2"
 tuprolog = "0.32.5"
 alchemist = "34.1.4"
 
