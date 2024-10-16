@@ -24,8 +24,8 @@ import kotlin.reflect.KFunction
  * @param scope the [LogicProgrammingScope] it inherits from.
  */
 class BodyScope(
-    private val scope: Scope,
-) : Builder<List<Goal>>, LogicProgrammingScope by LogicProgrammingScope.of(scope) {
+    private val lpScope: Scope,
+) : Builder<List<Goal>>, LogicProgrammingScope by LogicProgrammingScope.of(lpScope) {
 
     /**
      * The list of goals that the agent is going to execute in the during the plan execution.
