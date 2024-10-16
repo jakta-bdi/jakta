@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 group = "it.unibo.jakta"
 
 @Suppress("DSL_SCOPE_VIOLATION")
@@ -47,14 +49,12 @@ allprojects {
         testImplementation(rootProject.libs.bundles.kotlin.testing)
     }
 
-    kotlin {
-        target {
-            compilations.all {
-                kotlinOptions {
-                    allWarningsAsErrors = true
-                    freeCompilerArgs = listOf("-opt-in=kotlin.RequiresOptIn", "-Xcontext-receivers")
-                }
-            }
+    // ====== COMPILATION TASKS =====
+    tasks.withType<KotlinCompile>().configureEach {
+        compilerOptions {
+            allWarningsAsErrors = true
+            freeCompilerArgs.add("-Xcontext-receivers")
+            freeCompilerArgs.add("-opt-in=kotlin.RequiresOptIn")
         }
     }
 
