@@ -13,6 +13,8 @@ class SimulatedTimeRunner(
 
     override fun onResume() = error("Is not possible to RESUME a DiscreteTimeRunner")
 
+    // TODO("Sleep broken to be removed")
+
     override fun getCurrentTime(): Time = currentTime()
 
     override fun run(): Promise<Unit> {

@@ -44,6 +44,7 @@ abstract class AbstractRunner(override val activity: Activity) : Runner {
 
         override fun sleep(millis: Long) {
             pause()
+            // TODO("Executor Service to be removed")
             Executors.newScheduledThreadPool(1)
                 .schedule({ resume() }, millis, TimeUnit.MILLISECONDS)
         }
