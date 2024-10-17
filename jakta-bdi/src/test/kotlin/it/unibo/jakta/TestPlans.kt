@@ -3,7 +3,7 @@ package it.unibo.jakta
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
 import it.unibo.jakta.beliefs.Belief
-import it.unibo.jakta.beliefs.BeliefBase
+import it.unibo.jakta.beliefs.PrologBeliefBase
 import it.unibo.jakta.events.Event
 import it.unibo.jakta.goals.Achieve
 import it.unibo.jakta.goals.ActInternally
@@ -40,7 +40,7 @@ class TestPlans : DescribeSpec({
         it("should be applicable if its trigger is a valid Predicate") {
             val event = Event.ofBeliefBaseAddition(strawberryDesire)
 
-            val bb = BeliefBase.of(listOf(chocolateNeed))
+            val bb = PrologBeliefBase.of(listOf(chocolateNeed))
 
             plan.isApplicable(event, bb) shouldBe true
 
@@ -61,8 +61,8 @@ class TestPlans : DescribeSpec({
                 value = Jakta.parseStruct("start(S, M)"),
                 goals = listOf(ActInternally.of(Jakta.parseStruct("print(S)"))),
             )
-            p.isApplicable(event, BeliefBase.of()) shouldBe true
-            val ap = p.applicablePlan(event, BeliefBase.of())
+            p.isApplicable(event, PrologBeliefBase.of()) shouldBe true
+            val ap = p.applicablePlan(event, PrologBeliefBase.of())
             ap.trigger.value shouldBe event.trigger.value
             ap.goals.first().value shouldBe Jakta.parseStruct("print(0)")
         }
@@ -77,7 +77,7 @@ class TestPlans : DescribeSpec({
                     ActInternally.of(Jakta.parseStruct("print(N)")),
                 ),
             )
-            val ap = p.applicablePlan(event, BeliefBase.of())
+            val ap = p.applicablePlan(event, PrologBeliefBase.of())
             ap.goals.first().value shouldBe Jakta.parseStruct("print(0)")
             ap.goals[1].value shouldBe Jakta.parseStruct("print(1)")
         }

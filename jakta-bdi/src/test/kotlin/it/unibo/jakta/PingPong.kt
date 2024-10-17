@@ -3,10 +3,9 @@ package it.unibo.jakta
 import it.unibo.jakta.actions.ExternalRequest
 import it.unibo.jakta.actions.impl.AbstractExternalAction
 import it.unibo.jakta.beliefs.Belief
-import it.unibo.jakta.beliefs.BeliefBase
+import it.unibo.jakta.beliefs.PrologBeliefBase
 import it.unibo.jakta.environment.Environment
 import it.unibo.jakta.events.Event
-import it.unibo.jakta.executionstrategies.ExecutionStrategy
 import it.unibo.jakta.goals.Achieve
 import it.unibo.jakta.goals.Act
 import it.unibo.jakta.goals.ActInternally
@@ -49,7 +48,7 @@ fun main() {
 
     val pinger = Agent.of(
         name = "pinger",
-        beliefBase = BeliefBase.of(
+        beliefBase = PrologBeliefBase.of(
             Belief.fromSelfSource(Jakta.parseStruct("turn(me)")),
             Belief.fromSelfSource(Jakta.parseStruct("other(ponger)")),
         ),
@@ -81,7 +80,7 @@ fun main() {
 
     val ponger = Agent.of(
         name = "ponger",
-        beliefBase = BeliefBase.of(
+        beliefBase = PrologBeliefBase.of(
             Belief.fromSelfSource(Jakta.parseStruct("turn(other)")),
             Belief.fromSelfSource(Jakta.parseStruct("other(pinger)")),
         ),

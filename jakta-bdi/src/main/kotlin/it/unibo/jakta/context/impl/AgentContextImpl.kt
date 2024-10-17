@@ -1,7 +1,7 @@
 package it.unibo.jakta.context.impl
 
 import it.unibo.jakta.actions.InternalAction
-import it.unibo.jakta.beliefs.BeliefBase
+import it.unibo.jakta.beliefs.PrologBeliefBase
 import it.unibo.jakta.context.AgentContext
 import it.unibo.jakta.events.EventQueue
 import it.unibo.jakta.intentions.IntentionPool
@@ -9,7 +9,7 @@ import it.unibo.jakta.plans.PlanLibrary
 
 /** Implementation of Agent's [AgentContext] */
 internal class AgentContextImpl(
-    override val beliefBase: BeliefBase,
+    override val beliefBase: PrologBeliefBase,
     override val events: EventQueue,
     override val planLibrary: PlanLibrary,
     override val internalActions: Map<String, InternalAction>,

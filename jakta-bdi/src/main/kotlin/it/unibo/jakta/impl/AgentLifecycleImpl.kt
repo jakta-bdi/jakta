@@ -17,8 +17,8 @@ import it.unibo.jakta.actions.effects.PopMessage
 import it.unibo.jakta.actions.effects.Sleep
 import it.unibo.jakta.actions.effects.Stop
 import it.unibo.jakta.beliefs.Belief
-import it.unibo.jakta.beliefs.BeliefBase
 import it.unibo.jakta.beliefs.BeliefUpdate
+import it.unibo.jakta.beliefs.PrologBeliefBase
 import it.unibo.jakta.beliefs.RetrieveResult
 import it.unibo.jakta.context.AgentContext
 import it.unibo.jakta.context.ContextUpdate.ADDITION
@@ -57,7 +57,7 @@ internal data class AgentLifecycleImpl(
     private var debugEnabled = false
     private var cachedEffects = emptyList<EnvironmentChange>()
 
-    override fun updateBelief(perceptions: BeliefBase, beliefBase: BeliefBase): RetrieveResult =
+    override fun updateBelief(perceptions: PrologBeliefBase, beliefBase: PrologBeliefBase): RetrieveResult =
         when (perceptions == beliefBase) {
             false -> {
                 // 1. each literal l in p not currently in b is added to b
@@ -85,7 +85,7 @@ internal data class AgentLifecycleImpl(
 
     override fun selectRelevantPlans(event: Event, planLibrary: PlanLibrary) = planLibrary.relevantPlans(event)
 
-    override fun isPlanApplicable(event: Event, plan: Plan, beliefBase: BeliefBase) =
+    override fun isPlanApplicable(event: Event, plan: Plan, beliefBase: PrologBeliefBase) =
         plan.isApplicable(event, beliefBase)
 
     override fun selectApplicablePlan(plans: Iterable<Plan>) = agent.selectApplicablePlan(plans)
@@ -326,11 +326,11 @@ internal data class AgentLifecycleImpl(
         // STEP1: Perceive the Environment
         val perceptions = environment.percept()
 
-        // STEP2: Update the BeliefBase
+        // STEP2: Update the PrologBeliefBase
         val rr = updateBelief(perceptions, agent.context.beliefBase)
         var newBeliefBase = rr.updatedBeliefBase
         // println("pre-run -> $context")
-        // Generate events related to BeliefBase revision
+        // Generate events related to PrologBeliefBase revision
         var newEvents = generateEvents(agent.context.events, rr.modifiedBeliefs)
 
         // STEP3: Receiving Communication from Other Agents

@@ -1,7 +1,7 @@
 package it.unibo.jakta.plans
 
 import it.unibo.jakta.beliefs.Belief
-import it.unibo.jakta.beliefs.BeliefBase
+import it.unibo.jakta.beliefs.PrologBeliefBase
 import it.unibo.jakta.events.AchievementGoalFailure
 import it.unibo.jakta.events.AchievementGoalInvocation
 import it.unibo.jakta.events.BeliefBaseAddition
@@ -21,10 +21,10 @@ interface Plan {
     val goals: List<Goal>
 
     /** Determines if a plan is applicable */
-    fun isApplicable(event: Event, beliefBase: BeliefBase): Boolean
+    fun isApplicable(event: Event, beliefBase: PrologBeliefBase): Boolean
 
     /** Returns the computed applicable plan */
-    fun applicablePlan(event: Event, beliefBase: BeliefBase): Plan
+    fun applicablePlan(event: Event, beliefBase: PrologBeliefBase): Plan
 
     fun isRelevant(event: Event): Boolean
 

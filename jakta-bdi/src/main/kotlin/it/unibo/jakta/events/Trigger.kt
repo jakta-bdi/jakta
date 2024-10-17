@@ -1,7 +1,7 @@
 package it.unibo.jakta.events
 
 import it.unibo.jakta.beliefs.Belief
-import it.unibo.jakta.beliefs.BeliefBase
+import it.unibo.jakta.beliefs.PrologBeliefBase
 import it.unibo.jakta.goals.Achieve
 import it.unibo.jakta.goals.Test
 import it.unibo.tuprolog.core.Struct
@@ -11,15 +11,15 @@ interface Trigger {
     val value: Struct
 }
 
-/** [Trigger] generated after a [Belief] addition (or removal) from the [BeliefBase]. */
+/** [Trigger] generated after a [Belief] addition (or removal) from the [PrologBeliefBase]. */
 interface BeliefBaseRevision : Trigger {
 
-    /** The head of the [Belief] that is inserted (or removed) from the [BeliefBase]. */
+    /** The head of the [Belief] that is inserted (or removed) from the [PrologBeliefBase]. */
     val belief: Struct
         get() = value
 }
 
-/** [BeliefBaseRevision] generated after a [Belief] addition to agent's [BeliefBase]. */
+/** [BeliefBaseRevision] generated after a [Belief] addition to agent's [PrologBeliefBase]. */
 class BeliefBaseAddition(private val addedBelief: Belief) : BeliefBaseRevision {
     override val value: Struct
         get() = addedBelief.rule.head
@@ -27,7 +27,7 @@ class BeliefBaseAddition(private val addedBelief: Belief) : BeliefBaseRevision {
     override fun toString(): String = "BeliefBaseAddition(value=$value)"
 }
 
-/** [BeliefBaseRevision] generated after a [Belief] removal from agent's [BeliefBase]. */
+/** [BeliefBaseRevision] generated after a [Belief] removal from agent's [PrologBeliefBase]. */
 data class BeliefBaseRemoval(private val removedBelief: Belief) : BeliefBaseRevision {
     override val value: Struct
         get() = removedBelief.rule.head

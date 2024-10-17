@@ -1,6 +1,6 @@
 package it.unibo.jakta.plans
 
-import it.unibo.jakta.beliefs.BeliefBase
+import it.unibo.jakta.beliefs.PrologBeliefBase
 import it.unibo.jakta.events.Event
 import it.unibo.jakta.plans.impl.PlanLibraryImpl
 
@@ -13,8 +13,8 @@ interface PlanLibrary {
     /** @return all the relevant [Plan]s from a given [Event] */
     fun relevantPlans(event: Event): PlanLibrary
 
-    /** @return all the applicable [Plan]s in the agent with the specified [BeliefBase] */
-    fun applicablePlans(event: Event, beliefBase: BeliefBase): PlanLibrary
+    /** @return all the applicable [Plan]s in the agent with the specified [PrologBeliefBase] */
+    fun applicablePlans(event: Event, beliefBase: PrologBeliefBase): PlanLibrary
 
     fun addPlan(plan: Plan): PlanLibrary
 

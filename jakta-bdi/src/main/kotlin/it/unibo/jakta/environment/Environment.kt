@@ -3,7 +3,7 @@ package it.unibo.jakta.environment
 import it.unibo.jakta.Agent
 import it.unibo.jakta.AgentID
 import it.unibo.jakta.actions.ExternalAction
-import it.unibo.jakta.beliefs.BeliefBase
+import it.unibo.jakta.beliefs.PrologBeliefBase
 import it.unibo.jakta.environment.impl.EnvironmentImpl
 import it.unibo.jakta.messages.Message
 import it.unibo.jakta.messages.MessageQueue
@@ -32,7 +32,7 @@ interface Environment {
 
     fun removeAgent(agentName: String): Environment
 
-    fun percept(): BeliefBase = perception.percept()
+    fun percept(): PrologBeliefBase = perception.percept()
 
     fun addData(key: String, value: Any): Environment
 

@@ -51,7 +51,7 @@ class TestIntentions : DescribeSpec({
         }
 
         it("should apply a substitution on the actual Activation Record") {
-            // val bb = BeliefBase.of(listOf(Belief.of(Struct.of(buy()))))
+            // val bb = PrologBeliefBase.of(listOf(Belief.of(Struct.of(buy()))))
 
             val substitution = Substitution.of(X, Atom.of("chocolate"))
             val newIntention = Intention.of(

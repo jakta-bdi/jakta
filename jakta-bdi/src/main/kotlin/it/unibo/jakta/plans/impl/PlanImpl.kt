@@ -1,6 +1,6 @@
 package it.unibo.jakta.plans.impl
 
-import it.unibo.jakta.beliefs.BeliefBase
+import it.unibo.jakta.beliefs.PrologBeliefBase
 import it.unibo.jakta.events.Event
 import it.unibo.jakta.events.Trigger
 import it.unibo.jakta.goals.Goal
@@ -14,13 +14,18 @@ internal data class PlanImpl(
     override val guard: Struct,
     override val goals: List<Goal>,
 ) : Plan {
-    override fun isApplicable(event: Event, beliefBase: BeliefBase): Boolean {
+    override fun isApplicable(event: Event, beliefBase: PrologBeliefBase): Boolean {
         val mgu = event.trigger.value mguWith this.trigger.value
         val actualGuard = guard.apply(mgu).castToStruct()
         return isRelevant(event) && beliefBase.solve(actualGuard).isYes
     }
 
-    override fun applicablePlan(event: Event, beliefBase: BeliefBase): Plan = when (isApplicable(event, beliefBase)) {
+    override fun applicablePlan(event: Event, beliefBase: PrologBeliefBase): Plan = when (
+        isApplicable(
+            event,
+            beliefBase,
+        )
+    ) {
         true -> {
             val mgu = event.trigger.value mguWith this.trigger.value
             val actualGuard = guard.apply(mgu).castToStruct()

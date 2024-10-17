@@ -4,7 +4,7 @@ import io.kotest.assertions.fail
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
 import it.unibo.jakta.beliefs.Belief
-import it.unibo.jakta.beliefs.BeliefBase
+import it.unibo.jakta.beliefs.PrologBeliefBase
 import it.unibo.jakta.goals.Achieve
 import it.unibo.jakta.goals.ActInternally
 import it.unibo.tuprolog.core.Atom
@@ -17,7 +17,7 @@ class TestGoals : DescribeSpec({
 
     describe("A Goal") {
         it("should apply a substitution to its variables") {
-            val substitution = BeliefBase.of(listOf(strawberryDesire))
+            val substitution = PrologBeliefBase.of(listOf(strawberryDesire))
                 .solve(belief)
                 .substitution
 

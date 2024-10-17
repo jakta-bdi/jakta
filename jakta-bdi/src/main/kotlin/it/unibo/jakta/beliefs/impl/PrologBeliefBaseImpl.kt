@@ -2,8 +2,8 @@ package it.unibo.jakta.beliefs.impl
 
 import it.unibo.jakta.Jakta
 import it.unibo.jakta.beliefs.Belief
-import it.unibo.jakta.beliefs.BeliefBase
 import it.unibo.jakta.beliefs.BeliefUpdate
+import it.unibo.jakta.beliefs.PrologBeliefBase
 import it.unibo.jakta.beliefs.RetrieveResult
 import it.unibo.tuprolog.collections.ClauseMultiSet
 import it.unibo.tuprolog.core.Rule
@@ -15,20 +15,20 @@ import it.unibo.tuprolog.solve.flags.Unknown
 import it.unibo.tuprolog.theory.Theory
 import it.unibo.tuprolog.unify.Unificator
 
-internal class BeliefBaseImpl private constructor(private val beliefs: ClauseMultiSet) : BeliefBase {
+internal class PrologBeliefBaseImpl private constructor(private val beliefs: ClauseMultiSet) : PrologBeliefBase {
 
     constructor() : this(ClauseMultiSet.empty(Unificator.default))
 
     override fun add(belief: Belief) = when (beliefs.count(belief.rule)) {
         // There's no Belief that unify the param inside the MultiSet, so it's inserted
-        0L -> RetrieveResult(listOf(BeliefUpdate.addition(belief)), BeliefBaseImpl(beliefs.add(belief.rule)))
+        0L -> RetrieveResult(listOf(BeliefUpdate.addition(belief)), PrologBeliefBaseImpl(beliefs.add(belief.rule)))
         // There are Beliefs that unify the param, so the belief it's not inserted
         else -> RetrieveResult(emptyList(), this)
     }
 
-    override fun addAll(beliefs: BeliefBase): RetrieveResult {
+    override fun addAll(beliefs: PrologBeliefBase): RetrieveResult {
         var addedBeliefs = emptyList<BeliefUpdate>()
-        var bb: BeliefBase = this
+        var bb: PrologBeliefBase = this
         beliefs.forEach {
             val rr = bb.add(it)
             addedBeliefs = addedBeliefs + rr.modifiedBeliefs
@@ -42,13 +42,16 @@ internal class BeliefBaseImpl private constructor(private val beliefs: ClauseMul
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
-        other as BeliefBaseImpl
+        other as PrologBeliefBaseImpl
         return beliefs == other.beliefs
     }
 
     override fun remove(belief: Belief): RetrieveResult {
         return if (beliefs.count(belief.rule) > 0) {
-            RetrieveResult(listOf(BeliefUpdate.removal(first { it == belief })), BeliefBase.of(filter { it != belief }))
+            RetrieveResult(
+                listOf(BeliefUpdate.removal(first { it == belief })),
+                PrologBeliefBase.of(filter { it != belief }),
+            )
         } else {
             RetrieveResult(listOf(), this)
         }
@@ -65,9 +68,9 @@ internal class BeliefBaseImpl private constructor(private val beliefs: ClauseMul
         }
     }
 
-    override fun removeAll(beliefs: BeliefBase): RetrieveResult {
+    override fun removeAll(beliefs: PrologBeliefBase): RetrieveResult {
         var removedBeliefs = emptyList<BeliefUpdate>()
-        var bb: BeliefBase = this
+        var bb: PrologBeliefBase = this
         beliefs.forEach {
             val rr = bb.remove(it)
             removedBeliefs = removedBeliefs + rr.modifiedBeliefs

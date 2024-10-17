@@ -2,7 +2,7 @@ package it.unibo.jakta.context
 
 import it.unibo.jakta.actions.InternalAction
 import it.unibo.jakta.actions.InternalActions
-import it.unibo.jakta.beliefs.BeliefBase
+import it.unibo.jakta.beliefs.PrologBeliefBase
 import it.unibo.jakta.context.impl.AgentContextImpl
 import it.unibo.jakta.events.Event
 import it.unibo.jakta.events.EventQueue
@@ -15,8 +15,8 @@ import it.unibo.jakta.plans.PlanLibrary
  */
 interface AgentContext {
 
-    /** [BeliefBase] of the BDI Agent */
-    val beliefBase: BeliefBase
+    /** [PrologBeliefBase] of the BDI Agent */
+    val beliefBase: PrologBeliefBase
 
     /** [Event]s on which the BDI Agent reacts */
     val events: EventQueue
@@ -29,7 +29,7 @@ interface AgentContext {
     val internalActions: Map<String, InternalAction>
 
     fun copy(
-        beliefBase: BeliefBase = this.beliefBase,
+        beliefBase: PrologBeliefBase = this.beliefBase,
         events: EventQueue = this.events,
         planLibrary: PlanLibrary = this.planLibrary,
         intentions: IntentionPool = this.intentions,
@@ -38,7 +38,7 @@ interface AgentContext {
 
     companion object {
         fun of(
-            beliefBase: BeliefBase = BeliefBase.empty(),
+            beliefBase: PrologBeliefBase = PrologBeliefBase.empty(),
             events: EventQueue = emptyList(),
             planLibrary: PlanLibrary = PlanLibrary.empty(),
             internalActions: Map<String, InternalAction> = InternalActions.default(),
