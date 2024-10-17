@@ -1,3 +1,12 @@
+## [0.11.72](https://github.com/jakta-bdi/jakta/compare/v0.11.71...v0.11.72) (2024-10-17)
+
+
+### Bug Fixes
+
+* **deps:** update dependency gradle to v8.10.2 ([#347](https://github.com/jakta-bdi/jakta/issues/347)) ([f4c9483](https://github.com/jakta-bdi/jakta/commit/f4c9483a4fa097246009e16e86506a2d05b99a02))
+* **deps:** update kotlin to v2.0.21 and remove context receivers for extending 2pkt LogicProgrammingScope definitions ([#326](https://github.com/jakta-bdi/jakta/issues/326)) ([b98e551](https://github.com/jakta-bdi/jakta/commit/b98e551d65a43900eec2c5bbdc025e0425c7d490))
+* **deps:** update tuprolog to v1 (major) ([#229](https://github.com/jakta-bdi/jakta/issues/229)) ([2b59823](https://github.com/jakta-bdi/jakta/commit/2b59823556e0d8cabb2851d14920559255cfb585))
+
 ## [0.11.71](https://github.com/jakta-bdi/jakta/compare/v0.11.70...v0.11.71) (2024-10-15)
 
 
