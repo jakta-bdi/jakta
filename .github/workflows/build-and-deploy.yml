@@ -23,7 +23,7 @@ jobs:
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v3
       - name: Build
-        run: ./gradlew build
+        run: ./gradlew clean build
       - name: Lint Check
         run: ./gradlew ktlintCheck
       - name: Upload coverage reports to Codecov
