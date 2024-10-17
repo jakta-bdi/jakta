@@ -6,8 +6,8 @@ import it.unibo.alchemist.jakta.properties.JaktaEnvironmentForAlchemist
 import it.unibo.alchemist.model.Position
 import it.unibo.alchemist.model.molecules.SimpleMolecule
 import it.unibo.alchemist.util.Iterables.randomElement
-import it.unibo.jakta.agents.bdi.Agent
-import it.unibo.jakta.agents.bdi.dsl.AgentScope
+import it.unibo.jakta.Agent
+import it.unibo.jakta.dsl.AgentScope
 import it.unibo.tuprolog.core.Integer
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.solve.libs.oop.ObjectRef

@@ -3,9 +3,9 @@ package it.unibo.jakta.alchemist
 import it.unibo.alchemist.jakta.properties.JaktaEnvironmentForAlchemist
 import it.unibo.alchemist.jakta.reactions.JaktaAgentForAlchemist
 import it.unibo.alchemist.model.times.DoubleTime
-import it.unibo.jakta.agents.fsm.Activity
+import it.unibo.jakta.fsm.Activity
 import it.unibo.alchemist.model.Time as AlchemistTime
-import it.unibo.jakta.agents.fsm.time.Time as JaktaTime
+import it.unibo.jakta.fsm.time.Time as JaktaTime
 
 data class JaktaControllerForAlchemist(
     val jaktaEnvironment: JaktaEnvironmentForAlchemist<*>,

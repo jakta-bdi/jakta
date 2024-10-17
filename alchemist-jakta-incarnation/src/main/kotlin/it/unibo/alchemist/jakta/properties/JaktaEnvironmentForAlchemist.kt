@@ -8,19 +8,19 @@ import it.unibo.alchemist.model.Node
 import it.unibo.alchemist.model.NodeProperty
 import it.unibo.alchemist.model.Position
 import it.unibo.alchemist.model.molecules.SimpleMolecule
-import it.unibo.jakta.agents.bdi.Agent
-import it.unibo.jakta.agents.bdi.AgentID
-import it.unibo.jakta.agents.bdi.actions.ExternalAction
-import it.unibo.jakta.agents.bdi.beliefs.Belief
-import it.unibo.jakta.agents.bdi.environment.Environment
-import it.unibo.jakta.agents.bdi.messages.Message
-import it.unibo.jakta.agents.bdi.messages.MessageQueue
-import it.unibo.jakta.agents.bdi.perception.Perception
+import it.unibo.jakta.Agent
+import it.unibo.jakta.AgentID
+import it.unibo.jakta.actions.ExternalAction
+import it.unibo.jakta.beliefs.Belief
+import it.unibo.jakta.environment.Environment
+import it.unibo.jakta.messages.Message
+import it.unibo.jakta.messages.MessageQueue
+import it.unibo.jakta.perception.Perception
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.solve.libs.oop.ObjectRef
 import org.apache.commons.math3.random.RandomGenerator
 import it.unibo.alchemist.model.Environment as AlchemistEnvironment
-import it.unibo.jakta.agents.bdi.environment.Environment as JaktaEnvironment
+import it.unibo.jakta.environment.Environment as JaktaEnvironment
 
 /**
  * Jakta Environment Implementation that connects to Alchemist meta-model.

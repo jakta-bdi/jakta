@@ -4,9 +4,9 @@ import it.unibo.alchemist.jakta.properties.JaktaEnvironmentForAlchemist
 import it.unibo.alchemist.jakta.util.valueOrEmptyMolecule
 import it.unibo.alchemist.model.Position
 import it.unibo.alchemist.model.molecules.SimpleMolecule
-import it.unibo.jakta.agents.bdi.actions.ExternalAction
-import it.unibo.jakta.agents.bdi.actions.ExternalRequest
-import it.unibo.jakta.agents.bdi.actions.impl.AbstractExternalAction
+import it.unibo.jakta.actions.ExternalAction
+import it.unibo.jakta.actions.ExternalRequest
+import it.unibo.jakta.actions.impl.AbstractExternalAction
 import it.unibo.tuprolog.solve.libs.oop.ObjectRef
 import kotlin.reflect.KProperty
 
