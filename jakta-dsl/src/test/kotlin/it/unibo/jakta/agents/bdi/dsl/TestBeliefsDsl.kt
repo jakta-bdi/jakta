@@ -5,7 +5,6 @@ import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.shouldBe
 import it.unibo.jakta.agents.bdi.beliefs.Belief
 import it.unibo.jakta.agents.bdi.dsl.beliefs.BeliefsScope
-import it.unibo.jakta.agents.bdi.dsl.beliefs.fromSelf
 import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.Struct
 

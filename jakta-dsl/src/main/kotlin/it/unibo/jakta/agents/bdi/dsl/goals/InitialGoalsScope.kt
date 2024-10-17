@@ -5,9 +5,9 @@ import it.unibo.jakta.agents.bdi.events.AchievementGoalInvocation
 import it.unibo.jakta.agents.bdi.events.TestGoalInvocation
 import it.unibo.jakta.agents.bdi.events.Trigger
 import it.unibo.tuprolog.core.Struct
-import it.unibo.tuprolog.dsl.LogicProgrammingScope
+import it.unibo.tuprolog.dsl.jakta.JaktaLogicProgrammingScope
 
-class InitialGoalsScope : Builder<Iterable<Trigger>>, LogicProgrammingScope by LogicProgrammingScope.empty() {
+class InitialGoalsScope : Builder<Iterable<Trigger>>, JaktaLogicProgrammingScope by JaktaLogicProgrammingScope.empty() {
 
     private val triggers = mutableListOf<Trigger>()
 

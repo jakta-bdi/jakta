@@ -1,5 +1,5 @@
 package it.unibo.jakta.agents.bdi.dsl.beliefs
 
-import it.unibo.tuprolog.dsl.LogicProgrammingScope
+import it.unibo.tuprolog.dsl.jakta.JaktaLogicProgrammingScope
 
-class BeliefScope : LogicProgrammingScope by LogicProgrammingScope.empty()
+class BeliefScope : JaktaLogicProgrammingScope by JaktaLogicProgrammingScope.empty()
