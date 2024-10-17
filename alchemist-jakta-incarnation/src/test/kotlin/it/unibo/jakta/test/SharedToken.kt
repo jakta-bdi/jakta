@@ -8,8 +8,6 @@ import it.unibo.alchemist.model.molecules.SimpleMolecule
 import it.unibo.alchemist.util.Iterables.randomElement
 import it.unibo.jakta.agents.bdi.Agent
 import it.unibo.jakta.agents.bdi.dsl.AgentScope
-import it.unibo.jakta.agents.bdi.dsl.beliefs.fromPercept
-import it.unibo.jakta.agents.bdi.dsl.beliefs.fromSelf
 import it.unibo.tuprolog.core.Integer
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.solve.libs.oop.ObjectRef

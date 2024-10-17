@@ -1,6 +1,5 @@
 package it.unibo.jakta.agents.bdi.dsl
 
-import it.unibo.jakta.agents.bdi.dsl.beliefs.fromSelf
 import it.unibo.tuprolog.core.Struct
 
 fun main() {

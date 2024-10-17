@@ -6,9 +6,9 @@ import it.unibo.jakta.agents.bdi.events.BeliefBaseRevision
 import it.unibo.jakta.agents.bdi.events.TestGoalTrigger
 import it.unibo.jakta.agents.bdi.plans.Plan
 import it.unibo.tuprolog.core.Struct
-import it.unibo.tuprolog.dsl.LogicProgrammingScope
+import it.unibo.tuprolog.dsl.jakta.JaktaLogicProgrammingScope
 
-class PlansScope : Builder<Iterable<Plan>>, LogicProgrammingScope by LogicProgrammingScope.empty() {
+class PlansScope : Builder<Iterable<Plan>>, JaktaLogicProgrammingScope by JaktaLogicProgrammingScope.empty() {
 
     private val plans = mutableListOf<PlanScope>()
 

@@ -15,17 +15,17 @@ import it.unibo.jakta.agents.bdi.goals.Test
 import it.unibo.jakta.agents.bdi.goals.UpdateBelief
 import it.unibo.tuprolog.core.Scope
 import it.unibo.tuprolog.core.Struct
-import it.unibo.tuprolog.dsl.LogicProgrammingScope
+import it.unibo.tuprolog.dsl.jakta.JaktaLogicProgrammingScope
 import it.unibo.tuprolog.solve.libs.oop.ObjectRef
 import kotlin.reflect.KFunction
 
 /**
  * Builder for Jakta Agents Plan body.
- * @param scope the [LogicProgrammingScope] it inherits from.
+ * @param scope the [JaktaLogicProgrammingScope] it inherits from.
  */
 class BodyScope(
     private val lpScope: Scope,
-) : Builder<List<Goal>>, LogicProgrammingScope by LogicProgrammingScope.of(lpScope) {
+) : Builder<List<Goal>>, JaktaLogicProgrammingScope by JaktaLogicProgrammingScope.of(lpScope) {
 
     /**
      * The list of goals that the agent is going to execute in the during the plan execution.

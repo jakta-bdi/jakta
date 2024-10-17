@@ -6,15 +6,14 @@ import it.unibo.jakta.agents.bdi.dsl.Builder
 import it.unibo.tuprolog.core.Fact
 import it.unibo.tuprolog.core.Rule
 import it.unibo.tuprolog.core.Struct
-import it.unibo.tuprolog.dsl.LogicProgrammingScope
-import it.unibo.tuprolog.solve.stdlib.rule.SetPrologFlag.head
+import it.unibo.tuprolog.dsl.jakta.JaktaLogicProgrammingScope
 
 /**
  * Builder for Jakta Agents's [BeliefBase].
  */
 class BeliefsScope(
-    private val lp: LogicProgrammingScope = LogicProgrammingScope.empty(),
-) : Builder<BeliefBase>, LogicProgrammingScope by lp {
+    private val lp: JaktaLogicProgrammingScope = JaktaLogicProgrammingScope.empty(),
+) : Builder<BeliefBase>, JaktaLogicProgrammingScope by lp {
 
     private val beliefs = mutableListOf<Belief>()
 
@@ -27,9 +26,9 @@ class BeliefsScope(
 
     /**
      * Handler for the addition of a fact [Belief] into the agent's [BeliefBase].
-     * @param function executed in the [LogicProgrammingScope] context to describe agent's [Belief].
+     * @param function executed in the [JaktaLogicProgrammingScope] context to describe agent's [Belief].
      */
-    override fun fact(function: LogicProgrammingScope.() -> Any): Fact =
+    override fun fact(function: JaktaLogicProgrammingScope.() -> Any): Fact =
         lp.fact { function() }.also { fact(it.head) }
 
     /**
@@ -40,9 +39,9 @@ class BeliefsScope(
 
     /**
      * Handler for the addition of a rule [Belief] into the agent's [BeliefBase].
-     * @param function executed in the [LogicProgrammingScope] context to describe agent's [Belief].
+     * @param function executed in the [JaktaLogicProgrammingScope] context to describe agent's [Belief].
      */
-    override fun rule(function: LogicProgrammingScope.() -> Any): Rule =
+    override fun rule(function: JaktaLogicProgrammingScope.() -> Any): Rule =
         lp.rule(function).also { rule(it) }
 
     /**
