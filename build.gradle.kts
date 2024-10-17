@@ -17,6 +17,7 @@ dependencies {
     api(project(":jakta-state-machine"))
     api(project(":jakta-bdi"))
     api(project(":jakta-dsl"))
+    api(project(":jakta-api"))
 }
 
 val Provider<PluginDependency>.id: String get() = get().pluginId
