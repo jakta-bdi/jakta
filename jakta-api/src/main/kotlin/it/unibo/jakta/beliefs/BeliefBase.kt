@@ -3,7 +3,7 @@ package it.unibo.jakta.beliefs
 import it.unibo.jakta.resolution.Solution
 
 /** A BDI Agent's collection of [Belief]s */
-interface BeliefBase<B : Belief<B>> : Iterable<B> {
+interface BeliefBase<B : Belief<*>, C : BeliefBase<B, C>> : Iterable<B> {
     /**
      * Adds a [Belief] to this [BeliefBase]
      * @param belief: the [Belief] to be added
@@ -16,7 +16,7 @@ interface BeliefBase<B : Belief<B>> : Iterable<B> {
      * @param beliefs: beliefs to be added
      * @return a [RetrieveResult] with the new [BeliefBase] and the added [Belief]s
      **/
-    fun addAll(beliefs: BeliefBase<B>): RetrieveResult<B>
+    fun addAll(beliefs: C): RetrieveResult<B>
 
     /**
      * Removes a [Belief] from the [BeliefBase]
@@ -30,12 +30,12 @@ interface BeliefBase<B : Belief<B>> : Iterable<B> {
      * @param beliefs: beliefs to be removed
      * @return a [RetrieveResult] with the new [BeliefBase] and the removed [Belief]s
      */
-    fun removeAll(beliefs: BeliefBase<B>): RetrieveResult<B>
+    fun removeAll(beliefs: C): RetrieveResult<*>
 
     fun update(belief: B): RetrieveResult<B>
 
     /**
      * Performs unification between [B] and values in this [BeliefBase]
      */
-    fun solve(belief: B): Solution
+    fun solve(belief: B): Solution<*>
 }

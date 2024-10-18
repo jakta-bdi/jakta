@@ -17,7 +17,7 @@ internal data class PlanImpl(
     override fun isApplicable(event: Event, beliefBase: PrologBeliefBase): Boolean {
         val mgu = event.trigger.value mguWith this.trigger.value
         val actualGuard = guard.apply(mgu).castToStruct()
-        return isRelevant(event) && beliefBase.solve(actualGuard).isYes
+        return isRelevant(event) && beliefBase.solve(actualGuard).isSuccess
     }
 
     override fun applicablePlan(event: Event, beliefBase: PrologBeliefBase): Plan = when (
@@ -34,7 +34,7 @@ internal data class PlanImpl(
                 it.copy(
                     it.value
                         .apply(mgu)
-                        .apply(solvedGuard.substitution)
+                        .apply(solvedGuard.result.substitution)
                         .castToStruct(),
                 )
             }

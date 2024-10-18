@@ -1,15 +1,14 @@
 package it.unibo.jakta.beliefs
 
 import it.unibo.jakta.beliefs.impl.PrologBeliefBaseImpl
+import it.unibo.jakta.resolution.Solution
 import it.unibo.tuprolog.core.Struct
-import it.unibo.tuprolog.solve.Solution
+import it.unibo.tuprolog.solve.Solution as TuprologSolution
 
 /** A BDI Agent's collection of [PrologBelief] */
-interface PrologBeliefBase : BeliefBase {
+interface PrologBeliefBase : BeliefBase<PrologBelief, PrologBeliefBase> {
 
-    fun solve(struct: Struct): Solution
-
-    fun solve(belief: Belief): Solution
+    fun solve(struct: Struct): Solution<TuprologSolution>
 
     companion object {
         /** @return an empty [PrologBeliefBase] */
@@ -20,13 +19,13 @@ interface PrologBeliefBase : BeliefBase {
          * @param beliefs: the [Iterable] of [Belief] the [PrologBeliefBase] will be composed of
          * @return the new [PrologBeliefBase]
          */
-        fun of(beliefs: Iterable<Belief>): PrologBeliefBase {
+        fun of(beliefs: Iterable<PrologBelief>): PrologBeliefBase {
             var bb = empty()
             beliefs.forEach { bb = bb.add(it).updatedBeliefBase }
             return bb
         }
 
-        fun of(vararg beliefs: Belief): PrologBeliefBase =
+        fun of(vararg beliefs: PrologBelief): PrologBeliefBase =
             of(beliefs.asList())
     }
 }
