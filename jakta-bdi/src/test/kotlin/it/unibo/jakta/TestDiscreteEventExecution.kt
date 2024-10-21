@@ -5,7 +5,6 @@ import it.unibo.jakta.actions.InternalRequest
 import it.unibo.jakta.actions.impl.AbstractInternalAction
 import it.unibo.jakta.environment.Environment
 import it.unibo.jakta.events.Event
-import it.unibo.jakta.executionstrategies.ExecutionStrategy
 import it.unibo.jakta.executionstrategies.setTimeDistribution
 import it.unibo.jakta.fsm.time.SimulatedTime
 import it.unibo.jakta.fsm.time.Time

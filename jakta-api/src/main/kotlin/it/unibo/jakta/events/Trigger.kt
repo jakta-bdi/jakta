@@ -9,16 +9,16 @@ sealed interface Trigger<X> {
 }
 
 /** [Trigger] generated after a [Belief] addition to agent's [BeliefBase]. */
-class BeliefBaseAddition(override val value: Belief<*>) : Trigger<Belief<*>> {
+class BeliefBaseAddition<X>(override val value: Belief<X>) : Trigger<Belief<X>> {
     override fun toString(): String = "BeliefBaseAddition(value=$value)"
 }
 
 /** [Trigger] generated after a [Belief] removal from agent's [BeliefBase]. */
-data class BeliefBaseRemoval(override val value: Belief<*>) : Trigger<Belief<*>> {
+data class BeliefBaseRemoval<X>(override val value: Belief<X>) : Trigger<Belief<X>> {
     override fun toString(): String = "BeliefBaseRemoval(value=$value)"
 }
 
-data class BeliefBaseUpdate(override val value: Belief<*>) : Trigger<Belief<*>> {
+data class BeliefBaseUpdate<X>(override val value: Belief<X>) : Trigger<Belief<X>> {
     override fun toString(): String = "BeliefBaseUpdate(value=$value)"
 }
 

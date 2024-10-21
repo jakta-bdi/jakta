@@ -4,8 +4,6 @@ import it.unibo.jakta.goals.Goal
 import it.unibo.jakta.intentions.impl.IntentionImpl
 import it.unibo.jakta.plans.ActivationRecord
 import it.unibo.jakta.plans.Plan
-import it.unibo.tuprolog.core.Struct
-import it.unibo.tuprolog.core.Substitution
 
 interface Intention {
     val recordStack: List<ActivationRecord>
