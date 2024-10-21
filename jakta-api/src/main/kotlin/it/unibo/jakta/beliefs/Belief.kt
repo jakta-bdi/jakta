@@ -1,5 +1,5 @@
 package it.unibo.jakta.beliefs
 
-interface Belief<B> {
+interface Belief<out B> {
     val content: B
 }

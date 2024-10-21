@@ -10,6 +10,13 @@ interface PrologBeliefBase : BeliefBase<PrologBelief, PrologBeliefBase> {
 
     fun solve(struct: Struct): Solution<TuprologSolution>
 
+    /**
+     * Updates the content of the [BeliefBase] without saving the change in delta variable.
+     * @param belief the [Belief] to update
+     * @return a [BeliefBase]
+     */
+    fun update(belief: PrologBelief): PrologBeliefBase
+
     companion object {
         /** @return an empty [PrologBeliefBase] */
         fun empty(): PrologBeliefBase = PrologBeliefBaseImpl()
@@ -21,7 +28,7 @@ interface PrologBeliefBase : BeliefBase<PrologBelief, PrologBeliefBase> {
          */
         fun of(beliefs: Iterable<PrologBelief>): PrologBeliefBase {
             var bb = empty()
-            beliefs.forEach { bb = bb.add(it).updatedBeliefBase }
+            beliefs.forEach { bb += it }
             return bb
         }
 

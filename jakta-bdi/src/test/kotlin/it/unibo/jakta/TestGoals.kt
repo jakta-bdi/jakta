@@ -15,7 +15,7 @@ class TestGoals : DescribeSpec({
     val strawberryDesire = Belief.fromSelfSource(Struct.of("desire", Atom.of("strawberry")))
     val belief = Belief.fromSelfSource(Struct.of("desire", Var.of("X")))
 
-    describe("A Goal") {
+    describe("A PrologGoal") {
         it("should apply a substitution to its variables") {
             val substitution = PrologBeliefBase.of(listOf(strawberryDesire))
                 .solve(belief)
@@ -26,12 +26,12 @@ class TestGoals : DescribeSpec({
 
             goal.applySubstitution(substitution).value shouldBe strawberryDesire.rule
         }
-        it("should perform copy and keep the actual Goal type") {
+        it("should perform copy and keep the actual PrologGoal type") {
             val goal = ActInternally.of(strawberryDesire.rule)
             goal.value shouldBe strawberryDesire.rule
             when (val goalCopy = goal.copy(belief.rule)) {
                 is ActInternally -> goalCopy.value shouldBe belief.rule
-                else -> fail("Copy doesn't keep the Goal type")
+                else -> fail("Copy doesn't keep the PrologGoal type")
             }
         }
     }

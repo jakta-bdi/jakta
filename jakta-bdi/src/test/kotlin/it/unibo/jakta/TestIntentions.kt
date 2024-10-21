@@ -30,7 +30,7 @@ class TestIntentions : DescribeSpec({
         it("should return the next goal to satisfy with nextGoal() invocation") {
             when (val nextGoal = intention.nextGoal()) {
                 is AddBelief -> nextGoal.belief shouldBe buySomething.rule.head
-                else -> fail("Next Goal has wrong type")
+                else -> fail("Next PrologGoal has wrong type")
             }
         }
 

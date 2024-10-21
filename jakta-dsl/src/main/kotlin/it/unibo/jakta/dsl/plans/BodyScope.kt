@@ -8,7 +8,7 @@ import it.unibo.jakta.goals.Act
 import it.unibo.jakta.goals.ActExternally
 import it.unibo.jakta.goals.ActInternally
 import it.unibo.jakta.goals.AddBelief
-import it.unibo.jakta.goals.Goal
+import it.unibo.jakta.goals.PrologGoal
 import it.unibo.jakta.goals.RemoveBelief
 import it.unibo.jakta.goals.Spawn
 import it.unibo.jakta.goals.Test
@@ -25,47 +25,47 @@ import kotlin.reflect.KFunction
  */
 class BodyScope(
     private val lpScope: Scope,
-) : Builder<List<Goal>>, JaktaLogicProgrammingScope by JaktaLogicProgrammingScope.of(lpScope) {
+) : Builder<List<PrologGoal>>, JaktaLogicProgrammingScope by JaktaLogicProgrammingScope.of(lpScope) {
 
     /**
      * The list of goals that the agent is going to execute in the during the plan execution.
      */
-    private val goals = mutableListOf<Goal>()
+    private val goals = mutableListOf<PrologGoal>()
 
     /**
-     * Handler for the creation of a [Test] Goal.
-     * @param goal the [Struct] that describes the agent's [Goal] trigger.
+     * Handler for the creation of a [Test] PrologGoal.
+     * @param goal the [Struct] that describes the agent's [PrologGoal] trigger.
      */
     fun test(goal: Struct) {
         goals += Test.of(Belief.from(goal))
     }
 
     /**
-     * Handler for the creation of a [Test] Goal.
-     * @param goal the [String] representing the [Atom] that describes the agent's [Goal] trigger.
+     * Handler for the creation of a [Test] PrologGoal.
+     * @param goal the [String] representing the [Atom] that describes the agent's [PrologGoal] trigger.
      */
     fun test(goal: String) = test(atomOf(goal))
 
     /**
-     * Handler for the creation of an [Achieve] Goal on another intention.
+     * Handler for the creation of an [Achieve] PrologGoal on another intention.
      * This enables internal lifecycle concurrency.
-     * @param goal the [Struct] that describes the Goal to [Achieve].
+     * @param goal the [Struct] that describes the PrologGoal to [Achieve].
      */
     fun spawn(goal: Struct) {
         goals += Spawn.of(goal)
     }
 
     /**
-     * Handler for the creation of an [Achieve] Goal on another intention.
+     * Handler for the creation of an [Achieve] PrologGoal on another intention.
      * This enables internal lifecycle concurrency.
-     * @param goal the [String] representing the [Atom] that describes the Goal to [Achieve].
+     * @param goal the [String] representing the [Atom] that describes the PrologGoal to [Achieve].
      */
     fun spawn(goal: String) = spawn(atomOf(goal))
 
     /**
-     * Handler for the creation of an [Achieve] Goal, optionally deciding to force the allocation on a new intention.
+     * Handler for the creation of an [Achieve] PrologGoal, optionally deciding to force the allocation on a new intention.
      * The allocation of a goal in a fresh intention enables internal lifecycle concurrency.
-     * @param goal the [Struct] that describes the Goal to [Achieve].
+     * @param goal the [Struct] that describes the PrologGoal to [Achieve].
      * @param parallel a [Boolean] that indicates whether force the allocation on a fresh intention or not.
      */
     fun achieve(goal: Struct, parallel: Boolean = false) {
@@ -73,9 +73,9 @@ class BodyScope(
     }
 
     /**
-     * Handler for the creation of an [Achieve] Goal, optionally deciding to force the allocation on a new intention.
+     * Handler for the creation of an [Achieve] PrologGoal, optionally deciding to force the allocation on a new intention.
      * The allocation of a goal in a fresh intention enables internal lifecycle concurrency.
-     * @param goal the [String] representing the [Atom] that describes the Goal to [Achieve].
+     * @param goal the [String] representing the [Atom] that describes the PrologGoal to [Achieve].
      * @param parallel a [Boolean] that indicates whether force the allocation on a fresh intention or not.
      */
     fun achieve(goal: String, parallel: Boolean = false) = achieve(atomOf(goal), parallel)
@@ -168,13 +168,13 @@ class BodyScope(
     }
 
     /**
-     * Handler for the creation of a [ActInternally] Goal.
+     * Handler for the creation of a [ActInternally] PrologGoal.
      * @param struct the [String] representing the [Atom] that invokes the action.
      */
     fun iact(struct: String) = iact(atomOf(struct))
 
     /**
-     * Handler for the creation of a [ActInternally] Goal.
+     * Handler for the creation of a [ActInternally] PrologGoal.
      * @param struct the [Struct] that invokes the action.
      */
     fun iact(struct: Struct) {
@@ -183,11 +183,11 @@ class BodyScope(
 
     /**
      * Handler for the addition of a list of Goals.
-     * @param goalList the [List] of [Goal]s the agent is going to perform.
+     * @param goalList the [List] of [PrologGoal]s the agent is going to perform.
      */
-    fun from(goalList: List<Goal>) = goalList.forEach {
+    fun from(goalList: List<PrologGoal>) = goalList.forEach {
         goals += it
     }
 
-    override fun build(): List<Goal> = goals.toList()
+    override fun build(): List<PrologGoal> = goals.toList()
 }

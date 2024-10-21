@@ -4,7 +4,7 @@ import it.unibo.jakta.events.PrologEvent
 import it.unibo.jakta.events.Trigger
 import it.unibo.jakta.intentions.Intention
 
-internal data class EventImpl<X>(
-    override val trigger: Trigger<X>,
+internal data class EventImpl<T : Trigger<*>>(
+    override val trigger: T,
     override val intention: Intention?,
-) : PrologEvent<X>
+) : PrologEvent<T>

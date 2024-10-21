@@ -7,7 +7,7 @@ import it.unibo.jakta.events.BeliefBaseRevision
 import it.unibo.jakta.events.TestGoalTrigger
 import it.unibo.jakta.events.Trigger
 import it.unibo.jakta.goals.EmptyGoal
-import it.unibo.jakta.goals.Goal
+import it.unibo.jakta.goals.PrologGoal
 import it.unibo.jakta.plans.Plan
 import it.unibo.tuprolog.core.Scope
 import it.unibo.tuprolog.core.Struct
@@ -20,7 +20,7 @@ data class PlanScope(
     private val triggerType: KClass<out Trigger>,
 ) {
     private var guard: Struct = Truth.TRUE
-    private var goals: List<Goal> = mutableListOf()
+    private var goals: List<PrologGoal> = mutableListOf()
     var failure: Boolean = false
 
     infix fun onlyIf(guards: GuardScope.() -> Struct): PlanScope {

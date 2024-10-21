@@ -1,12 +1,12 @@
 package it.unibo.jakta.plans.impl
 
-import it.unibo.jakta.goals.Goal
+import it.unibo.jakta.goals.PrologGoal
 import it.unibo.jakta.plans.ActivationRecord
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
 
 internal data class ActivationRecordImpl(
-    override val goalQueue: List<Goal>,
+    override val goalQueue: List<PrologGoal>,
     override val plan: Struct,
 ) : ActivationRecord {
 

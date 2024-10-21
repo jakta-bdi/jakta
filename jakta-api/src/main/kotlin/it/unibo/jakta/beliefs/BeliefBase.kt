@@ -3,36 +3,46 @@ package it.unibo.jakta.beliefs
 import it.unibo.jakta.resolution.Solution
 
 /** A BDI Agent's collection of [Belief]s */
-interface BeliefBase<B : Belief<*>, C : BeliefBase<B, C>> : Iterable<B> {
+interface BeliefBase<B : Belief<*>, BB : BeliefBase<B, BB>> : Collection<B> {
+
+    /**
+     * List of [BeliefUpdate] that populated the current [BeliefBase].
+     **/
+    val delta: List<BeliefUpdate<B>>
+
+    /**
+     * Resets the [BeliefBase] operations.
+     * @return a [BeliefBase] where the delta list is empty.
+     */
+    fun resetDelta(): BB
+
     /**
      * Adds a [Belief] to this [BeliefBase]
      * @param belief: the [Belief] to be added
-     * @return a [RetrieveResult] with the new [BeliefBase] and the added [Belief]
+     * @return the new [BeliefBase] and the added [Belief]
      **/
-    fun add(belief: B): RetrieveResult<B>
+    operator fun plus(belief: B): BB
 
     /**
      * Adds all the given beliefs into this [BeliefBase]
      * @param beliefs: beliefs to be added
-     * @return a [RetrieveResult] with the new [BeliefBase] and the added [Belief]s
+     * @return the new [BeliefBase] and the added [Belief]s
      **/
-    fun addAll(beliefs: C): RetrieveResult<B>
+    operator fun plus(beliefs: BB): BB
 
     /**
      * Removes a [Belief] from the [BeliefBase]
      * @param belief: the [Belief] to be removed
-     * @return a [RetrieveResult] with the new [BeliefBase] and the removed [Belief]
+     * @return the new [BeliefBase] and the removed [Belief]
      */
-    fun remove(belief: B): RetrieveResult<B>
+    operator fun minus(belief: B): BB
 
     /**
      * Removes all the specified beliefs from this [BeliefBase]
      * @param beliefs: beliefs to be removed
-     * @return a [RetrieveResult] with the new [BeliefBase] and the removed [Belief]s
+     * @return the new [BeliefBase] and the removed [Belief]s
      */
-    fun removeAll(beliefs: C): RetrieveResult<*>
-
-    fun update(belief: B): RetrieveResult<B>
+    operator fun minus(beliefs: BB): BB
 
     /**
      * Performs unification between [B] and values in this [BeliefBase]
