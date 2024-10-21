@@ -4,7 +4,7 @@ import it.unibo.jakta.context.Addition
 import it.unibo.jakta.context.ContextUpdate
 import it.unibo.jakta.context.Removal
 
-data class BeliefUpdate<B : Belief<*>>(
+data class BeliefUpdate<Belief>(
     val belief: B,
     val updateType: ContextUpdate,
 ) {

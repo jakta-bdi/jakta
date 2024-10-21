@@ -2,13 +2,14 @@ package it.unibo.jakta.beliefs
 
 import it.unibo.jakta.beliefs.impl.PrologBeliefBaseImpl
 import it.unibo.jakta.resolution.Solution
+import it.unibo.tuprolog.core.Rule
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.solve.Solution as TuprologSolution
 
 /** A BDI Agent's collection of [PrologBelief] */
-interface PrologBeliefBase : BeliefBase<PrologBelief, PrologBeliefBase> {
+interface PrologBeliefBase : BeliefBase<Struct, Rule, PrologBeliefBase> {
 
-    fun solve(struct: Struct): Solution<TuprologSolution>
+    override fun solve(query: Struct): PrologBeliefBase
 
     /**
      * Updates the content of the [BeliefBase] without saving the change in delta variable.

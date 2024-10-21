@@ -8,7 +8,7 @@ import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.core.Term
 import it.unibo.tuprolog.core.Var
 
-interface PrologBelief : Belief<Rule> {
+interface PrologBelief : Rule {
 
     fun applySubstitution(substitution: Substitution): PrologBelief
 
