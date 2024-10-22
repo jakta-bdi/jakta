@@ -17,7 +17,6 @@ import it.unibo.jakta.actions.effects.PopMessage
 import it.unibo.jakta.actions.effects.Sleep
 import it.unibo.jakta.actions.effects.Stop
 import it.unibo.jakta.beliefs.Belief
-import it.unibo.jakta.beliefs.BeliefUpdate
 import it.unibo.jakta.beliefs.PrologBeliefBase
 import it.unibo.jakta.beliefs.RetrieveResult
 import it.unibo.jakta.context.AgentContext
