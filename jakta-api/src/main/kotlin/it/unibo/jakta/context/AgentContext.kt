@@ -12,10 +12,13 @@ import it.unibo.jakta.plans.PlanLibrary
 /**
  * The Context is the actual state of a BDI Agent's structures.
  */
-interface AgentContext<B : Belief<*>, C : BeliefBase<B, C>, T : Trigger<*>> {
+interface AgentContext<Query, Belief, BB, T> where
+      Query : Any,
+      BB : BeliefBase<Query, Belief, BB>,
+      T : Trigger<*> {
 
     /** [BeliefBase] of the BDI Agent */
-    val beliefBase: C
+    val beliefBase: BB
 
     /**
      * The collection of [Event] that the BDI Agent reacts on.

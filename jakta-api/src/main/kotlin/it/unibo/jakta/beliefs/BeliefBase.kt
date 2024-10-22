@@ -3,7 +3,7 @@ package it.unibo.jakta.beliefs
 import it.unibo.jakta.beliefs.BeliefBase.Update
 
 /** A BDI Agent's collection of [Belief]s */
-interface BeliefBase<Query : Any, Belief, SelfType : BeliefBase<Query, Belief, SelfType>> : Collection<Belief> {
+interface BeliefBase<in Query : Any, out Belief, SelfType : BeliefBase<Query, Belief, SelfType>> : Collection<Belief> {
 
     /**
      * Performs unification between [B] and values in this [BeliefBase]
