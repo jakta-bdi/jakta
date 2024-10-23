@@ -1,27 +1,33 @@
 package it.unibo.jakta.goals
 
-import it.unibo.jakta.beliefs.Belief
+interface Goal {
 
-sealed interface Goal<X> {
-    val value: X
+    data object EmptyGoal : Goal
+
+    data class Achieve<X>(override val value: X) : Goal<X>
+
+    data class Test<X>(override val value: X) : Goal<X>
+
+    data class Spawn<X>(override val value: X) : Goal<X>
 }
 
-data class EmptyGoal<X>(override val value: X) : Goal<X>
+interface NonEmptyGoal<out State> : Goal {
+    val value: State
+}
 
-data class AddBelief<B : Belief<*>> (override val value: B) : Goal<B>
+/**
+ * [ExecutableGoal]s represent something which Agent executes in the current iteration of its lifecycle.
+ */
+interface ExecutableGoal<out State> : NonEmptyGoal<State> {
+    data class AddBelief<out Belief>(override val value: B) : ExecutableGoal<B>
 
-data class RemoveBelief<B : Belief<*>> (override val value: B) : Goal<B>
+    data class RemoveBelief<B : Belief<*>>(override val value: B) : Goal<B>
 
-data class UpdateBelief<B : Belief<*>> (override val value: B) : Goal<B>
+    data class UpdateBelief<B : Belief<*>>(override val value: B) : Goal<B>
 
-data class Achieve<X> (override val value: X) : Goal<X>
+    data class Act<X>(override val value: X) : Goal<X>
 
-data class Test<X> (override val value: X) : Goal<X>
+    data class ActInternally<X>(override val value: X) : Goal<X>
 
-data class Spawn<X> (override val value: X) : Goal<X>
-
-data class Act<X> (override val value: X) : Goal<X>
-
-data class ActInternally<X> (override val value: X) : Goal<X>
-
-data class ActExternally<X> (override val value: X) : Goal<X>
+    data class ActExternally<X>(override val value: X) : Goal<X>
+}
