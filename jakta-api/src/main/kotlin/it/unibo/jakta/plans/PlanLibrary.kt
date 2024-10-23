@@ -20,7 +20,7 @@ interface PlanLibrary<T, Gu, Go, P> where
     fun relevantPlans(event: Event<T>): PlanLibrary<T, Gu, Go, P>
 
     /** @return all the applicable [Plan]s in the agent with the specified [BeliefBase] */
-    fun <B : Belief<*>, BB : BeliefBase<B, BB>> applicablePlans(
+    fun applicablePlans(
         event: Event<T>,
         beliefBase: BB,
     ): PlanLibrary<T, Gu, Go, P>
