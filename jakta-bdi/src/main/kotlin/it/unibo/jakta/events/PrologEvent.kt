@@ -5,9 +5,8 @@ import it.unibo.jakta.events.impl.EventImpl
 import it.unibo.jakta.goals.Achieve
 import it.unibo.jakta.goals.Test
 import it.unibo.jakta.intentions.Intention
-import it.unibo.jakta.intentions.IntentionID
+import it.unibo.jakta.plans.Test
 import it.unibo.tuprolog.core.Struct
-
 
 interface PrologEvent : Event<Trigger> {
 
@@ -53,7 +52,7 @@ interface PrologEvent : Event<Trigger> {
          * @return a new instance of [Event]
          */
         fun ofTestGoalInvocation(testGoal: Test, intention: Intention? = null) =
-            of(TestGoalInvocation(testGoal.value), intention)
+            of(TestGoalInvocation(testGoal.), intention)
 
         /**
          * Generates an [Event] with a [TestGoalFailure] trigger.

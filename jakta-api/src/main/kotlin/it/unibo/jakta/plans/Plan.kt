@@ -4,14 +4,14 @@ import it.unibo.jakta.beliefs.BeliefBase
 import it.unibo.jakta.events.Event
 
 interface Plan<PlanTrigger, out Guard, Query, Belief, BB> where
-    Query: Any,
-    BB: BeliefBase<Query, Belief, BB> {
+      Query : Any,
+      BB : BeliefBase<Query, Belief, BB> {
 
     val trigger: PlanTrigger
 
     val guard: Guard
 
-    val goals: List<Task>
+    val tasks: List<Task>
 
     /** Determines if a plan is relevant for the execution of the [Event] **/
     fun <EventTrigger> isRelevant(event: Event<EventTrigger>): Boolean
@@ -21,7 +21,8 @@ interface Plan<PlanTrigger, out Guard, Query, Belief, BB> where
 
     /** Returns the computed applicable plan */
     fun <EventTrigger> applicablePlan(
-        event: Event<EventTrigger>, beliefBase: BB,
+        event: Event<EventTrigger>,
+        beliefBase: BB,
     ): Plan<PlanTrigger, Guard, Query, Belief, BB>
 
     /**

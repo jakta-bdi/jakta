@@ -15,7 +15,7 @@ import it.unibo.jakta.plans.PlanLibrary
 interface AgentContext<Query, Belief, BB, T> where
       Query : Any,
       BB : BeliefBase<Query, Belief, BB>,
-      T : Trigger<*> {
+       {
 
     /** [BeliefBase] of the BDI Agent */
     val beliefBase: BB

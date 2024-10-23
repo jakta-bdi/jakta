@@ -2,15 +2,14 @@ package it.unibo.jakta.plans
 
 import it.unibo.jakta.goals.Goal
 import it.unibo.jakta.plans.impl.ActivationRecordImpl
-import it.unibo.tuprolog.core.Struct
-import it.unibo.tuprolog.core.Substitution
 
-interface ActivationRecord {
-    val goalQueue: List<Goal>
+// TODO("Sostituire il generico con il tipo corretto")
+interface ActivationRecord<Plan> {
+    val taskQueue: List<Task> // = plan.tasks
 
-    val plan: Struct
+    val plan: Plan
 
-    fun pop(): ActivationRecord
+    fun pop(): ActivationRecord<Plan>
 
     fun applySubstitution(substitution: Substitution): ActivationRecord
 

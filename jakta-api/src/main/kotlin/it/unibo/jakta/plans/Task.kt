@@ -10,7 +10,7 @@ interface Task {
     /**
      * Represents the [Agent]'s activity of doing nothing.
      */
-    data object Empty: Task
+    data object Empty : Task
 
     /**
      * Execution of a generic activity during the execution of the [AgentLifecycle]'s iteration

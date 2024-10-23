@@ -26,7 +26,7 @@ data class Act(override val activity: Struct) : Task.ActionExecution<Struct>
 /**
  * [Task.ActionExecution] which executes an [InternalAction].
  */
-data class ActInternally(override val activity: Struct)  : Task.ActionExecution<Struct>
+data class ActInternally(override val activity: Struct) : Task.ActionExecution<Struct>
 
 /**
  * [Task.ActionExecution] which executes an [ExternalAction].
