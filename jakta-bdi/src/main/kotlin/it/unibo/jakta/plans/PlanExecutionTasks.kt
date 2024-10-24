@@ -23,5 +23,5 @@ data class Test(
  * and executes it in another intention.
  */
 data class Spawn(
-    override val event: Event<AchievementGoalInvocation>,
-) : Task.PlanExecution<AchievementGoalInvocation>
+    override val event: Event,
+) : Task.PlanExecution

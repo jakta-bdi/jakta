@@ -1,22 +1,11 @@
 package it.unibo.jakta.plans
 
-import it.unibo.jakta.goals.Goal
-import it.unibo.jakta.plans.impl.ActivationRecordImpl
+interface ActivationRecord<out Query : Any, in Belief> {
 
-// TODO("Sostituire il generico con il tipo corretto")
-interface ActivationRecord<Plan> {
-    val taskQueue: List<Task> // = plan.tasks
+    val taskQueue: List<Task<*>> // = plan.tasks
 
-    val plan: Plan
+    val plan: Plan<Query, Belief>
 
-    fun pop(): ActivationRecord<Plan>
+    fun pop(): ActivationRecord<Query, Belief>
 
-    fun applySubstitution(substitution: Substitution): ActivationRecord
-
-    fun isLastGoal(): Boolean
-
-    companion object {
-        fun of(goals: List<Goal>, plan: Struct): ActivationRecord =
-            ActivationRecordImpl(goals, plan)
-    }
 }

@@ -22,7 +22,7 @@ internal data class PrologBeliefBaseImpl(
 
     override fun snapshot(): PrologBeliefBase = this
 
-    override fun select(query: Struct): PrologBeliefBase {
+    override fun select(query: Struct): List<PrologBelief> {
         val solution = Solver.prolog.newBuilder()
             .flag(Unknown, Unknown.FAIL)
             .staticKb(operatorExtension + Theory.of(beliefs))
@@ -30,13 +30,13 @@ internal data class PrologBeliefBaseImpl(
             .build()
             .solveOnce(query)
         return if (solution.isYes && solution.solvedQuery != null) {
-            PrologMutableBeliefBase.of(PrologBelief.wrap(solution.solvedQuery!!)).snapshot()
+            listOf(PrologBelief.wrap(solution.solvedQuery!!))
         } else {
-            PrologMutableBeliefBase.empty().snapshot()
+            emptyList()
         }
     }
 
-    override fun select(query: PrologBelief): PrologBeliefBase = select(query.content.head)
+    override fun select(query: PrologBelief) = select(query.content.head)
 
     override fun update(belief: PrologBelief): Boolean {
         val element = beliefs.find { it.head?.functor == belief.content.head.functor }

@@ -167,6 +167,7 @@ internal data class AgentLifecycleImpl(
     }
 
     override fun runIntention(intention: Intention, context: AgentContext, environment: Environment): ExecutionResult =
+        intention.nextTask().execute()
         when (val nextGoal = intention.nextGoal()) {
             is EmptyGoal -> ExecutionResult(
                 context.copy(intentions = context.intentions.updateIntention(intention.pop())),

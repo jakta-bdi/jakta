@@ -3,12 +3,12 @@ package it.unibo.jakta.beliefs
 import it.unibo.jakta.beliefs.BeliefBase.Update
 
 /** A BDI Agent's collection of [Belief]s */
-interface BeliefBase<in Query : Any, out Belief, SelfType : BeliefBase<Query, Belief, SelfType>> : Collection<Belief> {
+interface BeliefBase<in Query : Any, out Belief> : Collection<Belief> {
 
     /**
      * Performs unification between [B] and values in this [BeliefBase]
      */
-    fun select(query: Query): SelfType
+    fun select(query: Query): List<Belief> //SelfType
 
     // TODO: this may be a container of multiple updates that happen atomically
     sealed interface Update<Belief> {
@@ -19,7 +19,7 @@ interface BeliefBase<in Query : Any, out Belief, SelfType : BeliefBase<Query, Be
     }
 }
 
-interface MutableBeliefBase<Query : Any, Belief, ImmBB : BeliefBase<Query, Belief, ImmBB>> : Collection<Belief> {
+interface MutableBeliefBase<Query : Any, Belief, BB : BeliefBase<Query, Belief>> : Collection<Belief> {
 
     /**
      * List of [Update] that populated the current [BeliefBase].
@@ -29,7 +29,7 @@ interface MutableBeliefBase<Query : Any, Belief, ImmBB : BeliefBase<Query, Belie
     /**
      * @return the immutable [BeliefBase] version of this instance.
      */
-    fun snapshot(): ImmBB
+    fun snapshot(): BB
 
     /**
      * Adds a [Belief] to this [BeliefBase], if not present.
@@ -43,7 +43,7 @@ interface MutableBeliefBase<Query : Any, Belief, ImmBB : BeliefBase<Query, Belie
      * @param beliefs: the [BeliefBase] to be added.
      * @return true if the [BeliefBase] was changed as the result of the operation.
      **/
-    fun addAll(beliefs: ImmBB): Boolean {
+    fun addAll(beliefs: BeliefBase<*, Belief>): Boolean {
         var result = false
         for (b in beliefs) {
             if (add(b)) result = true
@@ -63,7 +63,7 @@ interface MutableBeliefBase<Query : Any, Belief, ImmBB : BeliefBase<Query, Belie
      * @param beliefs: beliefs to be removed
      * @return true if the [BeliefBase] was changed as the result of the operation.
      */
-    fun removeAll(beliefs: ImmBB): Boolean {
+    fun removeAll(beliefs: BeliefBase<*, Belief>): Boolean {
         var result = false
         for (b in beliefs) {
             if (remove(b)) result = true

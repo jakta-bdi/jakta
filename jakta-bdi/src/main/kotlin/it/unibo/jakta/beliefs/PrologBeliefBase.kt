@@ -4,9 +4,9 @@ import it.unibo.jakta.beliefs.impl.PrologBeliefBaseImpl
 import it.unibo.tuprolog.core.Struct
 
 /** A BDI Agent's collection of [PrologBelief] */
-interface PrologBeliefBase : BeliefBase<Struct, PrologBelief, PrologBeliefBase> {
+interface PrologBeliefBase : BeliefBase<Struct, PrologBelief> {
 
-    fun select(query: PrologBelief): PrologBeliefBase
+    fun select(query: PrologBelief): List<PrologBelief>
 }
 
 interface PrologMutableBeliefBase : MutableBeliefBase<Struct, PrologBelief, PrologBeliefBase> {
