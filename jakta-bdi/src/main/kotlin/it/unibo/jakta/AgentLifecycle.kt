@@ -1,8 +1,8 @@
 package it.unibo.jakta
 
 import it.unibo.jakta.actions.effects.EnvironmentChange
+import it.unibo.jakta.beliefs.ASBeliefBase
 import it.unibo.jakta.beliefs.Belief
-import it.unibo.jakta.beliefs.PrologBeliefBase
 import it.unibo.jakta.beliefs.RetrieveResult
 import it.unibo.jakta.context.AgentContext
 import it.unibo.jakta.environment.Environment
@@ -23,11 +23,11 @@ interface AgentLifecycle {
     /**
      * STEP 1 of reasoning cycle: Belief Update Function.
      * This function defines how to merge new [perceptions] into the current [beliefBase]
-     * @param perceptions: [PrologBeliefBase] that collects all agent's perceptions of the environment
-     * @param beliefBase: [PrologBeliefBase] the current agent's [PrologBeliefBase]
-     * @return a [RetrieveResult] that contains the updated [PrologBeliefBase] and the added [Belief]s
+     * @param perceptions: [ASBeliefBase] that collects all agent's perceptions of the environment
+     * @param beliefBase: [ASBeliefBase] the current agent's [ASBeliefBase]
+     * @return a [RetrieveResult] that contains the updated [ASBeliefBase] and the added [Belief]s
      */
-    fun updateBelief(perceptions: PrologBeliefBase, beliefBase: PrologBeliefBase): RetrieveResult
+    fun updateBelief(perceptions: ASBeliefBase, beliefBase: ASBeliefBase): RetrieveResult
 
     /**
      * STEP 5 of reasoning cycle: Selecting an Event.
@@ -53,10 +53,10 @@ interface AgentLifecycle {
      * This function defines if a plan is applicable based on the agent's Belief Base.
      * @param event: the selected [Event] that triggered the [Plan]
      * @param plan: the triggered [Plan]
-     * @param beliefBase: the agent's [PrologBeliefBase]
+     * @param beliefBase: the agent's [ASBeliefBase]
      * @return yes if it's applicable, false otherwise.
      */
-    fun isPlanApplicable(event: Event, plan: Plan, beliefBase: PrologBeliefBase): Boolean
+    fun isPlanApplicable(event: Event, plan: Plan, beliefBase: ASBeliefBase): Boolean
 
     /**
      * Step 8 of reasoning cycle: Selecting one Applicable Plan.
@@ -113,7 +113,7 @@ interface AgentLifecycle {
     /**
      * Performs the sensing phase of the reasoning cycle, in particular:
      *  - STEP1: Perceive the Environment
-     *  - STEP2: Update the PrologBeliefBase
+     *  - STEP2: Update the ASBeliefBase
      *  - STEP3: Receiving Communication from Other Agents
      *  - STEP4: Selecting "Socially Acceptable" Messages
      *  @param environment the [Environment]

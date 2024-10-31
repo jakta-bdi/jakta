@@ -6,9 +6,9 @@ import io.kotest.matchers.shouldBe
 import it.unibo.jakta.beliefs.Belief
 import it.unibo.jakta.goals.Achieve
 import it.unibo.jakta.goals.AddBelief
+import it.unibo.jakta.intentions.ActivationRecord
 import it.unibo.jakta.intentions.Intention
 import it.unibo.jakta.intentions.IntentionPool
-import it.unibo.jakta.plans.ActivationRecord
 import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
@@ -51,7 +51,7 @@ class TestIntentions : DescribeSpec({
         }
 
         it("should apply a substitution on the actual Activation Record") {
-            // val bb = PrologBeliefBase.of(listOf(Belief.of(Struct.of(buy()))))
+            // val bb = ASBeliefBase.of(listOf(Belief.of(Struct.of(buy()))))
 
             val substitution = Substitution.of(X, Atom.of("chocolate"))
             val newIntention = Intention.of(

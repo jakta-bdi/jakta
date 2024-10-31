@@ -1,12 +1,12 @@
 package it.unibo.jakta.actions.effects
 
-import it.unibo.jakta.beliefs.Belief
+import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.context.ContextUpdate
 import it.unibo.jakta.events.Event
 import it.unibo.jakta.intentions.Intention
 import it.unibo.jakta.plans.Plan
 
-sealed interface AgentChange : SideEffect
+sealed interface AgentChange : ActionResult
 
 sealed interface InternalChange : AgentChange {
     val changeType: ContextUpdate
@@ -15,7 +15,7 @@ sealed interface InternalChange : AgentChange {
 sealed interface ActivityChange : AgentChange
 
 data class BeliefChange(
-    val belief: Belief,
+    val belief: ASBelief,
     override val changeType: ContextUpdate,
 ) : InternalChange
 

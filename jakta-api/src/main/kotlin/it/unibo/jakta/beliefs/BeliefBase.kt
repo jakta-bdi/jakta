@@ -8,7 +8,7 @@ interface BeliefBase<in Query : Any, out Belief> : Collection<Belief> {
     /**
      * Performs unification between [B] and values in this [BeliefBase]
      */
-    fun select(query: Query): List<Belief> //SelfType
+    fun select(query: Query): List<Belief> // SelfType
 
     // TODO: this may be a container of multiple updates that happen atomically
     sealed interface Update<Belief> {

@@ -1,12 +1,9 @@
 package it.unibo.jakta.plans
 
-import it.unibo.jakta.beliefs.BeliefBase
-import it.unibo.jakta.events.Event
-
-//interface PlanLibrary<Query, Belief, BB> : Collection<Plan<Query, Belief, BB>> where
+// interface PlanLibrary<Query, Belief, BB> : Collection<Plan<Query, Belief, BB>> where
 //    Query : Any,
 //    BB : BeliefBase<Query, Belief, BB>
-//{
+// {
 //
 //    /**
 //     * Like a standard practice in prolog, plans are ordered to let programmers know when the end of an eventual recursion happens.
@@ -25,4 +22,4 @@ import it.unibo.jakta.events.Event
 //    operator fun plus(plan: Plan<Query, Belief, BB>): PlanLibrary<Query, Belief, BB>
 //
 //    operator fun minus(plan: Plan<Query, Belief, BB>): PlanLibrary<Query, Belief, BB>
-//}
+// }

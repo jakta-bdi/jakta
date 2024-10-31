@@ -1,17 +1,20 @@
 package it.unibo.jakta.intentions.impl
 
-import it.unibo.jakta.intentions.Intention
+import it.unibo.jakta.beliefs.ASBelief
+import it.unibo.jakta.intentions.ASActivationRecord
+import it.unibo.jakta.intentions.ASIntention
+import it.unibo.jakta.intentions.ActivationRecord
 import it.unibo.jakta.intentions.IntentionID
-import it.unibo.jakta.plans.ActivationRecord
+import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
 
-internal class IntentionImpl(
-    override val recordStack: List<ActivationRecord>,
+internal data class IntentionImpl(
+    override val recordStack: List<ASActivationRecord>,
     override val isSuspended: Boolean = false,
     override val id: IntentionID = IntentionID(),
-) : Intention {
+) : ASIntention {
 
-    override fun pop(): Intention {
+    override fun pop(): ASIntention {
         val record = recordStack.first()
         return if (record.isLastGoal()) {
             this.copy(recordStack = recordStack - record)
@@ -20,10 +23,13 @@ internal class IntentionImpl(
         }
     }
 
-    override fun push(activationRecord: ActivationRecord) =
-        this.copy(recordStack = listOf(activationRecord) + recordStack)
+    override fun push(activationRecord: ActivationRecord<Struct, ASBelief>): ASIntention =
+        when (activationRecord is ASActivationRecord) {
+            true -> this.copy(recordStack = listOf(activationRecord) + recordStack)
+            else -> this
+        }
 
-    override fun applySubstitution(substitution: Substitution): Intention {
+    override fun applySubstitution(substitution: Substitution): ASIntention {
         val record = recordStack.first()
         return this.copy(recordStack = listOf(record.applySubstitution(substitution)) + recordStack - record)
     }

@@ -2,8 +2,8 @@ package it.unibo.jakta
 
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
+import it.unibo.jakta.beliefs.ASBeliefBase
 import it.unibo.jakta.beliefs.Belief
-import it.unibo.jakta.beliefs.PrologBeliefBase
 import it.unibo.jakta.context.ContextUpdate
 import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.Struct
@@ -14,7 +14,7 @@ class TestBeliefs : DescribeSpec({
     val chocolateDesire = Belief.fromSelfSource(Struct.of("desire", Atom.of("chocolate")))
     val strawberryDesire = Belief.fromSelfSource(Struct.of("desire", Atom.of("strawberry")))
     val genericNeed = Belief.fromSelfSource(Struct.of("need", Var.of("X")))
-    val emptybb = PrologBeliefBase.empty()
+    val emptybb = ASBeliefBase.empty()
 
     describe("A belief with self source") {
         it("Should be added to a Belief Base") {
@@ -38,22 +38,22 @@ class TestBeliefs : DescribeSpec({
             bb.count() shouldBe 1
         }
 
-        it("Should be added to a PrologBeliefBase with a Belief with the same predicate") {
+        it("Should be added to a ASBeliefBase with a Belief with the same predicate") {
             var bb = emptybb.add(strawberryDesire).updatedBeliefBase
             bb.count() shouldBe 1
             bb = bb.add(chocolateDesire).updatedBeliefBase
             bb.count() shouldBe 2
         }
 
-        it("should not be added to a PrologBeliefBase with the same predicate and a Variable") {
+        it("should not be added to a ASBeliefBase with the same predicate and a Variable") {
             var bb = emptybb.add(genericDesire).updatedBeliefBase
             bb.count() shouldBe 1
             bb = bb.add(chocolateDesire).updatedBeliefBase
             bb.count() shouldBe 1
         }
 
-        it("should be removed from a PrologBeliefBase") {
-            var bb = PrologBeliefBase.of(listOf(strawberryDesire, chocolateDesire, genericNeed))
+        it("should be removed from a ASBeliefBase") {
+            var bb = ASBeliefBase.of(listOf(strawberryDesire, chocolateDesire, genericNeed))
             bb.count() shouldBe 3
 
             bb = bb.remove(genericNeed).updatedBeliefBase
@@ -69,12 +69,12 @@ class TestBeliefs : DescribeSpec({
         }
     }
 
-    describe("A PrologBeliefBase") {
+    describe("A ASBeliefBase") {
         it("should be added into another one") {
-            var bb = PrologBeliefBase.of(listOf(strawberryDesire))
+            var bb = ASBeliefBase.of(listOf(strawberryDesire))
             bb.count() shouldBe 1
 
-            val bb2 = PrologBeliefBase.of(listOf(genericNeed, chocolateDesire))
+            val bb2 = ASBeliefBase.of(listOf(genericNeed, chocolateDesire))
             bb2.count() shouldBe 2
 
             val rr = bb.addAll(bb2)
@@ -88,10 +88,10 @@ class TestBeliefs : DescribeSpec({
         }
 
         it("should be removed from another") {
-            var bb = PrologBeliefBase.of(listOf(genericNeed, chocolateDesire, strawberryDesire))
+            var bb = ASBeliefBase.of(listOf(genericNeed, chocolateDesire, strawberryDesire))
             bb.count() shouldBe 3
 
-            val bb2 = PrologBeliefBase.of(listOf(chocolateDesire, strawberryDesire))
+            val bb2 = ASBeliefBase.of(listOf(chocolateDesire, strawberryDesire))
             bb2.count() shouldBe 2
 
             val rr = bb.removeAll(bb2)
@@ -106,11 +106,11 @@ class TestBeliefs : DescribeSpec({
 
         it("should be solved") {
 
-            var substitution = PrologBeliefBase.of(listOf(strawberryDesire))
+            var substitution = ASBeliefBase.of(listOf(strawberryDesire))
                 .solve(genericDesire).substitution
             substitution.isFailed shouldBe false
             substitution.values.first() shouldBe Atom.of("strawberry")
-            substitution = PrologBeliefBase.of(listOf(genericDesire))
+            substitution = ASBeliefBase.of(listOf(genericDesire))
                 .solve(strawberryDesire).substitution
             substitution.isSuccess shouldBe true
             substitution.values.size shouldBe 0
@@ -120,9 +120,9 @@ class TestBeliefs : DescribeSpec({
     describe("the belief update function") {
         it("should not remove beliefs with source(self)") {
             val belief = Belief.fromSelfSource(Struct.of("something", Var.of("X")))
-            val agent = Agent.of(beliefBase = PrologBeliefBase.of(listOf(belief)))
+            val agent = Agent.of(beliefBase = ASBeliefBase.of(listOf(belief)))
             val al = AgentLifecycle.newLifecycleFor(agent)
-            val rr = al.updateBelief(PrologBeliefBase.empty(), agent.context.beliefBase)
+            val rr = al.updateBelief(ASBeliefBase.empty(), agent.context.beliefBase)
             println(agent.context.beliefBase)
             println(rr.modifiedBeliefs)
             println(rr.modifiedBeliefs.count())
@@ -133,7 +133,7 @@ class TestBeliefs : DescribeSpec({
 
     describe("A belief annotation") {
         it("should be solved as well") {
-            val bb = PrologBeliefBase.of(Belief.fromSelfSource(Struct.of("coffee", Atom.of("hot"))))
+            val bb = ASBeliefBase.of(Belief.fromSelfSource(Struct.of("coffee", Atom.of("hot"))))
             bb.solve(
                 Struct.of("coffee", Struct.of("source", Var.of("X")), Atom.of("hot")),
             ).substitution.values.first() shouldBe Atom.of("self")

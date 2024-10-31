@@ -1,21 +1,14 @@
 package it.unibo.jakta.intentions
 
-import it.unibo.jakta.intentions.impl.IntentionPoolImpl
+interface IntentionPool<Query : Any, Belief> : Map<IntentionID, Intention<Query, Belief>> {
 
-interface IntentionPool : Map<IntentionID, Intention> {
-    fun updateIntention(intention: Intention): IntentionPool
+    fun updateIntention(intention: Intention<Query, Belief>): IntentionPool<Query, Belief>
 
-    fun nextIntention(): Intention
+    fun nextIntention(): Intention<Query, Belief>
 
-    fun pop(): IntentionPool
+    fun pop(): IntentionPool<Query, Belief>
 
-    fun deleteIntention(intentionID: IntentionID): IntentionPool
-
-    companion object {
-        fun empty(): IntentionPool = IntentionPoolImpl()
-
-        fun of(intentions: Map<IntentionID, Intention>): IntentionPool = IntentionPoolImpl(intentions)
-        fun of(vararg intentions: Intention): IntentionPool = of(intentions.asList())
-        fun of(intentions: List<Intention>): IntentionPool = IntentionPoolImpl(intentions.associateBy { it.id })
-    }
+    fun deleteIntention(intentionID: IntentionID): IntentionPool<Query, Belief>
 }
+
+// TODO("Fare lo stesso giochetto mutabile <-> immutabile che ho fatto per la bb")

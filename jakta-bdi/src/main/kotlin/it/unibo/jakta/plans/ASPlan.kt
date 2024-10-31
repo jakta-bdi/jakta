@@ -1,19 +1,19 @@
 package it.unibo.jakta.plans
 
-import it.unibo.jakta.beliefs.PrologBelief
-import it.unibo.jakta.beliefs.PrologBeliefBase
+import it.unibo.jakta.beliefs.ASBelief
+import it.unibo.jakta.beliefs.ASBeliefBase
 import it.unibo.jakta.events.ASEvent
-import it.unibo.jakta.events.Event
+import it.unibo.jakta.intentions.ASActivationRecord
 import it.unibo.tuprolog.core.Struct
 
-interface ASPlan : Plan<Struct, PrologBelief> {
+interface ASPlan : Plan<Struct, ASBelief> {
 
     val trigger: ASEvent
 
     val guard: Struct
 
     /** Returns the computed applicable plan */
-    fun applicablePlan(event: ASEvent, beliefBase: PrologBeliefBase): ASPlan
+    fun applicablePlan(event: ASEvent, beliefBase: ASBeliefBase): ASPlan
 
     /**
      * Transforms the current plan into an [ActivationRecord] for the [Intention] that will execute it.

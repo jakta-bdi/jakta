@@ -1,12 +1,14 @@
 package it.unibo.jakta.intentions.impl
 
+import it.unibo.jakta.intentions.ASIntention
+import it.unibo.jakta.intentions.ASIntentionPool
 import it.unibo.jakta.intentions.Intention
 import it.unibo.jakta.intentions.IntentionID
 import it.unibo.jakta.intentions.IntentionPool
 
 internal data class IntentionPoolImpl(
-    val from: Map<IntentionID, Intention> = emptyMap(),
-) : IntentionPool, LinkedHashMap<IntentionID, Intention>(from) {
+    val from: Map<IntentionID, ASIntention> = emptyMap(),
+) : ASIntentionPool, LinkedHashMap<IntentionID, ASIntention>(from) {
 
     override fun updateIntention(intention: Intention): IntentionPool =
         IntentionPoolImpl(this + Pair(intention.id, intention))

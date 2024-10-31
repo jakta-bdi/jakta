@@ -3,9 +3,7 @@ package it.unibo.jakta.impl
 import it.unibo.jakta.Agent
 import it.unibo.jakta.AgentLifecycle
 import it.unibo.jakta.actions.ExternalAction
-import it.unibo.jakta.actions.ExternalRequest
 import it.unibo.jakta.actions.InternalAction
-import it.unibo.jakta.actions.InternalRequest
 import it.unibo.jakta.actions.effects.AgentChange
 import it.unibo.jakta.actions.effects.BeliefChange
 import it.unibo.jakta.actions.effects.EnvironmentChange
@@ -16,8 +14,8 @@ import it.unibo.jakta.actions.effects.PlanChange
 import it.unibo.jakta.actions.effects.PopMessage
 import it.unibo.jakta.actions.effects.Sleep
 import it.unibo.jakta.actions.effects.Stop
+import it.unibo.jakta.beliefs.ASBeliefBase
 import it.unibo.jakta.beliefs.Belief
-import it.unibo.jakta.beliefs.PrologBeliefBase
 import it.unibo.jakta.beliefs.RetrieveResult
 import it.unibo.jakta.context.AgentContext
 import it.unibo.jakta.context.ContextUpdate.ADDITION
@@ -56,7 +54,7 @@ internal data class AgentLifecycleImpl(
     private var debugEnabled = false
     private var cachedEffects = emptyList<EnvironmentChange>()
 
-    override fun updateBelief(perceptions: PrologBeliefBase, beliefBase: PrologBeliefBase): RetrieveResult =
+    override fun updateBelief(perceptions: ASBeliefBase, beliefBase: ASBeliefBase): RetrieveResult =
         when (perceptions == beliefBase) {
             false -> {
                 // 1. each literal l in p not currently in b is added to b
@@ -84,7 +82,7 @@ internal data class AgentLifecycleImpl(
 
     override fun selectRelevantPlans(event: Event, planLibrary: PlanLibrary) = planLibrary.relevantPlans(event)
 
-    override fun isPlanApplicable(event: Event, plan: Plan, beliefBase: PrologBeliefBase) =
+    override fun isPlanApplicable(event: Event, plan: Plan, beliefBase: ASBeliefBase) =
         plan.isApplicable(event, beliefBase)
 
     override fun selectApplicablePlan(plans: Iterable<Plan>) = agent.selectApplicablePlan(plans)
@@ -104,70 +102,7 @@ internal data class AgentLifecycleImpl(
 
     override fun scheduleIntention(intentions: IntentionPool) = agent.scheduleIntention(intentions)
 
-    private fun executeInternalAction(
-        intention: Intention,
-        action: InternalAction,
-        context: AgentContext,
-        goal: ActionGoal,
-    ): ExecutionResult {
-        var newIntention = intention.pop()
-        if (action.signature.arity < goal.action.args.size) { // Arguments number mismatch
-            return ExecutionResult(failAchievementGoal(intention, context))
-        } else {
-            val internalResponse = action.execute(
-                InternalRequest.of(this.agent, controller?.currentTime(), goal.action.args),
-            )
-            // Apply substitution
-            return if (internalResponse.substitution.isSuccess) {
-                if (newIntention.recordStack.isNotEmpty()) {
-                    newIntention = newIntention.applySubstitution(internalResponse.substitution)
-                }
-                val newContext = applyEffects(context, internalResponse.effects)
-                ExecutionResult(
-                    newContext.copy(intentions = newContext.intentions.updateIntention(newIntention)),
-                )
-            } else {
-                ExecutionResult(failAchievementGoal(intention, context))
-            }
-        }
-    }
-
-    private fun executeExternalAction(
-        intention: Intention,
-        action: ExternalAction,
-        context: AgentContext,
-        environment: Environment,
-        goal: ActionGoal,
-    ): ExecutionResult {
-        var newIntention = intention.pop()
-        if (action.signature.arity < goal.action.args.size) {
-            // Argument number mismatch from action definition
-            return ExecutionResult(failAchievementGoal(intention, context))
-        } else {
-            val externalResponse = action.execute(
-                ExternalRequest.of(
-                    environment,
-                    agent.name,
-                    controller?.currentTime(),
-                    goal.action.args,
-                ),
-            )
-            return if (externalResponse.substitution.isSuccess) {
-                if (newIntention.recordStack.isNotEmpty()) {
-                    newIntention = newIntention.applySubstitution(externalResponse.substitution)
-                }
-                ExecutionResult(
-                    context.copy(intentions = context.intentions.updateIntention(newIntention)),
-                    externalResponse.effects,
-                )
-            } else {
-                ExecutionResult(failAchievementGoal(intention, context))
-            }
-        }
-    }
-
     override fun runIntention(intention: Intention, context: AgentContext, environment: Environment): ExecutionResult =
-        intention.nextTask().execute()
         when (val nextGoal = intention.nextGoal()) {
             is EmptyGoal -> ExecutionResult(
                 context.copy(intentions = context.intentions.updateIntention(intention.pop())),
@@ -177,26 +112,26 @@ internal data class AgentLifecycleImpl(
                     val internalAction = context.internalActions[nextGoal.action.functor]
 
                     if (internalAction == null) {
-                        // Internal Action not found
+                        // Internal ASAction not found
                         if (debugEnabled) {
-                            println("[${agent.name}] WARNING: ${nextGoal.action.functor} Internal Action not found.")
+                            println("[${agent.name}] WARNING: ${nextGoal.action.functor} Internal ASAction not found.")
                         }
                         ExecutionResult(failAchievementGoal(intention, context))
                     } else {
-                        // Execute Internal Action
+                        // Execute Internal ASAction
                         executeInternalAction(intention, internalAction, context, nextGoal)
                     }
                 }
                 is ActExternally -> {
                     val externalAction = environment.externalActions[nextGoal.action.functor]
                     if (externalAction == null) {
-                        // Internal Action not found
+                        // Internal ASAction not found
                         if (debugEnabled) {
-                            println("[${agent.name}] WARNING: ${nextGoal.action.functor} External Action not found.")
+                            println("[${agent.name}] WARNING: ${nextGoal.action.functor} External ASAction not found.")
                         }
                         ExecutionResult(failAchievementGoal(intention, context))
                     } else {
-                        // Execute External Action
+                        // Execute External ASAction
                         executeExternalAction(intention, externalAction, context, environment, nextGoal)
                     }
                 }
@@ -204,18 +139,18 @@ internal data class AgentLifecycleImpl(
                     val action = (environment.externalActions + context.internalActions)[nextGoal.action.functor]
                     if (action == null) {
                         if (debugEnabled) {
-                            println("[${agent.name}] WARNING: ${nextGoal.action.functor} Action not found.")
+                            println("[${agent.name}] WARNING: ${nextGoal.action.functor} ASAction not found.")
                         }
                         ExecutionResult(failAchievementGoal(intention, context))
                     } else {
-                        // Execute Action
+                        // Execute ASAction
                         when (action) {
                             is InternalAction -> executeInternalAction(intention, action, context, nextGoal)
                             is ExternalAction ->
                                 executeExternalAction(intention, action, context, environment, nextGoal)
                             else ->
                                 throw
-                                IllegalStateException("The Action to execute is neither internal nor external")
+                                IllegalStateException("The ASAction to execute is neither internal nor external")
                         }
                     }
                 }
@@ -326,11 +261,11 @@ internal data class AgentLifecycleImpl(
         // STEP1: Perceive the Environment
         val perceptions = environment.percept()
 
-        // STEP2: Update the PrologBeliefBase
+        // STEP2: Update the ASBeliefBase
         val rr = updateBelief(perceptions, agent.context.beliefBase)
         var newBeliefBase = rr.updatedBeliefBase
         // println("pre-run -> $context")
-        // Generate events related to PrologBeliefBase revision
+        // Generate events related to ASBeliefBase revision
         var newEvents = generateEvents(agent.context.events, rr.modifiedBeliefs)
 
         // STEP3: Receiving Communication from Other Agents

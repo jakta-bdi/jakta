@@ -1,14 +1,14 @@
 package it.unibo.jakta.beliefs.impl
 
-import it.unibo.jakta.beliefs.PrologBelief
+import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.tuprolog.core.Rule
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
 
-internal class PrologBeliefImpl(override val content: Rule) : PrologBelief {
+internal class ASBeliefImpl(override val content: Rule) : ASBelief {
 
-    override fun applySubstitution(substitution: Substitution): PrologBelief =
-        PrologBeliefImpl(content.apply(substitution).castToRule())
+    override fun applySubstitution(substitution: Substitution): ASBelief =
+        ASBeliefImpl(content.apply(substitution).castToRule())
 
     override fun hashCode(): Int = content.hashCode()
 
@@ -23,7 +23,7 @@ internal class PrologBeliefImpl(override val content: Rule) : PrologBelief {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
-        other as PrologBeliefImpl
+        other as ASBeliefImpl
         return content == other.content
     }
 }

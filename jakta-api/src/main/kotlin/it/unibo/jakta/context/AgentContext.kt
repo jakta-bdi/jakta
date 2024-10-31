@@ -1,7 +1,6 @@
 package it.unibo.jakta.context
 
 import it.unibo.jakta.beliefs.BeliefBase
-import it.unibo.jakta.beliefs.MutableBeliefBase
 import it.unibo.jakta.events.Event
 import it.unibo.jakta.intentions.IntentionPool
 import it.unibo.jakta.plans.Plan
@@ -26,19 +25,21 @@ interface AgentContext<Query : Any, Belief> {
     val planLibrary: Collection<Plan<Query, Belief>>
 
     val intentions: IntentionPool
-
-//    val internalActions: Map<String, Action>
 }
 
-abstract class MutableAgentContext<Query, Belief, BB> where
-    Query : Any,
-    BB : BeliefBase<Query, Belief> {
-
-    val mutableBase: MutableBeliefBase<Query, Belief, BB>
-    final override val beliefBase: BB get() = mutableBase.snapshot()
-    override val events: MutableList<Event>
-    override val planLibrary: MutableCollection<Plan<Query, Belief, BB>>
-
-    abstract fun snapshot(): AgentContext<Query, Belief>
-
-}
+// interface MutableAgentContext<Query: Any, Belief, out IAgentContext: AgentContext<Query, Belief>> {
+//
+//    val beliefBase: MutableBeliefBase<Query, Belief, out BeliefBase<Query, Belief>>
+//
+// //    val beliefBase: BB
+// //        get() = mutableBase.snapshot()
+//
+//    val events: MutableList<Event>
+//
+//    val planLibrary: MutableCollection<out Plan<Query, Belief>>
+//
+//    // val intentionPool: MutableIntentionPool
+//
+//    fun snapshot(): IAgentContext
+//
+// } // L'ho spostata sotto...

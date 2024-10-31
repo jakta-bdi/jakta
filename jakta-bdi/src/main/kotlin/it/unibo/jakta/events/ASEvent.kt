@@ -1,6 +1,6 @@
 package it.unibo.jakta.events
 
-import it.unibo.jakta.beliefs.PrologBelief
+import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.intentions.Intention
 import it.unibo.tuprolog.core.Struct
 
@@ -35,8 +35,8 @@ sealed interface ASEvent : Event {
  */
 data class AchievementGoalInvocation(
     override val trigger: Struct,
-    override val intention: Intention? = null
-): ASEvent
+    override val intention: Intention? = null,
+) : ASEvent
 
 /**
  * Generates an [Event] for doing something after a plan failure.
@@ -47,8 +47,8 @@ data class AchievementGoalInvocation(
  */
 data class AchievementGoalFailure(
     override val trigger: Struct,
-    override val intention: Intention? = null
-): ASEvent
+    override val intention: Intention? = null,
+) : ASEvent
 
 /**
  * Generates an [Event] to test a plan.
@@ -59,8 +59,8 @@ data class AchievementGoalFailure(
  */
 data class TestGoalInvocation(
     override val trigger: Struct,
-    override val intention: Intention? = null
-): ASEvent
+    override val intention: Intention? = null,
+) : ASEvent
 
 /**
  * Generates an [Event] for doing something after the failure of the plan's tests.
@@ -71,25 +71,25 @@ data class TestGoalInvocation(
  */
 data class TestGoalFailure(
     override val trigger: Struct,
-    override val intention: Intention? = null
-): ASEvent
+    override val intention: Intention? = null,
+) : ASEvent
 
-///**
+// /**
 // * Generates an [Event] with a [BeliefBaseTrigger.Update] trigger.
 // * @param trigger the [BeliefBaseTrigger.Addition] that triggered this Event.
 // * @param intention if the event is internal, this parameter specifies the intention id where the event belongs.
 // * If the event is external, this value is set to null. It's default value is null.
 // * @return a new instance of [Event]
 // */
-//data class BeliefBaseUpdate(
+// data class BeliefBaseUpdate(
 //    override val trigger: BeliefBaseTrigger.Update,
 //    override val intention: Intention? = null
-//): ASEvent {
-//    constructor(belief: PrologBelief, intention: Intention? = null) : this(
+// ): ASEvent {
+//    constructor(belief: ASBelief, intention: Intention? = null) : this(
 //        BeliefBaseTrigger.Update(belief),
 //        intention
 //    )
-//}
+// }
 // TODO("REDESIGN")
 // This type of event may need more than one belief to store, the belief that was previously stored in
 // the BB and the new instance for that belief.
@@ -103,11 +103,11 @@ data class TestGoalFailure(
  */
 data class BeliefBaseAddition(
     override val trigger: Struct,
-    override val intention: Intention? = null
-): ASEvent {
-    constructor(belief: PrologBelief, intention: Intention? = null) : this(
+    override val intention: Intention? = null,
+) : ASEvent {
+    constructor(belief: ASBelief, intention: Intention? = null) : this(
         belief.content.head,
-        intention
+        intention,
     )
 }
 
@@ -120,11 +120,10 @@ data class BeliefBaseAddition(
  */
 data class BeliefBaseRemoval(
     override val trigger: Struct,
-    override val intention: Intention? = null
-): ASEvent {
-    constructor(belief: PrologBelief, intention: Intention? = null) : this(
+    override val intention: Intention? = null,
+) : ASEvent {
+    constructor(belief: ASBelief, intention: Intention? = null) : this(
         belief.content.head,
-        intention
+        intention,
     )
 }
-

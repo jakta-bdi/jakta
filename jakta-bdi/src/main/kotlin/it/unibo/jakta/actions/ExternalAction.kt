@@ -4,7 +4,7 @@ import it.unibo.jakta.Agent
 import it.unibo.jakta.actions.effects.EnvironmentChange
 import it.unibo.jakta.messages.Message
 
-interface ExternalAction : Action<EnvironmentChange, ExternalResponse, ExternalRequest> {
+interface ExternalAction : ASAction<EnvironmentChange, ExternalResponse, ExternalRequest> {
     fun addAgent(agent: Agent)
     fun removeAgent(agentName: String)
     fun sendMessage(agentName: String, message: Message)

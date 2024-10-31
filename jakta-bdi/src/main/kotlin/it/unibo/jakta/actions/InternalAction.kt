@@ -6,7 +6,7 @@ import it.unibo.jakta.events.Event
 import it.unibo.jakta.intentions.Intention
 import it.unibo.jakta.plans.Plan
 
-interface InternalAction : Action<AgentChange, InternalResponse, InternalRequest> {
+interface InternalAction : ASAction<AgentChange, InternalResponse, InternalRequest> {
     fun addBelief(belief: Belief)
     fun removeBelief(belief: Belief)
     fun addIntention(intention: Intention)

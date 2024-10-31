@@ -2,7 +2,7 @@ package it.unibo.jakta
 
 import it.unibo.jakta.actions.InternalAction
 import it.unibo.jakta.actions.InternalActions
-import it.unibo.jakta.beliefs.PrologBeliefBase
+import it.unibo.jakta.beliefs.ASBeliefBase
 import it.unibo.jakta.context.AgentContext
 import it.unibo.jakta.events.Event
 import it.unibo.jakta.events.EventQueue
@@ -36,7 +36,7 @@ interface Agent : Taggable<Agent> {
         of(this.agentID, this.name, agentContext.copy())
 
     fun copy(
-        beliefBase: PrologBeliefBase = this.context.beliefBase,
+        beliefBase: ASBeliefBase = this.context.beliefBase,
         events: EventQueue = this.context.events,
         planLibrary: PlanLibrary = this.context.planLibrary,
         intentions: IntentionPool = this.context.intentions,
@@ -52,7 +52,7 @@ interface Agent : Taggable<Agent> {
         fun of(
             agentID: AgentID = AgentID(),
             name: String = "Agent-" + UUID.randomUUID(),
-            beliefBase: PrologBeliefBase = PrologBeliefBase.empty(),
+            beliefBase: ASBeliefBase = ASBeliefBase.empty(),
             events: EventQueue = emptyList(),
             planLibrary: PlanLibrary = PlanLibrary.empty(),
             internalActions: Map<String, InternalAction> = InternalActions.default(),

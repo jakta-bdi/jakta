@@ -3,7 +3,7 @@ package it.unibo.jakta.actions.effects
 import it.unibo.jakta.Agent
 import it.unibo.jakta.messages.Message
 
-sealed interface EnvironmentChange : SideEffect
+sealed interface EnvironmentChange : ActionResult
 data class SpawnAgent(val agent: Agent) : EnvironmentChange
 data class RemoveAgent(val agentName: String) : EnvironmentChange
 data class SendMessage(

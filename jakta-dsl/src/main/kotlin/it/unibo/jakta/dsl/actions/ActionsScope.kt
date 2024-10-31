@@ -1,18 +1,18 @@
 package it.unibo.jakta.dsl.actions
 
-import it.unibo.jakta.actions.Action
+import it.unibo.jakta.actions.ASAction
 import it.unibo.jakta.actions.ActionRequest
 import it.unibo.jakta.actions.ActionResponse
-import it.unibo.jakta.actions.effects.SideEffect
+import it.unibo.jakta.actions.effects.ActionResult
 import it.unibo.jakta.dsl.Builder
 import it.unibo.tuprolog.core.Term
 import kotlin.reflect.KFunction
 
 abstract class ActionsScope<C, Res, Req, A, As> : Builder<Map<String, A>>
-    where C : SideEffect,
+    where C : ActionResult,
           Res : ActionResponse<C>,
           Req : ActionRequest<C, Res>,
-          A : Action<C, Res, Req>,
+          A : ASAction<C, Res, Req>,
           As : ActionScope<C, Res, Req, A> {
 
     private val actions = mutableListOf<A>()

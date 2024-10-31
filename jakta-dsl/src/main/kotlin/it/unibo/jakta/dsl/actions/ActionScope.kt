@@ -1,9 +1,9 @@
 package it.unibo.jakta.dsl.actions
 
-import it.unibo.jakta.actions.Action
+import it.unibo.jakta.actions.ASAction
 import it.unibo.jakta.actions.ActionRequest
 import it.unibo.jakta.actions.ActionResponse
-import it.unibo.jakta.actions.effects.SideEffect
+import it.unibo.jakta.actions.effects.ActionResult
 
-interface ActionScope<C : SideEffect, Res : ActionResponse<C>, Req : ActionRequest<C, Res>, A : Action<C, Res, Req>> :
-    ActionRequest<C, Res>, Action<C, Res, Req>
+interface ActionScope<C : ActionResult, Res : ActionResponse<C>, Req : ActionRequest<C, Res>, A : ASAction<C, Res, Req>> :
+    ActionRequest<C, Res>, ASAction<C, Res, Req>

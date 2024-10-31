@@ -1,7 +1,7 @@
 package it.unibo.jakta
 
+import it.unibo.jakta.beliefs.ASBeliefBase
 import it.unibo.jakta.beliefs.Belief
-import it.unibo.jakta.beliefs.PrologBeliefBase
 import it.unibo.jakta.environment.Environment
 import it.unibo.jakta.events.Event
 import it.unibo.jakta.goals.Achieve
@@ -13,7 +13,7 @@ fun main() {
     val start = Jakta.parseStruct("start")
     val sleepingAgent = Agent.of(
         name = "Sleeping Agent",
-        beliefBase = PrologBeliefBase.of(Belief.fromSelfSource(Jakta.parseStruct("run"))),
+        beliefBase = ASBeliefBase.of(Belief.fromSelfSource(Jakta.parseStruct("run"))),
         events = listOf(Event.ofAchievementGoalInvocation(Achieve.of(start))),
         planLibrary = PlanLibrary.of(
             Plan.ofAchievementGoalInvocation(

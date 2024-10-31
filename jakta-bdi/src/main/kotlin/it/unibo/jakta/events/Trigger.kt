@@ -1,23 +1,23 @@
-//package it.unibo.jakta.events
+// package it.unibo.jakta.events
 //
-//import it.unibo.jakta.beliefs.BeliefBase
-//import it.unibo.jakta.beliefs.PrologBelief
-//import it.unibo.tuprolog.core.Struct
+// import it.unibo.jakta.beliefs.BeliefBase
+// import it.unibo.jakta.beliefs.ASBelief
+// import it.unibo.tuprolog.core.Struct
 //
-///** [Trigger] denotes the change that took place for the [Event] generation. */
-//sealed interface Trigger {
+// /** [Trigger] denotes the change that took place for the [Event] generation. */
+// sealed interface Trigger {
 //    val value: Struct
-//}
+// }
 //
-///** [Trigger] generated after a [Belief] addition (or removal) from the [BeliefBase]. */
-//sealed interface BeliefBaseTrigger : Trigger {
+// /** [Trigger] generated after a [Belief] addition (or removal) from the [BeliefBase]. */
+// sealed interface BeliefBaseTrigger : Trigger {
 //
 //    /** The head of the [Belief] that is inserted (or removed) from the [BeliefBase]. */
 //    val belief: Struct
 //        get() = value
 //
 //    /** [BeliefBaseRevision] generated after a [Belief] addition to agent's [BeliefBase]. */
-//    class Addition(private val addedBelief: PrologBelief) : BeliefBaseTrigger {
+//    class Addition(private val addedBelief: ASBelief) : BeliefBaseTrigger {
 //        override val value: Struct
 //            get() = addedBelief.content.head
 //
@@ -25,24 +25,24 @@
 //    }
 //
 //    /** [BeliefBaseTrigger] generated after a [Belief] removal from agent's [BeliefBase]. */
-//    data class Removal(private val removedBelief: PrologBelief) : BeliefBaseTrigger {
+//    data class Removal(private val removedBelief: ASBelief) : BeliefBaseTrigger {
 //        override val value: Struct
 //            get() = removedBelief.content.head
 //        override fun toString(): String = "BeliefBaseRemoval(value=$value)"
 //    }
 //
-////    data class Update(private val removedBelief: PrologBelief) : BeliefBaseTrigger {
-////        override val value: Struct
-////            get() = removedBelief.content.head
-////        override fun toString(): String = "BeliefBaseUpdate(value=$value)"
-////    }
+// //    data class Update(private val removedBelief: ASBelief) : BeliefBaseTrigger {
+// //        override val value: Struct
+// //            get() = removedBelief.content.head
+// //        override fun toString(): String = "BeliefBaseUpdate(value=$value)"
+// //    }
 //    // TODO("REDESIGN")
 //    // This type of event may need more than one belief to store, the belief that was previously stored in
 //    // the BB and the new instance for that belief.
-//}
+// }
 //
-///** [Trigger] of an event made by a [Test] Goal. */
-//sealed interface TestGoalTrigger : Trigger {
+// /** [Trigger] of an event made by a [Test] Goal. */
+// sealed interface TestGoalTrigger : Trigger {
 //    val goal: Struct
 //        get() = value
 //
@@ -51,10 +51,10 @@
 //
 //    /** [TestGoalTrigger] generated after a failure of a [Test] Goal. */
 //    data class Failure(override val value: Struct) : TestGoalTrigger
-//}
+// }
 //
-///** [Trigger] of an event made by a [Achieve] Goal. */
-//interface AchievementGoalTrigger : Trigger {
+// /** [Trigger] of an event made by a [Achieve] Goal. */
+// interface AchievementGoalTrigger : Trigger {
 //    val goal: Struct
 //        get() = value
 //
@@ -63,4 +63,4 @@
 //
 //    /** [AchievementGoalTrigger] generated after the failure of a [Achieve] Goal. */
 //    data class Failure(override val value: Struct) : AchievementGoalTrigger
-//}
+// }

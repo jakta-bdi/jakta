@@ -11,4 +11,4 @@ fun interface Desire<StateQuery> {
     fun testState(stateQuery: StateQuery): Boolean
 }
 
-//TODO("Come genero l'evento iniziale relativo a questa condizione iniziale?")
+// TODO("Come genero l'evento iniziale relativo a questa condizione iniziale?")

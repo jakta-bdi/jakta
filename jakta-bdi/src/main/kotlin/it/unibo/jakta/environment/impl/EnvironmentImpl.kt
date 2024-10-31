@@ -3,7 +3,7 @@ package it.unibo.jakta.environment.impl
 import it.unibo.jakta.Agent
 import it.unibo.jakta.AgentID
 import it.unibo.jakta.actions.ExternalAction
-import it.unibo.jakta.beliefs.PrologBeliefBase
+import it.unibo.jakta.beliefs.ASBeliefBase
 import it.unibo.jakta.environment.Environment
 import it.unibo.jakta.messages.Message
 import it.unibo.jakta.messages.MessageQueue
@@ -66,7 +66,7 @@ open class EnvironmentImpl(
             this
         }
 
-    override fun percept(): PrologBeliefBase = perception.percept()
+    override fun percept(): ASBeliefBase = perception.percept()
 
     override fun addData(key: String, value: Any): Environment = copy(data = data + Pair(key, value))
 
