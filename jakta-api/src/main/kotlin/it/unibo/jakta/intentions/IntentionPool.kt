@@ -10,5 +10,3 @@ interface IntentionPool<Query : Any, Belief> : Map<IntentionID, Intention<Query,
 
     fun deleteIntention(intentionID: IntentionID): IntentionPool<Query, Belief>
 }
-
-// TODO("Fare lo stesso giochetto mutabile <-> immutabile che ho fatto per la bb")

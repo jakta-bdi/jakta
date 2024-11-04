@@ -24,7 +24,7 @@ interface AgentContext<Query : Any, Belief> {
     /** [Plan]s collection of the BDI Agent */
     val planLibrary: Collection<Plan<Query, Belief>>
 
-    val intentions: IntentionPool
+    val intentions: IntentionPool<Query, Belief>
 }
 
 // interface MutableAgentContext<Query: Any, Belief, out IAgentContext: AgentContext<Query, Belief>> {

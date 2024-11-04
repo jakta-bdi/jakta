@@ -7,13 +7,15 @@ import it.unibo.jakta.events.ASEvent
 import it.unibo.jakta.events.Event
 import it.unibo.jakta.intentions.ActivationRecord
 import it.unibo.jakta.plans.ASPlan
+import it.unibo.jakta.plans.ASTask
+import it.unibo.jakta.plans.Task
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.unify.Unificator.Companion.mguWith
 
-internal data class PlanImp(
+internal data class PlanImpl(
     override val trigger: ASEvent,
     override val guard: Struct,
-    override val tasks: List<ASTask<*>>,
+    override val tasks: List<Task<*>>,
 ) : ASPlan {
 
     override fun isApplicable(event: Event, beliefBase: BeliefBase<Struct, ASBelief>): Boolean {
@@ -35,12 +37,12 @@ internal data class PlanImp(
                 val actualGuard = guard.apply(mgu).castToStruct()
                 val solvedGuard = beliefBase.select(actualGuard)
                 val actualGoals = tasks.map { // TODO("Implementare i Task")
-                    it.copy(
+//                    it.copy(
                         it.value
                             .apply(mgu)
                             .apply(solvedGuard.substitution)
                             .castToStruct(),
-                    )
+//                    )
                 }
 
                 PlanImpl(event.trigger, actualGuard, actualGoals)

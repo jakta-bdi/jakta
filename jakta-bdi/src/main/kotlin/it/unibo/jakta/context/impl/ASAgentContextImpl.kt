@@ -7,6 +7,8 @@ import it.unibo.jakta.context.ASAgentContext
 import it.unibo.jakta.context.ASMutableAgentContext
 import it.unibo.jakta.events.ASEvent
 import it.unibo.jakta.events.Event
+import it.unibo.jakta.intentions.ASIntention
+import it.unibo.jakta.intentions.ASIntentionPool
 import it.unibo.jakta.intentions.Intention
 import it.unibo.jakta.intentions.IntentionPool
 import it.unibo.jakta.plans.ASPlan
@@ -16,7 +18,7 @@ data class ASAgentContextImpl(
     private val mutableEventList: MutableList<Event>,
     private val mutablePlanLibrary: MutableCollection<ASPlan>,
     private val mutableInternalActions: MutableMap<String, InternalAction>,
-    // private val mutableIntentions: MutableCollection<Intention>,
+    private var mutableIntentionPool: ASIntentionPool = ASIntentionPool.empty(),
 ) : ASMutableAgentContext, ASAgentContext {
 
     override val beliefBase
@@ -31,8 +33,8 @@ data class ASAgentContextImpl(
     override val internalActions: Map<String, InternalAction>
         get() = mutableInternalActions.toMap()
 
-    override val intentions: IntentionPool
-        get() = TODO()
+    override val intentions: ASIntentionPool
+        get() = mutableIntentionPool
 
     override fun addBelief(belief: ASBelief): Boolean = mutableBeliefBase.add(belief)
 
@@ -46,9 +48,15 @@ data class ASAgentContextImpl(
 
     override fun removePlan(plan: ASPlan): Boolean = mutablePlanLibrary.remove(plan)
 
-    override fun removeIntention(intention: Intention): Boolean = TODO()
+    override fun removeIntention(intention: ASIntention): Boolean {
+        mutableIntentionPool = mutableIntentionPool.deleteIntention(intention.id) as ASIntentionPool
+        return true
+    }
 
-    override fun updateIntention(intention: Intention): Boolean = TODO()
+    override fun updateIntention(intention: ASIntention): Boolean {
+        mutableIntentionPool = mutableIntentionPool.updateIntention(intention) as ASIntentionPool
+        return true
+    }
 
     override fun snapshot(): ASAgentContext = this.copy()
 

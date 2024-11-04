@@ -1,6 +1,7 @@
 package it.unibo.jakta.events
 
 import it.unibo.jakta.beliefs.ASBelief
+import it.unibo.jakta.intentions.ASIntention
 import it.unibo.jakta.intentions.Intention
 import it.unibo.tuprolog.core.Struct
 
@@ -17,7 +18,7 @@ sealed interface ASEvent : Event {
     val trigger: Struct
 
     /** The [Event]'s associated [Intention]. Its value is null if the [Event] is an External one. */
-    val intention: Intention?
+    val intention: ASIntention?
 
     /** @return true if this is an Internal Event, otherwise false. */
     fun isInternal(): Boolean = intention != null
@@ -35,7 +36,7 @@ sealed interface ASEvent : Event {
  */
 data class AchievementGoalInvocation(
     override val trigger: Struct,
-    override val intention: Intention? = null,
+    override val intention: ASIntention? = null,
 ) : ASEvent
 
 /**
@@ -47,7 +48,7 @@ data class AchievementGoalInvocation(
  */
 data class AchievementGoalFailure(
     override val trigger: Struct,
-    override val intention: Intention? = null,
+    override val intention: ASIntention? = null,
 ) : ASEvent
 
 /**
@@ -59,7 +60,7 @@ data class AchievementGoalFailure(
  */
 data class TestGoalInvocation(
     override val trigger: Struct,
-    override val intention: Intention? = null,
+    override val intention: ASIntention? = null,
 ) : ASEvent
 
 /**
@@ -71,7 +72,7 @@ data class TestGoalInvocation(
  */
 data class TestGoalFailure(
     override val trigger: Struct,
-    override val intention: Intention? = null,
+    override val intention: ASIntention? = null,
 ) : ASEvent
 
 // /**
@@ -103,9 +104,9 @@ data class TestGoalFailure(
  */
 data class BeliefBaseAddition(
     override val trigger: Struct,
-    override val intention: Intention? = null,
+    override val intention: ASIntention? = null,
 ) : ASEvent {
-    constructor(belief: ASBelief, intention: Intention? = null) : this(
+    constructor(belief: ASBelief, intention: ASIntention? = null) : this(
         belief.content.head,
         intention,
     )
@@ -120,9 +121,9 @@ data class BeliefBaseAddition(
  */
 data class BeliefBaseRemoval(
     override val trigger: Struct,
-    override val intention: Intention? = null,
+    override val intention: ASIntention? = null,
 ) : ASEvent {
-    constructor(belief: ASBelief, intention: Intention? = null) : this(
+    constructor(belief: ASBelief, intention: ASIntention? = null) : this(
         belief.content.head,
         intention,
     )

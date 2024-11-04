@@ -6,6 +6,7 @@ import it.unibo.jakta.beliefs.ASMutableBeliefBase
 import it.unibo.jakta.context.impl.ASAgentContextImpl
 import it.unibo.jakta.events.ASEvent
 import it.unibo.jakta.events.Event
+import it.unibo.jakta.intentions.ASIntention
 import it.unibo.jakta.intentions.Intention
 import it.unibo.jakta.plans.ASPlan
 import it.unibo.tuprolog.core.Struct
@@ -35,8 +36,8 @@ interface ASMutableAgentContext {
     fun removePlan(plan: ASPlan): Boolean
 
     // val intentionPool: MutableIntentionPool
-    fun removeIntention(intention: Intention): Boolean
-    fun updateIntention(intention: Intention): Boolean
+    fun removeIntention(intention: ASIntention): Boolean
+    fun updateIntention(intention: ASIntention): Boolean
 
     fun snapshot(): ASAgentContext
 
