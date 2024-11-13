@@ -3,7 +3,7 @@ package it.unibo.jakta.actions
 import it.unibo.jakta.actions.effects.AgentChange
 import it.unibo.tuprolog.core.Substitution
 
-data class InternalResponse(
+class InternalResponse(
     override val substitution: Substitution,
-    override val effects: Iterable<AgentChange>,
-) : ActionResponse<AgentChange>
+    effects: Iterable<AgentChange>,
+) : ActionResponse<AgentChange>, List<AgentChange> by effects.toList()

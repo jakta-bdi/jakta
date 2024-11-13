@@ -1,10 +1,15 @@
 package it.unibo.jakta.plans
 
+import it.unibo.jakta.Agent
 import it.unibo.jakta.actions.ExternalAction
 import it.unibo.jakta.actions.InternalAction
 import it.unibo.jakta.actions.ASAction
 import it.unibo.jakta.actions.ExternalRequest
 import it.unibo.jakta.actions.InternalRequest
+import it.unibo.jakta.actions.InternalResponse
+import it.unibo.jakta.actions.effects.AgentChange
+import it.unibo.jakta.actions.impl.AbstractAction
+import it.unibo.jakta.actions.impl.AbstractInternalAction
 import it.unibo.jakta.beliefs.BeliefBase
 import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.beliefs.ASMutableBeliefBase
@@ -24,32 +29,34 @@ import it.unibo.jakta.intentions.Intention
 import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
+import it.unibo.tuprolog.core.Term
+import it.unibo.tuprolog.core.Var
+import it.unibo.tuprolog.solve.Signature
 import it.unibo.tuprolog.solve.concurrentSolverFactory
 import it.unibo.tuprolog.solve.sideffects.SideEffect
 
 /**
  * [Action] Task which adds a [ASBelief] into the [ASBeliefBase]
  */
-data class AddBelief(
-    val belief: ASBelief,
-    override var currentIntentionProvider: () -> ASIntention = { ASIntention.of() },
-    override var agentContextProvider: () -> ASMutableAgentContext = { ASMutableAgentContext.of() },
-    override var environmentProvider: () -> Environment = { Environment.of() },
-) : Action, ASTask<ActionTaskEffects, AddBelief> {
-    override suspend fun execute(): ActionTaskEffects {
-        val operationResult = agentContextProvider().addBelief(belief)
-        return object : ActionTaskEffects {
-            // TODO("Better ways to hide the anonym implementation?")
-            override val events: List<Event> = when(operationResult) {
-                true -> listOf(BeliefBaseAddition(belief))
-                false -> listOf()
-            }
-        }
+class AddBelief(
+    var belief: ASBelief,
+) : AbstractInternalAction(
+    Signature("addBelief", 1)
+) {
+
+    override fun applySubstitution(substitution: Substitution) {
+        belief = belief.applySubstitution(substitution)
     }
 
-    override fun applySubstitution(substitution: Substitution): AddBelief =
-        this.copy(belief = belief.applySubstitution(substitution))
+    override fun action(request: InternalRequest) {
+        if ((request.agent.context as ASMutableAgentContext).addBelief(belief)) {
+            addBelief(BeliefBaseAddition(belief))
+        }
+    }
 }
+
+
+
 /**
  * [Action] which removes a [Belief] from the [BeliefBase]
  */
@@ -99,79 +106,28 @@ data class UpdateBelief(
 }
 
 /**
- * [Task.ActionExecution] which executes an [Action], first looks for an internal action and then for an external one.
- */
-data class Act(
-    val actionInvocation: Struct,
-    override var currentIntentionProvider: () -> ASIntention = { ASIntention.of() },
-    override var agentContextProvider: () -> ASMutableAgentContext = { ASMutableAgentContext.of() },
-    override var environmentProvider: () -> Environment = { Environment.of() },
-) : Action, ASTask<ActionTaskEffects, Act> {
-    override suspend fun execute(): ActionTaskEffects {
-        val action = (
-            agentContextProvider().snapshot().internalActions + environmentProvider().externalActions
-        )[actionInvocation.functor]
-        val currentIntention = currentIntentionProvider()
-        val events: List<Event> = if (action == null) {
-//            if (debugEnabled) {
-//                println("[${agent.name}] WARNING: ${nextGoal.action.functor} Action not found.")
-//            }
-            listOf(AchievementGoalFailure(actionInvocation, currentIntention))
-        } else {
-            // Execute Action
-            when (action) {
-                is InternalAction -> listOf(
-                    executeInternalAction(currentIntention, action, agentContextProvider().snapshot(), actionInvocation)
-                )
-                is ExternalAction -> listOf(
-                    executeExternalAction(
-                        currentIntention,
-                        action,
-                        agentContextProvider().snapshot(),
-                        environmentProvider(),
-                        actionInvocation
-                    )
-                )
-                else -> listOf()
-                    // throw IllegalStateException("The Action to execute is neither internal nor external")
-                    // TODO("Manage this kind of error with logs (?)")
-            }
-        }
-
-        return object : ActionTaskEffects {
-            override val events: List<Event>
-                get() = events
-
-        }
-    }
-}
-
-/**
  * [Task.ActionExecution] which executes an [InternalAction].
  */
-data class ActInternally(
-    val actionSignature: Struct,
-    val actionsProvider: () -> Map<String, ExternalAction>,
-    val currentIntentionProvider: () -> Intention,
-) : Action {
-    override suspend fun execute(): ActionTaskEffects {
-        val internalAction = actionsProvider()[actionSignature.functor]
+class ActInternally(
+    var parameters: List<Term>,
+) : AbstractInternalAction(
+    Signature("actInternally", parameters.size)
+) {
 
-        val events: List<ASEvent> = if (internalAction == null) {
-            // Internal Action not found
-//            if (debugEnabled) {
-//                println("[${agent.name}] WARNING: ${nextGoal.action.functor} Internal Action not found.")
-//            }
-            listOf(AchievementGoalFailure(actionSignature, ))
-        } else {
-            // Execute Internal Action
-            executeInternalAction(intention, internalAction, context, nextGoal)
-        }
-        return object : ActionTaskEffects{
-            override val events: List<Event>
-                get() = TODO("Not yet implemented")
-        }
+    constructor(vararg parameter: Term): this(parameter.toList())
+
+    override fun applySubstitution(substitution: Substitution) {
+        parameters = parameters.map { it.apply(substitution) } // TODO("Needs better verification")
     }
+
+     override fun action(request: InternalRequest) {
+         if (parameters.filterIsInstance<Var>().isNotEmpty())
+             return this.failAchievementGoal(intention, context))
+         executeInternalAction(
+            request.agent.context.intention //TODO,
+            internalAction, context, nextGoal)
+    }
+
 }
 
 /**
@@ -190,24 +146,20 @@ private fun executeInternalAction(
     actionInvocation: Struct,
 ): Event {
     var newIntention = intention.pop()
-    if (action.signature.arity < actionInvocation.args.size) { // Arguments number mismatch
-        return AchievementGoalFailure(actionInvocation, intention)
-    } else {
-        val internalResponse = action.execute(
-            InternalRequest.of(this.agent, controller?.currentTime(), goal.args),
-        )
-        // Apply substitution
-        return if (internalResponse.substitution.isSuccess) {
-            if (newIntention.recordStack.isNotEmpty()) {
-                newIntention = newIntention.applySubstitution(internalResponse.substitution)
-            }
-            val newContext = applyEffects(context, internalResponse.effects)
-            ExecutionResult(
-                newContext.copy(intentions = newContext.intentions.updateIntention(newIntention)),
-            )
-        } else {
-            ExecutionResult(failAchievementGoal(intention, context))
+    val internalResponse = action.execute(
+        InternalRequest.of(agent, controller?.currentTime(), goal.args),
+    )
+    // Apply substitution
+    return if (internalResponse.substitution.isSuccess) {
+        if (newIntention.recordStack.isNotEmpty()) {
+            newIntention = newIntention.applySubstitution(internalResponse.substitution)
         }
+        val newContext = applyEffects(context, internalResponse.effects)
+        ExecutionResult(
+            newContext.copy(intentions = newContext.intentions.updateIntention(newIntention)),
+        )
+    } else {
+        ExecutionResult(failAchievementGoal(intention, context))
     }
 }
 
