@@ -12,6 +12,9 @@ import it.unibo.jakta.intentions.ASIntentionPool
 import it.unibo.jakta.intentions.Intention
 import it.unibo.jakta.intentions.IntentionPool
 import it.unibo.jakta.plans.ASPlan
+import it.unibo.jakta.plans.Plan
+import it.unibo.tuprolog.core.Struct
+import javax.management.Query
 
 data class ASAgentContextImpl(
     private val mutableBeliefBase: ASMutableBeliefBase,
@@ -46,19 +49,21 @@ data class ASAgentContextImpl(
     override fun removeEvent(event: Event): Boolean =
         if (event is ASEvent) mutableEventList.remove(event) else false
 
-    override fun addPlan(plan: ASPlan): Boolean = mutablePlanLibrary.add(plan)
+    override fun addPlan(plan: Plan<Struct, ASBelief>): Boolean =
+        if (plan is ASPlan) mutablePlanLibrary.add(plan) else false
 
-    override fun removePlan(plan: ASPlan): Boolean = mutablePlanLibrary.remove(plan)
+    override fun removePlan(plan: Plan<Struct, ASBelief>): Boolean =
+        if (plan is ASPlan) mutablePlanLibrary.remove(plan) else false
 
-    override fun removeIntention(intention: ASIntention): Boolean {
+    override fun removeIntention(intention: Intention<Struct, ASBelief>): Boolean  = if (intention is ASIntention) {
         mutableIntentionPool = mutableIntentionPool.deleteIntention(intention.id) as ASIntentionPool
-        return true
-    }
+        true
+    } else false
 
-    override fun updateIntention(intention: ASIntention): Boolean {
+    override fun updateIntention(intention:  Intention<Struct, ASBelief>): Boolean = if (intention is ASIntention) {
         mutableIntentionPool = mutableIntentionPool.updateIntention(intention) as ASIntentionPool
-        return true
-    }
+        true
+    } else false
 
     override fun snapshot(): ASAgentContext = this.copy()
 

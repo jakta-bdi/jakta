@@ -21,7 +21,7 @@ interface ASAgentContext : AgentContext<Struct, ASBelief> {
 /**
  * Methods that are capable to modify the [AgentContext].
  */
-interface ASMutableAgentContext : MutableAgentContext<Struct, ASBelief, ASIntention, ASPlan, ASAgentContext> {
+interface ASMutableAgentContext : MutableAgentContext<Struct, ASBelief, ASAgentContext> {
     companion object {
         fun of(
             beliefBase: ASMutableBeliefBase = ASMutableBeliefBase.empty(),
