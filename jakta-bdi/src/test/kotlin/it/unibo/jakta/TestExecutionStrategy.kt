@@ -10,7 +10,7 @@ import it.unibo.jakta.plans.Plan
 import it.unibo.jakta.plans.PlanLibrary
 
 fun main() {
-    val alice = Agent.of(
+    val alice = ASAgent.of(
         name = "Alice",
         events = listOf(
             Event.ofAchievementGoalInvocation(Achieve.of(Jakta.parseStruct("my_thread"))),

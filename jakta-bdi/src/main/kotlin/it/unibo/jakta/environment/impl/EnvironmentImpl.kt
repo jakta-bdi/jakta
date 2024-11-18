@@ -1,6 +1,6 @@
 package it.unibo.jakta.environment.impl
 
-import it.unibo.jakta.Agent
+import it.unibo.jakta.ASAgent
 import it.unibo.jakta.AgentID
 import it.unibo.jakta.actions.ExternalAction
 import it.unibo.jakta.beliefs.ASBeliefBase
@@ -46,7 +46,7 @@ open class EnvironmentImpl(
         messageBoxes = messageBoxes.entries.associate { it.key to it.value + message },
     )
 
-    override fun addAgent(agent: Agent): Environment =
+    override fun addAgent(agent: ASAgent): Environment =
         if (!agentIDs.contains(agent.name)) {
             copy(
                 agentIDs = agentIDs + mapOf(agent.name to agent.agentID),

@@ -6,7 +6,7 @@ import io.kotest.matchers.shouldBe
 class TestAgentBeliefBaseRevision : DescribeSpec({
     describe("An empty agent") {
         it("should have empty sets in its Context") {
-            val agentContext = Agent.empty().context
+            val agentContext = ASAgent.empty().context
             agentContext.beliefBase.count() shouldBe 0
             agentContext.events.size shouldBe 0
             agentContext.intentions.size shouldBe 0

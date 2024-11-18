@@ -8,7 +8,7 @@ import it.unibo.alchemist.model.Node
 import it.unibo.alchemist.model.NodeProperty
 import it.unibo.alchemist.model.Position
 import it.unibo.alchemist.model.molecules.SimpleMolecule
-import it.unibo.jakta.Agent
+import it.unibo.jakta.ASAgent
 import it.unibo.jakta.AgentID
 import it.unibo.jakta.actions.ExternalAction
 import it.unibo.jakta.beliefs.Belief
@@ -84,7 +84,7 @@ class JaktaEnvironmentForAlchemist<P : Position<P>>(
 
     // ----------------------------------------
 
-    override fun addAgent(agent: Agent): Environment = TODO()
+    override fun addAgent(agent: ASAgent): Environment = TODO()
 
     override fun removeAgent(agentName: String): Environment = TODO()
 

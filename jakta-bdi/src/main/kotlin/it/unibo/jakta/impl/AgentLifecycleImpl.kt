@@ -1,6 +1,6 @@
 package it.unibo.jakta.impl
 
-import it.unibo.jakta.Agent
+import it.unibo.jakta.ASAgent
 import it.unibo.jakta.AgentLifecycle
 import it.unibo.jakta.actions.ExternalAction
 import it.unibo.jakta.actions.InternalAction
@@ -48,7 +48,7 @@ import it.unibo.jakta.plans.Plan
 import it.unibo.jakta.plans.PlanLibrary
 
 internal data class AgentLifecycleImpl(
-    private var agent: Agent,
+    private var agent: ASAgent,
 ) : AgentLifecycle {
     private var controller: Activity.Controller? = null
     private var debugEnabled = false

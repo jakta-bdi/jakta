@@ -7,7 +7,7 @@ import it.unibo.jakta.impl.MasImpl
 
 interface Mas {
     val environment: Environment
-    val agents: Iterable<Agent>
+    val agents: Iterable<ASAgent>
     val executionStrategy: ExecutionStrategy
 
     fun start(debugEnabled: Boolean = false)
@@ -18,15 +18,15 @@ interface Mas {
         fun of(
             executionStrategy: ExecutionStrategy,
             environment: Environment,
-            agent: Agent,
-            vararg agents: Agent,
+            agent: ASAgent,
+            vararg agents: ASAgent,
         ): Mas =
             of(executionStrategy, environment, agents.asIterable() + agent)
 
         fun of(
             executionStrategy: ExecutionStrategy,
             environment: Environment,
-            agents: Iterable<Agent>,
+            agents: Iterable<ASAgent>,
         ): Mas = MasImpl(executionStrategy, environment, agents)
     }
 }

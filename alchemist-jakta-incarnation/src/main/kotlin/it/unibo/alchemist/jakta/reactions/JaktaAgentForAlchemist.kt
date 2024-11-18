@@ -9,7 +9,7 @@ import it.unibo.alchemist.model.Position
 import it.unibo.alchemist.model.Reaction
 import it.unibo.alchemist.model.TimeDistribution
 import it.unibo.alchemist.model.reactions.AbstractReaction
-import it.unibo.jakta.Agent
+import it.unibo.jakta.ASAgent
 import it.unibo.jakta.AgentLifecycle
 import it.unibo.jakta.actions.effects.AddData
 import it.unibo.jakta.actions.effects.BroadcastMessage
@@ -32,7 +32,7 @@ import kotlin.reflect.jvm.kotlinFunction
 class JaktaAgentForAlchemist<P : Position<P>>(
     val jaktaEnvironment: JaktaEnvironmentForAlchemist<P>,
     timeDistribution: TimeDistribution<Any?>,
-    val agent: Agent,
+    val agent: ASAgent,
 ) : AbstractReaction<Any?>(jaktaEnvironment.node, timeDistribution) {
 
     private val agentLifecycle = AgentLifecycle.newLifecycleFor(agent)
@@ -53,7 +53,7 @@ class JaktaAgentForAlchemist<P : Position<P>>(
     constructor(
         jaktaEnvironment: JaktaEnvironmentForAlchemist<P>,
         timeDistribution: TimeDistribution<Any?>,
-        agentFactory: KCallable<Agent>,
+        agentFactory: KCallable<ASAgent>,
         parameters: List<Any?>,
     ) : this(
         jaktaEnvironment,
@@ -138,7 +138,7 @@ class JaktaAgentForAlchemist<P : Position<P>>(
         jaktaEnvironment.alchemistEnvironment.simulation.time >= jaktaController.minimumAwakeTime
 
     companion object {
-        fun String.reflectMethod(): KCallable<Agent> {
+        fun String.reflectMethod(): KCallable<ASAgent> {
             val method = substringAfterLast('.')
             val className = substringBeforeLast('.')
             check(method.isNotEmpty() && className.isNotEmpty() && method != className) {
@@ -148,8 +148,8 @@ class JaktaAgentForAlchemist<P : Position<P>>(
             return `class`.methods
                 .asSequence()
                 .mapNotNull { it.kotlinFunction }
-                .filter { it.returnType == Agent::class.starProjectedType }
-                .filterIsInstance<KCallable<Agent>>()
+                .filter { it.returnType == ASAgent::class.starProjectedType }
+                .filterIsInstance<KCallable<ASAgent>>()
                 .first { it.name == method }
         }
     }

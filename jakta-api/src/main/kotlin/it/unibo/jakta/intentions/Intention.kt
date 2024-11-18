@@ -10,7 +10,7 @@ interface Intention<Query : Any, Belief> {
 
     val id: IntentionID
 
-    fun nextTask(): Task<*> = recordStack.first().taskQueue.first()
+    fun nextTask(): Task<Query, Belief, *, *> = recordStack.first().taskQueue.first()
 
     fun currentPlan(): Plan<Query, Belief> = recordStack.first().plan
 

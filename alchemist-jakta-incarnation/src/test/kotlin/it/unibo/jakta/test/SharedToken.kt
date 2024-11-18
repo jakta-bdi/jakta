@@ -6,7 +6,7 @@ import it.unibo.alchemist.jakta.properties.JaktaEnvironmentForAlchemist
 import it.unibo.alchemist.model.Position
 import it.unibo.alchemist.model.molecules.SimpleMolecule
 import it.unibo.alchemist.util.Iterables.randomElement
-import it.unibo.jakta.Agent
+import it.unibo.jakta.ASAgent
 import it.unibo.jakta.dsl.AgentScope
 import it.unibo.tuprolog.core.Integer
 import it.unibo.tuprolog.core.Struct
@@ -16,13 +16,13 @@ import java.awt.Color
 val knownAgents = SimpleMolecule("knownAgents")
 
 @OptIn(ExperimentalStdlibApi::class)
-fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.entrypoint(): Agent {
+fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.entrypoint(): ASAgent {
     val myColor = randomGenerator::nextFloat.let { Color.getHSBColor(it(), it(), it()) }
     return tokenPassAgent("Agent#${myColor.rgb.toHexString()}@${node.id}", myColor)
 }
 
 @OptIn(ExperimentalStdlibApi::class)
-fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.entrypointWithColor(color: Color): Agent {
+fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.entrypointWithColor(color: Color): ASAgent {
     return tokenPassAgent("Agent#${color.rgb.toHexString()}@${node.id}", color)
 }
 data class ColoredAgent(val name: String, val nodeId: Int, val color: Color)
@@ -34,7 +34,7 @@ fun colorToStruct(color: Color): Struct = Struct.of(
     Integer.of(color.green),
 )
 
-fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.tokenPassAgent(name: String, color: Color): Agent =
+fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.tokenPassAgent(name: String, color: Color): ASAgent =
     with(AgentScope(name)) {
         val myColor = ColoredAgent(name, node.id, color)
         beliefs {

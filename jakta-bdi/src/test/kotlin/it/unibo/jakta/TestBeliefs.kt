@@ -120,7 +120,7 @@ class TestBeliefs : DescribeSpec({
     describe("the belief update function") {
         it("should not remove beliefs with source(self)") {
             val belief = Belief.fromSelfSource(Struct.of("something", Var.of("X")))
-            val agent = Agent.of(beliefBase = ASBeliefBase.of(listOf(belief)))
+            val agent = ASAgent.of(beliefBase = ASBeliefBase.of(listOf(belief)))
             val al = AgentLifecycle.newLifecycleFor(agent)
             val rr = al.updateBelief(ASBeliefBase.empty(), agent.context.beliefBase)
             println(agent.context.beliefBase)

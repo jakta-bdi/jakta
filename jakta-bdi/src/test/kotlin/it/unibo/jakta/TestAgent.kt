@@ -48,7 +48,7 @@ class TestAgent : DescribeSpec({
         }
     }
     val start = Atom.of("start")
-    val agent = Agent.of(
+    val agent = ASAgent.of(
         events = listOf(Event.ofAchievementGoalInvocation(Achieve.of(start))),
         internalActions = InternalActions.default() +
             (TEST.signature.name to TEST) +
@@ -199,7 +199,7 @@ fun main() {
         }
     }
     val start = Atom.of("start")
-    val agent = Agent.of(
+    val agent = ASAgent.of(
         events = listOf(Event.ofAchievementGoalInvocation(Achieve.of(start))),
         internalActions = InternalActions.default() + (ADDBELIEF.signature.name to ADDBELIEF),
         planLibrary = PlanLibrary.of(

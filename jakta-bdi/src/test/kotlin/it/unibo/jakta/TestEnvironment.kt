@@ -11,7 +11,7 @@ fun main() {
     val env = Environment.of()
 
     val start = it.unibo.jakta.Jakta.parseStruct("start(0, 10)")
-    val alice = it.unibo.jakta.Agent.Companion.of(
+    val alice = it.unibo.jakta.ASAgent.Companion.of(
         name = "alice",
         events = listOf(Event.ofAchievementGoalInvocation(Achieve.of(start))),
         planLibrary = PlanLibrary.of(
@@ -32,7 +32,7 @@ fun main() {
         ),
     )
 
-    val bob = it.unibo.jakta.Agent.Companion.of(
+    val bob = it.unibo.jakta.ASAgent.Companion.of(
         name = "bob",
         events = listOf(Event.ofAchievementGoalInvocation(Achieve.of(start))),
         planLibrary = PlanLibrary.of(

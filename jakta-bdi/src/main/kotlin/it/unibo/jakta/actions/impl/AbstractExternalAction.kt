@@ -1,6 +1,6 @@
 package it.unibo.jakta.actions.impl
 
-import it.unibo.jakta.Agent
+import it.unibo.jakta.ASAgent
 import it.unibo.jakta.actions.ExternalAction
 import it.unibo.jakta.actions.ExternalRequest
 import it.unibo.jakta.actions.ExternalResponse
@@ -20,7 +20,7 @@ abstract class AbstractExternalAction(override val signature: Signature) : Exter
 
     constructor(name: String, arity: Int) : this(Signature(name, arity))
 
-    override fun addAgent(agent: Agent) {
+    override fun addAgent(agent: ASAgent) {
         effects.add(SpawnAgent(agent))
     }
 

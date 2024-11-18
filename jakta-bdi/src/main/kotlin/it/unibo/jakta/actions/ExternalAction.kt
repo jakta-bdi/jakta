@@ -1,11 +1,11 @@
 package it.unibo.jakta.actions
 
-import it.unibo.jakta.Agent
+import it.unibo.jakta.ASAgent
 import it.unibo.jakta.actions.effects.EnvironmentChange
 import it.unibo.jakta.messages.Message
 
 interface ExternalAction : ASAction<EnvironmentChange, ExternalResponse, ExternalRequest> {
-    fun addAgent(agent: Agent)
+    fun addAgent(agent: ASAgent)
     fun removeAgent(agentName: String)
     fun sendMessage(agentName: String, message: Message)
     fun broadcastMessage(message: Message)

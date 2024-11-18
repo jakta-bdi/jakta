@@ -33,7 +33,7 @@ fun main() {
         ),
     )
 
-    val sender = Agent.of(
+    val sender = ASAgent.of(
         name = "sender",
         events = listOf(
             Event.ofAchievementGoalInvocation(Achieve.of(Jakta.parseStruct("broadcast"))),
@@ -49,7 +49,7 @@ fun main() {
         ),
     )
 
-    val alice = Agent.of(
+    val alice = ASAgent.of(
         name = "alice",
         planLibrary = PlanLibrary.of(
             Plan.ofBeliefBaseAddition(

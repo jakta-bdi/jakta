@@ -1,53 +1,44 @@
 package it.unibo.jakta.plans
 
-import it.unibo.jakta.Agent
 import it.unibo.jakta.actions.ExternalAction
 import it.unibo.jakta.actions.InternalAction
-import it.unibo.jakta.actions.ASAction
 import it.unibo.jakta.actions.ExternalRequest
 import it.unibo.jakta.actions.InternalRequest
-import it.unibo.jakta.actions.InternalResponse
-import it.unibo.jakta.actions.effects.AgentChange
-import it.unibo.jakta.actions.impl.AbstractAction
 import it.unibo.jakta.actions.impl.AbstractInternalAction
 import it.unibo.jakta.beliefs.BeliefBase
 import it.unibo.jakta.beliefs.ASBelief
-import it.unibo.jakta.beliefs.ASMutableBeliefBase
 import it.unibo.jakta.context.ASAgentContext
 import it.unibo.jakta.context.ASMutableAgentContext
 import it.unibo.jakta.context.AgentContext
-import it.unibo.jakta.context.Removal
 import it.unibo.jakta.environment.Environment
-import it.unibo.jakta.events.ASEvent
-import it.unibo.jakta.events.AchievementGoalFailure
 import it.unibo.jakta.events.BeliefBaseAddition
 import it.unibo.jakta.events.BeliefBaseRemoval
 import it.unibo.jakta.events.Event
 import it.unibo.jakta.executionstrategies.ExecutionResult
 import it.unibo.jakta.intentions.ASIntention
 import it.unibo.jakta.intentions.Intention
-import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.core.Term
 import it.unibo.tuprolog.core.Var
 import it.unibo.tuprolog.solve.Signature
-import it.unibo.tuprolog.solve.concurrentSolverFactory
-import it.unibo.tuprolog.solve.sideffects.SideEffect
+
+
+abstract class AbstractBeliefInternalAction(
+    var belief: ASBelief,
+    name: String,
+): AbstractInternalAction(Signature(name, 1)) {
+    override fun applySubstitution(substitution: Substitution) {
+        belief = belief.applySubstitution(substitution)
+    }
+}
 
 /**
  * [Action] Task which adds a [ASBelief] into the [ASBeliefBase]
  */
 class AddBelief(
-    var belief: ASBelief,
-) : AbstractInternalAction(
-    Signature("addBelief", 1)
-) {
-
-    override fun applySubstitution(substitution: Substitution) {
-        belief = belief.applySubstitution(substitution)
-    }
-
+    belief: ASBelief,
+) : AbstractBeliefInternalAction(belief, "addBelief") {
     override fun action(request: InternalRequest) {
         if ((request.agent.context as ASMutableAgentContext).addBelief(belief)) {
             addBelief(BeliefBaseAddition(belief))
@@ -56,53 +47,28 @@ class AddBelief(
 }
 
 
-
 /**
  * [Action] which removes a [Belief] from the [BeliefBase]
  */
-data class RemoveBelief(
-    val belief: ASBelief,
-    override var currentIntentionProvider: () -> ASIntention = { ASIntention.of() },
-    override var agentContextProvider: () -> ASMutableAgentContext = { ASMutableAgentContext.of() },
-    override var environmentProvider: () -> Environment = { Environment.of() },
-) : Action,  ASTask<ActionTaskEffects, RemoveBelief>  {
-    override suspend fun execute(): ActionTaskEffects {
-        val operationResult = agentContextProvider().removeBelief(belief)
-        return object : ActionTaskEffects {
-            override val events: List<Event> = when (operationResult) {
-                true -> listOf(BeliefBaseRemoval(belief))
-                else -> listOf()
-            }
+class RemoveBelief(
+    belief: ASBelief,
+) : AbstractBeliefInternalAction(belief, "addBelief")  {
+    override fun action(request: InternalRequest) {
+        if ((request.agent.context as ASMutableAgentContext).removeBelief(belief)) {
+            removeBelief(BeliefBaseRemoval(belief))
         }
     }
-
-    override fun applySubstitution(substitution: Substitution): RemoveBelief =
-        this.copy(belief = belief.applySubstitution(substitution))
-
 }
 
 /**
  * [Action] Task which updates the [Belief]'s content in the [BeliefBase]
  */
-data class UpdateBelief(
-    val belief: ASBelief,
-    override var currentIntentionProvider: () -> ASIntention = { ASIntention.of() },
-    override var agentContextProvider: () -> ASMutableAgentContext = { ASMutableAgentContext.of() },
-    override var environmentProvider: () -> Environment = { Environment.of() },
-) : Action, ASTask<ActionTaskEffects, UpdateBelief>  {
-    override suspend fun execute(): ActionTaskEffects {
-        //val operationResult = agentContextProvider().updateBelief(belief)
-        // TODO ("Missing implementation for update in beliefcontext")
-        return object : ActionTaskEffects {
-            override val events: List<Event> = when (true) {
-                true -> listOf() //TODO("Ci andrebbbe un beliefbase update.. oppure una rimozione e aggiunta")
-                else -> listOf()
-            }
-        }
+class UpdateBelief(
+    belief: ASBelief,
+) : AbstractBeliefInternalAction(belief, "removeBelief")  {
+    override fun action(request: InternalRequest) {
+        TODO("Missing implementation for update in beliefcontext")
     }
-
-    override fun applySubstitution(substitution: Substitution): UpdateBelief =
-        this.copy(belief = belief.applySubstitution(substitution))
 }
 
 /**
@@ -117,7 +83,7 @@ class ActInternally(
     constructor(vararg parameter: Term): this(parameter.toList())
 
     override fun applySubstitution(substitution: Substitution) {
-        parameters = parameters.map { it.apply(substitution) } // TODO("Needs better verification")
+        parameters = parameters.map { it.apply(substitution) } // TODO("Needs testing")
     }
 
      override fun action(request: InternalRequest) {
@@ -145,7 +111,7 @@ private fun executeInternalAction(
     context: ASAgentContext,
     actionInvocation: Struct,
 ): Event {
-    var newIntention = intention.pop()
+    var runningIntention = intention.nextTask()
     val internalResponse = action.execute(
         InternalRequest.of(agent, controller?.currentTime(), goal.args),
     )

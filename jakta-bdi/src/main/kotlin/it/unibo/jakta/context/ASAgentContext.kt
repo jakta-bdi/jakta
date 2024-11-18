@@ -15,32 +15,13 @@ import it.unibo.tuprolog.core.Struct
  * AgentSpeak extension for the general concept of AgentContext.
  */
 interface ASAgentContext : AgentContext<Struct, ASBelief> {
-    val internalActions: Map<String, InternalAction>
+    val internalActions: Map<String, InternalAction> // TODO("is this need?")
 }
 
 /**
  * Methods that are capable to modify the [AgentContext].
  */
-interface ASMutableAgentContext {
-
-    // val mutableBeliefBase: ASMutableBeliefBase
-    fun addBelief(belief: ASBelief): Boolean
-    fun removeBelief(belief: ASBelief): Boolean
-
-    // val mutableEventList: MutableList<Event>
-    fun addEvent(event: ASEvent): Boolean
-    fun removeEvent(event: ASEvent): Boolean
-
-    // val mutablePlanLibrary: MutableCollection<ASPlan>
-    fun addPlan(plan: ASPlan): Boolean
-    fun removePlan(plan: ASPlan): Boolean
-
-    // val intentionPool: MutableIntentionPool
-    fun removeIntention(intention: ASIntention): Boolean
-    fun updateIntention(intention: ASIntention): Boolean
-
-    fun snapshot(): ASAgentContext
-
+interface ASMutableAgentContext : MutableAgentContext<Struct, ASBelief, ASIntention, ASPlan, ASAgentContext> {
     companion object {
         fun of(
             beliefBase: ASMutableBeliefBase = ASMutableBeliefBase.empty(),

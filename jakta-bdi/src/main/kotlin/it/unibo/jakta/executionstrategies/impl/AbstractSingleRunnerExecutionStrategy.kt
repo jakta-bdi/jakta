@@ -1,6 +1,6 @@
 package it.unibo.jakta.executionstrategies.impl
 
-import it.unibo.jakta.Agent
+import it.unibo.jakta.ASAgent
 import it.unibo.jakta.AgentLifecycle
 import it.unibo.jakta.executionstrategies.ExecutionStrategy
 
@@ -8,7 +8,7 @@ abstract class AbstractSingleRunnerExecutionStrategy : ExecutionStrategy {
 
     protected val synchronizedAgents = SynchronizedAgents()
 
-    override fun spawnAgent(agent: Agent) {
+    override fun spawnAgent(agent: ASAgent) {
         synchronizedAgents.addAgent(agent)
     }
 
@@ -17,10 +17,10 @@ abstract class AbstractSingleRunnerExecutionStrategy : ExecutionStrategy {
     }
 
     class SynchronizedAgents {
-        private var agents: Map<Agent, AgentLifecycle> = emptyMap()
+        private var agents: Map<ASAgent, AgentLifecycle> = emptyMap()
 
         @Synchronized
-        fun addAgent(agent: Agent) {
+        fun addAgent(agent: ASAgent) {
             agents = agents + (agent to AgentLifecycle.newLifecycleFor(agent))
         }
 
@@ -30,6 +30,6 @@ abstract class AbstractSingleRunnerExecutionStrategy : ExecutionStrategy {
         }
 
         @Synchronized
-        fun getAgents(): Map<Agent, AgentLifecycle> = agents
+        fun getAgents(): Map<ASAgent, AgentLifecycle> = agents
     }
 }

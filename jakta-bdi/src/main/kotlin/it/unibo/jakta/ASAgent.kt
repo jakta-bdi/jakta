@@ -3,31 +3,33 @@ package it.unibo.jakta
 import it.unibo.jakta.actions.InternalAction
 import it.unibo.jakta.actions.InternalActions
 import it.unibo.jakta.beliefs.ASBeliefBase
+import it.unibo.jakta.context.ASMutableAgentContext
 import it.unibo.jakta.context.AgentContext
-import it.unibo.jakta.events.Event
+import it.unibo.jakta.events.ASEvent
 import it.unibo.jakta.events.EventQueue
 import it.unibo.jakta.impl.AgentImpl
 import it.unibo.jakta.intentions.IntentionPool
 import it.unibo.jakta.intentions.SchedulingResult
+import it.unibo.jakta.plans.ASPlan
 import it.unibo.jakta.plans.Plan
 import it.unibo.jakta.plans.PlanLibrary
 import it.unibo.tuprolog.utils.Taggable
 import java.util.*
 
-interface Agent : Taggable<Agent> {
+interface ASAgent : Taggable<ASAgent> {
 
     val agentID: AgentID
 
     val name: String
 
-    /** Snapshot of Agent's Actual State */
-    val context: AgentContext
+    /** Agent's Actual State */
+    val context: ASMutableAgentContext
 
     /** Event Selection Function*/
-    fun selectEvent(events: EventQueue): Event?
+    fun selectEvent(events: List<ASEvent>): ASEvent?
 
     /** Plan Selection Function */
-    fun selectApplicablePlan(plans: Iterable<Plan>): Plan?
+    fun selectApplicablePlan(plans: Iterable<ASPlan>): Plan?
 
     /** Intention Selection Function */
     fun scheduleIntention(intentions: IntentionPool): SchedulingResult
@@ -48,7 +50,7 @@ interface Agent : Taggable<Agent> {
     )
 
     companion object {
-        fun empty(): Agent = AgentImpl(AgentContext.of())
+        fun empty(): ASAgent = AgentImpl(AgentContext.of())
         fun of(
             agentID: AgentID = AgentID(),
             name: String = "Agent-" + UUID.randomUUID(),
@@ -56,7 +58,7 @@ interface Agent : Taggable<Agent> {
             events: EventQueue = emptyList(),
             planLibrary: PlanLibrary = PlanLibrary.empty(),
             internalActions: Map<String, InternalAction> = InternalActions.default(),
-        ): Agent = AgentImpl(
+        ): ASAgent = AgentImpl(
             AgentContext.of(beliefBase, events, planLibrary, internalActions),
             agentID,
             name,
@@ -66,6 +68,6 @@ interface Agent : Taggable<Agent> {
             agentID: AgentID = AgentID(),
             name: String = "Agent-" + UUID.randomUUID(),
             agentContext: AgentContext,
-        ): Agent = AgentImpl(agentContext, agentID, name)
+        ): ASAgent = AgentImpl(agentContext, agentID, name)
     }
 }

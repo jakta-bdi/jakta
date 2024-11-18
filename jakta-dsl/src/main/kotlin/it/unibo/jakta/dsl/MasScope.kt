@@ -1,6 +1,6 @@
 package it.unibo.jakta.dsl
 
-import it.unibo.jakta.Agent
+import it.unibo.jakta.ASAgent
 import it.unibo.jakta.Mas
 import it.unibo.jakta.dsl.environment.EnvironmentScope
 import it.unibo.jakta.environment.Environment
@@ -8,7 +8,7 @@ import it.unibo.jakta.environment.Environment
 @JaktaDSL
 class MasScope : Builder<Mas> {
     var env: Environment = Environment.of()
-    var agents: List<Agent> = emptyList()
+    var agents: List<ASAgent> = emptyList()
     var executionStrategy = it.unibo.jakta.executionstrategies.ExecutionStrategy.oneThreadPerMas()
 
     fun environment(f: EnvironmentScope.() -> Unit): MasScope {

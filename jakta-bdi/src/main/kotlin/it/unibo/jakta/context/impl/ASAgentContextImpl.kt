@@ -40,9 +40,11 @@ data class ASAgentContextImpl(
 
     override fun removeBelief(belief: ASBelief): Boolean = mutableBeliefBase.remove(belief)
 
-    override fun addEvent(event: ASEvent): Boolean = mutableEventList.add(event)
+    override fun addEvent(event: Event): Boolean =
+        if (event is ASEvent) mutableEventList.add(event) else false
 
-    override fun removeEvent(event: ASEvent): Boolean = mutableEventList.remove(event)
+    override fun removeEvent(event: Event): Boolean =
+        if (event is ASEvent) mutableEventList.remove(event) else false
 
     override fun addPlan(plan: ASPlan): Boolean = mutablePlanLibrary.add(plan)
 

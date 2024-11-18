@@ -1,6 +1,6 @@
 package it.unibo.jakta.dsl
 
-import it.unibo.jakta.Agent
+import it.unibo.jakta.ASAgent
 import it.unibo.jakta.Mas
 import it.unibo.jakta.dsl.actions.ExternalActionScope
 import it.unibo.jakta.dsl.actions.ExternalActionsScope
@@ -29,7 +29,7 @@ fun externalAction(name: String, arity: Int, f: ExternalActionScope.() -> Unit) 
 fun environment(f: EnvironmentScope.() -> Unit): Environment = EnvironmentScope().also(f).build()
 
 @JaktaDSL
-fun agent(name: String, f: AgentScope.() -> Unit): Agent = AgentScope(name).also(f).build()
+fun agent(name: String, f: AgentScope.() -> Unit): ASAgent = AgentScope(name).also(f).build()
 
 fun plans(f: PlansScope.() -> Unit): Iterable<Plan> = PlansScope().also(f).build()
 

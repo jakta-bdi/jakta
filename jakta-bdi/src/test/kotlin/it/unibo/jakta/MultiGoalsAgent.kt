@@ -9,7 +9,7 @@ import it.unibo.jakta.plans.Plan
 import it.unibo.jakta.plans.PlanLibrary
 
 fun main() {
-    val agent = Agent.of(
+    val agent = ASAgent.of(
         name = "agent",
         events = listOf(
             Event.of(AchievementGoalInvocation(Jakta.parseStruct("count(0, 10, up)"))),

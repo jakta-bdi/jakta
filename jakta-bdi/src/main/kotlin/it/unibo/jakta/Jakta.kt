@@ -22,7 +22,7 @@ object Jakta {
     fun parseStruct(string: String): Struct = parser.parseStruct(string)
     fun parseClause(string: String): Clause = parser.parseClause(string)
 
-    fun printAslSyntax(agent: Agent, prettyFormatted: Boolean = true) {
+    fun printAslSyntax(agent: ASAgent, prettyFormatted: Boolean = true) {
         println("% ${agent.name}")
         for (belief in agent.context.beliefBase) {
             if (prettyFormatted) {

@@ -11,7 +11,7 @@ import it.unibo.jakta.plans.PlanLibrary
 
 fun main() {
     val start = Jakta.parseStruct("start")
-    val sleepingAgent = Agent.of(
+    val sleepingAgent = ASAgent.of(
         name = "Sleeping Agent",
         beliefBase = ASBeliefBase.of(Belief.fromSelfSource(Jakta.parseStruct("run"))),
         events = listOf(Event.ofAchievementGoalInvocation(Achieve.of(start))),

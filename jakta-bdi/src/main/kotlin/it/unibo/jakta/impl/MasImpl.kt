@@ -1,6 +1,6 @@
 package it.unibo.jakta.impl
 
-import it.unibo.jakta.Agent
+import it.unibo.jakta.ASAgent
 import it.unibo.jakta.Mas
 import it.unibo.jakta.actions.effects.AddData
 import it.unibo.jakta.actions.effects.BroadcastMessage
@@ -17,7 +17,7 @@ import it.unibo.jakta.executionstrategies.ExecutionStrategy
 internal class MasImpl(
     override val executionStrategy: ExecutionStrategy,
     override var environment: Environment,
-    override var agents: Iterable<Agent>,
+    override var agents: Iterable<ASAgent>,
 ) : Mas {
     init {
         agents.forEach { environment = environment.addAgent(it) }

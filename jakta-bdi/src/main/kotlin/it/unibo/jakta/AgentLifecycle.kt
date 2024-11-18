@@ -140,6 +140,6 @@ interface AgentLifecycle {
     fun act(environment: Environment): Iterable<EnvironmentChange>
 
     companion object {
-        fun newLifecycleFor(agent: Agent): AgentLifecycle = AgentLifecycleImpl(agent)
+        fun newLifecycleFor(agent: ASAgent): AgentLifecycle = AgentLifecycleImpl(agent)
     }
 }

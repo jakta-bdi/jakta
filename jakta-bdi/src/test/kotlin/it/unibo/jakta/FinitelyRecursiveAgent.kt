@@ -12,7 +12,7 @@ fun main() {
 
     val start = Jakta.parseStruct("start(0, 120)")
 
-    val alice = Agent.of(
+    val alice = ASAgent.of(
         name = "alice",
         events = listOf(Event.ofAchievementGoalInvocation(Achieve.of(start))),
         planLibrary = PlanLibrary.of(

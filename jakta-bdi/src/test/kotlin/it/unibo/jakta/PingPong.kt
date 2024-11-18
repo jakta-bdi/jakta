@@ -46,7 +46,7 @@ fun main() {
         ),
     )
 
-    val pinger = Agent.of(
+    val pinger = ASAgent.of(
         name = "pinger",
         beliefBase = ASBeliefBase.of(
             Belief.fromSelfSource(Jakta.parseStruct("turn(me)")),
@@ -78,7 +78,7 @@ fun main() {
 
     )
 
-    val ponger = Agent.of(
+    val ponger = ASAgent.of(
         name = "ponger",
         beliefBase = ASBeliefBase.of(
             Belief.fromSelfSource(Jakta.parseStruct("turn(other)")),

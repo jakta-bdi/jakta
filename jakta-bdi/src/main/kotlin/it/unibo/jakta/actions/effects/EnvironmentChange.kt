@@ -1,10 +1,10 @@
 package it.unibo.jakta.actions.effects
 
-import it.unibo.jakta.Agent
+import it.unibo.jakta.ASAgent
 import it.unibo.jakta.messages.Message
 
 sealed interface EnvironmentChange : ActionResult
-data class SpawnAgent(val agent: Agent) : EnvironmentChange
+data class SpawnAgent(val agent: ASAgent) : EnvironmentChange
 data class RemoveAgent(val agentName: String) : EnvironmentChange
 data class SendMessage(
     val message: Message,

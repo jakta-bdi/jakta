@@ -19,7 +19,7 @@ fun main() {
             println("time: ${request.requestTimestamp}")
         }
     }
-    val alice = Agent.of(
+    val alice = ASAgent.of(
         events = listOf(Event.ofAchievementGoalInvocation(Achieve.of(Jakta.parseStruct("time")))),
         internalActions = InternalActions.default() + (dummyAction.signature.name to dummyAction),
         planLibrary = PlanLibrary.of(

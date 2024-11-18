@@ -1,6 +1,6 @@
 package it.unibo.jakta.dsl
 
-import it.unibo.jakta.Agent
+import it.unibo.jakta.ASAgent
 import it.unibo.jakta.actions.InternalActions
 import it.unibo.jakta.dsl.actions.InternalActionsScope
 import it.unibo.jakta.dsl.beliefs.BeliefsScope
@@ -14,7 +14,7 @@ import it.unibo.jakta.plans.PlanLibrary
 
 class AgentScope(
     val name: String? = null,
-) : Builder<Agent> {
+) : Builder<ASAgent> {
     private val beliefsScope by lazy { BeliefsScope() }
     private val goalsScope by lazy { InitialGoalsScope() }
     private val plansScope by lazy { PlansScope() }
@@ -52,8 +52,8 @@ class AgentScope(
         return this
     }
 
-    override fun build(): Agent {
-        var agent = Agent.of(
+    override fun build(): ASAgent {
+        var agent = ASAgent.of(
             name = name.orEmpty(),
             beliefBase = beliefsScope.build(),
             events = goalsScope.build().map { Event.of(it) },
