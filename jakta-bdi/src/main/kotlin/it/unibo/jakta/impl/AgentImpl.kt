@@ -2,28 +2,36 @@ package it.unibo.jakta.impl
 
 import it.unibo.jakta.ASAgent
 import it.unibo.jakta.AgentID
-import it.unibo.jakta.context.AgentContext
-import it.unibo.jakta.events.EventQueue
-import it.unibo.jakta.intentions.IntentionPool
-import it.unibo.jakta.intentions.SchedulingResult
-import it.unibo.jakta.plans.Plan
+import it.unibo.jakta.AgentLifecycle
+import it.unibo.jakta.beliefs.ASBelief
+import it.unibo.jakta.context.ASAgentContext
+import it.unibo.jakta.context.MutableAgentContext
+import it.unibo.jakta.context.MutableAgentContextStaticFactory
+import it.unibo.jakta.events.ASEvent
+import it.unibo.jakta.intentions.ASActivationRecord
+import it.unibo.jakta.intentions.ASIntention
+import it.unibo.jakta.intentions.ASIntentionPool
+import it.unibo.jakta.plans.ASPlan
+import it.unibo.tuprolog.core.Struct
 import java.util.UUID
 
-internal data class AgentImpl(
-    override val context: AgentContext,
+internal class AgentImpl(
     override val agentID: AgentID = AgentID(),
     override val name: String = "Agent-" + UUID.randomUUID(),
-    override val tags: Map<String, Any> = emptyMap(),
+    override val context: MutableAgentContext<Struct, ASBelief, ASEvent, ASPlan, ASActivationRecord, ASIntention, ASAgentContext> = MutableAgentContextStaticFactory.of(),
 ) : ASAgent {
-    override fun selectEvent(events: EventQueue) = events.firstOrNull()
-    override fun selectApplicablePlan(plans: Iterable<Plan>) = plans.firstOrNull()
-    override fun scheduleIntention(intentions: IntentionPool) =
-        SchedulingResult(intentions.pop(), intentions.nextIntention())
 
-    override fun replaceTags(tags: Map<String, Any>): ASAgent =
-        if (tags != this.tags) {
-            copy(tags = tags)
-        } else {
-            this
-        }
+    override var tags: Map<String, Any> = emptyMap()
+
+    override val lifecycle: AgentLifecycle<Struct, ASBelief>
+        get() = AgentLifecycleImpl(this)
+
+    override fun selectEvent(events: List<ASEvent>) = events.firstOrNull()
+    override fun selectApplicablePlan(plans: Iterable<ASPlan>) = plans.firstOrNull()
+    override fun scheduleIntention(intentions: ASIntentionPool) = intentions.nextIntention()
+
+    override fun replaceTags(tags: Map<String, Any>): ASAgent {
+        this.tags += tags
+        return this
+    }
 }

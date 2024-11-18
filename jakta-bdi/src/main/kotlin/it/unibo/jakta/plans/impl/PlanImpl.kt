@@ -4,10 +4,8 @@ import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.beliefs.ASBeliefBase
 import it.unibo.jakta.beliefs.BeliefBase
 import it.unibo.jakta.events.ASEvent
-import it.unibo.jakta.events.Event
 import it.unibo.jakta.intentions.ActivationRecord
 import it.unibo.jakta.plans.ASPlan
-import it.unibo.jakta.plans.ASTask
 import it.unibo.jakta.plans.Task
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.unify.Unificator.Companion.mguWith

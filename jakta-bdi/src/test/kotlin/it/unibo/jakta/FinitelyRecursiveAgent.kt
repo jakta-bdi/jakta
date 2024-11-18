@@ -1,7 +1,6 @@
 package it.unibo.jakta
 
 import it.unibo.jakta.environment.Environment
-import it.unibo.jakta.events.Event
 import it.unibo.jakta.goals.Achieve
 import it.unibo.jakta.goals.ActInternally
 import it.unibo.jakta.plans.Plan

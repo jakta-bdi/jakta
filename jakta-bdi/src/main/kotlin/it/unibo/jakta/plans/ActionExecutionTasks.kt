@@ -13,7 +13,6 @@ import it.unibo.jakta.context.AgentContext
 import it.unibo.jakta.environment.Environment
 import it.unibo.jakta.events.BeliefBaseAddition
 import it.unibo.jakta.events.BeliefBaseRemoval
-import it.unibo.jakta.events.Event
 import it.unibo.jakta.executionstrategies.ExecutionResult
 import it.unibo.jakta.intentions.ASIntention
 import it.unibo.jakta.intentions.Intention

@@ -1,33 +1,35 @@
 package it.unibo.jakta
 
-import it.unibo.jakta.actions.effects.EnvironmentChange
-import it.unibo.jakta.beliefs.ASBeliefBase
-import it.unibo.jakta.beliefs.Belief
-import it.unibo.jakta.beliefs.RetrieveResult
+import it.unibo.jakta.beliefs.BeliefBase
+import it.unibo.jakta.beliefs.MutableBeliefBase
 import it.unibo.jakta.context.AgentContext
-import it.unibo.jakta.environment.Environment
-import it.unibo.jakta.events.Event
-import it.unibo.jakta.events.EventQueue
-import it.unibo.jakta.executionstrategies.ExecutionResult
+import it.unibo.jakta.context.MutableAgentContext
 import it.unibo.jakta.fsm.Activity
-import it.unibo.jakta.impl.AgentLifecycleImpl
+import it.unibo.jakta.intentions.ActivationRecord
 import it.unibo.jakta.intentions.Intention
 import it.unibo.jakta.intentions.IntentionPool
-import it.unibo.jakta.intentions.SchedulingResult
 import it.unibo.jakta.plans.Plan
-import it.unibo.jakta.plans.PlanLibrary
 
 /** BDI Agent definition*/
-interface AgentLifecycle {
+interface AgentLifecycle<Query, Belief, EventType, PlanType, ActivationRecordType, IntentionType, Context> where
+    Query: Any,
+    PlanType: Plan<Query, Belief>,
+    ActivationRecordType: ActivationRecord<Query, Belief>,
+    IntentionType: Intention<Query, Belief, ActivationRecordType>,
+    Context: AgentContext<Query, Belief, EventType, PlanType>
+{
 
     /**
      * STEP 1 of reasoning cycle: Belief Update Function.
      * This function defines how to merge new [perceptions] into the current [beliefBase]
-     * @param perceptions: [ASBeliefBase] that collects all agent's perceptions of the environment
-     * @param beliefBase: [ASBeliefBase] the current agent's [ASBeliefBase]
-     * @return a [RetrieveResult] that contains the updated [ASBeliefBase] and the added [Belief]s
+     * @param perceptions: [BeliefBase] that collects all agent's perceptions of the environment
+     * @param beliefBase: [MutableBeliefBase] the current agent's beliefs where the perceptions will be added.
+     * @return true is the [MutableBeliefBase] is changed as a result of the operation
      */
-    fun updateBelief(perceptions: ASBeliefBase, beliefBase: ASBeliefBase): RetrieveResult
+    fun updateBelief(
+        perceptions: BeliefBase<Query, Belief>,
+        beliefBase: MutableBeliefBase<Query, Belief, BeliefBase<Query, Belief>>
+    ): Boolean
 
     /**
      * STEP 5 of reasoning cycle: Selecting an Event.
@@ -36,27 +38,31 @@ interface AgentLifecycle {
      * @param events: [EventQueue] on which select the event
      * @return the selected [Event]
      */
-    fun selectEvent(events: EventQueue): Event?
+    fun selectEvent(events: List<EventType>): EventType?
 
     /**
-     * STEP 6 of reasoning cycle: Retrieving all Relevant Plans.
-     * This function returns all plans from [PlanLibrary] that have a triggering event that can be unified
+     * STEP 6 of reasoning cycle: Retrieving all Relevant [Plan]s.
+     * This function returns all [Plan]s that have a triggering event that can be unified
      * with the selected event.
      * @param event: the selected [Event]
-     * @param planLibrary: the [PlanLibrary] of the Agent
+     * @param planLibrary: the [Plan]s known by the Agent
      * @return the relevant [Plan]s
      */
-    fun selectRelevantPlans(event: Event, planLibrary: PlanLibrary): PlanLibrary
+    fun selectRelevantPlans(event: EventType, planLibrary: List<PlanType>): List<PlanType>
 
     /**
      * STEP 7 of reasoning cycle: Determining the Applicable Plans.
      * This function defines if a plan is applicable based on the agent's Belief Base.
      * @param event: the selected [Event] that triggered the [Plan]
      * @param plan: the triggered [Plan]
-     * @param beliefBase: the agent's [ASBeliefBase]
+     * @param beliefBase: the agent's [BeliefBase]
      * @return yes if it's applicable, false otherwise.
      */
-    fun isPlanApplicable(event: Event, plan: Plan, beliefBase: ASBeliefBase): Boolean
+    fun isPlanApplicable(
+        event: EventType,
+        plan: PlanType,
+        beliefBase: BeliefBase<Query, Belief>,
+    ): Boolean
 
     /**
      * Step 8 of reasoning cycle: Selecting one Applicable Plan.
@@ -65,7 +71,7 @@ interface AgentLifecycle {
      * @param plans: applicable [Plan]s
      * @return the selected [Plan] to be executed
      */
-    fun selectApplicablePlan(plans: Iterable<Plan>): Plan?
+    fun selectApplicablePlan(plans: List<PlanType>): PlanType?
 
     /**
      * Step 8 of reasoning cycle: Assign selected plan to an Intention.
@@ -74,37 +80,45 @@ interface AgentLifecycle {
      * @param event: the [Event] that triggered the [Plan]
      * @param plan: the selected [Plan]
      * @param intentions: the [IntentionPool] of the agent
-     * @return the updated [Intention]
+     * @return the updated [Intention] or null if the intention is not found
      */
-    fun assignPlanToIntention(event: Event, plan: Plan, intentions: IntentionPool): Intention
+    fun assignPlanToIntention(
+        event: EventType,
+        plan: PlanType,
+        intentions: IntentionPool<Query, Belief, ActivationRecordType, IntentionType>
+    ): IntentionType?
 
     /**
      * Step 9 of reasoning cycle: Selecting an Intention for Further Execution.
      * Given all agent's intentions, this Selection Function selects the intention to be scheduled to execution
      * by the agent. By default, this function implements Round Robin scheduling.
      * @param intentions: the agent's [IntentionPool]
-     * @return a [SchedulingResult] with the updated [IntentionPool] and the [Intention] to execute
+     * @return the [Intention] to execute, or null if there's no intention
      */
-    fun scheduleIntention(intentions: IntentionPool): SchedulingResult
+    fun scheduleIntention(intentions: IntentionPool<Query, Belief, ActivationRecordType, IntentionType>): IntentionType?
 
     /**
      * Step 10 of reasoning cycle: Executing One step of an Intention.
      * Depending on the formula on the top of the intention, the agent will execute the related action.
      * @param intention: [Intention] on which the agent is currently focused
-     * @return the updated [Intention] after agent execution
      */
-    fun runIntention(intention: Intention, context: AgentContext, environment: Environment): ExecutionResult
+    fun runIntention(
+        intention: IntentionType,
+        context: MutableAgentContext<Query, Belief, EventType, PlanType, ActivationRecordType, IntentionType, Context>,
+        environment: Environment,
+    )
 
     /** Performs the whole procedure (10 steps) of the BDI Agent's Reasoning Cycle.
      *  @param environment the [Environment]
      *  @param controller [Activity.Controller] that manages agent's execution
      *  @param debugEnabled [Boolean] specifies wether debug logs are needed or not
+     *  @return true if the environment has been changed as a result of this operation
      */
     fun runOneCycle(
         environment: Environment,
         controller: Activity.Controller? = null,
         debugEnabled: Boolean = false,
-    ): Iterable<EnvironmentChange> {
+    ): Boolean {
         sense(environment, controller, debugEnabled)
         deliberate()
         return act(environment)
@@ -135,11 +149,9 @@ interface AgentLifecycle {
      *  - STEP9: Select an Intention for Further Execution
      *  - STEP10: Executing one Step on an Intention
      *  @param environment [Environment]
-     *  @return an Iterable of [EnvironmentChange] that need to be scheduled for the application in the environment.
+     *  @return true if the environment has been changed as a result of this operation.
      */
-    fun act(environment: Environment): Iterable<EnvironmentChange>
+    fun act(environment: Environment): Boolean
 
-    companion object {
-        fun newLifecycleFor(agent: ASAgent): AgentLifecycle = AgentLifecycleImpl(agent)
-    }
+
 }

@@ -1,7 +1,6 @@
 package it.unibo.jakta.plans
 
 import it.unibo.jakta.events.AchievementGoalInvocation
-import it.unibo.jakta.events.Event
 import it.unibo.jakta.events.TestGoalInvocation
 
 /**

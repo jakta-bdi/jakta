@@ -5,7 +5,6 @@ import it.unibo.jakta.actions.impl.AbstractExternalAction
 import it.unibo.jakta.beliefs.ASBeliefBase
 import it.unibo.jakta.beliefs.Belief
 import it.unibo.jakta.environment.Environment
-import it.unibo.jakta.events.Event
 import it.unibo.jakta.goals.Achieve
 import it.unibo.jakta.goals.Act
 import it.unibo.jakta.goals.ActInternally

@@ -1,9 +1,8 @@
 package it.unibo.jakta.plans
 
 import it.unibo.jakta.beliefs.BeliefBase
-import it.unibo.jakta.events.Event
 
-interface Plan<Query : Any, Belief> {
+interface Plan<Query : Any, Belief, Event> {
 
     val tasks: List<Task<Query, Belief, *, *>>
 

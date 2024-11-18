@@ -14,17 +14,21 @@ import it.unibo.jakta.actions.effects.PlanChange
 import it.unibo.jakta.actions.effects.PopMessage
 import it.unibo.jakta.actions.effects.Sleep
 import it.unibo.jakta.actions.effects.Stop
+import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.beliefs.ASBeliefBase
 import it.unibo.jakta.beliefs.Belief
+import it.unibo.jakta.beliefs.BeliefBase
+import it.unibo.jakta.beliefs.MutableBeliefBase
 import it.unibo.jakta.beliefs.RetrieveResult
+import it.unibo.jakta.context.ASAgentContext
 import it.unibo.jakta.context.AgentContext
 import it.unibo.jakta.context.ContextUpdate.ADDITION
 import it.unibo.jakta.context.ContextUpdate.REMOVAL
 import it.unibo.jakta.environment.Environment
+import it.unibo.jakta.events.ASEvent
 import it.unibo.jakta.events.AchievementGoalFailure
 import it.unibo.jakta.events.BeliefBaseAddition
 import it.unibo.jakta.events.BeliefBaseRemoval
-import it.unibo.jakta.events.Event
 import it.unibo.jakta.events.EventQueue
 import it.unibo.jakta.events.TestGoalFailure
 import it.unibo.jakta.executionstrategies.ExecutionResult
@@ -41,64 +45,74 @@ import it.unibo.jakta.goals.RemoveBelief
 import it.unibo.jakta.goals.Spawn
 import it.unibo.jakta.goals.Test
 import it.unibo.jakta.goals.UpdateBelief
+import it.unibo.jakta.intentions.ASActivationRecord
+import it.unibo.jakta.intentions.ASIntention
+import it.unibo.jakta.intentions.ASIntentionPool
 import it.unibo.jakta.intentions.Intention
 import it.unibo.jakta.intentions.IntentionPool
 import it.unibo.jakta.messages.Tell
+import it.unibo.jakta.plans.ASPlan
 import it.unibo.jakta.plans.Plan
 import it.unibo.jakta.plans.PlanLibrary
+import it.unibo.tuprolog.core.Struct
 
 internal data class AgentLifecycleImpl(
     private var agent: ASAgent,
-) : AgentLifecycle {
+) : AgentLifecycle<Struct, ASBelief, ASEvent, ASPlan, ASActivationRecord, ASIntention, ASAgentContext> {
     private var controller: Activity.Controller? = null
     private var debugEnabled = false
     private var cachedEffects = emptyList<EnvironmentChange>()
 
-    override fun updateBelief(perceptions: ASBeliefBase, beliefBase: ASBeliefBase): RetrieveResult =
-        when (perceptions == beliefBase) {
-            false -> {
-                // 1. each literal l in p not currently in b is added to b
-                val rrAddition = beliefBase.addAll(perceptions)
+    override fun selectEvent(events: List<ASEvent>): ASEvent? = agent.selectEvent(events)
 
-                // 2. each literal l in b no longer in p is deleted from b
-                var removedBeliefs = emptyList<BeliefUpdate>()
-                var rrRemoval = RetrieveResult(removedBeliefs, rrAddition.updatedBeliefBase)
-                rrRemoval.updatedBeliefBase.forEach {
-                    if (!perceptions.contains(it) && it.rule.head.args.first() == Belief.SOURCE_PERCEPT) {
-                        rrRemoval = rrRemoval.updatedBeliefBase.remove(it)
-                        removedBeliefs = removedBeliefs + rrRemoval.modifiedBeliefs
-                    }
-                }
+    override fun updateBelief(
+        perceptions: BeliefBase<Struct, ASBelief>,
+        beliefBase: MutableBeliefBase<Struct, ASBelief, BeliefBase<Struct, ASBelief>>
+    ): Boolean = when (perceptions == beliefBase) {
+        false -> {
+            // 1. each literal l in p not currently in b is added to b
+            beliefBase.addAll(perceptions)
 
-                RetrieveResult(
-                    rrAddition.modifiedBeliefs + rrRemoval.modifiedBeliefs,
-                    rrRemoval.updatedBeliefBase,
-                )
-            }
-            else -> RetrieveResult(emptyList(), beliefBase)
-        }
-
-    override fun selectEvent(events: EventQueue) = agent.selectEvent(events)
-
-    override fun selectRelevantPlans(event: Event, planLibrary: PlanLibrary) = planLibrary.relevantPlans(event)
-
-    override fun isPlanApplicable(event: Event, plan: Plan, beliefBase: ASBeliefBase) =
-        plan.isApplicable(event, beliefBase)
-
-    override fun selectApplicablePlan(plans: Iterable<Plan>) = agent.selectApplicablePlan(plans)
-
-    override fun assignPlanToIntention(event: Event, plan: Plan, intentions: IntentionPool) =
-        when (event.isExternal()) {
-            true -> Intention.of(plan)
-            false -> {
-                when (event.trigger) {
-                    is AchievementGoalFailure, is TestGoalFailure ->
-                        event.intention!!.copy(recordStack = listOf(plan.toActivationRecord()))
-                    // else -> intentions[event.intention!!.id]!!.push(plan.toActivationRecord())
-                    else -> event.intention!!.pop().push(plan.toActivationRecord())
+            // 2. each literal l in b no longer in p is deleted from b
+            beliefBase.forEach {
+                if (!perceptions.contains(it) && it.content.head.args.first() == ASBelief.SOURCE_PERCEPT) {
+                    beliefBase.remove(it)
                 }
             }
+            true
         }
+        else -> false
+    }
+
+    override fun selectRelevantPlans(
+        event: ASEvent,
+        planLibrary: List<ASPlan>
+    ): List<ASPlan> = planLibrary.filter { it.isRelevant(event) }
+
+    override fun isPlanApplicable(
+        event: ASEvent,
+        plan: ASPlan,
+        beliefBase: BeliefBase<Struct, ASBelief>
+    ): Boolean = plan.isApplicable(event, beliefBase)
+
+    override fun selectApplicablePlan(plans: List<ASPlan>) = agent.selectApplicablePlan(plans)
+
+    override fun assignPlanToIntention(
+        event: ASEvent,
+        plan: ASPlan,
+        intentions: ASIntentionPool,
+    ): ASIntention? = when (event.isExternal()) {
+        true -> ASIntention.of(plan)
+        false -> {
+            when (event) {
+                is AchievementGoalFailure, is TestGoalFailure ->
+                    event.intention?.copy(recordStack = listOf(plan.toActivationRecord()))
+                // else -> intentions[event.intention!!.id]!!.push(plan.toActivationRecord())
+                else -> event.intention?.pop()?.push(plan.toActivationRecord())
+            }
+        }
+    }
+
 
     override fun scheduleIntention(intentions: IntentionPool) = agent.scheduleIntention(intentions)
 

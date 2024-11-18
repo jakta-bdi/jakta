@@ -8,7 +8,6 @@ import it.unibo.jakta.actions.InternalRequest
 import it.unibo.jakta.actions.impl.AbstractInternalAction
 import it.unibo.jakta.beliefs.Belief
 import it.unibo.jakta.environment.Environment
-import it.unibo.jakta.events.Event
 import it.unibo.jakta.goals.Achieve
 import it.unibo.jakta.goals.ActInternally
 import it.unibo.jakta.goals.AddBelief

@@ -3,8 +3,8 @@ package it.unibo.jakta.intentions
 import it.unibo.jakta.plans.Plan
 import it.unibo.jakta.plans.Task
 
-interface Intention<Query : Any, Belief> {
-    val recordStack: List<ActivationRecord<Query, Belief>>
+interface Intention<Query : Any, Belief, ActivationRecordType: ActivationRecord<Query, Belief>> {
+    val recordStack: List<ActivationRecordType>
 
     val isSuspended: Boolean
 
@@ -15,10 +15,17 @@ interface Intention<Query : Any, Belief> {
     fun currentPlan(): Plan<Query, Belief> = recordStack.first().plan
 
     /**
-     * Removes the first goal to be executed from the first activation record. If the goal is the last one,
+     * Removes the first goal to be executed from the first activation record.
+     * If the goal is the last one,
      * then the whole activation record is removed from the records stack.
+     * @return the [ActivationRecord] removed.
      */
-    fun pop(): Intention<Query, Belief>
+    fun pop(): ActivationRecordType
 
-    fun push(activationRecord: ActivationRecord<Query, Belief>): Intention<Query, Belief>
+    /**
+     * Inserts at the top of the records stack the new [ActivationRecord].
+     * @param activationRecord the [ActivationRecord] that is inserted in the records stack.
+     * @return true if the intention is modified, otherwise false
+     */
+    fun push(activationRecord: ActivationRecordType): Boolean
 }

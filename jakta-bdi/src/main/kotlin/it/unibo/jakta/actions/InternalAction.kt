@@ -2,7 +2,6 @@ package it.unibo.jakta.actions
 
 import it.unibo.jakta.actions.effects.AgentChange
 import it.unibo.jakta.beliefs.Belief
-import it.unibo.jakta.events.Event
 import it.unibo.jakta.intentions.Intention
 import it.unibo.jakta.plans.Plan
 

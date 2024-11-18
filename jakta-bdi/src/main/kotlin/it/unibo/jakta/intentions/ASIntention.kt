@@ -6,20 +6,21 @@ import it.unibo.jakta.plans.ASPlan
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
 
-interface ASIntention : Intention<Struct, ASBelief> {
-    fun applySubstitution(substitution: Substitution): ASIntention
+interface ASIntention : Intention<Struct, ASBelief, ASActivationRecord> {
 
-//    fun copy(
-//        recordStack: List<ASActivationRecord> = this.recordStack,
-//        isSuspended: Boolean = this.isSuspended,
-//        id: IntentionID = this.id,
-//    ): ASIntention = of(recordStack, isSuspended, id)
+    fun applySubstitution(substitution: Substitution): Boolean
+
+    fun copy(
+        recordStack: MutableList<ASActivationRecord> = this.recordStack.toMutableList(),
+        isSuspended: Boolean = this.isSuspended,
+        id: IntentionID = this.id,
+    ): ASIntention = of(recordStack, isSuspended, id)
 
     companion object {
-        fun of(plan: ASPlan): ASIntention = IntentionImpl(listOf(plan.toActivationRecord()))
+        fun of(plan: ASPlan): ASIntention = IntentionImpl(mutableListOf(plan.toActivationRecord()))
 
         fun of(
-            recordStack: List<ASActivationRecord> = emptyList(),
+            recordStack: MutableList<ASActivationRecord> = mutableListOf(),
             isSuspended: Boolean = false,
             id: IntentionID = IntentionID(),
         ): ASIntention = IntentionImpl(recordStack, isSuspended, id)

@@ -6,28 +6,23 @@ import it.unibo.jakta.beliefs.ASMutableBeliefBase
 import it.unibo.jakta.context.ASAgentContext
 import it.unibo.jakta.context.ASMutableAgentContext
 import it.unibo.jakta.events.ASEvent
-import it.unibo.jakta.events.Event
 import it.unibo.jakta.intentions.ASIntention
 import it.unibo.jakta.intentions.ASIntentionPool
-import it.unibo.jakta.intentions.Intention
-import it.unibo.jakta.intentions.IntentionPool
+import it.unibo.jakta.intentions.IntentionPoolStaticFactory
 import it.unibo.jakta.plans.ASPlan
-import it.unibo.jakta.plans.Plan
-import it.unibo.tuprolog.core.Struct
-import javax.management.Query
 
-data class ASAgentContextImpl(
+class ASAgentContextImpl(
     private val mutableBeliefBase: ASMutableBeliefBase = ASMutableBeliefBase.empty(),
     private val mutableEventList: MutableList<ASEvent> = mutableListOf(),
     private val mutablePlanLibrary: MutableCollection<ASPlan> = mutableListOf(),
     private val mutableInternalActions: MutableMap<String, InternalAction> = mutableMapOf(),
-    private var mutableIntentionPool: ASIntentionPool = ASIntentionPool.empty(),
+    private var mutableIntentionPool: ASIntentionPool = IntentionPoolStaticFactory.empty(),
 ) : ASMutableAgentContext, ASAgentContext {
 
     override val beliefBase
         get() = mutableBeliefBase.snapshot()
 
-    override val events: List<Event>
+    override val events: List<ASEvent>
         get() = mutableEventList.toList()
 
     override val planLibrary: Collection<ASPlan>
@@ -43,29 +38,31 @@ data class ASAgentContextImpl(
 
     override fun removeBelief(belief: ASBelief): Boolean = mutableBeliefBase.remove(belief)
 
-    override fun addEvent(event: Event): Boolean =
-        if (event is ASEvent) mutableEventList.add(event) else false
+    override fun addEvent(event: ASEvent): Boolean = mutableEventList.add(event)
 
-    override fun removeEvent(event: Event): Boolean =
-        if (event is ASEvent) mutableEventList.remove(event) else false
+    override fun removeEvent(event: ASEvent): Boolean = mutableEventList.remove(event)
 
-    override fun addPlan(plan: Plan<Struct, ASBelief>): Boolean =
-        if (plan is ASPlan) mutablePlanLibrary.add(plan) else false
+    override fun addPlan(plan: ASPlan): Boolean = mutablePlanLibrary.add(plan)
 
-    override fun removePlan(plan: Plan<Struct, ASBelief>): Boolean =
-        if (plan is ASPlan) mutablePlanLibrary.remove(plan) else false
+    override fun removePlan(plan: ASPlan): Boolean = mutablePlanLibrary.remove(plan)
 
-    override fun removeIntention(intention: Intention<Struct, ASBelief>): Boolean  = if (intention is ASIntention) {
-        mutableIntentionPool = mutableIntentionPool.deleteIntention(intention.id) as ASIntentionPool
-        true
-    } else false
+    override fun removeIntention(intention: ASIntention): Boolean {
+        mutableIntentionPool = mutableIntentionPool.deleteIntention(intention.id)
+        return true
+    }
 
-    override fun updateIntention(intention:  Intention<Struct, ASBelief>): Boolean = if (intention is ASIntention) {
-        mutableIntentionPool = mutableIntentionPool.updateIntention(intention) as ASIntentionPool
-        true
-    } else false
+    override fun updateIntention(intention: ASIntention): Boolean {
+        mutableIntentionPool = mutableIntentionPool.updateIntention(intention)
+        return true
+    }
 
-    override fun snapshot(): ASAgentContext = this.copy()
+    override fun snapshot(): ASAgentContext = ASAgentContextImpl(
+        mutableBeliefBase,
+        mutableEventList,
+        mutablePlanLibrary,
+        mutableInternalActions,
+        mutableIntentionPool,
+    )
 
     override fun toString(): String = """
     AgentContext {

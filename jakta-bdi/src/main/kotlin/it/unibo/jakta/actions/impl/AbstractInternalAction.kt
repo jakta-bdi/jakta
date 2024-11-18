@@ -14,7 +14,6 @@ import it.unibo.jakta.actions.effects.Stop
 import it.unibo.jakta.beliefs.Belief
 import it.unibo.jakta.context.ContextUpdate.ADDITION
 import it.unibo.jakta.context.ContextUpdate.REMOVAL
-import it.unibo.jakta.events.Event
 import it.unibo.jakta.intentions.Intention
 import it.unibo.jakta.plans.Plan
 import it.unibo.tuprolog.solve.Signature

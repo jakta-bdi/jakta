@@ -2,7 +2,6 @@ package it.unibo.jakta.actions.effects
 
 import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.context.ContextUpdate
-import it.unibo.jakta.events.Event
 import it.unibo.jakta.intentions.Intention
 import it.unibo.jakta.plans.Plan
 

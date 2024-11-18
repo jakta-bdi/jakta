@@ -1,6 +1,6 @@
 package it.unibo.jakta.plans
 
-import it.unibo.jakta.events.Event
+import it.unibo.jakta.intentions.ActivationRecord
 import it.unibo.jakta.intentions.Intention
 import javax.management.Query
 
@@ -17,13 +17,13 @@ interface ActionTaskEffects<Event> : ExecutionResult, List<Event> {
     }
 }
 
-interface InternalEvent<Query: Any, Belief> : ExecutionResult, Event, Intention<Query, Belief> // TODO("I just don't like the name of this")
+interface InternalEvent<Query: Any, Belief> : ExecutionResult, Intention<Query, Belief, ActivationRecord<Query, Belief>> // TODO("I just don't like the name of this")
 
 /**
  * Represents one of the steps that need to be executed for the [Plan]'s successful completion.
  */
 interface Task<Query: Any, Belief, in Argument, out Result : ExecutionResult> {
-    suspend fun execute(intention: Intention<Query, Belief>, argument: Argument): Result // QUESTA MI DA' FASTIDIO, quando creo un task sto dicendo che voglio fare una certa cosa, non che cosa viene eseguito sotto.
+    suspend fun execute(argument: Argument): Result
 }
 
 interface Action<Query: Any, Belief, in Argument, Event> : Task<Query, Belief, Argument, ActionTaskEffects<Event>>

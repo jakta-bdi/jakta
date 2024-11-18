@@ -6,7 +6,6 @@ import it.unibo.jakta.dsl.actions.InternalActionsScope
 import it.unibo.jakta.dsl.beliefs.BeliefsScope
 import it.unibo.jakta.dsl.goals.InitialGoalsScope
 import it.unibo.jakta.dsl.plans.PlansScope
-import it.unibo.jakta.events.Event
 import it.unibo.jakta.executionstrategies.TimeDistribution
 import it.unibo.jakta.executionstrategies.setTimeDistribution
 import it.unibo.jakta.plans.Plan
