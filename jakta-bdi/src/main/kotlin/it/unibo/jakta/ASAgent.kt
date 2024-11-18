@@ -1,65 +1,59 @@
 package it.unibo.jakta
 
-import it.unibo.jakta.actions.InternalAction
-import it.unibo.jakta.actions.InternalActions
-import it.unibo.jakta.beliefs.ASBeliefBase
+import it.unibo.jakta.beliefs.ASBelief
+import it.unibo.jakta.beliefs.ASMutableBeliefBase
 import it.unibo.jakta.context.ASMutableAgentContext
 import it.unibo.jakta.context.AgentContext
+import it.unibo.jakta.context.MutableAgentContext
 import it.unibo.jakta.events.ASEvent
-import it.unibo.jakta.events.EventQueue
+import it.unibo.jakta.events.Event
 import it.unibo.jakta.impl.AgentImpl
+import it.unibo.jakta.intentions.ASIntention
+import it.unibo.jakta.intentions.ASIntentionPool
+import it.unibo.jakta.intentions.Intention
 import it.unibo.jakta.intentions.IntentionPool
-import it.unibo.jakta.intentions.SchedulingResult
 import it.unibo.jakta.plans.ASPlan
 import it.unibo.jakta.plans.Plan
-import it.unibo.jakta.plans.PlanLibrary
+import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.utils.Taggable
 import java.util.*
 
-interface ASAgent : Taggable<ASAgent> {
+interface ASAgent : Agent<Struct, ASBelief>, Taggable<ASAgent> {
 
-    val agentID: AgentID
+    val asContext: ASMutableAgentContext
 
-    val name: String
-
-    /** Agent's Actual State */
-    val context: ASMutableAgentContext
+    override val context: MutableAgentContext<Struct, ASBelief, AgentContext<Struct, ASBelief>>
+        get() = asContext
 
     /** Event Selection Function*/
     fun selectEvent(events: List<ASEvent>): ASEvent?
 
+    override fun selectEvent(events: List<Event>): Event? = selectEvent(events.filterIsInstance<ASEvent>())
+
     /** Plan Selection Function */
-    fun selectApplicablePlan(plans: Iterable<ASPlan>): Plan?
+    fun selectApplicablePlan(plans: Iterable<ASPlan>): ASPlan?
+
+    override fun selectApplicablePlan(plans: Iterable<Plan<Struct, ASBelief>>): Plan<Struct, ASBelief>? =
+        selectApplicablePlan(plans.filterIsInstance<ASPlan>())
 
     /** Intention Selection Function */
-    fun scheduleIntention(intentions: IntentionPool): SchedulingResult
+    fun scheduleIntention(intentions: ASIntentionPool): ASIntention?
 
-    fun copy(agentContext: AgentContext = this.context) =
-        of(this.agentID, this.name, agentContext.copy())
-
-    fun copy(
-        beliefBase: ASBeliefBase = this.context.beliefBase,
-        events: EventQueue = this.context.events,
-        planLibrary: PlanLibrary = this.context.planLibrary,
-        intentions: IntentionPool = this.context.intentions,
-        internalActions: Map<String, InternalAction> = this.context.internalActions,
-    ) = of(
-        this.agentID,
-        this.name,
-        context.copy(beliefBase, events, planLibrary, intentions, internalActions),
-    )
+    override fun scheduleIntention(intentions: IntentionPool<Struct, ASBelief>): Intention<Struct, ASBelief>? =
+        if (intentions is ASIntentionPool) scheduleIntention(intentions) else null
 
     companion object {
-        fun empty(): ASAgent = AgentImpl(AgentContext.of())
+        fun empty(): ASAgent = AgentImpl(ASMutableAgentContext.of())
+
         fun of(
             agentID: AgentID = AgentID(),
             name: String = "Agent-" + UUID.randomUUID(),
-            beliefBase: ASBeliefBase = ASBeliefBase.empty(),
-            events: EventQueue = emptyList(),
-            planLibrary: PlanLibrary = PlanLibrary.empty(),
-            internalActions: Map<String, InternalAction> = InternalActions.default(),
+            beliefBase: ASMutableBeliefBase = ASMutableBeliefBase.empty(),
+            events: MutableList<ASEvent> = mutableListOf(),
+            planLibrary: MutableCollection<ASPlan> = mutableListOf(),
+            //internalActions: MutableMap<String, InternalAction> = InternalActions.default(), //TODO()
         ): ASAgent = AgentImpl(
-            AgentContext.of(beliefBase, events, planLibrary, internalActions),
+            ASMutableAgentContext.of(beliefBase, events, planLibrary),
             agentID,
             name,
         )
@@ -67,7 +61,7 @@ interface ASAgent : Taggable<ASAgent> {
         fun of(
             agentID: AgentID = AgentID(),
             name: String = "Agent-" + UUID.randomUUID(),
-            agentContext: AgentContext,
+            agentContext: ASMutableAgentContext = ASMutableAgentContext.of(),
         ): ASAgent = AgentImpl(agentContext, agentID, name)
     }
 }

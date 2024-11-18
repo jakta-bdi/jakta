@@ -25,7 +25,7 @@ interface ASMutableAgentContext : MutableAgentContext<Struct, ASBelief, ASAgentC
     companion object {
         fun of(
             beliefBase: ASMutableBeliefBase = ASMutableBeliefBase.empty(),
-            events: MutableList<Event> = mutableListOf(),
+            events: MutableList<ASEvent> = mutableListOf(),
             planLibrary: MutableCollection<ASPlan> = mutableListOf(),
             internalActions: MutableMap<String, InternalAction> = mutableMapOf(),
         ): ASMutableAgentContext = ASAgentContextImpl(

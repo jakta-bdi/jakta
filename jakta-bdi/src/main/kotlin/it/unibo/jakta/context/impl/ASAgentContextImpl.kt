@@ -17,10 +17,10 @@ import it.unibo.tuprolog.core.Struct
 import javax.management.Query
 
 data class ASAgentContextImpl(
-    private val mutableBeliefBase: ASMutableBeliefBase,
-    private val mutableEventList: MutableList<Event>,
-    private val mutablePlanLibrary: MutableCollection<ASPlan>,
-    private val mutableInternalActions: MutableMap<String, InternalAction>,
+    private val mutableBeliefBase: ASMutableBeliefBase = ASMutableBeliefBase.empty(),
+    private val mutableEventList: MutableList<ASEvent> = mutableListOf(),
+    private val mutablePlanLibrary: MutableCollection<ASPlan> = mutableListOf(),
+    private val mutableInternalActions: MutableMap<String, InternalAction> = mutableMapOf(),
     private var mutableIntentionPool: ASIntentionPool = ASIntentionPool.empty(),
 ) : ASMutableAgentContext, ASAgentContext {
 
