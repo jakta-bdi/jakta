@@ -1,40 +1,30 @@
 package it.unibo.jakta.actions.effects
 
 import it.unibo.jakta.beliefs.ASBelief
-import it.unibo.jakta.context.ContextUpdate
-import it.unibo.jakta.intentions.Intention
-import it.unibo.jakta.plans.Plan
+import it.unibo.jakta.events.ASEvent
+import it.unibo.jakta.intentions.ASIntention
+import it.unibo.jakta.plans.ASPlan
 
 sealed interface AgentChange : ActionResult
 
-sealed interface InternalChange : AgentChange {
-    val changeType: ContextUpdate
-}
-
-sealed interface ActivityChange : AgentChange
-
 data class BeliefChange(
     val belief: ASBelief,
-    override val changeType: ContextUpdate,
-) : InternalChange
+) : AgentChange
 
 data class IntentionChange(
-    val intention: Intention,
-    override val changeType: ContextUpdate,
-) : InternalChange
+    val intention: ASIntention,
+) : AgentChange
 
 data class EventChange(
-    val event: Event,
-    override val changeType: ContextUpdate,
-) : InternalChange
+    val event: ASEvent,
+) : AgentChange
 
 data class PlanChange(
-    val plan: Plan,
-    override val changeType: ContextUpdate,
-) : InternalChange
+    val plan: ASPlan,
+) : AgentChange
 
-data class Sleep(val millis: Long) : ActivityChange
+data class Sleep(val millis: Long) : AgentChange
 
-class Stop : ActivityChange
+data object Stop : AgentChange
 
-class Pause : ActivityChange
+data object Pause : AgentChange

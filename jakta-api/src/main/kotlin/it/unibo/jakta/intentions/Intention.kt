@@ -3,7 +3,10 @@ package it.unibo.jakta.intentions
 import it.unibo.jakta.plans.Plan
 import it.unibo.jakta.plans.Task
 
-interface Intention<Query : Any, Belief, ActivationRecordType: ActivationRecord<Query, Belief>> {
+interface Intention<Query, Belief, Event, ActivationRecordType> where
+    Query: Any,
+    ActivationRecordType: ActivationRecord<Query, Belief, Event>
+{
     val recordStack: List<ActivationRecordType>
 
     val isSuspended: Boolean
@@ -12,7 +15,7 @@ interface Intention<Query : Any, Belief, ActivationRecordType: ActivationRecord<
 
     fun nextTask(): Task<Query, Belief, *, *> = recordStack.first().taskQueue.first()
 
-    fun currentPlan(): Plan<Query, Belief> = recordStack.first().plan
+    fun currentPlan(): Plan<Query, Belief, Event> = recordStack.first().plan
 
     /**
      * Removes the first goal to be executed from the first activation record.

@@ -11,12 +11,12 @@ import it.unibo.jakta.intentions.IntentionPool
 import it.unibo.jakta.plans.Plan
 
 /** BDI Agent definition*/
-interface AgentLifecycle<Query, Belief, EventType, PlanType, ActivationRecordType, IntentionType, Context> where
+interface AgentLifecycle<Query, Belief, Event, PlanType, ActivationRecordType, IntentionType, Context> where
     Query: Any,
-    PlanType: Plan<Query, Belief>,
-    ActivationRecordType: ActivationRecord<Query, Belief>,
-    IntentionType: Intention<Query, Belief, ActivationRecordType>,
-    Context: AgentContext<Query, Belief, EventType, PlanType>
+    PlanType: Plan<Query, Belief, Event>,
+    ActivationRecordType: ActivationRecord<Query, Belief, Event>,
+    IntentionType: Intention<Query, Belief, Event, ActivationRecordType>,
+    Context: AgentContext<Query, Belief, Event, PlanType, ActivationRecordType, IntentionType>
 {
 
     /**
@@ -38,7 +38,7 @@ interface AgentLifecycle<Query, Belief, EventType, PlanType, ActivationRecordTyp
      * @param events: [EventQueue] on which select the event
      * @return the selected [Event]
      */
-    fun selectEvent(events: List<EventType>): EventType?
+    fun selectEvent(events: List<Event>): Event?
 
     /**
      * STEP 6 of reasoning cycle: Retrieving all Relevant [Plan]s.
@@ -48,7 +48,7 @@ interface AgentLifecycle<Query, Belief, EventType, PlanType, ActivationRecordTyp
      * @param planLibrary: the [Plan]s known by the Agent
      * @return the relevant [Plan]s
      */
-    fun selectRelevantPlans(event: EventType, planLibrary: List<PlanType>): List<PlanType>
+    fun selectRelevantPlans(event: Event, planLibrary: List<PlanType>): List<PlanType>
 
     /**
      * STEP 7 of reasoning cycle: Determining the Applicable Plans.
@@ -59,7 +59,7 @@ interface AgentLifecycle<Query, Belief, EventType, PlanType, ActivationRecordTyp
      * @return yes if it's applicable, false otherwise.
      */
     fun isPlanApplicable(
-        event: EventType,
+        event: Event,
         plan: PlanType,
         beliefBase: BeliefBase<Query, Belief>,
     ): Boolean
@@ -83,9 +83,9 @@ interface AgentLifecycle<Query, Belief, EventType, PlanType, ActivationRecordTyp
      * @return the updated [Intention] or null if the intention is not found
      */
     fun assignPlanToIntention(
-        event: EventType,
+        event: Event,
         plan: PlanType,
-        intentions: IntentionPool<Query, Belief, ActivationRecordType, IntentionType>
+        intentions: IntentionPool<Query, Belief, Event, ActivationRecordType, IntentionType>
     ): IntentionType?
 
     /**
@@ -95,7 +95,9 @@ interface AgentLifecycle<Query, Belief, EventType, PlanType, ActivationRecordTyp
      * @param intentions: the agent's [IntentionPool]
      * @return the [Intention] to execute, or null if there's no intention
      */
-    fun scheduleIntention(intentions: IntentionPool<Query, Belief, ActivationRecordType, IntentionType>): IntentionType?
+    fun scheduleIntention(
+        intentions: IntentionPool<Query, Belief, Event, ActivationRecordType, IntentionType>
+    ): IntentionType?
 
     /**
      * Step 10 of reasoning cycle: Executing One step of an Intention.
@@ -104,7 +106,7 @@ interface AgentLifecycle<Query, Belief, EventType, PlanType, ActivationRecordTyp
      */
     fun runIntention(
         intention: IntentionType,
-        context: MutableAgentContext<Query, Belief, EventType, PlanType, ActivationRecordType, IntentionType, Context>,
+        context: MutableAgentContext<Query, Belief, Event, PlanType, ActivationRecordType, IntentionType, Context>,
         environment: Environment,
     )
 

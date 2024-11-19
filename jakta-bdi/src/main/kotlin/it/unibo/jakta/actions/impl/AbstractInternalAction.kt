@@ -11,11 +11,10 @@ import it.unibo.jakta.actions.effects.Pause
 import it.unibo.jakta.actions.effects.PlanChange
 import it.unibo.jakta.actions.effects.Sleep
 import it.unibo.jakta.actions.effects.Stop
-import it.unibo.jakta.beliefs.Belief
-import it.unibo.jakta.context.ContextUpdate.ADDITION
-import it.unibo.jakta.context.ContextUpdate.REMOVAL
-import it.unibo.jakta.intentions.Intention
-import it.unibo.jakta.plans.Plan
+import it.unibo.jakta.beliefs.ASBelief
+import it.unibo.jakta.events.ASEvent
+import it.unibo.jakta.intentions.ASIntention
+import it.unibo.jakta.plans.ASPlan
 import it.unibo.tuprolog.solve.Signature
 
 abstract class AbstractInternalAction(override val signature: Signature) : InternalAction,
@@ -23,40 +22,40 @@ abstract class AbstractInternalAction(override val signature: Signature) : Inter
 
     constructor(name: String, arity: Int) : this(Signature(name, arity))
 
-    override fun addBelief(belief: Belief) {
-        effects.add(BeliefChange(belief, ADDITION))
+    override fun addBelief(belief: ASBelief) {
+        effects.add(BeliefChange(belief))
     }
 
-    override fun removeBelief(belief: Belief) {
-        effects.add(BeliefChange(belief, REMOVAL))
+    override fun removeBelief(belief: ASBelief) {
+        effects.add(BeliefChange(belief))
     }
 
-    override fun addIntention(intention: Intention) {
-        effects.add(IntentionChange(intention, ADDITION))
+    override fun addIntention(intention: ASIntention) {
+        effects.add(IntentionChange(intention))
     }
 
-    override fun removeIntention(intention: Intention) {
-        effects.add(IntentionChange(intention, REMOVAL))
+    override fun removeIntention(intention: ASIntention) {
+        effects.add(IntentionChange(intention))
     }
 
-    override fun addEvent(event: Event) {
-        effects.add(EventChange(event, ADDITION))
+    override fun addEvent(event: ASEvent) {
+        effects.add(EventChange(event))
     }
 
-    override fun removeEvent(event: Event) {
-        effects.add(EventChange(event, REMOVAL))
+    override fun removeEvent(event: ASEvent) {
+        effects.add(EventChange(event))
     }
 
-    override fun addPlan(plan: Plan) {
-        effects.add(PlanChange(plan, ADDITION))
+    override fun addPlan(plan: ASPlan) {
+        effects.add(PlanChange(plan))
     }
 
-    override fun removePlan(plan: Plan) {
-        effects.add(PlanChange(plan, REMOVAL))
+    override fun removePlan(plan: ASPlan) {
+        effects.add(PlanChange(plan))
     }
 
     override fun stopAgent() {
-        effects.add(Stop())
+        effects.add(Stop)
     }
 
     override fun sleepAgent(millis: Long) {
@@ -64,7 +63,7 @@ abstract class AbstractInternalAction(override val signature: Signature) : Inter
     }
 
     override fun pauseAgent() {
-        effects.add(Pause())
+        effects.add(Pause)
     }
 
     override fun toString(): String = "InternalAction(${signature.name}, ${signature.arity})"

@@ -39,9 +39,7 @@ class AddBelief(
     belief: ASBelief,
 ) : AbstractBeliefInternalAction(belief, "addBelief") {
     override fun action(request: InternalRequest) {
-        if ((request.agent.context as ASMutableAgentContext).addBelief(belief)) {
-            addBelief(BeliefBaseAddition(belief))
-        }
+        request.agent.context.addBelief(belief)
     }
 }
 
@@ -53,7 +51,7 @@ class RemoveBelief(
     belief: ASBelief,
 ) : AbstractBeliefInternalAction(belief, "addBelief")  {
     override fun action(request: InternalRequest) {
-        if ((request.agent.context as ASMutableAgentContext).removeBelief(belief)) {
+        if ((request.agent.context).removeBelief(belief)) {
             removeBelief(BeliefBaseRemoval(belief))
         }
     }
@@ -78,7 +76,6 @@ class ActInternally(
 ) : AbstractInternalAction(
     Signature("actInternally", parameters.size)
 ) {
-
     constructor(vararg parameter: Term): this(parameter.toList())
 
     override fun applySubstitution(substitution: Substitution) {
@@ -88,9 +85,22 @@ class ActInternally(
      override fun action(request: InternalRequest) {
          if (parameters.filterIsInstance<Var>().isNotEmpty())
              return this.failAchievementGoal(intention, context))
-         executeInternalAction(
-            request.agent.context.intention //TODO,
-            internalAction, context, nextGoal)
+         var runningIntention = request.agent.context.snapshot().intentions.nextTask()
+         val internalResponse = action.execute(
+             InternalRequest.of(agent, controller?.currentTime(), goal.args),
+         )
+         // Apply substitution
+         return if (internalResponse.substitution.isSuccess) {
+             if (newIntention.recordStack.isNotEmpty()) {
+                 newIntention = newIntention.applySubstitution(internalResponse.substitution)
+             }
+             val newContext = applyEffects(context, internalResponse.effects)
+             ExecutionResult(
+                 newContext.copy(intentions = newContext.intentions.updateIntention(newIntention)),
+             )
+         } else {
+             ExecutionResult(failAchievementGoal(intention, context))
+         }
     }
 
 }
@@ -110,22 +120,7 @@ private fun executeInternalAction(
     context: ASAgentContext,
     actionInvocation: Struct,
 ): Event {
-    var runningIntention = intention.nextTask()
-    val internalResponse = action.execute(
-        InternalRequest.of(agent, controller?.currentTime(), goal.args),
-    )
-    // Apply substitution
-    return if (internalResponse.substitution.isSuccess) {
-        if (newIntention.recordStack.isNotEmpty()) {
-            newIntention = newIntention.applySubstitution(internalResponse.substitution)
-        }
-        val newContext = applyEffects(context, internalResponse.effects)
-        ExecutionResult(
-            newContext.copy(intentions = newContext.intentions.updateIntention(newIntention)),
-        )
-    } else {
-        ExecutionResult(failAchievementGoal(intention, context))
-    }
+
 }
 
 private fun executeExternalAction(

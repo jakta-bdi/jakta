@@ -15,12 +15,12 @@ abstract class AbstractAction<C : ActionResult, Res : ActionResponse<C>, Req : A
 
     protected val effects: MutableList<C> = mutableListOf()
 
-    final override fun execute(request: Req): Res {
-        if (request.arguments.size > signature.arity) {
+    final override suspend fun execute(argument: Req): Res {
+        if (argument.arguments.size > signature.arity) {
             throw IllegalArgumentException("ERROR: Wrong number of arguments for action ${signature.name}")
         }
-        action(request)
-        val res = request.reply(result, effects.toMutableList())
+        action(argument)
+        val res = argument.reply(result, effects.toMutableList())
         effects.clear()
         return res
     }

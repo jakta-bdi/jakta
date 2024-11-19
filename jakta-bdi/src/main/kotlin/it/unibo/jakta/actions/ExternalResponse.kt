@@ -5,5 +5,5 @@ import it.unibo.tuprolog.core.Substitution
 
 data class ExternalResponse(
     override val substitution: Substitution,
-    override val effects: Iterable<EnvironmentChange>,
-) : ActionResponse<EnvironmentChange>
+    val effects: Iterable<EnvironmentChange>,
+) : ActionResponse<EnvironmentChange>, List<EnvironmentChange> by effects.toList()

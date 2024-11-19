@@ -1,20 +1,19 @@
 package it.unibo.jakta.context
 
 import it.unibo.jakta.beliefs.BeliefBase
-import it.unibo.jakta.beliefs.MutableBeliefBase
 import it.unibo.jakta.intentions.ActivationRecord
 import it.unibo.jakta.intentions.Intention
 import it.unibo.jakta.intentions.IntentionPool
 import it.unibo.jakta.plans.Plan
-import javax.management.Query
 
 /**
  * The Context is the actual state of a BDI Agent's structures.
  */
-interface AgentContext<Query, Belief, EventType, PlanType> where
+interface AgentContext<Query, Belief, Event, PlanType, ActivationRecordType, IntentionType> where
     Query: Any,
-    EventType: Event,
-    PlanType: Plan<Query, Belief>
+    PlanType: Plan<Query, Belief, Event>,
+    ActivationRecordType: ActivationRecord<Query, Belief, Event>,
+    IntentionType: Intention<Query, Belief, Event, ActivationRecordType>
 {
 
     /** [BeliefBase] of the BDI Agent */
@@ -26,37 +25,36 @@ interface AgentContext<Query, Belief, EventType, PlanType> where
      * As in Jason, Events are modeled with a FIFO queue. Users can provide an agent-specific event selection function,
      * that handle how an event is chosen from the queue.
      */
-    val events: List<EventType>
+    val events: List<Event>
 
     /** [Plan]s collection of the BDI Agent */
     val planLibrary: Collection<PlanType>
 
-    val intentions: IntentionPool<Query, Belief>
+    val intentions: IntentionPool<Query, Belief, Event, ActivationRecordType, IntentionType>
 }
 
 interface MutableAgentContext<
     Query,
     Belief,
-    EventType,
+    Event,
     PlanType,
     ActivationRecordType,
     IntentionType,
     out ImmutableContext
 > where
     Query: Any,
-    EventType: Event,
-    PlanType: Plan<Query, Belief>,
-    ActivationRecordType: ActivationRecord<Query, Belief>,
-    IntentionType: Intention<Query, Belief, ActivationRecordType>,
-    ImmutableContext: AgentContext<Query, Belief, EventType, PlanType>
+    PlanType: Plan<Query, Belief, Event>,
+    ActivationRecordType: ActivationRecord<Query, Belief, Event>,
+    IntentionType: Intention<Query, Belief, Event, ActivationRecordType>,
+    ImmutableContext: AgentContext<Query, Belief, Event, PlanType, ActivationRecordType, IntentionType>
 {
      // val mutableBeliefBase: MutableBeliefBase<Query, Belief, out BeliefBase<Query, Belief>>
      fun addBelief(belief: Belief): Boolean
      fun removeBelief(belief: Belief): Boolean
 
      // val mutableEventList: MutableList<Event>
-     fun addEvent(event: EventType): Boolean
-     fun removeEvent(event: EventType): Boolean
+     fun addEvent(event: Event): Boolean
+     fun removeEvent(event: Event): Boolean
 
      // val mutablePlanLibrary: MutableCollection<out Plan<Query, Belief>>
      fun addPlan(plan: PlanType): Boolean

@@ -10,31 +10,38 @@ import it.unibo.jakta.plans.Plan
 interface Agent<
     Query,
     Belief,
-    EventType,
+    Event,
     PlanType,
     ActivationRecordType,
     IntentionType,
-    out ImmutableContext,
+    ImmutableContext,
 > where
     Query: Any,
-    EventType: Event,
-    PlanType: Plan<Query, Belief>,
-    ActivationRecordType: ActivationRecord<Query, Belief>,
-    IntentionType: Intention<Query, Belief, ActivationRecordType>,
-    ImmutableContext: AgentContext<Query, Belief, EventType, PlanType>
+    PlanType: Plan<Query, Belief, Event>,
+    ActivationRecordType: ActivationRecord<Query, Belief, Event>,
+    IntentionType: Intention<Query, Belief, Event, ActivationRecordType>,
+    ImmutableContext: AgentContext<Query, Belief, Event, PlanType, ActivationRecordType, IntentionType>
 {
 
     val agentID: AgentID
 
     val name: String
 
-    val lifecycle: AgentLifecycle<Query, Belief>
+    val lifecycle: AgentLifecycle<
+        Query,
+        Belief,
+        Event,
+        PlanType,
+        ActivationRecordType,
+        IntentionType,
+        ImmutableContext
+    >
 
     /** Agent's Actual State */
     val context: MutableAgentContext<
         Query,
         Belief,
-        EventType,
+        Event,
         PlanType,
         ActivationRecordType,
         IntentionType,
@@ -42,11 +49,13 @@ interface Agent<
     >
 
     /** Event Selection Function*/
-    fun selectEvent(events: List<EventType>): Event?
+    fun selectEvent(events: List<Event>): Event?
 
     /** Plan Selection Function */
     fun selectApplicablePlan(plans: Iterable<PlanType>): PlanType?
 
     /** Intention Selection Function */
-    fun scheduleIntention(intentions: IntentionPool<Query, Belief, ActivationRecordType, IntentionType>): IntentionType?
+    fun scheduleIntention(
+        intentions: IntentionPool<Query, Belief, Event, ActivationRecordType, IntentionType>
+    ): IntentionType?
 }
