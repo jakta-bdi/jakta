@@ -1,3 +1,10 @@
+## [0.11.101](https://github.com/jakta-bdi/jakta/compare/v0.11.100...v0.11.101) (2024-11-19)
+
+
+### Bug Fixes
+
+* **deps:** update dependency it.unibo.alchemist:alchemist to v35.0.1 ([#390](https://github.com/jakta-bdi/jakta/issues/390)) ([26b933e](https://github.com/jakta-bdi/jakta/commit/26b933e76645365023b624956f64086cee67c053))
+
 ## [0.11.100](https://github.com/jakta-bdi/jakta/compare/v0.11.99...v0.11.100) (2024-11-18)
 
 
