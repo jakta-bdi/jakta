@@ -1,14 +1,15 @@
 package it.unibo.jakta.intentions
 
 import it.unibo.jakta.beliefs.ASBelief
+import it.unibo.jakta.events.ASEvent
 import it.unibo.jakta.intentions.impl.IntentionImpl
 import it.unibo.jakta.plans.ASPlan
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
 
-interface ASIntention : Intention<Struct, ASBelief, ASActivationRecord> {
+interface ASIntention : Intention<Struct, ASBelief, ASEvent, ASPlan, ASActivationRecord> {
 
-    fun applySubstitution(substitution: Substitution): Boolean
+    fun applySubstitution(substitution: Substitution)
 
     fun copy(
         recordStack: MutableList<ASActivationRecord> = this.recordStack.toMutableList(),

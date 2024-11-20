@@ -14,7 +14,7 @@ import it.unibo.tuprolog.core.Struct
 /**
  * AgentSpeak extension for the general concept of AgentContext.
  */
-interface ASAgentContext : AgentContext<Struct, ASBelief, ASEvent, ASPlan> {
+interface ASAgentContext : AgentContext<Struct, ASBelief, ASEvent, ASPlan, ASActivationRecord, ASIntention> {
     val internalActions: Map<String, InternalAction> // TODO("is this need?")
 }
 

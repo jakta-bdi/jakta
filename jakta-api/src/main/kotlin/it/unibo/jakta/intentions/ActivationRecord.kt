@@ -3,11 +3,16 @@ package it.unibo.jakta.intentions
 import it.unibo.jakta.plans.Plan
 import it.unibo.jakta.plans.Task
 
-interface ActivationRecord<Query : Any, Belief, Event> {
+interface ActivationRecord<Query, Belief, Event, PlanType> where
+    Query: Any,
+    PlanType: Plan<Query, Belief, Event>
+{
 
     val taskQueue: List<Task<Query, Belief, *, *>> // = plan.tasks
 
-    val plan: Plan<Query, Belief, Event>
+    val plan: PlanType
 
-    fun pop(): ActivationRecord<Query, Belief, Event>
+    fun isLastTask(): Boolean = taskQueue.size == 1
+
+    fun pop(): Task<Query, Belief, *, *>?
 }

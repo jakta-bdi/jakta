@@ -14,7 +14,7 @@ import it.unibo.jakta.plans.PlanLibrary
 
 fun main() {
     val dummyAction = object : AbstractInternalAction("time", 0) {
-        override fun action(request: InternalRequest) {
+        override suspend fun action(request: InternalRequest) {
             println("time: ${request.requestTimestamp}")
         }
     }

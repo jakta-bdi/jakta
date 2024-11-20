@@ -1,8 +1,11 @@
 package it.unibo.jakta.intentions.impl
 
+import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.intentions.ASActivationRecord
 import it.unibo.jakta.intentions.ASIntention
 import it.unibo.jakta.intentions.IntentionID
+import it.unibo.jakta.plans.Task
+import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
 
 internal class IntentionImpl(
@@ -11,14 +14,14 @@ internal class IntentionImpl(
     override val id: IntentionID = IntentionID(),
 ) : ASIntention {
 
-    override fun pop(): ASActivationRecord {
-        val record = recordStack.first()
-        recordStack = if (record.isLastGoal()) {
-            recordStack - record
+    override fun pop(): Task<Struct, ASBelief, *, *>? {
+        val record = recordStack.firstOrNull() ?: return null
+        return if (record.isLastTask()) {
+            recordStack = recordStack - record
+            return null
         } else {
-            listOf(record.pop()) + recordStack - record
+            record.pop()
         }
-        return record
     }
 
     override fun push(activationRecord: ASActivationRecord): Boolean {
@@ -26,11 +29,8 @@ internal class IntentionImpl(
         return true
     }
 
-    override fun applySubstitution(substitution: Substitution): Boolean {
-        val record = recordStack.first()
-        recordStack = listOf(record.applySubstitution(substitution)) + recordStack - record
-        return true
-    }
+    override fun applySubstitution(substitution: Substitution) =
+        recordStack.first().applySubstitution(substitution)
 
     override fun toString(): String = "$id { \n ${recordStack.joinToString(separator = "\n", prefix = "\t")} \n }"
 }

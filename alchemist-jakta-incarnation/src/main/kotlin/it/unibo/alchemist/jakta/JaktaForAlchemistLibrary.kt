@@ -21,7 +21,7 @@ class JaktaForAlchemistLibrary<P : Position<P>>(private val env: JaktaEnvironmen
     ) {
         operator fun getValue(thisRef: Any?, property: KProperty<*>): ExternalAction {
             return object : AbstractExternalAction(property.name, arity) {
-                override fun action(request: ExternalRequest) {
+                override suspend fun action(request: ExternalRequest) {
                     request.body()
                 }
             }
@@ -32,7 +32,7 @@ class JaktaForAlchemistLibrary<P : Position<P>>(private val env: JaktaEnvironmen
      * External action that writes information into the Alchemist environment.
      */
     val writeData = object : AbstractExternalAction("writeData", 2) {
-        override fun action(request: ExternalRequest) {
+        override suspend fun action(request: ExternalRequest) {
             val name = request.arguments[0].castToAtom().value
             val concentration = request.arguments[1].`as`<ObjectRef>()?.`object`.valueOrEmptyMolecule()
             env.node.setConcentration(SimpleMolecule(name), concentration)
@@ -40,7 +40,7 @@ class JaktaForAlchemistLibrary<P : Position<P>>(private val env: JaktaEnvironmen
     }
 
     val brownianMove = object : AbstractExternalAction("brownianMove", 0) {
-        override fun action(request: ExternalRequest) {
+        override suspend fun action(request: ExternalRequest) {
             val deltaX = (env.randomGenerator.nextFloat() - 0.5) * 0.05
             val deltaY = (env.randomGenerator.nextFloat() - 0.5) * 0.05
             val position = env.alchemistEnvironment.getPosition(env.node)

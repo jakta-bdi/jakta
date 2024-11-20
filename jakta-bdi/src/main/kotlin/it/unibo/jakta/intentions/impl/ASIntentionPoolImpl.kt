@@ -3,26 +3,28 @@ package it.unibo.jakta.intentions.impl
 import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.intentions.ASIntention
 import it.unibo.jakta.intentions.ASIntentionPool
+import it.unibo.jakta.intentions.ASMutableIntentionPool
 import it.unibo.jakta.intentions.Intention
 import it.unibo.jakta.intentions.IntentionID
 import it.unibo.tuprolog.core.Struct
 
-internal data class ASIntentionPoolImpl(
-    val from: Map<IntentionID, Intention<Struct, ASBelief>> = emptyMap(),
-) : ASIntentionPool, LinkedHashMap<IntentionID, Intention<Struct, ASBelief>>(from) {
+internal class ASIntentionPoolImpl(
+    from: MutableMap<IntentionID, ASIntention> = mutableMapOf(),
+) : ASIntentionPool, ASMutableIntentionPool, MutableMap<IntentionID, ASIntention> by from {
 
-    override fun updateIntention(intention: Intention<Struct, ASBelief>): ASIntentionPool {
-        return if (intention is ASIntention){
-            ASIntentionPoolImpl(this + Pair(intention.id, intention))
-        } else this
+    override fun updateIntention(intention: ASIntention): Boolean {
+        this.put(intention.id, intention) ?: return false
+        return true
     }
 
-    override fun nextIntention(): ASIntention = this.values.filterIsInstance<ASIntention>().iterator().next()
+    override fun nextIntention(): ASIntention = this.values.first()
 
-    override fun pop(): ASIntentionPool = ASIntentionPoolImpl(this - nextIntention().id)
+    override fun pop(): ASIntention? = this.remove(nextIntention().id)
 
-    override fun deleteIntention(intentionID: IntentionID): ASIntentionPool =
-        ASIntentionPoolImpl(this - intentionID)
+    override fun deleteIntention(intentionID: IntentionID): ASIntention? = this.remove(intentionID)
 
-    override fun toString(): String = from.values.joinToString(separator = "\n")
+    override fun snapshot(): ASIntentionPool =
+        ASIntentionPoolImpl(mutableMapOf(*this.entries.map{it.key to it.value}.toTypedArray()))
+
+    override fun toString(): String = this.values.joinToString(separator = "\n")
 }

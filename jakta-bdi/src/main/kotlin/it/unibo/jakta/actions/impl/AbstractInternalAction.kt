@@ -13,6 +13,7 @@ import it.unibo.jakta.actions.effects.Sleep
 import it.unibo.jakta.actions.effects.Stop
 import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.events.ASEvent
+import it.unibo.jakta.executionstrategies.ExecutionResult
 import it.unibo.jakta.intentions.ASIntention
 import it.unibo.jakta.plans.ASPlan
 import it.unibo.tuprolog.solve.Signature
@@ -21,6 +22,31 @@ abstract class AbstractInternalAction(override val signature: Signature) : Inter
     AbstractAction<AgentChange, InternalResponse, InternalRequest>(signature) {
 
     constructor(name: String, arity: Int) : this(Signature(name, arity))
+
+    final override suspend fun execute(argument: InternalRequest): InternalResponse {
+        if (argument.arguments.size > signature.arity) {
+            throw IllegalArgumentException("ERROR: Wrong number of arguments for action ${signature.name}")
+        }
+        action(argument)
+        val res = argument.reply(result, effects.toMutableList())
+        effects.clear()
+        // ======================
+        if (res.substitution.isSuccess) {
+            val intention = argument.agent.context.snapshot().intentions.nextIntention()
+            if (intention.recordStack.isNotEmpty()) {
+                intention.applySubstitution(internalResponse.substitution)
+            }
+            val newContext = applyEffects(context, internalResponse.effects)
+            ExecutionResult(
+                newContext.copy(intentions = newContext.intentions.updateIntention(newIntention)),
+            )
+        } else {
+            ExecutionResult(failAchievementGoal(intention, context))
+        }
+
+        // ======================
+        return res
+    }
 
     override fun addBelief(belief: ASBelief) {
         effects.add(BeliefChange(belief))

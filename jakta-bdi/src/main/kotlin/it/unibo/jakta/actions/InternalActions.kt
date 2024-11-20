@@ -5,7 +5,7 @@ import it.unibo.tuprolog.core.Substitution
 
 object InternalActions {
     object Print : AbstractInternalAction("print", 2) {
-        override fun action(request: InternalRequest) {
+        override suspend fun action(request: InternalRequest) {
             val payload = request.arguments.joinToString(" ") {
                 when {
                     it.isAtom -> it.castToAtom().value
@@ -17,25 +17,25 @@ object InternalActions {
     }
 
     object Fail : AbstractInternalAction("fail", 0) {
-        override fun action(request: InternalRequest) {
+        override suspend fun action(request: InternalRequest) {
             result = Substitution.failed()
         }
     }
 
     object Stop : AbstractInternalAction("stop", 0) {
-        override fun action(request: InternalRequest) {
+        override suspend fun action(request: InternalRequest) {
             stopAgent()
         }
     }
 
     object Pause : AbstractInternalAction("pause", 0) {
-        override fun action(request: InternalRequest) {
+        override suspend fun action(request: InternalRequest) {
             pauseAgent()
         }
     }
 
     object Sleep : AbstractInternalAction("sleep", 1) {
-        override fun action(request: InternalRequest) {
+        override suspend fun action(request: InternalRequest) {
             if (request.arguments[0].isInteger) {
                 sleepAgent(request.arguments[0].castToInteger().value.toLong())
             }

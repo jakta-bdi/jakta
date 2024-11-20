@@ -38,7 +38,7 @@ abstract class AbstractBeliefInternalAction(
 class AddBelief(
     belief: ASBelief,
 ) : AbstractBeliefInternalAction(belief, "addBelief") {
-    override fun action(request: InternalRequest) {
+    override suspend fun action(request: InternalRequest) {
         request.agent.context.addBelief(belief)
     }
 }
@@ -50,10 +50,8 @@ class AddBelief(
 class RemoveBelief(
     belief: ASBelief,
 ) : AbstractBeliefInternalAction(belief, "addBelief")  {
-    override fun action(request: InternalRequest) {
-        if ((request.agent.context).removeBelief(belief)) {
-            removeBelief(BeliefBaseRemoval(belief))
-        }
+    override suspend fun action(request: InternalRequest) {
+        request.agent.context.removeBelief(belief)
     }
 }
 
@@ -63,7 +61,7 @@ class RemoveBelief(
 class UpdateBelief(
     belief: ASBelief,
 ) : AbstractBeliefInternalAction(belief, "removeBelief")  {
-    override fun action(request: InternalRequest) {
+    override suspend fun action(request: InternalRequest) {
         TODO("Missing implementation for update in beliefcontext")
     }
 }
@@ -82,14 +80,15 @@ class ActInternally(
         parameters = parameters.map { it.apply(substitution) } // TODO("Needs testing")
     }
 
-     override fun action(request: InternalRequest) {
-         if (parameters.filterIsInstance<Var>().isNotEmpty())
-             return this.failAchievementGoal(intention, context))
-         var runningIntention = request.agent.context.snapshot().intentions.nextTask()
-         val internalResponse = action.execute(
-             InternalRequest.of(agent, controller?.currentTime(), goal.args),
-         )
+     override suspend fun action(request: InternalRequest) {
+//         if (parameters.filterIsInstance<Var>().isNotEmpty())
+//             return this.failAchievementGoal(intention, context))
+         val agentContext = request.agent.context
+         val taskToRun = agentContext.snapshot().intentions.nextIntention().nextTask()
          // Apply substitution
+
+
+
          return if (internalResponse.substitution.isSuccess) {
              if (newIntention.recordStack.isNotEmpty()) {
                  newIntention = newIntention.applySubstitution(internalResponse.substitution)

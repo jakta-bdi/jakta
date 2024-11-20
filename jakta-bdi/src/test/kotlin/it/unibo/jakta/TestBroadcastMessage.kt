@@ -14,7 +14,7 @@ import it.unibo.jakta.plans.PlanLibrary
 
 fun main() {
     val broadcastAction = object : AbstractExternalAction("broadcast", 2) {
-        override fun action(request: ExternalRequest) {
+        override suspend fun action(request: ExternalRequest) {
             val type = request.arguments[0].castToAtom()
             val message = request.arguments[1].castToStruct()
             when (type.value) {

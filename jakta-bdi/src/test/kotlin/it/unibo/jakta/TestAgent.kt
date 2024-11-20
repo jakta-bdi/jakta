@@ -22,7 +22,7 @@ import it.unibo.tuprolog.core.Var
 class TestAgent : DescribeSpec({
     @Suppress("VariableNaming")
     val TEST = object : AbstractInternalAction("test", 2) {
-        override fun action(request: InternalRequest) {
+        override suspend fun action(request: InternalRequest) {
             if (request.arguments[0].isAtom && request.arguments[1].isAtom) {
                 val first: Int = Integer.parseInt(request.arguments[0].castToAtom().value)
                 val second: Int = Integer.parseInt(request.arguments[1].castToAtom().value)
@@ -35,14 +35,14 @@ class TestAgent : DescribeSpec({
 
     @Suppress("VariableNaming")
     val FAILTEST = object : AbstractInternalAction("failtest", 0) {
-        override fun action(request: InternalRequest) {
+        override suspend fun action(request: InternalRequest) {
             fail("This action should not be executed by the agent")
         }
     }
 
     @Suppress("VariableNaming")
     val PASSTEST = object : AbstractInternalAction("passtest", 0) {
-        override fun action(request: InternalRequest) {
+        override suspend fun action(request: InternalRequest) {
             println("This should be shown")
         }
     }
@@ -76,7 +76,7 @@ class TestAgent : DescribeSpec({
         it("can declare custom actions to be performed") {
             @Suppress("VariableNaming")
             val INCREMENT = object : AbstractInternalAction("increment", 2) {
-                override fun action(request: InternalRequest) {
+                override suspend fun action(request: InternalRequest) {
                     val first: Atom = request.arguments.first().castToAtom()
                     val second: Var = request.arguments[1].castToVar()
                     val computation = Atom.of((Integer.parseInt(first.value) + 1).toString())
@@ -157,7 +157,7 @@ class TestAgent : DescribeSpec({
 
             @Suppress("VariableNaming")
             val ADDBELIEF = object : AbstractInternalAction("add_belief", 1) {
-                override fun action(request: InternalRequest) {
+                override suspend fun action(request: InternalRequest) {
                     AddBelief.of(needChocolate)
                 }
             }
@@ -193,7 +193,7 @@ fun main() {
 
     @Suppress("VariableNaming")
     val ADDBELIEF = object : AbstractInternalAction("add_belief", 1) {
-        override fun action(request: InternalRequest) {
+        override suspend fun action(request: InternalRequest) {
             addBelief(Belief.from(request.arguments.first().castToRule()))
         }
     }

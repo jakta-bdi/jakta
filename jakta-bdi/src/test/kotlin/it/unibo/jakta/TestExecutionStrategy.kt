@@ -24,7 +24,7 @@ fun main() {
         ),
         internalActions = mapOf(
             "thread" to object : AbstractInternalAction("thread", 0) {
-                override fun action(request: InternalRequest) {
+                override suspend fun action(request: InternalRequest) {
                     println("Thread: ${Thread.currentThread().name}")
                 }
             },

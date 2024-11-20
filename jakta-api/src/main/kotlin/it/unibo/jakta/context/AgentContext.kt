@@ -1,6 +1,7 @@
 package it.unibo.jakta.context
 
 import it.unibo.jakta.beliefs.BeliefBase
+import it.unibo.jakta.beliefs.MutableBeliefBase
 import it.unibo.jakta.intentions.ActivationRecord
 import it.unibo.jakta.intentions.Intention
 import it.unibo.jakta.intentions.IntentionPool
@@ -44,25 +45,25 @@ interface MutableAgentContext<
 > where
     Query: Any,
     PlanType: Plan<Query, Belief, Event>,
-    ActivationRecordType: ActivationRecord<Query, Belief, Event>,
-    IntentionType: Intention<Query, Belief, Event, ActivationRecordType>,
+    ActivationRecordType: ActivationRecord<Query, Belief, Event, PlanType>,
+    IntentionType: Intention<Query, Belief, Event, PlanType, ActivationRecordType>,
     ImmutableContext: AgentContext<Query, Belief, Event, PlanType, ActivationRecordType, IntentionType>
 {
-     // val mutableBeliefBase: MutableBeliefBase<Query, Belief, out BeliefBase<Query, Belief>>
-     fun addBelief(belief: Belief): Boolean
-     fun removeBelief(belief: Belief): Boolean
+     val mutableBeliefBase: MutableBeliefBase<Query, Belief, out BeliefBase<Query, Belief>>
+     //fun addBelief(belief: Belief): Boolean
+     //fun removeBelief(belief: Belief): Boolean
 
-     // val mutableEventList: MutableList<Event>
-     fun addEvent(event: Event): Boolean
-     fun removeEvent(event: Event): Boolean
+     val mutableEventList: MutableList<Event>
+     //fun addEvent(event: Event): Boolean
+     //fun removeEvent(event: Event): Boolean
 
-     // val mutablePlanLibrary: MutableCollection<out Plan<Query, Belief>>
-     fun addPlan(plan: PlanType): Boolean
-     fun removePlan(plan: PlanType): Boolean
+     val mutablePlanLibrary: MutableCollection<out PlanType>
+     //fun addPlan(plan: PlanType): Boolean
+     //fun removePlan(plan: PlanType): Boolean
 
-     // val intentionPool: MutableIntentionPool
-     fun removeIntention(intention: IntentionType): Boolean
-     fun updateIntention(intention: IntentionType): Boolean
+     val intentionPool: MutableIntentionPool
+     // fun removeIntention(intention: IntentionType): Boolean
+     // fun updateIntention(intention: IntentionType): Boolean
 
     fun snapshot(): ImmutableContext
  }
