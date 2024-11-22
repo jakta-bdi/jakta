@@ -1,3 +1,10 @@
+## [0.11.108](https://github.com/jakta-bdi/jakta/compare/v0.11.107...v0.11.108) (2024-11-22)
+
+
+### Bug Fixes
+
+* **deps:** update dependency it.unibo.alchemist:alchemist-euclidean-geometry to v35.0.2 ([#397](https://github.com/jakta-bdi/jakta/issues/397)) ([edbec8d](https://github.com/jakta-bdi/jakta/commit/edbec8d9ca15bf5441ecb3515162dc1b17e8f8f6))
+
 ## [0.11.107](https://github.com/jakta-bdi/jakta/compare/v0.11.106...v0.11.107) (2024-11-22)
 
 
