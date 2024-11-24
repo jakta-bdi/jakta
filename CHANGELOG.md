@@ -1,3 +1,10 @@
+## [0.11.109](https://github.com/jakta-bdi/jakta/compare/v0.11.108...v0.11.109) (2024-11-24)
+
+
+### Bug Fixes
+
+* **deps:** update dependency it.unibo.alchemist:alchemist-maps to v35.0.3 ([#400](https://github.com/jakta-bdi/jakta/issues/400)) ([03c2b45](https://github.com/jakta-bdi/jakta/commit/03c2b457a11323e8072e2ca0b794080d0eb54b94))
+
 ## [0.11.108](https://github.com/jakta-bdi/jakta/compare/v0.11.107...v0.11.108) (2024-11-22)
 
 
