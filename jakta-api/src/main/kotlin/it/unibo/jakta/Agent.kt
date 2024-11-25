@@ -18,11 +18,10 @@ interface Agent<
 > where
     Query: Any,
     PlanType: Plan<Query, Belief, Event>,
-    ActivationRecordType: ActivationRecord<Query, Belief, Event>,
-    IntentionType: Intention<Query, Belief, Event, ActivationRecordType>,
+    ActivationRecordType: ActivationRecord<Query, Belief, Event, PlanType>,
+    IntentionType: Intention<Query, Belief, Event, PlanType, ActivationRecordType>,
     ImmutableContext: AgentContext<Query, Belief, Event, PlanType, ActivationRecordType, IntentionType>
 {
-
     val agentID: AgentID
 
     val name: String
@@ -56,6 +55,6 @@ interface Agent<
 
     /** Intention Selection Function */
     fun scheduleIntention(
-        intentions: IntentionPool<Query, Belief, Event, ActivationRecordType, IntentionType>
+        intentions: IntentionPool<Query, Belief, Event, ActivationRecordType, IntentionType, PlanType>
     ): IntentionType?
 }

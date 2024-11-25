@@ -41,3 +41,9 @@ interface ASAgent :
         ): ASAgent = AgentImpl( agentID, name, agentContext)
     }
 }
+
+interface ASMutableAgent :
+    MutableAgent<Struct, ASBelief, ASEvent, ASPlan, ASActivationRecord, ASIntention, ASAgentContext>,
+    Taggable<ASAgent>
+
+

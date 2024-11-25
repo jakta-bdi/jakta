@@ -1,6 +1,7 @@
-package it.unibo.jakta.actions
+package it.unibo.jakta.actions.stdlib
 
-import it.unibo.jakta.actions.impl.AbstractInternalAction
+import it.unibo.jakta.actions.AbstractInternalAction
+import it.unibo.jakta.actions.requests.InternalRequest
 import it.unibo.tuprolog.core.Substitution
 
 object InternalActions {

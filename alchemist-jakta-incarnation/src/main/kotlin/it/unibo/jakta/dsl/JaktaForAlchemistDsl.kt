@@ -3,7 +3,6 @@ package it.unibo.jakta.dsl
 import it.unibo.alchemist.jakta.properties.JaktaEnvironmentForAlchemist
 import it.unibo.alchemist.model.Position
 import it.unibo.jakta.ASAgent
-import it.unibo.jakta.actions.ExternalAction
 import it.unibo.jakta.dsl.actions.ExternalActionsScope
 import it.unibo.jakta.environment.Environment
 

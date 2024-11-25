@@ -5,26 +5,38 @@ import it.unibo.jakta.events.ASEvent
 import it.unibo.jakta.intentions.ASIntention
 import it.unibo.jakta.plans.ASPlan
 
-sealed interface AgentChange : ActionResult
+interface AgentChange : ActionResult
 
-data class BeliefChange(
-    val belief: ASBelief,
-) : AgentChange
+interface BeliefChange: AgentChange {
+    val belief: ASBelief
 
-data class IntentionChange(
-    val intention: ASIntention,
-) : AgentChange
+    class BeliefAddition(override val belief: ASBelief): BeliefChange
+    class BeliefRemoval(override val belief: ASBelief): BeliefChange
+}
 
-data class EventChange(
-    val event: ASEvent,
-) : AgentChange
+interface IntentionChange : AgentChange {
+    val intention: ASIntention
 
-data class PlanChange(
-    val plan: ASPlan,
-) : AgentChange
+    class IntentionAddition(override val intention: ASIntention): IntentionChange
+    class IntentionRemoval(override val intention: ASIntention): IntentionChange
+}
 
-data class Sleep(val millis: Long) : AgentChange
+interface EventChange : AgentChange {
+    val event: ASEvent
 
-data object Stop : AgentChange
+    class EventAddition(override val event: ASEvent): EventChange
+    class EventRemoval(override val event: ASEvent): EventChange
+}
 
-data object Pause : AgentChange
+interface PlanChange : AgentChange {
+    val plan: ASPlan
+
+    class PlanAddition(override val plan: ASPlan) : PlanChange
+    class PlanRemoval(override val plan: ASPlan) : PlanChange
+}
+
+class Sleep(val millis: Long) : AgentChange
+
+object Stop : AgentChange
+
+object Pause : AgentChange

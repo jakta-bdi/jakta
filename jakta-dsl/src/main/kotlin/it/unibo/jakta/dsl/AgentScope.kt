@@ -1,7 +1,7 @@
 package it.unibo.jakta.dsl
 
 import it.unibo.jakta.ASAgent
-import it.unibo.jakta.actions.InternalActions
+import it.unibo.jakta.actions.stdlib.InternalActions
 import it.unibo.jakta.dsl.actions.InternalActionsScope
 import it.unibo.jakta.dsl.beliefs.BeliefsScope
 import it.unibo.jakta.dsl.goals.InitialGoalsScope

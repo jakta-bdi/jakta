@@ -2,7 +2,6 @@ package it.unibo.jakta.environment
 
 import it.unibo.jakta.ASAgent
 import it.unibo.jakta.AgentID
-import it.unibo.jakta.actions.ExternalAction
 import it.unibo.jakta.beliefs.ASBeliefBase
 import it.unibo.jakta.environment.impl.EnvironmentImpl
 import it.unibo.jakta.messages.Message

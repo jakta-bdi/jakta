@@ -1,8 +1,8 @@
 package it.unibo.jakta
 
-import it.unibo.jakta.actions.InternalActions
-import it.unibo.jakta.actions.InternalRequest
-import it.unibo.jakta.actions.impl.AbstractInternalAction
+import it.unibo.jakta.actions.stdlib.InternalActions
+import it.unibo.jakta.actions.requests.InternalRequest
+import it.unibo.jakta.actions.AbstractInternalAction
 import it.unibo.jakta.environment.Environment
 import it.unibo.jakta.executionstrategies.setTimeDistribution
 import it.unibo.jakta.fsm.time.SimulatedTime

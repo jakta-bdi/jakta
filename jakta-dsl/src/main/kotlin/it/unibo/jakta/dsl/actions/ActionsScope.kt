@@ -1,8 +1,8 @@
 package it.unibo.jakta.dsl.actions
 
 import it.unibo.jakta.actions.ASAction
-import it.unibo.jakta.actions.ActionRequest
-import it.unibo.jakta.actions.ActionResponse
+import it.unibo.jakta.actions.requests.ActionRequest
+import it.unibo.jakta.actions.responses.ActionResponse
 import it.unibo.jakta.actions.effects.ActionResult
 import it.unibo.jakta.dsl.Builder
 import it.unibo.tuprolog.core.Term

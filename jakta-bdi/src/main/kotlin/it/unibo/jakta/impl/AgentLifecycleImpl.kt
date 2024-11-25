@@ -2,8 +2,6 @@ package it.unibo.jakta.impl
 
 import it.unibo.jakta.ASAgent
 import it.unibo.jakta.AgentLifecycle
-import it.unibo.jakta.actions.ExternalAction
-import it.unibo.jakta.actions.InternalAction
 import it.unibo.jakta.actions.effects.AgentChange
 import it.unibo.jakta.actions.effects.BeliefChange
 import it.unibo.jakta.actions.effects.EnvironmentChange
@@ -56,9 +54,11 @@ import it.unibo.jakta.plans.Plan
 import it.unibo.jakta.plans.PlanLibrary
 import it.unibo.tuprolog.core.Struct
 
+typealias ASAgentLifecycle = AgentLifecycle<Struct, ASBelief, ASEvent, ASPlan, ASActivationRecord, ASIntention, ASAgentContext>
+
 internal data class AgentLifecycleImpl(
     private var agent: ASAgent,
-) : AgentLifecycle<Struct, ASBelief, ASEvent, ASPlan, ASActivationRecord, ASIntention, ASAgentContext> {
+) : ASAgentLifecycle {
     private var controller: Activity.Controller? = null
     private var debugEnabled = false
     private var cachedEffects = emptyList<EnvironmentChange>()

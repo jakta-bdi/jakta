@@ -12,13 +12,13 @@ typealias ASMutableIntentionPool =
     MutableIntentionPool<Struct, ASBelief, ASEvent, ASActivationRecord, ASIntention, ASPlan>
 
 object IntentionPoolStaticFactory{
-    fun empty(): ASIntentionPool = ASIntentionPoolImpl()
+    fun empty(): ASMutableIntentionPool = ASIntentionPoolImpl()
 
-    fun of(intentions: Map<IntentionID, ASIntention>): ASIntentionPool =
+    fun of(intentions: Map<IntentionID, ASIntention>): ASMutableIntentionPool =
         ASIntentionPoolImpl(intentions.toMutableMap())
 
-    fun of(vararg intentions: ASIntention): ASIntentionPool = of(intentions.asList())
+    fun of(vararg intentions: ASIntention): ASMutableIntentionPool = of(intentions.asList())
 
-    fun of(intentions: List<ASIntention>): ASIntentionPool =
+    fun of(intentions: List<ASIntention>): ASMutableIntentionPool =
         ASIntentionPoolImpl(intentions.associateBy { it.id }.toMutableMap())
 }

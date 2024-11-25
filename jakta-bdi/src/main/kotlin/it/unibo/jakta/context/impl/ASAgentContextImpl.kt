@@ -1,60 +1,26 @@
 package it.unibo.jakta.context.impl
 
-import it.unibo.jakta.actions.InternalAction
 import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.beliefs.ASMutableBeliefBase
+import it.unibo.jakta.beliefs.BeliefBase
 import it.unibo.jakta.context.ASAgentContext
 import it.unibo.jakta.context.ASMutableAgentContext
 import it.unibo.jakta.events.ASEvent
+import it.unibo.jakta.intentions.ASActivationRecord
 import it.unibo.jakta.intentions.ASIntention
-import it.unibo.jakta.intentions.ASIntentionPool
+import it.unibo.jakta.intentions.ASMutableIntentionPool
+import it.unibo.jakta.intentions.IntentionPool
 import it.unibo.jakta.intentions.IntentionPoolStaticFactory
 import it.unibo.jakta.plans.ASPlan
+import it.unibo.tuprolog.core.Struct
 
-class ASAgentContextImpl(
-    private val mutableBeliefBase: ASMutableBeliefBase = ASMutableBeliefBase.empty(),
-    private val mutableEventList: MutableList<ASEvent> = mutableListOf(),
-    private val mutablePlanLibrary: MutableCollection<ASPlan> = mutableListOf(),
-    private val mutableInternalActions: MutableMap<String, InternalAction> = mutableMapOf(),
-    private var mutableIntentionPool: ASIntentionPool = IntentionPoolStaticFactory.empty(),
+internal class ASAgentContextImpl(
+    override val mutableBeliefBase: ASMutableBeliefBase = ASMutableBeliefBase.empty(),
+    override val mutableEventList: MutableList<ASEvent> = mutableListOf(),
+    override val mutablePlanLibrary: MutableCollection<ASPlan> = mutableListOf(),
+    val mutableInternalActions: MutableMap<String, InternalAction> = mutableMapOf(),
+    override val mutableIntentionPool: ASMutableIntentionPool = IntentionPoolStaticFactory.empty(),
 ) : ASMutableAgentContext, ASAgentContext {
-
-    override val beliefBase
-        get() = mutableBeliefBase.snapshot()
-
-    override val events: List<ASEvent>
-        get() = mutableEventList.toList()
-
-    override val planLibrary: Collection<ASPlan>
-        get() = mutablePlanLibrary.toList()
-
-    override val internalActions: Map<String, InternalAction>
-        get() = mutableInternalActions.toMap()
-
-    override val intentions: ASIntentionPool
-        get() = mutableIntentionPool
-
-    override fun addBelief(belief: ASBelief): Boolean = mutableBeliefBase.add(belief)
-
-    override fun removeBelief(belief: ASBelief): Boolean = mutableBeliefBase.remove(belief)
-
-    override fun addEvent(event: ASEvent): Boolean = mutableEventList.add(event)
-
-    override fun removeEvent(event: ASEvent): Boolean = mutableEventList.remove(event)
-
-    override fun addPlan(plan: ASPlan): Boolean = mutablePlanLibrary.add(plan)
-
-    override fun removePlan(plan: ASPlan): Boolean = mutablePlanLibrary.remove(plan)
-
-    override fun removeIntention(intention: ASIntention): Boolean {
-        mutableIntentionPool = mutableIntentionPool.deleteIntention(intention.id)
-        return true
-    }
-
-    override fun updateIntention(intention: ASIntention): Boolean {
-        mutableIntentionPool = mutableIntentionPool.updateIntention(intention)
-        return true
-    }
 
     override fun snapshot(): ASAgentContext = ASAgentContextImpl(
         mutableBeliefBase,
@@ -63,6 +29,17 @@ class ASAgentContextImpl(
         mutableInternalActions,
         mutableIntentionPool,
     )
+
+    override val internalActions: Map<String, InternalAction>
+        get() = mutableInternalActions.toMap()
+    override val beliefBase: BeliefBase<Struct, ASBelief>
+        get() = mutableBeliefBase.snapshot()
+    override val events: List<ASEvent>
+        get() = mutableEventList.toList()
+    override val planLibrary: Collection<ASPlan>
+        get() = mutablePlanLibrary
+    override val intentions: IntentionPool<Struct, ASBelief, ASEvent, ASActivationRecord, ASIntention, ASPlan>
+        get() = mutableIntentionPool
 
     override fun toString(): String = """
     AgentContext {

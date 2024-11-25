@@ -1,7 +1,7 @@
 package it.unibo.jakta
 
-import it.unibo.jakta.actions.ExternalRequest
-import it.unibo.jakta.actions.impl.AbstractExternalAction
+import it.unibo.jakta.actions.requests.ExternalRequest
+import it.unibo.jakta.actions.AbstractExternalAction
 import it.unibo.jakta.beliefs.Belief
 import it.unibo.jakta.environment.Environment
 import it.unibo.jakta.goals.Achieve

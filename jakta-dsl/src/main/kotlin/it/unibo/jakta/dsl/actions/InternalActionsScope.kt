@@ -1,10 +1,9 @@
 package it.unibo.jakta.dsl.actions
 
-import it.unibo.jakta.actions.InternalAction
-import it.unibo.jakta.actions.InternalRequest
-import it.unibo.jakta.actions.InternalResponse
+import it.unibo.jakta.actions.requests.InternalRequest
+import it.unibo.jakta.actions.responses.InternalResponse
 import it.unibo.jakta.actions.effects.AgentChange
-import it.unibo.jakta.actions.impl.AbstractInternalAction
+import it.unibo.jakta.actions.AbstractInternalAction
 
 class InternalActionsScope :
     ActionsScope<AgentChange, InternalResponse, InternalRequest, InternalAction, InternalActionScope>() {

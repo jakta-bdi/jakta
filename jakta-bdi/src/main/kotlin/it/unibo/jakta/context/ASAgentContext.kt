@@ -1,13 +1,11 @@
 package it.unibo.jakta.context
 
-import it.unibo.jakta.actions.InternalAction
 import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.beliefs.ASMutableBeliefBase
 import it.unibo.jakta.context.impl.ASAgentContextImpl
 import it.unibo.jakta.events.ASEvent
 import it.unibo.jakta.intentions.ASActivationRecord
 import it.unibo.jakta.intentions.ASIntention
-import it.unibo.jakta.intentions.Intention
 import it.unibo.jakta.plans.ASPlan
 import it.unibo.tuprolog.core.Struct
 

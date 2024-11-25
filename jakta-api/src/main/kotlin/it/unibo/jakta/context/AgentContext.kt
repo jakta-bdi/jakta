@@ -5,6 +5,7 @@ import it.unibo.jakta.beliefs.MutableBeliefBase
 import it.unibo.jakta.intentions.ActivationRecord
 import it.unibo.jakta.intentions.Intention
 import it.unibo.jakta.intentions.IntentionPool
+import it.unibo.jakta.intentions.MutableIntentionPool
 import it.unibo.jakta.plans.Plan
 
 /**
@@ -13,8 +14,8 @@ import it.unibo.jakta.plans.Plan
 interface AgentContext<Query, Belief, Event, PlanType, ActivationRecordType, IntentionType> where
     Query: Any,
     PlanType: Plan<Query, Belief, Event>,
-    ActivationRecordType: ActivationRecord<Query, Belief, Event>,
-    IntentionType: Intention<Query, Belief, Event, ActivationRecordType>
+    ActivationRecordType: ActivationRecord<Query, Belief, Event, PlanType>,
+    IntentionType: Intention<Query, Belief, Event, PlanType, ActivationRecordType>
 {
 
     /** [BeliefBase] of the BDI Agent */
@@ -31,7 +32,7 @@ interface AgentContext<Query, Belief, Event, PlanType, ActivationRecordType, Int
     /** [Plan]s collection of the BDI Agent */
     val planLibrary: Collection<PlanType>
 
-    val intentions: IntentionPool<Query, Belief, Event, ActivationRecordType, IntentionType>
+    val intentions: IntentionPool<Query, Belief, Event, ActivationRecordType, IntentionType, PlanType>
 }
 
 interface MutableAgentContext<
@@ -61,7 +62,7 @@ interface MutableAgentContext<
      //fun addPlan(plan: PlanType): Boolean
      //fun removePlan(plan: PlanType): Boolean
 
-     val intentionPool: MutableIntentionPool
+     val mutableIntentionPool: MutableIntentionPool<Query, Belief, Event, ActivationRecordType, IntentionType, PlanType>
      // fun removeIntention(intention: IntentionType): Boolean
      // fun updateIntention(intention: IntentionType): Boolean
 

@@ -1,4 +1,4 @@
-package it.unibo.jakta.actions
+package it.unibo.jakta.actions.responses
 
 import it.unibo.jakta.actions.effects.AgentChange
 import it.unibo.tuprolog.core.Substitution

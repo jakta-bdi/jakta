@@ -3,9 +3,9 @@ package it.unibo.jakta
 import io.kotest.assertions.fail
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
-import it.unibo.jakta.actions.InternalActions
-import it.unibo.jakta.actions.InternalRequest
-import it.unibo.jakta.actions.impl.AbstractInternalAction
+import it.unibo.jakta.actions.stdlib.InternalActions
+import it.unibo.jakta.actions.requests.InternalRequest
+import it.unibo.jakta.actions.AbstractInternalAction
 import it.unibo.jakta.beliefs.Belief
 import it.unibo.jakta.environment.Environment
 import it.unibo.jakta.goals.Achieve
