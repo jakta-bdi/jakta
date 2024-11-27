@@ -3,7 +3,7 @@ package it.unibo.jakta
 import io.kotest.assertions.fail
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
-import it.unibo.jakta.actions.stdlib.InternalActions
+import it.unibo.jakta.actions.stdlib.ExecutionActions
 import it.unibo.jakta.actions.requests.InternalRequest
 import it.unibo.jakta.actions.AbstractInternalAction
 import it.unibo.jakta.beliefs.Belief
@@ -49,7 +49,7 @@ class TestAgent : DescribeSpec({
     val start = Atom.of("start")
     val agent = ASAgent.of(
         events = listOf(Event.ofAchievementGoalInvocation(Achieve.of(start))),
-        internalActions = InternalActions.default() +
+        internalActions = ExecutionActions.default() +
             (TEST.signature.name to TEST) +
             (FAILTEST.signature.name to FAILTEST) +
             (PASSTEST.signature.name to PASSTEST),
@@ -200,7 +200,7 @@ fun main() {
     val start = Atom.of("start")
     val agent = ASAgent.of(
         events = listOf(Event.ofAchievementGoalInvocation(Achieve.of(start))),
-        internalActions = InternalActions.default() + (ADDBELIEF.signature.name to ADDBELIEF),
+        internalActions = ExecutionActions.default() + (ADDBELIEF.signature.name to ADDBELIEF),
         planLibrary = PlanLibrary.of(
             Plan.ofAchievementGoalInvocation(
                 value = start,

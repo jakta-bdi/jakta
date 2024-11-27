@@ -1,6 +1,6 @@
 package it.unibo.jakta
 
-import it.unibo.jakta.actions.stdlib.InternalActions
+import it.unibo.jakta.actions.stdlib.ExecutionActions
 import it.unibo.jakta.actions.requests.InternalRequest
 import it.unibo.jakta.actions.AbstractInternalAction
 import it.unibo.jakta.environment.Environment
@@ -20,7 +20,7 @@ fun main() {
     }
     val alice = ASAgent.of(
         events = listOf(Event.ofAchievementGoalInvocation(Achieve.of(Jakta.parseStruct("time")))),
-        internalActions = InternalActions.default() + (dummyAction.signature.name to dummyAction),
+        internalActions = ExecutionActions.default() + (dummyAction.signature.name to dummyAction),
         planLibrary = PlanLibrary.of(
             Plan.ofAchievementGoalInvocation(
                 value = Jakta.parseStruct("time"),

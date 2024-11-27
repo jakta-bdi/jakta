@@ -58,7 +58,7 @@ interface MutableAgentContext<
      //fun addEvent(event: Event): Boolean
      //fun removeEvent(event: Event): Boolean
 
-     val mutablePlanLibrary: MutableCollection<out PlanType>
+     val mutablePlanLibrary: MutableCollection<PlanType>
      //fun addPlan(plan: PlanType): Boolean
      //fun removePlan(plan: PlanType): Boolean
 

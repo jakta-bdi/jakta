@@ -10,7 +10,7 @@ import it.unibo.jakta.events.AchievementGoalFailure
 import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.solve.Signature
 
-abstract class AbstractAction<C : ActionResult, Res : ActionResponse<C>, Req : ActionRequest<C, Res>> (
+abstract class AbstractAction<out C : ActionResult, Res : ActionResponse<C>, Req : ActionRequest<C, Res>> (
     override val signature: Signature,
 ) : ASAction<C, Res, Req> {
 

@@ -1,7 +1,7 @@
 package it.unibo.jakta.dsl
 
 import it.unibo.jakta.ASAgent
-import it.unibo.jakta.actions.stdlib.InternalActions
+import it.unibo.jakta.actions.stdlib.ExecutionActions
 import it.unibo.jakta.dsl.actions.InternalActionsScope
 import it.unibo.jakta.dsl.beliefs.BeliefsScope
 import it.unibo.jakta.dsl.goals.InitialGoalsScope
@@ -57,7 +57,7 @@ class AgentScope(
             beliefBase = beliefsScope.build(),
             events = goalsScope.build().map { Event.of(it) },
             planLibrary = PlanLibrary.of(plans + plansScope.build().toList()),
-            internalActions = InternalActions.default() + actionsScope.build(),
+            internalActions = ExecutionActions.default() + actionsScope.build(),
         )
         if (this::time.isInitialized) {
             agent = agent.setTimeDistribution(time)

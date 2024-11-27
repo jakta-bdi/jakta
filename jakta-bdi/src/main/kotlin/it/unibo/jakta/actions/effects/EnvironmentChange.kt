@@ -1,10 +1,19 @@
 package it.unibo.jakta.actions.effects
 
 import it.unibo.jakta.ASAgent
+import it.unibo.jakta.context.ASMutableAgentContext
+import it.unibo.jakta.fsm.Activity
 import it.unibo.jakta.messages.Message
 
+// Potrebbero diventare dipendenti dalle capabilities ?
+
 sealed interface EnvironmentChange : AgentChange, ActionResult
-data class SpawnAgent(val agent: ASAgent) : EnvironmentChange
+data class SpawnAgent(val agent: ASAgent) : EnvironmentChange {
+    override fun ASMutableAgentContext.apply(controller: Activity.Controller?) {
+        TODO("Not yet implemented")
+    }
+}
+
 data class RemoveAgent(val agentName: String) : EnvironmentChange
 data class SendMessage(
     val message: Message,

@@ -9,16 +9,8 @@ import it.unibo.jakta.intentions.ASIntention
 import it.unibo.jakta.plans.ASPlan
 import it.unibo.tuprolog.core.Struct
 
-/**
- * AgentSpeak extension for the general concept of AgentContext.
- */
-interface ASAgentContext : AgentContext<Struct, ASBelief, ASEvent, ASPlan, ASActivationRecord, ASIntention> {
-    val internalActions: Map<String, InternalAction> // TODO("is this need?")
-}
+typealias ASAgentContext = AgentContext<Struct, ASBelief, ASEvent, ASPlan, ASActivationRecord, ASIntention>
 
-/**
- * Methods that are capable to modify the [AgentContext].
- */
 typealias ASMutableAgentContext = MutableAgentContext<
     Struct,
     ASBelief,
@@ -34,11 +26,11 @@ object MutableAgentContextStaticFactory {
         beliefBase: ASMutableBeliefBase = ASMutableBeliefBase.empty(),
         events: MutableList<ASEvent> = mutableListOf(),
         planLibrary: MutableCollection<ASPlan> = mutableListOf(),
-        internalActions: MutableMap<String, InternalAction> = mutableMapOf(),
+        //internalActions: MutableMap<String, InternalAction> = mutableMapOf(),
     ): ASMutableAgentContext = ASAgentContextImpl(
         beliefBase,
         events,
         planLibrary,
-        internalActions,
+        //internalActions,
     )
 }

@@ -27,7 +27,7 @@ interface ASAgent :
             beliefBase: ASMutableBeliefBase = ASMutableBeliefBase.empty(),
             events: MutableList<ASEvent> = mutableListOf(),
             planLibrary: MutableCollection<ASPlan> = mutableListOf(),
-            //internalActions: MutableMap<String, InternalAction> = InternalActions.default(), //TODO()
+            //internalActions: MutableMap<String, InternalAction> = ExecutionActions.default(), //TODO()
         ): ASAgent = AgentImpl(
             agentID,
             name,
@@ -41,9 +41,3 @@ interface ASAgent :
         ): ASAgent = AgentImpl( agentID, name, agentContext)
     }
 }
-
-interface ASMutableAgent :
-    MutableAgent<Struct, ASBelief, ASEvent, ASPlan, ASActivationRecord, ASIntention, ASAgentContext>,
-    Taggable<ASAgent>
-
-

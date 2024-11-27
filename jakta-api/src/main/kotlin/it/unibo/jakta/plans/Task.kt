@@ -6,7 +6,7 @@ import javax.management.Query
 
 sealed interface ExecutionResult
 
-interface ActionTaskEffects<Event> : ExecutionResult, List<Event> {
+interface ActionTaskEffects<out Event> : ExecutionResult, List<Event> {
     companion object {
         fun <Event> from(events: List<Event>): ActionTaskEffects<Event> =
             object : ActionTaskEffects<Event>, List<Event> by events { }

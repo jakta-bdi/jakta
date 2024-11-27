@@ -8,7 +8,7 @@ import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.solve.Signature
 
-interface ASAction<C, Res, Req> : Action<Struct, ASBelief, Req, Res> where
+interface ASAction<out C, Res, Req> : Action<Struct, ASBelief, Req, Res> where
     Req: ActionRequest<C, Res>,
     Res: ActionResponse<C>,
     C: ActionResult

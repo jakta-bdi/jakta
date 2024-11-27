@@ -9,7 +9,7 @@ import it.unibo.jakta.fsm.time.Time
 import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.core.Term
 
-interface ActionRequest<C : ActionResult, Res : ActionResponse<C>> {
+interface ActionRequest<out C : ActionResult, out Res : ActionResponse<C>> {
     val arguments: List<Term>
     val agentContext: ASAgentContext
     val agentName: String

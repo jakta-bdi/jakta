@@ -13,10 +13,10 @@ import it.unibo.tuprolog.unify.Unificator.Companion.mguWith
 internal data class PlanImpl(
     override val trigger: ASEvent,
     override val guard: Struct,
-    override val tasks: List<Task<*>>,
+    override val tasks: List<Task<Struct, ASBelief, *, *>>,
 ) : ASPlan {
 
-    override fun isApplicable(event: Event, beliefBase: BeliefBase<Struct, ASBelief>): Boolean {
+    override fun isApplicable(event: ASEvent, beliefBase: BeliefBase<Struct, ASBelief>): Boolean {
         if (event.javaClass != trigger.javaClass || beliefBase.javaClass.isInstance(ASBeliefBase::class.java)) {
             return false
         }

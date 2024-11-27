@@ -18,7 +18,7 @@ internal class ASAgentContextImpl(
     override val mutableBeliefBase: ASMutableBeliefBase = ASMutableBeliefBase.empty(),
     override val mutableEventList: MutableList<ASEvent> = mutableListOf(),
     override val mutablePlanLibrary: MutableCollection<ASPlan> = mutableListOf(),
-    val mutableInternalActions: MutableMap<String, InternalAction> = mutableMapOf(),
+    //val mutableInternalActions: MutableMap<String, InternalAction> = mutableMapOf(),
     override val mutableIntentionPool: ASMutableIntentionPool = IntentionPoolStaticFactory.empty(),
 ) : ASMutableAgentContext, ASAgentContext {
 
@@ -26,12 +26,12 @@ internal class ASAgentContextImpl(
         mutableBeliefBase,
         mutableEventList,
         mutablePlanLibrary,
-        mutableInternalActions,
+        //mutableInternalActions,
         mutableIntentionPool,
     )
 
-    override val internalActions: Map<String, InternalAction>
-        get() = mutableInternalActions.toMap()
+//    override val internalActions: Map<String, InternalAction>
+//        get() = mutableInternalActions.toMap()
     override val beliefBase: BeliefBase<Struct, ASBelief>
         get() = mutableBeliefBase.snapshot()
     override val events: List<ASEvent>
@@ -47,7 +47,6 @@ internal class ASAgentContextImpl(
         events = $events
         planLibrary = [$planLibrary]
         intentions = [$intentions]
-        internalActions = [$internalActions]
     }
     """.trimIndent()
 }

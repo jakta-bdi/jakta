@@ -10,7 +10,7 @@ abstract class AbstractInternalAction(override val signature: Signature) :
 
     constructor(name: String, arity: Int) : this(Signature(name, arity))
 
-    fun addActionResult(actionResult: AgentChange) = effects.add(actionResult)
+    fun addActionEffect(actionResult: AgentChange) = effects.add(actionResult)
 
     override fun toString(): String = "InternalAction(${signature.name}, ${signature.arity})"
 }
