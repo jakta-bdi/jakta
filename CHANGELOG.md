@@ -1,3 +1,10 @@
+## [0.11.111](https://github.com/jakta-bdi/jakta/compare/v0.11.110...v0.11.111) (2024-11-27)
+
+
+### Bug Fixes
+
+* **core-deps:** update dependency org.jetbrains.kotlin:kotlin-stdlib-jdk8 to v2.1.0 ([#403](https://github.com/jakta-bdi/jakta/issues/403)) ([31d12c1](https://github.com/jakta-bdi/jakta/commit/31d12c102efceaf265e21dc2d0839fdb1dd3ada9))
+
 ## [0.11.110](https://github.com/jakta-bdi/jakta/compare/v0.11.109...v0.11.110) (2024-11-27)
 
 
