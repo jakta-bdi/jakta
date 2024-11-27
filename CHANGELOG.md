@@ -1,3 +1,10 @@
+## [0.11.110](https://github.com/jakta-bdi/jakta/compare/v0.11.109...v0.11.110) (2024-11-27)
+
+
+### Bug Fixes
+
+* **deps:** update dependency it.unibo.alchemist:alchemist-swingui to v36 ([#402](https://github.com/jakta-bdi/jakta/issues/402)) ([4e59f04](https://github.com/jakta-bdi/jakta/commit/4e59f04d730306b944472a76eec8250a508bb9b5))
+
 ## [0.11.109](https://github.com/jakta-bdi/jakta/compare/v0.11.108...v0.11.109) (2024-11-24)
 
 
