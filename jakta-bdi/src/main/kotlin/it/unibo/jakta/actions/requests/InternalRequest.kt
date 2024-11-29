@@ -2,10 +2,8 @@ package it.unibo.jakta.actions.requests
 
 import it.unibo.jakta.ASAgent
 import it.unibo.jakta.AgentID
-import it.unibo.jakta.actions.effects.ActionResult
 import it.unibo.jakta.actions.responses.InternalResponse
 import it.unibo.jakta.actions.effects.AgentChange
-import it.unibo.jakta.actions.responses.ExternalResponse
 import it.unibo.jakta.context.ASAgentContext
 import it.unibo.jakta.context.ASMutableAgentContext
 import it.unibo.jakta.fsm.time.Time

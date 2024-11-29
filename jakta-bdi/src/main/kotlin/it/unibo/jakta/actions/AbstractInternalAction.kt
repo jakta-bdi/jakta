@@ -5,7 +5,7 @@ import it.unibo.jakta.actions.responses.InternalResponse
 import it.unibo.jakta.actions.effects.AgentChange
 import it.unibo.tuprolog.solve.Signature
 
-abstract class AbstractInternalAction(override val signature: Signature) :
+abstract class AbstractInternalAction2(override val signature: Signature) :
     AbstractAction<AgentChange, InternalResponse, InternalRequest>(signature) {
 
     constructor(name: String, arity: Int) : this(Signature(name, arity))

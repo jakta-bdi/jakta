@@ -1,10 +1,9 @@
 package it.unibo.jakta.actions.responses
 
-import it.unibo.jakta.actions.effects.ActionResult
-import it.unibo.jakta.actions.effects.EnvironmentChange
+import it.unibo.jakta.actions.effects.ActionSideEffect
 import it.unibo.tuprolog.core.Substitution
 
 class ExternalResponse(
     override val substitution: Substitution,
-    effects: Iterable<ActionResult<Any>>,
-) : ActionResponse<Any, ActionResult<Any>>, List<ActionResult<Any>> by effects.toList()
+    effects: Iterable<ActionSideEffect<Any>>,
+) : ActionResponse<Any, ActionSideEffect<Any>>, List<ActionSideEffect<Any>> by effects.toList()

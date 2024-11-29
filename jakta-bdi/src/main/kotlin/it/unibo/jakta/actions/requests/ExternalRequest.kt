@@ -3,15 +3,14 @@ package it.unibo.jakta.actions.requests
 import it.unibo.jakta.ASAgent
 import it.unibo.jakta.AgentID
 import it.unibo.jakta.actions.responses.ExternalResponse
-import it.unibo.jakta.actions.effects.ActionResult
-import it.unibo.jakta.actions.effects.EnvironmentChange
+import it.unibo.jakta.actions.effects.ActionSideEffect
 import it.unibo.jakta.context.ASAgentContext
 import it.unibo.jakta.environment.Environment
 import it.unibo.jakta.fsm.time.Time
 import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.core.Term
 
-interface ExternalRequest : ActionRequest<Any, ActionResult<Any>, ExternalResponse> {
+interface ExternalRequest : ActionRequest<Any, ActionSideEffect<Any>, ExternalResponse> {
     val environment: Environment
 
     companion object {
@@ -34,10 +33,10 @@ interface ExternalRequest : ActionRequest<Any, ActionResult<Any>, ExternalRespon
             override val requestTimestamp: Time?
                 get() = requestTime
 
-            override fun reply(substitution: Substitution, effects: Iterable<ActionResult<Any>>): ExternalResponse =
+            override fun reply(substitution: Substitution, effects: Iterable<ActionSideEffect<Any>>): ExternalResponse =
                 ExternalResponse(substitution, effects)
 
-            override fun reply(substitution: Substitution, vararg effects: ActionResult<Any>): ExternalResponse =
+            override fun reply(substitution: Substitution, vararg effects: ActionSideEffect<Any>): ExternalResponse =
                 reply(substitution, effects.asList())
         }
 

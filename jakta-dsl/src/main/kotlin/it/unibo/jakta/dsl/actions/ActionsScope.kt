@@ -3,13 +3,13 @@ package it.unibo.jakta.dsl.actions
 import it.unibo.jakta.actions.ASAction
 import it.unibo.jakta.actions.requests.ActionRequest
 import it.unibo.jakta.actions.responses.ActionResponse
-import it.unibo.jakta.actions.effects.ActionResult
+import it.unibo.jakta.actions.effects.ActionSideEffect
 import it.unibo.jakta.dsl.Builder
 import it.unibo.tuprolog.core.Term
 import kotlin.reflect.KFunction
 
 abstract class ActionsScope<C, Res, Req, A, As> : Builder<Map<String, A>>
-    where C : ActionResult,
+    where C : ActionSideEffect,
           Res : ActionResponse<C>,
           Req : ActionRequest<C, Res>,
           A : ASAction<C, Res, Req>,

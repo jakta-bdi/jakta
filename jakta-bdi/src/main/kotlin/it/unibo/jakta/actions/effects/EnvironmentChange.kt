@@ -1,24 +1,29 @@
 package it.unibo.jakta.actions.effects
 
 import it.unibo.jakta.ASAgent
-import it.unibo.jakta.context.ASMutableAgentContext
 import it.unibo.jakta.environment.Environment
 import it.unibo.jakta.fsm.Activity
 import it.unibo.jakta.messages.Message
 
 // Potrebbero diventare dipendenti dalle capabilities ?
 
-sealed interface EnvironmentChange : ActionResult<Environment>
+sealed interface EnvironmentChange : ActionSideEffect<Environment>
 
 data class SpawnAgent(val agent: ASAgent) : EnvironmentChange {
-     override fun Environment.apply(controller: Activity.Controller?) {
-        addAgent(agent)
+    override fun invoke(
+        context: Environment,
+        controller: Activity.Controller?
+    ) {
+        context.addAgent(agent)
     }
 }
 
 data class RemoveAgent(val agentName: String) : EnvironmentChange {
-    override fun Environment.apply(controller: Activity.Controller?) {
-        removeAgent(agentName)
+    override fun invoke(
+        context: Environment,
+        controller: Activity.Controller?
+    ) {
+        context.removeAgent(agentName)
     }
 }
 

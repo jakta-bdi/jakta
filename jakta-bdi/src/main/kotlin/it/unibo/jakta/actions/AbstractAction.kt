@@ -1,29 +1,24 @@
 package it.unibo.jakta.actions
 
-import it.unibo.jakta.actions.effects.ActionResult
-import it.unibo.jakta.actions.effects.AgentChange
-import it.unibo.jakta.actions.effects.BeliefChange
+import it.unibo.jakta.actions.effects.ActionSideEffect
 import it.unibo.jakta.actions.effects.EventChange
-import it.unibo.jakta.actions.effects.Pause
 import it.unibo.jakta.actions.requests.ActionRequest
 import it.unibo.jakta.actions.responses.ActionResponse
 import it.unibo.jakta.context.ASMutableAgentContext
 import it.unibo.jakta.events.AchievementGoalFailure
-import it.unibo.jakta.fsm.Activity
 import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.solve.Signature
 
-abstract class AbstractAction<in Context, SideEffect, Response, Request> (
+abstract class AbstractAction<Response, Request> (
     override val signature: Signature,
-) : ASAction<Context, SideEffect, Response, Request> where
-    SideEffect: ActionResult<Context>,
-    Request: ActionRequest<Context, SideEffect, Response>,
-    Response: ActionResponse<Context, SideEffect>
+) : ASAction<Response, Request> where
+    Request: ActionRequest<Response>,
+    Response: ActionResponse
 {
 
     protected var result: Substitution = Substitution.empty()
-
-    protected val effects: MutableList<SideEffect> = mutableListOf()
+    protected abstract var mutableAgentContext: ASMutableAgentContext // TODO: somehow this must be provided
+    protected val effects: MutableList<ActionSideEffect> = mutableListOf()
 
     override fun addResults(substitution: Substitution) {
         result = substitution
@@ -33,12 +28,10 @@ abstract class AbstractAction<in Context, SideEffect, Response, Request> (
         val intention = argument.agentContext.intentions.nextIntention()
 
         if (argument.arguments.size > signature.arity) {
+            val failure = AchievementGoalFailure(intention.currentPlan().trigger.trigger, intention)
+            val failureEvent = EventChange.EventAddition(failure, mutableAgentContext)
             // throw IllegalArgumentException("ERROR: Wrong number of arguments for action ${signature.name}")
-            effects.add(
-               EventChange.EventAddition(
-                       AchievementGoalFailure(intention.currentPlan().trigger.trigger, intention)
-               )
-            )
+            effects.add(failureEvent)
         }
 
         action(argument)
@@ -52,11 +45,10 @@ abstract class AbstractAction<in Context, SideEffect, Response, Request> (
                 intention.applySubstitution(res.substitution)
             }
         } else {
-            effects.add(
-                EventChange.EventAddition(
-                    AchievementGoalFailure(intention.currentPlan().trigger.trigger, intention)
-                )
-            )
+            val trigger = intention.currentPlan().trigger.trigger // TODO: that trigger.trigger looks awful
+            val failure = AchievementGoalFailure(trigger, intention)
+            val failureEvent = EventChange.EventAddition(failure, mutableAgentContext)
+            effects.add(failureEvent)
         }
         return res
     }

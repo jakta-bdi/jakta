@@ -1,8 +1,6 @@
 package it.unibo.jakta.actions.effects
 
 import it.unibo.jakta.beliefs.ASBelief
-import it.unibo.jakta.beliefs.BeliefBase
-import it.unibo.jakta.context.ASAgentContext
 import it.unibo.jakta.context.ASMutableAgentContext
 import it.unibo.jakta.events.ASEvent
 import it.unibo.jakta.events.BeliefBaseAddition
@@ -11,16 +9,21 @@ import it.unibo.jakta.fsm.Activity
 import it.unibo.jakta.intentions.ASIntention
 import it.unibo.jakta.plans.ASPlan
 
-interface AgentChange : ActionResult<ASMutableAgentContext>
+interface AgentChange : ActionSideEffect
 
 interface BeliefChange: AgentChange {
     val belief: ASBelief
 
     class BeliefAddition(override val belief: ASBelief): BeliefChange {
-        override fun ASMutableAgentContext.apply(controller: Activity.Controller?) {
-            mutableBeliefBase.add(belief)
-            mutableEventList.add(BeliefBaseAddition(belief))
-            mutableBeliefBase.delta = emptyList() //TODO("Perhaps is better to remove deltas from BB?")
+        override fun invoke(
+            context: ASMutableAgentContext,
+            controller: Activity.Controller?
+        ) {
+            with(context) {
+                mutableBeliefBase.add(belief)
+                mutableEventList.add(BeliefBaseAddition(belief))
+                mutableBeliefBase.delta = emptyList() //TODO("Perhaps is better to remove deltas from BB?")
+            }
         }
     }
 
@@ -52,9 +55,9 @@ interface IntentionChange : AgentChange {
 interface EventChange : AgentChange {
     val event: ASEvent
 
-    class EventAddition(override val event: ASEvent): EventChange {
-        override fun ASMutableAgentContext.apply(controller: Activity.Controller?) {
-            mutableEventList.add(event)
+    class EventAddition(override val event: ASEvent, val context: ASMutableAgentContext): EventChange {
+        override fun invoke() {
+            context.mutableEventList.add(event)
         }
     }
 
