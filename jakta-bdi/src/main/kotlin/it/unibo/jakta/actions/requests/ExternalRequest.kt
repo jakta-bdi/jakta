@@ -11,7 +11,7 @@ import it.unibo.jakta.fsm.time.Time
 import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.core.Term
 
-interface ExternalRequest : ActionRequest<EnvironmentChange, ExternalResponse> {
+interface ExternalRequest : ActionRequest<Any, ActionResult<Any>, ExternalResponse> {
     val environment: Environment
 
     companion object {
@@ -34,10 +34,10 @@ interface ExternalRequest : ActionRequest<EnvironmentChange, ExternalResponse> {
             override val requestTimestamp: Time?
                 get() = requestTime
 
-            override fun reply(substitution: Substitution, effects: Iterable<EnvironmentChange>): ExternalResponse =
+            override fun reply(substitution: Substitution, effects: Iterable<ActionResult<Any>>): ExternalResponse =
                 ExternalResponse(substitution, effects)
 
-            override fun reply(substitution: Substitution, vararg effects: EnvironmentChange): ExternalResponse =
+            override fun reply(substitution: Substitution, vararg effects: ActionResult<Any>): ExternalResponse =
                 reply(substitution, effects.asList())
         }
 

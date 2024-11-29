@@ -7,11 +7,12 @@ import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.solve.Signature
+import it.unibo.tuprolog.solve.sideffects.SideEffect
 
-interface ASAction<out C, Res, Req> : Action<Struct, ASBelief, Req, Res> where
-    Req: ActionRequest<C, Res>,
-    Res: ActionResponse<C>,
-    C: ActionResult
+interface ASAction<in Context, out SideEffect, Response, Request> : Action<Struct, ASBelief, Request, Response> where
+    SideEffect: ActionResult<Context>,
+    Request: ActionRequest<Context, SideEffect, Response>,
+    Response: ActionResponse<Context, SideEffect>
 {
     val signature: Signature
 

@@ -2,15 +2,17 @@ package it.unibo.jakta.actions.requests
 
 import it.unibo.jakta.ASAgent
 import it.unibo.jakta.AgentID
+import it.unibo.jakta.actions.effects.ActionResult
 import it.unibo.jakta.actions.responses.InternalResponse
 import it.unibo.jakta.actions.effects.AgentChange
+import it.unibo.jakta.actions.responses.ExternalResponse
 import it.unibo.jakta.context.ASAgentContext
+import it.unibo.jakta.context.ASMutableAgentContext
 import it.unibo.jakta.fsm.time.Time
 import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.core.Term
 
-interface InternalRequest : ActionRequest<AgentChange, InternalResponse> {
-
+interface InternalRequest : ActionRequest<ASMutableAgentContext, AgentChange, InternalResponse> {
     companion object {
         fun of(agent: ASAgent, requestTime: Time?, arguments: Iterable<Term>): InternalRequest =
             object : InternalRequest {

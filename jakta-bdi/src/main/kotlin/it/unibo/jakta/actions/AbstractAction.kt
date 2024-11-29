@@ -1,36 +1,43 @@
 package it.unibo.jakta.actions
 
 import it.unibo.jakta.actions.effects.ActionResult
+import it.unibo.jakta.actions.effects.AgentChange
 import it.unibo.jakta.actions.effects.BeliefChange
 import it.unibo.jakta.actions.effects.EventChange
 import it.unibo.jakta.actions.effects.Pause
 import it.unibo.jakta.actions.requests.ActionRequest
 import it.unibo.jakta.actions.responses.ActionResponse
+import it.unibo.jakta.context.ASMutableAgentContext
 import it.unibo.jakta.events.AchievementGoalFailure
+import it.unibo.jakta.fsm.Activity
 import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.solve.Signature
 
-abstract class AbstractAction<out C : ActionResult, Res : ActionResponse<C>, Req : ActionRequest<C, Res>> (
+abstract class AbstractAction<in Context, SideEffect, Response, Request> (
     override val signature: Signature,
-) : ASAction<C, Res, Req> {
+) : ASAction<Context, SideEffect, Response, Request> where
+    SideEffect: ActionResult<Context>,
+    Request: ActionRequest<Context, SideEffect, Response>,
+    Response: ActionResponse<Context, SideEffect>
+{
 
     protected var result: Substitution = Substitution.empty()
 
-    protected val effects: MutableList<ActionResult> = mutableListOf()
+    protected val effects: MutableList<ActionResult<Context>> = mutableListOf()
 
     override fun addResults(substitution: Substitution) {
         result = substitution
     }
 
-    final override suspend fun execute(argument: Req): Res {
+    final override suspend fun execute(argument: Request): Response {
         val intention = argument.agentContext.intentions.nextIntention()
 
         if (argument.arguments.size > signature.arity) {
             // throw IllegalArgumentException("ERROR: Wrong number of arguments for action ${signature.name}")
             effects.add(
-                EventChange.EventAddition(
-                    AchievementGoalFailure(intention.currentPlan().trigger.trigger, intention)
-                )
+               EventChange.EventAddition(
+                       AchievementGoalFailure(intention.currentPlan().trigger.trigger, intention)
+               )
             )
         }
 
@@ -54,5 +61,5 @@ abstract class AbstractAction<out C : ActionResult, Res : ActionResponse<C>, Req
         return res
     }
 
-    abstract suspend fun action(request: Req)
+    abstract suspend fun action(request: Request)
 }

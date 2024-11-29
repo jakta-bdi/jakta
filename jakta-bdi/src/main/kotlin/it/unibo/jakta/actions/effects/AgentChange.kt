@@ -11,9 +11,7 @@ import it.unibo.jakta.fsm.Activity
 import it.unibo.jakta.intentions.ASIntention
 import it.unibo.jakta.plans.ASPlan
 
-interface AgentChange : ActionResult {
-    fun ASMutableAgentContext.apply(controller: Activity.Controller?)
-}
+interface AgentChange : ActionResult<ASMutableAgentContext>
 
 interface BeliefChange: AgentChange {
     val belief: ASBelief
