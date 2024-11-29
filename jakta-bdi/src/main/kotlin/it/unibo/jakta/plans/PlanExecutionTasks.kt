@@ -1,6 +1,5 @@
 package it.unibo.jakta.plans
 
-import it.unibo.jakta.actions.AbstractInternalAction
 import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.events.AchievementGoalInvocation
 import it.unibo.jakta.events.TestGoalInvocation

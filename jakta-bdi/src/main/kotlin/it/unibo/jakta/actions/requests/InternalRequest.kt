@@ -2,37 +2,33 @@ package it.unibo.jakta.actions.requests
 
 import it.unibo.jakta.ASAgent
 import it.unibo.jakta.AgentID
-import it.unibo.jakta.actions.responses.InternalResponse
+import it.unibo.jakta.actions.Action
+import it.unibo.jakta.actions.effects.ActionSideEffect
 import it.unibo.jakta.actions.effects.AgentChange
+import it.unibo.jakta.actions.responses.ActionResponse
 import it.unibo.jakta.context.ASAgentContext
 import it.unibo.jakta.context.ASMutableAgentContext
 import it.unibo.jakta.fsm.time.Time
 import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.core.Term
 
-interface InternalRequest : ActionRequest<ASMutableAgentContext, AgentChange, InternalResponse> {
-    companion object {
-        fun of(agent: ASAgent, requestTime: Time?, arguments: Iterable<Term>): InternalRequest =
-            object : InternalRequest {
-                override val arguments: List<Term>
-                    get() = arguments.toList()
-                override val agentContext: ASAgentContext
-                    get() = agent.context.snapshot()
-                override val agentName: String
-                    get() = agent.name
-                override val agentID: AgentID
-                    get() = agent.agentID
-                override val requestTimestamp: Time?
-                    get() = requestTime
+class InternalRequest (
+    override val agentContext: ASAgentContext,
+    override val agentName: String,
+    override val agentID: AgentID,
+    override val requestTimestamp: Time?,
+    override val arguments: List<Term>,
+) : ActionRequest {
 
-                override fun reply(substitution: Substitution, effects: Iterable<AgentChange>) =
-                    InternalResponse(substitution, effects)
+    constructor(agent: ASAgent, requestTime: Time?, arguments: List<Term>):
+        this(agent.context.snapshot(), agent.name, agent.agentID, requestTime, arguments)
 
-                override fun reply(substitution: Substitution, vararg effects: AgentChange) =
-                    reply(substitution, effects.asList())
-            }
+    constructor(agent: ASAgent, requestTime: Time?, vararg arguments: Term):
+        this(agent, requestTime, arguments.toList())
 
-        fun of(agent: ASAgent, requestTime: Time?, vararg arguments: Term): InternalRequest =
-            of(agent, requestTime, arguments.asList())
-    }
+    override fun reply(substitution: Substitution, effects: List<ActionSideEffect>): ActionResponse =
+        ActionResponse(substitution, effects)
+
+    override fun reply(substitution: Substitution, vararg effects: ActionSideEffect) =
+        reply(substitution, effects.asList())
 }

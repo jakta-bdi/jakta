@@ -8,14 +8,14 @@ import it.unibo.jakta.fsm.time.Time
 import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.core.Term
 
-interface ActionRequest<out Res : ActionResponse> {
+interface ActionRequest {
     val arguments: List<Term>
     val agentContext: ASAgentContext
     val agentName: String
     val agentID: AgentID
     val requestTimestamp: Time?
 
-    fun reply(substitution: Substitution = Substitution.empty(), effects: Iterable<ActionSideEffect>): Res
+    fun reply(substitution: Substitution = Substitution.empty(), effects: List<ActionSideEffect>): ActionResponse
 
-    fun reply(substitution: Substitution = Substitution.empty(), vararg effects: ActionSideEffect): Res
+    fun reply(substitution: Substitution = Substitution.empty(), vararg effects: ActionSideEffect): ActionResponse
 }

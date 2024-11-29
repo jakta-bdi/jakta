@@ -1,7 +1,8 @@
 package it.unibo.jakta.actions.stdlib
 
-import it.unibo.jakta.actions.requests.InternalRequest
+import it.unibo.jakta.actions.AbstractAction
 import it.unibo.jakta.actions.AbstractInternalAction
+import it.unibo.jakta.actions.requests.InternalRequest
 import it.unibo.jakta.actions.effects.BeliefChange
 import it.unibo.jakta.beliefs.BeliefBase
 import it.unibo.jakta.beliefs.ASBelief
@@ -25,6 +26,7 @@ class AddBelief(
     belief: ASBelief,
 ) : AbstractBeliefInternalAction(belief, "addBelief") {
     override suspend fun action(request: InternalRequest) {
+        effects.add() //HEre is the trouble
         addActionEffect(BeliefChange.BeliefAddition(belief))
     }
 }

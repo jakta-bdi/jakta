@@ -8,10 +8,7 @@ import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.solve.Signature
 
-interface ASAction<Response, Request> : Action<Struct, ASBelief, Request, Response> where
-    Request: ActionRequest<Response>,
-    Response: ActionResponse
-{
+interface ASAction<Request: ActionRequest> : Action<Struct, ASBelief, Request, ActionResponse> {
     val signature: Signature
 
     fun applySubstitution(substitution: Substitution)

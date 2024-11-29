@@ -1,6 +1,5 @@
 package it.unibo.jakta.actions.stdlib
 
-import it.unibo.jakta.actions.AbstractInternalAction
 import it.unibo.jakta.actions.effects.Pause
 import it.unibo.jakta.actions.effects.Sleep
 import it.unibo.jakta.actions.effects.Stop
