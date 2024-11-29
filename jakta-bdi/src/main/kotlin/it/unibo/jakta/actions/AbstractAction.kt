@@ -23,7 +23,7 @@ abstract class AbstractAction<in Context, SideEffect, Response, Request> (
 
     protected var result: Substitution = Substitution.empty()
 
-    protected val effects: MutableList<ActionResult<Context>> = mutableListOf()
+    protected val effects: MutableList<SideEffect> = mutableListOf()
 
     override fun addResults(substitution: Substitution) {
         result = substitution
