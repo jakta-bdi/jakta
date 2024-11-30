@@ -1,3 +1,10 @@
+## [0.11.114](https://github.com/jakta-bdi/jakta/compare/v0.11.113...v0.11.114) (2024-11-30)
+
+
+### Bug Fixes
+
+* **deps:** update alchemist to v36.0.3 ([#408](https://github.com/jakta-bdi/jakta/issues/408)) ([66a73ef](https://github.com/jakta-bdi/jakta/commit/66a73ef3847cdce356aa5792d9a511e739419a7d))
+
 ## [0.11.113](https://github.com/jakta-bdi/jakta/compare/v0.11.112...v0.11.113) (2024-11-29)
 
 
