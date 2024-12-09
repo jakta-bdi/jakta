@@ -3,7 +3,7 @@ kotest = "5.9.1"
 kotlin = "2.1.0"
 mockito = "5.14.2"
 tuprolog = "1.0.4"
-alchemist = "36.0.5"
+alchemist = "36.0.6"
 
 [libraries]
 alchemist-api = { module = "it.unibo.alchemist:alchemist-api", version.ref = "alchemist" }
