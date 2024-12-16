@@ -1,3 +1,10 @@
+## [0.11.126](https://github.com/jakta-bdi/jakta/compare/v0.11.125...v0.11.126) (2024-12-16)
+
+
+### Bug Fixes
+
+* **deps:** update plugin dokka to v2 ([#423](https://github.com/jakta-bdi/jakta/issues/423)) ([fd8bb49](https://github.com/jakta-bdi/jakta/commit/fd8bb49d140cdd215a70e0550ff563336edae1e3))
+
 ## [0.11.125](https://github.com/jakta-bdi/jakta/compare/v0.11.124...v0.11.125) (2024-12-09)
 
 
