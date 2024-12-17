@@ -1,3 +1,11 @@
+## [0.11.129](https://github.com/jakta-bdi/jakta/compare/v0.11.128...v0.11.129) (2024-12-17)
+
+
+### Bug Fixes
+
+* **deps:** update plugin org.danilopianini.gradle-pre-commit-git-hooks to v2.0.17 ([#426](https://github.com/jakta-bdi/jakta/issues/426)) ([bf2346e](https://github.com/jakta-bdi/jakta/commit/bf2346e8f5e0a2de9c4240085973a001685fb36e))
+* **deps:** update plugin publishoncentral to v7.0.1 ([#427](https://github.com/jakta-bdi/jakta/issues/427)) ([464cf66](https://github.com/jakta-bdi/jakta/commit/464cf6602ae22ce1cefb0c152cb13d3c0cab444a))
+
 ## [0.11.128](https://github.com/jakta-bdi/jakta/compare/v0.11.127...v0.11.128) (2024-12-17)
 
 
