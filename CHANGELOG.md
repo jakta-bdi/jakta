@@ -1,3 +1,10 @@
+## [0.11.139](https://github.com/jakta-bdi/jakta/compare/v0.11.138...v0.11.139) (2024-12-21)
+
+
+### Bug Fixes
+
+* **deps:** update dependency gradle to v8.12 ([#434](https://github.com/jakta-bdi/jakta/issues/434)) ([1e99bd8](https://github.com/jakta-bdi/jakta/commit/1e99bd81f4efb7579e14328c81f4ab795e735198))
+
 ## [0.11.138](https://github.com/jakta-bdi/jakta/compare/v0.11.137...v0.11.138) (2024-12-21)
 
 
