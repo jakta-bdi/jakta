@@ -4,7 +4,6 @@ import it.unibo.jakta.beliefs.BeliefBase
 import it.unibo.jakta.beliefs.MutableBeliefBase
 import it.unibo.jakta.context.AgentContext
 import it.unibo.jakta.context.MutableAgentContext
-import it.unibo.jakta.fsm.Activity
 import it.unibo.jakta.intentions.ActivationRecord
 import it.unibo.jakta.intentions.Intention
 import it.unibo.jakta.intentions.IntentionPool
@@ -14,8 +13,8 @@ import it.unibo.jakta.plans.Plan
 interface AgentLifecycle<Query, Belief, Event, PlanType, ActivationRecordType, IntentionType, Context> where
     Query: Any,
     PlanType: Plan<Query, Belief, Event>,
-    ActivationRecordType: ActivationRecord<Query, Belief, Event>,
-    IntentionType: Intention<Query, Belief, Event, ActivationRecordType>,
+    ActivationRecordType: ActivationRecord<Query, Belief, Event, PlanType>,
+    IntentionType: Intention<Query, Belief, Event, PlanType, ActivationRecordType>,
     Context: AgentContext<Query, Belief, Event, PlanType, ActivationRecordType, IntentionType>
 {
 
@@ -85,7 +84,7 @@ interface AgentLifecycle<Query, Belief, Event, PlanType, ActivationRecordType, I
     fun assignPlanToIntention(
         event: Event,
         plan: PlanType,
-        intentions: IntentionPool<Query, Belief, Event, ActivationRecordType, IntentionType>
+        intentions: IntentionPool<Query, Belief, Event, ActivationRecordType, IntentionType, PlanType>
     ): IntentionType?
 
     /**
@@ -96,7 +95,7 @@ interface AgentLifecycle<Query, Belief, Event, PlanType, ActivationRecordType, I
      * @return the [Intention] to execute, or null if there's no intention
      */
     fun scheduleIntention(
-        intentions: IntentionPool<Query, Belief, Event, ActivationRecordType, IntentionType>
+        intentions: IntentionPool<Query, Belief, Event, ActivationRecordType, IntentionType, PlanType>
     ): IntentionType?
 
     /**
@@ -118,10 +117,10 @@ interface AgentLifecycle<Query, Belief, Event, PlanType, ActivationRecordType, I
      */
     fun runOneCycle(
         environment: Environment,
-        controller: Activity.Controller? = null,
+        //controller: Activity.Controller? = null,
         debugEnabled: Boolean = false,
     ): Boolean {
-        sense(environment, controller, debugEnabled)
+        sense(environment, debugEnabled)
         deliberate()
         return act(environment)
     }
@@ -136,7 +135,7 @@ interface AgentLifecycle<Query, Belief, Event, PlanType, ActivationRecordType, I
      *  @param controller [Activity.Controller] that manages agent's execution
      *  @param debugEnabled [Boolean] specifies wether debug logs are needed or not
      */
-    fun sense(environment: Environment, controller: Activity.Controller?, debugEnabled: Boolean)
+    fun sense(environment: Environment, debugEnabled: Boolean)
 
     /** Performs the reason phase of the reasoning cycle, in particular:
      *  - STEP5: Selecting an Event

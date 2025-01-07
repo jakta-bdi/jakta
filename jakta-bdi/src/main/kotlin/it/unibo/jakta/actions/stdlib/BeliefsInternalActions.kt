@@ -26,8 +26,7 @@ class AddBelief(
     belief: ASBelief,
 ) : AbstractBeliefInternalAction(belief, "addBelief") {
     override suspend fun action(request: InternalRequest) {
-        effects.add() //HEre is the trouble
-        addActionEffect(BeliefChange.BeliefAddition(belief))
+        effects.add(BeliefChange.BeliefAddition(belief))
     }
 }
 
@@ -38,7 +37,7 @@ class RemoveBelief(
     belief: ASBelief,
 ) : AbstractBeliefInternalAction(belief, "addBelief")  {
     override suspend fun action(request: InternalRequest) {
-        addActionEffect(BeliefChange.BeliefRemoval(belief))
+        effects.add(BeliefChange.BeliefRemoval(belief))
     }
 }
 

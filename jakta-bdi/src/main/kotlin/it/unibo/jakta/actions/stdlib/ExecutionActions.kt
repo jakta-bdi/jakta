@@ -1,5 +1,6 @@
 package it.unibo.jakta.actions.stdlib
 
+import it.unibo.jakta.actions.AbstractInternalAction
 import it.unibo.jakta.actions.effects.Pause
 import it.unibo.jakta.actions.effects.Sleep
 import it.unibo.jakta.actions.effects.Stop
@@ -38,7 +39,7 @@ object Fail : AbstractInternalAction("fail", 0) {
 
 object Stop : AbstractInternalAction("stop", 0) {
     override suspend fun action(request: InternalRequest) {
-        addActionEffect(Stop)
+        effects.add(Stop)
     }
 
     override fun applySubstitution(substitution: Substitution) = Unit
@@ -46,7 +47,7 @@ object Stop : AbstractInternalAction("stop", 0) {
 
 object Pause : AbstractInternalAction("pause", 0) {
     override suspend fun action(request: InternalRequest) {
-        addActionEffect(Pause)
+        effects.add(Pause)
     }
 
     override fun applySubstitution(substitution: Substitution) = Unit
@@ -57,7 +58,7 @@ class Sleep(
 ) : AbstractInternalAction("sleep", 1) {
     override suspend fun action(request: InternalRequest) {
         if (request.arguments[0].isInteger) {
-            addActionEffect(Sleep(request.arguments[0].castToInteger().value.toLong()))
+            effects.add(Sleep(request.arguments[0].castToInteger().value.toLong()))
         }
     }
 
