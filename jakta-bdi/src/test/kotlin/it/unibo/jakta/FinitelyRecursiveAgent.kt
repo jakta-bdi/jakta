@@ -1,13 +1,13 @@
 package it.unibo.jakta
 
-import it.unibo.jakta.environment.Environment
+import it.unibo.jakta.environment.BasicEnvironment
 import it.unibo.jakta.goals.Achieve
 import it.unibo.jakta.goals.ActInternally
 import it.unibo.jakta.plans.Plan
 import it.unibo.jakta.plans.PlanLibrary
 
 fun main() {
-    val env = Environment.of()
+    val env = BasicEnvironment.of()
 
     val start = Jakta.parseStruct("start(0, 120)")
 

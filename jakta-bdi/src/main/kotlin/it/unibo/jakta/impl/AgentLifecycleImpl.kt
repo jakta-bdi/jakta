@@ -13,16 +13,14 @@ import it.unibo.jakta.actions.effects.PopMessage
 import it.unibo.jakta.actions.effects.Sleep
 import it.unibo.jakta.actions.effects.Stop
 import it.unibo.jakta.beliefs.ASBelief
-import it.unibo.jakta.beliefs.ASBeliefBase
 import it.unibo.jakta.beliefs.Belief
 import it.unibo.jakta.beliefs.BeliefBase
 import it.unibo.jakta.beliefs.MutableBeliefBase
-import it.unibo.jakta.beliefs.RetrieveResult
 import it.unibo.jakta.context.ASAgentContext
 import it.unibo.jakta.context.AgentContext
 import it.unibo.jakta.context.ContextUpdate.ADDITION
 import it.unibo.jakta.context.ContextUpdate.REMOVAL
-import it.unibo.jakta.environment.Environment
+import it.unibo.jakta.environment.BasicEnvironment
 import it.unibo.jakta.events.ASEvent
 import it.unibo.jakta.events.AchievementGoalFailure
 import it.unibo.jakta.events.BeliefBaseAddition
@@ -50,8 +48,6 @@ import it.unibo.jakta.intentions.Intention
 import it.unibo.jakta.intentions.IntentionPool
 import it.unibo.jakta.messages.Tell
 import it.unibo.jakta.plans.ASPlan
-import it.unibo.jakta.plans.Plan
-import it.unibo.jakta.plans.PlanLibrary
 import it.unibo.tuprolog.core.Struct
 
 typealias ASAgentLifecycle = AgentLifecycle<Struct, ASBelief, ASEvent, ASPlan, ASActivationRecord, ASIntention, ASAgentContext>
@@ -116,7 +112,7 @@ internal data class AgentLifecycleImpl(
 
     override fun scheduleIntention(intentions: IntentionPool) = agent.scheduleIntention(intentions)
 
-    override fun runIntention(intention: Intention, context: AgentContext, environment: Environment): ExecutionResult =
+    override fun runIntention(intention: Intention, context: AgentContext, environment: BasicEnvironment): ExecutionResult =
         when (val nextGoal = intention.nextGoal()) {
             is EmptyGoal -> ExecutionResult(
                 context.copy(intentions = context.intentions.updateIntention(intention.pop())),
@@ -268,11 +264,11 @@ internal data class AgentLifecycleImpl(
             }
         }
 
-    override fun sense(environment: Environment, controller: Activity.Controller?, debugEnabled: Boolean) {
+    override fun sense(environment: BasicEnvironment, controller: Activity.Controller?, debugEnabled: Boolean) {
         this.controller = controller
         this.debugEnabled = debugEnabled
 
-        // STEP1: Perceive the Environment
+        // STEP1: Perceive the BasicEnvironment
         val perceptions = environment.percept()
 
         // STEP2: Update the ASBeliefBase
@@ -350,7 +346,7 @@ internal data class AgentLifecycleImpl(
         )
     }
 
-    override fun act(environment: Environment): Iterable<EnvironmentChange> {
+    override fun act(environment: BasicEnvironment): Iterable<EnvironmentChange> {
         var executionResult = ExecutionResult(AgentContext.of())
 
         var newIntentionPool = agent.context.intentions
@@ -374,14 +370,14 @@ internal data class AgentLifecycleImpl(
             // println("post run -> ${newAgent.context}")
         }
 
-        // Generate Environment Changes
+        // Generate BasicEnvironment Changes
         val environmentChangesToApply = executionResult.environmentEffects + cachedEffects
         cachedEffects = emptyList()
         return environmentChangesToApply
     }
 
     override fun runOneCycle(
-        environment: Environment,
+        environment: BasicEnvironment,
         controller: Activity.Controller?,
         debugEnabled: Boolean,
     ): Iterable<EnvironmentChange> {

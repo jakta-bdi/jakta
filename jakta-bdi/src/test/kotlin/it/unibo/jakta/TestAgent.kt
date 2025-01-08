@@ -6,7 +6,7 @@ import io.kotest.matchers.shouldBe
 import it.unibo.jakta.actions.stdlib.ExecutionActions
 import it.unibo.jakta.actions.requests.InternalRequest
 import it.unibo.jakta.beliefs.Belief
-import it.unibo.jakta.environment.Environment
+import it.unibo.jakta.environment.BasicEnvironment
 import it.unibo.jakta.goals.Achieve
 import it.unibo.jakta.goals.ActInternally
 import it.unibo.jakta.goals.AddBelief
@@ -54,7 +54,7 @@ class TestAgent : DescribeSpec({
             (PASSTEST.signature.name to PASSTEST),
     )
 
-    val environment = Environment.of()
+    val environment = BasicEnvironment.of()
 
     describe("An agent") {
         it("should call an internal action specifying its name") {
@@ -216,5 +216,5 @@ fun main() {
             ),
         ),
     )
-    Mas.of(it.unibo.jakta.executionstrategies.ExecutionStrategy.oneThreadPerAgent(), Environment.of(), agent).start()
+    Mas.of(it.unibo.jakta.executionstrategies.ExecutionStrategy.oneThreadPerAgent(), BasicEnvironment.of(), agent).start()
 }

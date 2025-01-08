@@ -11,7 +11,7 @@ import it.unibo.alchemist.model.molecules.SimpleMolecule
 import it.unibo.jakta.ASAgent
 import it.unibo.jakta.AgentID
 import it.unibo.jakta.beliefs.Belief
-import it.unibo.jakta.environment.Environment
+import it.unibo.jakta.environment.BasicEnvironment
 import it.unibo.jakta.messages.Message
 import it.unibo.jakta.messages.MessageQueue
 import it.unibo.jakta.perception.Perception
@@ -19,17 +19,17 @@ import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.solve.libs.oop.ObjectRef
 import org.apache.commons.math3.random.RandomGenerator
 import it.unibo.alchemist.model.Environment as AlchemistEnvironment
-import it.unibo.jakta.environment.Environment as JaktaEnvironment
+import it.unibo.jakta.environment.BasicEnvironment as JaktaEnvironment
 
 /**
- * Jakta Environment Implementation that connects to Alchemist meta-model.
+ * Jakta BasicEnvironment Implementation that connects to Alchemist meta-model.
  */
 class JaktaEnvironmentForAlchemist<P : Position<P>>(
     val alchemistEnvironment: AlchemistEnvironment<Any?, P>,
     val randomGenerator: RandomGenerator,
     // Alchemist NodeProperty inheritance
     override val node: Node<Any?>,
-    // Jakta Environment inheritance
+    // Jakta BasicEnvironment inheritance
     override val messageBoxes: Map<AgentID, MessageQueue> = emptyMap(),
 ) : JaktaEnvironment, NodeProperty<Any?> {
 
@@ -69,37 +69,37 @@ class JaktaEnvironmentForAlchemist<P : Position<P>>(
         return getMessageBroker().nextMessage(agentName, node.id.toString())
     }
 
-    override fun popMessage(agentName: String): Environment = this.also {
+    override fun popMessage(agentName: String): BasicEnvironment = this.also {
         getMessageBroker().pop(agentName, node.id.toString())
     }
 
-    override fun submitMessage(agentName: String, message: Message): Environment = this.also {
+    override fun submitMessage(agentName: String, message: Message): BasicEnvironment = this.also {
         getMessageBroker().send(agentName, message)
     }
 
-    override fun broadcastMessage(message: Message): Environment = this.also {
+    override fun broadcastMessage(message: Message): BasicEnvironment = this.also {
         getMessageBroker().broadcast(message)
     }
 
     // ----------------------------------------
 
-    override fun addAgent(agent: ASAgent): Environment = TODO()
+    override fun addAgent(agent: ASAgent): BasicEnvironment = TODO()
 
-    override fun removeAgent(agentName: String): Environment = TODO()
+    override fun removeAgent(agentName: String): BasicEnvironment = TODO()
 
     // --------------- Data manipulation in node ---------------
 
-    override fun addData(key: String, value: Any): Environment {
+    override fun addData(key: String, value: Any): BasicEnvironment {
         node.setConcentration(SimpleMolecule(key), value)
         return this
     }
 
-    override fun removeData(key: String): Environment {
+    override fun removeData(key: String): BasicEnvironment {
         node.contents.keys.firstOrNull { it.name.equals(key) }?.let { node.removeConcentration(it) }
         return this
     }
 
-    override fun updateData(newData: Map<String, Any>): Environment {
+    override fun updateData(newData: Map<String, Any>): BasicEnvironment {
         newData.forEach { node.setConcentration(SimpleMolecule(it.key), it.value) }
         return this
     }
@@ -112,7 +112,7 @@ class JaktaEnvironmentForAlchemist<P : Position<P>>(
         messageBoxes: Map<AgentID, MessageQueue>,
         perception: Perception,
         data: Map<String, Any>,
-    ): Environment = this
+    ): BasicEnvironment = this
 
     override fun cloneOnNewNode(node: Node<Any?>): NodeProperty<Any?> =
         JaktaEnvironmentForAlchemist(alchemistEnvironment, randomGenerator, node)

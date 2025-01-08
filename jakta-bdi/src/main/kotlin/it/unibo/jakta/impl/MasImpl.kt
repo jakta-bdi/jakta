@@ -11,12 +11,12 @@ import it.unibo.jakta.actions.effects.RemoveData
 import it.unibo.jakta.actions.effects.SendMessage
 import it.unibo.jakta.actions.effects.SpawnAgent
 import it.unibo.jakta.actions.effects.UpdateData
-import it.unibo.jakta.environment.Environment
+import it.unibo.jakta.environment.BasicEnvironment
 import it.unibo.jakta.executionstrategies.ExecutionStrategy
 
 internal class MasImpl(
     override val executionStrategy: ExecutionStrategy,
-    override var environment: Environment,
+    override var environment: BasicEnvironment,
     override var agents: Iterable<ASAgent>,
 ) : Mas {
     init {

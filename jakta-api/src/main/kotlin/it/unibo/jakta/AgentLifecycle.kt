@@ -10,7 +10,8 @@ import it.unibo.jakta.intentions.IntentionPool
 import it.unibo.jakta.plans.Plan
 
 /** BDI Agent definition*/
-interface AgentLifecycle<Query, Belief, Event, PlanType, ActivationRecordType, IntentionType, Context> where
+interface AgentLifecycle<Query, Belief, Event, PlanType, ActivationRecordType, IntentionType, Context, Environment>
+    where
     Query: Any,
     PlanType: Plan<Query, Belief, Event>,
     ActivationRecordType: ActivationRecord<Query, Belief, Event, PlanType>,
@@ -33,8 +34,8 @@ interface AgentLifecycle<Query, Belief, Event, PlanType, ActivationRecordType, I
     /**
      * STEP 5 of reasoning cycle: Selecting an Event.
      * This function select an event to be handled in a particular reasoning cycle.
-     * The default implementation follows a FIFO policy for the [EventQueue].
-     * @param events: [EventQueue] on which select the event
+     * The default implementation follows a FIFO policy for the list of [Event]s.
+     * @param events: list of [Event]s on which select the event
      * @return the selected [Event]
      */
     fun selectEvent(events: List<Event>): Event?
@@ -111,8 +112,6 @@ interface AgentLifecycle<Query, Belief, Event, PlanType, ActivationRecordType, I
 
     /** Performs the whole procedure (10 steps) of the BDI Agent's Reasoning Cycle.
      *  @param environment the [Environment]
-     *  @param controller [Activity.Controller] that manages agent's execution
-     *  @param debugEnabled [Boolean] specifies wether debug logs are needed or not
      *  @return true if the environment has been changed as a result of this operation
      */
     fun runOneCycle(
@@ -120,7 +119,7 @@ interface AgentLifecycle<Query, Belief, Event, PlanType, ActivationRecordType, I
         //controller: Activity.Controller? = null,
         debugEnabled: Boolean = false,
     ): Boolean {
-        sense(environment, debugEnabled)
+        sense(environment)
         deliberate()
         return act(environment)
     }
@@ -132,10 +131,8 @@ interface AgentLifecycle<Query, Belief, Event, PlanType, ActivationRecordType, I
      *  - STEP3: Receiving Communication from Other Agents
      *  - STEP4: Selecting "Socially Acceptable" Messages
      *  @param environment the [Environment]
-     *  @param controller [Activity.Controller] that manages agent's execution
-     *  @param debugEnabled [Boolean] specifies wether debug logs are needed or not
      */
-    fun sense(environment: Environment, debugEnabled: Boolean)
+    fun sense(environment: Environment)
 
     /** Performs the reason phase of the reasoning cycle, in particular:
      *  - STEP5: Selecting an Event

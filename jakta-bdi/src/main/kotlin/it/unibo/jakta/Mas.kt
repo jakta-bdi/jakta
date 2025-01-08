@@ -1,12 +1,12 @@
 package it.unibo.jakta
 
 import it.unibo.jakta.actions.effects.EnvironmentChange
-import it.unibo.jakta.environment.Environment
+import it.unibo.jakta.environment.BasicEnvironment
 import it.unibo.jakta.executionstrategies.ExecutionStrategy
 import it.unibo.jakta.impl.MasImpl
 
 interface Mas {
-    val environment: Environment
+    val environment: BasicEnvironment
     val agents: Iterable<ASAgent>
     val executionStrategy: ExecutionStrategy
 
@@ -17,7 +17,7 @@ interface Mas {
     companion object {
         fun of(
             executionStrategy: ExecutionStrategy,
-            environment: Environment,
+            environment: BasicEnvironment,
             agent: ASAgent,
             vararg agents: ASAgent,
         ): Mas =
@@ -25,7 +25,7 @@ interface Mas {
 
         fun of(
             executionStrategy: ExecutionStrategy,
-            environment: Environment,
+            environment: BasicEnvironment,
             agents: Iterable<ASAgent>,
         ): Mas = MasImpl(executionStrategy, environment, agents)
     }

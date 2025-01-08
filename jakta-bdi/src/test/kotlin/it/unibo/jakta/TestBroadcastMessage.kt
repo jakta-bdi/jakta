@@ -3,7 +3,7 @@ package it.unibo.jakta
 import it.unibo.jakta.actions.requests.ExternalRequest
 import it.unibo.jakta.actions.AbstractExternalAction
 import it.unibo.jakta.beliefs.Belief
-import it.unibo.jakta.environment.Environment
+import it.unibo.jakta.environment.BasicEnvironment
 import it.unibo.jakta.goals.Achieve
 import it.unibo.jakta.goals.Act
 import it.unibo.jakta.goals.ActInternally
@@ -26,7 +26,7 @@ fun main() {
         }
     }
 
-    val env = Environment.of(
+    val env = BasicEnvironment.of(
         externalActions = mapOf(
             broadcastAction.signature.name to broadcastAction,
         ),

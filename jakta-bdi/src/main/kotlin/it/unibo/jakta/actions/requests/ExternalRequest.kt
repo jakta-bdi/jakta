@@ -2,26 +2,25 @@ package it.unibo.jakta.actions.requests
 
 import it.unibo.jakta.ASAgent
 import it.unibo.jakta.AgentID
-import it.unibo.jakta.actions.Action
 import it.unibo.jakta.actions.effects.ActionSideEffect
 import it.unibo.jakta.actions.responses.ActionResponse
 import it.unibo.jakta.context.ASAgentContext
-import it.unibo.jakta.environment.Environment
+import it.unibo.jakta.environment.BasicEnvironment
 import it.unibo.jakta.fsm.time.Time
 import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.core.Term
 
 interface ExternalRequest : ActionRequest {
-    val environment: Environment
+    val environment: BasicEnvironment
 
     companion object {
         fun of(
-            environment: Environment,
+            environment: BasicEnvironment,
             agent: ASAgent,
             requestTime: Time?,
             arguments: Iterable<Term>,
         ): ExternalRequest = object: ExternalRequest {
-            override val environment: Environment
+            override val environment: BasicEnvironment
                 get() = environment
             override val arguments: List<Term>
                 get() = arguments.toList()
@@ -41,7 +40,7 @@ interface ExternalRequest : ActionRequest {
                 reply(substitution, effects.asList())
         }
 
-        fun of(environment: Environment, agent: ASAgent, requestTime: Time?, vararg arguments: Term): ExternalRequest =
+        fun of(environment: BasicEnvironment, agent: ASAgent, requestTime: Time?, vararg arguments: Term): ExternalRequest =
             of(environment, agent, requestTime, arguments.asList())
     }
 }

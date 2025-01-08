@@ -6,7 +6,7 @@ import it.unibo.jakta.dsl.mas
 import it.unibo.tuprolog.core.Struct
 
 class TestEnvironment : DescribeSpec({
-    describe("An Environment") {
+    describe("An BasicEnvironment") {
         it("should be built from a DSL") {
             val e = mas {
                 environment {

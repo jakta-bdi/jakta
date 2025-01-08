@@ -4,7 +4,7 @@ import it.unibo.alchemist.jakta.properties.JaktaEnvironmentForAlchemist
 import it.unibo.alchemist.model.Position
 import it.unibo.jakta.ASAgent
 import it.unibo.jakta.dsl.actions.ExternalActionsScope
-import it.unibo.jakta.environment.Environment
+import it.unibo.jakta.environment.BasicEnvironment
 
 class WrappedAgent(
     val agent: ASAgent,
@@ -20,7 +20,7 @@ class JaktaForAlchemistMasScope : Builder<WrappedAgent> {
         return this
     }
 
-    fun environment(e: Environment): JaktaForAlchemistMasScope {
+    fun environment(e: BasicEnvironment): JaktaForAlchemistMasScope {
         actions += e.externalActions
         return this
     }

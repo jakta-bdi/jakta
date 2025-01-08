@@ -3,7 +3,7 @@ package it.unibo.jakta.environment.impl
 import it.unibo.jakta.ASAgent
 import it.unibo.jakta.AgentID
 import it.unibo.jakta.beliefs.ASBeliefBase
-import it.unibo.jakta.environment.Environment
+import it.unibo.jakta.environment.BasicEnvironment
 import it.unibo.jakta.messages.Message
 import it.unibo.jakta.messages.MessageQueue
 import it.unibo.jakta.perception.Perception
@@ -14,10 +14,10 @@ open class EnvironmentImpl(
     override val messageBoxes: Map<AgentID, MessageQueue> = mapOf(),
     override var perception: Perception,
     override val data: Map<String, Any> = emptyMap(),
-) : Environment {
+) : BasicEnvironment {
     override fun getNextMessage(agentName: String): Message? = messageBoxes[agentIDs[agentName]]?.lastOrNull()
 
-    override fun popMessage(agentName: String): Environment {
+    override fun popMessage(agentName: String): BasicEnvironment {
         val message = getNextMessage(agentName)
         return if (message != null) {
             copy(
@@ -41,11 +41,11 @@ open class EnvironmentImpl(
             this
         }
 
-    override fun broadcastMessage(message: Message): Environment = copy(
+    override fun broadcastMessage(message: Message): BasicEnvironment = copy(
         messageBoxes = messageBoxes.entries.associate { it.key to it.value + message },
     )
 
-    override fun addAgent(agent: ASAgent): Environment =
+    override fun addAgent(agent: ASAgent): BasicEnvironment =
         if (!agentIDs.contains(agent.name)) {
             copy(
                 agentIDs = agentIDs + mapOf(agent.name to agent.agentID),
@@ -55,7 +55,7 @@ open class EnvironmentImpl(
             this
         }
 
-    override fun removeAgent(agentName: String): Environment =
+    override fun removeAgent(agentName: String): BasicEnvironment =
         if (agentIDs.contains(agentName)) {
             copy(
                 messageBoxes = messageBoxes - agentIDs[agentName]!!,
@@ -67,18 +67,18 @@ open class EnvironmentImpl(
 
     override fun percept(): ASBeliefBase = perception.percept()
 
-    override fun addData(key: String, value: Any): Environment = copy(data = data + Pair(key, value))
+    override fun addData(key: String, value: Any): BasicEnvironment = copy(data = data + Pair(key, value))
 
-    override fun removeData(key: String): Environment = copy(data = data - key)
+    override fun removeData(key: String): BasicEnvironment = copy(data = data - key)
 
-    override fun updateData(newData: Map<String, Any>): Environment = copy(data = newData)
+    override fun updateData(newData: Map<String, Any>): BasicEnvironment = copy(data = newData)
     override fun copy(
         agentIDs: Map<String, AgentID>,
         externalActions: Map<String, ExternalAction>,
         messageBoxes: Map<AgentID, MessageQueue>,
         perception: Perception,
         data: Map<String, Any>,
-    ): Environment = EnvironmentImpl(
+    ): BasicEnvironment = EnvironmentImpl(
         externalActions,
         agentIDs,
         messageBoxes,
@@ -87,7 +87,7 @@ open class EnvironmentImpl(
     )
 
     override fun toString(): String = """
-        Environment(
+        BasicEnvironment(
            class=${this.javaClass}
            actions=${externalActions.values},
            agents=${agentIDs.values}, 

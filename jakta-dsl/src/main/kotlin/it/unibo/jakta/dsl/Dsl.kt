@@ -8,7 +8,7 @@ import it.unibo.jakta.dsl.actions.InternalActionScope
 import it.unibo.jakta.dsl.actions.InternalActionsScope
 import it.unibo.jakta.dsl.environment.EnvironmentScope
 import it.unibo.jakta.dsl.plans.PlansScope
-import it.unibo.jakta.environment.Environment
+import it.unibo.jakta.environment.BasicEnvironment
 import it.unibo.jakta.plans.Plan
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Term
@@ -26,7 +26,7 @@ fun externalAction(name: String, arity: Int, f: ExternalActionScope.() -> Unit) 
     ExternalActionsScope().newAction(name, arity, f)
 
 @JaktaDSL
-fun environment(f: EnvironmentScope.() -> Unit): Environment = EnvironmentScope().also(f).build()
+fun environment(f: EnvironmentScope.() -> Unit): BasicEnvironment = EnvironmentScope().also(f).build()
 
 @JaktaDSL
 fun agent(name: String, f: AgentScope.() -> Unit): ASAgent = AgentScope(name).also(f).build()

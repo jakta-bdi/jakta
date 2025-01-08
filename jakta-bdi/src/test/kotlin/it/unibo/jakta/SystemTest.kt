@@ -1,9 +1,9 @@
 package it.unibo.jakta
 
-import it.unibo.jakta.environment.Environment
+import it.unibo.jakta.environment.BasicEnvironment
 
 fun main() {
-    val e = Environment.of()
+    val e = BasicEnvironment.of()
 
     val alice = ASAgent.of()
     val bob = ASAgent.of()
