@@ -15,6 +15,7 @@ interface Agent<
     ActivationRecordType,
     IntentionType,
     ImmutableContext,
+    Environment
 > where
     Query: Any,
     PlanType: Plan<Query, Belief, Event>,
@@ -33,7 +34,8 @@ interface Agent<
         PlanType,
         ActivationRecordType,
         IntentionType,
-        ImmutableContext
+        ImmutableContext,
+        Environment
     >
 
     /** Agent's Actual State */

@@ -10,8 +10,16 @@ import it.unibo.jakta.intentions.IntentionPool
 import it.unibo.jakta.plans.Plan
 
 /** BDI Agent definition*/
-interface AgentLifecycle<Query, Belief, Event, PlanType, ActivationRecordType, IntentionType, Context, Environment>
-    where
+interface AgentLifecycle<
+    Query,
+    Belief,
+    Event,
+    PlanType,
+    ActivationRecordType,
+    IntentionType,
+    Context,
+    Environment
+> where
     Query: Any,
     PlanType: Plan<Query, Belief, Event>,
     ActivationRecordType: ActivationRecord<Query, Belief, Event, PlanType>,
