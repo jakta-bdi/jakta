@@ -2,6 +2,7 @@ package it.unibo.jakta.impl
 
 import it.unibo.jakta.ASAgent
 import it.unibo.jakta.AgentLifecycle
+import it.unibo.jakta.actions.ASAction
 import it.unibo.jakta.actions.effects.AgentChange
 import it.unibo.jakta.actions.effects.BeliefChange
 import it.unibo.jakta.actions.effects.EnvironmentChange
@@ -13,34 +14,19 @@ import it.unibo.jakta.actions.effects.PopMessage
 import it.unibo.jakta.actions.effects.Sleep
 import it.unibo.jakta.actions.effects.Stop
 import it.unibo.jakta.beliefs.ASBelief
-import it.unibo.jakta.beliefs.Belief
+import it.unibo.jakta.beliefs.ASBeliefBase
 import it.unibo.jakta.beliefs.BeliefBase
 import it.unibo.jakta.beliefs.MutableBeliefBase
 import it.unibo.jakta.context.ASAgentContext
 import it.unibo.jakta.context.AgentContext
-import it.unibo.jakta.context.ContextUpdate.ADDITION
-import it.unibo.jakta.context.ContextUpdate.REMOVAL
 import it.unibo.jakta.environment.BasicEnvironment
 import it.unibo.jakta.events.ASEvent
 import it.unibo.jakta.events.AchievementGoalFailure
 import it.unibo.jakta.events.BeliefBaseAddition
 import it.unibo.jakta.events.BeliefBaseRemoval
-import it.unibo.jakta.events.EventQueue
 import it.unibo.jakta.events.TestGoalFailure
 import it.unibo.jakta.executionstrategies.ExecutionResult
 import it.unibo.jakta.fsm.Activity
-import it.unibo.jakta.goals.Achieve
-import it.unibo.jakta.goals.Act
-import it.unibo.jakta.goals.ActExternally
-import it.unibo.jakta.goals.ActInternally
-import it.unibo.jakta.goals.ActionGoal
-import it.unibo.jakta.goals.AddBelief
-import it.unibo.jakta.goals.BeliefGoal
-import it.unibo.jakta.goals.EmptyGoal
-import it.unibo.jakta.goals.RemoveBelief
-import it.unibo.jakta.goals.Spawn
-import it.unibo.jakta.goals.Test
-import it.unibo.jakta.goals.UpdateBelief
 import it.unibo.jakta.intentions.ASActivationRecord
 import it.unibo.jakta.intentions.ASIntention
 import it.unibo.jakta.intentions.ASIntentionPool
@@ -50,13 +36,20 @@ import it.unibo.jakta.messages.Tell
 import it.unibo.jakta.plans.ASPlan
 import it.unibo.tuprolog.core.Struct
 
-typealias ASAgentLifecycle = AgentLifecycle<Struct, ASBelief, ASEvent, ASPlan, ASActivationRecord, ASIntention, ASAgentContext>
+typealias ASAgentLifecycle = AgentLifecycle<
+    Struct,
+    ASBelief,
+    ASEvent,
+    ASPlan,
+    ASActivationRecord,
+    ASIntention,
+    ASAgentContext,
+    BasicEnvironment,
+>
 
 internal data class AgentLifecycleImpl(
     private var agent: ASAgent,
 ) : ASAgentLifecycle {
-    private var controller: Activity.Controller? = null
-    private var debugEnabled = false
     private var cachedEffects = emptyList<EnvironmentChange>()
 
     override fun selectEvent(events: List<ASEvent>): ASEvent? = agent.selectEvent(events)
@@ -102,21 +95,22 @@ internal data class AgentLifecycleImpl(
         false -> {
             when (event) {
                 is AchievementGoalFailure, is TestGoalFailure ->
-                    event.intention?.copy(recordStack = listOf(plan.toActivationRecord()))
+                    event.intention?.copy(recordStack = mutableListOf(plan.toActivationRecord()))
                 // else -> intentions[event.intention!!.id]!!.push(plan.toActivationRecord())
-                else -> event.intention?.pop()?.push(plan.toActivationRecord())
+                else -> {
+                    event.intention?.pop()
+                    event.intention?.push(plan.toActivationRecord())
+                    event.intention
+                }
             }
         }
     }
 
+    override fun scheduleIntention(intentions: ASIntentionPool) = agent.scheduleIntention(intentions)
 
-    override fun scheduleIntention(intentions: IntentionPool) = agent.scheduleIntention(intentions)
+    override fun runIntention(intention: ASIntention, context: ASAgentContext, environment: BasicEnvironment): ExecutionResult {
+        when (val nextGoal = intention.nextTask()) {
 
-    override fun runIntention(intention: Intention, context: AgentContext, environment: BasicEnvironment): ExecutionResult =
-        when (val nextGoal = intention.nextGoal()) {
-            is EmptyGoal -> ExecutionResult(
-                context.copy(intentions = context.intentions.updateIntention(intention.pop())),
-            )
             is ActionGoal -> when (nextGoal) {
                 is ActInternally -> {
                     val internalAction = context.internalActions[nextGoal.action.functor]
@@ -132,6 +126,7 @@ internal data class AgentLifecycleImpl(
                         executeInternalAction(intention, internalAction, context, nextGoal)
                     }
                 }
+
                 is ActExternally -> {
                     val externalAction = environment.externalActions[nextGoal.action.functor]
                     if (externalAction == null) {
@@ -145,6 +140,7 @@ internal data class AgentLifecycleImpl(
                         executeExternalAction(intention, externalAction, context, environment, nextGoal)
                     }
                 }
+
                 is Act -> {
                     val action = (environment.externalActions + context.internalActions)[nextGoal.action.functor]
                     if (action == null) {
@@ -158,25 +154,28 @@ internal data class AgentLifecycleImpl(
                             is InternalAction -> executeInternalAction(intention, action, context, nextGoal)
                             is ExternalAction ->
                                 executeExternalAction(intention, action, context, environment, nextGoal)
+
                             else ->
-                                throw
-                                IllegalStateException("The ASAction to execute is neither internal nor external")
+                                throw IllegalStateException("The ASAction to execute is neither internal nor external")
                         }
                     }
                 }
             }
+
             is Spawn -> ExecutionResult(
                 context.copy(
                     events = context.events + Event.ofAchievementGoalInvocation(Achieve.of(nextGoal.value)),
                     intentions = context.intentions.updateIntention(intention.pop()),
                 ),
             )
+
             is Achieve -> ExecutionResult(
                 context.copy(
                     events = context.events + Event.ofAchievementGoalInvocation(nextGoal, intention),
                     intentions = IntentionPool.of(context.intentions - intention.id),
                 ),
             )
+
             is Test -> {
                 val solution = context.beliefBase.solve(nextGoal.value)
                 when (solution.isYes) {
@@ -187,6 +186,7 @@ internal data class AgentLifecycleImpl(
                             ),
                         ),
                     )
+
                     else -> ExecutionResult(
                         context.copy(
                             events = context.events + Event.ofTestGoalFailure(intention.currentPlan(), intention),
@@ -194,6 +194,7 @@ internal data class AgentLifecycleImpl(
                     )
                 }
             }
+
             is BeliefGoal -> {
                 val retrieveResult = when (nextGoal) {
                     is AddBelief -> context.beliefBase.add(Belief.from(nextGoal.value))
@@ -208,7 +209,10 @@ internal data class AgentLifecycleImpl(
                     ),
                 )
             }
+
+            else -> {}
         }
+    }
 
     private fun applyEffects(context: AgentContext, effects: Iterable<AgentChange>): AgentContext {
         var newBeliefBase = context.beliefBase
@@ -301,19 +305,18 @@ internal data class AgentLifecycleImpl(
 
     override fun deliberate() {
         // STEP5: Selecting an Event.
-        var newEvents = this.agent.context.events
-        val selectedEvent = selectEvent(this.agent.context.events)
-        var newIntentionPool = agent.context.intentions
+        val roContext = this.agent.context.snapshot()
+        val selectedEvent = selectEvent(roContext.events)
         if (selectedEvent != null) {
-            newEvents = newEvents - selectedEvent
+            agent.context.mutableEventList.remove(selectedEvent)
 
             // STEP6: Retrieving all Relevant Plans.
-            val relevantPlans = selectRelevantPlans(selectedEvent, agent.context.planLibrary)
+            val relevantPlans = selectRelevantPlans(selectedEvent, roContext.planLibrary.toList())
             // if the set of relevant plans is empty, the event is simply discarded.
 
             // STEP7: Determining the Applicable Plans.
-            val applicablePlans = relevantPlans.plans.filter {
-                isPlanApplicable(selectedEvent, it, this.agent.context.beliefBase)
+            val applicablePlans = relevantPlans.filter {
+                isPlanApplicable(selectedEvent, it, roContext.beliefBase)
             }
 
             // STEP8: Selecting one Applicable Plan.
@@ -321,34 +324,32 @@ internal data class AgentLifecycleImpl(
 
             // Add plan to intentions
             if (selectedPlan != null) {
-                if (debugEnabled) println("[${agent.name}] Selected the event: $selectedEvent")
+                if (this.agent.environment.debugEnabled)
+                    println("[${agent.name}] Selected the event: $selectedEvent")
                 // if (debugEnabled) println("[${agent.name}] Selected the plan: $selectedPlan")
                 val updatedIntention = assignPlanToIntention(
                     selectedEvent,
-                    selectedPlan.applicablePlan(selectedEvent, this.agent.context.beliefBase),
-                    agent.context.intentions,
+                    selectedPlan.applicablePlan(selectedEvent, roContext.beliefBase as ASBeliefBase), //Todo(remove this cast)
+                    roContext.intentions,
                 )
                 // if (debugEnabled) println("[${agent.name}] Updated Intention: $updatedIntention")
-                newIntentionPool = agent.context.intentions.updateIntention(updatedIntention)
+                if (updatedIntention != null) {
+                    agent.context.mutableIntentionPool.updateIntention(updatedIntention)
+                }
             } else {
-                if (debugEnabled) {
+                if (agent.environment.debugEnabled) {
                     println("[${agent.name}] WARNING: There's no applicable plan for the event: $selectedEvent")
                 }
                 if (selectedEvent.isInternal()) {
-                    newIntentionPool = newIntentionPool.deleteIntention(selectedEvent.intention!!.id)
+                    agent.context.mutableIntentionPool.deleteIntention(selectedEvent.intention!!.id)
                 }
             }
         }
-        // Select intention to execute
-        this.agent = this.agent.copy(
-            events = newEvents,
-            intentions = newIntentionPool,
-        )
     }
 
-    override fun act(environment: BasicEnvironment): Iterable<EnvironmentChange> {
+    override fun act(environment: BasicEnvironment): Boolean {
         var executionResult = ExecutionResult(AgentContext.of())
-
+        // Select intention to execute
         var newIntentionPool = agent.context.intentions
         if (!newIntentionPool.isEmpty()) {
             // STEP9: Select an Intention for Further Execution.
@@ -378,10 +379,9 @@ internal data class AgentLifecycleImpl(
 
     override fun runOneCycle(
         environment: BasicEnvironment,
-        controller: Activity.Controller?,
         debugEnabled: Boolean,
-    ): Iterable<EnvironmentChange> {
-        sense(environment, controller, debugEnabled)
+    ): Boolean {
+        sense(environment, debugEnabled)
         deliberate()
         return act(environment)
     }

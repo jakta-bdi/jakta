@@ -158,6 +158,4 @@ interface AgentLifecycle<
      *  @return true if the environment has been changed as a result of this operation.
      */
     fun act(environment: Environment): Boolean
-
-
 }

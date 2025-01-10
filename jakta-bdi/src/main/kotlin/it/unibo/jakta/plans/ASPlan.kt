@@ -3,6 +3,7 @@ package it.unibo.jakta.plans
 import it.unibo.jakta.actions.ASAction
 import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.beliefs.ASBeliefBase
+import it.unibo.jakta.beliefs.BeliefBase
 import it.unibo.jakta.events.ASEvent
 import it.unibo.jakta.events.AchievementGoalFailure
 import it.unibo.jakta.events.AchievementGoalInvocation
@@ -73,3 +74,5 @@ interface ASPlan : Plan<Struct, ASBelief, ASEvent> {
         ): ASPlan = of(TestGoalFailure(value), guard, goals)
     }
 }
+
+

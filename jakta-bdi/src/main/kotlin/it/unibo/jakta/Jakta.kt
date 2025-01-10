@@ -24,23 +24,24 @@ object Jakta {
 
     fun printAslSyntax(agent: ASAgent, prettyFormatted: Boolean = true) {
         println("% ${agent.name}")
-        for (belief in agent.context.beliefBase) {
+        for (belief in agent.context.mutableBeliefBase) {
             if (prettyFormatted) {
                 val formatter = TermFormatter.prettyExpressions(operatorSet = OperatorSet.DEFAULT + Jakta.operators)
-                println(formatter.format(belief.rule))
+                println(formatter.format(belief.content))
             } else {
-                println(belief.rule)
+                println(belief.content)
             }
         }
-        for (plan in agent.context.planLibrary.plans) {
+        for (plan in agent.context.mutablePlanLibrary) {
             var trigger = plan.trigger.value.toString()
             var guard = plan.guard.toString()
-            var body = plan.goals.joinToString("; ") { it.value.toString() }
+            var body = plan.tasks.joinToString("; ") { it.toString() }
             if (prettyFormatted) {
                 val formatter = TermFormatter.prettyExpressions(operatorSet = OperatorSet.DEFAULT + Jakta.operators)
                 trigger = formatter.format(plan.trigger.value)
                 guard = formatter.format(plan.guard)
-                body = plan.goals.joinToString("; ") { formatter.format(it.value) }
+                //body = plan.tasks.joinToString("; ") { formatter.format(it.value) }
+            // TODO(Missing generator of ASL syntax from Jakta spec)
             }
             println("+!$trigger : $guard <- $body")
         }

@@ -15,7 +15,7 @@ import it.unibo.tuprolog.core.Struct
 interface ASEvent {
 
     /** Denotes the change that took place for the Event generation */
-    val trigger: Struct
+    val value: Struct
 
     /** The [Event]'s associated [Intention]. Its value is null if the [Event] is an External one. */
     val intention: ASIntention?
@@ -29,49 +29,49 @@ interface ASEvent {
 
 /**
  * Generates an [Event] to execute a plan.
- * @param trigger the [AchievementGoalTrigger.Invocation] that triggered this Event.
+ * @param value the [AchievementGoalTrigger.Invocation] that triggered this Event.
  * @param intention if the event is internal, this parameter specifies the intention id where the event belongs.
  * If the event is external, this value is set to null. It's default value is null.
  * @return a new instance of [Event]
  */
 data class AchievementGoalInvocation(
-    override val trigger: Struct,
+    override val value: Struct,
     override val intention: ASIntention? = null,
 ) : ASEvent
 
 /**
  * Generates an [Event] for doing something after a plan failure.
- * @param trigger the [Struct] that triggered this Event.
+ * @param value the [Struct] that triggered this Event.
  * @param intention if the event is internal, this parameter specifies the intention id where the event belongs.
  * If the event is external, this value is set to null. It's default value is null.
  * @return a new instance of [Event]
  */
 data class AchievementGoalFailure(
-    override val trigger: Struct,
+    override val value: Struct,
     override val intention: ASIntention? = null,
 ) : ASEvent
 
 /**
  * Generates an [Event] to test a plan.
- * @param trigger the [Struct] that triggered this Event
+ * @param value the [Struct] that triggered this Event
  * @param intention if the event is internal, this parameter specifies the intention id where the event belongs.
  * If the event is external, this value is set to null. It's default value is null.
  * @return a new instance of [Event]
  */
 data class TestGoalInvocation(
-    override val trigger: Struct,
+    override val value: Struct,
     override val intention: ASIntention? = null,
 ) : ASEvent
 
 /**
  * Generates an [Event] for doing something after the failure of the plan's tests.
- * @param trigger the [Struct] that triggered this Event.
+ * @param value the [Struct] that triggered this Event.
  * @param intention if the event is internal, this parameter specifies the intention id where the event belongs.
  * If the event is external, this value is set to null. It's default value is null.
  * @return a new instance of [Event]
  */
 data class TestGoalFailure(
-    override val trigger: Struct,
+    override val value: Struct,
     override val intention: ASIntention? = null,
 ) : ASEvent
 
@@ -97,13 +97,13 @@ data class TestGoalFailure(
 
 /**
  * Generates an [Event] triggered by a BeliefBase addition.
- * @param trigger the [Struct] that triggered this Event.
+ * @param value the [Struct] that triggered this Event.
  * @param intention if the event is internal, this parameter specifies the intention id where the event belongs.
  * If the event is external, this value is set to null. It's default value is null.
  * @return a new instance of [Event]
  */
 data class BeliefBaseAddition(
-    override val trigger: Struct,
+    override val value: Struct,
     override val intention: ASIntention? = null,
 ) : ASEvent {
     constructor(belief: ASBelief, intention: ASIntention? = null) : this(
@@ -114,13 +114,13 @@ data class BeliefBaseAddition(
 
 /**
  * Generates an [Event] triggered by a BeliefBase removal.
- * @param trigger the [Struct] that triggered this Event
+ * @param value the [Struct] that triggered this Event
  * @param intention if the event is internal, this parameter specifies the intention id where the event belongs.
  * If the event is external, this value is set to null. It's default value is null.
  * @return a new instance of [Event]
  */
 data class BeliefBaseRemoval(
-    override val trigger: Struct,
+    override val value: Struct,
     override val intention: ASIntention? = null,
 ) : ASEvent {
     constructor(belief: ASBelief, intention: ASIntention? = null) : this(

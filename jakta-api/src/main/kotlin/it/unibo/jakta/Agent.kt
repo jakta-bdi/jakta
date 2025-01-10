@@ -27,6 +27,8 @@ interface Agent<
 
     val name: String
 
+    val environment: Environment
+
     val lifecycle: AgentLifecycle<
         Query,
         Belief,

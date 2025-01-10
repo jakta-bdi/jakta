@@ -4,6 +4,7 @@ import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.beliefs.ASBeliefBase
 import it.unibo.jakta.beliefs.BeliefBase
 import it.unibo.jakta.events.ASEvent
+import it.unibo.jakta.intentions.ASActivationRecord
 import it.unibo.jakta.intentions.ActivationRecord
 import it.unibo.jakta.plans.ASPlan
 import it.unibo.jakta.plans.Task
@@ -23,7 +24,7 @@ internal data class PlanImpl(
         // TODO("Migliorabile per i cast")
         val castedEvent: ASEvent = event as ASEvent
         val castedBB: ASBeliefBase = beliefBase as ASBeliefBase
-        val mgu = castedEvent.trigger mguWith this.trigger.trigger
+        val mgu = castedEvent.value mguWith this.trigger.value
         val actualGuard = guard.apply(mgu).castToStruct()
         return isRelevant(event) && castedBB.select(actualGuard).isNotEmpty()
     }
@@ -31,25 +32,26 @@ internal data class PlanImpl(
     override fun applicablePlan(event: ASEvent, beliefBase: ASBeliefBase): ASPlan =
         when (isApplicable(event, beliefBase)) {
             true -> {
-                val mgu = event.trigger mguWith this.trigger.trigger
+                val mgu = event.value mguWith this.trigger.value
                 val actualGuard = guard.apply(mgu).castToStruct()
                 val solvedGuard = beliefBase.select(actualGuard)
-                val actualGoals = tasks.map { // TODO("Implementare i Task")
+                val actualGoals = tasks.map { // TODO("Does the new Task structure lose the concept of unification?")
 //                    it.copy(
-                        it.value
-                            .apply(mgu)
-                            .apply(solvedGuard.substitution)
-                            .castToStruct(),
+//                        it.value
+//                            .apply(mgu)
+//                            .apply(solvedGuard.substitution)
+//                            .castToStruct(),
 //                    )
                 }
 
-                PlanImpl(event.trigger, actualGuard, actualGoals)
+                //PlanImpl(event.value, actualGuard, actualGoals)
+                this
             }
             else -> this
         }
 
-    override fun isRelevant(event: Event<T>): Boolean =
-        event.trigger::class == this.trigger::class && (trigger.value mguWith event.trigger.value).isSuccess
+    override fun isRelevant(event: ASEvent): Boolean =
+        event::class == this.trigger::class && (trigger.value mguWith event.value).isSuccess
 
-    override fun toActivationRecord(): ActivationRecord = ActivationRecord.of(goals, trigger.value)
+    override fun toActivationRecord(): ASActivationRecord = ASActivationRecord(this, tasks)
 }

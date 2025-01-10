@@ -17,6 +17,6 @@ data class ASActivationRecord(
         taskQueue.firstOrNull()?.also { taskQueue -= it }
 
     fun applySubstitution(substitution: Substitution) =
-        taskQueue.forEach{ if (it is ASAction<*, *, *>) it.applySubstitution(substitution)}
+        taskQueue.forEach{ if (it is ASAction<*>) it.applySubstitution(substitution)}
 
 }
