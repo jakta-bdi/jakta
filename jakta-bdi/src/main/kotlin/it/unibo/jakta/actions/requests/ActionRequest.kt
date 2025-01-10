@@ -9,7 +9,7 @@ import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.core.Term
 
 interface ActionRequest {
-    val arguments: List<Term>
+    // val arguments: List<Term> // TODO(potrebbero non sevirmi più, ci pensa il compilatore kotlin)
     val agentContext: ASAgentContext
     val agentName: String
     val agentID: AgentID

@@ -22,8 +22,8 @@ interface ExternalRequest : ActionRequest {
         ): ExternalRequest = object: ExternalRequest {
             override val environment: BasicEnvironment
                 get() = environment
-            override val arguments: List<Term>
-                get() = arguments.toList()
+//            override val arguments: List<Term>
+//                get() = arguments.toList()
             override val agentContext: ASAgentContext
                 get() = agent.context.snapshot()
             override val agentName: String

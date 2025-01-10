@@ -1,5 +1,6 @@
 package it.unibo.jakta.actions.stdlib
 
+import it.unibo.jakta.actions.AbstractAction
 import it.unibo.jakta.actions.AbstractInternalAction
 import it.unibo.jakta.actions.effects.EventChange
 import it.unibo.jakta.actions.effects.IntentionChange
@@ -28,7 +29,10 @@ abstract class AbstractPlanExecutionTask(
 class Achieve(
     val planTrigger: Struct,
 ) : AbstractPlanExecutionTask("Achieve", planTrigger) {
-    override suspend fun action(request: InternalRequest) { }
+    override suspend fun action(request: InternalRequest) {
+
+
+    }
 }
 
 /**

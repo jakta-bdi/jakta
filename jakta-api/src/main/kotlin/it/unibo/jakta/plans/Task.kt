@@ -4,16 +4,14 @@ import it.unibo.jakta.intentions.ActivationRecord
 import it.unibo.jakta.intentions.Intention
 import javax.management.Query
 
-sealed interface ExecutionResult
-
-interface ActionTaskEffects<out Event> : ExecutionResult, List<Event> {
+interface ExecutionResult<out SideEffect> : List<SideEffect> {
     companion object {
-        fun <Event> from(events: List<Event>): ActionTaskEffects<Event> =
-            object : ActionTaskEffects<Event>, List<Event> by events { }
+        fun <SideEffect> from(events: List<SideEffect>): ExecutionResult<SideEffect> =
+            object : ExecutionResult<SideEffect>, List<SideEffect> by events { }
 
-        fun <Event> from(vararg events: Event): ActionTaskEffects<Event> = from(events.toList())
+        fun <SideEffect> from(vararg events: SideEffect): ExecutionResult<SideEffect> = from(events.toList())
 
-        fun  <Event> none(): ActionTaskEffects<Event> = from(emptyList())
+        fun  <SideEffect> none(): ExecutionResult<SideEffect> = from(emptyList())
     }
 }
 
@@ -21,12 +19,12 @@ interface ActionTaskEffects<out Event> : ExecutionResult, List<Event> {
 //    ExecutionResult,
 //    Intention<Query, Belief, Event, ActivationRecord<Query, Belief, Event>>
 
-/**
- * Represents one of the steps that need to be executed for the [Plan]'s successful completion.
- */
-interface Task<Query: Any, Belief, in Argument, out Result : ExecutionResult> {
-    suspend fun execute(argument: Argument): Result
-}
+///**
+// * Represents one of the steps that need to be executed for the [Plan]'s successful completion.
+// */
+//interface Task<Query: Any, Belief, in Argument, out Result : ExecutionResult> {
+//    suspend fun execute(argument: Argument): Result
+//}
 
 
 //interface Achieve<Query: Any, Belief, in Argument, Event> :

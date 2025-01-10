@@ -17,14 +17,11 @@ class InternalRequest (
     override val agentName: String,
     override val agentID: AgentID,
     override val requestTimestamp: Time?,
-    override val arguments: List<Term>,
+//    override val arguments: List<Term>,
 ) : ActionRequest {
 
-    constructor(agent: ASAgent, requestTime: Time?, arguments: List<Term>):
-        this(agent.context.snapshot(), agent.name, agent.agentID, requestTime, arguments)
-
-    constructor(agent: ASAgent, requestTime: Time?, vararg arguments: Term):
-        this(agent, requestTime, arguments.toList())
+    constructor(agent: ASAgent, requestTime: Time?):
+        this(agent.context.snapshot(), agent.name, agent.agentID, requestTime)
 
     override fun reply(substitution: Substitution, effects: List<ActionSideEffect>): ActionResponse =
         ActionResponse(substitution, effects)

@@ -29,12 +29,13 @@ abstract class AbstractAction<Request: ActionRequest> (
 
         val intention = argument.agentContext.intentions.nextIntention()
 
-        if (argument.arguments.size > signature.arity) {
-            val failure = AchievementGoalFailure(intention.currentPlan().trigger.value, intention)
-            val failureEvent = EventChange.EventAddition(failure)
-            // throw IllegalArgumentException("ERROR: Wrong number of arguments for action ${signature.name}")
-            effects.add(failureEvent)
-        }
+        // STATIC CHECKING
+//        if (argument.arguments.size > signature.arity) {
+//            val failure = AchievementGoalFailure(intention.currentPlan().trigger.value, intention)
+//            val failureEvent = EventChange.EventAddition(failure)
+//            // throw IllegalArgumentException("ERROR: Wrong number of arguments for action ${signature.name}")
+//            effects.add(failureEvent)
+//        }
 
         action(argument)
 
@@ -50,7 +51,7 @@ abstract class AbstractAction<Request: ActionRequest> (
             val trigger = intention.currentPlan().trigger.value
             val failure = AchievementGoalFailure(trigger, intention)
             val failureEvent = EventChange.EventAddition(failure)
-            effects.add(failureEvent)
+            effects.add(failureEvent) //TODO(odd position for this addition, add test)
         }
         return res
     }
