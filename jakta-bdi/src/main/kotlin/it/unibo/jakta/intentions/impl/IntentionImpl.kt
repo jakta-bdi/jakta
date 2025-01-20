@@ -1,11 +1,9 @@
 package it.unibo.jakta.intentions.impl
 
-import it.unibo.jakta.beliefs.ASBelief
+import it.unibo.jakta.actions.ASAction
 import it.unibo.jakta.intentions.ASActivationRecord
 import it.unibo.jakta.intentions.ASIntention
 import it.unibo.jakta.intentions.IntentionID
-import it.unibo.jakta.plans.Task
-import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
 
 internal class IntentionImpl(
@@ -14,7 +12,7 @@ internal class IntentionImpl(
     override val id: IntentionID = IntentionID(),
 ) : ASIntention {
 
-    override fun pop(): Task<Struct, ASBelief, *, *>? {
+    override fun pop(): ASAction? {
         val record = recordStack.firstOrNull() ?: return null
         return if (record.isLastTask()) {
             recordStack = recordStack - record

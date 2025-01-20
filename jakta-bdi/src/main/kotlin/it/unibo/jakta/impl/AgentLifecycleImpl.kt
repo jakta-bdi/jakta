@@ -48,6 +48,7 @@ typealias ASAgentLifecycle = AgentLifecycle<
 >
 
 internal data class AgentLifecycleImpl(
+
     private var agent: ASAgent,
 ) : ASAgentLifecycle {
     private var cachedEffects = emptyList<EnvironmentChange>()

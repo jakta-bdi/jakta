@@ -2,11 +2,14 @@ package it.unibo.jakta.beliefs
 
 import it.unibo.jakta.beliefs.impl.ASBeliefBaseImpl
 import it.unibo.tuprolog.core.Struct
+import it.unibo.tuprolog.solve.Solution
 
 /** A BDI Agent's collection of [ASBelief] */
 interface ASBeliefBase : BeliefBase<Struct, ASBelief> {
 
     fun select(query: ASBelief): List<ASBelief>
+    fun getSolutionOf(query: Struct): Solution
+    fun getSolutionOf(belief: ASBelief): Solution
 }
 
 interface ASMutableBeliefBase : MutableBeliefBase<Struct, ASBelief, ASBeliefBase> {

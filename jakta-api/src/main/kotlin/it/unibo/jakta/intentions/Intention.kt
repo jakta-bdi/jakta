@@ -1,12 +1,12 @@
 package it.unibo.jakta.intentions
 
+import it.unibo.jakta.actions.Action
 import it.unibo.jakta.plans.Plan
-import it.unibo.jakta.plans.Task
 
 interface Intention<Query, Belief, Event, PlanType, ActivationRecordType> where
     Query: Any,
     PlanType: Plan<Query, Belief, Event>,
-    ActivationRecordType: ActivationRecord<Query, Belief, Event, PlanType>
+    ActivationRecordType: ActivationRecord<Query, Belief, Event>
 {
     val recordStack: List<ActivationRecordType>
 
@@ -14,7 +14,8 @@ interface Intention<Query, Belief, Event, PlanType, ActivationRecordType> where
 
     val id: IntentionID
 
-    fun nextTask(): Task<Query, Belief, *, *>? = recordStack.firstOrNull()?.taskQueue?.firstOrNull()
+    fun nextTask(): Action<*, *, *>? =
+        recordStack.firstOrNull()?.taskQueue?.firstOrNull()
 
     fun currentPlan(): PlanType = recordStack.first().plan
 
@@ -24,7 +25,7 @@ interface Intention<Query, Belief, Event, PlanType, ActivationRecordType> where
      * then the whole activation record is removed from the records stack.
      * @return the [Task] removed.
      */
-    fun pop(): Task<Query, Belief, *, *>?
+    fun pop(): Action<*, *, *>?
 
     /**
      * Inserts at the top of the records stack the new [ActivationRecord].

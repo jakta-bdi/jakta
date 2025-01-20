@@ -1,10 +1,12 @@
 package it.unibo.jakta.context.impl
 
 import it.unibo.jakta.beliefs.ASBelief
+import it.unibo.jakta.beliefs.ASBeliefBase
 import it.unibo.jakta.beliefs.ASMutableBeliefBase
 import it.unibo.jakta.beliefs.BeliefBase
 import it.unibo.jakta.context.ASAgentContext
 import it.unibo.jakta.context.ASMutableAgentContext
+import it.unibo.jakta.environment.BasicEnvironment
 import it.unibo.jakta.events.ASEvent
 import it.unibo.jakta.intentions.ASActivationRecord
 import it.unibo.jakta.intentions.ASIntention
@@ -19,6 +21,7 @@ internal class ASAgentContextImpl(
     override val mutableEventList: MutableList<ASEvent> = mutableListOf(),
     override val mutablePlanLibrary: MutableCollection<ASPlan> = mutableListOf(),
     //val mutableInternalActions: MutableMap<String, InternalAction> = mutableMapOf(),
+    override val environment: BasicEnvironment,
     override val mutableIntentionPool: ASMutableIntentionPool = IntentionPoolStaticFactory.empty(),
 ) : ASMutableAgentContext, ASAgentContext {
 
@@ -27,12 +30,13 @@ internal class ASAgentContextImpl(
         mutableEventList,
         mutablePlanLibrary,
         //mutableInternalActions,
+        environment,
         mutableIntentionPool,
     )
 
 //    override val internalActions: Map<String, InternalAction>
 //        get() = mutableInternalActions.toMap()
-    override val beliefBase: BeliefBase<Struct, ASBelief>
+    override val beliefBase: ASBeliefBase
         get() = mutableBeliefBase.snapshot()
     override val events: List<ASEvent>
         get() = mutableEventList.toList()

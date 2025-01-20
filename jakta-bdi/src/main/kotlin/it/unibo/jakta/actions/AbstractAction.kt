@@ -4,13 +4,16 @@ import it.unibo.jakta.actions.effects.ActionSideEffect
 import it.unibo.jakta.actions.effects.EventChange
 import it.unibo.jakta.actions.requests.ActionRequest
 import it.unibo.jakta.actions.responses.ActionResponse
+import it.unibo.jakta.context.ASAgentContext
+import it.unibo.jakta.context.AgentContext
 import it.unibo.jakta.events.AchievementGoalFailure
+import it.unibo.jakta.intentions.ASIntention
 import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.solve.Signature
 
-abstract class AbstractAction<Request: ActionRequest> (
+abstract class AbstractAction (
     override val signature: Signature,
-) : ASAction<Request> {
+) : ASAction {
 
     constructor(name: String, arity: Int) : this(Signature(name, arity))
 
@@ -21,11 +24,13 @@ abstract class AbstractAction<Request: ActionRequest> (
         result = substitution
     }
 
-    final override suspend fun execute(argument: Request): ActionResponse {
+    protected fun fail() {
+        result = Substitution.failed()
+    }
 
-//        val sideEffect = ActionSideEffect { context: ASMutableAgentContext ->
-//            context.mutableEventList.add(eadfewfew)
-//        }
+    abstract fun postExec(intention: ASIntention)
+
+    final override suspend fun execute(argument: ActionRequest): ActionResponse {
 
         val intention = argument.agentContext.intentions.nextIntention()
 
@@ -38,23 +43,11 @@ abstract class AbstractAction<Request: ActionRequest> (
 //        }
 
         action(argument)
-
-        val res = argument.reply(result, effects.toMutableList())
-
+        postExec(intention)
+        val response = argument.reply(result, effects.toMutableList())
         effects.clear()
-
-        if (res.substitution.isSuccess) {
-            if (intention.recordStack.isNotEmpty()) {
-                intention.applySubstitution(res.substitution)
-            }
-        } else {
-            val trigger = intention.currentPlan().trigger.value
-            val failure = AchievementGoalFailure(trigger, intention)
-            val failureEvent = EventChange.EventAddition(failure)
-            effects.add(failureEvent) //TODO(odd position for this addition, add test)
-        }
-        return res
+        return response
     }
 
-    abstract suspend fun action(request: Request)
+    abstract suspend fun action(request: ActionRequest)
 }

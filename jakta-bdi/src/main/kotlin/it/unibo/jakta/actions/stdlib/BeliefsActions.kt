@@ -1,21 +1,25 @@
 package it.unibo.jakta.actions.stdlib
 
 import it.unibo.jakta.actions.AbstractAction
-import it.unibo.jakta.actions.AbstractInternalAction
-import it.unibo.jakta.actions.requests.InternalRequest
 import it.unibo.jakta.actions.effects.BeliefChange
+import it.unibo.jakta.actions.requests.ActionRequest
 import it.unibo.jakta.beliefs.BeliefBase
 import it.unibo.jakta.beliefs.ASBelief
+import it.unibo.jakta.intentions.ASIntention
 import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.solve.Signature
 
 
-abstract class AbstractBeliefInternalAction(
+abstract class AbstractBeliefAction(
     var belief: ASBelief,
     name: String,
-): AbstractInternalAction(Signature(name, 1)) {
+): AbstractAction(Signature(name, 1)) {
     override fun applySubstitution(substitution: Substitution) {
         belief = belief.applySubstitution(substitution)
+    }
+
+    override fun postExec(intention: ASIntention) {
+        intention.pop()
     }
 }
 
@@ -24,8 +28,8 @@ abstract class AbstractBeliefInternalAction(
  */
 class AddBelief(
     belief: ASBelief,
-) : AbstractBeliefInternalAction(belief, "addBelief") {
-    override suspend fun action(request: InternalRequest) {
+) : AbstractBeliefAction(belief, "addBelief") {
+    override suspend fun action(request: ActionRequest) {
         effects.add(BeliefChange.BeliefAddition(belief))
     }
 }
@@ -35,8 +39,8 @@ class AddBelief(
  */
 class RemoveBelief(
     belief: ASBelief,
-) : AbstractBeliefInternalAction(belief, "addBelief")  {
-    override suspend fun action(request: InternalRequest) {
+) : AbstractBeliefAction(belief, "addBelief")  {
+    override suspend fun action(request: ActionRequest) {
         effects.add(BeliefChange.BeliefRemoval(belief))
     }
 }
@@ -46,8 +50,8 @@ class RemoveBelief(
  */
 class UpdateBelief(
     belief: ASBelief,
-) : AbstractBeliefInternalAction(belief, "removeBelief")  {
-    override suspend fun action(request: InternalRequest) {
+) : AbstractBeliefAction(belief, "removeBelief")  {
+    override suspend fun action(request: ActionRequest) {
         TODO("Missing implementation for update in beliefcontext")
     }
 }

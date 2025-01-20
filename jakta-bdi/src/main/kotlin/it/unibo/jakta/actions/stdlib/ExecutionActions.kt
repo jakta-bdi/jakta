@@ -1,20 +1,38 @@
 package it.unibo.jakta.actions.stdlib
 
-import it.unibo.jakta.actions.AbstractInternalAction
+import it.unibo.jakta.actions.AbstractAction
+import it.unibo.jakta.actions.effects.EventChange
 import it.unibo.jakta.actions.effects.Pause
 import it.unibo.jakta.actions.effects.Sleep
 import it.unibo.jakta.actions.effects.Stop
-import it.unibo.jakta.actions.requests.InternalRequest
+import it.unibo.jakta.actions.requests.ActionRequest
+import it.unibo.jakta.events.AchievementGoalFailure
+import it.unibo.jakta.intentions.ASIntention
 import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.core.Term
 
+abstract class AbstractExecutionAction(name: String, arity: Int): AbstractAction(name, arity) {
+    override fun postExec(intention: ASIntention) {
+        if (result.isSuccess) {
+            if (intention.recordStack.isNotEmpty()) {
+                intention.applySubstitution(result)
+            }
+        } else {
+            val trigger = intention.currentPlan().trigger.value
+            val failure = AchievementGoalFailure(trigger, intention)
+            val failureEvent = EventChange.EventAddition(failure)
+            effects.add(failureEvent) // Add Failure Event to be handled in future lifecycle steps
+        }
+    }
+}
+
 class Print(
     vararg terms: Term
-) : AbstractInternalAction("print", 2) {
+) : AbstractExecutionAction("print", 2) {
 
     private var termsList: List<Term> = terms.toList()
 
-    override suspend fun action(request: InternalRequest) {
+    override suspend fun action(request: ActionRequest) {
         val payload = termsList.joinToString(" ") {
             when {
                 it.isAtom -> it.castToAtom().value
@@ -29,24 +47,24 @@ class Print(
     }
 }
 
-object Fail : AbstractInternalAction("fail", 0) {
-    override suspend fun action(request: InternalRequest) {
+object Fail : AbstractExecutionAction("fail", 0) {
+    override suspend fun action(request: ActionRequest) {
         result = Substitution.failed()
     }
 
     override fun applySubstitution(substitution: Substitution) = Unit
 }
 
-object Stop : AbstractInternalAction("stop", 0) {
-    override suspend fun action(request: InternalRequest) {
+object Stop : AbstractExecutionAction("stop", 0) {
+    override suspend fun action(request: ActionRequest) {
         effects.add(Stop)
     }
 
     override fun applySubstitution(substitution: Substitution) = Unit
 }
 
-object Pause : AbstractInternalAction("pause", 0) {
-    override suspend fun action(request: InternalRequest) {
+object Pause : AbstractExecutionAction("pause", 0) {
+    override suspend fun action(request: ActionRequest) {
         effects.add(Pause)
     }
 
@@ -55,11 +73,9 @@ object Pause : AbstractInternalAction("pause", 0) {
 
 class Sleep(
     private var timeAmount: Term
-) : AbstractInternalAction("sleep", 1) {
-    override suspend fun action(request: InternalRequest) {
-        if (request.arguments[0].isInteger) {
-            effects.add(Sleep(request.arguments[0].castToInteger().value.toLong()))
-        }
+) : AbstractExecutionAction("sleep", 1) {
+    override suspend fun action(request: ActionRequest) {
+        effects.add(Sleep(timeAmount.castToInteger().value.toLong()))
     }
 
     override fun applySubstitution(substitution: Substitution) {

@@ -1,5 +1,7 @@
 package it.unibo.jakta
 
+import it.unibo.jakta.beliefs.BeliefBase
+import it.unibo.jakta.beliefs.MutableBeliefBase
 import it.unibo.jakta.context.AgentContext
 import it.unibo.jakta.context.MutableAgentContext
 import it.unibo.jakta.intentions.ActivationRecord
@@ -10,6 +12,8 @@ import it.unibo.jakta.plans.Plan
 interface Agent<
     Query,
     Belief,
+    BeliefBaseType,
+    MutableBeliefBaseType,
     Event,
     PlanType,
     ActivationRecordType,
@@ -19,19 +23,30 @@ interface Agent<
 > where
     Query: Any,
     PlanType: Plan<Query, Belief, Event>,
+    BeliefBaseType: BeliefBase<Query, Belief>,
+    MutableBeliefBaseType: MutableBeliefBase<Query, Belief, BeliefBaseType>,
     ActivationRecordType: ActivationRecord<Query, Belief, Event, PlanType>,
     IntentionType: Intention<Query, Belief, Event, PlanType, ActivationRecordType>,
-    ImmutableContext: AgentContext<Query, Belief, Event, PlanType, ActivationRecordType, IntentionType>
+    ImmutableContext: AgentContext<
+        Query,
+        Belief,
+        BeliefBaseType,
+        Event,
+        PlanType,
+        ActivationRecordType,
+        IntentionType,
+        Environment
+    >
 {
     val agentID: AgentID
 
     val name: String
 
-    val environment: Environment
-
     val lifecycle: AgentLifecycle<
         Query,
         Belief,
+        BeliefBaseType,
+        MutableBeliefBaseType,
         Event,
         PlanType,
         ActivationRecordType,
@@ -44,11 +59,14 @@ interface Agent<
     val context: MutableAgentContext<
         Query,
         Belief,
+        BeliefBaseType,
+        MutableBeliefBaseType,
         Event,
         PlanType,
         ActivationRecordType,
         IntentionType,
-        ImmutableContext
+        ImmutableContext,
+        Environment
     >
 
     /** Event Selection Function*/

@@ -10,13 +10,13 @@ import it.unibo.tuprolog.core.Substitution
 
 data class ASActivationRecord(
     override val plan: ASPlan,
-    override var taskQueue: List<Task<Struct, ASBelief, *, *>> = plan.tasks,
+    override var taskQueue: List<ASAction> = plan.tasks,
 ) : ActivationRecord<Struct, ASBelief, ASEvent, ASPlan> {
 
-    override fun pop(): Task<Struct, ASBelief, *, *>? =
+    override fun pop(): ASAction? =
         taskQueue.firstOrNull()?.also { taskQueue -= it }
 
     fun applySubstitution(substitution: Substitution) =
-        taskQueue.forEach{ if (it is ASAction<*>) it.applySubstitution(substitution)}
+        taskQueue.forEach{ it.applySubstitution(substitution)}
 
 }

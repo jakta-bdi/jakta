@@ -7,6 +7,8 @@ import it.unibo.jakta.beliefs.ASMutableBeliefBase
 import it.unibo.jakta.beliefs.BeliefBase
 import it.unibo.tuprolog.collections.ClauseMultiSet
 import it.unibo.tuprolog.core.Struct
+import it.unibo.tuprolog.core.Substitution
+import it.unibo.tuprolog.solve.Solution
 import it.unibo.tuprolog.solve.Solver
 import it.unibo.tuprolog.solve.flags.TrackVariables
 import it.unibo.tuprolog.solve.flags.Unknown
@@ -23,12 +25,7 @@ internal data class ASBeliefBaseImpl(
     override fun snapshot(): ASBeliefBase = this.copy()
 
     override fun select(query: Struct): List<ASBelief> {
-        val solution = Solver.prolog.newBuilder()
-            .flag(Unknown, Unknown.FAIL)
-            .staticKb(operatorExtension + Theory.of(beliefs))
-            .flag(TrackVariables) { ON }
-            .build()
-            .solveOnce(query)
+        val solution = getSolutionOf(query)
         return if (solution.isYes && solution.solvedQuery != null) {
             listOf(ASBelief.wrap(solution.solvedQuery!!))
         } else {
@@ -37,6 +34,15 @@ internal data class ASBeliefBaseImpl(
     }
 
     override fun select(query: ASBelief) = select(query.content.head)
+
+    override fun getSolutionOf(query: Struct): Solution = Solver.prolog.newBuilder()
+        .flag(Unknown, Unknown.FAIL)
+        .staticKb(operatorExtension + Theory.of(beliefs))
+        .flag(TrackVariables) { ON }
+        .build()
+        .solveOnce(query)
+
+    override fun getSolutionOf(belief: ASBelief): Solution = getSolutionOf(belief.content.head)
 
     override fun update(belief: ASBelief): Boolean {
         val element = beliefs.find { it.head?.functor == belief.content.head.functor }

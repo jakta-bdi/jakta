@@ -13,6 +13,8 @@ import it.unibo.jakta.plans.Plan
 interface AgentLifecycle<
     Query,
     Belief,
+    BeliefBaseType,
+    MutableBeliefBaseType,
     Event,
     PlanType,
     ActivationRecordType,
@@ -21,10 +23,21 @@ interface AgentLifecycle<
     Environment
 > where
     Query: Any,
+    BeliefBaseType: BeliefBase<Query, Belief>,
+    MutableBeliefBaseType: MutableBeliefBase<Query, Belief, BeliefBaseType>,
     PlanType: Plan<Query, Belief, Event>,
     ActivationRecordType: ActivationRecord<Query, Belief, Event, PlanType>,
     IntentionType: Intention<Query, Belief, Event, PlanType, ActivationRecordType>,
-    Context: AgentContext<Query, Belief, Event, PlanType, ActivationRecordType, IntentionType>
+    Context: AgentContext<
+        Query,
+        Belief,
+        BeliefBaseType,
+        Event,
+        PlanType,
+        ActivationRecordType,
+        IntentionType,
+        Environment
+    >
 {
 
     /**
@@ -114,7 +127,18 @@ interface AgentLifecycle<
      */
     fun runIntention(
         intention: IntentionType,
-        context: MutableAgentContext<Query, Belief, Event, PlanType, ActivationRecordType, IntentionType, Context>,
+        context: MutableAgentContext<
+            Query,
+            Belief,
+            BeliefBaseType,
+            MutableBeliefBaseType,
+            Event,
+            PlanType,
+            ActivationRecordType,
+            IntentionType,
+            Context,
+            Environment
+        >,
         environment: Environment,
     )
 

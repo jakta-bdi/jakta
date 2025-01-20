@@ -1,6 +1,7 @@
 package it.unibo.jakta
 
 import it.unibo.jakta.beliefs.ASBelief
+import it.unibo.jakta.beliefs.ASBeliefBase
 import it.unibo.jakta.beliefs.ASMutableBeliefBase
 import it.unibo.jakta.context.ASAgentContext
 import it.unibo.jakta.context.ASMutableAgentContext
@@ -16,7 +17,18 @@ import it.unibo.tuprolog.utils.Taggable
 import java.util.*
 
 interface ASAgent :
-    Agent<Struct, ASBelief, ASEvent, ASPlan, ASActivationRecord, ASIntention, ASAgentContext, BasicEnvironment>,
+    Agent<
+        Struct,
+        ASBelief,
+        ASBeliefBase,
+        ASMutableBeliefBase,
+        ASEvent,
+        ASPlan,
+        ASActivationRecord,
+        ASIntention,
+        ASAgentContext,
+        BasicEnvironment
+    >,
     Taggable<ASAgent>
 {
     companion object {

@@ -5,7 +5,7 @@ import it.unibo.jakta.beliefs.BeliefBase
 
 interface Plan<Query : Any, Belief, Event> {
 
-    val tasks: List<Action<Query, Belief, *, ExecutionResult>>
+    val tasks: List<Action<*, *, *>>
 
     /** Determines if a plan is relevant for the execution of the [Event]  --> UNIFICATION**/
     fun isRelevant(event: Event): Boolean

@@ -1,20 +1,19 @@
 package it.unibo.jakta.plans.impl
 
+import it.unibo.jakta.actions.ASAction
 import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.beliefs.ASBeliefBase
 import it.unibo.jakta.beliefs.BeliefBase
 import it.unibo.jakta.events.ASEvent
 import it.unibo.jakta.intentions.ASActivationRecord
-import it.unibo.jakta.intentions.ActivationRecord
 import it.unibo.jakta.plans.ASPlan
-import it.unibo.jakta.plans.Task
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.unify.Unificator.Companion.mguWith
 
 internal data class PlanImpl(
     override val trigger: ASEvent,
     override val guard: Struct,
-    override val tasks: List<Task<Struct, ASBelief, *, *>>,
+    override val tasks: List<ASAction>,
 ) : ASPlan {
 
     override fun isApplicable(event: ASEvent, beliefBase: BeliefBase<Struct, ASBelief>): Boolean {

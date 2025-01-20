@@ -6,13 +6,10 @@ import it.unibo.jakta.actions.responses.ActionResponse
 import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.solve.Signature
 
-interface ASAction<Request: ActionRequest> : Action<Request, ActionSideEffect, ActionResponse> {
+interface ASAction : Action<ActionRequest, ActionSideEffect, ActionResponse> {
     val signature: Signature
 
     fun applySubstitution(substitution: Substitution)
 
     fun addResults(substitution: Substitution)
-
-
-
 }

@@ -34,42 +34,42 @@ interface ASPlan : Plan<Struct, ASBelief, ASEvent> {
         private fun of(
             trigger: ASEvent,
             guard: Struct,
-            goals: List<ASAction<*, *, *>>,
+            goals: List<ASAction>,
         ): ASPlan = PlanImpl(trigger, guard, goals)
 
         fun ofBeliefBaseAddition(
             belief: ASBelief,
-            goals: List<ASAction<*, *, *>>,
+            goals: List<ASAction>,
             guard: Struct = Truth.TRUE,
         ): ASPlan = of(BeliefBaseAddition(belief), guard, goals)
 
         fun ofBeliefBaseRemoval(
             belief: ASBelief,
-            goals: List<ASAction<*, *, *>>,
+            goals: List<ASAction>,
             guard: Struct = Truth.TRUE,
         ): ASPlan = of(BeliefBaseRemoval(belief), guard, goals)
 
         fun ofAchievementGoalInvocation(
             value: Struct,
-            goals: List<ASAction<*, *, *>>,
+            goals: List<ASAction>,
             guard: Struct = Truth.TRUE,
         ): ASPlan = of(AchievementGoalInvocation(value), guard, goals)
 
         fun ofAchievementGoalFailure(
             value: Struct,
-            goals: List<ASAction<*, *, *>>,
+            goals: List<ASAction>,
             guard: Struct = Truth.TRUE,
         ): ASPlan = of(AchievementGoalFailure(value), guard, goals)
 
         fun ofTestGoalInvocation(
             value: Struct,
-            goals: List<ASAction<*, *, *>>,
+            goals: List<ASAction>,
             guard: Struct = Truth.TRUE,
         ): ASPlan = of(TestGoalInvocation(value), guard, goals)
 
         fun ofTestGoalFailure(
             value: Struct,
-            goals: List<ASAction<*, *, *>>,
+            goals: List<ASAction>,
             guard: Struct = Truth.TRUE,
         ): ASPlan = of(TestGoalFailure(value), guard, goals)
     }
