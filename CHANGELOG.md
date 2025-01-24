@@ -1,3 +1,10 @@
+## [0.11.153](https://github.com/jakta-bdi/jakta/compare/v0.11.152...v0.11.153) (2025-01-24)
+
+
+### Bug Fixes
+
+* **deps:** update plugin multijvmtesting to v3.2.0 ([#451](https://github.com/jakta-bdi/jakta/issues/451)) ([d0ec1f3](https://github.com/jakta-bdi/jakta/commit/d0ec1f3268fb6d38c3862ae63683f2877ab49308))
+
 ## [0.11.152](https://github.com/jakta-bdi/jakta/compare/v0.11.151...v0.11.152) (2025-01-24)
 
 
