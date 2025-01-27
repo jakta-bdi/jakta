@@ -1,3 +1,10 @@
+## [0.11.162](https://github.com/jakta-bdi/jakta/compare/v0.11.161...v0.11.162) (2025-01-27)
+
+
+### Bug Fixes
+
+* **core-deps:** update dependency org.jetbrains.kotlin.jvm to v2.1.10 ([#462](https://github.com/jakta-bdi/jakta/issues/462)) ([a626f92](https://github.com/jakta-bdi/jakta/commit/a626f9206ca44e876b1a52ef0e66d0e04e797080))
+
 ## [0.11.161](https://github.com/jakta-bdi/jakta/compare/v0.11.160...v0.11.161) (2025-01-27)
 
 
