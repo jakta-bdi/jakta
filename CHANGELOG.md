@@ -1,3 +1,11 @@
+## [0.11.193](https://github.com/jakta-bdi/jakta/compare/v0.11.192...v0.11.193) (2025-03-08)
+
+
+### Bug Fixes
+
+* **deps:** update alchemist to v40.1.3 ([#492](https://github.com/jakta-bdi/jakta/issues/492)) ([04ddd0f](https://github.com/jakta-bdi/jakta/commit/04ddd0f2bc0b7455c04d031dcb02bf73ea9dab9d))
+* **deps:** update plugin tasktree to v4.0.1 ([#493](https://github.com/jakta-bdi/jakta/issues/493)) ([17b5da2](https://github.com/jakta-bdi/jakta/commit/17b5da263035e80df0ce774dd1577d926b988ea6))
+
 ## [0.11.192](https://github.com/jakta-bdi/jakta/compare/v0.11.191...v0.11.192) (2025-03-07)
 
 
