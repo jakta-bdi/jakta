@@ -1,21 +1,25 @@
 To cite JaKtA in publications, please use:
 
-Baiardi, M., Burattini, S., Ciatto, G., & Pianini, D. (2023, September). JaKtA: BDI Agent-Oriented Programming in Pure Kotlin. 
-In European Conference on Multi-Agent Systems (pp. 49-65). Cham: Springer Nature Switzerland. https://doi.org/10.1007/978-3-031-43264-4\_4
+Baiardi, M., Burattini, S., Ciatto, G. et al. Blending BDI Agents with Object-Oriented and Functional Programming with JaKtA. SN COMPUT. SCI. 5, 1003 (2024). 
+https://doi.org/10.1007/s42979-024-03244-y
 
 A BibTeX entry for LaTeX users is:
 
-@inproceedings{DBLP:conf/eumas/BaiardiBCP23,
-  author       = {Martina Baiardi and Samuele Burattini and Giovanni Ciatto and Danilo Pianini},
-  editor       = {Vadim Malvone and Aniello Murano},
-  title        = {JaKtA: {BDI} Agent-Oriented Programming in Pure Kotlin},
-  booktitle    = {Multi-Agent Systems - 20th European Conference, {EUMAS} 2023, Naples, Italy, September 14-15, 2023, Proceedings},
-  series       = {Lecture Notes in Computer Science},
-  volume       = {14282},
-  pages        = {49--65},
-  publisher    = {Springer},
-  year         = {2023},
-  url          = {https://doi.org/10.1007/978-3-031-43264-4\_4},
-  doi          = {10.1007/978-3-031-43264-4\_4},
-  timestamp    = {Sat, 30 Sep 2023 09:40:42 +0200},
+@article{DBLP:journals/sncs/BaiardiBCP24,
+  author       = {Martina Baiardi and
+                  Samuele Burattini and
+                  Giovanni Ciatto and
+                  Danilo Pianini},
+  title        = {Blending {BDI} Agents with Object-Oriented and Functional Programming
+                  with JaKtA},
+  journal      = {{SN} Comput. Sci.},
+  volume       = {5},
+  number       = {8},
+  pages        = {1003},
+  year         = {2024},
+  url          = {https://doi.org/10.1007/s42979-024-03244-y},
+  doi          = {10.1007/S42979-024-03244-Y},
+  timestamp    = {Mon, 03 Mar 2025 22:23:02 +0100},
+  biburl       = {https://dblp.org/rec/journals/sncs/BaiardiBCP24.bib},
+  bibsource    = {dblp computer science bibliography, https://dblp.org}
 }
