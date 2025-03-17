@@ -37,7 +37,7 @@ implementation("it.unibo.jakta:jakta-dsl:<VERSION>")
 A working in progress documentation for this library can be found at this [link](https://jakta-bdi.github.io/)
 
 ## Citation
-If you want to cite this work, you can follow [citation instructions][https://github.com/jakta-bdi/jakta/blob/main/CITATION).
+If you want to cite this work, you can follow [citation instructions](https://github.com/jakta-bdi/jakta/blob/main/CITATION).
 
 ### Contributors
 
