@@ -36,10 +36,14 @@ implementation("it.unibo.jakta:jakta-dsl:<VERSION>")
 
 A working in progress documentation for this library can be found at this [link](https://jakta-bdi.github.io/)
 
+## Usage examples
+
+Check [jakta-examples](https://github.com/jakta-bdi/jakta-examples) to see some application examples for JaKtA DSL!
+
 ## Citation
 If you want to cite this work, you can follow [citation instructions](https://github.com/jakta-bdi/jakta/blob/main/CITATION).
 
-### Contributors
+## Contributors
 
 <a href="https://github.com/jakta-bdi/jakta/graphs/contributors">
 	<img src="https://contributors-img.web.app/image?repo=jakta-bdi/jakta" />
