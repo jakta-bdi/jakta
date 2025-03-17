@@ -23,7 +23,8 @@ JaKtA is a Kotlin internal DSL adding support for the definition of BDI agents i
 ![GitHub Release Downloads](https://img.shields.io/github/downloads/jakta-bdi/jakta/total)
 ![GitHub Languages](https://img.shields.io/github/languages/count/jakta-bdi/jakta)
 
-<!--## Include the DSL in your project
+## Import JaKtA in your project
+
 Maven Central: https://central.sonatype.com/artifact/it.unibo.jakta/jakta-dsl
 
 Gradle (KTS) dependency:
@@ -31,8 +32,15 @@ Gradle (KTS) dependency:
 implementation("it.unibo.jakta:jakta-dsl:<VERSION>")
 ```
 
+## Documentation
+
+A working in progress documentation for this library can be found at this [link](https://jakta-bdi.github.io/)
+
+## Citation
+If you want to cite this work, you can follow [citation instructions][https://github.com/jakta-bdi/jakta/blob/main/CITATION).
+
 ### Contributors
 
 <a href="https://github.com/jakta-bdi/jakta/graphs/contributors">
 	<img src="https://contributors-img.web.app/image?repo=jakta-bdi/jakta" />
-</a>-->
+</a>
