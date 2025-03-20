@@ -1,3 +1,10 @@
+## [0.11.199](https://github.com/jakta-bdi/jakta/compare/v0.11.198...v0.11.199) (2025-03-20)
+
+
+### Bug Fixes
+
+* **core-deps:** update kotlin monorepo to v2.1.20 ([#500](https://github.com/jakta-bdi/jakta/issues/500)) ([24ec161](https://github.com/jakta-bdi/jakta/commit/24ec1611bfb8b4a737f803c3a251e2ddb0088328))
+
 ## [0.11.198](https://github.com/jakta-bdi/jakta/compare/v0.11.197...v0.11.198) (2025-03-18)
 
 
