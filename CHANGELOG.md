@@ -1,3 +1,10 @@
+# [0.12.0](https://github.com/jakta-bdi/jakta/compare/v0.11.205...v0.12.0) (2025-03-29)
+
+
+### Features
+
+* Add definition of Belief sources using variables for matching purposes ([923d4c2](https://github.com/jakta-bdi/jakta/commit/923d4c26b4b4b277cf8fbaf86897bd53ae1bc03a))
+
 ## [0.11.205](https://github.com/jakta-bdi/jakta/compare/v0.11.204...v0.11.205) (2025-03-26)
 
 
