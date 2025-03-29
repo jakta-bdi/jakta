@@ -14,9 +14,9 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":jakta-state-machine"))
-    implementation(project(":jakta-bdi"))
-    implementation(project(":jakta-dsl"))
+    api(project(":jakta-state-machine"))
+    api(project(":jakta-bdi"))
+    api(project(":jakta-dsl"))
 }
 
 val Provider<PluginDependency>.id: String get() = get().pluginId
@@ -69,23 +69,20 @@ allprojects {
     }
 
     publishOnCentral {
+        val repoOwner = "jakta-bdi"
         projectLongName.set("JaKtA")
         projectDescription.set("A Kotlin internal DSL for the definition of BDI agents")
-        val repoOwner = "jakta-bdi"
         scmConnection.set("scm:git:https://github.com/$repoOwner/${rootProject.name}")
         projectUrl.set("https://github.com/$repoOwner/${rootProject.name}")
-        publishing {
-            publications {
-                withType<MavenPublication>().configureEach {
-                    pom {
-                        developers {
-                            developer {
-                                id.set("anitvam")
-                                name.set("Martina Baiardi")
-                                email.set("m.baiardi@unibo.it")
-                            }
-                        }
-                    }
+    }
+
+    publishing.publications.withType<MavenPublication>().configureEach {
+        pom {
+            developers {
+                developer {
+                    id.set("anitvam")
+                    name.set("Martina Baiardi")
+                    email.set("m.baiardi@unibo.it")
                 }
             }
         }
