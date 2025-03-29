@@ -1,3 +1,10 @@
+## [0.12.1](https://github.com/jakta-bdi/jakta/compare/v0.12.0...v0.12.1) (2025-03-29)
+
+
+### Bug Fixes
+
+* **ci:** fix typo preventing release command execution ([67aae08](https://github.com/jakta-bdi/jakta/commit/67aae080892f6ebd2b1762a48212719bea5115fe))
+
 # [0.12.0](https://github.com/jakta-bdi/jakta/compare/v0.11.205...v0.12.0) (2025-03-29)
 
 
