@@ -15,6 +15,7 @@ interface Intention {
     val id: IntentionID
 
     fun nextGoal(): Goal = recordStack.first().goalQueue.first()
+
     fun currentPlan(): Struct = recordStack.first().plan
 
     /**

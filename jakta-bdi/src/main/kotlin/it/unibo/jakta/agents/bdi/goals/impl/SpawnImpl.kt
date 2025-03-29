@@ -5,9 +5,10 @@ import it.unibo.jakta.agents.bdi.goals.Spawn
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
 
-internal class SpawnImpl(override val value: Struct) : Spawn {
-    override fun applySubstitution(substitution: Substitution) =
-        SpawnImpl(value.apply(substitution).castToStruct())
+internal class SpawnImpl(
+    override val value: Struct,
+) : Spawn {
+    override fun applySubstitution(substitution: Substitution) = SpawnImpl(value.apply(substitution).castToStruct())
 
     override fun toString() = "Achieve($value)"
 

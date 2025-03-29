@@ -54,13 +54,14 @@ class AgentScope(
     }
 
     override fun build(): Agent {
-        var agent = Agent.of(
-            name = name.orEmpty(),
-            beliefBase = beliefsScope.build(),
-            events = goalsScope.build().map { Event.of(it) },
-            planLibrary = PlanLibrary.of(plans + plansScope.build().toList()),
-            internalActions = InternalActions.default() + actionsScope.build(),
-        )
+        var agent =
+            Agent.of(
+                name = name.orEmpty(),
+                beliefBase = beliefsScope.build(),
+                events = goalsScope.build().map { Event.of(it) },
+                planLibrary = PlanLibrary.of(plans + plansScope.build().toList()),
+                internalActions = InternalActions.default() + actionsScope.build(),
+            )
         if (this::time.isInitialized) {
             agent = agent.setTimeDistribution(time)
         }

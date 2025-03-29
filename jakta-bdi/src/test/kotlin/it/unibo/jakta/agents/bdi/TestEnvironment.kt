@@ -12,39 +12,46 @@ fun main() {
     val env = Environment.of()
 
     val start = Jakta.parseStruct("start(0, 10)")
-    val alice = Agent.of(
-        name = "alice",
-        events = listOf(Event.ofAchievementGoalInvocation(Achieve.of(start))),
-        planLibrary = PlanLibrary.of(
-            Plan.ofAchievementGoalInvocation(
-                value = Jakta.parseStruct("start(N, N)"),
-                goals = listOf(
-                    ActInternally.of(Jakta.parseStruct("print(\"hello world\", N)")),
+    val alice =
+        Agent.of(
+            name = "alice",
+            events = listOf(Event.ofAchievementGoalInvocation(Achieve.of(start))),
+            planLibrary =
+                PlanLibrary.of(
+                    Plan.ofAchievementGoalInvocation(
+                        value = Jakta.parseStruct("start(N, N)"),
+                        goals =
+                            listOf(
+                                ActInternally.of(Jakta.parseStruct("print(\"hello world\", N)")),
+                            ),
+                    ),
+                    Plan.ofAchievementGoalInvocation(
+                        value = Jakta.parseStruct("start(N, M)"),
+                        guard = Jakta.parseStruct("N < M & S is N + 1"),
+                        goals =
+                            listOf(
+                                ActInternally.of(Jakta.parseStruct("print(\"hello world\", N)")),
+                                Achieve.of(Jakta.parseStruct("start(S, M)")),
+                            ),
+                    ),
                 ),
-            ),
-            Plan.ofAchievementGoalInvocation(
-                value = Jakta.parseStruct("start(N, M)"),
-                guard = Jakta.parseStruct("N < M & S is N + 1"),
-                goals = listOf(
-                    ActInternally.of(Jakta.parseStruct("print(\"hello world\", N)")),
-                    Achieve.of(Jakta.parseStruct("start(S, M)")),
-                ),
-            ),
-        ),
-    )
+        )
 
-    val bob = Agent.of(
-        name = "bob",
-        events = listOf(Event.ofAchievementGoalInvocation(Achieve.of(start))),
-        planLibrary = PlanLibrary.of(
-            Plan.ofAchievementGoalInvocation(
-                value = start,
-                goals = listOf(
-                    ActInternally.of(Jakta.parseStruct("print('Hello, my name is Bob')")),
+    val bob =
+        Agent.of(
+            name = "bob",
+            events = listOf(Event.ofAchievementGoalInvocation(Achieve.of(start))),
+            planLibrary =
+                PlanLibrary.of(
+                    Plan.ofAchievementGoalInvocation(
+                        value = start,
+                        goals =
+                            listOf(
+                                ActInternally.of(Jakta.parseStruct("print('Hello, my name is Bob')")),
+                            ),
+                    ),
                 ),
-            ),
-        ),
-    )
+        )
 
     val mas = Mas.of(ExecutionStrategy.oneThreadPerAgent(), env, alice, bob)
 

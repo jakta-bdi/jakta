@@ -9,7 +9,13 @@ interface ActionRequest<C : SideEffect, Res : ActionResponse<C>> {
     val arguments: List<Term>
     val requestTimestamp: Time?
 
-    fun reply(substitution: Substitution = Substitution.empty(), effects: Iterable<C>): Res
+    fun reply(
+        substitution: Substitution = Substitution.empty(),
+        effects: Iterable<C>,
+    ): Res
 
-    fun reply(substitution: Substitution = Substitution.empty(), vararg effects: C): Res
+    fun reply(
+        substitution: Substitution = Substitution.empty(),
+        vararg effects: C,
+    ): Res
 }

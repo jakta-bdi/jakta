@@ -5,9 +5,10 @@ import it.unibo.jakta.agents.bdi.goals.Goal
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
 
-internal class AchieveImpl(override val value: Struct) : Achieve {
-    override fun applySubstitution(substitution: Substitution) =
-        AchieveImpl(value.apply(substitution).castToStruct())
+internal class AchieveImpl(
+    override val value: Struct,
+) : Achieve {
+    override fun applySubstitution(substitution: Substitution) = AchieveImpl(value.apply(substitution).castToStruct())
 
     override fun toString(): String = "Achieve($value)"
 

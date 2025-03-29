@@ -6,7 +6,9 @@ import it.unibo.jakta.agents.bdi.goals.Goal
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
 
-class ActExternallyImpl(override val value: Struct) : ActExternally {
+class ActExternallyImpl(
+    override val value: Struct,
+) : ActExternally {
     override fun applySubstitution(substitution: Substitution) =
         ActExternallyImpl(value.apply(substitution).castToStruct())
 

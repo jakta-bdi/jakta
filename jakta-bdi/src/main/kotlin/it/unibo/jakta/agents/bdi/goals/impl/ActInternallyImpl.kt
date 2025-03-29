@@ -4,7 +4,9 @@ import it.unibo.jakta.agents.bdi.goals.ActInternally
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
 
-internal class ActInternallyImpl(override val value: Struct) : ActInternally {
+internal class ActInternallyImpl(
+    override val value: Struct,
+) : ActInternally {
     override fun applySubstitution(substitution: Substitution) =
         ActInternallyImpl(value.apply(substitution).castToStruct())
 

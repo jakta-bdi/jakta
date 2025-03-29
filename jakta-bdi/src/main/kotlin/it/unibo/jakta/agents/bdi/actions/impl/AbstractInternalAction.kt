@@ -19,9 +19,10 @@ import it.unibo.jakta.agents.bdi.intentions.Intention
 import it.unibo.jakta.agents.bdi.plans.Plan
 import it.unibo.tuprolog.solve.Signature
 
-abstract class AbstractInternalAction(override val signature: Signature) : InternalAction,
-    AbstractAction<AgentChange, InternalResponse, InternalRequest>(signature) {
-
+abstract class AbstractInternalAction(
+    override val signature: Signature,
+) : AbstractAction<AgentChange, InternalResponse, InternalRequest>(signature),
+    InternalAction {
     constructor(name: String, arity: Int) : this(Signature(name, arity))
 
     override fun addBelief(belief: Belief) {

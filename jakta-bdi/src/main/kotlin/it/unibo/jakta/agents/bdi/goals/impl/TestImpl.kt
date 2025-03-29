@@ -6,12 +6,13 @@ import it.unibo.jakta.agents.bdi.goals.Test
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
 
-internal class TestImpl(private val belief: Belief) : Test {
+internal class TestImpl(
+    private val belief: Belief,
+) : Test {
     override val value: Struct
         get() = belief.rule.head
 
-    override fun applySubstitution(substitution: Substitution) =
-        TestImpl(belief.applySubstitution(substitution))
+    override fun applySubstitution(substitution: Substitution) = TestImpl(belief.applySubstitution(substitution))
 
     override fun toString(): String = "Test($value)"
 

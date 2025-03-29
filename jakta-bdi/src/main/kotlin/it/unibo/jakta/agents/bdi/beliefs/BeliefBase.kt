@@ -55,7 +55,6 @@ interface BeliefBase : Iterable<Belief> {
             return bb
         }
 
-        fun of(vararg beliefs: Belief): BeliefBase =
-            of(beliefs.asList())
+        fun of(vararg beliefs: Belief): BeliefBase = of(beliefs.asList())
     }
 }

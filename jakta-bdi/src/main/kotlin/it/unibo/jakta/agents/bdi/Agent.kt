@@ -12,10 +12,9 @@ import it.unibo.jakta.agents.bdi.intentions.SchedulingResult
 import it.unibo.jakta.agents.bdi.plans.Plan
 import it.unibo.jakta.agents.bdi.plans.PlanLibrary
 import it.unibo.tuprolog.utils.Taggable
-import java.util.*
+import java.util.UUID
 
 interface Agent : Taggable<Agent> {
-
     val agentID: AgentID
 
     val name: String
@@ -32,8 +31,7 @@ interface Agent : Taggable<Agent> {
     /** Intention Selection Function */
     fun scheduleIntention(intentions: IntentionPool): SchedulingResult
 
-    fun copy(agentContext: AgentContext = this.context) =
-        of(this.agentID, this.name, agentContext.copy())
+    fun copy(agentContext: AgentContext = this.context) = of(this.agentID, this.name, agentContext.copy())
 
     fun copy(
         beliefBase: BeliefBase = this.context.beliefBase,
@@ -49,6 +47,7 @@ interface Agent : Taggable<Agent> {
 
     companion object {
         fun empty(): Agent = AgentImpl(AgentContext.of())
+
         fun of(
             agentID: AgentID = AgentID(),
             name: String = "Agent-" + UUID.randomUUID(),
@@ -56,11 +55,12 @@ interface Agent : Taggable<Agent> {
             events: EventQueue = emptyList(),
             planLibrary: PlanLibrary = PlanLibrary.empty(),
             internalActions: Map<String, InternalAction> = InternalActions.default(),
-        ): Agent = AgentImpl(
-            AgentContext.of(beliefBase, events, planLibrary, internalActions),
-            agentID,
-            name,
-        )
+        ): Agent =
+            AgentImpl(
+                AgentContext.of(beliefBase, events, planLibrary, internalActions),
+                agentID,
+                name,
+            )
 
         fun of(
             agentID: AgentID = AgentID(),

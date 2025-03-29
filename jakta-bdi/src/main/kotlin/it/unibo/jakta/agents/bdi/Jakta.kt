@@ -9,20 +9,25 @@ import it.unibo.tuprolog.core.operators.Specifier
 import it.unibo.tuprolog.core.parsing.TermParser
 
 object Jakta {
-
     // fun convert1(struct: Struct): Term = struct.accept(jasonTo2p)
 
-    val operators = OperatorSet(
-        Operator("&", Specifier.XFY, 1000),
-        Operator("|", Specifier.XFY, 1100),
-        Operator("~", Specifier.FX, 900),
-    )
+    val operators =
+        OperatorSet(
+            Operator("&", Specifier.XFY, 1000),
+            Operator("|", Specifier.XFY, 1100),
+            Operator("~", Specifier.FX, 900),
+        )
 
     private val parser = TermParser.withOperators(OperatorSet.DEFAULT + operators)
+
     fun parseStruct(string: String): Struct = parser.parseStruct(string)
+
     fun parseClause(string: String): Clause = parser.parseClause(string)
 
-    fun printAslSyntax(agent: Agent, prettyFormatted: Boolean = true) {
+    fun printAslSyntax(
+        agent: Agent,
+        prettyFormatted: Boolean = true,
+    ) {
         println("% ${agent.name}")
         for (belief in agent.context.beliefBase) {
             if (prettyFormatted) {

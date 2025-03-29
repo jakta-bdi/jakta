@@ -8,19 +8,23 @@ import java.util.concurrent.Semaphore
 /**
  * [AbstractRunner] implementation that executes the FSM on a separated thread.
  */
-class ThreadRunner(override val activity: Activity) : AbstractRunner(activity) {
+class ThreadRunner(
+    override val activity: Activity,
+) : AbstractRunner(activity) {
     private val promise = Promise<Unit>()
     private val mutex = Semaphore(0)
-    private val thread = Thread {
-        while (!isOver) {
-            safeExecute({ promise.completeExceptionally(it) }) {
-                doStateTransition()
+    private val thread =
+        Thread {
+            while (!isOver) {
+                safeExecute({ promise.completeExceptionally(it) }) {
+                    doStateTransition()
+                }
             }
+            promise.complete(null)
         }
-        promise.complete(null)
-    }
 
     override fun onPause() = mutex.acquire()
+
     override fun onResume() = mutex.release()
 
     override fun getCurrentTime(): Time = Time.real(System.currentTimeMillis())

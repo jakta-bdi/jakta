@@ -29,7 +29,10 @@ class JaktaForAlchemistMasScope : Builder<WrappedAgent> {
         return this
     }
 
-    fun agent(name: String, f: AgentScope.() -> Unit): JaktaForAlchemistMasScope {
+    fun agent(
+        name: String,
+        f: AgentScope.() -> Unit,
+    ): JaktaForAlchemistMasScope {
         agents = AgentScope(name).also(f).build()
         return this
     }
@@ -38,7 +41,6 @@ class JaktaForAlchemistMasScope : Builder<WrappedAgent> {
 }
 
 class JaktaForAlchemistEnvironmentScope : Builder<Map<String, ExternalAction>> {
-
     private val actionsScopes by lazy { ExternalActionsScope() }
 
     infix fun actions(actions: ExternalActionsScope.() -> Unit): JaktaForAlchemistEnvironmentScope {

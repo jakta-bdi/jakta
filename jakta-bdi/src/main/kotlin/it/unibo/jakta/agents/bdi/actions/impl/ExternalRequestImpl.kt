@@ -14,9 +14,13 @@ class ExternalRequestImpl(
     override val requestTimestamp: Time?,
     override val arguments: List<Term>,
 ) : ExternalRequest {
-    override fun reply(substitution: Substitution, effects: Iterable<EnvironmentChange>) =
-        ExternalResponse(substitution, effects)
+    override fun reply(
+        substitution: Substitution,
+        effects: Iterable<EnvironmentChange>,
+    ) = ExternalResponse(substitution, effects)
 
-    override fun reply(substitution: Substitution, vararg effects: EnvironmentChange) =
-        reply(substitution, effects.asList())
+    override fun reply(
+        substitution: Substitution,
+        vararg effects: EnvironmentChange,
+    ) = reply(substitution, effects.asList())
 }

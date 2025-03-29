@@ -8,8 +8,9 @@ import it.unibo.jakta.agents.bdi.plans.Plan
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.dsl.jakta.JaktaLogicProgrammingScope
 
-class PlansScope : Builder<Iterable<Plan>>, JaktaLogicProgrammingScope by JaktaLogicProgrammingScope.empty() {
-
+class PlansScope :
+    Builder<Iterable<Plan>>,
+    JaktaLogicProgrammingScope by JaktaLogicProgrammingScope.empty() {
     private val plans = mutableListOf<PlanScope>()
 
     fun achieve(goal: String): PlanScope = achieve(atomOf(goal))

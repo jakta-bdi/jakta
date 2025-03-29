@@ -6,7 +6,9 @@ import it.unibo.jakta.agents.bdi.goals.UpdateBelief
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
 
-internal class UpdateBeliefImpl(private val updatedBelief: Belief) : UpdateBelief {
+internal class UpdateBeliefImpl(
+    private val updatedBelief: Belief,
+) : UpdateBelief {
     override val value: Struct
         get() = updatedBelief.rule.head
 

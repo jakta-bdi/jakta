@@ -5,7 +5,9 @@ import it.unibo.jakta.agents.bdi.actions.InternalRequest
 import it.unibo.jakta.agents.bdi.actions.InternalResponse
 import it.unibo.jakta.agents.bdi.actions.effects.AgentChange
 
-class InternalActionScope(action: InternalAction, request: InternalRequest) :
-    ActionScope<AgentChange, InternalResponse, InternalRequest, InternalAction>,
+class InternalActionScope(
+    action: InternalAction,
+    request: InternalRequest,
+) : ActionScope<AgentChange, InternalResponse, InternalRequest, InternalAction>,
     InternalAction by action,
     InternalRequest by request

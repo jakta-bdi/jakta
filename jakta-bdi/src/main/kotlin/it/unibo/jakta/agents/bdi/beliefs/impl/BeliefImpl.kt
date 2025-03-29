@@ -5,8 +5,9 @@ import it.unibo.tuprolog.core.Rule
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
 
-internal class BeliefImpl(override val rule: Rule) : Belief {
-
+internal class BeliefImpl(
+    override val rule: Rule,
+) : Belief {
     override fun applySubstitution(substitution: Substitution): Belief =
         BeliefImpl(rule.apply(substitution).castToRule())
 

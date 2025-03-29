@@ -14,7 +14,6 @@ import it.unibo.jakta.agents.bdi.plans.PlanLibrary
  * The Context is the actual state of a BDI Agent's structures.
  */
 interface AgentContext {
-
     /** [BeliefBase] of the BDI Agent */
     val beliefBase: BeliefBase
 

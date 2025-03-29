@@ -8,7 +8,10 @@ import it.unibo.jakta.agents.bdi.executionstrategies.impl.OneThreadPerAgentImpl
 import it.unibo.jakta.agents.bdi.executionstrategies.impl.OneThreadPerMasImpl
 
 interface ExecutionStrategy {
-    fun dispatch(mas: Mas, debugEnabled: Boolean)
+    fun dispatch(
+        mas: Mas,
+        debugEnabled: Boolean,
+    )
 
     fun spawnAgent(agent: Agent)
 

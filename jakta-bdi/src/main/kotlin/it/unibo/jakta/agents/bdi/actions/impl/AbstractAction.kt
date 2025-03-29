@@ -7,10 +7,9 @@ import it.unibo.jakta.agents.bdi.actions.effects.SideEffect
 import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.solve.Signature
 
-abstract class AbstractAction<C : SideEffect, Res : ActionResponse<C>, Req : ActionRequest<C, Res>> (
+abstract class AbstractAction<C : SideEffect, Res : ActionResponse<C>, Req : ActionRequest<C, Res>>(
     override val signature: Signature,
 ) : Action<C, Res, Req> {
-
     protected var result: Substitution = Substitution.empty()
 
     protected val effects: MutableList<C> = mutableListOf()

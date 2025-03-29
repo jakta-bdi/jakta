@@ -43,7 +43,9 @@ interface Runner {
 
         fun threadOf(activity: Activity): Runner = ThreadRunner(activity)
 
-        fun simulatedOf(activity: Activity, currentTime: () -> Time): Runner =
-            SimulatedTimeRunner(activity, currentTime)
+        fun simulatedOf(
+            activity: Activity,
+            currentTime: () -> Time,
+        ): Runner = SimulatedTimeRunner(activity, currentTime)
     }
 }

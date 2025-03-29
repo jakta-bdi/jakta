@@ -26,19 +26,24 @@ class JaktaTimeDistribution(
     val deliberate: TimeDistribution<Any?>,
     val act: TimeDistribution<Any?>,
 ) : TimeDistribution<Any?> {
-
     var phase = SENSE
         private set
 
     val controller: JaktaControllerForAlchemist = JaktaControllerForAlchemist(node)
 
-    val currentBackingTimeDistribution get() = when (phase) {
-        SENSE -> sense
-        DELIBERATE -> deliberate
-        ACT -> act
-    }
+    val currentBackingTimeDistribution get() =
+        when (phase) {
+            SENSE -> sense
+            DELIBERATE -> deliberate
+            ACT -> act
+        }
 
-    override fun update(currentTime: Time, executed: Boolean, param: Double, environment: Environment<Any?, *>) {
+    override fun update(
+        currentTime: Time,
+        executed: Boolean,
+        param: Double,
+        environment: Environment<Any?, *>,
+    ) {
         if (executed) {
             phaseComplete()
             currentBackingTimeDistribution.update(
@@ -50,10 +55,11 @@ class JaktaTimeDistribution(
         }
     }
 
-    override fun getNextOccurence(): Time = currentBackingTimeDistribution
-        .nextOccurence
-        .takeIf { it > controller.minimumAwakeTime }
-        ?: controller.minimumAwakeTime
+    override fun getNextOccurence(): Time =
+        currentBackingTimeDistribution
+            .nextOccurence
+            .takeIf { it > controller.minimumAwakeTime }
+            ?: controller.minimumAwakeTime
 
     override fun getRate(): Double = currentBackingTimeDistribution.rate
 
@@ -61,7 +67,10 @@ class JaktaTimeDistribution(
         phase = phase.next()
     }
 
-    override fun cloneOnNewNode(destination: Node<Any?>, currentTime: Time): TimeDistribution<Any?> =
+    override fun cloneOnNewNode(
+        destination: Node<Any?>,
+        currentTime: Time,
+    ): TimeDistribution<Any?> =
         JaktaTimeDistribution(
             destination.asProperty(),
             sense.cloneOnNewNode(destination, currentTime),

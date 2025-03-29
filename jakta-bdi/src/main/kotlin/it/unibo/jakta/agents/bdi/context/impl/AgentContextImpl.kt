@@ -15,13 +15,14 @@ internal class AgentContextImpl(
     override val internalActions: Map<String, InternalAction>,
     override val intentions: IntentionPool = IntentionPool.empty(),
 ) : AgentContext {
-    override fun toString(): String = """
-    AgentContext {
-        beliefBase = [$beliefBase]
-        events = $events
-        planLibrary = [${planLibrary.plans}]
-        intentions = [$intentions]
-        internalActions = [$internalActions]
-    }
-    """.trimIndent()
+    override fun toString(): String =
+        """
+        AgentContext {
+            beliefBase = [$beliefBase]
+            events = $events
+            planLibrary = [${planLibrary.plans}]
+            intentions = [$intentions]
+            internalActions = [$internalActions]
+        }
+        """.trimIndent()
 }

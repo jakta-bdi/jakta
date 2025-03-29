@@ -6,12 +6,15 @@ import it.unibo.tuprolog.utils.setTag
 
 typealias TimeDistribution = (Time) -> Time
 
-private val TAG_TIME_DISTRIBUTION = Agent::class.qualifiedName
-    ?.replace("Agent", "TimeDistribution")!!
+private val TAG_TIME_DISTRIBUTION =
+    Agent::class
+        .qualifiedName
+        ?.replace("Agent", "TimeDistribution")!!
 
 val Agent.timeDistribution: TimeDistribution
-    get() = getTag<TimeDistribution>(TAG_TIME_DISTRIBUTION)
-        ?: error("No time distribution for agent $agentID")
+    get() =
+        getTag<TimeDistribution>(TAG_TIME_DISTRIBUTION)
+            ?: error("No time distribution for agent $agentID")
 
 val Agent.hasTimeDistribution: Boolean
     get() = containsTag(TAG_TIME_DISTRIBUTION)
