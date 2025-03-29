@@ -15,9 +15,10 @@ import it.unibo.jakta.agents.bdi.actions.effects.UpdateData
 import it.unibo.jakta.agents.bdi.messages.Message
 import it.unibo.tuprolog.solve.Signature
 
-abstract class AbstractExternalAction(override val signature: Signature) : ExternalAction,
-    AbstractAction<EnvironmentChange, ExternalResponse, ExternalRequest>(signature) {
-
+abstract class AbstractExternalAction(
+    override val signature: Signature,
+) : AbstractAction<EnvironmentChange, ExternalResponse, ExternalRequest>(signature),
+    ExternalAction {
     constructor(name: String, arity: Int) : this(Signature(name, arity))
 
     override fun addAgent(agent: Agent) {
@@ -28,7 +29,10 @@ abstract class AbstractExternalAction(override val signature: Signature) : Exter
         effects.add(RemoveAgent(agentName))
     }
 
-    override fun sendMessage(agentName: String, message: Message) {
+    override fun sendMessage(
+        agentName: String,
+        message: Message,
+    ) {
         effects.add(SendMessage(message, agentName))
     }
 
@@ -36,7 +40,10 @@ abstract class AbstractExternalAction(override val signature: Signature) : Exter
         effects.add(BroadcastMessage(message))
     }
 
-    override fun addData(key: String, value: Any) {
+    override fun addData(
+        key: String,
+        value: Any,
+    ) {
         effects.add(AddData(key, value))
     }
 

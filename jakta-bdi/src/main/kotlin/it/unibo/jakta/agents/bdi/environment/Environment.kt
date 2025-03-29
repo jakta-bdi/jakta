@@ -24,7 +24,10 @@ interface Environment {
 
     fun popMessage(agentName: String): Environment
 
-    fun submitMessage(agentName: String, message: Message): Environment
+    fun submitMessage(
+        agentName: String,
+        message: Message,
+    ): Environment
 
     fun broadcastMessage(message: Message): Environment
 
@@ -34,7 +37,10 @@ interface Environment {
 
     fun percept(): BeliefBase = perception.percept()
 
-    fun addData(key: String, value: Any): Environment
+    fun addData(
+        key: String,
+        value: Any,
+    ): Environment
 
     fun removeData(key: String): Environment
 
@@ -49,19 +55,19 @@ interface Environment {
     ): Environment
 
     companion object {
-
         fun of(
             agentIDs: Map<String, AgentID> = emptyMap(),
             externalActions: Map<String, ExternalAction> = emptyMap(),
             messageBoxes: Map<AgentID, MessageQueue> = emptyMap(),
             perception: Perception = Perception.empty(),
             data: Map<String, Any> = emptyMap(),
-        ): Environment = EnvironmentImpl(
-            externalActions,
-            agentIDs,
-            messageBoxes,
-            perception,
-            data,
-        )
+        ): Environment =
+            EnvironmentImpl(
+                externalActions,
+                agentIDs,
+                messageBoxes,
+                perception,
+                data,
+            )
     }
 }

@@ -5,7 +5,6 @@ import it.unibo.jakta.agents.bdi.AgentLifecycle
 import it.unibo.jakta.agents.bdi.executionstrategies.ExecutionStrategy
 
 abstract class AbstractSingleRunnerExecutionStrategy : ExecutionStrategy {
-
     protected val synchronizedAgents = SynchronizedAgents()
 
     override fun spawnAgent(agent: Agent) {

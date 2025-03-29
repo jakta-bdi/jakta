@@ -7,8 +7,9 @@ import it.unibo.jakta.agents.utils.Promise
 /**
  * [AbstractRunner] implementation that executes the FSM on the current thread.
  */
-class SyncRunner(override val activity: Activity) : AbstractRunner(activity) {
-
+class SyncRunner(
+    override val activity: Activity,
+) : AbstractRunner(activity) {
     override fun onPause() = error("Is not possible to PAUSE a SyncRunner")
 
     override fun onResume() = error("Is not possible to RESUME a SyncRunner")

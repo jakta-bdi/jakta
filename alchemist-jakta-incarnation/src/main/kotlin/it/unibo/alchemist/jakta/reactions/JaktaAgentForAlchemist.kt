@@ -34,7 +34,6 @@ class JaktaAgentForAlchemist<P : Position<P>>(
     timeDistribution: TimeDistribution<Any?>,
     val agent: Agent,
 ) : AbstractReaction<Any?>(jaktaEnvironment.node, timeDistribution) {
-
     private val agentLifecycle = AgentLifecycle.newLifecycleFor(agent)
     private val jaktaController = JaktaControllerForAlchemist(jaktaEnvironment)
 
@@ -60,29 +59,34 @@ class JaktaAgentForAlchemist<P : Position<P>>(
         timeDistribution,
         with(agentFactory) {
             var parameterIndex = 0
-            val supportedTypes = listOf(
-                jaktaEnvironment,
-                jaktaEnvironment.node,
-                jaktaEnvironment.randomGenerator,
-                jaktaEnvironment.alchemistEnvironment,
-            )
-            val actualParameters = formalParameterTypes.map { type ->
-                val implicitParameter = supportedTypes.firstOrNull { type.isInstance(it) }
-                if (implicitParameter == null) {
-                    check(parameterIndex < parameters.size) {
-                        "Invalid number of parameters for $agentFactory: " +
-                            "expected at least $parameterIndex parameters, got ${parameters.size}"
+            val supportedTypes =
+                listOf(
+                    jaktaEnvironment,
+                    jaktaEnvironment.node,
+                    jaktaEnvironment.randomGenerator,
+                    jaktaEnvironment.alchemistEnvironment,
+                )
+            val actualParameters =
+                formalParameterTypes.map { type ->
+                    val implicitParameter = supportedTypes.firstOrNull { type.isInstance(it) }
+                    if (implicitParameter == null) {
+                        check(parameterIndex < parameters.size) {
+                            "Invalid number of parameters for $agentFactory: " +
+                                "expected at least $parameterIndex parameters, got ${parameters.size}"
+                        }
+                        parameters[parameterIndex++]
+                    } else {
+                        implicitParameter
                     }
-                    parameters[parameterIndex++]
-                } else {
-                    implicitParameter
                 }
-            }
             call(*actualParameters.toTypedArray())
         },
     )
 
-    override fun cloneOnNewNode(node: Node<Any?>, currentTime: it.unibo.alchemist.model.Time): Reaction<Any?> =
+    override fun cloneOnNewNode(
+        node: Node<Any?>,
+        currentTime: it.unibo.alchemist.model.Time,
+    ): Reaction<Any?> =
         JaktaAgentForAlchemist(
             node.asProperty<Any?, JaktaEnvironmentForAlchemist<P>>(),
             timeDistribution.cloneOnNewNode(node, currentTime),
@@ -90,28 +94,31 @@ class JaktaAgentForAlchemist<P : Position<P>>(
         )
 
     override fun execute() {
-        val sideEffects: Iterable<EnvironmentChange> = when (val timeDist = timeDistribution) {
-            is JaktaTimeDistribution -> when (timeDist.phase) {
-                SENSE -> {
-                    agentLifecycle.sense(
+        val sideEffects: Iterable<EnvironmentChange> =
+            when (val timeDist = timeDistribution) {
+                is JaktaTimeDistribution ->
+                    when (timeDist.phase) {
+                        SENSE -> {
+                            agentLifecycle.sense(
+                                environment = jaktaEnvironment,
+                                controller = jaktaController,
+                                debugEnabled = false,
+                            )
+                            emptyList()
+                        }
+                        DELIBERATE -> {
+                            agentLifecycle.deliberate()
+                            emptyList()
+                        }
+                        ACT -> agentLifecycle.act(jaktaEnvironment)
+                    }
+                else ->
+                    agentLifecycle.runOneCycle(
                         environment = jaktaEnvironment,
                         controller = jaktaController,
                         debugEnabled = false,
                     )
-                    emptyList()
-                }
-                DELIBERATE -> {
-                    agentLifecycle.deliberate()
-                    emptyList()
-                }
-                ACT -> agentLifecycle.act(jaktaEnvironment)
             }
-            else -> agentLifecycle.runOneCycle(
-                environment = jaktaEnvironment,
-                controller = jaktaController,
-                debugEnabled = false,
-            )
-        }
         sideEffects.forEach {
             when (it) {
                 is BroadcastMessage -> jaktaEnvironment.broadcastMessage(it.message)

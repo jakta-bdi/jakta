@@ -22,19 +22,27 @@ fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.entrypoint(): Agent {
 }
 
 @OptIn(ExperimentalStdlibApi::class)
-fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.entrypointWithColor(color: Color): Agent {
-    return tokenPassAgent("Agent#${color.rgb.toHexString()}@${node.id}", color)
-}
-data class ColoredAgent(val name: String, val nodeId: Int, val color: Color)
+fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.entrypointWithColor(color: Color): Agent =
+    tokenPassAgent("Agent#${color.rgb.toHexString()}@${node.id}", color)
 
-fun colorToStruct(color: Color): Struct = Struct.of(
-    color.toString(),
-    Integer.of(color.red),
-    Integer.of(color.blue),
-    Integer.of(color.green),
+data class ColoredAgent(
+    val name: String,
+    val nodeId: Int,
+    val color: Color,
 )
 
-fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.tokenPassAgent(name: String, color: Color): Agent =
+fun colorToStruct(color: Color): Struct =
+    Struct.of(
+        color.toString(),
+        Integer.of(color.red),
+        Integer.of(color.blue),
+        Integer.of(color.green),
+    )
+
+fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.tokenPassAgent(
+    name: String,
+    color: Color,
+): Agent =
     with(AgentScope(name)) {
         val myColor = ColoredAgent(name, node.id, color)
         beliefs {
@@ -54,9 +62,12 @@ fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.tokenPassAgent(name: Strin
                 "myColor"(X).fromSelf and "ball"(X).fromPercept
             } then {
                 execute(run, {
-                    val colors = data.filter { it.key.startsWith("Agent") }.values
-                        .filterIsInstance<ColoredAgent>()
-                        .subtract(setOf(myColor))
+                    val colors =
+                        data
+                            .filter { it.key.startsWith("Agent") }
+                            .values
+                            .filterIsInstance<ColoredAgent>()
+                            .subtract(setOf(myColor))
 
                     // val known = A.fix<Set<ColoredAgent>>() subtract setOf(myColor)
                     if (colors.isNotEmpty()) {

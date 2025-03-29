@@ -5,9 +5,10 @@ import it.unibo.jakta.agents.bdi.goals.Goal
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
 
-internal class ActImpl(override val value: Struct) : Act {
-    override fun applySubstitution(substitution: Substitution) =
-        ActImpl(value.apply(substitution).castToStruct())
+internal class ActImpl(
+    override val value: Struct,
+) : Act {
+    override fun applySubstitution(substitution: Substitution) = ActImpl(value.apply(substitution).castToStruct())
 
     override fun toString(): String = "Act($value)"
 

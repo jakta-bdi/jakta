@@ -34,7 +34,9 @@ data class PlanChange(
     override val changeType: ContextUpdate,
 ) : InternalChange
 
-data class Sleep(val millis: Long) : ActivityChange
+data class Sleep(
+    val millis: Long,
+) : ActivityChange
 
 class Stop : ActivityChange
 

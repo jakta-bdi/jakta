@@ -9,7 +9,6 @@ internal data class ActivationRecordImpl(
     override val goalQueue: List<Goal>,
     override val plan: Struct,
 ) : ActivationRecord {
-
     override fun pop(): ActivationRecord = copy(goalQueue = goalQueue - goalQueue.first())
 
     override fun applySubstitution(substitution: Substitution): ActivationRecord =

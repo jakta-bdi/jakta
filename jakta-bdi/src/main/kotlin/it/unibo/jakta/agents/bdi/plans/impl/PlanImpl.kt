@@ -14,30 +14,38 @@ internal data class PlanImpl(
     override val guard: Struct,
     override val goals: List<Goal>,
 ) : Plan {
-    override fun isApplicable(event: Event, beliefBase: BeliefBase): Boolean {
+    override fun isApplicable(
+        event: Event,
+        beliefBase: BeliefBase,
+    ): Boolean {
         val mgu = event.trigger.value mguWith this.trigger.value
         val actualGuard = guard.apply(mgu).castToStruct()
         return isRelevant(event) && beliefBase.solve(actualGuard).isYes
     }
 
-    override fun applicablePlan(event: Event, beliefBase: BeliefBase): Plan = when (isApplicable(event, beliefBase)) {
-        true -> {
-            val mgu = event.trigger.value mguWith this.trigger.value
-            val actualGuard = guard.apply(mgu).castToStruct()
-            val solvedGuard = beliefBase.solve(actualGuard)
-            val actualGoals = goals.map {
-                it.copy(
-                    it.value
-                        .apply(mgu)
-                        .apply(solvedGuard.substitution)
-                        .castToStruct(),
-                )
-            }
+    override fun applicablePlan(
+        event: Event,
+        beliefBase: BeliefBase,
+    ): Plan =
+        when (isApplicable(event, beliefBase)) {
+            true -> {
+                val mgu = event.trigger.value mguWith this.trigger.value
+                val actualGuard = guard.apply(mgu).castToStruct()
+                val solvedGuard = beliefBase.solve(actualGuard)
+                val actualGoals =
+                    goals.map {
+                        it.copy(
+                            it.value
+                                .apply(mgu)
+                                .apply(solvedGuard.substitution)
+                                .castToStruct(),
+                        )
+                    }
 
-            PlanImpl(event.trigger, actualGuard, actualGoals)
+                PlanImpl(event.trigger, actualGuard, actualGoals)
+            }
+            else -> this
         }
-        else -> this
-    }
 
     override fun isRelevant(event: Event): Boolean =
         event.trigger::class == this.trigger::class && (trigger.value mguWith event.trigger.value).isSuccess

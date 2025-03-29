@@ -17,6 +17,9 @@ interface ActivationRecord {
     fun isLastGoal(): Boolean
 
     companion object {
-        fun of(goals: List<Goal>, plan: Struct): ActivationRecord = ActivationRecordImpl(goals, plan)
+        fun of(
+            goals: List<Goal>,
+            plan: Struct,
+        ): ActivationRecord = ActivationRecordImpl(goals, plan)
     }
 }

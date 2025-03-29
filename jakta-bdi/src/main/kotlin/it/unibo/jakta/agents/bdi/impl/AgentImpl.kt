@@ -16,7 +16,9 @@ internal data class AgentImpl(
     override val tags: Map<String, Any> = emptyMap(),
 ) : Agent {
     override fun selectEvent(events: EventQueue) = events.firstOrNull()
+
     override fun selectApplicablePlan(plans: Iterable<Plan>) = plans.firstOrNull()
+
     override fun scheduleIntention(intentions: IntentionPool) =
         SchedulingResult(intentions.pop(), intentions.nextIntention())
 

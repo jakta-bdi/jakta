@@ -22,7 +22,10 @@ class MasScope : Builder<Mas> {
         return this
     }
 
-    fun agent(name: String, f: AgentScope.() -> Unit): MasScope {
+    fun agent(
+        name: String,
+        f: AgentScope.() -> Unit,
+    ): MasScope {
         agents += AgentScope(name).also(f).build()
         return this
     }

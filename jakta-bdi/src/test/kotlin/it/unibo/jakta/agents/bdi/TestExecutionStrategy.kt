@@ -11,27 +11,33 @@ import it.unibo.jakta.agents.bdi.plans.Plan
 import it.unibo.jakta.agents.bdi.plans.PlanLibrary
 
 fun main() {
-    val alice = Agent.of(
-        name = "Alice",
-        events = listOf(
-            Event.ofAchievementGoalInvocation(Achieve.of(Jakta.parseStruct("my_thread"))),
-        ),
-        planLibrary = PlanLibrary.of(
-            Plan.ofAchievementGoalInvocation(
-                value = Jakta.parseStruct("my_thread"),
-                goals = listOf(
-                    ActInternally.of(Jakta.parseStruct("thread")),
+    val alice =
+        Agent.of(
+            name = "Alice",
+            events =
+                listOf(
+                    Event.ofAchievementGoalInvocation(Achieve.of(Jakta.parseStruct("my_thread"))),
                 ),
-            ),
-        ),
-        internalActions = mapOf(
-            "thread" to object : AbstractInternalAction("thread", 0) {
-                override fun action(request: InternalRequest) {
-                    println("Thread: ${Thread.currentThread().name}")
-                }
-            },
-        ),
-    )
+            planLibrary =
+                PlanLibrary.of(
+                    Plan.ofAchievementGoalInvocation(
+                        value = Jakta.parseStruct("my_thread"),
+                        goals =
+                            listOf(
+                                ActInternally.of(Jakta.parseStruct("thread")),
+                            ),
+                    ),
+                ),
+            internalActions =
+                mapOf(
+                    "thread" to
+                        object : AbstractInternalAction("thread", 0) {
+                            override fun action(request: InternalRequest) {
+                                println("Thread: ${Thread.currentThread().name}")
+                            }
+                        },
+                ),
+        )
     val environment = Environment.of()
 
     Mas.of(ExecutionStrategy.oneThreadPerAgent(), environment, alice, alice.copy()).start()

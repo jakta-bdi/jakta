@@ -20,8 +20,7 @@ interface Mas {
             environment: Environment,
             agent: Agent,
             vararg agents: Agent,
-        ): Mas =
-            of(executionStrategy, environment, agents.asIterable() + agent)
+        ): Mas = of(executionStrategy, environment, agents.asIterable() + agent)
 
         fun of(
             executionStrategy: ExecutionStrategy,

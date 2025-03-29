@@ -22,10 +22,13 @@ sealed interface Goal {
     fun copy(value: Struct = this.value): Goal
 }
 
-class EmptyGoal(override val value: Struct = Truth.TRUE) : Goal {
+class EmptyGoal(
+    override val value: Struct = Truth.TRUE,
+) : Goal {
     override fun applySubstitution(substitution: Substitution): Goal = this
 
     override fun copy(value: Struct): Goal = EmptyGoal(value)
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

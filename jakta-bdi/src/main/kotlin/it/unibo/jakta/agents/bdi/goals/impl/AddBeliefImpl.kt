@@ -6,9 +6,12 @@ import it.unibo.jakta.agents.bdi.goals.Goal
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
 
-internal class AddBeliefImpl(private val addedBelief: Belief) : AddBelief {
+internal class AddBeliefImpl(
+    private val addedBelief: Belief,
+) : AddBelief {
     override val value: Struct
         get() = addedBelief.rule.head
+
     override fun applySubstitution(substitution: Substitution) =
         AddBeliefImpl(addedBelief.applySubstitution(substitution))
 

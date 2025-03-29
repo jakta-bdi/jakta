@@ -13,16 +13,15 @@ import it.unibo.tuprolog.dsl.jakta.JaktaLogicProgrammingScope
  */
 class BeliefsScope(
     private val lp: JaktaLogicProgrammingScope = JaktaLogicProgrammingScope.empty(),
-) : Builder<BeliefBase>, JaktaLogicProgrammingScope by lp {
-
+) : Builder<BeliefBase>,
+    JaktaLogicProgrammingScope by lp {
     private val beliefs = mutableListOf<Belief>()
 
     /**
      * Handler for the addition of a fact [Belief] into the agent's [BeliefBase].
      * @param struct the [Struct] that represents the [Belief].
      */
-    fun fact(struct: Struct) =
-        beliefs.add(Belief.wrap(struct.freshCopy(), wrappingTag = Belief.SOURCE_SELF))
+    fun fact(struct: Struct) = beliefs.add(Belief.wrap(struct.freshCopy(), wrappingTag = Belief.SOURCE_SELF))
 
     /**
      * Handler for the addition of a fact [Belief] into the agent's [BeliefBase].
@@ -41,8 +40,7 @@ class BeliefsScope(
      * Handler for the addition of a rule [Belief] into the agent's [BeliefBase].
      * @param function executed in the [JaktaLogicProgrammingScope] context to describe agent's [Belief].
      */
-    override fun rule(function: JaktaLogicProgrammingScope.() -> Any): Rule =
-        lp.rule(function).also { rule(it) }
+    override fun rule(function: JaktaLogicProgrammingScope.() -> Any): Rule = lp.rule(function).also { rule(it) }
 
     /**
      * Handler for the addition of a rule [Belief] into the agent's [BeliefBase].

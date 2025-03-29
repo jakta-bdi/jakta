@@ -13,9 +13,13 @@ data class InternalRequestImpl(
     override val requestTimestamp: Time?,
     override val arguments: List<Term>,
 ) : InternalRequest {
-    override fun reply(substitution: Substitution, effects: Iterable<AgentChange>) =
-        InternalResponse(substitution, effects)
+    override fun reply(
+        substitution: Substitution,
+        effects: Iterable<AgentChange>,
+    ) = InternalResponse(substitution, effects)
 
-    override fun reply(substitution: Substitution, vararg effects: AgentChange) =
-        reply(substitution, effects.asList())
+    override fun reply(
+        substitution: Substitution,
+        vararg effects: AgentChange,
+    ) = reply(substitution, effects.asList())
 }

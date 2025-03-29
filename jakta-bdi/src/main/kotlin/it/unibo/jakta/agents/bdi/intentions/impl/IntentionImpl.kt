@@ -10,7 +10,6 @@ internal class IntentionImpl(
     override val isSuspended: Boolean = false,
     override val id: IntentionID = IntentionID(),
 ) : Intention {
-
     override fun pop(): Intention {
         val record = recordStack.first()
         return if (record.isLastGoal()) {

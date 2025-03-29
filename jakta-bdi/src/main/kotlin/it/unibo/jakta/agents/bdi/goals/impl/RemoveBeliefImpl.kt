@@ -6,7 +6,9 @@ import it.unibo.jakta.agents.bdi.goals.RemoveBelief
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
 
-internal class RemoveBeliefImpl(private val removedBelief: Belief) : RemoveBelief {
+internal class RemoveBeliefImpl(
+    private val removedBelief: Belief,
+) : RemoveBelief {
     override val value: Struct
         get() = removedBelief.rule.head
 

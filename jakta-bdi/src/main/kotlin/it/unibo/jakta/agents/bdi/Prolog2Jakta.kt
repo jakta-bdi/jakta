@@ -5,11 +5,10 @@ import it.unibo.tuprolog.core.Term
 import it.unibo.tuprolog.core.visitors.DefaultTermVisitor
 
 object Prolog2Jakta : DefaultTermVisitor<Term>() {
-
     override fun defaultValue(term: Term): Term = term
 
-    override fun visitStruct(term: Struct): Term {
-        return when {
+    override fun visitStruct(term: Struct): Term =
+        when {
             term.arity == 2 && term.functor == "," ->
                 Struct.of("&", term.args.map { it.accept(this) })
             term.arity == 2 && term.functor == ";" ->
@@ -18,5 +17,4 @@ object Prolog2Jakta : DefaultTermVisitor<Term>() {
                 Struct.of("~", term.args.map { it.accept(this) })
             else -> super.visitStruct(term)
         }
-    }
 }

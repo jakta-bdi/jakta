@@ -21,18 +21,27 @@ interface Plan {
     val goals: List<Goal>
 
     /** Determines if a plan is applicable */
-    fun isApplicable(event: Event, beliefBase: BeliefBase): Boolean
+    fun isApplicable(
+        event: Event,
+        beliefBase: BeliefBase,
+    ): Boolean
 
     /** Returns the computed applicable plan */
-    fun applicablePlan(event: Event, beliefBase: BeliefBase): Plan
+    fun applicablePlan(
+        event: Event,
+        beliefBase: BeliefBase,
+    ): Plan
 
     fun isRelevant(event: Event): Boolean
 
     fun toActivationRecord(): ActivationRecord
 
     companion object {
-        private fun of(trigger: Trigger, guard: Struct, goals: List<Goal>): Plan =
-            PlanImpl(trigger, guard, goals)
+        private fun of(
+            trigger: Trigger,
+            guard: Struct,
+            goals: List<Goal>,
+        ): Plan = PlanImpl(trigger, guard, goals)
 
         fun ofBeliefBaseAddition(
             belief: Belief,

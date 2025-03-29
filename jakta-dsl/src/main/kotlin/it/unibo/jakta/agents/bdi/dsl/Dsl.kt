@@ -17,24 +17,31 @@ import it.unibo.tuprolog.core.Term
 annotation class JaktaDSL
 
 @JaktaDSL
-fun mas(f: MasScope.() -> Unit): Mas =
-    MasScope().also(f).build()
-fun internalAction(name: String, arity: Int, f: InternalActionScope.() -> Unit) =
-    InternalActionsScope().newAction(name, arity, f)
+fun mas(f: MasScope.() -> Unit): Mas = MasScope().also(f).build()
 
-fun externalAction(name: String, arity: Int, f: ExternalActionScope.() -> Unit) =
-    ExternalActionsScope().newAction(name, arity, f)
+fun internalAction(
+    name: String,
+    arity: Int,
+    f: InternalActionScope.() -> Unit,
+) = InternalActionsScope().newAction(name, arity, f)
+
+fun externalAction(
+    name: String,
+    arity: Int,
+    f: ExternalActionScope.() -> Unit,
+) = ExternalActionsScope().newAction(name, arity, f)
 
 @JaktaDSL
 fun environment(f: EnvironmentScope.() -> Unit): Environment = EnvironmentScope().also(f).build()
 
 @JaktaDSL
-fun agent(name: String, f: AgentScope.() -> Unit): Agent = AgentScope(name).also(f).build()
+fun agent(
+    name: String,
+    f: AgentScope.() -> Unit,
+): Agent = AgentScope(name).also(f).build()
 
 fun plans(f: PlansScope.() -> Unit): Iterable<Plan> = PlansScope().also(f).build()
 
-operator fun String.invoke(vararg terms: Term): Struct =
-    Struct.of(this, *terms)
+operator fun String.invoke(vararg terms: Term): Struct = Struct.of(this, *terms)
 
-operator fun String.invoke(terms: List<Term>): Struct =
-    Struct.of(this, terms)
+operator fun String.invoke(terms: List<Term>): Struct = Struct.of(this, terms)

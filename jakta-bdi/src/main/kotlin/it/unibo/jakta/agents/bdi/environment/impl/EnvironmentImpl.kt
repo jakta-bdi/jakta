@@ -22,29 +22,36 @@ open class EnvironmentImpl(
         val message = getNextMessage(agentName)
         return if (message != null) {
             copy(
-                messageBoxes = messageBoxes + mapOf(
-                    agentIDs[agentName]!! to messageBoxes[agentIDs[agentName]]!!.minus(message),
-                ),
+                messageBoxes =
+                    messageBoxes +
+                        mapOf(
+                            agentIDs[agentName]!! to messageBoxes[agentIDs[agentName]]!!.minus(message),
+                        ),
             )
         } else {
             this
         }
     }
 
-    override fun submitMessage(agentName: String, message: Message) =
-        if (messageBoxes.contains(agentIDs[agentName])) {
-            copy(
-                messageBoxes = messageBoxes + mapOf(
-                    agentIDs[agentName]!! to messageBoxes[agentIDs[agentName]]!!.plus(message),
-                ),
-            )
-        } else {
-            this
-        }
+    override fun submitMessage(
+        agentName: String,
+        message: Message,
+    ) = if (messageBoxes.contains(agentIDs[agentName])) {
+        copy(
+            messageBoxes =
+                messageBoxes +
+                    mapOf(
+                        agentIDs[agentName]!! to messageBoxes[agentIDs[agentName]]!!.plus(message),
+                    ),
+        )
+    } else {
+        this
+    }
 
-    override fun broadcastMessage(message: Message): Environment = copy(
-        messageBoxes = messageBoxes.entries.associate { it.key to it.value + message },
-    )
+    override fun broadcastMessage(message: Message): Environment =
+        copy(
+            messageBoxes = messageBoxes.entries.associate { it.key to it.value + message },
+        )
 
     override fun addAgent(agent: Agent): Environment =
         if (!agentIDs.contains(agent.name)) {
@@ -68,26 +75,32 @@ open class EnvironmentImpl(
 
     override fun percept(): BeliefBase = perception.percept()
 
-    override fun addData(key: String, value: Any): Environment = copy(data = data + Pair(key, value))
+    override fun addData(
+        key: String,
+        value: Any,
+    ): Environment = copy(data = data + Pair(key, value))
 
     override fun removeData(key: String): Environment = copy(data = data - key)
 
     override fun updateData(newData: Map<String, Any>): Environment = copy(data = newData)
+
     override fun copy(
         agentIDs: Map<String, AgentID>,
         externalActions: Map<String, ExternalAction>,
         messageBoxes: Map<AgentID, MessageQueue>,
         perception: Perception,
         data: Map<String, Any>,
-    ): Environment = EnvironmentImpl(
-        externalActions,
-        agentIDs,
-        messageBoxes,
-        perception,
-        data,
-    )
+    ): Environment =
+        EnvironmentImpl(
+            externalActions,
+            agentIDs,
+            messageBoxes,
+            perception,
+            data,
+        )
 
-    override fun toString(): String = """
+    override fun toString(): String =
+        """
         Environment(
            class=${this.javaClass}
            actions=${externalActions.values},
@@ -95,5 +108,5 @@ open class EnvironmentImpl(
            messages=${messageBoxes.keys},
            perception=$perception
         )
-    """.trimIndent()
+        """.trimIndent()
 }
