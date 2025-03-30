@@ -1,3 +1,15 @@
+# [0.13.0](https://github.com/jakta-bdi/jakta/compare/v0.12.1...v0.13.0) (2025-03-30)
+
+
+### Bug Fixes
+
+* correct usage of publish-on-central gitubaction ([ae7738c](https://github.com/jakta-bdi/jakta/commit/ae7738ce1343c596483c4829e773548d0eb7b622))
+
+
+### Features
+
+* renaming jakta into jakta-full package ([8094ec4](https://github.com/jakta-bdi/jakta/commit/8094ec4407a745c229aae6a4682aee4f50f86d36))
+
 ## [0.12.1](https://github.com/jakta-bdi/jakta/compare/v0.12.0...v0.12.1) (2025-03-29)
 
 
