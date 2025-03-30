@@ -13,12 +13,6 @@ plugins {
     alias(libs.plugins.kotlin.qa)
 }
 
-dependencies {
-    api(project(":jakta-state-machine"))
-    api(project(":jakta-bdi"))
-    api(project(":jakta-dsl"))
-}
-
 val Provider<PluginDependency>.id: String get() = get().pluginId
 
 allprojects {
@@ -88,19 +82,12 @@ allprojects {
         }
     }
 
-    tasks {
-        test {
-            useJUnitPlatform()
-            testLogging {
-                showStandardStreams = true
-                showCauses = true
-                showStackTraces = true
-                events(
-                    *org.gradle.api.tasks.testing.logging.TestLogEvent
-                        .values(),
-                )
-                exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
-            }
+    tasks.test {
+        useJUnitPlatform()
+        testLogging {
+            showStandardStreams = true
+            showCauses = true
+            showStackTraces = true
         }
     }
 
@@ -114,5 +101,15 @@ allprojects {
         onlyIf {
             project.hasProperty("runDetect")
         }
+    }
+}
+
+tasks {
+    // Prevent publishing the root project (since is empty)
+    withType<AbstractPublishToMaven>().configureEach {
+        enabled = false
+    }
+    withType<GenerateModuleMetadata>().configureEach {
+        enabled = false
     }
 }
