@@ -1,3 +1,10 @@
+## [0.13.6](https://github.com/jakta-bdi/jakta/compare/v0.13.5...v0.13.6) (2025-04-10)
+
+
+### Bug Fixes
+
+* **deps:** update plugin org.gradle.toolchains.foojay-resolver-convention to v0.10.0 ([#518](https://github.com/jakta-bdi/jakta/issues/518)) ([902c2c5](https://github.com/jakta-bdi/jakta/commit/902c2c58ceac46f056f4f26a53c5fc3233272f7c))
+
 ## [0.13.5](https://github.com/jakta-bdi/jakta/compare/v0.13.4...v0.13.5) (2025-04-10)
 
 
