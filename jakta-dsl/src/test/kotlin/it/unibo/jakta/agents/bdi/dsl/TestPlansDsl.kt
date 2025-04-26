@@ -283,4 +283,48 @@ class TestPlansDsl :
                         .first()
             }
         }
+
+        describe("A guard should convert correctly into Jakta Code") {
+            it("when parsing belief using not TuProlog operator") {
+                lateinit var variable: Var
+                val plan =
+                    testingPlans {
+                        variable = A
+                        +achieve("pippo") onlyIf {
+                            not("there_is"(variable, "here").fromSelf)
+                        } then {
+                            "print"("pippo")
+                        }
+                    }.first()
+                plan.guard.toString() shouldBe "'~'(there_is(source(self), A_0, here))"
+            }
+
+            it("when parsing belief using not TuProlog operator as string") {
+                lateinit var variable: Var
+                val plan =
+                    testingPlans {
+                        variable = A
+                        +achieve("pippo") onlyIf {
+                            "not"("there_is"(variable, "here").fromSelf)
+                        } then {
+                            "print"("pippo")
+                        }
+                    }.first()
+                plan.guard.toString() shouldBe "'~'(there_is(source(self), $variable, here))"
+            }
+
+            it("when parsing belief using ~ operator") {
+                lateinit var variable: Var
+                val plan =
+                    testingPlans {
+                        +achieve("pippo") onlyIf {
+                            variable = A
+                            "~"("there_is"(variable, "here").fromSelf)
+                        } then {
+                            "print"("pippo")
+                        }
+                    }.first()
+                plan.guard.toString() shouldBe "'~'(there_is(source(self), $variable, here))"
+            }
+        }
     })
