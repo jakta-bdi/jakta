@@ -296,7 +296,7 @@ class TestPlansDsl :
                             "print"("pippo")
                         }
                     }.first()
-                plan.guard.toString() shouldBe "'~'(there_is(source(self), A_0, here))"
+                plan.guard.toString() shouldBe "'~'(there_is(source(self), $variable, here))"
             }
 
             it("when parsing belief using not TuProlog operator as string") {
