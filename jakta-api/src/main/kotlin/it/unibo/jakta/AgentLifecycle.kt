@@ -26,7 +26,7 @@ interface AgentLifecycle<
     BeliefBaseType: BeliefBase<Query, Belief>,
     MutableBeliefBaseType: MutableBeliefBase<Query, Belief, BeliefBaseType>,
     PlanType: Plan<Query, Belief, Event>,
-    ActivationRecordType: ActivationRecord<Query, Belief, Event, PlanType>,
+    ActivationRecordType: ActivationRecord<Query, Belief, Event>,
     IntentionType: Intention<Query, Belief, Event, PlanType, ActivationRecordType>,
     Context: AgentContext<
         Query,

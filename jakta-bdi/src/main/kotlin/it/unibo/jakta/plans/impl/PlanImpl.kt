@@ -21,7 +21,7 @@ internal data class PlanImpl(
             return false
         }
         // TODO("Migliorabile per i cast")
-        val castedEvent: ASEvent = event as ASEvent
+        val castedEvent: ASEvent = event
         val castedBB: ASBeliefBase = beliefBase as ASBeliefBase
         val mgu = castedEvent.value mguWith this.trigger.value
         val actualGuard = guard.apply(mgu).castToStruct()

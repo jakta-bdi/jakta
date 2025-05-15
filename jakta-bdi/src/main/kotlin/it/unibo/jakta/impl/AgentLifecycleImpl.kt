@@ -15,6 +15,7 @@ import it.unibo.jakta.actions.effects.Sleep
 import it.unibo.jakta.actions.effects.Stop
 import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.beliefs.ASBeliefBase
+import it.unibo.jakta.beliefs.ASMutableBeliefBase
 import it.unibo.jakta.beliefs.BeliefBase
 import it.unibo.jakta.beliefs.MutableBeliefBase
 import it.unibo.jakta.context.ASAgentContext
@@ -39,6 +40,8 @@ import it.unibo.tuprolog.core.Struct
 typealias ASAgentLifecycle = AgentLifecycle<
     Struct,
     ASBelief,
+    ASBeliefBase,
+    ASMutableBeliefBase,
     ASEvent,
     ASPlan,
     ASActivationRecord,

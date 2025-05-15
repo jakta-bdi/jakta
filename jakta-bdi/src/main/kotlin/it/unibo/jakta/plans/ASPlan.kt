@@ -16,7 +16,7 @@ import it.unibo.jakta.plans.impl.PlanImpl
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Truth
 
-interface ASPlan : Plan<Struct, ASBelief, ASEvent> {
+interface ASPlan : Plan<Struct, ASBelief> {
 
     val trigger: ASEvent
 

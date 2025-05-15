@@ -25,7 +25,7 @@ interface AgentContext<
     Query: Any,
     BeliefBaseType: BeliefBase<Query, Belief>,
     PlanType: Plan<Query, Belief, Event>,
-    ActivationRecordType: ActivationRecord<Query, Belief, Event, PlanType>,
+    ActivationRecordType: ActivationRecord<Query, Belief, Event>,
     IntentionType: Intention<Query, Belief, Event, PlanType, ActivationRecordType>
 {
     val environment: Environment
@@ -63,7 +63,7 @@ interface MutableAgentContext<
     BeliefBaseType: BeliefBase<Query, Belief>,
     MutableBeliefBaseType: MutableBeliefBase<Query, Belief, BeliefBaseType>,
     PlanType: Plan<Query, Belief, Event>,
-    ActivationRecordType: ActivationRecord<Query, Belief, Event, PlanType>,
+    ActivationRecordType: ActivationRecord<Query, Belief, Event>,
     IntentionType: Intention<Query, Belief, Event, PlanType, ActivationRecordType>,
     ImmutableContext: AgentContext<Query, Belief, BeliefBaseType, Event, PlanType, ActivationRecordType, IntentionType, Environment>
 {
