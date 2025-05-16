@@ -41,26 +41,26 @@
 //    // the BB and the new instance for that belief.
 // }
 //
-// /** [Trigger] of an event made by a [Test] Goal. */
+// /** [Trigger] of an event made by a [Test] AgentEvent. */
 // sealed interface TestGoalTrigger : Trigger {
 //    val goal: Struct
 //        get() = value
 //
-//    /** [TestGoalTrigger] generated after an invocation of a [Test] Goal. */
+//    /** [TestGoalTrigger] generated after an invocation of a [Test] AgentEvent. */
 //    data class Invocation(override val value: Struct) : TestGoalTrigger
 //
-//    /** [TestGoalTrigger] generated after a failure of a [Test] Goal. */
+//    /** [TestGoalTrigger] generated after a failure of a [Test] AgentEvent. */
 //    data class Failure(override val value: Struct) : TestGoalTrigger
 // }
 //
-// /** [Trigger] of an event made by a [Achieve] Goal. */
+// /** [Trigger] of an event made by a [Achieve] AgentEvent. */
 // interface AchievementGoalTrigger : Trigger {
 //    val goal: Struct
 //        get() = value
 //
-//    /** [AchievementGoalTrigger] generated after the invocation of a [Achieve] Goal. */
+//    /** [AchievementGoalTrigger] generated after the invocation of a [Achieve] AgentEvent. */
 //    data class Invocation(override val value: Struct) : AchievementGoalTrigger
 //
-//    /** [AchievementGoalTrigger] generated after the failure of a [Achieve] Goal. */
+//    /** [AchievementGoalTrigger] generated after the failure of a [Achieve] AgentEvent. */
 //    data class Failure(override val value: Struct) : AchievementGoalTrigger
 // }

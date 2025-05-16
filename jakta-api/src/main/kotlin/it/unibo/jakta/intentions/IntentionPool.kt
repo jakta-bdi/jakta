@@ -1,42 +1,16 @@
 package it.unibo.jakta.intentions
 
-import it.unibo.jakta.plans.Plan
+import it.unibo.jakta.plans.ExecutionResult
 
-interface IntentionPool<
-    Query,
-    Belief,
-    Event,
-    ActivationRecordType,
-    IntentionType,
-    PlanType,
-> : Map<IntentionID, IntentionType> where
-    Query: Any,
-    PlanType: Plan<Query, Belief, Event>,
-    ActivationRecordType: ActivationRecord<Query, Belief, Event, PlanType>,
-    IntentionType: Intention<Query, Belief, Event, PlanType, ActivationRecordType>
-{
-    fun nextIntention(): IntentionType
+interface IntentionPool<ActionResult: ExecutionResult<Any>> : Map<IntentionID, Intention<ActionResult>> {
+    fun nextIntention(): Intention<ActionResult>
 }
 
-interface MutableIntentionPool<
-    Query,
-    Belief,
-    Event,
-    ActivationRecordType,
-    IntentionType,
-    PlanType,
-> : Map<IntentionID, IntentionType>,
-    IntentionPool<Query, Belief, Event, ActivationRecordType, IntentionType, PlanType> where
-    Query: Any,
-    PlanType: Plan<Query, Belief, Event>,
-    ActivationRecordType: ActivationRecord<Query, Belief, Event, PlanType>,
-    IntentionType: Intention<Query, Belief, Event, PlanType, ActivationRecordType>
+interface MutableIntentionPool<ActionResult: ExecutionResult<Any>> :
+    Map<IntentionID, Intention<ActionResult>>, IntentionPool<ActionResult>
 {
-    fun updateIntention(intention: IntentionType): Boolean
-
-    fun pop(): IntentionType?
-
-    fun deleteIntention(intentionID: IntentionID): IntentionType?
-
-    fun snapshot(): IntentionPool<Query, Belief, Event, ActivationRecordType, IntentionType, PlanType>
+    fun updateIntention(intention: Intention<ActionResult>): Boolean
+    fun pop(): Intention<ActionResult>?
+    fun deleteIntention(intentionID: IntentionID): Intention<ActionResult>?
+    fun snapshot(): IntentionPool<ActionResult>
 }

@@ -6,6 +6,7 @@ import it.unibo.jakta.intentions.ActivationRecord
 import it.unibo.jakta.intentions.Intention
 import it.unibo.jakta.intentions.IntentionPool
 import it.unibo.jakta.intentions.MutableIntentionPool
+import it.unibo.jakta.plans.ExecutionResult
 import it.unibo.jakta.plans.Plan
 import javax.management.Query
 
@@ -15,23 +16,16 @@ import javax.management.Query
 interface AgentContext<
     Query,
     Belief,
-    BeliefBaseType,
     Event,
-    PlanType,
-    ActivationRecordType,
-    IntentionType,
+    ActionResult: ExecutionResult<Any>,
     Environment
 > where
-    Query: Any,
-    BeliefBaseType: BeliefBase<Query, Belief>,
-    PlanType: Plan<Query, Belief, Event>,
-    ActivationRecordType: ActivationRecord<Query, Belief, Event>,
-    IntentionType: Intention<Query, Belief, Event, PlanType, ActivationRecordType>
+    Query: Any
 {
     val environment: Environment
 
     /** [BeliefBase] of the BDI Agent */
-    val beliefBase: BeliefBaseType
+    val beliefBase: BeliefBase<Query, Belief>
 
     /**
      * The collection of [Event] that the BDI Agent reacts on.
@@ -42,33 +36,20 @@ interface AgentContext<
     val events: List<Event>
 
     /** [Plan]s collection of the BDI Agent */
-    val planLibrary: Collection<PlanType>
+    val planLibrary: Collection<Plan<ActionResult>>
 
-    val intentions: IntentionPool<Query, Belief, Event, ActivationRecordType, IntentionType, PlanType>
+    val intentions: IntentionPool<ActionResult>
 }
 
 interface MutableAgentContext<
-    Query,
-    Belief,
-    BeliefBaseType,
-    MutableBeliefBaseType,
-    Event,
-    PlanType,
-    ActivationRecordType,
-    IntentionType,
-    out ImmutableContext,
-    Environment
-> where
     Query: Any,
-    BeliefBaseType: BeliefBase<Query, Belief>,
-    MutableBeliefBaseType: MutableBeliefBase<Query, Belief, BeliefBaseType>,
-    PlanType: Plan<Query, Belief, Event>,
-    ActivationRecordType: ActivationRecord<Query, Belief, Event>,
-    IntentionType: Intention<Query, Belief, Event, PlanType, ActivationRecordType>,
-    ImmutableContext: AgentContext<Query, Belief, BeliefBaseType, Event, PlanType, ActivationRecordType, IntentionType, Environment>
-{
+    Belief,
+    Event,
+    ActionResult: ExecutionResult<Any>,
+    Environment
+> {
 
-    val mutableBeliefBase: MutableBeliefBaseType
+    val mutableBeliefBase: MutableBeliefBase<Query, Belief, BeliefBase<Query, Belief>>
     //fun addBelief(belief: Belief): Boolean
     //fun removeBelief(belief: Belief): Boolean
 
@@ -76,13 +57,13 @@ interface MutableAgentContext<
     //fun addEvent(event: Event): Boolean
     //fun removeEvent(event: Event): Boolean
 
-    val mutablePlanLibrary: MutableCollection<PlanType>
+    val mutablePlanLibrary: MutableCollection<Plan<ActionResult>>
     //fun addPlan(plan: PlanType): Boolean
     //fun removePlan(plan: PlanType): Boolean
 
-    val mutableIntentionPool: MutableIntentionPool<Query, Belief, Event, ActivationRecordType, IntentionType, PlanType>
+    val mutableIntentionPool: MutableIntentionPool<ActionResult>
     // fun removeIntention(intention: IntentionType): Boolean
     // fun updateIntention(intention: IntentionType): Boolean
 
-    fun snapshot(): ImmutableContext
+    fun snapshot(): AgentContext<Query, Belief, Event, ActionResult, Environment>
 }

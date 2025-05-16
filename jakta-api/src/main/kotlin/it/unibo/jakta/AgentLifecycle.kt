@@ -1,5 +1,6 @@
 package it.unibo.jakta
 
+import it.unibo.jakta.actions.Action
 import it.unibo.jakta.beliefs.BeliefBase
 import it.unibo.jakta.beliefs.MutableBeliefBase
 import it.unibo.jakta.context.AgentContext
@@ -7,38 +8,17 @@ import it.unibo.jakta.context.MutableAgentContext
 import it.unibo.jakta.intentions.ActivationRecord
 import it.unibo.jakta.intentions.Intention
 import it.unibo.jakta.intentions.IntentionPool
+import it.unibo.jakta.plans.ExecutionResult
 import it.unibo.jakta.plans.Plan
 
 /** BDI Agent definition*/
 interface AgentLifecycle<
-    Query,
-    Belief,
-    BeliefBaseType,
-    MutableBeliefBaseType,
-    Event,
-    PlanType,
-    ActivationRecordType,
-    IntentionType,
-    Context,
-    Environment
-> where
     Query: Any,
-    BeliefBaseType: BeliefBase<Query, Belief>,
-    MutableBeliefBaseType: MutableBeliefBase<Query, Belief, BeliefBaseType>,
-    PlanType: Plan<Query, Belief, Event>,
-    ActivationRecordType: ActivationRecord<Query, Belief, Event>,
-    IntentionType: Intention<Query, Belief, Event, PlanType, ActivationRecordType>,
-    Context: AgentContext<
-        Query,
-        Belief,
-        BeliefBaseType,
-        Event,
-        PlanType,
-        ActivationRecordType,
-        IntentionType,
-        Environment
-    >
-{
+    Belief,
+    Event,
+    ActionResult: ExecutionResult<Any>,
+    Environment
+> {
 
     /**
      * STEP 1 of reasoning cycle: Belief Update Function.
@@ -69,7 +49,7 @@ interface AgentLifecycle<
      * @param planLibrary: the [Plan]s known by the Agent
      * @return the relevant [Plan]s
      */
-    fun selectRelevantPlans(event: Event, planLibrary: List<PlanType>): List<PlanType>
+    fun selectRelevantPlans(event: Event, planLibrary: List<Plan<ActionResult>>): List<Plan<ActionResult>>
 
     /**
      * STEP 7 of reasoning cycle: Determining the Applicable Plans.
@@ -81,7 +61,7 @@ interface AgentLifecycle<
      */
     fun isPlanApplicable(
         event: Event,
-        plan: PlanType,
+        plan: ActionResult,
         beliefBase: BeliefBase<Query, Belief>,
     ): Boolean
 
@@ -92,7 +72,7 @@ interface AgentLifecycle<
      * @param plans: applicable [Plan]s
      * @return the selected [Plan] to be executed
      */
-    fun selectApplicablePlan(plans: List<PlanType>): PlanType?
+    fun selectApplicablePlan(plans: List<ActionResult>): Plan<ActionResult>?
 
     /**
      * Step 8 of reasoning cycle: Assign selected plan to an Intention.
@@ -105,9 +85,9 @@ interface AgentLifecycle<
      */
     fun assignPlanToIntention(
         event: Event,
-        plan: PlanType,
-        intentions: IntentionPool<Query, Belief, Event, ActivationRecordType, IntentionType, PlanType>
-    ): IntentionType?
+        plan: Plan<ActionResult>,
+        intentions: IntentionPool<ActionResult>
+    ): Intention<ActionResult>?
 
     /**
      * Step 9 of reasoning cycle: Selecting an Intention for Further Execution.
@@ -117,8 +97,8 @@ interface AgentLifecycle<
      * @return the [Intention] to execute, or null if there's no intention
      */
     fun scheduleIntention(
-        intentions: IntentionPool<Query, Belief, Event, ActivationRecordType, IntentionType, PlanType>
-    ): IntentionType?
+        intentions: IntentionPool<ActionResult>
+    ): Intention<ActionResult>?
 
     /**
      * Step 10 of reasoning cycle: Executing One step of an Intention.
@@ -126,19 +106,16 @@ interface AgentLifecycle<
      * @param intention: [Intention] on which the agent is currently focused
      */
     fun runIntention(
-        intention: IntentionType,
+        intention: Intention<ActionResult>,
         context: MutableAgentContext<
             Query,
             Belief,
-            BeliefBaseType,
+            B,
             MutableBeliefBaseType,
+            ActionResult,
             Event,
-            PlanType,
-            ActivationRecordType,
-            IntentionType,
-            Context,
             Environment
-        >,
+            >,
         environment: Environment,
     )
 

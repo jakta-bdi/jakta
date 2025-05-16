@@ -4,18 +4,13 @@ import it.unibo.jakta.actions.Action
 import it.unibo.jakta.plans.ExecutionResult
 import it.unibo.jakta.plans.Plan
 
-interface ActivationRecord<
+interface ActivationRecord<Result: ExecutionResult<Any>> {
 
-    Query: Any,
-    Belief,
-    Event
-> {
+    val actionsQueue: List<Action<Any?, Any, Result>> // = plan.tasks
 
-    fun <Request, SideEffect, Result: ExecutionResult<SideEffect>> getActionsQueue(): List<Action<Request, SideEffect, Result>> // = plan.tasks
-
-    val generatingPlan: Plan<Query, Belief, Event>
+    val generatingPlan: Plan<Result>
 
     fun isLastActionToExecute(): Boolean
 
-    fun pop(): Action<*, *, *>?
+    fun pop(): Action<Any?, Any, Result>?
 }
