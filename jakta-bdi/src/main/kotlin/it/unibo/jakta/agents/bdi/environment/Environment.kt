@@ -35,7 +35,7 @@ interface Environment {
 
     fun removeAgent(agentName: String): Environment
 
-    fun percept(): BeliefBase = perception.percept()
+    fun percept(agent: Agent): BeliefBase = perception.percept()
 
     fun addData(
         key: String,

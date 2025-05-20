@@ -73,7 +73,7 @@ open class EnvironmentImpl(
             this
         }
 
-    override fun percept(): BeliefBase = perception.percept()
+    override fun percept(agent: Agent): BeliefBase = perception.percept()
 
     override fun addData(
         key: String,

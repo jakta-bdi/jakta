@@ -377,7 +377,7 @@ internal data class AgentLifecycleImpl(
         this.debugEnabled = debugEnabled
 
         // STEP1: Perceive the Environment
-        val perceptions = environment.percept()
+        val perceptions = environment.percept(this.agent)
 
         // STEP2: Update the BeliefBase
         val rr = updateBelief(perceptions, agent.context.beliefBase)
