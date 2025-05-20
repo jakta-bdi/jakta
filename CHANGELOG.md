@@ -1,3 +1,10 @@
+# [0.14.0](https://github.com/jakta-bdi/jakta/compare/v0.13.28...v0.14.0) (2025-05-20)
+
+
+### Features
+
+* add agent reference in environment percept method ([8467599](https://github.com/jakta-bdi/jakta/commit/8467599572165be5704c3040d7b42458dbaae8eb))
+
 ## [0.13.28](https://github.com/jakta-bdi/jakta/compare/v0.13.27...v0.13.28) (2025-05-20)
 
 
