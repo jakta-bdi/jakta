@@ -1,8 +1,9 @@
 package it.unibo.jakta.environment
 
+import it.unibo.jakta.AgentProcess
 import it.unibo.jakta.fsm.Activity
 
-interface BasicEnvironment {
+interface BasicEnvironment: AgentProcess {
 
     val debugEnabled: Boolean
     val controller: Activity.Controller?

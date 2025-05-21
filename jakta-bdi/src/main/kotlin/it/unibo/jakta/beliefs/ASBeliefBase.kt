@@ -1,18 +1,65 @@
 package it.unibo.jakta.beliefs
 
 import it.unibo.jakta.beliefs.impl.ASBeliefBaseImpl
+import it.unibo.jakta.events.Event
+import it.unibo.jakta.events.EventGenerator
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.solve.Solution
 
 /** A BDI Agent's collection of [ASBelief] */
-interface ASBeliefBase : BeliefBase<Struct, ASBelief> {
-
+interface ASBeliefBase : BeliefBase<Struct> {
     fun select(query: ASBelief): List<ASBelief>
     fun getSolutionOf(query: Struct): Solution
     fun getSolutionOf(belief: ASBelief): Solution
 }
 
-interface ASMutableBeliefBase : MutableBeliefBase<Struct, ASBelief, ASBeliefBase> {
+interface ASMutableBeliefBase: ASBeliefBase {
+
+    /**
+     * @return the immutable [BeliefBase] version of this instance.
+     */
+    fun snapshot(): ASBeliefBase
+
+    /**
+     * Adds a [Belief] to this [BeliefBase], if not present.
+     * @param belief: the [Belief] to be added.
+     * @return true if the [BeliefBase] was changed as the result of the operation.
+     **/
+    fun add(belief: ASBelief): Boolean
+
+    /**
+     * Adds all the given beliefs into this [BeliefBase], if not present.
+     * @param beliefs: the [BeliefBase] to be added.
+     * @return true if the [BeliefBase] was changed as the result of the operation.
+     **/
+    fun addAll(beliefs: ASBeliefBase): Boolean {
+        var result = false
+        for (b in beliefs) {
+            if (add(b as ASBelief)) result = true //TODO(CAST)
+        }
+        return result
+    }
+
+    /**
+     * Removes a [Belief] from the [BeliefBase], if present.
+     * @param belief: the [Belief] to be removed
+     * @return true if the [BeliefBase] was changed as the result of the operation.
+     */
+    fun remove(belief: ASBelief): Boolean
+
+    /**
+     * Removes all the specified beliefs from this [BeliefBase], if present.
+     * @param beliefs: beliefs to be removed
+     * @return true if the [BeliefBase] was changed as the result of the operation.
+     */
+    fun removeAll(beliefs: ASBeliefBase): Boolean {
+        var result = false
+        for (b in beliefs) {
+            if (remove(b as ASBelief)) result = true //TODO(CAST)
+        }
+        return result
+    }
+
     /**
      * Updates the content of the [BeliefBase].
      * @param belief the [Belief] to update

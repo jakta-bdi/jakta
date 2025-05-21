@@ -1,10 +1,11 @@
 package it.unibo.jakta.actions.effects
 
 import it.unibo.jakta.ASAgent
+import it.unibo.jakta.actions.SideEffect
 import it.unibo.jakta.environment.BasicEnvironment
 import it.unibo.jakta.messages.Message
 
-fun interface EnvironmentChange : ActionSideEffect, (BasicEnvironment) -> Unit
+fun interface EnvironmentChange : SideEffect, (BasicEnvironment) -> Unit
 
 data class SpawnAgent(val agent: ASAgent) : EnvironmentChange {
     override fun invoke(context: BasicEnvironment) {

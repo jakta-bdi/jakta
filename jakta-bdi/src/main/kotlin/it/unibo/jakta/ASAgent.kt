@@ -1,36 +1,30 @@
 package it.unibo.jakta
 
-import it.unibo.jakta.beliefs.ASBelief
-import it.unibo.jakta.beliefs.ASBeliefBase
 import it.unibo.jakta.beliefs.ASMutableBeliefBase
-import it.unibo.jakta.context.ASAgentContext
-import it.unibo.jakta.context.ASMutableAgentContext
-import it.unibo.jakta.context.MutableAgentContextStaticFactory
-import it.unibo.jakta.environment.BasicEnvironment
 import it.unibo.jakta.events.ASEvent
+import it.unibo.jakta.events.Event
 import it.unibo.jakta.impl.AgentImpl
-import it.unibo.jakta.intentions.ASActivationRecord
 import it.unibo.jakta.intentions.ASIntention
+import it.unibo.jakta.intentions.ASIntentionPool
 import it.unibo.jakta.plans.ASPlan
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.utils.Taggable
 import java.util.*
 
-interface ASAgent :
-    Agent<
-        Struct,
-        ASBelief,
-        ASBeliefBase,
-        ASMutableBeliefBase,
-        ASEvent,
-        ASPlan,
-        ASActivationRecord,
-        ASIntention,
-        ASAgentContext,
-        BasicEnvironment
-    >,
-    Taggable<ASAgent>
-{
+interface ASAgent: Agent<Struct>, Taggable<ASAgent> {
+    val intentions: ASIntentionPool
+
+    /** Event Selection Function*/
+    fun selectEvent(events: List<ASEvent>): ASEvent?
+
+    /** Plan Selection Function */
+    fun selectApplicablePlan(plans: Iterable<ASPlan>): ASPlan?
+
+    /** Intention Selection Function */
+    fun scheduleIntention(
+        intentions: ASIntentionPool
+    ): ASIntention
+
     companion object {
         fun empty(): ASAgent = AgentImpl()
 
@@ -44,13 +38,9 @@ interface ASAgent :
         ): ASAgent = AgentImpl(
             agentID,
             name,
-            MutableAgentContextStaticFactory.of(beliefBase, events, planLibrary),
+            beliefBase,
+                events,
+                planLibrary)
         )
-
-        fun of(
-            agentID: AgentID = AgentID(),
-            name: String = "Agent-" + UUID.randomUUID(),
-            agentContext: ASMutableAgentContext = MutableAgentContextStaticFactory.of(),
-        ): ASAgent = AgentImpl( agentID, name, agentContext)
     }
 }

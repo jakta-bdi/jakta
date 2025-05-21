@@ -1,8 +1,8 @@
 package it.unibo.jakta.actions.effects
 
+import it.unibo.jakta.ASAgent
+import it.unibo.jakta.actions.SideEffect
 import it.unibo.jakta.beliefs.ASBelief
-import it.unibo.jakta.context.ASAgentContext
-import it.unibo.jakta.context.ASMutableAgentContext
 import it.unibo.jakta.events.ASEvent
 import it.unibo.jakta.events.BeliefBaseAddition
 import it.unibo.jakta.events.BeliefBaseRemoval
@@ -10,13 +10,13 @@ import it.unibo.jakta.fsm.Activity
 import it.unibo.jakta.intentions.ASIntention
 import it.unibo.jakta.plans.ASPlan
 
-fun interface AgentChange : ActionSideEffect, (ASMutableAgentContext) -> Unit
+fun interface AgentChange : SideEffect, (ASAgent) -> Unit
 
 interface BeliefChange: AgentChange {
     val belief: ASBelief
 
     class BeliefAddition(override val belief: ASBelief): BeliefChange {
-        override fun invoke(mutableAgentContext: ASMutableAgentContext) {
+        override fun invoke(mutableAgentContext: ASAgent) {
             with(mutableAgentContext) {
                 mutableBeliefBase.add(belief)
                 mutableEventList.add(BeliefBaseAddition(belief))
@@ -26,7 +26,7 @@ interface BeliefChange: AgentChange {
     }
 
     class BeliefRemoval(override val belief: ASBelief): BeliefChange {
-        override fun invoke(mutableAgentContext: ASMutableAgentContext) {
+        override fun invoke(mutableAgentContext: ASAgent) {
             with(mutableAgentContext) {
                 mutableBeliefBase.remove(belief)
                 mutableEventList.add(BeliefBaseRemoval(belief))

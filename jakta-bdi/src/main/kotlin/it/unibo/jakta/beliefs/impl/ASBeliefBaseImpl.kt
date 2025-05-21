@@ -4,7 +4,11 @@ import it.unibo.jakta.Jakta
 import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.beliefs.ASBeliefBase
 import it.unibo.jakta.beliefs.ASMutableBeliefBase
+import it.unibo.jakta.beliefs.Belief
 import it.unibo.jakta.beliefs.BeliefBase
+import it.unibo.jakta.events.BeliefBaseAddition
+import it.unibo.jakta.events.BeliefBaseRemoval
+import it.unibo.jakta.events.Event
 import it.unibo.tuprolog.collections.ClauseMultiSet
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
@@ -14,13 +18,18 @@ import it.unibo.tuprolog.solve.flags.TrackVariables
 import it.unibo.tuprolog.solve.flags.Unknown
 import it.unibo.tuprolog.theory.Theory
 import it.unibo.tuprolog.unify.Unificator
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.publish
+import kotlinx.coroutines.flow.shareIn
 
 internal data class ASBeliefBaseImpl(
     private var beliefs: ClauseMultiSet,
-    override var delta: List<BeliefBase.Update<ASBelief>> = emptyList(),
+    override var events: Flow<Event.BeliefEvent>,
 ) : ASMutableBeliefBase, ASBeliefBase {
 
-    constructor() : this(ClauseMultiSet.empty(Unificator.default))
+    constructor() : this(ClauseMultiSet.empty(Unificator.default), emptyFlow())
 
     override fun snapshot(): ASBeliefBase = this.copy()
 
@@ -58,7 +67,10 @@ internal data class ASBeliefBaseImpl(
         0L -> false
         else -> true.also {
             val match = beliefs.filterIsInstance<ASBelief>().first { it == belief }
-            delta += BeliefBase.Update.Removal(match)
+            // delta += BeliefBase.Update.Removal(match)
+            events = flow {
+                emit(BeliefBaseRemoval(match))
+            }
             beliefs = ClauseMultiSet.of(Unificator.default, beliefs.filter { it != belief })
         }
     }
@@ -67,7 +79,10 @@ internal data class ASBeliefBaseImpl(
         // There's no Belief that unify the param inside the MultiSet, so it's inserted
         0L -> true.also {
             beliefs.add(belief.content)
-            delta += BeliefBase.Update.Addition(belief)
+            // delta += BeliefBase.Update.Addition(belief)
+            events = flow {
+                emit(BeliefBaseAddition(belief))
+            }
         }
         // There are Beliefs that unify the param, so the belief it's not inserted
         else -> false
@@ -77,11 +92,14 @@ internal data class ASBeliefBaseImpl(
 
     override fun isEmpty() = beliefs.isEmpty()
 
-    override fun iterator() = beliefs.filterIsInstance<ASBelief>().iterator()
+    override fun iterator() = beliefs.filterIsInstance<Belief>().iterator()
 
-    override fun containsAll(elements: Collection<ASBelief>) = beliefs.containsAll(elements.map { it.content })
+    override fun containsAll(elements: Collection<Belief>) = beliefs.containsAll(elements.filterIsInstance<ASBelief>().map { it.content })
 
-    override fun contains(element: ASBelief) = beliefs.contains(element.content)
+    override fun contains(element: Belief) = when (element) {
+        is ASBelief -> beliefs.contains(element.content)
+        else -> throw IllegalArgumentException("Expected an instance of [ASBelief], but got ")
+    }
 
     override fun toString(): String =
         beliefs.joinToString { ASBelief.from(it.castToRule()).toString() }

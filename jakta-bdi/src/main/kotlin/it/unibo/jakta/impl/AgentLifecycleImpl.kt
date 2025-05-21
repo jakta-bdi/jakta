@@ -1,8 +1,8 @@
 package it.unibo.jakta.impl
 
 import it.unibo.jakta.ASAgent
-import it.unibo.jakta.AgentLifecycle
-import it.unibo.jakta.actions.ASAction
+import it.unibo.jakta.ASAgentLifecycle
+import it.unibo.jakta.AgentProcess
 import it.unibo.jakta.actions.effects.AgentChange
 import it.unibo.jakta.actions.effects.BeliefChange
 import it.unibo.jakta.actions.effects.EnvironmentChange
@@ -16,10 +16,6 @@ import it.unibo.jakta.actions.effects.Stop
 import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.beliefs.ASBeliefBase
 import it.unibo.jakta.beliefs.ASMutableBeliefBase
-import it.unibo.jakta.beliefs.BeliefBase
-import it.unibo.jakta.beliefs.MutableBeliefBase
-import it.unibo.jakta.context.ASAgentContext
-import it.unibo.jakta.context.AgentContext
 import it.unibo.jakta.environment.BasicEnvironment
 import it.unibo.jakta.events.ASEvent
 import it.unibo.jakta.events.AchievementGoalFailure
@@ -28,30 +24,26 @@ import it.unibo.jakta.events.BeliefBaseRemoval
 import it.unibo.jakta.events.TestGoalFailure
 import it.unibo.jakta.executionstrategies.ExecutionResult
 import it.unibo.jakta.fsm.Activity
-import it.unibo.jakta.intentions.ASActivationRecord
 import it.unibo.jakta.intentions.ASIntention
 import it.unibo.jakta.intentions.ASIntentionPool
-import it.unibo.jakta.intentions.Intention
-import it.unibo.jakta.intentions.IntentionPool
 import it.unibo.jakta.messages.Tell
 import it.unibo.jakta.plans.ASPlan
-import it.unibo.tuprolog.core.Struct
 
-typealias ASAgentLifecycle = AgentLifecycle<
-    Struct,
-    ASBelief,
-    ASBeliefBase,
-    ASMutableBeliefBase,
-    ASEvent,
-    ASPlan,
-    ASActivationRecord,
-    ASIntention,
-    ASAgentContext,
-    BasicEnvironment,
->
+//class LifeCycle {
+//    val agent: Agent<String> = TODO()
+//    var todos: List<Action>
+//
+//    suspend fun runCycle() {
+//        val nextEvent = agent.sense()
+//        if (nextEvent != null) {
+//            todos += agent.deliberate(nextEvent)
+//        }
+//        val sideEffects = todos.first()()
+//        sideEffects.forEach { it() }
+//    }
+//}
 
 internal data class AgentLifecycleImpl(
-
     private var agent: ASAgent,
 ) : ASAgentLifecycle {
     private var cachedEffects = emptyList<EnvironmentChange>()
@@ -59,8 +51,8 @@ internal data class AgentLifecycleImpl(
     override fun selectEvent(events: List<ASEvent>): ASEvent? = agent.selectEvent(events)
 
     override fun updateBelief(
-        perceptions: BeliefBase<Struct, ASBelief>,
-        beliefBase: MutableBeliefBase<Struct, ASBelief, BeliefBase<Struct, ASBelief>>
+        perceptions: ASBeliefBase,
+        beliefBase: ASMutableBeliefBase,
     ): Boolean = when (perceptions == beliefBase) {
         false -> {
             // 1. each literal l in p not currently in b is added to b
@@ -85,7 +77,7 @@ internal data class AgentLifecycleImpl(
     override fun isPlanApplicable(
         event: ASEvent,
         plan: ASPlan,
-        beliefBase: BeliefBase<Struct, ASBelief>
+        beliefBase: ASBeliefBase,
     ): Boolean = plan.isApplicable(event, beliefBase)
 
     override fun selectApplicablePlan(plans: List<ASPlan>) = agent.selectApplicablePlan(plans)
@@ -111,8 +103,19 @@ internal data class AgentLifecycleImpl(
     }
 
     override fun scheduleIntention(intentions: ASIntentionPool) = agent.scheduleIntention(intentions)
+    override fun runIntention(
+        intention: ASIntention,
+        agent: ASAgent,
+        environment: AgentProcess
+    ) {
+        TODO("Not yet implemented")
+    }
 
-    override fun runIntention(intention: ASIntention, context: ASAgentContext, environment: BasicEnvironment): ExecutionResult {
+    override fun sense(environment: AgentProcess) {
+        TODO("Not yet implemented")
+    }
+
+    override fun runIntention(intention: ASIntention, agent: ASAgent, environment: BasicEnvironment): ExecutionResult {
         when (val nextGoal = intention.nextTask()) {
 
             is ActionGoal -> when (nextGoal) {
@@ -349,6 +352,10 @@ internal data class AgentLifecycleImpl(
                 }
             }
         }
+    }
+
+    override fun act(environment: AgentProcess): Boolean {
+        TODO("Not yet implemented")
     }
 
     override fun act(environment: BasicEnvironment): Boolean {

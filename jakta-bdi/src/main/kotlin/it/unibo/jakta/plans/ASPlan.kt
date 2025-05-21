@@ -3,7 +3,6 @@ package it.unibo.jakta.plans
 import it.unibo.jakta.actions.ASAction
 import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.beliefs.ASBeliefBase
-import it.unibo.jakta.beliefs.BeliefBase
 import it.unibo.jakta.events.ASEvent
 import it.unibo.jakta.events.AchievementGoalFailure
 import it.unibo.jakta.events.AchievementGoalInvocation
@@ -16,7 +15,7 @@ import it.unibo.jakta.plans.impl.PlanImpl
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Truth
 
-interface ASPlan : Plan<Struct, ASBelief> {
+interface ASPlan : Plan<Struct> {
 
     val trigger: ASEvent
 
@@ -30,12 +29,17 @@ interface ASPlan : Plan<Struct, ASBelief> {
      */
     fun toActivationRecord(): ASActivationRecord
 
+    fun isApplicable(event: ASEvent, beliefBase: ASBeliefBase): Boolean
+
+    fun isRelevant(event: ASEvent): Boolean
+
     companion object {
         private fun of(
             trigger: ASEvent,
             guard: Struct,
             goals: List<ASAction>,
-        ): ASPlan = PlanImpl(trigger, guard, goals)
+            agent: ASAgent,
+        ): ASPlan = PlanImpl(trigger = trigger, guard = guard, tasks = goals, agent = agent)
 
         fun ofBeliefBaseAddition(
             belief: ASBelief,

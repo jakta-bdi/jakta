@@ -1,9 +1,12 @@
 package it.unibo.jakta.actions.stdlib
 
 import it.unibo.jakta.actions.AbstractAction
+import it.unibo.jakta.actions.ActionInvocationContext
+import it.unibo.jakta.actions.SideEffect
 import it.unibo.jakta.actions.effects.EventChange
 import it.unibo.jakta.actions.effects.IntentionChange
 import it.unibo.jakta.actions.requests.ActionRequest
+import it.unibo.jakta.beliefs.ASBeliefBase
 import it.unibo.jakta.events.AchievementGoalInvocation
 import it.unibo.jakta.events.TestGoalFailure
 import it.unibo.jakta.events.TestGoalInvocation
@@ -32,7 +35,7 @@ class Achieve(
         effects.add(IntentionChange.IntentionRemoval(intention)) // It gets added back in the queue after plan execution
     }
 
-    override suspend fun action(request: ActionRequest) = Unit
+    override suspend fun invoke(context: ActionInvocationContext): List<SideEffect> = emptyList()
 }
 
 /**
@@ -55,8 +58,12 @@ class Test(
         }
     }
 
-    override suspend fun action(request: ActionRequest) {
-        solution = request.agentContext.beliefBase.getSolutionOf(planTrigger)
+    override suspend fun invoke(context: ActionInvocationContext): List<SideEffect> {
+        solution = when (context.agent.beliefBase) {
+            is ASBeliefBase -> (context.agent.beliefBase as ASBeliefBase).getSolutionOf(planTrigger)
+            else -> Solution.no(planTrigger)
+        }
+        return emptyList()
     }
 }
 
@@ -73,5 +80,6 @@ class Spawn(
         intention.pop()
     }
 
-    override suspend fun action(request: ActionRequest) = Unit
+    override suspend fun invoke(context: ActionInvocationContext): List<SideEffect> = emptyList()
+
 }

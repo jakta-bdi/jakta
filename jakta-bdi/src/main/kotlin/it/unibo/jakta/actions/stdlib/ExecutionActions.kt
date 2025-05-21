@@ -1,6 +1,8 @@
 package it.unibo.jakta.actions.stdlib
 
 import it.unibo.jakta.actions.AbstractAction
+import it.unibo.jakta.actions.ActionInvocationContext
+import it.unibo.jakta.actions.SideEffect
 import it.unibo.jakta.actions.effects.EventChange
 import it.unibo.jakta.actions.effects.Pause
 import it.unibo.jakta.actions.effects.Sleep
@@ -14,7 +16,7 @@ import it.unibo.tuprolog.core.Term
 abstract class AbstractExecutionAction(name: String, arity: Int): AbstractAction(name, arity) {
     override fun postExec(intention: ASIntention) {
         if (result.isSuccess) {
-            if (intention.recordStack.isNotEmpty()) {
+            if (!intention.recordStack.isEmpty()) {
                 intention.applySubstitution(result)
             }
         } else {
@@ -32,53 +34,58 @@ class Print(
 
     private var termsList: List<Term> = terms.toList()
 
-    override suspend fun action(request: ActionRequest) {
+    override fun applySubstitution(substitution: Substitution) {
+        termsList = termsList.map { it.apply(substitution) }
+    }
+
+    override suspend fun invoke(context: ActionInvocationContext): List<SideEffect> {
         val payload = termsList.joinToString(" ") {
             when {
                 it.isAtom -> it.castToAtom().value
                 else -> it.toString()
             }
         }
-        println("[${request.agentName}] $payload")
-    }
-
-    override fun applySubstitution(substitution: Substitution) {
-        termsList = termsList.map { it.apply(substitution) }
+        println("[${context.agent.name}] $payload")
+        return emptyList()
     }
 }
 
 object Fail : AbstractExecutionAction("fail", 0) {
-    override suspend fun action(request: ActionRequest) {
-        result = Substitution.failed()
-    }
-
     override fun applySubstitution(substitution: Substitution) = Unit
+
+    override suspend fun invoke(context: ActionInvocationContext): List<SideEffect> {
+        result = Substitution.failed()
+        return emptyList()
+    }
 }
 
 object Stop : AbstractExecutionAction("stop", 0) {
-    override suspend fun action(request: ActionRequest) {
-        effects.add(Stop)
-    }
-
     override fun applySubstitution(substitution: Substitution) = Unit
+
+    override suspend fun invoke(context: ActionInvocationContext): List<SideEffect> {
+        effects.add(Stop)
+        return emptyList()
+    }
 }
 
 object Pause : AbstractExecutionAction("pause", 0) {
-    override suspend fun action(request: ActionRequest) {
-        effects.add(Pause)
-    }
-
     override fun applySubstitution(substitution: Substitution) = Unit
+
+    override suspend fun invoke(context: ActionInvocationContext): List<SideEffect> {
+        effects.add(Pause)
+        return emptyList()
+    }
 }
 
 class Sleep(
     private var timeAmount: Term
 ) : AbstractExecutionAction("sleep", 1) {
-    override suspend fun action(request: ActionRequest) {
-        effects.add(Sleep(timeAmount.castToInteger().value.toLong()))
-    }
-
     override fun applySubstitution(substitution: Substitution) {
         timeAmount = timeAmount.apply(substitution)
+    }
+
+    override suspend fun invoke(context: ActionInvocationContext): List<SideEffect> {
+        effects.add(Sleep(timeAmount.castToInteger().value.toLong()))
+        return emptyList()
     }
 }

@@ -6,10 +6,16 @@ import it.unibo.jakta.intentions.impl.ASIntentionPoolImpl
 import it.unibo.jakta.plans.ASPlan
 import it.unibo.tuprolog.core.Struct
 
-typealias ASIntentionPool = IntentionPool<Struct, ASBelief, ASEvent, ASActivationRecord, ASIntention, ASPlan>
+interface ASIntentionPool: Map<IntentionID, ASIntention> {
+    fun nextIntention(): ASIntention
+}
 
-typealias ASMutableIntentionPool =
-    MutableIntentionPool<Struct, ASBelief, ASEvent, ASActivationRecord, ASIntention, ASPlan>
+interface ASMutableIntentionPool: Map<IntentionID, ASIntention>, ASIntentionPool {
+    fun updateIntention(intention: ASIntention): Boolean
+    fun pop(): ASIntention?
+    fun deleteIntention(intentionID: IntentionID): ASIntention?
+    fun snapshot(): ASIntentionPool
+}
 
 object IntentionPoolStaticFactory{
     fun empty(): ASMutableIntentionPool = ASIntentionPoolImpl()

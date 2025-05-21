@@ -4,6 +4,7 @@ kotlin = "2.0.21"
 mockito = "5.14.2"
 tuprolog = "1.0.4"
 alchemist = "34.1.4"
+kotlin-coroutines = "1.10.2"
 
 [libraries]
 alchemist-api = { module = "it.unibo.alchemist:alchemist-api", version.ref = "alchemist" }
@@ -33,6 +34,7 @@ tuprolog-dsl-unify = { module = "it.unibo.tuprolog:dsl-unify-jvm", version.ref =
 tuprolog-dsl-theory = { module = "it.unibo.tuprolog:dsl-theory-jvm", version.ref = "tuprolog" }
 tuprolog-dsl-solve = { module = "it.unibo.tuprolog:dsl-solve-jvm", version.ref = "tuprolog" }
 tuprolog-oop-lib = { module = "it.unibo.tuprolog:oop-lib-jvm", version.ref = "tuprolog" }
+kotlin-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlin-coroutines" }
 
 [bundles]
 kotlin-testing = [ "kotest-junit5-jvm", "kotest-assertions-core-jvm", "mockito-core" ]

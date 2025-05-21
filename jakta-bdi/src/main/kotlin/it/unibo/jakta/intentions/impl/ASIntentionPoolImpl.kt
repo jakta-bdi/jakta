@@ -1,12 +1,9 @@
 package it.unibo.jakta.intentions.impl
 
-import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.intentions.ASIntention
 import it.unibo.jakta.intentions.ASIntentionPool
 import it.unibo.jakta.intentions.ASMutableIntentionPool
-import it.unibo.jakta.intentions.Intention
 import it.unibo.jakta.intentions.IntentionID
-import it.unibo.tuprolog.core.Struct
 
 internal class ASIntentionPoolImpl(
     from: MutableMap<IntentionID, ASIntention> = mutableMapOf(),

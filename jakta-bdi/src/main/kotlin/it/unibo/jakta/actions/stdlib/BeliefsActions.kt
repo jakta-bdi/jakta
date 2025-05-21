@@ -1,6 +1,8 @@
 package it.unibo.jakta.actions.stdlib
 
 import it.unibo.jakta.actions.AbstractAction
+import it.unibo.jakta.actions.ActionInvocationContext
+import it.unibo.jakta.actions.SideEffect
 import it.unibo.jakta.actions.effects.BeliefChange
 import it.unibo.jakta.actions.requests.ActionRequest
 import it.unibo.jakta.beliefs.BeliefBase
@@ -29,9 +31,8 @@ abstract class AbstractBeliefAction(
 class AddBelief(
     belief: ASBelief,
 ) : AbstractBeliefAction(belief, "addBelief") {
-    override suspend fun action(request: ActionRequest) {
-        effects.add(BeliefChange.BeliefAddition(belief))
-    }
+    override suspend fun invoke(context: ActionInvocationContext): List<SideEffect> =
+        listOf(BeliefChange.BeliefAddition(belief))
 }
 
 /**
@@ -40,9 +41,8 @@ class AddBelief(
 class RemoveBelief(
     belief: ASBelief,
 ) : AbstractBeliefAction(belief, "addBelief")  {
-    override suspend fun action(request: ActionRequest) {
-        effects.add(BeliefChange.BeliefRemoval(belief))
-    }
+    override suspend fun invoke(context: ActionInvocationContext): List<SideEffect> =
+        listOf(BeliefChange.BeliefRemoval(belief))
 }
 
 /**
@@ -51,8 +51,7 @@ class RemoveBelief(
 class UpdateBelief(
     belief: ASBelief,
 ) : AbstractBeliefAction(belief, "removeBelief")  {
-    override suspend fun action(request: ActionRequest) {
+    override suspend fun invoke(context: ActionInvocationContext): List<SideEffect> =
         TODO("Missing implementation for update in beliefcontext")
-    }
 }
 

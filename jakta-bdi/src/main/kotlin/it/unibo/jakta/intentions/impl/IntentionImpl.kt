@@ -14,7 +14,7 @@ internal class IntentionImpl(
 
     override fun pop(): ASAction? {
         val record = recordStack.firstOrNull() ?: return null
-        return if (record.isLastTask()) {
+        return if (record.isLastActionToExecute()) {
             recordStack = recordStack - record
             return null
         } else {

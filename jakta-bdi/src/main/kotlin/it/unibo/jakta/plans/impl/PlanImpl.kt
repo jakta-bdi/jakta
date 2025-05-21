@@ -1,31 +1,32 @@
 package it.unibo.jakta.plans.impl
 
+import it.unibo.jakta.ASAgent
+import it.unibo.jakta.Agent
 import it.unibo.jakta.actions.ASAction
+import it.unibo.jakta.actions.Action
 import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.beliefs.ASBeliefBase
 import it.unibo.jakta.beliefs.BeliefBase
 import it.unibo.jakta.events.ASEvent
+import it.unibo.jakta.events.Event
 import it.unibo.jakta.intentions.ASActivationRecord
 import it.unibo.jakta.plans.ASPlan
+import it.unibo.jakta.plans.PlanID
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.unify.Unificator.Companion.mguWith
 
 internal data class PlanImpl(
     override val trigger: ASEvent,
     override val guard: Struct,
-    override val tasks: List<ASAction>,
+    val tasks: List<ASAction>,
+    override val agent: ASAgent,
 ) : ASPlan {
 
-    override fun isApplicable(event: ASEvent, beliefBase: BeliefBase<Struct, ASBelief>): Boolean {
-        if (event.javaClass != trigger.javaClass || beliefBase.javaClass.isInstance(ASBeliefBase::class.java)) {
-            return false
-        }
-        // TODO("Migliorabile per i cast")
+    override fun isApplicable(event: ASEvent, beliefBase: ASBeliefBase): Boolean {
         val castedEvent: ASEvent = event
-        val castedBB: ASBeliefBase = beliefBase as ASBeliefBase
         val mgu = castedEvent.value mguWith this.trigger.value
         val actualGuard = guard.apply(mgu).castToStruct()
-        return isRelevant(event) && castedBB.select(actualGuard).isNotEmpty()
+        return isRelevant(event) && beliefBase.select(actualGuard).isNotEmpty()
     }
 
     override fun applicablePlan(event: ASEvent, beliefBase: ASBeliefBase): ASPlan =
@@ -53,4 +54,5 @@ internal data class PlanImpl(
         event::class == this.trigger::class && (trigger.value mguWith event.value).isSuccess
 
     override fun toActivationRecord(): ASActivationRecord = ASActivationRecord(this, tasks)
+    override fun apply(event: Event): List<Action> = tasks
 }
