@@ -1,3 +1,10 @@
+## [0.14.4](https://github.com/jakta-bdi/jakta/compare/v0.14.3...v0.14.4) (2025-05-21)
+
+
+### Bug Fixes
+
+* fix modules dependencies ([f70f515](https://github.com/jakta-bdi/jakta/commit/f70f5159895e990c491e51463186cd4c0ac4f37a))
+
 ## [0.14.3](https://github.com/jakta-bdi/jakta/compare/v0.14.2...v0.14.3) (2025-05-21)
 
 
