@@ -10,10 +10,13 @@ import it.unibo.jakta.events.Event
 import it.unibo.jakta.intentions.ASIntentionPool
 import it.unibo.jakta.plans.ASPlan
 import it.unibo.jakta.plans.Plan
+import it.unibo.tuprolog.collections.MutableClauseCollection.Companion.emptyQueue
+import it.unibo.tuprolog.collections.MutableClauseQueue
 import it.unibo.tuprolog.core.Struct
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.firstOrNull
-import java.util.UUID
+import java.util.*
 
 internal class AgentImpl(
     override val intentions: ASIntentionPool,
@@ -23,7 +26,7 @@ internal class AgentImpl(
     override val agentID: AgentID = AgentID(),
     override val name: String = "Agent-" + UUID.randomUUID(),
     override var tags: Map<String, Any> = emptyMap(),
-    override val events: Flow<Event.AgentEvent>,
+    override val events: Queue<Event.AgentEvent> = ArrayDeque(),
 ) : ASAgent {
 
 //    override val lifecycle: ASAgentLifecycle
@@ -39,8 +42,8 @@ internal class AgentImpl(
     }
 
     // TODO("I don't like that this in not a single queue")
-    override suspend fun sense(): Event? =
-       this.beliefBase.events.firstOrNull() ?: this.events.firstOrNull() ?: this.environment.events.firstOrNull()
+    override fun sense(): Event? =
+        this.events.poll() ?: this.beliefBase.events.poll() ?: this.environment.events.poll()
 
     override fun deliberate(event: Event): List<Action> {
         TODO("Not yet implemented")

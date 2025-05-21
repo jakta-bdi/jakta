@@ -13,7 +13,7 @@ interface Agent<Query : Any> : EventGenerator<Event.AgentEvent> {
     val beliefBase: BeliefBase<Query>
     val plans: Collection<Plan<Query>>
 
-    suspend fun sense(): Event?
+    fun sense(): Event?
 
     fun deliberate(event: Event): List<Action>
 }

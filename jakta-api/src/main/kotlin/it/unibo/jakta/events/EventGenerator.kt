@@ -1,7 +1,7 @@
 package it.unibo.jakta.events
 
-import kotlinx.coroutines.flow.Flow
+import java.util.*
 
 interface EventGenerator<X: Event> {
-    val events: Flow<X>
+    val events: Queue<X>
 }

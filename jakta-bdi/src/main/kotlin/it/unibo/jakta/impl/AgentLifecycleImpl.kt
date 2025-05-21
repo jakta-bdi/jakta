@@ -28,6 +28,7 @@ import it.unibo.jakta.intentions.ASIntention
 import it.unibo.jakta.intentions.ASIntentionPool
 import it.unibo.jakta.messages.Tell
 import it.unibo.jakta.plans.ASPlan
+import kotlinx.coroutines.flow.FlowCollector
 
 //class LifeCycle {
 //    val agent: Agent<String> = TODO()
@@ -44,7 +45,7 @@ import it.unibo.jakta.plans.ASPlan
 //}
 
 internal data class AgentLifecycleImpl(
-    private var agent: ASAgent,
+    override var agent: ASAgent,
 ) : ASAgentLifecycle {
     private var cachedEffects = emptyList<EnvironmentChange>()
 
@@ -59,10 +60,10 @@ internal data class AgentLifecycleImpl(
             beliefBase.addAll(perceptions)
 
             // 2. each literal l in b no longer in p is deleted from b
-            beliefBase.forEach {
-                if (!perceptions.contains(it) && it.content.head.args.first() == ASBelief.SOURCE_PERCEPT) {
+            beliefBase.forEach { when {
+                it is ASBelief -> if (!perceptions.contains(it) && it.content.head.args.first() == ASBelief.SOURCE_PERCEPT) {
                     beliefBase.remove(it)
-                }
+                } }
             }
             true
         }
@@ -103,6 +104,7 @@ internal data class AgentLifecycleImpl(
     }
 
     override fun scheduleIntention(intentions: ASIntentionPool) = agent.scheduleIntention(intentions)
+
     override fun runIntention(
         intention: ASIntention,
         agent: ASAgent,
@@ -111,9 +113,7 @@ internal data class AgentLifecycleImpl(
         TODO("Not yet implemented")
     }
 
-    override fun sense(environment: AgentProcess) {
-        TODO("Not yet implemented")
-    }
+    override fun sense(environment: AgentProcess) = agent.sense()
 
     override fun runIntention(intention: ASIntention, agent: ASAgent, environment: BasicEnvironment): ExecutionResult {
         when (val nextGoal = intention.nextTask()) {

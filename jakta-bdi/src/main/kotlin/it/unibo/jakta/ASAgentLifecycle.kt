@@ -4,6 +4,7 @@ import it.unibo.jakta.beliefs.ASBeliefBase
 import it.unibo.jakta.beliefs.ASMutableBeliefBase
 import it.unibo.jakta.beliefs.Belief
 import it.unibo.jakta.events.ASEvent
+import it.unibo.jakta.events.Event
 import it.unibo.jakta.intentions.ASIntention
 import it.unibo.jakta.intentions.ASIntentionPool
 import it.unibo.jakta.plans.ASPlan
@@ -126,7 +127,7 @@ interface ASAgentLifecycle {
      *  - STEP4: Selecting "Socially Acceptable" Messages
      *  @param environment the [AgentProcess]
      */
-    fun sense(environment: AgentProcess)
+    fun sense(environment: AgentProcess): Event?
 
     /** Performs the reason phase of the reasoning cycle, in particular:
      *  - STEP5: Selecting an ASEvent
