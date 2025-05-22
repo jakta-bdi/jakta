@@ -3,8 +3,8 @@ package it.unibo.jakta
 import io.kotest.assertions.fail
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
-import it.unibo.jakta.actions.stdlib.ExecutionActions
 import it.unibo.jakta.actions.requests.InternalRequest
+import it.unibo.jakta.actions.stdlib.ExecutionActions
 import it.unibo.jakta.beliefs.Belief
 import it.unibo.jakta.environment.BasicEnvironment
 import it.unibo.jakta.goals.Achieve
@@ -216,5 +216,9 @@ fun main() {
             ),
         ),
     )
-    Mas.of(it.unibo.jakta.executionstrategies.ExecutionStrategy.oneThreadPerAgent(), BasicEnvironment.of(), agent).start()
+    Mas.of(
+        it.unibo.jakta.executionstrategies.ExecutionStrategy.oneThreadPerAgent(),
+        BasicEnvironment.of(),
+        agent,
+    ).start()
 }

@@ -1,18 +1,21 @@
 package it.unibo.jakta.environment
 
 import it.unibo.jakta.AgentProcess
-import it.unibo.jakta.fsm.Activity
+import it.unibo.jakta.beliefs.ASBeliefBase
+import it.unibo.jakta.events.Event
+import it.unibo.jakta.perception.Perception
+import java.util.*
 
-interface BasicEnvironment: AgentProcess {
-
-    val debugEnabled: Boolean
-    val controller: Activity.Controller?
+data class BasicEnvironment(
+    val debugEnabled: Boolean,
+    val perception: Perception,
+    override val events: Queue<Event.EnvironmentEvent> = ArrayDeque(),
+) : AgentProcess {
 
 //    val agentIDs: Map<String, AgentID>
 //    val externalActions: Map<String, ExternalAction>
 //    val messageBoxes: Map<AgentID, MessageQueue>
 //    val data: Map<String, Any>
-//    val perception: Perception
 
 //    fun getNextMessage(agentName: String): Message?
 //    fun popMessage(agentName: String): BasicEnvironment
@@ -20,7 +23,7 @@ interface BasicEnvironment: AgentProcess {
 //    fun broadcastMessage(message: Message): BasicEnvironment
 //    fun addAgent(agent: ASAgent): BasicEnvironment
 //    fun removeAgent(agentName: String): BasicEnvironment
-//    fun percept(): ASBeliefBase = perception.percept()
+    fun percept(): ASBeliefBase = perception.percept()
 //    fun addData(key: String, value: Any): BasicEnvironment
 //    fun removeData(key: String): BasicEnvironment
 //    fun updateData(newData: Map<String, Any>): BasicEnvironment
@@ -31,5 +34,4 @@ interface BasicEnvironment: AgentProcess {
 //        perception: Perception = this.perception,
 //        data: Map<String, Any> = this.data,
 //    ): BasicEnvironment
-
 }

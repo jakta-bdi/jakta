@@ -1,5 +1,6 @@
 package it.unibo.jakta.executionstrategies.impl
 
+import it.unibo.jakta.ASAgentLifecycle
 import it.unibo.jakta.Mas
 import it.unibo.jakta.executionstrategies.hasTimeDistribution
 import it.unibo.jakta.executionstrategies.timeDistribution
@@ -16,23 +17,25 @@ internal class DiscreteEventExecutionImpl : AbstractSingleRunnerExecutionStrateg
             }
         }
         var time = Time.continuous(0.0)
-        mas.agents.forEach { synchronizedAgents.addAgent(it) }
+        mas.agents.forEach { synchronizedAgents.addAgent(
+            ASAgentLifecycle.of(it, mas.environment, debugEnabled)
+        ) }
         Runner.simulatedOf(
             Activity.of {
                 // Compute next executions
                 val timeDistributions = mas.agents.associateWith { it.timeDistribution.invoke(time) }
                 val nextEventTime = timeDistributions.values.minOf { it }
-                val agentsToExecute = timeDistributions.filter { it.value == nextEventTime }.keys.map { it.agentID }
+                val agentsToExecute = timeDistributions.filter { it.value == nextEventTime }.keys.map { it.context.agentID }
 
                 // Update time
                 time = nextEventTime
 
                 // Run Agents
                 synchronizedAgents.getAgents()
-                    .filter { (agent, _) -> agentsToExecute.contains(agent.agentID) }
-                    .forEach { (_, agentLC) ->
-                        val sideEffects = agentLC.runOneCycle(mas.environment, it, debugEnabled)
-                        mas.applyEnvironmentEffects(sideEffects)
+                    .filter { agentsToExecute.contains(it.agent.context.agentID) }
+                    .forEach {
+                        val sideEffects = it.runOneCycle()
+                        //mas.applyEnvironmentEffects(sideEffects)
                     }
                 synchronizedAgents.getAgents().ifEmpty { it.stop() }
             },

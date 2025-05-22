@@ -15,7 +15,7 @@ import it.unibo.jakta.plans.impl.PlanImpl
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Truth
 
-interface ASPlan : Plan<Struct> {
+interface ASPlan : Plan {
 
     val trigger: ASEvent
 
@@ -38,8 +38,7 @@ interface ASPlan : Plan<Struct> {
             trigger: ASEvent,
             guard: Struct,
             goals: List<ASAction>,
-            agent: ASAgent,
-        ): ASPlan = PlanImpl(trigger = trigger, guard = guard, tasks = goals, agent = agent)
+        ): ASPlan = PlanImpl(trigger = trigger, guard = guard, tasks = goals)
 
         fun ofBeliefBaseAddition(
             belief: ASBelief,
@@ -78,5 +77,3 @@ interface ASPlan : Plan<Struct> {
         ): ASPlan = of(TestGoalFailure(value), guard, goals)
     }
 }
-
-

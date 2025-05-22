@@ -6,16 +6,21 @@ import it.unibo.jakta.events.Event
 import it.unibo.jakta.events.EventGenerator
 import it.unibo.jakta.plans.Plan
 
-interface Agent<Query : Any> : EventGenerator<Event.AgentEvent> {
-    val agentID: AgentID
-    val name: String
-    val environment: AgentProcess
-    val beliefBase: BeliefBase<Query>
-    val plans: Collection<Plan<Query>>
+interface Agent {
+    // val environment: AgentProcess
 
-    fun sense(): Event?
+    interface Context<Query: Any> : EventGenerator<Event.AgentEvent> {
+        val agentID: AgentID get() = AgentID()
+        val agentName: String get() = "Agent-$agentID"
+        val beliefBase: BeliefBase<Query>
+        val plans: Collection<Plan>
+    }
 
-    fun deliberate(event: Event): List<Action>
+    fun sense(agentProcess: AgentProcess): Event?
+
+    fun deliberate(agentProcess: AgentProcess, event: Event)
+
+    fun act(agentProcess: AgentProcess)
 }
 
 //interface Agent<

@@ -1,8 +1,6 @@
 package it.unibo.jakta.beliefs
 
 import it.unibo.jakta.beliefs.impl.ASBeliefBaseImpl
-import it.unibo.jakta.events.Event
-import it.unibo.jakta.events.EventGenerator
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.solve.Solution
 
@@ -13,7 +11,7 @@ interface ASBeliefBase : BeliefBase<Struct> {
     fun getSolutionOf(belief: ASBelief): Solution
 }
 
-interface ASMutableBeliefBase: ASBeliefBase {
+interface ASMutableBeliefBase : ASBeliefBase {
 
     /**
      * @return the immutable [BeliefBase] version of this instance.
@@ -35,7 +33,7 @@ interface ASMutableBeliefBase: ASBeliefBase {
     fun addAll(beliefs: ASBeliefBase): Boolean {
         var result = false
         for (b in beliefs) {
-            if (add(b as ASBelief)) result = true //TODO(CAST)
+            if (add(b as ASBelief)) result = true // TODO(CAST)
         }
         return result
     }
@@ -55,7 +53,7 @@ interface ASMutableBeliefBase: ASBeliefBase {
     fun removeAll(beliefs: ASBeliefBase): Boolean {
         var result = false
         for (b in beliefs) {
-            if (remove(b as ASBelief)) result = true //TODO(CAST)
+            if (remove(b as ASBelief)) result = true // TODO(CAST)
         }
         return result
     }
@@ -67,6 +65,8 @@ interface ASMutableBeliefBase: ASBeliefBase {
      *
      */
     fun update(belief: ASBelief): Boolean
+
+    fun update(beliefBase: ASBeliefBase): Boolean
 
     companion object {
         /** @return an empty [ASMutableBeliefBase] */

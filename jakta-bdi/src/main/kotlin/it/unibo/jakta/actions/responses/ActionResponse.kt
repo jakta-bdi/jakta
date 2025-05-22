@@ -10,7 +10,7 @@ interface ExecutionResult<out SideEffect> : List<SideEffect> {
 
         fun <SideEffect> from(vararg events: SideEffect): ExecutionResult<SideEffect> = from(events.toList())
 
-        fun  <SideEffect> none(): ExecutionResult<SideEffect> = from(emptyList())
+        fun <SideEffect> none(): ExecutionResult<SideEffect> = from(emptyList())
     }
 }
 

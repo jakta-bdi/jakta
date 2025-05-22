@@ -4,6 +4,6 @@ import it.unibo.jakta.Agent
 import it.unibo.jakta.fsm.time.Time
 
 interface ActionInvocationContext {
-    val agent: Agent<*>
+    val agentContext: Agent.Context<*>
     val invocationTimestamp: Time?
 }

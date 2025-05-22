@@ -1,20 +1,20 @@
-//package it.unibo.jakta.environment.impl
+// package it.unibo.jakta.environment.impl
 //
-//import it.unibo.jakta.ASAgent
-//import it.unibo.jakta.AgentID
-//import it.unibo.jakta.beliefs.ASBeliefBase
-//import it.unibo.jakta.environment.BasicEnvironment
-//import it.unibo.jakta.messages.Message
-//import it.unibo.jakta.messages.MessageQueue
-//import it.unibo.jakta.perception.Perception
+// import it.unibo.jakta.ASAgent
+// import it.unibo.jakta.AgentID
+// import it.unibo.jakta.beliefs.ASBeliefBase
+// import it.unibo.jakta.environment.BasicEnvironment
+// import it.unibo.jakta.messages.Message
+// import it.unibo.jakta.messages.MessageQueue
+// import it.unibo.jakta.perception.Perception
 //
-//open class EnvironmentImpl(
+// open class EnvironmentImpl(
 //    override val externalActions: Map<String, ExternalAction>,
 //    override val agentIDs: Map<String, AgentID> = emptyMap(),
 //    override val messageBoxes: Map<AgentID, MessageQueue> = mapOf(),
 //    override var perception: Perception,
 //    override val data: Map<String, Any> = emptyMap(),
-//) : BasicEnvironment {
+// ) : BasicEnvironment {
 //    override fun getNextMessage(agentName: String): Message? = messageBoxes[agentIDs[agentName]]?.lastOrNull()
 //
 //    override fun popMessage(agentName: String): BasicEnvironment {
@@ -95,4 +95,4 @@
 //           perception=$perception
 //        )
 //    """.trimIndent()
-//}
+// }

@@ -9,7 +9,7 @@ fun interface EnvironmentChange : SideEffect, (BasicEnvironment) -> Unit
 
 data class SpawnAgent(val agent: ASAgent) : EnvironmentChange {
     override fun invoke(context: BasicEnvironment) {
-        //context.addAgent(agent)
+        // context.addAgent(agent)
         // TODO(Missing implementation)
     }
 }
@@ -18,7 +18,6 @@ data class RemoveAgent(val agentName: String) : EnvironmentChange {
     override fun invoke(context: BasicEnvironment) {
 //        context.removeAgent(agentName)
         // TODO(Missing implementation)
-
     }
 }
 

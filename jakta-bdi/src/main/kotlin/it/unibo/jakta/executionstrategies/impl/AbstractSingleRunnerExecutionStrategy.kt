@@ -1,35 +1,36 @@
 package it.unibo.jakta.executionstrategies.impl
 
 import it.unibo.jakta.ASAgent
-import it.unibo.jakta.AgentLifecycle
+import it.unibo.jakta.ASAgentLifecycle
+import it.unibo.jakta.environment.BasicEnvironment
 import it.unibo.jakta.executionstrategies.ExecutionStrategy
 
-abstract class AbstractSingleRunnerExecutionStrategy : ExecutionStrategy {
+abstract class AbstractSingleRunnerExecutionStrategy: ExecutionStrategy {
 
     protected val synchronizedAgents = SynchronizedAgents()
 
-    override fun spawnAgent(agent: ASAgent) {
-        synchronizedAgents.addAgent(agent)
+    override fun spawnAgent(agentLC: ASAgentLifecycle) {
+        synchronizedAgents.addAgent(agentLC)
     }
 
     override fun removeAgent(agentName: String) {
         synchronizedAgents.removeAgent(agentName)
     }
 
-    class SynchronizedAgents {
-        private var agents: Map<ASAgent, AgentLifecycle> = emptyMap()
+    class SynchronizedAgents{
+        private var agents: List<ASAgentLifecycle> = listOf()
 
         @Synchronized
-        fun addAgent(agent: ASAgent) {
-            agents = agents + (agent to AgentLifecycle.newLifecycleFor(agent))
+        fun addAgent(agentLC: ASAgentLifecycle) {
+            agents = agents + agentLC
         }
 
         @Synchronized
         fun removeAgent(agentName: String) {
-            agents = agents.filter { it.key.name != agentName }
+            agents = agents.filter { it.agent.context.agentName != agentName }
         }
 
         @Synchronized
-        fun getAgents(): Map<ASAgent, AgentLifecycle> = agents
+        fun getAgents(): List<ASAgentLifecycle> = agents
     }
 }

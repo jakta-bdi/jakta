@@ -8,7 +8,7 @@ import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.core.Term
 import it.unibo.tuprolog.core.Var
 
-interface ASBelief: Belief {
+interface ASBelief : Belief {
 
     val content: Rule
 

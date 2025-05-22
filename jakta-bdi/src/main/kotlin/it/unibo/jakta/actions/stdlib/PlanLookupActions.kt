@@ -5,7 +5,6 @@ import it.unibo.jakta.actions.ActionInvocationContext
 import it.unibo.jakta.actions.SideEffect
 import it.unibo.jakta.actions.effects.EventChange
 import it.unibo.jakta.actions.effects.IntentionChange
-import it.unibo.jakta.actions.requests.ActionRequest
 import it.unibo.jakta.beliefs.ASBeliefBase
 import it.unibo.jakta.events.AchievementGoalInvocation
 import it.unibo.jakta.events.TestGoalFailure
@@ -18,7 +17,7 @@ import it.unibo.tuprolog.solve.Solution
 abstract class AbstractPlanLookupActions(
     name: String,
     var struct: Struct,
-): AbstractAction(name, 1) {
+) : AbstractAction(name, 1) {
     override fun applySubstitution(substitution: Substitution) {
         struct = struct.apply(substitution).castToStruct()
     }
@@ -35,7 +34,7 @@ class Achieve(
         effects.add(IntentionChange.IntentionRemoval(intention)) // It gets added back in the queue after plan execution
     }
 
-    override suspend fun invoke(context: ActionInvocationContext): List<SideEffect> = emptyList()
+    override fun invoke(context: ActionInvocationContext): List<SideEffect> = emptyList()
 }
 
 /**
@@ -47,8 +46,10 @@ class Test(
 
     lateinit var solution: Solution
     override fun postExec(intention: ASIntention) {
-        effects.add(EventChange.EventAddition(
-            AchievementGoalInvocation(planTrigger, intention))
+        effects.add(
+            EventChange.EventAddition(
+                AchievementGoalInvocation(planTrigger, intention),
+            ),
         )
         if (solution.isYes) {
             intention.pop()
@@ -58,9 +59,9 @@ class Test(
         }
     }
 
-    override suspend fun invoke(context: ActionInvocationContext): List<SideEffect> {
-        solution = when (context.agent.beliefBase) {
-            is ASBeliefBase -> (context.agent.beliefBase as ASBeliefBase).getSolutionOf(planTrigger)
+    override fun invoke(context: ActionInvocationContext): List<SideEffect> {
+        solution = when (context.agentContext.beliefBase) {
+            is ASBeliefBase -> (context.agentContext.beliefBase as ASBeliefBase).getSolutionOf(planTrigger)
             else -> Solution.no(planTrigger)
         }
         return emptyList()
@@ -80,6 +81,5 @@ class Spawn(
         intention.pop()
     }
 
-    override suspend fun invoke(context: ActionInvocationContext): List<SideEffect> = emptyList()
-
+    override fun invoke(context: ActionInvocationContext): List<SideEffect> = emptyList()
 }

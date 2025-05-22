@@ -1,7 +1,6 @@
 package it.unibo.jakta.actions.effects
 
 import it.unibo.jakta.actions.SideEffect
-import it.unibo.jakta.events.ASEvent
 import it.unibo.jakta.fsm.Activity
 
 fun interface ActivitySideEffect : SideEffect, (Activity.Controller) -> Unit

@@ -19,30 +19,28 @@ internal class MasImpl(
     override var environment: BasicEnvironment,
     override var agents: Iterable<ASAgent>,
 ) : Mas {
-    init {
-        agents.forEach { environment = environment.addAgent(it) }
-    }
 
     override fun start(debugEnabled: Boolean) = executionStrategy.dispatch(this, debugEnabled)
 
     override fun applyEnvironmentEffects(effects: Iterable<EnvironmentChange>) = effects.forEach {
-        when (it) {
-            is BroadcastMessage -> environment = environment.broadcastMessage(it.message)
-            is RemoveAgent -> {
-                agents = agents.filter { agent -> agent.name != it.agentName }
-                executionStrategy.removeAgent(it.agentName)
-                environment = environment.removeAgent(it.agentName)
-            }
-            is SendMessage -> environment = environment.submitMessage(it.recipient, it.message)
-            is SpawnAgent -> {
-                agents += it.agent
-                executionStrategy.spawnAgent(it.agent)
-                environment = environment.addAgent(it.agent)
-            }
-            is AddData -> environment = environment.addData(it.key, it.value)
-            is RemoveData -> environment = environment.removeData(it.key)
-            is UpdateData -> environment = environment.updateData(it.newData)
-            is PopMessage -> environment = environment.popMessage(it.agentName)
-        }
+//        when (it) {
+//            is BroadcastMessage -> environment = environment.broadcastMessage(it.message)
+//            is RemoveAgent -> {
+//                agents = agents.filter { agent -> agent.name != it.agentName }
+//                executionStrategy.removeAgent(it.agentName)
+//                environment = environment.removeAgent(it.agentName)
+//            }
+//            is SendMessage -> environment = environment.submitMessage(it.recipient, it.message)
+//            is SpawnAgent -> {
+//                agents += it.agent
+//                executionStrategy.spawnAgent(it.agent)
+//                environment = environment.addAgent(it.agent)
+//            }
+//            is AddData -> environment = environment.addData(it.key, it.value)
+//            is RemoveData -> environment = environment.removeData(it.key)
+//            is UpdateData -> environment = environment.updateData(it.newData)
+//            is PopMessage -> environment = environment.popMessage(it.agentName)
+//        }
+        TODO()
     }
 }

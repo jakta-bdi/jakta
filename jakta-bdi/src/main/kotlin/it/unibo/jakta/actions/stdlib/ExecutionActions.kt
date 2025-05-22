@@ -7,13 +7,12 @@ import it.unibo.jakta.actions.effects.EventChange
 import it.unibo.jakta.actions.effects.Pause
 import it.unibo.jakta.actions.effects.Sleep
 import it.unibo.jakta.actions.effects.Stop
-import it.unibo.jakta.actions.requests.ActionRequest
 import it.unibo.jakta.events.AchievementGoalFailure
 import it.unibo.jakta.intentions.ASIntention
 import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.core.Term
 
-abstract class AbstractExecutionAction(name: String, arity: Int): AbstractAction(name, arity) {
+abstract class AbstractExecutionAction(name: String, arity: Int) : AbstractAction(name, arity) {
     override fun postExec(intention: ASIntention) {
         if (result.isSuccess) {
             if (!intention.recordStack.isEmpty()) {
@@ -29,7 +28,7 @@ abstract class AbstractExecutionAction(name: String, arity: Int): AbstractAction
 }
 
 class Print(
-    vararg terms: Term
+    vararg terms: Term,
 ) : AbstractExecutionAction("print", 2) {
 
     private var termsList: List<Term> = terms.toList()
@@ -38,14 +37,14 @@ class Print(
         termsList = termsList.map { it.apply(substitution) }
     }
 
-    override suspend fun invoke(context: ActionInvocationContext): List<SideEffect> {
+    override fun invoke(context: ActionInvocationContext): List<SideEffect> {
         val payload = termsList.joinToString(" ") {
             when {
                 it.isAtom -> it.castToAtom().value
                 else -> it.toString()
             }
         }
-        println("[${context.agent.name}] $payload")
+        println("[${context.agentContext.agentName}] $payload")
         return emptyList()
     }
 }
@@ -53,7 +52,7 @@ class Print(
 object Fail : AbstractExecutionAction("fail", 0) {
     override fun applySubstitution(substitution: Substitution) = Unit
 
-    override suspend fun invoke(context: ActionInvocationContext): List<SideEffect> {
+    override fun invoke(context: ActionInvocationContext): List<SideEffect> {
         result = Substitution.failed()
         return emptyList()
     }
@@ -62,7 +61,7 @@ object Fail : AbstractExecutionAction("fail", 0) {
 object Stop : AbstractExecutionAction("stop", 0) {
     override fun applySubstitution(substitution: Substitution) = Unit
 
-    override suspend fun invoke(context: ActionInvocationContext): List<SideEffect> {
+    override fun invoke(context: ActionInvocationContext): List<SideEffect> {
         effects.add(Stop)
         return emptyList()
     }
@@ -71,20 +70,20 @@ object Stop : AbstractExecutionAction("stop", 0) {
 object Pause : AbstractExecutionAction("pause", 0) {
     override fun applySubstitution(substitution: Substitution) = Unit
 
-    override suspend fun invoke(context: ActionInvocationContext): List<SideEffect> {
+    override fun invoke(context: ActionInvocationContext): List<SideEffect> {
         effects.add(Pause)
         return emptyList()
     }
 }
 
 class Sleep(
-    private var timeAmount: Term
+    private var timeAmount: Term,
 ) : AbstractExecutionAction("sleep", 1) {
     override fun applySubstitution(substitution: Substitution) {
         timeAmount = timeAmount.apply(substitution)
     }
 
-    override suspend fun invoke(context: ActionInvocationContext): List<SideEffect> {
+    override fun invoke(context: ActionInvocationContext): List<SideEffect> {
         effects.add(Sleep(timeAmount.castToInteger().value.toLong()))
         return emptyList()
     }

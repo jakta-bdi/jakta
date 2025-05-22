@@ -5,31 +5,27 @@ import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.beliefs.ASBeliefBase
 import it.unibo.jakta.beliefs.ASMutableBeliefBase
 import it.unibo.jakta.beliefs.Belief
-import it.unibo.jakta.beliefs.BeliefBase
 import it.unibo.jakta.events.BeliefBaseAddition
 import it.unibo.jakta.events.BeliefBaseRemoval
 import it.unibo.jakta.events.Event
 import it.unibo.tuprolog.collections.ClauseMultiSet
 import it.unibo.tuprolog.core.Struct
-import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.solve.Solution
 import it.unibo.tuprolog.solve.Solver
 import it.unibo.tuprolog.solve.flags.TrackVariables
 import it.unibo.tuprolog.solve.flags.Unknown
 import it.unibo.tuprolog.theory.Theory
 import it.unibo.tuprolog.unify.Unificator
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.publish
-import kotlinx.coroutines.flow.shareIn
+import java.util.ArrayDeque
+import java.util.Queue
+import java.util.function.Consumer
 
 internal data class ASBeliefBaseImpl(
     private var beliefs: ClauseMultiSet,
-    override var events: Flow<Event.BeliefEvent>,
+    override var events: Queue<Event.BeliefEvent> = ArrayDeque(),
 ) : ASMutableBeliefBase, ASBeliefBase {
 
-    constructor() : this(ClauseMultiSet.empty(Unificator.default), emptyFlow())
+    constructor() : this(ClauseMultiSet.empty(Unificator.default))
 
     override fun snapshot(): ASBeliefBase = this.copy()
 
@@ -63,14 +59,38 @@ internal data class ASBeliefBaseImpl(
         }
     }
 
+    override fun update(beliefBase: ASBeliefBase): Boolean {
+        when (this == beliefBase) {
+            false -> {
+                // 1. each literal l in p not currently in b is added to b
+                this.addAll(beliefBase)
+
+                // 2. each literal l in b no longer in p is deleted from b
+                this.forEachASBelief { belief: ASBelief ->
+                    if (!beliefBase.contains(belief) && belief.content.head.args.first() == ASBelief.SOURCE_PERCEPT) {
+                        this.remove(belief)
+                    }
+                }
+                return true
+            }
+            else -> return false
+        }
+    }
+
+    private fun forEachASBelief(action: Consumer<ASBelief>) {
+        this.forEach {
+            when {
+                it is ASBelief -> action.accept(it)
+            }
+        }
+    }
+
     override fun remove(belief: ASBelief): Boolean = when (beliefs.count(belief.content)) {
         0L -> false
         else -> true.also {
             val match = beliefs.filterIsInstance<ASBelief>().first { it == belief }
             // delta += BeliefBase.Update.Removal(match)
-            events = flow {
-                emit(BeliefBaseRemoval(match))
-            }
+            events.add(BeliefBaseRemoval(match))
             beliefs = ClauseMultiSet.of(Unificator.default, beliefs.filter { it != belief })
         }
     }
@@ -80,9 +100,7 @@ internal data class ASBeliefBaseImpl(
         0L -> true.also {
             beliefs.add(belief.content)
             // delta += BeliefBase.Update.Addition(belief)
-            events = flow {
-                emit(BeliefBaseAddition(belief))
-            }
+            events.add(BeliefBaseAddition(belief))
         }
         // There are Beliefs that unify the param, so the belief it's not inserted
         else -> false
@@ -94,7 +112,11 @@ internal data class ASBeliefBaseImpl(
 
     override fun iterator() = beliefs.filterIsInstance<Belief>().iterator()
 
-    override fun containsAll(elements: Collection<Belief>) = beliefs.containsAll(elements.filterIsInstance<ASBelief>().map { it.content })
+    override fun containsAll(elements: Collection<Belief>) = beliefs.containsAll(
+        elements.filterIsInstance<ASBelief>().map {
+            it.content
+        },
+    )
 
     override fun contains(element: Belief) = when (element) {
         is ASBelief -> beliefs.contains(element.content)

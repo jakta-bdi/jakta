@@ -4,18 +4,16 @@ import it.unibo.jakta.actions.AbstractAction
 import it.unibo.jakta.actions.ActionInvocationContext
 import it.unibo.jakta.actions.SideEffect
 import it.unibo.jakta.actions.effects.BeliefChange
-import it.unibo.jakta.actions.requests.ActionRequest
-import it.unibo.jakta.beliefs.BeliefBase
 import it.unibo.jakta.beliefs.ASBelief
+import it.unibo.jakta.beliefs.BeliefBase
 import it.unibo.jakta.intentions.ASIntention
 import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.solve.Signature
 
-
 abstract class AbstractBeliefAction(
     var belief: ASBelief,
     name: String,
-): AbstractAction(Signature(name, 1)) {
+) : AbstractAction(Signature(name, 1)) {
     override fun applySubstitution(substitution: Substitution) {
         belief = belief.applySubstitution(substitution)
     }
@@ -31,7 +29,7 @@ abstract class AbstractBeliefAction(
 class AddBelief(
     belief: ASBelief,
 ) : AbstractBeliefAction(belief, "addBelief") {
-    override suspend fun invoke(context: ActionInvocationContext): List<SideEffect> =
+    override fun invoke(context: ActionInvocationContext): List<SideEffect> =
         listOf(BeliefChange.BeliefAddition(belief))
 }
 
@@ -40,8 +38,8 @@ class AddBelief(
  */
 class RemoveBelief(
     belief: ASBelief,
-) : AbstractBeliefAction(belief, "addBelief")  {
-    override suspend fun invoke(context: ActionInvocationContext): List<SideEffect> =
+) : AbstractBeliefAction(belief, "addBelief") {
+    override fun invoke(context: ActionInvocationContext): List<SideEffect> =
         listOf(BeliefChange.BeliefRemoval(belief))
 }
 
@@ -50,8 +48,7 @@ class RemoveBelief(
  */
 class UpdateBelief(
     belief: ASBelief,
-) : AbstractBeliefAction(belief, "removeBelief")  {
-    override suspend fun invoke(context: ActionInvocationContext): List<SideEffect> =
+) : AbstractBeliefAction(belief, "removeBelief") {
+    override fun invoke(context: ActionInvocationContext): List<SideEffect> =
         TODO("Missing implementation for update in beliefcontext")
 }
-

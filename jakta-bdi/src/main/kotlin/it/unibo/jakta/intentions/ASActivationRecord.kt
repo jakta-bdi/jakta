@@ -11,6 +11,5 @@ data class ASActivationRecord(
     fun isLastActionToExecute(): Boolean = taskQueue.size == 1
     fun pop(): ASAction? = taskQueue.firstOrNull()?.also { taskQueue -= it }
     fun applySubstitution(substitution: Substitution) =
-        taskQueue.forEach{ it.applySubstitution(substitution)}
-
+        taskQueue.forEach { it.applySubstitution(substitution) }
 }

@@ -1,5 +1,6 @@
 package it.unibo.jakta
 
+import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.tuprolog.core.Clause
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.TermFormatter
@@ -23,8 +24,8 @@ object Jakta {
     fun parseClause(string: String): Clause = parser.parseClause(string)
 
     fun printAslSyntax(agent: ASAgent, prettyFormatted: Boolean = true) {
-        println("% ${agent.name}")
-        for (belief in agent.context.mutableBeliefBase) {
+        println("% ${agent.context.agentName}")
+        for (belief in agent.context.beliefBase.filterIsInstance<ASBelief>()) {
             if (prettyFormatted) {
                 val formatter = TermFormatter.prettyExpressions(operatorSet = OperatorSet.DEFAULT + Jakta.operators)
                 println(formatter.format(belief.content))
@@ -32,16 +33,16 @@ object Jakta {
                 println(belief.content)
             }
         }
-        for (plan in agent.context.mutablePlanLibrary) {
+        for (plan in agent.context.plans) {
             var trigger = plan.trigger.value.toString()
             var guard = plan.guard.toString()
-            var body = plan.tasks.joinToString("; ") { it.toString() }
+            var body = plan.toActivationRecord().taskQueue.joinToString("; ") { it.toString() }
             if (prettyFormatted) {
                 val formatter = TermFormatter.prettyExpressions(operatorSet = OperatorSet.DEFAULT + Jakta.operators)
                 trigger = formatter.format(plan.trigger.value)
                 guard = formatter.format(plan.guard)
-                //body = plan.tasks.joinToString("; ") { formatter.format(it.value) }
-            // TODO(Missing generator of ASL syntax from Jakta spec)
+                // body = plan.tasks.joinToString("; ") { formatter.format(it.value) }
+                // TODO(Missing generator of ASL syntax from Jakta spec)
             }
             println("+!$trigger : $guard <- $body")
         }

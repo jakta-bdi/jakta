@@ -7,7 +7,7 @@ import it.unibo.jakta.intentions.ASIntention
 import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.solve.Signature
 
-abstract class AbstractAction (
+abstract class AbstractAction(
     override val signature: Signature,
 ) : ASAction {
     constructor(name: String, arity: Int) : this(Signature(name, arity))
@@ -23,14 +23,13 @@ abstract class AbstractAction (
         result = Substitution.failed()
     }
 
+
     abstract fun postExec(intention: ASIntention)
 
     suspend fun execute(argument: ActionRequest): ActionResponse {
-        when (argument.agent) {
-            is ASAgent -> {
-                val intention = (argument.agent as ASAgent).intentions.nextIntention()
+        val intention = (argument.agentContext as ASAgent.ASAgentContext).intentions.nextIntention()
 
-                // STATIC CHECKING
+        // STATIC CHECKING
 //        if (argument.arguments.size > signature.arity) {
 //            val failure = AchievementGoalFailure(intention.currentPlan().trigger.value, intention)
 //            val failureEvent = EventChange.EventAddition(failure)
@@ -38,13 +37,10 @@ abstract class AbstractAction (
 //            effects.add(failureEvent)
 //        }
 
-                val effects = invoke(argument)
-                postExec(intention)
-                val response = argument.reply(result, effects.toMutableList() + this.effects)
-                //effects.clear()
-                return response
-            }
-            else -> throw IllegalArgumentException("Agent of type ASAgent expected, got ${argument.agent.javaClass} instead.")
-        }
+        val effects = invoke(argument)
+        postExec(intention)
+        val response = argument.reply(result, effects.toMutableList() + this.effects)
+        // effects.clear()
+        return response
     }
 }

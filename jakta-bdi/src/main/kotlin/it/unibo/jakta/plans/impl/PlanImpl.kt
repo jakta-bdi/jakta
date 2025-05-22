@@ -1,17 +1,12 @@
 package it.unibo.jakta.plans.impl
 
-import it.unibo.jakta.ASAgent
-import it.unibo.jakta.Agent
 import it.unibo.jakta.actions.ASAction
 import it.unibo.jakta.actions.Action
-import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.beliefs.ASBeliefBase
-import it.unibo.jakta.beliefs.BeliefBase
 import it.unibo.jakta.events.ASEvent
 import it.unibo.jakta.events.Event
 import it.unibo.jakta.intentions.ASActivationRecord
 import it.unibo.jakta.plans.ASPlan
-import it.unibo.jakta.plans.PlanID
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.unify.Unificator.Companion.mguWith
 
@@ -19,7 +14,6 @@ internal data class PlanImpl(
     override val trigger: ASEvent,
     override val guard: Struct,
     val tasks: List<ASAction>,
-    override val agent: ASAgent,
 ) : ASPlan {
 
     override fun isApplicable(event: ASEvent, beliefBase: ASBeliefBase): Boolean {
@@ -44,7 +38,7 @@ internal data class PlanImpl(
 //                    )
                 }
 
-                //PlanImpl(event.value, actualGuard, actualGoals)
+                // PlanImpl(event.value, actualGuard, actualGoals)
                 this
             }
             else -> this

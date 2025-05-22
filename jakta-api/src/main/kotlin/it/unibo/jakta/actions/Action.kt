@@ -2,7 +2,7 @@ package it.unibo.jakta.actions
 
 interface SideEffect
 
-interface Action : suspend (ActionInvocationContext) -> List<SideEffect>
+interface Action : (ActionInvocationContext) -> List<SideEffect>
 
 //action("pluto", 2) {
 //    val gg = do_something(argument.1, argument.2)

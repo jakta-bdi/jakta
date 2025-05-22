@@ -3,49 +3,212 @@ package it.unibo.jakta.impl
 import it.unibo.jakta.ASAgent
 import it.unibo.jakta.AgentID
 import it.unibo.jakta.AgentProcess
-import it.unibo.jakta.actions.Action
-import it.unibo.jakta.beliefs.BeliefBase
+import it.unibo.jakta.actions.SideEffect
+import it.unibo.jakta.actions.effects.ActivitySideEffect
+import it.unibo.jakta.actions.effects.AgentChange
+import it.unibo.jakta.actions.effects.EnvironmentChange
+import it.unibo.jakta.actions.requests.ActionRequest
+import it.unibo.jakta.beliefs.ASBeliefBase
+import it.unibo.jakta.beliefs.ASMutableBeliefBase
+import it.unibo.jakta.environment.BasicEnvironment
 import it.unibo.jakta.events.ASEvent
+import it.unibo.jakta.events.AchievementGoalFailure
 import it.unibo.jakta.events.Event
+import it.unibo.jakta.events.TestGoalFailure
+import it.unibo.jakta.fsm.Activity
+import it.unibo.jakta.intentions.ASIntention
 import it.unibo.jakta.intentions.ASIntentionPool
+import it.unibo.jakta.intentions.ASMutableIntentionPool
+import it.unibo.jakta.intentions.IntentionPoolStaticFactory
 import it.unibo.jakta.plans.ASPlan
-import it.unibo.jakta.plans.Plan
-import it.unibo.tuprolog.collections.MutableClauseCollection.Companion.emptyQueue
-import it.unibo.tuprolog.collections.MutableClauseQueue
-import it.unibo.tuprolog.core.Struct
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.firstOrNull
-import java.util.*
+import java.util.Queue
+import java.util.ArrayDeque
 
 internal class AgentImpl(
-    override val intentions: ASIntentionPool,
-    override val environment: AgentProcess,
-    override val beliefBase: BeliefBase<Struct>,
-    override val plans: Collection<Plan<Struct>>,
-    override val agentID: AgentID = AgentID(),
-    override val name: String = "Agent-" + UUID.randomUUID(),
+    override val controller: Activity.Controller?,
+    agentID: AgentID = AgentID(),
+    agentName: String = "Agent-$agentID",
+    beliefBase: ASMutableBeliefBase = ASMutableBeliefBase.of(),
+    plans: MutableCollection<ASPlan> = mutableListOf(),
+    intentions: ASMutableIntentionPool = IntentionPoolStaticFactory.empty(),
     override var tags: Map<String, Any> = emptyMap(),
-    override val events: Queue<Event.AgentEvent> = ArrayDeque(),
 ) : ASAgent {
+    override val context: MutableContext = MutableContext(agentID, agentName, beliefBase, plans, intentions)
 
-//    override val lifecycle: ASAgentLifecycle
-//        get() = AgentLifecycleImpl(this)
-//
-    override fun selectEvent(events: List<ASEvent>) = events.firstOrNull()
-    override fun selectApplicablePlan(plans: Iterable<ASPlan>) = plans.firstOrNull()
-    override fun scheduleIntention(intentions: ASIntentionPool) = intentions.nextIntention()
+    data class MutableContext(
+        override val agentID: AgentID,
+        override val agentName: String,
+        override val beliefBase: ASMutableBeliefBase,
+        override val plans: MutableCollection<ASPlan>,
+        override val intentions: ASMutableIntentionPool,
+        override val events: Queue<Event.AgentEvent> = ArrayDeque(),
+    ) : ASAgent.ASAgentContext, ASAgent.ASMutableAgentContext
+
+    fun updateContext(function: (mutableContext: ASAgent.ASMutableAgentContext) -> Unit): Unit =
+        function.invoke(context)
+
+    override fun selectEvent(environment: BasicEnvironment): Event? =
+        context.events.poll() ?: this.context.beliefBase.events.poll() ?: environment.events.poll()
+
+    override fun scheduleIntention(): ASIntention = this.context.intentions.nextIntention()
+    // TODO(Does this implementation update the intention pool?)
+
+    override fun runIntention(intention: ASIntention): List<SideEffect> =
+        intention.nextTask()?.invoke(ActionRequest.of(context, controller?.currentTime())) ?: emptyList()
+
+    override fun sense(environment: BasicEnvironment, debugEnabled: Boolean): Event? {
+        // STEP1: Perceive the BasicEnvironment.
+        val perceptions = environment.percept()
+
+        // STEP2: Update the ASBeliefBase
+        this.context.beliefBase.update(perceptions)
+
+        // println("pre-run -> $context")
+
+        // TODO(STEP3: Receiving Communication from Other Agents)
+        // val message = environment.getNextMessage(agent.name)
+
+        // TODO(STEP4: Selecting "Socially Acceptable" Messages)
+
+        // Parse message
+//        if (message != null) {
+//            newEvents = when (message.type) {
+//                is it.unibo.jakta.messages.Achieve ->
+//                    newEvents + Event.ofAchievementGoalInvocation(Achieve.of(message.value))
+//                is Tell -> {
+//                    val retrieveResult = newBeliefBase.add(Belief.fromMessageSource(message.from, message.value))
+//                    newBeliefBase = retrieveResult.updatedBeliefBase
+//                    generateEvents(newEvents, retrieveResult.modifiedBeliefs)
+//                }
+//            }
+//            cachedEffects = cachedEffects + PopMessage(this.agent.name)
+//        }
+
+        // STEP5: Selecting an Event.
+        return selectEvent(environment)
+    }
 
     override fun replaceTags(tags: Map<String, Any>): ASAgent {
         this.tags += tags
         return this
     }
 
-    // TODO("I don't like that this in not a single queue")
-    override fun sense(): Event? =
-        this.events.poll() ?: this.beliefBase.events.poll() ?: this.environment.events.poll()
+    override fun selectRelevantPlans(
+        event: ASEvent,
+        planLibrary: List<ASPlan>,
+    ): List<ASPlan> = planLibrary.filter { it.isRelevant(event) }
 
-    override fun deliberate(event: Event): List<Action> {
-        TODO("Not yet implemented")
+    override fun isPlanApplicable(
+        event: ASEvent,
+        plan: ASPlan,
+        beliefBase: ASBeliefBase,
+    ): Boolean = plan.isApplicable(event, beliefBase)
+
+    override fun selectApplicablePlan(plans: List<ASPlan>): ASPlan? = plans.firstOrNull()
+
+    override fun assignPlanToIntention(
+        event: ASEvent,
+        plan: ASPlan,
+        intentions: ASIntentionPool,
+    ): ASIntention? = when (event.isExternal()) {
+        true -> ASIntention.of(plan)
+        false -> {
+            when (event) {
+                is AchievementGoalFailure, is TestGoalFailure ->
+                    event.intention?.copy(recordStack = mutableListOf(plan.toActivationRecord()))
+                // else -> intentions[event.intention!!.id]!!.push(plan.toActivationRecord())
+                else -> {
+                    event.intention?.pop()
+                    event.intention?.push(plan.toActivationRecord())
+                    event.intention
+                }
+            }
+        }
+    }
+
+    override fun sense(agentProcess: AgentProcess): Event? = when {
+        agentProcess is BasicEnvironment -> sense(agentProcess, false)
+        else -> null
+    }
+
+    override fun deliberate(agentProcess: AgentProcess, event: Event) = when {
+        agentProcess is BasicEnvironment -> deliberate(agentProcess, event, false)
+        else -> Unit
+    }
+
+    override fun deliberate(environment: BasicEnvironment, event: Event, debugEnabled: Boolean) {
+        when {
+            event is ASEvent -> {
+                // STEP6: Retrieving all Relevant Plans.
+                val relevantPlans = selectRelevantPlans(event, this.context.plans.toList())
+                // if the set of relevant plans is empty, the event is simply discarded.
+
+                // STEP7: Determining the Applicable Plans.
+                val applicablePlans = relevantPlans.filter {
+                    isPlanApplicable(event, it, this.context.beliefBase)
+                }
+
+                // STEP8: Selecting one Applicable Plan.
+                val selectedPlan = selectApplicablePlan(applicablePlans)
+
+                // Add plan to intentions
+                if (selectedPlan != null) {
+                    if (environment.debugEnabled) {
+                        println("[${this.context.agentName}] Selected the event: $event")
+                    }
+                    // if (debugEnabled) println("[${agent.agentName}] Selected the plan: $selectedPlan")
+                    val updatedIntention = assignPlanToIntention(
+                        event,
+                        selectedPlan.applicablePlan(event, this.context.beliefBase),
+                        this.context.intentions,
+                    )
+                    // if (debugEnabled) println("[${agent.agentName}] Updated Intention: $updatedIntention")
+                    if (updatedIntention != null) {
+                        this.context.intentions.updateIntention(updatedIntention)
+                    }
+                } else {
+                    if (environment.debugEnabled) {
+                        println("[${this.context.agentName}] WARNING: There's no applicable plan for the event: $event")
+                    }
+                    if (event.isInternal()) {
+                        this.context.intentions.deleteIntention(event.intention!!.id)
+                    }
+                }
+            }
+
+            else -> Unit
+        }
+    }
+
+    override fun act(agentProcess: AgentProcess) = when {
+        agentProcess is BasicEnvironment -> act(agentProcess, false)
+        else -> Unit
+    }
+
+    override fun act(environment: BasicEnvironment, debugEnabled: Boolean) {
+        // Select intention to execute
+        if (!this.context.intentions.isEmpty()) {
+            // STEP9: Select an Intention for Further Execution.
+            val intentionToExecute = scheduleIntention()
+
+            // STEP10: Executing one Step on an Intention
+            if (intentionToExecute.recordStack.isNotEmpty()) {
+                // if (debugEnabled) println("[${agent.agentName}] RUN -> $scheduledIntention")
+                val sideEffects = runIntention(intentionToExecute)
+                sideEffects.forEach { sideEffect ->
+                    when {
+                        sideEffect is ActivitySideEffect && controller != null -> sideEffect.invoke(controller)
+                        sideEffect is EnvironmentChange -> sideEffect.invoke(environment)
+                        sideEffects is AgentChange -> this.updateContext { sideEffects.invoke(context) }
+                    }
+                }
+            }
+            // println("post run -> ${newAgent.context}")
+        }
+
+//        // Generate BasicEnvironment Changes
+//        val environmentChangesToApply = executionResult.environmentEffects + cachedEffects
+//        cachedEffects = emptyList()
+//        return environmentChangesToApply
     }
 }

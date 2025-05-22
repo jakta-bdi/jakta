@@ -1,13 +1,8 @@
 package it.unibo.jakta.intentions
 
 import it.unibo.jakta.actions.ASAction
-import it.unibo.jakta.actions.Action
-import it.unibo.jakta.beliefs.ASBelief
-import it.unibo.jakta.events.ASEvent
 import it.unibo.jakta.intentions.impl.IntentionImpl
 import it.unibo.jakta.plans.ASPlan
-import it.unibo.jakta.plans.Plan
-import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
 
 interface ASIntention {
@@ -37,7 +32,6 @@ interface ASIntention {
      * @return true if the intention is modified, otherwise false
      */
     fun push(activationRecord: ASActivationRecord): Boolean
-
 
     fun applySubstitution(substitution: Substitution)
 

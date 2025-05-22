@@ -21,7 +21,7 @@ internal class ASIntentionPoolImpl(
     override fun deleteIntention(intentionID: IntentionID): ASIntention? = this.remove(intentionID)
 
     override fun snapshot(): ASIntentionPool =
-        ASIntentionPoolImpl(mutableMapOf(*this.entries.map{it.key to it.value}.toTypedArray()))
+        ASIntentionPoolImpl(mutableMapOf(*this.entries.map { it.key to it.value }.toTypedArray()))
 
     override fun toString(): String = this.values.joinToString(separator = "\n")
 }

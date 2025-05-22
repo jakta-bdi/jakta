@@ -11,7 +11,7 @@ private val TAG_TIME_DISTRIBUTION = ASAgent::class.qualifiedName
 
 val ASAgent.timeDistribution: TimeDistribution
     get() = getTag<TimeDistribution>(TAG_TIME_DISTRIBUTION)
-        ?: error("No time distribution for agent $agentID")
+        ?: error("No time distribution for agent ${context.agentID}")
 
 val ASAgent.hasTimeDistribution: Boolean
     get() = containsTag(TAG_TIME_DISTRIBUTION)
