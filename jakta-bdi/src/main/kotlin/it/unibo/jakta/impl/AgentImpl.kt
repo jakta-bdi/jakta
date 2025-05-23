@@ -21,6 +21,7 @@ import it.unibo.jakta.intentions.ASIntentionPool
 import it.unibo.jakta.intentions.ASMutableIntentionPool
 import it.unibo.jakta.intentions.IntentionPoolStaticFactory
 import it.unibo.jakta.plans.ASPlan
+import it.unibo.tuprolog.core.Empty
 import java.util.Queue
 import java.util.ArrayDeque
 
@@ -28,12 +29,20 @@ internal class AgentImpl(
     override val controller: Activity.Controller?,
     agentID: AgentID = AgentID(),
     agentName: String = "Agent-$agentID",
+    events: List<Event.AgentEvent> = emptyList(),
     beliefBase: ASMutableBeliefBase = ASMutableBeliefBase.of(),
     plans: MutableCollection<ASPlan> = mutableListOf(),
     intentions: ASMutableIntentionPool = IntentionPoolStaticFactory.empty(),
     override var tags: Map<String, Any> = emptyMap(),
 ) : ASAgent {
-    override val context: MutableContext = MutableContext(agentID, agentName, beliefBase, plans, intentions)
+    override val context: MutableContext = MutableContext(
+        agentID,
+        agentName,
+        beliefBase,
+        plans,
+        intentions,
+        ArrayDeque(events)
+    )
 
     data class MutableContext(
         override val agentID: AgentID,

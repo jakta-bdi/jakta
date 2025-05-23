@@ -1,40 +1,43 @@
 package it.unibo.jakta
 
-import it.unibo.jakta.actions.requests.InternalRequest
+import it.unibo.jakta.actions.ActionInvocationContext
+import it.unibo.jakta.actions.SideEffect
+import it.unibo.jakta.actions.stdlib.AbstractExecutionAction
 import it.unibo.jakta.environment.BasicEnvironment
-import it.unibo.jakta.goals.Achieve
-import it.unibo.jakta.goals.ActInternally
-import it.unibo.jakta.plans.Plan
-import it.unibo.jakta.plans.PlanLibrary
+import it.unibo.jakta.events.AchievementGoalInvocation
+import it.unibo.jakta.perception.Perception
+import it.unibo.jakta.plans.ASPlan
+import it.unibo.tuprolog.core.Substitution
+import java.util.ArrayDeque
+
+class PrintThread: AbstractExecutionAction("PrintThread", 0) {
+    override fun applySubstitution(substitution: Substitution) = Unit
+    override fun invoke(context: ActionInvocationContext): List<SideEffect> {
+        println("Thread: ${Thread.currentThread().name}")
+        return emptyList()
+    }
+}
+
+
+fun agentGenerator(name: String) = ASAgent.of(
+    name = name,
+    events = ArrayDeque(
+        listOf(AchievementGoalInvocation(Jakta.parseStruct("my_thread"))),
+    ),
+    planLibrary = mutableListOf(ASPlan.ofAchievementGoalInvocation(
+        value = Jakta.parseStruct("my_thread"),
+        goals = listOf(PrintThread()),
+    )),
+)
+
 
 fun main() {
-    val alice = ASAgent.of(
-        name = "Alice",
-        events = listOf(
-            Event.ofAchievementGoalInvocation(Achieve.of(Jakta.parseStruct("my_thread"))),
-        ),
-        planLibrary = PlanLibrary.of(
-            Plan.ofAchievementGoalInvocation(
-                value = Jakta.parseStruct("my_thread"),
-                goals = listOf(
-                    ActInternally.of(Jakta.parseStruct("thread")),
-                ),
-            ),
-        ),
-        internalActions = mapOf(
-            "thread" to object : AbstractInternalAction("thread", 0) {
-                override suspend fun action(request: InternalRequest) {
-                    println("Thread: ${Thread.currentThread().name}")
-                }
-            },
-        ),
-    )
-    val environment = BasicEnvironment.of()
+    val environment = BasicEnvironment(true, Perception.empty())
 
     Mas.of(
         it.unibo.jakta.executionstrategies.ExecutionStrategy.oneThreadPerAgent(),
         environment,
-        alice,
-        alice.copy(),
+        agentGenerator("alice"),
+        agentGenerator("bob"),
     ).start()
 }

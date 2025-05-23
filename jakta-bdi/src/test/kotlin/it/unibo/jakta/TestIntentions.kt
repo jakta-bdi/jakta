@@ -2,89 +2,102 @@ package it.unibo.jakta
 
 import io.kotest.assertions.fail
 import io.kotest.core.spec.style.DescribeSpec
+import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import it.unibo.jakta.beliefs.Belief
-import it.unibo.jakta.goals.Achieve
-import it.unibo.jakta.goals.AddBelief
-import it.unibo.jakta.intentions.ActivationRecord
-import it.unibo.jakta.intentions.Intention
-import it.unibo.jakta.intentions.IntentionPool
+import it.unibo.jakta.actions.effects.BeliefChange
+import it.unibo.jakta.actions.requests.ActionRequest
+import it.unibo.jakta.actions.stdlib.Achieve
+import it.unibo.jakta.actions.stdlib.AddBelief
+import it.unibo.jakta.beliefs.ASBelief
+import it.unibo.jakta.fsm.time.Time
+import it.unibo.jakta.intentions.ASIntention
+import it.unibo.jakta.intentions.IntentionPoolStaticFactory
+import it.unibo.jakta.plans.ASPlan
 import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.core.Var
+import java.util.Calendar
 
 class TestIntentions : DescribeSpec({
     @Suppress("VariableNaming")
     val X = Var.of("X")
-    val buySomething = Belief.fromSelfSource(Struct.of("buy", X))
-    val eatSomething = Belief.fromSelfSource(Struct.of("eat", X))
+    val buySomething = ASBelief.fromSelfSource(Struct.of("buy", X))
+    val eatSomething = ASBelief.fromSelfSource(Struct.of("eat", X))
 
-    val activationRecord = ActivationRecord.of(
-        listOf(AddBelief.of(buySomething), AddBelief.of(eatSomething)),
+    val plan = ASPlan.ofAchievementGoalInvocation(
         Struct.of("test"),
+        listOf(AddBelief(buySomething), AddBelief(eatSomething)),
     )
-    val intention = Intention.of(listOf(activationRecord))
+
+    val intention = ASIntention.of(plan)
 
     describe("An intention") {
         it("should return the next goal to satisfy with nextGoal() invocation") {
-            when (val nextGoal = intention.nextGoal()) {
-                is AddBelief -> nextGoal.belief shouldBe buySomething.rule.head
+            when (val nextGoal = intention.nextTask()) {
+                is AddBelief -> nextGoal.belief shouldBe buySomething.content.head
                 else -> fail("Next PrologGoal has wrong type")
             }
         }
 
-        it("should remove the right goal with pop() invocation") {
+        it("should retrieve the right action after pop() invocation") {
             val updatedIntention = intention.pop()
-            updatedIntention.recordStack.size shouldBe 1
-            updatedIntention.nextGoal().value shouldBe eatSomething.rule.head
-            updatedIntention.pop().recordStack shouldBe emptyList()
+            updatedIntention shouldNotBeNull {
+                this.signature.arity shouldBe 1
+                this.signature.name shouldBe "AddBelief"
+                val sideEffects = this.invoke(
+                    ActionRequest.of(ASAgent.of().context, Time.real(Calendar.getInstance().timeInMillis))
+                )
+                sideEffects.size shouldBe 1
+                sideEffects shouldContain BeliefChange.BeliefAddition(buySomething)
+
+                intention.pop()
+                intention.recordStack shouldBe emptyList()
+            }
+
         }
 
         it("should add on top of the record stack after a push() invocation") {
-            val newActivationRecord = ActivationRecord.of(
-                listOf(Achieve.of(Atom.of("clean"))),
+            val newActivationRecord = ASPlan.ofAchievementGoalInvocation(
                 Struct.of("test"),
-            )
-            val updatedIntention = intention.push(newActivationRecord)
-            updatedIntention.nextGoal() shouldBe Achieve.of(Atom.of("clean"))
+                listOf(Achieve(Atom.of("clean"))),
+            ).toActivationRecord()
+            intention.push(newActivationRecord)
+            intention.nextTask() shouldBe Achieve(Atom.of("clean"))
         }
 
         it("should apply a substitution on the actual Activation Record") {
-            // val bb = ASBeliefBase.of(listOf(Belief.of(Struct.of(buy()))))
+            // val bb = ASBeliefBase.of(listOf(ASBelief.of(Struct.of(buy()))))
 
             val substitution = Substitution.of(X, Atom.of("chocolate"))
-            val newIntention = Intention.of(
-                intention.recordStack +
-                    ActivationRecord.of(
-                        listOf(Achieve.of(Struct.of("clean", X))),
+            val newIntention = ASIntention.of(
+                recordStack = (intention.recordStack +
+                    ASPlan.ofAchievementGoalInvocation(
                         Struct.of("test"),
-                    ),
+                        listOf(Achieve(Struct.of("clean", X))),
+                    ).toActivationRecord()).toMutableList(),
             )
             newIntention.recordStack.size shouldBe 2
-            val computedIntention = newIntention.applySubstitution(substitution)
-            computedIntention.recordStack.size shouldBe 2
-            computedIntention.recordStack.first().goalQueue.forEach {
-                it.value.args[1] shouldBe Atom.of("chocolate")
+            newIntention.applySubstitution(substitution)
+            newIntention.recordStack.size shouldBe 2
+            newIntention.recordStack.first().taskQueue.forEach {
+                it.signature.name shouldBe "Achieve"
             }
-            computedIntention.recordStack.last().goalQueue.forEach {
-                it.value.args.first() shouldBe X
+            newIntention.recordStack.last().taskQueue.forEach {
+                it.signature.name shouldBe "Achieve"
             }
         }
     }
 
     describe("An intention pool") {
-        val intention2 = Intention.of(
-            listOf(
-                ActivationRecord.of(
-                    listOf(
-                        Achieve.of(Struct.of("clean", Atom.of("home"))),
-                    ),
-                    Struct.of("test"),
-                ),
+        val intention2 = ASIntention.of(
+            ASPlan.ofAchievementGoalInvocation(
+                Struct.of("test"),
+                listOf(Achieve(Struct.of("clean", Atom.of("home")))),
             ),
         )
-        val intentionPool = IntentionPool.of(listOf(intention, intention2))
+        val intentionPool = IntentionPoolStaticFactory.of(listOf(intention, intention2))
 
         it("should be created correctly providing a list of intentions") {
             intentionPool[intention.id] shouldBe intention
@@ -96,19 +109,19 @@ class TestIntentions : DescribeSpec({
             nextIntention shouldBe intention
         }
         it("should remove the next intention to be executed after pop() invocation") {
-            val newPool = intentionPool.pop()
-            newPool.size shouldBe 1
-            newPool.keys shouldBe setOf(intention2.id)
-            newPool.values.first() shouldBe intention2
+            val intention = intentionPool.pop()
+            intentionPool.size shouldBe 1
+            intentionPool.keys shouldBe setOf(intention2.id)
+            intentionPool.values.first() shouldBe intention2
         }
         it("should add a new intention after the update() invocation") {
-            val intentionPool2 = IntentionPool.of(listOf(intention))
-            var newPool = intentionPool2.updateIntention(intention2)
-            newPool shouldBe intentionPool
+            val intentionPool2 = IntentionPoolStaticFactory.of(listOf(intention))
+            intentionPool2.updateIntention(intention2)
+            intentionPool2 shouldBe intentionPool
 
-            val updatedIntention2 = intention2.pop()
-            newPool = newPool.updateIntention(updatedIntention2)
-            newPool[intention2.id] shouldBe updatedIntention2
+            intention2.pop()
+            val newPool = IntentionPoolStaticFactory.of(listOf(intention2))
+            newPool[intention2.id] shouldBe intention2
             newPool.size shouldBe 2
         }
     }

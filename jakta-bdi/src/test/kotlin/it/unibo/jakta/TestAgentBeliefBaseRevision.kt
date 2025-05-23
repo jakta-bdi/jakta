@@ -10,7 +10,7 @@ class TestAgentBeliefBaseRevision : DescribeSpec({
             agentContext.beliefBase.count() shouldBe 0
             agentContext.events.size shouldBe 0
             agentContext.intentions.size shouldBe 0
-            agentContext.planLibrary.plans.size shouldBe 0
+            agentContext.plans.size shouldBe 0
         }
     }
 

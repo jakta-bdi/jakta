@@ -1,60 +1,65 @@
 package it.unibo.jakta
 
-import it.unibo.jakta.actions.AbstractExternalAction
-import it.unibo.jakta.actions.requests.ExternalRequest
-import it.unibo.jakta.beliefs.Belief
+import it.unibo.jakta.actions.ActionInvocationContext
+import it.unibo.jakta.actions.SideEffect
+import it.unibo.jakta.actions.stdlib.AbstractExecutionAction
+import it.unibo.jakta.actions.stdlib.Print
+import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.environment.BasicEnvironment
-import it.unibo.jakta.goals.Achieve
-import it.unibo.jakta.goals.Act
-import it.unibo.jakta.goals.ActInternally
-import it.unibo.jakta.messages.Message
-import it.unibo.jakta.messages.Tell
-import it.unibo.jakta.plans.Plan
-import it.unibo.jakta.plans.PlanLibrary
+import it.unibo.jakta.events.AchievementGoalInvocation
+import it.unibo.jakta.plans.ASPlan
+import it.unibo.tuprolog.core.Atom
+import it.unibo.tuprolog.core.Substitution
+import it.unibo.tuprolog.core.Var
 
 fun main() {
-    val broadcastAction = object : AbstractExternalAction("broadcast", 2) {
-        override suspend fun action(request: ExternalRequest) {
-            val type = request.arguments[0].castToAtom()
-            val message = request.arguments[1].castToStruct()
-            when (type.value) {
-                "tell" -> broadcastMessage(Message(request.sender, Tell, message))
-                "achieve" -> broadcastMessage(
-                    Message(request.sender, it.unibo.jakta.messages.Achieve, message),
-                )
-            }
+    class BroadcastAction(
+        val type: String,
+        val message: String,
+    ): AbstractExecutionAction("broadcast", 2){ //TODO("Not sure this will work, is the name considered? Otherwise i can consider to directly delete that")
+        override fun applySubstitution(substitution: Substitution) {
+            TODO("Can't this be generic?")
         }
+
+        override fun invoke(p1: ActionInvocationContext): List<SideEffect> {
+//            when (type) {
+//                "tell" -> broadcastMessage(Message(request.sender, Tell, message))
+//                "achieve" -> broadcastMessage(
+//                    Message(request.sender, it.unibo.jakta.messages.Achieve, message),
+//                )
+//            } // TODO("Missing Communication Capabilities")
+
+            println("seending message $message of type $type")
+            return emptyList()
+        }
+
     }
 
-    val env = BasicEnvironment.of(
-        externalActions = mapOf(
-            broadcastAction.signature.name to broadcastAction,
-        ),
-    )
+    val env = BasicEnvironment()
 
     val sender = ASAgent.of(
         name = "sender",
         events = listOf(
-            Event.ofAchievementGoalInvocation(Achieve.of(Jakta.parseStruct("broadcast"))),
+            AchievementGoalInvocation(Jakta.parseStruct("broadcast")),
         ),
-        planLibrary = PlanLibrary.of(
-            Plan.ofAchievementGoalInvocation(
+        planLibrary = mutableListOf(
+            ASPlan.ofAchievementGoalInvocation(
                 value = Jakta.parseStruct("broadcast"),
                 goals = listOf(
-                    ActInternally.of(Jakta.parseStruct("print(\"Broadcast message\")")),
-                    Act.of(Jakta.parseStruct("broadcast(tell, greetings)")),
+                    Print(Atom.of("Broadcast message")),
+                    BroadcastAction("tell", "greetings"),
                 ),
             ),
         ),
     )
 
-    val alice = ASAgent.of(
-        name = "alice",
-        planLibrary = PlanLibrary.of(
-            Plan.ofBeliefBaseAddition(
-                belief = Belief.from(Jakta.parseStruct("greetings(source(Sender))")),
+    fun agentGenerator(name: String) = ASAgent.of(
+        name = name,
+        planLibrary = mutableListOf(
+            ASPlan.ofBeliefBaseAddition(
+                belief = ASBelief.from(Jakta.parseStruct("greetings(source(Sender))")),
                 goals = listOf(
-                    ActInternally.of(Jakta.parseStruct("print(\"Received message from: \", Sender)")),
+                    Print(Atom.of("Received message from: "), Var.of("Sender")),
                 ),
             ),
         ),
@@ -64,7 +69,7 @@ fun main() {
         it.unibo.jakta.executionstrategies.ExecutionStrategy.oneThreadPerAgent(),
         env,
         sender,
-        alice,
-        alice.copy(),
+        agentGenerator("alice"),
+        agentGenerator("bob"),
     ).start()
 }

@@ -7,8 +7,8 @@ import it.unibo.jakta.perception.Perception
 import java.util.*
 
 data class BasicEnvironment(
-    val debugEnabled: Boolean,
-    val perception: Perception,
+    val debugEnabled: Boolean = false,
+    val perception: Perception = Perception.empty(),
     override val events: Queue<Event.EnvironmentEvent> = ArrayDeque(),
 ) : AgentProcess {
 

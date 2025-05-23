@@ -1,31 +1,39 @@
 package it.unibo.jakta
 
-import it.unibo.jakta.actions.requests.InternalRequest
-import it.unibo.jakta.actions.stdlib.ExecutionActions
+import io.kotest.assertions.retry
+import it.unibo.jakta.actions.ActionInvocationContext
+import it.unibo.jakta.actions.SideEffect
+import it.unibo.jakta.actions.stdlib.AbstractExecutionAction
+import it.unibo.jakta.actions.stdlib.Achieve
 import it.unibo.jakta.environment.BasicEnvironment
+import it.unibo.jakta.events.AchievementGoalInvocation
 import it.unibo.jakta.executionstrategies.setTimeDistribution
 import it.unibo.jakta.fsm.time.SimulatedTime
 import it.unibo.jakta.fsm.time.Time
-import it.unibo.jakta.goals.Achieve
-import it.unibo.jakta.goals.ActInternally
+import it.unibo.jakta.plans.ASPlan
 import it.unibo.jakta.plans.Plan
-import it.unibo.jakta.plans.PlanLibrary
+import it.unibo.tuprolog.core.Atom
+import it.unibo.tuprolog.core.Substitution
 
 fun main() {
-    val dummyAction = object : AbstractInternalAction("time", 0) {
-        override suspend fun action(request: InternalRequest) {
-            println("time: ${request.requestTimestamp}")
+    class DummyAction: AbstractExecutionAction("DummyAction", 0) {
+        override fun applySubstitution(substitution: Substitution) = Unit
+
+        override fun invoke(context: ActionInvocationContext): List<SideEffect> {
+            println("time: ${context.invocationTimestamp}")
+            return emptyList()
         }
+
     }
+
     val alice = ASAgent.of(
-        events = listOf(Event.ofAchievementGoalInvocation(Achieve.of(Jakta.parseStruct("time")))),
-        internalActions = ExecutionActions.default() + (dummyAction.signature.name to dummyAction),
-        planLibrary = PlanLibrary.of(
-            Plan.ofAchievementGoalInvocation(
+        events = listOf(AchievementGoalInvocation(Atom.of("time"))),
+        planLibrary = mutableListOf(
+            ASPlan.ofAchievementGoalInvocation(
                 value = Jakta.parseStruct("time"),
                 goals = listOf(
-                    ActInternally.of(Jakta.parseStruct("time")),
-                    Achieve.of(Jakta.parseStruct("time")),
+                    DummyAction(),
+                    Achieve(Jakta.parseStruct("time")),
                 ),
             ),
         ),
@@ -33,7 +41,7 @@ fun main() {
 
     Mas.of(
         it.unibo.jakta.executionstrategies.ExecutionStrategy.discreteEventExecution(),
-        BasicEnvironment.of(),
+        BasicEnvironment(),
         alice,
     ).start()
 }

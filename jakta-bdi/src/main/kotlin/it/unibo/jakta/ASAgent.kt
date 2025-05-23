@@ -126,6 +126,7 @@ interface ASAgent : Agent, Taggable<ASAgent> {
             agentID: AgentID = AgentID(),
             name: String = "Agent-" + UUID.randomUUID(),
             beliefBase: ASMutableBeliefBase = ASMutableBeliefBase.empty(),
+            events: List<Event.AgentEvent> = emptyList(),
             planLibrary: MutableCollection<ASPlan> = mutableListOf(),
             controller: Activity.Controller? = null,
             // internalActions: MutableMap<String, InternalAction> = ExecutionActions.default(), //TODO()
@@ -133,6 +134,7 @@ interface ASAgent : Agent, Taggable<ASAgent> {
             controller,
             agentID,
             name,
+            events,
             beliefBase,
             planLibrary,
         )
