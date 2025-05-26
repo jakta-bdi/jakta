@@ -47,7 +47,7 @@ class TestIntentions : DescribeSpec({
                 this.signature.arity shouldBe 1
                 this.signature.name shouldBe "AddBelief"
                 val sideEffects = this.invoke(
-                    ActionRequest.of(ASAgent.of().context, Time.real(Calendar.getInstance().timeInMillis))
+                    ActionRequest.of(ASAgent.of().context, Time.real(Calendar.getInstance().timeInMillis)),
                 )
                 sideEffects.size shouldBe 1
                 sideEffects shouldContain BeliefChange.BeliefAddition(buySomething)
@@ -55,7 +55,6 @@ class TestIntentions : DescribeSpec({
                 intention.pop()
                 intention.recordStack shouldBe emptyList()
             }
-
         }
 
         it("should add on top of the record stack after a push() invocation") {
@@ -72,11 +71,13 @@ class TestIntentions : DescribeSpec({
 
             val substitution = Substitution.of(X, Atom.of("chocolate"))
             val newIntention = ASIntention.of(
-                recordStack = (intention.recordStack +
-                    ASPlan.ofAchievementGoalInvocation(
-                        Struct.of("test"),
-                        listOf(Achieve(Struct.of("clean", X))),
-                    ).toActivationRecord()).toMutableList(),
+                recordStack = (
+                    intention.recordStack +
+                        ASPlan.ofAchievementGoalInvocation(
+                            Struct.of("test"),
+                            listOf(Achieve(Struct.of("clean", X))),
+                        ).toActivationRecord()
+                    ).toMutableList(),
             )
             newIntention.recordStack.size shouldBe 2
             newIntention.applySubstitution(substitution)
@@ -109,7 +110,7 @@ class TestIntentions : DescribeSpec({
             nextIntention shouldBe intention
         }
         it("should remove the next intention to be executed after pop() invocation") {
-            val intention = intentionPool.pop()
+            intentionPool.pop()
             intentionPool.size shouldBe 1
             intentionPool.keys shouldBe setOf(intention2.id)
             intentionPool.values.first() shouldBe intention2

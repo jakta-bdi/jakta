@@ -24,12 +24,14 @@ class TestBeliefs : DescribeSpec({
     describe("A belief with self source") {
         it("Should be added to a Belief Base") {
             emptybb.count() shouldBe 0
-            emptybb.add(chocolateDesire)
+            emptybb.add(chocolateDesire) shouldBe true
             emptybb.events.size shouldBe 1
-            shouldBeInstanceOf<BeliefBaseAddition> {
-                emptybb.events.first()
-            }
+            println(emptybb.events.first())
+            emptybb.events.first().shouldBeInstanceOf<BeliefBaseAddition>()
             println(emptybb.events)
+            println(emptybb.size)
+            println(emptybb.count())
+            emptybb.isEmpty() shouldBe false
             emptybb.count() shouldBe 1
         }
 
@@ -55,7 +57,7 @@ class TestBeliefs : DescribeSpec({
         }
 
         it("should be removed from a ASBeliefBase") {
-            var bb = ASMutableBeliefBase.of(listOf(strawberryDesire, chocolateDesire, genericNeed))
+            val bb = ASMutableBeliefBase.of(listOf(strawberryDesire, chocolateDesire, genericNeed))
             bb.count() shouldBe 3
 
             bb.remove(genericNeed)
@@ -73,7 +75,7 @@ class TestBeliefs : DescribeSpec({
 
     describe("A ASBeliefBase") {
         it("should be added into another one") {
-            var bb = ASMutableBeliefBase.of(listOf(strawberryDesire))
+            val bb = ASMutableBeliefBase.of(listOf(strawberryDesire))
             bb.count() shouldBe 1
 
             val bb2 = ASMutableBeliefBase.of(listOf(genericNeed, chocolateDesire))
@@ -84,12 +86,12 @@ class TestBeliefs : DescribeSpec({
             bb.events.filterIsInstance<BeliefBaseAddition>().count() shouldBe 2
             bb.events.filterIsInstance<BeliefBaseAddition>().map {
                 ASBelief.from(it.value)
-            } shouldBe listOf(genericNeed, chocolateDesire) //TODO("Not sure this is working")
+            } shouldBe listOf(genericNeed, chocolateDesire) // TODO("Not sure this is working")
             bb.count() shouldBe 3
         }
 
         it("should be removed from another") {
-            var bb = ASMutableBeliefBase.of(listOf(genericNeed, chocolateDesire, strawberryDesire))
+            val bb = ASMutableBeliefBase.of(listOf(genericNeed, chocolateDesire, strawberryDesire))
             bb.count() shouldBe 3
 
             val bb2 = ASMutableBeliefBase.of(listOf(chocolateDesire, strawberryDesire))
@@ -98,7 +100,9 @@ class TestBeliefs : DescribeSpec({
             bb.removeAll(bb2)
             bb.events.count() shouldBe 2
             bb.events.filterIsInstance<BeliefBaseRemoval>().count() shouldBe 2
-            bb.events.filterIsInstance<BeliefBaseRemoval>().map { ASBelief.from(it.value) } shouldBe listOf(chocolateDesire, strawberryDesire)
+            bb.events.filterIsInstance<BeliefBaseRemoval>().map {
+                ASBelief.from(it.value)
+            } shouldBe listOf(chocolateDesire, strawberryDesire)
 
             bb.count() shouldBe 1
             bb.first() shouldBe genericNeed

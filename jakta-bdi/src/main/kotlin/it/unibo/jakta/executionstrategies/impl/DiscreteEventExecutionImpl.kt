@@ -17,15 +17,20 @@ internal class DiscreteEventExecutionImpl : AbstractSingleRunnerExecutionStrateg
             }
         }
         var time = Time.continuous(0.0)
-        mas.agents.forEach { synchronizedAgents.addAgent(
-            ASAgentLifecycle.of(it, mas.environment, debugEnabled)
-        ) }
+        mas.agents.forEach {
+            synchronizedAgents.addAgent(
+                ASAgentLifecycle.of(it, mas.environment, debugEnabled),
+            )
+        }
         Runner.simulatedOf(
             Activity.of {
                 // Compute next executions
                 val timeDistributions = mas.agents.associateWith { it.timeDistribution.invoke(time) }
                 val nextEventTime = timeDistributions.values.minOf { it }
-                val agentsToExecute = timeDistributions.filter { it.value == nextEventTime }.keys.map { it.context.agentID }
+                val agentsToExecute = timeDistributions
+                    .filter { it.value == nextEventTime }
+                    .keys
+                    .map { it.context.agentID }
 
                 // Update time
                 time = nextEventTime
@@ -35,7 +40,7 @@ internal class DiscreteEventExecutionImpl : AbstractSingleRunnerExecutionStrateg
                     .filter { agentsToExecute.contains(it.agent.context.agentID) }
                     .forEach {
                         val sideEffects = it.runOneCycle()
-                        //mas.applyEnvironmentEffects(sideEffects)
+                        // mas.applyEnvironmentEffects(sideEffects)
                     }
                 synchronizedAgents.getAgents().ifEmpty { it.stop() }
             },

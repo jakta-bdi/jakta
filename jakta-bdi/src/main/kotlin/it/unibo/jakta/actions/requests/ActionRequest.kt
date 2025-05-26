@@ -1,7 +1,6 @@
 package it.unibo.jakta.actions.requests
 
 import it.unibo.jakta.ASAgent
-import it.unibo.jakta.Agent
 import it.unibo.jakta.actions.ActionInvocationContext
 import it.unibo.jakta.actions.SideEffect
 import it.unibo.jakta.actions.responses.ActionResponse

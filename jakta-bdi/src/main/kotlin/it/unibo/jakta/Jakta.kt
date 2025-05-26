@@ -4,6 +4,7 @@ import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.tuprolog.core.Clause
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.TermFormatter
+import it.unibo.tuprolog.core.Var
 import it.unibo.tuprolog.core.operators.Operator
 import it.unibo.tuprolog.core.operators.OperatorSet
 import it.unibo.tuprolog.core.operators.Specifier
@@ -21,6 +22,7 @@ object Jakta {
 
     private val parser = TermParser.withOperators(OperatorSet.DEFAULT + operators)
     fun parseStruct(string: String): Struct = parser.parseStruct(string)
+    fun parseVar(string: String): Var = parser.parseVar(string)
     fun parseClause(string: String): Clause = parser.parseClause(string)
 
     fun printAslSyntax(agent: ASAgent, prettyFormatted: Boolean = true) {

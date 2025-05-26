@@ -12,15 +12,15 @@ internal class OneThreadPerMasImpl : AbstractSingleRunnerExecutionStrategy() {
                 ASAgentLifecycle.of(
                     it,
                     mas.environment,
-                    debugEnabled
-                )
+                    debugEnabled,
+                ),
             )
         }
         Runner.threadOf(
             Activity.of {
                 synchronizedAgents.getAgents().forEach {
                     val sideEffects = it.runOneCycle()
-                    //mas.applyEnvironmentEffects(sideEffects)
+                    // mas.applyEnvironmentEffects(sideEffects)
                 }
                 synchronizedAgents.getAgents().ifEmpty { it.stop() }
             },

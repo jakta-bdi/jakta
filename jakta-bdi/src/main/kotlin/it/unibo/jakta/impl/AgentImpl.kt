@@ -21,9 +21,8 @@ import it.unibo.jakta.intentions.ASIntentionPool
 import it.unibo.jakta.intentions.ASMutableIntentionPool
 import it.unibo.jakta.intentions.IntentionPoolStaticFactory
 import it.unibo.jakta.plans.ASPlan
-import it.unibo.tuprolog.core.Empty
-import java.util.Queue
 import java.util.ArrayDeque
+import java.util.Queue
 
 internal class AgentImpl(
     override val controller: Activity.Controller?,
@@ -41,7 +40,7 @@ internal class AgentImpl(
         beliefBase,
         plans,
         intentions,
-        ArrayDeque(events)
+        ArrayDeque(events),
     )
 
     data class MutableContext(
@@ -152,10 +151,15 @@ internal class AgentImpl(
                 val relevantPlans = selectRelevantPlans(event, this.context.plans.toList())
                 // if the set of relevant plans is empty, the event is simply discarded.
 
+                println("relevant plans: $relevantPlans")
+
                 // STEP7: Determining the Applicable Plans.
                 val applicablePlans = relevantPlans.filter {
                     isPlanApplicable(event, it, this.context.beliefBase)
                 }
+
+                println("applicable plans: $applicablePlans")
+
 
                 // STEP8: Selecting one Applicable Plan.
                 val selectedPlan = selectApplicablePlan(applicablePlans)
@@ -202,7 +206,7 @@ internal class AgentImpl(
 
             // STEP10: Executing one Step on an Intention
             if (intentionToExecute.recordStack.isNotEmpty()) {
-                // if (debugEnabled) println("[${agent.agentName}] RUN -> $scheduledIntention")
+                if (environment.debugEnabled) println("[${context.agentName}] RUN -> $intentionToExecute")
                 val sideEffects = runIntention(intentionToExecute)
                 sideEffects.forEach { sideEffect ->
                     when {

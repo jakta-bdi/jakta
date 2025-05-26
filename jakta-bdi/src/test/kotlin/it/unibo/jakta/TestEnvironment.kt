@@ -5,7 +5,6 @@ import it.unibo.jakta.actions.stdlib.Print
 import it.unibo.jakta.environment.BasicEnvironment
 import it.unibo.jakta.events.AchievementGoalInvocation
 import it.unibo.jakta.plans.ASPlan
-import it.unibo.jakta.plans.Plan
 import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.Var
 

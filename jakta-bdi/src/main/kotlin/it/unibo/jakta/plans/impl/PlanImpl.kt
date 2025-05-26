@@ -11,8 +11,8 @@ import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.unify.Unificator.Companion.mguWith
 
 internal data class PlanImpl(
-    override val trigger: ASEvent,
-    override val guard: Struct,
+    override var trigger: ASEvent,
+    override var guard: Struct,
     val tasks: List<ASAction>,
 ) : ASPlan {
 
@@ -28,17 +28,14 @@ internal data class PlanImpl(
             true -> {
                 val mgu = event.value mguWith this.trigger.value
                 val actualGuard = guard.apply(mgu).castToStruct()
-                val solvedGuard = beliefBase.select(actualGuard)
-                val actualGoals = tasks.map { // TODO("Does the new Task structure lose the concept of unification?")
-//                    it.copy(
-//                        it.value
-//                            .apply(mgu)
-//                            .apply(solvedGuard.substitution)
-//                            .castToStruct(),
-//                    )
+                val solvedGuard = beliefBase.getSolutionOf(actualGuard)
+                tasks.forEach {
+                    it.applySubstitution(mgu)
+                    it.applySubstitution(solvedGuard.substitution)
                 }
 
-                // PlanImpl(event.value, actualGuard, actualGoals)
+                this.trigger = event
+                this.guard = actualGuard
                 this
             }
             else -> this

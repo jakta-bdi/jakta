@@ -1,75 +1,78 @@
 package it.unibo.jakta
 
-import it.unibo.jakta.actions.AbstractExternalAction
-import it.unibo.jakta.actions.requests.ExternalRequest
-import it.unibo.jakta.beliefs.ASBeliefBase
-import it.unibo.jakta.beliefs.Belief
+import it.unibo.jakta.actions.ActionInvocationContext
+import it.unibo.jakta.actions.SideEffect
+import it.unibo.jakta.actions.effects.SendMessage
+import it.unibo.jakta.actions.stdlib.AbstractExecutionAction
+import it.unibo.jakta.actions.stdlib.Print
+import it.unibo.jakta.actions.stdlib.RemoveBelief
+import it.unibo.jakta.actions.stdlib.UpdateBelief
+import it.unibo.jakta.beliefs.ASBelief
+import it.unibo.jakta.beliefs.ASMutableBeliefBase
 import it.unibo.jakta.environment.BasicEnvironment
-import it.unibo.jakta.goals.Achieve
-import it.unibo.jakta.goals.Act
-import it.unibo.jakta.goals.ActInternally
-import it.unibo.jakta.goals.RemoveBelief
-import it.unibo.jakta.goals.UpdateBelief
+import it.unibo.jakta.events.AchievementGoalInvocation
 import it.unibo.jakta.messages.Message
+import it.unibo.jakta.messages.MessageType
 import it.unibo.jakta.messages.Tell
-import it.unibo.jakta.plans.Plan
-import it.unibo.jakta.plans.PlanLibrary
+import it.unibo.jakta.plans.ASPlan
+import it.unibo.tuprolog.core.Substitution
+import it.unibo.tuprolog.core.Term
+import it.unibo.tuprolog.core.Var
 
 fun main() {
-    val sendAction = object : AbstractExternalAction("send", 3) {
-        override suspend fun action(request: ExternalRequest) {
-            val receiver = request.arguments[0].castToAtom()
-            val type = request.arguments[1].castToAtom()
-            val message = request.arguments[2].castToStruct()
-            when (type.value) {
-                "tell" -> sendMessage(receiver.value, Message(request.sender, Tell, message))
-                "achieve" -> sendMessage(
-                    receiver.value,
-                    Message(request.sender, it.unibo.jakta.messages.Achieve, message),
-                )
-            }
+    data class Send(
+        var receiver: Term,
+        var type: MessageType,
+        var message: Term,
+    ) : AbstractExecutionAction("Send", 3) {
+        override fun applySubstitution(substitution: Substitution) = with(substitution) {
+            receiver = this.applyTo(receiver) ?: error("$receiver is not a valid Var and cannot be substituted.")
+            message = this.applyTo(message) ?: error("$message is not a valid Var and cannot be substituted.")
+        }
+
+        override fun invoke(p1: ActionInvocationContext): List<SideEffect> {
+            return listOf(
+                SendMessage(
+                    Message(p1.agentContext.agentName, type, message.castToStruct()),
+                    receiver.castToAtom().value,
+                ),
+            )
         }
     }
 
-    val env = BasicEnvironment.of(
-        externalActions = mapOf(
-            sendAction.signature.name to sendAction,
-        ),
-    )
-
-    val sendPlan = Plan.ofAchievementGoalInvocation(
+    val sendPlan = ASPlan.ofAchievementGoalInvocation(
         value = Jakta.parseStruct("sendMessageTo(Message, Receiver)"),
         goals = listOf(
-            ActInternally.of(Jakta.parseStruct("print(\"Sending \", Message)")),
-            Act.of(Jakta.parseStruct("send(Receiver, tell, Message)")),
+            Print(Jakta.parseStruct("print(\"Sending \", Message)")),
+            Send(Jakta.parseVar("Receiver"), Tell, Jakta.parseVar("Message")),
         ),
     )
 
     val pinger = ASAgent.of(
         name = "pinger",
-        beliefBase = ASBeliefBase.of(
-            Belief.fromSelfSource(Jakta.parseStruct("turn(me)")),
-            Belief.fromSelfSource(Jakta.parseStruct("other(ponger)")),
+        beliefBase = ASMutableBeliefBase.of(
+            ASBelief.fromSelfSource(Jakta.parseStruct("turn(me)")),
+            ASBelief.fromSelfSource(Jakta.parseStruct("other(ponger)")),
         ),
-        events = listOf(Event.ofAchievementGoalInvocation(Achieve.of(Jakta.parseStruct("send_ping")))),
+        events = listOf(AchievementGoalInvocation(Jakta.parseStruct("send_ping"))),
 
-        planLibrary = PlanLibrary.of(
-            Plan.ofAchievementGoalInvocation(
+        planLibrary = mutableListOf(
+            ASPlan.ofAchievementGoalInvocation(
                 value = Jakta.parseStruct("send_ping"),
                 guard = Jakta.parseStruct("turn(source(self), me) & other(source(self), Receiver)"),
                 goals = listOf(
-                    UpdateBelief.of(Belief.fromSelfSource(Jakta.parseStruct("turn(other)"))),
-                    Achieve.of(Jakta.parseStruct("sendMessageTo(ball, Receiver)")),
+                    UpdateBelief(ASBelief.fromSelfSource(Jakta.parseStruct("turn(other)"))),
+                    it.unibo.jakta.actions.stdlib.Achieve(Jakta.parseStruct("sendMessageTo(ball, Receiver)")),
                 ),
             ),
-            Plan.ofBeliefBaseAddition(
+            ASPlan.ofBeliefBaseAddition(
                 guard = Jakta.parseStruct("turn(source(self), other) & other(source(self), Sender)"),
-                belief = Belief.from(Jakta.parseStruct("ball(source(Sender))")),
+                belief = ASBelief.from(Jakta.parseStruct("ball(source(Sender))")),
                 goals = listOf(
-                    UpdateBelief.of(Belief.fromSelfSource(Jakta.parseStruct("turn(me)"))),
-                    ActInternally.of(Jakta.parseStruct("print(\"Received ball from\", Sender)")),
-                    RemoveBelief.of(Belief.from(Jakta.parseStruct("ball(source(Sender))"))),
-                    ActInternally.of(Jakta.parseStruct("print(\"Pinger hasDone\")")),
+                    UpdateBelief(ASBelief.fromSelfSource(Jakta.parseStruct("turn(me)"))),
+                    Print(Jakta.parseStruct("print(\"Received ball from\", Sender)")),
+                    RemoveBelief(ASBelief.from(Jakta.parseStruct("ball(source(Sender))"))),
+                    Print(Jakta.parseStruct("print(\"Pinger hasDone\")")),
                 ),
             ),
             sendPlan,
@@ -79,32 +82,38 @@ fun main() {
 
     val ponger = ASAgent.of(
         name = "ponger",
-        beliefBase = ASBeliefBase.of(
-            Belief.fromSelfSource(Jakta.parseStruct("turn(other)")),
-            Belief.fromSelfSource(Jakta.parseStruct("other(pinger)")),
+        beliefBase = ASMutableBeliefBase.of(
+            ASBelief.fromSelfSource(Jakta.parseStruct("turn(other)")),
+            ASBelief.fromSelfSource(Jakta.parseStruct("other(pinger)")),
         ),
-        planLibrary = PlanLibrary.of(
-            Plan.ofBeliefBaseAddition(
-                belief = Belief.from(Jakta.parseStruct("ball(source(Sender))")),
+        planLibrary = mutableListOf(
+            ASPlan.ofBeliefBaseAddition(
+                belief = ASBelief.from(Jakta.parseStruct("ball(source(Sender))")),
                 guard = Jakta.parseStruct("turn(source(self), other) & other(source(self), Sender)"),
                 goals = listOf(
-                    UpdateBelief.of(Belief.fromSelfSource(Jakta.parseStruct("turn(me)"))),
-                    RemoveBelief.of(Belief.from(Jakta.parseStruct("ball(source(Sender))"))),
-                    ActInternally.of(Jakta.parseStruct("print(\"Received ball from\", Sender)")),
-                    Achieve.of(Jakta.parseStruct("sendMessageTo(ball, Sender)")),
-                    Achieve.of(Jakta.parseStruct("handle_ping")),
+                    UpdateBelief(ASBelief.fromSelfSource(Jakta.parseStruct("turn(me)"))),
+                    RemoveBelief(ASBelief.from(Jakta.parseStruct("ball(source(Sender))"))),
+                    Print(Jakta.parseStruct("print(\"Received ball from\", Sender)")),
+                    it.unibo.jakta.actions.stdlib.Achieve(Jakta.parseStruct("sendMessageTo(ball, Sender)")),
+                    it.unibo.jakta.actions.stdlib.Achieve(Jakta.parseStruct("handle_ping")),
                 ),
             ),
-            Plan.ofAchievementGoalInvocation(
+            ASPlan.ofAchievementGoalInvocation(
                 value = Jakta.parseStruct("handle_ping"),
                 goals = listOf(
-                    UpdateBelief.of(Belief.fromSelfSource(Jakta.parseStruct("turn(other)"))),
-                    ActInternally.of(Jakta.parseStruct("print(\"Ponger has Done\")")),
+                    UpdateBelief(ASBelief.fromSelfSource(Jakta.parseStruct("turn(other)"))),
+                    Print(Jakta.parseStruct("print(\"Ponger has Done\")")),
                 ),
             ),
             sendPlan,
         ),
     )
 
-    Mas.of(it.unibo.jakta.executionstrategies.ExecutionStrategy.oneThreadPerAgent(), env, pinger, ponger).start()
+
+    Mas.of(
+        it.unibo.jakta.executionstrategies.ExecutionStrategy.oneThreadPerAgent(),
+        BasicEnvironment(debugEnabled = true),
+        pinger,
+        ponger,
+    ).start()
 }

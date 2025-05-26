@@ -21,11 +21,10 @@ import java.util.Queue
 import java.util.function.Consumer
 
 internal data class ASBeliefBaseImpl(
-    private var beliefs: ClauseMultiSet,
+    val beliefs: MutableList<ASBelief> = mutableListOf(),
     override var events: Queue<Event.BeliefEvent> = ArrayDeque(),
-) : ASMutableBeliefBase, ASBeliefBase {
-
-    constructor() : this(ClauseMultiSet.empty(Unificator.default))
+) : ASMutableBeliefBase, ASBeliefBase, Collection<Belief> by beliefs  {
+    //private var beliefs: ClauseMultiSet = ClauseMultiSet.empty(Unificator.default)
 
     override fun snapshot(): ASBeliefBase = this.copy()
 
@@ -42,7 +41,7 @@ internal data class ASBeliefBaseImpl(
 
     override fun getSolutionOf(query: Struct): Solution = Solver.prolog.newBuilder()
         .flag(Unknown, Unknown.FAIL)
-        .staticKb(operatorExtension + Theory.of(beliefs))
+        .staticKb(operatorExtension + Theory.of(beliefs.map { it.content }))
         .flag(TrackVariables) { ON }
         .build()
         .solveOnce(query)
@@ -50,9 +49,10 @@ internal data class ASBeliefBaseImpl(
     override fun getSolutionOf(belief: ASBelief): Solution = getSolutionOf(belief.content.head)
 
     override fun update(belief: ASBelief): Boolean {
-        val element = beliefs.find { it.head?.functor == belief.content.head.functor }
+        val element = beliefs.find { it.content.head.functor == belief.content.head.functor }
         return if (element != null) {
-            beliefs = ClauseMultiSet.of(Unificator.default, beliefs.filter { it != belief }).add(belief.content)
+            beliefs.remove(element) //TODO("Missing: Correct management of events")
+            beliefs.add(belief)
             true
         } else {
             false
@@ -85,22 +85,23 @@ internal data class ASBeliefBaseImpl(
         }
     }
 
-    override fun remove(belief: ASBelief): Boolean = when (beliefs.count(belief.content)) {
-        0L -> false
-        else -> true.also {
-            val match = beliefs.filterIsInstance<ASBelief>().first { it == belief }
+    override fun remove(belief: ASBelief): Boolean = when (getSolutionOf(belief).isNo) {
+        false -> true.also {
+            val match = beliefs.first { it == belief }
             // delta += BeliefBase.Update.Removal(match)
             events.add(BeliefBaseRemoval(match))
-            beliefs = ClauseMultiSet.of(Unificator.default, beliefs.filter { it != belief })
+            beliefs.remove(match)
         }
+        else -> false
     }
 
-    override fun add(belief: ASBelief): Boolean = when (beliefs.count(belief.content)) {
+    override fun add(belief: ASBelief): Boolean = when (getSolutionOf(belief).isNo) {
         // There's no Belief that unify the param inside the MultiSet, so it's inserted
-        0L -> true.also {
-            beliefs.add(belief.content)
+        true -> {
+            beliefs.add(belief)
             // delta += BeliefBase.Update.Addition(belief)
             events.add(BeliefBaseAddition(belief))
+            true
         }
         // There are Beliefs that unify the param, so the belief it's not inserted
         else -> false
@@ -108,23 +109,23 @@ internal data class ASBeliefBaseImpl(
 
     override val size = beliefs.size
 
+    //override fun count(): Int = beliefs.size
+
     override fun isEmpty() = beliefs.isEmpty()
 
     override fun iterator() = beliefs.filterIsInstance<Belief>().iterator()
 
-    override fun containsAll(elements: Collection<Belief>) = beliefs.containsAll(
-        elements.filterIsInstance<ASBelief>().map {
-            it.content
-        },
+    override fun containsAll(elements: Collection<Belief>): Boolean = beliefs.containsAll(
+        elements.filterIsInstance<ASBelief>()
     )
 
     override fun contains(element: Belief) = when (element) {
-        is ASBelief -> beliefs.contains(element.content)
+        is ASBelief -> beliefs.contains(element)
         else -> throw IllegalArgumentException("Expected an instance of [ASBelief], but got ")
     }
 
     override fun toString(): String =
-        beliefs.joinToString { ASBelief.from(it.castToRule()).toString() }
+        beliefs.joinToString { ASBelief.from(it.content.castToRule()).toString() }
 
     companion object {
         private val operatorExtension = Theory.of(

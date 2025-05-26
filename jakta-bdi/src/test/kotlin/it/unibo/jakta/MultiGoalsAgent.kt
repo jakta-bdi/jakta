@@ -1,43 +1,41 @@
 package it.unibo.jakta
 
+import it.unibo.jakta.actions.stdlib.Achieve
+import it.unibo.jakta.actions.stdlib.Print
 import it.unibo.jakta.environment.BasicEnvironment
 import it.unibo.jakta.events.AchievementGoalInvocation
-import it.unibo.jakta.goals.Achieve
-import it.unibo.jakta.goals.ActInternally
-import it.unibo.jakta.plans.Plan
-import it.unibo.jakta.plans.PlanLibrary
+import it.unibo.jakta.plans.ASPlan
 
 fun main() {
     val agent = ASAgent.of(
         name = "agent",
         events = listOf(
-            Event.of(AchievementGoalInvocation(Jakta.parseStruct("count(0, 10, up)"))),
-            Event.of(AchievementGoalInvocation(Jakta.parseStruct("count(100, 90, down)"))),
+            AchievementGoalInvocation(Jakta.parseStruct("count(0, 10, up)")),
+            AchievementGoalInvocation(Jakta.parseStruct("count(100, 90, down)")),
         ),
-        planLibrary = PlanLibrary.of(
-            Plan.ofAchievementGoalInvocation(
+        planLibrary = mutableListOf(
+            ASPlan.ofAchievementGoalInvocation(
                 value = Jakta.parseStruct("count(N, N, Dir)"),
-                goals = listOf(ActInternally.of(Jakta.parseStruct("print(\"End of\", Dir)"))),
+                goals = listOf(Print(Jakta.parseStruct("print(\"End of\", Dir)"))),
             ),
-            Plan.ofAchievementGoalInvocation(
+            ASPlan.ofAchievementGoalInvocation(
                 value = Jakta.parseStruct("count(N, M, up)"),
                 guard = Jakta.parseStruct("N < M & S is N + 1"),
                 goals = listOf(
-                    ActInternally.of(Jakta.parseStruct("print(\"Up\", N)")),
-                    Achieve.of(Jakta.parseStruct("count(S, M, up)")),
+                    Print(Jakta.parseStruct("print(\"Up\", N)")),
+                    Achieve(Jakta.parseStruct("count(S, M, up)")),
                 ),
             ),
-            Plan.ofAchievementGoalInvocation(
+            ASPlan.ofAchievementGoalInvocation(
                 value = Jakta.parseStruct("count(N, M, down)"),
                 guard = Jakta.parseStruct("N > M & S is N - 1"),
                 goals = listOf(
-                    ActInternally.of(Jakta.parseStruct("print(\"Down\", N)")),
-                    Achieve.of(Jakta.parseStruct("count(S, M, down)")),
+                    Print(Jakta.parseStruct("print(\"Down\", N)")),
+                    Achieve(Jakta.parseStruct("count(S, M, down)")),
                 ),
             ),
         ),
     )
 
-    val env = BasicEnvironment.of()
-    Mas.of(it.unibo.jakta.executionstrategies.ExecutionStrategy.oneThreadPerAgent(), env, agent).start()
+    Mas.of(it.unibo.jakta.executionstrategies.ExecutionStrategy.oneThreadPerAgent(), BasicEnvironment(), agent).start()
 }

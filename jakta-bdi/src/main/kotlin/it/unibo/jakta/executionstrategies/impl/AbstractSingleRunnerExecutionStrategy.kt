@@ -1,11 +1,9 @@
 package it.unibo.jakta.executionstrategies.impl
 
-import it.unibo.jakta.ASAgent
 import it.unibo.jakta.ASAgentLifecycle
-import it.unibo.jakta.environment.BasicEnvironment
 import it.unibo.jakta.executionstrategies.ExecutionStrategy
 
-abstract class AbstractSingleRunnerExecutionStrategy: ExecutionStrategy {
+abstract class AbstractSingleRunnerExecutionStrategy : ExecutionStrategy {
 
     protected val synchronizedAgents = SynchronizedAgents()
 
@@ -17,7 +15,7 @@ abstract class AbstractSingleRunnerExecutionStrategy: ExecutionStrategy {
         synchronizedAgents.removeAgent(agentName)
     }
 
-    class SynchronizedAgents{
+    class SynchronizedAgents {
         private var agents: List<ASAgentLifecycle> = listOf()
 
         @Synchronized

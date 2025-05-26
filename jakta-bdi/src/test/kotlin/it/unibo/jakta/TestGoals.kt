@@ -1,12 +1,9 @@
 package it.unibo.jakta
 
-import io.kotest.assertions.fail
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
 import it.unibo.jakta.actions.stdlib.Achieve
-import it.unibo.jakta.actions.stdlib.Print
 import it.unibo.jakta.beliefs.ASBelief
-import it.unibo.jakta.beliefs.ASBeliefBase
 import it.unibo.jakta.beliefs.ASMutableBeliefBase
 import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.Struct

@@ -1,6 +1,5 @@
 package it.unibo.jakta
 
-import io.kotest.assertions.retry
 import it.unibo.jakta.actions.ActionInvocationContext
 import it.unibo.jakta.actions.SideEffect
 import it.unibo.jakta.actions.stdlib.AbstractExecutionAction
@@ -11,19 +10,17 @@ import it.unibo.jakta.executionstrategies.setTimeDistribution
 import it.unibo.jakta.fsm.time.SimulatedTime
 import it.unibo.jakta.fsm.time.Time
 import it.unibo.jakta.plans.ASPlan
-import it.unibo.jakta.plans.Plan
 import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.Substitution
 
 fun main() {
-    class DummyAction: AbstractExecutionAction("DummyAction", 0) {
+    class DummyAction : AbstractExecutionAction("DummyAction", 0) {
         override fun applySubstitution(substitution: Substitution) = Unit
 
         override fun invoke(context: ActionInvocationContext): List<SideEffect> {
             println("time: ${context.invocationTimestamp}")
             return emptyList()
         }
-
     }
 
     val alice = ASAgent.of(

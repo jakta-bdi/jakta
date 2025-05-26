@@ -16,7 +16,10 @@ fun main() {
     class BroadcastAction(
         val type: String,
         val message: String,
-    ): AbstractExecutionAction("broadcast", 2){ //TODO("Not sure this will work, is the name considered? Otherwise i can consider to directly delete that")
+    ) : AbstractExecutionAction(
+        "broadcast",
+        2,
+    ) { // TODO("Not sure this will work, is the name considered? Otherwise i can consider to directly delete that")
         override fun applySubstitution(substitution: Substitution) {
             TODO("Can't this be generic?")
         }
@@ -32,7 +35,6 @@ fun main() {
             println("seending message $message of type $type")
             return emptyList()
         }
-
     }
 
     val env = BasicEnvironment()

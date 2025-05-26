@@ -1,10 +1,8 @@
 package it.unibo.jakta.actions.effects
 
 import it.unibo.jakta.ASAgent
-import it.unibo.jakta.Agent
 import it.unibo.jakta.actions.SideEffect
 import it.unibo.jakta.beliefs.ASBelief
-import it.unibo.jakta.events.ASEvent
 import it.unibo.jakta.events.Event
 import it.unibo.jakta.intentions.ASIntention
 import it.unibo.jakta.plans.ASPlan

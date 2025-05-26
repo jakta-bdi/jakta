@@ -8,9 +8,8 @@ import it.unibo.jakta.events.AchievementGoalInvocation
 import it.unibo.jakta.perception.Perception
 import it.unibo.jakta.plans.ASPlan
 import it.unibo.tuprolog.core.Substitution
-import java.util.ArrayDeque
 
-class PrintThread: AbstractExecutionAction("PrintThread", 0) {
+class PrintThread : AbstractExecutionAction("PrintThread", 0) {
     override fun applySubstitution(substitution: Substitution) = Unit
     override fun invoke(context: ActionInvocationContext): List<SideEffect> {
         println("Thread: ${Thread.currentThread().name}")
@@ -18,18 +17,16 @@ class PrintThread: AbstractExecutionAction("PrintThread", 0) {
     }
 }
 
-
 fun agentGenerator(name: String) = ASAgent.of(
     name = name,
-    events = ArrayDeque(
-        listOf(AchievementGoalInvocation(Jakta.parseStruct("my_thread"))),
+    events = listOf(AchievementGoalInvocation(Jakta.parseStruct("my_thread"))),
+    planLibrary = mutableListOf(
+        ASPlan.ofAchievementGoalInvocation(
+            value = Jakta.parseStruct("my_thread"),
+            goals = listOf(PrintThread()),
+        ),
     ),
-    planLibrary = mutableListOf(ASPlan.ofAchievementGoalInvocation(
-        value = Jakta.parseStruct("my_thread"),
-        goals = listOf(PrintThread()),
-    )),
 )
-
 
 fun main() {
     val environment = BasicEnvironment(true, Perception.empty())

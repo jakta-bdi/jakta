@@ -23,7 +23,6 @@ abstract class AbstractAction(
         result = Substitution.failed()
     }
 
-
     abstract fun postExec(intention: ASIntention)
 
     suspend fun execute(argument: ActionRequest): ActionResponse {

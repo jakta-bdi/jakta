@@ -2,15 +2,7 @@ package it.unibo.jakta.impl
 
 import it.unibo.jakta.ASAgent
 import it.unibo.jakta.Mas
-import it.unibo.jakta.actions.effects.AddData
-import it.unibo.jakta.actions.effects.BroadcastMessage
 import it.unibo.jakta.actions.effects.EnvironmentChange
-import it.unibo.jakta.actions.effects.PopMessage
-import it.unibo.jakta.actions.effects.RemoveAgent
-import it.unibo.jakta.actions.effects.RemoveData
-import it.unibo.jakta.actions.effects.SendMessage
-import it.unibo.jakta.actions.effects.SpawnAgent
-import it.unibo.jakta.actions.effects.UpdateData
 import it.unibo.jakta.environment.BasicEnvironment
 import it.unibo.jakta.executionstrategies.ExecutionStrategy
 
