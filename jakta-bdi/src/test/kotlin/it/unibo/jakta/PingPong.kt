@@ -17,18 +17,18 @@ import it.unibo.jakta.messages.Tell
 import it.unibo.jakta.plans.ASPlan
 import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.core.Term
-import it.unibo.tuprolog.core.Var
 
 fun main() {
     data class Send(
         var receiver: Term,
         var type: MessageType,
         var message: Term,
-    ) : AbstractExecutionAction("Send", 3) {
-        override fun applySubstitution(substitution: Substitution) = with(substitution) {
-            receiver = this.applyTo(receiver) ?: error("$receiver is not a valid Var and cannot be substituted.")
-            message = this.applyTo(message) ?: error("$message is not a valid Var and cannot be substituted.")
-        }
+    ) : AbstractExecutionAction() {
+        override fun applySubstitution(substitution: Substitution) = Send(
+            receiver = substitution.applyTo(receiver) ?: error("$receiver cannot be substituted."),
+            type = this.type,
+            message = substitution.applyTo(message) ?: error("$message cannot be substituted."),
+        )
 
         override fun invoke(p1: ActionInvocationContext): List<SideEffect> {
             return listOf(
@@ -109,10 +109,9 @@ fun main() {
         ),
     )
 
-
     Mas.of(
         it.unibo.jakta.executionstrategies.ExecutionStrategy.oneThreadPerAgent(),
-        BasicEnvironment(debugEnabled = true),
+        BasicEnvironment(debugEnabled = false),
         pinger,
         ponger,
     ).start()

@@ -5,7 +5,7 @@ import it.unibo.jakta.fsm.Activity
 
 fun interface ActivitySideEffect : SideEffect, (Activity.Controller) -> Unit
 
-class Sleep(val millis: Long) : ActivitySideEffect {
+data class Sleep(val millis: Long) : ActivitySideEffect {
     override fun invoke(controller: Activity.Controller) {
         controller.sleep(millis)
     }

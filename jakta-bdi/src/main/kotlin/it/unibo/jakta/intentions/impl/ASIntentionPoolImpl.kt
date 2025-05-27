@@ -10,7 +10,10 @@ internal class ASIntentionPoolImpl(
 ) : ASIntentionPool, ASMutableIntentionPool, MutableMap<IntentionID, ASIntention> by from {
 
     override fun updateIntention(intention: ASIntention): Boolean {
-        this.put(intention.id, intention) ?: return false
+        when (intention.recordStack.isEmpty()) {
+            true -> this.remove(intention.id).also{println(this)}
+            else -> this.put(intention.id, intention) ?: return false
+        }
         return true
     }
 

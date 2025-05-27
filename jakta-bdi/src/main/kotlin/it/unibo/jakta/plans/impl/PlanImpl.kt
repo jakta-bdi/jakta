@@ -11,8 +11,8 @@ import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.unify.Unificator.Companion.mguWith
 
 internal data class PlanImpl(
-    override var trigger: ASEvent,
-    override var guard: Struct,
+    override val trigger: ASEvent,
+    override val guard: Struct,
     val tasks: List<ASAction>,
 ) : ASPlan {
 
@@ -29,14 +29,13 @@ internal data class PlanImpl(
                 val mgu = event.value mguWith this.trigger.value
                 val actualGuard = guard.apply(mgu).castToStruct()
                 val solvedGuard = beliefBase.getSolutionOf(actualGuard)
-                tasks.forEach {
-                    it.applySubstitution(mgu)
-                    it.applySubstitution(solvedGuard.substitution)
-                }
-
-                this.trigger = event
-                this.guard = actualGuard
-                this
+                PlanImpl(
+                    trigger = event,
+                    guard = actualGuard,
+                    tasks = tasks.map {
+                        it.applySubstitution(mgu).applySubstitution(solvedGuard.substitution)
+                    }
+                ).also { println(it) }
             }
             else -> this
         }

@@ -7,24 +7,22 @@ import it.unibo.jakta.beliefs.ASMutableBeliefBase
 import it.unibo.jakta.beliefs.Belief
 import it.unibo.jakta.events.BeliefBaseAddition
 import it.unibo.jakta.events.BeliefBaseRemoval
+import it.unibo.jakta.events.BeliefBaseUpdate
 import it.unibo.jakta.events.Event
-import it.unibo.tuprolog.collections.ClauseMultiSet
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.solve.Solution
 import it.unibo.tuprolog.solve.Solver
 import it.unibo.tuprolog.solve.flags.TrackVariables
 import it.unibo.tuprolog.solve.flags.Unknown
 import it.unibo.tuprolog.theory.Theory
-import it.unibo.tuprolog.unify.Unificator
 import java.util.ArrayDeque
 import java.util.Queue
-import java.util.function.Consumer
 
 internal data class ASBeliefBaseImpl(
     val beliefs: MutableList<ASBelief> = mutableListOf(),
     override var events: Queue<Event.BeliefEvent> = ArrayDeque(),
-) : ASMutableBeliefBase, ASBeliefBase, Collection<Belief> by beliefs  {
-    //private var beliefs: ClauseMultiSet = ClauseMultiSet.empty(Unificator.default)
+) : ASMutableBeliefBase, ASBeliefBase, Collection<Belief> by beliefs {
+    // private var beliefs: ClauseMultiSet = ClauseMultiSet.empty(Unificator.default)
 
     override fun snapshot(): ASBeliefBase = this.copy()
 
@@ -51,8 +49,9 @@ internal data class ASBeliefBaseImpl(
     override fun update(belief: ASBelief): Boolean {
         val element = beliefs.find { it.content.head.functor == belief.content.head.functor }
         return if (element != null) {
-            beliefs.remove(element) //TODO("Missing: Correct management of events")
+            beliefs.remove(element)
             beliefs.add(belief)
+            events.add(BeliefBaseUpdate(belief, element))
             true
         } else {
             false
@@ -60,35 +59,26 @@ internal data class ASBeliefBaseImpl(
     }
 
     override fun update(beliefBase: ASBeliefBase): Boolean {
-        when (this == beliefBase) {
+        when (beliefs == beliefBase) {
             false -> {
                 // 1. each literal l in p not currently in b is added to b
-                this.addAll(beliefBase)
+                beliefs.addAll(beliefBase.filterIsInstance<ASBelief>())
 
                 // 2. each literal l in b no longer in p is deleted from b
-                this.forEachASBelief { belief: ASBelief ->
+                beliefs.forEach { belief: ASBelief ->
                     if (!beliefBase.contains(belief) && belief.content.head.args.first() == ASBelief.SOURCE_PERCEPT) {
-                        this.remove(belief)
+                        remove(belief)
                     }
                 }
                 return true
-            }
+            } // TODO("Can be done better. Different lists for percepts and self sourced beliefs; update events are not curr. generated)
             else -> return false
-        }
-    }
-
-    private fun forEachASBelief(action: Consumer<ASBelief>) {
-        this.forEach {
-            when {
-                it is ASBelief -> action.accept(it)
-            }
         }
     }
 
     override fun remove(belief: ASBelief): Boolean = when (getSolutionOf(belief).isNo) {
         false -> true.also {
             val match = beliefs.first { it == belief }
-            // delta += BeliefBase.Update.Removal(match)
             events.add(BeliefBaseRemoval(match))
             beliefs.remove(match)
         }
@@ -99,7 +89,6 @@ internal data class ASBeliefBaseImpl(
         // There's no Belief that unify the param inside the MultiSet, so it's inserted
         true -> {
             beliefs.add(belief)
-            // delta += BeliefBase.Update.Addition(belief)
             events.add(BeliefBaseAddition(belief))
             true
         }
@@ -107,22 +96,22 @@ internal data class ASBeliefBaseImpl(
         else -> false
     }
 
-    override val size = beliefs.size
+    // override val size = beliefs.size
 
-    //override fun count(): Int = beliefs.size
+    // override fun count(): Int = beliefs.size
 
-    override fun isEmpty() = beliefs.isEmpty()
+    // override fun isEmpty() = beliefs.isEmpty()
 
-    override fun iterator() = beliefs.filterIsInstance<Belief>().iterator()
+    // override fun iterator() = beliefs.filterIsInstance<Belief>().iterator()
 
-    override fun containsAll(elements: Collection<Belief>): Boolean = beliefs.containsAll(
-        elements.filterIsInstance<ASBelief>()
-    )
+    // override fun containsAll(elements: Collection<Belief>): Boolean = beliefs.containsAll(
+    //    elements.filterIsInstance<ASBelief>()
+    // )
 
-    override fun contains(element: Belief) = when (element) {
-        is ASBelief -> beliefs.contains(element)
-        else -> throw IllegalArgumentException("Expected an instance of [ASBelief], but got ")
-    }
+    // override fun contains(element: Belief) = when (element) {
+    //    is ASBelief -> beliefs.contains(element)
+    //    else -> throw IllegalArgumentException("Expected an instance of [ASBelief], but got ")
+    // }
 
     override fun toString(): String =
         beliefs.joinToString { ASBelief.from(it.content.castToRule()).toString() }

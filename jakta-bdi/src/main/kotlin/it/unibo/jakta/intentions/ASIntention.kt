@@ -24,7 +24,7 @@ interface ASIntention {
      * then the whole activation record is removed from the records stack.
      * @return the [Task] removed.
      */
-    fun pop(): ASAction?
+    fun pop(): ASIntention
 
     /**
      * Inserts at the top of the records stack the new [ActivationRecord].
@@ -33,7 +33,9 @@ interface ASIntention {
      */
     fun push(activationRecord: ASActivationRecord): Boolean
 
-    fun applySubstitution(substitution: Substitution)
+    fun nextActionToExecute(): ASAction?
+
+    fun applySubstitution(substitution: Substitution): ASIntention
 
     fun copy(
         recordStack: MutableList<ASActivationRecord> = this.recordStack.toMutableList(),

@@ -77,11 +77,7 @@ interface ASMutableBeliefBase : ASBeliefBase {
          * @param beliefs: the [Iterable] of [Belief] the [ASBeliefBase] will be composed of
          * @return the new [ASBeliefBase]
          */
-        fun of(beliefs: Iterable<ASBelief>): ASMutableBeliefBase {
-            val bb = empty()
-            beliefs.forEach { bb.add(it) }
-            return bb
-        }
+        fun of(beliefs: Iterable<ASBelief>): ASMutableBeliefBase = ASBeliefBaseImpl(beliefs.toMutableList())
 
         fun of(vararg beliefs: ASBelief): ASMutableBeliefBase = of(beliefs.asList())
     }

@@ -1,7 +1,7 @@
 package it.unibo.jakta
 
+import it.unibo.jakta.actions.ASAction
 import it.unibo.jakta.actions.ActionInvocationContext
-import it.unibo.jakta.actions.SideEffect
 import it.unibo.jakta.actions.stdlib.AbstractExecutionAction
 import it.unibo.jakta.actions.stdlib.Print
 import it.unibo.jakta.beliefs.ASBelief
@@ -16,15 +16,12 @@ fun main() {
     class BroadcastAction(
         val type: String,
         val message: String,
-    ) : AbstractExecutionAction(
-        "broadcast",
-        2,
-    ) { // TODO("Not sure this will work, is the name considered? Otherwise i can consider to directly delete that")
-        override fun applySubstitution(substitution: Substitution) {
+    ) : AbstractExecutionAction.WithoutSideEffects() {
+        override fun applySubstitution(substitution: Substitution): ASAction {
             TODO("Can't this be generic?")
         }
 
-        override fun invoke(p1: ActionInvocationContext): List<SideEffect> {
+        override fun execute(context: ActionInvocationContext) {
 //            when (type) {
 //                "tell" -> broadcastMessage(Message(request.sender, Tell, message))
 //                "achieve" -> broadcastMessage(
@@ -33,7 +30,6 @@ fun main() {
 //            } // TODO("Missing Communication Capabilities")
 
             println("seending message $message of type $type")
-            return emptyList()
         }
     }
 

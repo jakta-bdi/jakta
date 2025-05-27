@@ -22,56 +22,52 @@ import it.unibo.tuprolog.core.Var
 data class IncrementAction(
     val first: Int,
     val second: Var,
-) : AbstractExecutionAction("IncrementAction", 2) {
-    override fun applySubstitution(substitution: Substitution) = Unit
+) : AbstractExecutionAction.WithoutSideEffects() {
+    override fun applySubstitution(substitution: Substitution) = IncrementAction(first, second)
 
-    override fun invoke(p1: ActionInvocationContext): List<SideEffect> {
+    override fun execute(context: ActionInvocationContext) {
         val computation = Atom.of((first + 1).toString())
         result = Substitution.of(second to computation)
-        return emptyList()
     }
 }
 
 data class AddBeliefAction(
-    var belief: ASBelief,
-) : AbstractExecutionAction("AddBelief", 1) {
-    override fun applySubstitution(substitution: Substitution) = Unit
+    val belief: ASBelief,
+) : AbstractExecutionAction() {
+    override fun applySubstitution(substitution: Substitution) = AddBeliefAction(belief)
 
-    override fun invoke(p1: ActionInvocationContext): List<SideEffect> {
-        return listOf(BeliefChange.BeliefAddition(belief))
-    }
+    override fun invoke(context: ActionInvocationContext): List<SideEffect> =
+        listOf(BeliefChange.BeliefAddition(belief))
 }
 
 data class TestAction(
     var first: Term,
     var second: Term,
-) : AbstractExecutionAction("TestAction", 2) {
+) : AbstractExecutionAction.WithoutSideEffects() {
 
-    override fun applySubstitution(substitution: Substitution) = with(substitution) {
-        first = this.applyTo(first) ?: error("first parameter cannot be substituted.")
-        second = this.applyTo(second) ?: error("second parameter cannot be substituted.")
-    }
+    override fun applySubstitution(substitution: Substitution) = TestAction(
+        first = substitution.applyTo(first) ?: error("first parameter cannot be substituted."),
+        second = substitution.applyTo(second) ?: error("second parameter cannot be substituted."),
+    )
 
-    override fun invoke(p1: ActionInvocationContext): List<SideEffect> {
+    override fun execute(context: ActionInvocationContext) {
         first shouldBe second
-        return emptyList()
     }
 }
 
-object FailTestAction : AbstractExecutionAction("FailTestAction", 0) {
-    override fun applySubstitution(substitution: Substitution) = Unit
+object FailTestAction : AbstractExecutionAction.WithoutSideEffects() {
+    override fun applySubstitution(substitution: Substitution) = FailTestAction
 
-    override fun invoke(p1: ActionInvocationContext): List<SideEffect> {
+    override fun execute(context: ActionInvocationContext) {
         fail("This action should not be executed by the agent")
     }
 }
 
-object PassTestAction : AbstractExecutionAction("PassTestAction", 0) {
-    override fun applySubstitution(substitution: Substitution) = Unit
+object PassTestAction : AbstractExecutionAction.WithoutSideEffects() {
+    override fun applySubstitution(substitution: Substitution) = this
 
-    override fun invoke(p1: ActionInvocationContext): List<SideEffect> {
+    override fun execute(context: ActionInvocationContext) {
         println("This should be shown")
-        return emptyList()
     }
 }
 

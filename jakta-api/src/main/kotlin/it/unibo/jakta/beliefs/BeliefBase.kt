@@ -9,5 +9,5 @@ interface BeliefBase<in Query : Any> : Collection<Belief>, EventGenerator<Event.
     /**
      * Performs unification between [B] and values in this [BeliefBase]
      */
-    fun select(query: Query): List<Belief> // SelfType
+    fun select(query: Query): List<Belief>
 }

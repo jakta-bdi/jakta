@@ -160,7 +160,6 @@ internal class AgentImpl(
 
                 println("applicable plans: $applicablePlans")
 
-
                 // STEP8: Selecting one Applicable Plan.
                 val selectedPlan = selectApplicablePlan(applicablePlans)
 

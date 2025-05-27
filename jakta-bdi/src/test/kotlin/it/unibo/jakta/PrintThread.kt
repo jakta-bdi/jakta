@@ -1,7 +1,6 @@
 package it.unibo.jakta
 
 import it.unibo.jakta.actions.ActionInvocationContext
-import it.unibo.jakta.actions.SideEffect
 import it.unibo.jakta.actions.stdlib.AbstractExecutionAction
 import it.unibo.jakta.environment.BasicEnvironment
 import it.unibo.jakta.events.AchievementGoalInvocation
@@ -9,11 +8,10 @@ import it.unibo.jakta.perception.Perception
 import it.unibo.jakta.plans.ASPlan
 import it.unibo.tuprolog.core.Substitution
 
-class PrintThread : AbstractExecutionAction("PrintThread", 0) {
-    override fun applySubstitution(substitution: Substitution) = Unit
-    override fun invoke(context: ActionInvocationContext): List<SideEffect> {
-        println("Thread: ${Thread.currentThread().name}")
-        return emptyList()
+object PrintThread : AbstractExecutionAction.WithoutSideEffects() {
+    override fun applySubstitution(substitution: Substitution) = this
+    override fun execute(context: ActionInvocationContext) {
+        println("[${context.agentContext.agentName}]Thread: ${Thread.currentThread().name}")
     }
 }
 
@@ -23,13 +21,13 @@ fun agentGenerator(name: String) = ASAgent.of(
     planLibrary = mutableListOf(
         ASPlan.ofAchievementGoalInvocation(
             value = Jakta.parseStruct("my_thread"),
-            goals = listOf(PrintThread()),
+            goals = listOf(PrintThread),
         ),
     ),
 )
 
 fun main() {
-    val environment = BasicEnvironment(true, Perception.empty())
+    val environment = BasicEnvironment(false, Perception.empty())
 
     Mas.of(
         it.unibo.jakta.executionstrategies.ExecutionStrategy.oneThreadPerAgent(),

@@ -6,10 +6,16 @@ import it.unibo.tuprolog.core.Substitution
 
 data class ASActivationRecord(
     val generatingPlan: ASPlan,
-    var taskQueue: List<ASAction>,
+    val taskQueue: List<ASAction>,
 ) {
     fun isLastActionToExecute(): Boolean = taskQueue.size == 1
-    fun pop(): ASAction? = taskQueue.firstOrNull()?.also { taskQueue -= it }
-    fun applySubstitution(substitution: Substitution) =
-        taskQueue.forEach { it.applySubstitution(substitution) }
+    fun nextActionToExecute(): ASAction? = taskQueue.firstOrNull()
+    fun pop(): ASActivationRecord = ASActivationRecord(generatingPlan, when (nextActionToExecute() != null) {
+        true -> taskQueue - nextActionToExecute()!!
+        false -> taskQueue
+    })
+    fun applySubstitution(substitution: Substitution) = ASActivationRecord(
+        generatingPlan,
+        taskQueue.map { it.applySubstitution(substitution) }
+    )
 }

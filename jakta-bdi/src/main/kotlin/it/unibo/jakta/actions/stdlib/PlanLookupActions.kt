@@ -1,8 +1,7 @@
 package it.unibo.jakta.actions.stdlib
 
-import it.unibo.jakta.actions.AbstractAction
+import it.unibo.jakta.actions.ASAction
 import it.unibo.jakta.actions.ActionInvocationContext
-import it.unibo.jakta.actions.SideEffect
 import it.unibo.jakta.actions.effects.EventChange
 import it.unibo.jakta.actions.effects.IntentionChange
 import it.unibo.jakta.beliefs.ASBeliefBase
@@ -14,37 +13,32 @@ import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.solve.Solution
 
-abstract class AbstractPlanLookupActions(
-    name: String,
-    var struct: Struct,
-) : AbstractAction(name, 1) {
-    override fun applySubstitution(substitution: Substitution) {
-        struct = struct.apply(substitution).castToStruct()
-    }
-}
-
 /**
  * [Task.PlanExecution] which looks for a Plan with [AchievementGoalInvocation] trigger.
  */
-class Achieve(
+data class Achieve(
     val planTrigger: Struct,
-) : AbstractPlanLookupActions("Achieve", planTrigger) {
+) : AbstractExecutionAction.WithoutSideEffects() {
     override fun postExec(intention: ASIntention) {
         effects.add(EventChange.EventAddition(AchievementGoalInvocation(planTrigger, intention)))
         effects.add(IntentionChange.IntentionRemoval(intention)) // It gets added back in the queue after plan execution
     }
 
-    override fun invoke(context: ActionInvocationContext): List<SideEffect> = emptyList()
+    override fun applySubstitution(substitution: Substitution): ASAction =
+        Achieve(planTrigger.apply(substitution).castToStruct())
+
+    override fun execute(context: ActionInvocationContext) = Unit
 }
 
 /**
  * [Task.PlanExecution] which looks for a Plan with [TestGoalInvocation] trigger.
  */
-class Test(
+data class Test(
     val planTrigger: Struct,
-) : AbstractPlanLookupActions("Test", planTrigger) {
+) : AbstractExecutionAction.WithoutSideEffects() {
 
-    lateinit var solution: Solution
+    private var solution: Solution = Solution.no(planTrigger)
+
     override fun postExec(intention: ASIntention) {
         effects.add(
             EventChange.EventAddition(
@@ -59,12 +53,14 @@ class Test(
         }
     }
 
-    override fun invoke(context: ActionInvocationContext): List<SideEffect> {
+    override fun applySubstitution(substitution: Substitution): ASAction =
+        Test(planTrigger.apply(substitution).castToStruct())
+
+    override fun execute(context: ActionInvocationContext) {
         solution = when (context.agentContext.beliefBase) {
             is ASBeliefBase -> (context.agentContext.beliefBase as ASBeliefBase).getSolutionOf(planTrigger)
             else -> Solution.no(planTrigger)
         }
-        return emptyList()
     }
 }
 
@@ -72,14 +68,17 @@ class Test(
  * [Task.PlanExecution] which looks for a Plan with [AchievementGoalInvocation] trigger
  * and executes it in another intention.
  */
-class Spawn(
+data class Spawn(
     val planTrigger: Struct,
-) : AbstractPlanLookupActions("Spawn", planTrigger) {
+) : AbstractExecutionAction.WithoutSideEffects() {
 
     override fun postExec(intention: ASIntention) {
         effects.add(EventChange.EventAddition(AchievementGoalInvocation(planTrigger)))
         intention.pop()
     }
 
-    override fun invoke(context: ActionInvocationContext): List<SideEffect> = emptyList()
+    override fun applySubstitution(substitution: Substitution): ASAction =
+        Spawn(planTrigger.apply(substitution).castToStruct())
+
+    override fun execute(context: ActionInvocationContext) = Unit
 }

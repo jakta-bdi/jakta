@@ -26,13 +26,10 @@ class TestBeliefs : DescribeSpec({
             emptybb.count() shouldBe 0
             emptybb.add(chocolateDesire) shouldBe true
             emptybb.events.size shouldBe 1
-            println(emptybb.events.first())
             emptybb.events.first().shouldBeInstanceOf<BeliefBaseAddition>()
-            println(emptybb.events)
-            println(emptybb.size)
-            println(emptybb.count())
             emptybb.isEmpty() shouldBe false
             emptybb.count() shouldBe 1
+            emptybb.size shouldBe 1
         }
 
         it("Should not be added to a Belief Base two times") {
@@ -62,11 +59,10 @@ class TestBeliefs : DescribeSpec({
 
             bb.remove(genericNeed)
             bb.count() shouldBe 2
-
             bb.remove(strawberryDesire)
-            bb.events.size shouldBe 1
-            shouldBeInstanceOf<BeliefBaseRemoval> {
-                bb.events.first()
+            bb.events.size shouldBe 2
+            bb.events.forEach {
+                it.shouldBeInstanceOf<BeliefBaseRemoval>()
             }
             bb.count() shouldBe 1
             bb.first() shouldBe chocolateDesire

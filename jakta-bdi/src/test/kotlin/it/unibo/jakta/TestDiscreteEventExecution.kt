@@ -1,7 +1,6 @@
 package it.unibo.jakta
 
 import it.unibo.jakta.actions.ActionInvocationContext
-import it.unibo.jakta.actions.SideEffect
 import it.unibo.jakta.actions.stdlib.AbstractExecutionAction
 import it.unibo.jakta.actions.stdlib.Achieve
 import it.unibo.jakta.environment.BasicEnvironment
@@ -13,23 +12,22 @@ import it.unibo.jakta.plans.ASPlan
 import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.Substitution
 
-fun main() {
-    class DummyAction : AbstractExecutionAction("DummyAction", 0) {
-        override fun applySubstitution(substitution: Substitution) = Unit
+object TestDiscreteEventExecution : AbstractExecutionAction.WithoutSideEffects() {
+    override fun applySubstitution(substitution: Substitution) = this
 
-        override fun invoke(context: ActionInvocationContext): List<SideEffect> {
-            println("time: ${context.invocationTimestamp}")
-            return emptyList()
-        }
+    override fun execute(context: ActionInvocationContext) {
+        println("time: ${context.invocationTimestamp}")
     }
+}
 
+fun main() {
     val alice = ASAgent.of(
         events = listOf(AchievementGoalInvocation(Atom.of("time"))),
         planLibrary = mutableListOf(
             ASPlan.ofAchievementGoalInvocation(
                 value = Jakta.parseStruct("time"),
                 goals = listOf(
-                    DummyAction(),
+                    TestDiscreteEventExecution,
                     Achieve(Jakta.parseStruct("time")),
                 ),
             ),

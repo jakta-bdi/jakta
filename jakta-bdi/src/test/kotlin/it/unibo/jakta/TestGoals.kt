@@ -2,6 +2,7 @@ package it.unibo.jakta
 
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import it.unibo.jakta.actions.stdlib.Achieve
 import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.beliefs.ASMutableBeliefBase
@@ -22,8 +23,10 @@ class TestGoals : DescribeSpec({
             val goal = Achieve(belief.content)
             goal.planTrigger shouldBe belief.content
 
-            goal.applySubstitution(substitution)
-            goal shouldBe strawberryDesire.content
+            val substitutedGoal = goal.applySubstitution(substitution)
+            goal.planTrigger shouldBe belief.content
+            substitutedGoal.shouldBeInstanceOf<Achieve>()
+            substitutedGoal.planTrigger shouldBe strawberryDesire.content
         }
         it("should perform copy and keep the actual PrologGoal type") {
 //            val goal = Print(strawberryDesire.content)

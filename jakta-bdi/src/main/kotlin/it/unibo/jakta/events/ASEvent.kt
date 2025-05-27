@@ -75,25 +75,24 @@ data class TestGoalFailure(
     override val intention: ASIntention? = null,
 ) : ASEvent, Event.AgentEvent
 
-// /**
-// * Generates an [Event] with a [BeliefBaseTrigger.Update] trigger.
-// * @param trigger the [BeliefBaseTrigger.Addition] that triggered this Event.
-// * @param intention if the event is internal, this parameter specifies the intention id where the event belongs.
-// * If the event is external, this value is set to null. It's default value is null.
-// * @return a new instance of [Event]
-// */
-// data class BeliefBaseUpdate(
-//    override val trigger: BeliefBaseTrigger.Update,
-//    override val intention: Intention? = null
-// ): ASEvent {
-//    constructor(belief: ASBelief, intention: Intention? = null) : this(
-//        BeliefBaseTrigger.Update(belief),
-//        intention
-//    )
-// }
-// TODO("REDESIGN")
-// This type of event may need more than one belief to store, the belief that was previously stored in
-// the BB and the new instance for that belief.
+/**
+ * Generates an [Event] with a [BeliefBaseTrigger.Update] trigger.
+ * @param trigger the [BeliefBaseTrigger.Addition] that triggered this Event.
+ * @param intention if the event is internal, this parameter specifies the intention id where the event belongs.
+ * If the event is external, this value is set to null. It's default value is null.
+ * @return a new instance of [Event]
+ */
+data class BeliefBaseUpdate(
+    override val value: Struct,
+    val oldBelief: ASBelief,
+    override val intention: ASIntention? = null,
+) : ASEvent, Event.BeliefEvent {
+    constructor(newBelief: ASBelief, oldBelief: ASBelief, intention: ASIntention? = null) : this(
+        newBelief.content.head,
+        oldBelief,
+        intention,
+    )
+}
 
 /**
  * Generates an [Event] triggered by a BeliefBase addition.

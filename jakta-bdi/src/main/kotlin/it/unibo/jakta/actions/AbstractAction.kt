@@ -5,12 +5,8 @@ import it.unibo.jakta.actions.requests.ActionRequest
 import it.unibo.jakta.actions.responses.ActionResponse
 import it.unibo.jakta.intentions.ASIntention
 import it.unibo.tuprolog.core.Substitution
-import it.unibo.tuprolog.solve.Signature
 
-abstract class AbstractAction(
-    override val signature: Signature,
-) : ASAction {
-    constructor(name: String, arity: Int) : this(Signature(name, arity))
+abstract class AbstractAction : ASAction {
 
     protected var result: Substitution = Substitution.empty()
     protected val effects: MutableList<SideEffect> = mutableListOf()

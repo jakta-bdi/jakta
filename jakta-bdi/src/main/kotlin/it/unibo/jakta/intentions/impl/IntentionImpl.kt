@@ -12,13 +12,28 @@ internal class IntentionImpl(
     override val id: IntentionID = IntentionID(),
 ) : ASIntention {
 
-    override fun pop(): ASAction? {
+    override fun nextActionToExecute(): ASAction? {
         val record = recordStack.firstOrNull() ?: return null
         return if (record.isLastActionToExecute()) {
-            recordStack = recordStack - record
             return null
         } else {
-            record.pop()
+            record.nextActionToExecute()
+        }
+    }
+
+    override fun pop(): ASIntention {
+        val record = recordStack.firstOrNull() ?: return this
+        return if (record.isLastActionToExecute()) {
+            IntentionImpl(
+                recordStack - record,
+                isSuspended,
+                id)
+        } else {
+            IntentionImpl(
+                listOf(record.pop()) + recordStack - record,
+                isSuspended,
+                id
+            )
         }
     }
 
@@ -28,7 +43,11 @@ internal class IntentionImpl(
     }
 
     override fun applySubstitution(substitution: Substitution) =
-        recordStack.first().applySubstitution(substitution)
+        IntentionImpl(
+            recordStack.apply { recordStack.first().applySubstitution(substitution) },
+            isSuspended,
+            id
+        )
 
     override fun toString(): String = "$id { \n ${recordStack.joinToString(separator = "\n", prefix = "\t")} \n }"
 }

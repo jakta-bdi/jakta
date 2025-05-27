@@ -1,9 +1,10 @@
 package it.unibo.jakta
 
+import io.kotest.assertions.fail
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import it.unibo.jakta.actions.ActionInvocationContext
-import it.unibo.jakta.actions.SideEffect
 import it.unibo.jakta.actions.requests.ActionRequest
 import it.unibo.jakta.actions.stdlib.AbstractExecutionAction
 import it.unibo.jakta.actions.stdlib.Print
@@ -18,7 +19,6 @@ import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.core.Term
 import it.unibo.tuprolog.core.Truth
-import it.unibo.tuprolog.core.Var
 import org.gciatto.kt.math.BigInteger
 import java.util.*
 
@@ -77,22 +77,23 @@ class TestPlans : DescribeSpec({
             p.isApplicable(event, ASMutableBeliefBase.of()) shouldBe true
             val ap = p.applicablePlan(event, ASMutableBeliefBase.of())
             ap.trigger.value shouldBe event.value
-            ap.apply(event).first() shouldBe action
+            ap.apply(event).first().shouldBeInstanceOf<Print>()
         }
 
         it("should run if and only if the context is valid, and unify those values") {
-            data class VerifySubstitution(var term: Term, val expected: Int): AbstractExecutionAction("VerifySubstitution",1) {
-                override fun applySubstitution(substitution: Substitution) {
-                    term = substitution.applyTo(term) ?: io.kotest.assertions.fail("Failed to apply substitution to $term")
-                    println("substitution $substitution applied to $term")
-                }
+            data class VerifySubstitution(
+                val term: Term,
+                val expected: Int,
+            ) : AbstractExecutionAction.WithoutSideEffects() {
+                override fun applySubstitution(substitution: Substitution) = VerifySubstitution(
+                    term = substitution.applyTo(term) ?: fail("Failed to apply substitution to $term"),
+                    expected = expected,
+                )
 
-                override fun invoke(p1: ActionInvocationContext): List<SideEffect> {
+                override fun execute(context: ActionInvocationContext) {
                     println("The term is $term")
                     term.asInteger()?.value shouldBe BigInteger.of(expected)
-                    return emptyList()
                 }
-
             }
 
             val event = AchievementGoalInvocation(Jakta.parseStruct("pippo(0)"))
@@ -105,9 +106,9 @@ class TestPlans : DescribeSpec({
                 ),
             )
             val ap = p.applicablePlan(event, ASMutableBeliefBase.of())
-            ap.apply(event).first().invoke(ActionRequest.of(ASAgent.of().context, Time.real(Calendar.getInstance().timeInMillis)))
-           // ap.apply(event).first() shouldBe Atom.of("0")
-           // ap.apply(event)[1] shouldBe Atom.of("1")
+            ap.apply(event).first().invoke(ActionRequest.of(ASAgent.of().context, Time.real()))
+            // ap.apply(event).first() shouldBe Atom.of("0")
+            // ap.apply(event)[1] shouldBe Atom.of("1")
         }
     }
 })
