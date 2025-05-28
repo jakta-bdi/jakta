@@ -1,9 +1,9 @@
 package it.unibo.jakta.plans
 
-import it.unibo.jakta.ActivationRecord
 import it.unibo.jakta.actions.Action
 import it.unibo.jakta.beliefs.BeliefBase
 import it.unibo.jakta.events.Event
+import it.unibo.jakta.intentions.ActivationRecord
 
 // TODO: sealed
 interface Plan<Belief : Any, Query : Any, Result> {

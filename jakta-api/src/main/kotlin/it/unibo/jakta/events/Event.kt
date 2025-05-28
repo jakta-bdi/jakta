@@ -1,7 +1,6 @@
 package it.unibo.jakta.events
 
-import it.unibo.jakta.Intention
-import it.unibo.jakta.events.Event.Internal.Goal
+import it.unibo.jakta.intentions.Intention
 
 sealed interface Event {
 
