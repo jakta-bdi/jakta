@@ -5,11 +5,7 @@ import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.solve.Solution
 
 /** A BDI Agent's collection of [ASBelief] */
-interface ASBeliefBase : BeliefBase<Struct> {
-    fun select(query: ASBelief): List<ASBelief>
-    fun getSolutionOf(query: Struct): Solution
-    fun getSolutionOf(belief: ASBelief): Solution
-}
+interface ASBeliefBase : BeliefBase<ASBelief, Struct, Solution>
 
 interface ASMutableBeliefBase : ASBeliefBase {
 

@@ -1,20 +1,21 @@
 package it.unibo.jakta
 
 import it.unibo.jakta.actions.SideEffect
+import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.beliefs.ASBeliefBase
 import it.unibo.jakta.beliefs.ASMutableBeliefBase
 import it.unibo.jakta.beliefs.BeliefBase
 import it.unibo.jakta.environment.BasicEnvironment
-import it.unibo.jakta.events.ASEvent
 import it.unibo.jakta.events.Event
 import it.unibo.jakta.fsm.Activity
 import it.unibo.jakta.impl.AgentImpl
 import it.unibo.jakta.intentions.ASIntention
 import it.unibo.jakta.intentions.ASIntentionPool
 import it.unibo.jakta.intentions.ASMutableIntentionPool
-import it.unibo.jakta.plans.ASPlan
 import it.unibo.jakta.plans.Plan
+import it.unibo.jakta.plans.impl.PlanImpl
 import it.unibo.tuprolog.core.Struct
+import it.unibo.tuprolog.solve.Solution
 import it.unibo.tuprolog.utils.Taggable
 import java.util.*
 
@@ -23,19 +24,23 @@ interface ASAgent : Agent, Taggable<ASAgent> {
     val controller: Activity.Controller?
     val context: ASAgentContext
 
-    interface ASAgentContext : Agent.Context<Struct> {
+    interface ASAgentContext : Agent.Context<ASBelief, Struct, Solution> {
         /** [BeliefBase] of the BDI Agent */
         override val beliefBase: ASBeliefBase
 
         /** [Plan]s collection of the BDI Agent */
-        override val plans: Collection<ASPlan>
+        override val plans: Collection<PlanImpl>
         val intentions: ASIntentionPool
     }
 
     interface ASMutableAgentContext : ASAgentContext {
         override val beliefBase: ASMutableBeliefBase
-        override val plans: MutableCollection<ASPlan>
+        override val plans: MutableCollection<PlanImpl>
         override val intentions: ASMutableIntentionPool
+
+        fun enqueue(event: Event.Internal.Goal<ASBelief, Struct, Solution>)
+
+        fun drop(event: Event.Internal.Goal<ASBelief, Struct, Solution>)
     }
 
     /**
@@ -55,7 +60,7 @@ interface ASAgent : Agent, Taggable<ASAgent> {
      * @param planLibrary: the [Plan]s known by the Agent
      * @return the relevant [Plan]s
      */
-    fun selectRelevantPlans(event: ASEvent, planLibrary: List<ASPlan>): List<ASPlan>
+    fun selectRelevantPlans(event: Event.Internal, planLibrary: List<Plan<ASBelief, Struct, Solution>>): List<Plan<ASBelief, Struct, Solution>>
 
     /**
      * STEP 7 of reasoning cycle: Determining the Applicable Plans.
@@ -66,8 +71,8 @@ interface ASAgent : Agent, Taggable<ASAgent> {
      * @return yes if it's applicable, false otherwise.
      */
     fun isPlanApplicable(
-        event: ASEvent,
-        plan: ASPlan,
+        event: Event.Internal,
+        plan: Plan<ASBelief, Struct, Solution>,
         beliefBase: ASBeliefBase,
     ): Boolean
 
@@ -78,7 +83,7 @@ interface ASAgent : Agent, Taggable<ASAgent> {
      * @param plans: applicable [Plan]s
      * @return the selected [Plan] to be executed
      */
-    fun selectApplicablePlan(plans: List<ASPlan>): ASPlan?
+    fun selectApplicablePlan(plans: List<Plan<ASBelief, Struct, Solution>>): Plan<ASBelief, Struct, Solution>?
 
     /**
      * Step 8 of reasoning cycle: Assign selected plan to an Intention.
@@ -90,8 +95,8 @@ interface ASAgent : Agent, Taggable<ASAgent> {
      * @return the updated [Intention] or null if the intention is not found
      */
     fun assignPlanToIntention(
-        event: ASEvent,
-        plan: ASPlan,
+        event: Event.Internal,
+        plan: Plan<ASBelief, Struct, Solution>,
         intentions: ASIntentionPool,
     ): ASIntention?
 
@@ -113,9 +118,9 @@ interface ASAgent : Agent, Taggable<ASAgent> {
         intention: ASIntention,
     ): List<SideEffect>
 
-    fun sense(environment: BasicEnvironment, debugEnabled: Boolean): Event?
+    fun sense(environment: BasicEnvironment, debugEnabled: Boolean): Event.Internal?
 
-    fun deliberate(environment: BasicEnvironment, event: Event, debugEnabled: Boolean)
+    fun deliberate(environment: BasicEnvironment, event: Event.Internal, debugEnabled: Boolean)
 
     fun act(environment: BasicEnvironment, debugEnabled: Boolean)
 
@@ -126,8 +131,8 @@ interface ASAgent : Agent, Taggable<ASAgent> {
             agentID: AgentID = AgentID(),
             name: String = "Agent-" + UUID.randomUUID(),
             beliefBase: ASMutableBeliefBase = ASMutableBeliefBase.empty(),
-            events: List<Event.AgentEvent> = emptyList(),
-            planLibrary: MutableCollection<ASPlan> = mutableListOf(),
+            events: List<Event.Internal.Goal<ASBelief, Struct, Solution>> = emptyList(),
+            planLibrary: MutableCollection<Plan<ASBelief, Struct, Solution>> = mutableListOf(),
             controller: Activity.Controller? = null,
             // internalActions: MutableMap<String, InternalAction> = ExecutionActions.default(), //TODO()
         ): ASAgent = AgentImpl(

@@ -28,7 +28,7 @@ interface ASAgentLifecycle {
      *  - STEP4: Selecting "Socially Acceptable" Messages
      *  @param environment the [AgentProcess]
      */
-    fun sense(): Event?
+    fun sense(): Event.Internal?
 
     /** Performs the reason phase of the reasoning cycle, in particular:
      *  - STEP5: Selecting an ASEvent
@@ -36,7 +36,7 @@ interface ASAgentLifecycle {
      *  - STEP7: Determining the Applicable Plans
      *  - STEP8: Selecting one Applicable Plan
      */
-    fun deliberate(event: Event?)
+    fun deliberate(event: Event.Internal?)
 
     /**
      * Performs the reason phase of the reasoning cycle, in particular:
@@ -60,9 +60,9 @@ interface ASAgentLifecycle {
             override val environment: BasicEnvironment
                 get() = environment
 
-            override fun sense(): Event? = agent.sense(environment, debugEnabled)
+            override fun sense(): Event.Internal? = agent.sense(environment, debugEnabled)
 
-            override fun deliberate(event: Event?) = when {
+            override fun deliberate(event: Event.Internal?) = when {
                 event != null -> agent.deliberate(environment, event, debugEnabled)
                 else -> Unit
             }

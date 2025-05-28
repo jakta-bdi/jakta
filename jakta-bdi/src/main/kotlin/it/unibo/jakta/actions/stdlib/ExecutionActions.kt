@@ -8,27 +8,31 @@ import it.unibo.jakta.actions.effects.EventChange
 import it.unibo.jakta.actions.effects.Pause
 import it.unibo.jakta.actions.effects.Sleep
 import it.unibo.jakta.actions.effects.Stop
+import it.unibo.jakta.actions.requests.ASActionContext
+import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.events.AchievementGoalFailure
 import it.unibo.jakta.intentions.ASIntention
+import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.core.Term
+import it.unibo.tuprolog.solve.Solution
 
 abstract class AbstractExecutionAction : AbstractAction() {
     override fun postExec(intention: ASIntention) {
         if (result.isSuccess) {
-            if (!intention.recordStack.isEmpty()) {
+            if (!intention.stack.isEmpty()) {
                 intention.applySubstitution(result)
             }
         } else {
-            val trigger = intention.currentPlan().trigger.value
+            val trigger = intention.currentPlan().trigger
             val failure = AchievementGoalFailure(trigger, intention)
             val failureEvent = EventChange.EventAddition(failure)
             effects.add(failureEvent) // Add Failure Event to be handled in future lifecycle steps
         }
     }
 
-    abstract class WithoutSideEffects : Action.WithoutSideEffect, AbstractExecutionAction() {
-        final override fun invoke(p1: ActionInvocationContext): List<SideEffect> {
+    abstract class WithoutSideEffects : Action.WithoutSideEffect<ASBelief, Struct, Solution>, AbstractExecutionAction() {
+        final override fun invoke(p1: ASActionContext): List<SideEffect> {
             return super.invoke(p1)
         }
     }
@@ -45,7 +49,7 @@ class Print(
     override fun applySubstitution(substitution: Substitution) =
         Print(termsList.map { it.apply(substitution) })
 
-    override fun execute(context: ActionInvocationContext) {
+    override fun execute(context: ASActionContext) {
         val payload = termsList.joinToString(" ") {
             when {
                 it.isAtom -> it.castToAtom().value
@@ -66,7 +70,7 @@ class Print(
 object Fail : AbstractExecutionAction.WithoutSideEffects() {
     override fun applySubstitution(substitution: Substitution) = this
 
-    override fun execute(context: ActionInvocationContext) {
+    override fun execute(context: ASActionContext) {
         result = Substitution.failed()
     }
 }
@@ -74,7 +78,7 @@ object Fail : AbstractExecutionAction.WithoutSideEffects() {
 object Stop : AbstractExecutionAction.WithoutSideEffects() {
     override fun applySubstitution(substitution: Substitution) = this
 
-    override fun execute(context: ActionInvocationContext) {
+    override fun execute(context: ASActionContext) {
         effects.add(Stop)
     }
 }
@@ -82,7 +86,7 @@ object Stop : AbstractExecutionAction.WithoutSideEffects() {
 object Pause : AbstractExecutionAction.WithoutSideEffects() {
     override fun applySubstitution(substitution: Substitution) = this
 
-    override fun execute(context: ActionInvocationContext) {
+    override fun execute(context: ASActionContext) {
         effects.add(Pause)
     }
 }
@@ -92,7 +96,7 @@ class Sleep(
 ) : AbstractExecutionAction.WithoutSideEffects() {
     override fun applySubstitution(substitution: Substitution) = Sleep(timeAmount.apply(substitution))
 
-    override fun execute(context: ActionInvocationContext) {
+    override fun execute(context: ASActionContext) {
         effects.add(Sleep(timeAmount.castToInteger().value.toLong()))
     }
 }

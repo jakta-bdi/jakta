@@ -4,7 +4,9 @@ import it.unibo.jakta.actions.ASAction
 import it.unibo.jakta.actions.ActionInvocationContext
 import it.unibo.jakta.actions.effects.EventChange
 import it.unibo.jakta.actions.effects.IntentionChange
+import it.unibo.jakta.actions.requests.ASActionContext
 import it.unibo.jakta.beliefs.ASBeliefBase
+import it.unibo.jakta.beliefs.impl.ASBeliefBaseImpl.Companion.operatorExtension
 import it.unibo.jakta.events.AchievementGoalInvocation
 import it.unibo.jakta.events.TestGoalFailure
 import it.unibo.jakta.events.TestGoalInvocation
@@ -12,6 +14,11 @@ import it.unibo.jakta.intentions.ASIntention
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.solve.Solution
+import it.unibo.tuprolog.solve.Solver
+import it.unibo.tuprolog.solve.flags.TrackVariables
+import it.unibo.tuprolog.solve.flags.TrackVariables.ON
+import it.unibo.tuprolog.solve.flags.Unknown
+import it.unibo.tuprolog.theory.Theory
 
 /**
  * [Task.PlanExecution] which looks for a Plan with [AchievementGoalInvocation] trigger.
@@ -27,7 +34,7 @@ data class Achieve(
     override fun applySubstitution(substitution: Substitution): ASAction =
         Achieve(planTrigger.apply(substitution).castToStruct())
 
-    override fun execute(context: ActionInvocationContext) = Unit
+    override fun execute(context: ASActionContext) = Unit
 }
 
 /**
@@ -56,11 +63,8 @@ data class Test(
     override fun applySubstitution(substitution: Substitution): ASAction =
         Test(planTrigger.apply(substitution).castToStruct())
 
-    override fun execute(context: ActionInvocationContext) {
-        solution = when (context.agentContext.beliefBase) {
-            is ASBeliefBase -> (context.agentContext.beliefBase as ASBeliefBase).getSolutionOf(planTrigger)
-            else -> Solution.no(planTrigger)
-        }
+    override fun execute(context: ASActionContext) {
+        solution = context.agentContext.beliefBase.select(planTrigger)
     }
 }
 
@@ -80,5 +84,5 @@ data class Spawn(
     override fun applySubstitution(substitution: Substitution): ASAction =
         Spawn(planTrigger.apply(substitution).castToStruct())
 
-    override fun execute(context: ActionInvocationContext) = Unit
+    override fun execute(context: ASActionContext) = Unit
 }

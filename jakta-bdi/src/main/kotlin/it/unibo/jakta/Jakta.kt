@@ -36,12 +36,12 @@ object Jakta {
             }
         }
         for (plan in agent.context.plans) {
-            var trigger = plan.trigger.value.toString()
+            var trigger = plan.trigger.toString()
             var guard = plan.guard.toString()
-            var body = plan.toActivationRecord().taskQueue.joinToString("; ") { it.toString() }
+            var body = plan.toActivationRecord().queue.joinToString("; ") { it.toString() }
             if (prettyFormatted) {
                 val formatter = TermFormatter.prettyExpressions(operatorSet = OperatorSet.DEFAULT + Jakta.operators)
-                trigger = formatter.format(plan.trigger.value)
+                trigger = formatter.format(plan.trigger)
                 guard = formatter.format(plan.guard)
                 // body = plan.tasks.joinToString("; ") { formatter.format(it.value) }
                 // TODO(Missing generator of ASL syntax from Jakta spec)

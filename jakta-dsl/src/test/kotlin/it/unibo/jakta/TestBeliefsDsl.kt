@@ -3,7 +3,6 @@ package it.unibo.jakta
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.shouldBe
-import it.unibo.jakta.beliefs.Belief
 import it.unibo.jakta.dsl.beliefs.BeliefsScope
 import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.Struct

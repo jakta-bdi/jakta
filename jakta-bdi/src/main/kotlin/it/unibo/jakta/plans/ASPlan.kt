@@ -3,77 +3,53 @@ package it.unibo.jakta.plans
 import it.unibo.jakta.actions.ASAction
 import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.beliefs.ASBeliefBase
-import it.unibo.jakta.events.ASEvent
-import it.unibo.jakta.events.AchievementGoalFailure
-import it.unibo.jakta.events.AchievementGoalInvocation
-import it.unibo.jakta.events.BeliefBaseAddition
-import it.unibo.jakta.events.BeliefBaseRemoval
-import it.unibo.jakta.events.TestGoalFailure
-import it.unibo.jakta.events.TestGoalInvocation
+import it.unibo.jakta.events.*
 import it.unibo.jakta.intentions.ASActivationRecord
 import it.unibo.jakta.plans.impl.PlanImpl
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Truth
+import it.unibo.tuprolog.solve.Solution
 
-interface ASPlan : Plan {
+object ASPlan {
+    private fun of(
+        trigger: Event.Internal,
+        guard: Struct,
+        goals: List<ASAction>,
+    ): ASPlan = PlanImpl(trigger = trigger, guard = guard, tasks = goals)
 
-    val trigger: ASEvent
+    fun ofBeliefBaseAddition(
+        belief: ASBelief,
+        goals: List<ASAction>,
+        guard: Struct = Truth.TRUE,
+    ): ASPlan = of(BeliefBaseAddition(belief), guard, goals)
 
-    val guard: Struct
+    fun ofBeliefBaseRemoval(
+        belief: ASBelief,
+        goals: List<ASAction>,
+        guard: Struct = Truth.TRUE,
+    ): ASPlan = of(BeliefBaseRemoval(belief), guard, goals)
 
-    /** Returns the computed applicable plan */
-    fun applicablePlan(event: ASEvent, beliefBase: ASBeliefBase): ASPlan
+    fun ofAchievementGoalInvocation(
+        value: Struct,
+        goals: List<ASAction>,
+        guard: Struct = Truth.TRUE,
+    ): ASPlan = of(AchievementGoalInvocation(value), guard, goals)
 
-    /**
-     * Transforms the current plan into an [ActivationRecord] for the [Intention] that will execute it.
-     */
-    fun toActivationRecord(): ASActivationRecord
+    fun ofAchievementGoalFailure(
+        value: Struct,
+        goals: List<ASAction>,
+        guard: Struct = Truth.TRUE,
+    ): ASPlan = of(AchievementGoalFailure(value), guard, goals)
 
-    fun isApplicable(event: ASEvent, beliefBase: ASBeliefBase): Boolean
+    fun ofTestGoalInvocation(
+        value: Struct,
+        goals: List<ASAction>,
+        guard: Struct = Truth.TRUE,
+    ): ASPlan = of(TestGoalInvocation(value), guard, goals)
 
-    fun isRelevant(event: ASEvent): Boolean
-
-    companion object {
-        private fun of(
-            trigger: ASEvent,
-            guard: Struct,
-            goals: List<ASAction>,
-        ): ASPlan = PlanImpl(trigger = trigger, guard = guard, tasks = goals)
-
-        fun ofBeliefBaseAddition(
-            belief: ASBelief,
-            goals: List<ASAction>,
-            guard: Struct = Truth.TRUE,
-        ): ASPlan = of(BeliefBaseAddition(belief), guard, goals)
-
-        fun ofBeliefBaseRemoval(
-            belief: ASBelief,
-            goals: List<ASAction>,
-            guard: Struct = Truth.TRUE,
-        ): ASPlan = of(BeliefBaseRemoval(belief), guard, goals)
-
-        fun ofAchievementGoalInvocation(
-            value: Struct,
-            goals: List<ASAction>,
-            guard: Struct = Truth.TRUE,
-        ): ASPlan = of(AchievementGoalInvocation(value), guard, goals)
-
-        fun ofAchievementGoalFailure(
-            value: Struct,
-            goals: List<ASAction>,
-            guard: Struct = Truth.TRUE,
-        ): ASPlan = of(AchievementGoalFailure(value), guard, goals)
-
-        fun ofTestGoalInvocation(
-            value: Struct,
-            goals: List<ASAction>,
-            guard: Struct = Truth.TRUE,
-        ): ASPlan = of(TestGoalInvocation(value), guard, goals)
-
-        fun ofTestGoalFailure(
-            value: Struct,
-            goals: List<ASAction>,
-            guard: Struct = Truth.TRUE,
-        ): ASPlan = of(TestGoalFailure(value), guard, goals)
-    }
+    fun ofTestGoalFailure(
+        value: Struct,
+        goals: List<ASAction>,
+        guard: Struct = Truth.TRUE,
+    ): ASPlan = of(TestGoalFailure(value), guard, goals)
 }

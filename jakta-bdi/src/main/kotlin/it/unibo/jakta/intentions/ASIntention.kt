@@ -1,22 +1,28 @@
 package it.unibo.jakta.intentions
 
+import it.unibo.jakta.ActivationRecord
+import it.unibo.jakta.Intention
 import it.unibo.jakta.actions.ASAction
+import it.unibo.jakta.actions.Action
+import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.intentions.impl.IntentionImpl
 import it.unibo.jakta.plans.ASPlan
+import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
+import it.unibo.tuprolog.solve.Solution
 
-interface ASIntention {
+interface ASIntention : Intention<ASBelief, Struct, Solution> {
 
-    val recordStack: List<ASActivationRecord>
+    override val stack: List<ASActivationRecord>
 
     val isSuspended: Boolean
 
     val id: IntentionID
 
     fun nextTask(): ASAction? =
-        recordStack.firstOrNull()?.taskQueue?.firstOrNull()
+        stack.firstOrNull()?.queue?.firstOrNull()
 
-    fun currentPlan(): ASPlan = recordStack.first().generatingPlan
+    fun currentPlan(): ASPlan = stack.first().origin
 
     /**
      * Removes the first task to be executed from the first activation record.
@@ -38,7 +44,7 @@ interface ASIntention {
     fun applySubstitution(substitution: Substitution): ASIntention
 
     fun copy(
-        recordStack: MutableList<ASActivationRecord> = this.recordStack.toMutableList(),
+        recordStack: MutableList<ASActivationRecord> = this.stack.toMutableList(),
         isSuspended: Boolean = this.isSuspended,
         id: IntentionID = this.id,
     ): ASIntention = of(recordStack, isSuspended, id)

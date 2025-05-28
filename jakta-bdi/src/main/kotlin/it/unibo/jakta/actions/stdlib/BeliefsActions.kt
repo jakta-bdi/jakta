@@ -5,10 +5,13 @@ import it.unibo.jakta.actions.AbstractAction
 import it.unibo.jakta.actions.ActionInvocationContext
 import it.unibo.jakta.actions.SideEffect
 import it.unibo.jakta.actions.effects.BeliefChange
+import it.unibo.jakta.actions.requests.ASActionContext
 import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.beliefs.BeliefBase
 import it.unibo.jakta.intentions.ASIntention
+import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
+import it.unibo.tuprolog.solve.Solution
 
 sealed class AbstractBeliefAction : AbstractAction() {
     override fun postExec(intention: ASIntention) {
@@ -25,7 +28,7 @@ data class AddBelief(
     override fun applySubstitution(substitution: Substitution): AddBelief =
         AddBelief(belief.applySubstitution(substitution))
 
-    override fun invoke(context: ActionInvocationContext): List<SideEffect> =
+    override fun invoke(context: ASActionContext): List<SideEffect> =
         listOf(BeliefChange.BeliefAddition(belief))
 }
 
@@ -38,7 +41,7 @@ data class RemoveBelief(
     override fun applySubstitution(substitution: Substitution): ASAction =
         RemoveBelief(belief.applySubstitution(substitution))
 
-    override fun invoke(context: ActionInvocationContext): List<SideEffect> =
+    override fun invoke(context: ASActionContext): List<SideEffect> =
         listOf(BeliefChange.BeliefRemoval(belief))
 }
 
@@ -51,6 +54,6 @@ data class UpdateBelief(
     override fun applySubstitution(substitution: Substitution): ASAction =
         UpdateBelief(belief.applySubstitution(substitution))
 
-    override fun invoke(context: ActionInvocationContext): List<SideEffect> =
+    override fun invoke(context: ASActionContext): List<SideEffect> =
         listOf(BeliefChange.BeliefUpdate(belief))
 }

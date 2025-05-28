@@ -9,8 +9,10 @@ import java.util.*
 data class BasicEnvironment(
     val debugEnabled: Boolean = false,
     val perception: Perception = Perception.empty(),
-    override val events: Queue<Event.EnvironmentEvent> = ArrayDeque(),
+    private val events: Queue<Event.External> = ArrayDeque(),
 ) : AgentProcess {
+
+    override fun poll(): Event.External? = events.poll()
 
 //    val agentIDs: Map<String, AgentID>
 //    val externalActions: Map<String, ExternalAction>

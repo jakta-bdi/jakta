@@ -1,6 +1,5 @@
 package it.unibo.jakta.dsl.plans
 
-import it.unibo.jakta.beliefs.Belief
 import it.unibo.jakta.dsl.Builder
 import it.unibo.jakta.goals.Achieve
 import it.unibo.jakta.goals.Act

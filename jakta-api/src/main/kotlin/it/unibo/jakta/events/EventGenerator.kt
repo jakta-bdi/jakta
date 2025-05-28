@@ -2,6 +2,6 @@ package it.unibo.jakta.events
 
 import java.util.*
 
-interface EventGenerator<X: Event> {
-    val events: Queue<X>
+interface EventGenerator<out X: Event> {
+    fun poll(): X?
 }

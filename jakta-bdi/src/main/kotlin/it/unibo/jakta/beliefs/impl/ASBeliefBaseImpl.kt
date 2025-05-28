@@ -4,10 +4,8 @@ import it.unibo.jakta.Jakta
 import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.beliefs.ASBeliefBase
 import it.unibo.jakta.beliefs.ASMutableBeliefBase
-import it.unibo.jakta.beliefs.Belief
 import it.unibo.jakta.events.BeliefBaseAddition
 import it.unibo.jakta.events.BeliefBaseRemoval
-import it.unibo.jakta.events.BeliefBaseUpdate
 import it.unibo.jakta.events.Event
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.solve.Solution
@@ -20,38 +18,34 @@ import java.util.Queue
 
 internal data class ASBeliefBaseImpl(
     val beliefs: MutableList<ASBelief> = mutableListOf(),
-    override var events: Queue<Event.BeliefEvent> = ArrayDeque(),
-) : ASMutableBeliefBase, ASBeliefBase, Collection<Belief> by beliefs {
+    var events: Queue<Event.Internal.Belief<ASBelief>> = ArrayDeque(),
+) : ASMutableBeliefBase, ASBeliefBase, Collection<ASBelief> by beliefs {
     // private var beliefs: ClauseMultiSet = ClauseMultiSet.empty(Unificator.default)
+
+    override fun poll(): Event.Internal.Belief<ASBelief>? = events.poll()
 
     override fun snapshot(): ASBeliefBase = this.copy()
 
-    override fun select(query: Struct): List<ASBelief> {
-        val solution = getSolutionOf(query)
-        return if (solution.isYes && solution.solvedQuery != null) {
-            listOf(ASBelief.wrap(solution.solvedQuery!!))
-        } else {
-            emptyList()
-        }
-    }
+    override fun select(query: Struct): Solution = getSolutionOf(query)
 
-    override fun select(query: ASBelief) = select(query.content.head)
+//    override fun select(query: ASBelief) = select(query.content.head)
 
-    override fun getSolutionOf(query: Struct): Solution = Solver.prolog.newBuilder()
+    private fun getSolutionOf(query: Struct): Solution = Solver.prolog.newBuilder()
         .flag(Unknown, Unknown.FAIL)
         .staticKb(operatorExtension + Theory.of(beliefs.map { it.content }))
         .flag(TrackVariables) { ON }
         .build()
         .solveOnce(query)
 
-    override fun getSolutionOf(belief: ASBelief): Solution = getSolutionOf(belief.content.head)
+    private fun getSolutionOf(belief: ASBelief): Solution = getSolutionOf(belief.content.head)
 
     override fun update(belief: ASBelief): Boolean {
         val element = beliefs.find { it.content.head.functor == belief.content.head.functor }
         return if (element != null) {
             beliefs.remove(element)
+            events.add(BeliefBaseRemoval(element))
             beliefs.add(belief)
-            events.add(BeliefBaseUpdate(belief, element))
+            events.add(BeliefBaseAddition(belief))
             true
         } else {
             false
@@ -117,7 +111,7 @@ internal data class ASBeliefBaseImpl(
         beliefs.joinToString { ASBelief.from(it.content.castToRule()).toString() }
 
     companion object {
-        private val operatorExtension = Theory.of(
+        val operatorExtension = Theory.of(
             Jakta.parseClause("&(A, B) :- A, B"),
             Jakta.parseClause("|(A, _) :- A"),
             Jakta.parseClause("|(_, B) :- B"),

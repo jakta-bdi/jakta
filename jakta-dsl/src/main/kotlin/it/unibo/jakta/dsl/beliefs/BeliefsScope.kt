@@ -1,7 +1,6 @@
 package it.unibo.jakta.dsl.beliefs
 
 import it.unibo.jakta.beliefs.ASBeliefBase
-import it.unibo.jakta.beliefs.Belief
 import it.unibo.jakta.dsl.Builder
 import it.unibo.tuprolog.core.Fact
 import it.unibo.tuprolog.core.Rule

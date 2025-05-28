@@ -1,21 +1,26 @@
 package it.unibo.jakta.intentions
 
+import it.unibo.jakta.ActivationRecord
 import it.unibo.jakta.actions.ASAction
+import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.plans.ASPlan
+import it.unibo.jakta.plans.Plan
+import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
+import it.unibo.tuprolog.solve.Solution
 
 data class ASActivationRecord(
-    val generatingPlan: ASPlan,
-    val taskQueue: List<ASAction>,
-) {
-    fun isLastActionToExecute(): Boolean = taskQueue.size == 1
-    fun nextActionToExecute(): ASAction? = taskQueue.firstOrNull()
-    fun pop(): ASActivationRecord = ASActivationRecord(generatingPlan, when (nextActionToExecute() != null) {
-        true -> taskQueue - nextActionToExecute()!!
-        false -> taskQueue
+    override val origin: Plan<ASBelief, Struct, Solution>,
+    override val queue: Sequence<ASAction>,
+) : ActivationRecord<ASBelief, Struct, Solution> {
+    fun isLastActionToExecute(): Boolean = queue.count() == 1
+    fun nextActionToExecute(): ASAction? = queue.firstOrNull()
+    fun pop(): ASActivationRecord = ASActivationRecord(origin, when (nextActionToExecute() != null) {
+        true -> queue - nextActionToExecute()!!
+        false -> queue
     })
     fun applySubstitution(substitution: Substitution) = ASActivationRecord(
-        generatingPlan,
-        taskQueue.map { it.applySubstitution(substitution) }
+        origin,
+        queue.map { it.applySubstitution(substitution) }
     )
 }
