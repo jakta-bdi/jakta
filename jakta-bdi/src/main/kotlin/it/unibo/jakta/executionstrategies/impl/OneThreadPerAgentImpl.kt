@@ -18,6 +18,7 @@ internal class OneThreadPerAgentImpl : ExecutionStrategy {
             val agentLC = ASAgentLifecycle.of(agent, mas.environment, debugEnabled)
             Runner.threadOf(
                 Activity.of {
+                    agent.controller = it
                     runningAgents += agent
                     val sideEffects = agentLC.runOneCycle()
                     // executionMas.applyEnvironmentEffects(sideEffects)

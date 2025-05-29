@@ -1,14 +1,14 @@
 package it.unibo.jakta.actions.stdlib
 
+import it.unibo.jakta.ASAgent
 import it.unibo.jakta.actions.ASAction
 import it.unibo.jakta.actions.ActionInvocationContext
+import it.unibo.jakta.actions.SideEffect
 import it.unibo.jakta.actions.effects.EventChange
 import it.unibo.jakta.actions.effects.IntentionChange
 import it.unibo.jakta.beliefs.ASBeliefBase
 import it.unibo.jakta.events.AchievementGoalInvocation
-import it.unibo.jakta.events.TestGoalFailure
 import it.unibo.jakta.events.TestGoalInvocation
-import it.unibo.jakta.intentions.ASIntention
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.solve.Solution
@@ -18,16 +18,17 @@ import it.unibo.tuprolog.solve.Solution
  */
 data class Achieve(
     val planTrigger: Struct,
-) : AbstractExecutionAction.WithoutSideEffects() {
-    override fun postExec(intention: ASIntention) {
-        effects.add(EventChange.EventAddition(AchievementGoalInvocation(planTrigger, intention)))
-        effects.add(IntentionChange.IntentionRemoval(intention)) // It gets added back in the queue after plan execution
-    }
-
+) : AbstractExecutionAction() {
     override fun applySubstitution(substitution: Substitution): ASAction =
         Achieve(planTrigger.apply(substitution).castToStruct())
 
-    override fun execute(context: ActionInvocationContext) = Unit
+    override fun invoke(context: ActionInvocationContext) = (context.agentContext as? ASAgent.ASAgentContext)
+        ?.intentions?.nextIntention()?.let {
+            listOf(
+                EventChange.EventAddition(AchievementGoalInvocation(planTrigger, it.pop())),
+                IntentionChange.IntentionRemoval(it), // It gets added back in the queue after plan execution
+            )
+        } ?: error("The action context is not an instance of Jakta AgentSpeak incarnation")
 }
 
 /**
@@ -35,32 +36,27 @@ data class Achieve(
  */
 data class Test(
     val planTrigger: Struct,
-) : AbstractExecutionAction.WithoutSideEffects() {
+) : AbstractExecutionAction() {
 
     private var solution: Solution = Solution.no(planTrigger)
-
-    override fun postExec(intention: ASIntention) {
-        effects.add(
-            EventChange.EventAddition(
-                AchievementGoalInvocation(planTrigger, intention),
-            ),
-        )
-        if (solution.isYes) {
-            intention.pop()
-            intention.applySubstitution(solution.substitution)
-        } else {
-            effects.add(EventChange.EventAddition(TestGoalFailure(planTrigger, intention)))
-        }
-    }
 
     override fun applySubstitution(substitution: Substitution): ASAction =
         Test(planTrigger.apply(substitution).castToStruct())
 
-    override fun execute(context: ActionInvocationContext) {
+    override fun invoke(context: ActionInvocationContext): List<SideEffect> {
         solution = when (context.agentContext.beliefBase) {
             is ASBeliefBase -> (context.agentContext.beliefBase as ASBeliefBase).getSolutionOf(planTrigger)
             else -> Solution.no(planTrigger)
         }
+        return listOf(
+            EventChange.EventAddition(
+                AchievementGoalInvocation(
+                    planTrigger,
+                    (context.agentContext as? ASAgent.ASAgentContext)?.intentions?.nextIntention()
+                        ?: error("The action context is not an instance of Jakta AgentSpeak incarnation"),
+                ),
+            ),
+        )
     }
 }
 
@@ -70,15 +66,11 @@ data class Test(
  */
 data class Spawn(
     val planTrigger: Struct,
-) : AbstractExecutionAction.WithoutSideEffects() {
-
-    override fun postExec(intention: ASIntention) {
-        effects.add(EventChange.EventAddition(AchievementGoalInvocation(planTrigger)))
-        intention.pop()
-    }
-
+) : AbstractExecutionAction() {
     override fun applySubstitution(substitution: Substitution): ASAction =
         Spawn(planTrigger.apply(substitution).castToStruct())
 
-    override fun execute(context: ActionInvocationContext) = Unit
+    override fun invoke(context: ActionInvocationContext) = listOf(
+        EventChange.EventAddition(AchievementGoalInvocation(planTrigger)),
+    )
 }

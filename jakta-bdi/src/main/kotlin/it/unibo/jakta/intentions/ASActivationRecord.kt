@@ -10,12 +10,17 @@ data class ASActivationRecord(
 ) {
     fun isLastActionToExecute(): Boolean = taskQueue.size == 1
     fun nextActionToExecute(): ASAction? = taskQueue.firstOrNull()
-    fun pop(): ASActivationRecord = ASActivationRecord(generatingPlan, when (nextActionToExecute() != null) {
-        true -> taskQueue - nextActionToExecute()!!
-        false -> taskQueue
-    })
+    fun pop(): ASActivationRecord = ASActivationRecord(
+        generatingPlan,
+        when (nextActionToExecute() != null) {
+            true -> taskQueue - nextActionToExecute()!!
+            false -> taskQueue
+        },
+    )
+
+    override fun toString(): String = "AR(${generatingPlan.trigger.value}) :- $taskQueue"
     fun applySubstitution(substitution: Substitution) = ASActivationRecord(
         generatingPlan,
-        taskQueue.map { it.applySubstitution(substitution) }
+        taskQueue.map { it.applySubstitution(substitution) },
     )
 }

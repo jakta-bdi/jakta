@@ -60,14 +60,14 @@ interface ASAgentLifecycle {
             override val environment: BasicEnvironment
                 get() = environment
 
-            override fun sense(): Event? = agent.sense(environment, debugEnabled)
+            override fun sense(): Event? = agent.sense(environment)
 
             override fun deliberate(event: Event?) = when {
-                event != null -> agent.deliberate(environment, event, debugEnabled)
+                event != null -> agent.deliberate(environment, event)
                 else -> Unit
             }
 
-            override fun act() = agent.act(environment, debugEnabled)
+            override fun act() = agent.act(environment)
         }
     }
 }

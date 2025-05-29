@@ -20,7 +20,7 @@ import java.util.*
 
 interface ASAgent : Agent, Taggable<ASAgent> {
 
-    val controller: Activity.Controller?
+    var controller: Activity.Controller?
     val context: ASAgentContext
 
     interface ASAgentContext : Agent.Context<Struct> {
@@ -113,11 +113,11 @@ interface ASAgent : Agent, Taggable<ASAgent> {
         intention: ASIntention,
     ): List<SideEffect>
 
-    fun sense(environment: BasicEnvironment, debugEnabled: Boolean): Event?
+    fun sense(environment: BasicEnvironment): Event?
 
-    fun deliberate(environment: BasicEnvironment, event: Event, debugEnabled: Boolean)
+    fun deliberate(environment: BasicEnvironment, event: Event)
 
-    fun act(environment: BasicEnvironment, debugEnabled: Boolean)
+    fun act(environment: BasicEnvironment)
 
     companion object {
         fun empty(controller: Activity.Controller? = null): ASAgent = AgentImpl(controller)

@@ -26,13 +26,17 @@ object Jakta {
     fun parseClause(string: String): Clause = parser.parseClause(string)
 
     fun printAslSyntax(agent: ASAgent, prettyFormatted: Boolean = true) {
-        println("% ${agent.context.agentName}")
+        println(asAslSyntax(agent, prettyFormatted))
+    }
+
+    fun asAslSyntax(agent: ASAgent, prettyFormatted: Boolean = true): String {
+        val stringBuilder = StringBuilder("% ${agent.context.agentName}\n")
         for (belief in agent.context.beliefBase.filterIsInstance<ASBelief>()) {
             if (prettyFormatted) {
                 val formatter = TermFormatter.prettyExpressions(operatorSet = OperatorSet.DEFAULT + Jakta.operators)
-                println(formatter.format(belief.content))
+                stringBuilder.append("${formatter.format(belief.content)}\n")
             } else {
-                println(belief.content)
+                stringBuilder.append("${belief.content}\n")
             }
         }
         for (plan in agent.context.plans) {
@@ -43,10 +47,12 @@ object Jakta {
                 val formatter = TermFormatter.prettyExpressions(operatorSet = OperatorSet.DEFAULT + Jakta.operators)
                 trigger = formatter.format(plan.trigger.value)
                 guard = formatter.format(plan.guard)
-                // body = plan.tasks.joinToString("; ") { formatter.format(it.value) }
-                // TODO(Missing generator of ASL syntax from Jakta spec)
+                body = plan.tasks.joinToString("; ") {
+                    it.toString()
+                } // it.javaClass.constructors.first().parameters.map { par -> Atom.of(par.name) }.asIterable())) }
             }
-            println("+!$trigger : $guard <- $body")
+            stringBuilder.append("+!$trigger : $guard <- $body\n")
         }
+        return stringBuilder.toString()
     }
 }

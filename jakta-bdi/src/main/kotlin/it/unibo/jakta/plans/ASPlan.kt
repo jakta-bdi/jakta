@@ -18,7 +18,7 @@ import it.unibo.tuprolog.core.Truth
 interface ASPlan : Plan {
 
     val trigger: ASEvent
-
+    val tasks: List<ASAction>
     val guard: Struct
 
     /** Returns the computed applicable plan */

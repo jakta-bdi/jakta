@@ -3,11 +3,12 @@ package it.unibo.jakta.impl
 import it.unibo.jakta.ASAgent
 import it.unibo.jakta.AgentID
 import it.unibo.jakta.AgentProcess
-import it.unibo.jakta.actions.SideEffect
+import it.unibo.jakta.Jakta
 import it.unibo.jakta.actions.effects.ActivitySideEffect
 import it.unibo.jakta.actions.effects.AgentChange
 import it.unibo.jakta.actions.effects.EnvironmentChange
 import it.unibo.jakta.actions.requests.ActionRequest
+import it.unibo.jakta.actions.responses.ActionResponse
 import it.unibo.jakta.beliefs.ASBeliefBase
 import it.unibo.jakta.beliefs.ASMutableBeliefBase
 import it.unibo.jakta.environment.BasicEnvironment
@@ -25,7 +26,7 @@ import java.util.ArrayDeque
 import java.util.Queue
 
 internal class AgentImpl(
-    override val controller: Activity.Controller?,
+    override var controller: Activity.Controller?,
     agentID: AgentID = AgentID(),
     agentName: String = "Agent-$agentID",
     events: List<Event.AgentEvent> = emptyList(),
@@ -55,16 +56,20 @@ internal class AgentImpl(
     fun updateContext(function: (mutableContext: ASAgent.ASMutableAgentContext) -> Unit): Unit =
         function.invoke(context)
 
+    override fun toString(): String = Jakta.asAslSyntax(this, true)
+
     override fun selectEvent(environment: BasicEnvironment): Event? =
         context.events.poll() ?: this.context.beliefBase.events.poll() ?: environment.events.poll()
 
     override fun scheduleIntention(): ASIntention = this.context.intentions.nextIntention()
-    // TODO(Does this implementation update the intention pool?)
 
-    override fun runIntention(intention: ASIntention): List<SideEffect> =
-        intention.nextTask()?.invoke(ActionRequest.of(context, controller?.currentTime())) ?: emptyList()
+    override fun runIntention(intention: ASIntention): ActionResponse =
+        intention.nextTask()?.run(ActionRequest.of(context, controller?.currentTime())) ?: ActionResponse(
+            it.unibo.tuprolog.core.Substitution.failed(),
+            emptyList(),
+        )
 
-    override fun sense(environment: BasicEnvironment, debugEnabled: Boolean): Event? {
+    override fun sense(environment: BasicEnvironment): Event? {
         // STEP1: Perceive the BasicEnvironment.
         val perceptions = environment.percept()
 
@@ -135,30 +140,26 @@ internal class AgentImpl(
     }
 
     override fun sense(agentProcess: AgentProcess): Event? = when {
-        agentProcess is BasicEnvironment -> sense(agentProcess, false)
+        agentProcess is BasicEnvironment -> sense(agentProcess)
         else -> null
     }
 
     override fun deliberate(agentProcess: AgentProcess, event: Event) = when {
-        agentProcess is BasicEnvironment -> deliberate(agentProcess, event, false)
+        agentProcess is BasicEnvironment -> deliberate(agentProcess, event)
         else -> Unit
     }
 
-    override fun deliberate(environment: BasicEnvironment, event: Event, debugEnabled: Boolean) {
+    override fun deliberate(environment: BasicEnvironment, event: Event) {
         when {
             event is ASEvent -> {
                 // STEP6: Retrieving all Relevant Plans.
                 val relevantPlans = selectRelevantPlans(event, this.context.plans.toList())
                 // if the set of relevant plans is empty, the event is simply discarded.
 
-                println("relevant plans: $relevantPlans")
-
                 // STEP7: Determining the Applicable Plans.
                 val applicablePlans = relevantPlans.filter {
                     isPlanApplicable(event, it, this.context.beliefBase)
                 }
-
-                println("applicable plans: $applicablePlans")
 
                 // STEP8: Selecting one Applicable Plan.
                 val selectedPlan = selectApplicablePlan(applicablePlans)
@@ -166,7 +167,7 @@ internal class AgentImpl(
                 // Add plan to intentions
                 if (selectedPlan != null) {
                     if (environment.debugEnabled) {
-                        println("[${this.context.agentName}] Selected the event: $event")
+                        println("${this.context.agentName}] Selected the event: $event")
                     }
                     // if (debugEnabled) println("[${agent.agentName}] Selected the plan: $selectedPlan")
                     val updatedIntention = assignPlanToIntention(
@@ -193,29 +194,48 @@ internal class AgentImpl(
     }
 
     override fun act(agentProcess: AgentProcess) = when {
-        agentProcess is BasicEnvironment -> act(agentProcess, false)
+        agentProcess is BasicEnvironment -> act(agentProcess)
         else -> Unit
     }
 
-    override fun act(environment: BasicEnvironment, debugEnabled: Boolean) {
+    override fun act(environment: BasicEnvironment) {
         // Select intention to execute
+//        if(environment.debugEnabled) {
+//            println("----- INTENTIONS STACK -----")
+//            if(context.intentions.isEmpty()) {
+//                println("EMPTY")
+//            } else {
+//                context.intentions.values.forEach {
+//                    println(it)
+//                }
+//            }
+//            println("----------------------------")
+//
+//        }
         if (!this.context.intentions.isEmpty()) {
             // STEP9: Select an Intention for Further Execution.
             val intentionToExecute = scheduleIntention()
 
             // STEP10: Executing one Step on an Intention
             if (intentionToExecute.recordStack.isNotEmpty()) {
-                if (environment.debugEnabled) println("[${context.agentName}] RUN -> $intentionToExecute")
+                if (environment.debugEnabled) {
+                    println(
+                        "[${context.agentName}] RUN -> ${intentionToExecute.nextActionToExecute()}",
+                    )
+                }
                 val sideEffects = runIntention(intentionToExecute)
+
                 sideEffects.forEach { sideEffect ->
+                    val processController = controller
                     when {
-                        sideEffect is ActivitySideEffect && controller != null -> sideEffect.invoke(controller)
+                        sideEffect is ActivitySideEffect && processController != null -> sideEffect.invoke(
+                            processController,
+                        )
                         sideEffect is EnvironmentChange -> sideEffect.invoke(environment)
-                        sideEffects is AgentChange -> this.updateContext { sideEffects.invoke(context) }
+                        sideEffect is AgentChange -> this.updateContext { sideEffect.invoke(context) }
                     }
                 }
             }
-            // println("post run -> ${newAgent.context}")
         }
 
 //        // Generate BasicEnvironment Changes

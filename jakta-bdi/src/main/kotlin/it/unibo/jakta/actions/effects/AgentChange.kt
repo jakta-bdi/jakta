@@ -61,6 +61,12 @@ interface IntentionChange : AgentChange {
             mutableAgentContext.intentions.deleteIntention(intention.id)
         }
     }
+
+    data class IntentionUpdate(override val intention: ASIntention) : IntentionChange {
+        override fun invoke(mutableAgentContext: ASAgent.ASMutableAgentContext) {
+            mutableAgentContext.intentions.updateIntention(intention).also { "Updated" }
+        }
+    }
 }
 
 interface PlanChange : AgentChange {

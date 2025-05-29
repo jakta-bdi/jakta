@@ -15,12 +15,13 @@ internal class DiscreteTimeExecutionImpl : AbstractSingleRunnerExecutionStrategy
             )
         }
         Runner.simulatedOf(
-            Activity.of {
+            Activity.of { controller ->
                 synchronizedAgents.getAgents().forEach {
+                    it.agent.controller = controller
                     val sideEffects = it.runOneCycle()
                     // mas.applyEnvironmentEffects(sideEffects)
                 }
-                synchronizedAgents.getAgents().ifEmpty { it.stop() }
+                synchronizedAgents.getAgents().ifEmpty { controller.stop() }
                 time++
             },
             currentTime = { Time.discrete(time) },

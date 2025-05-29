@@ -14,11 +14,7 @@ internal class IntentionImpl(
 
     override fun nextActionToExecute(): ASAction? {
         val record = recordStack.firstOrNull() ?: return null
-        return if (record.isLastActionToExecute()) {
-            return null
-        } else {
-            record.nextActionToExecute()
-        }
+        return record.nextActionToExecute()
     }
 
     override fun pop(): ASIntention {
@@ -27,12 +23,13 @@ internal class IntentionImpl(
             IntentionImpl(
                 recordStack - record,
                 isSuspended,
-                id)
+                id,
+            )
         } else {
             IntentionImpl(
                 listOf(record.pop()) + recordStack - record,
                 isSuspended,
-                id
+                id,
             )
         }
     }
@@ -46,8 +43,11 @@ internal class IntentionImpl(
         IntentionImpl(
             recordStack.apply { recordStack.first().applySubstitution(substitution) },
             isSuspended,
-            id
+            id,
         )
 
-    override fun toString(): String = "$id { \n ${recordStack.joinToString(separator = "\n", prefix = "\t")} \n }"
+    override fun toString(): String = "Intention { id = ${id.id} \n ${recordStack.joinToString(
+        separator = "\n\t",
+        prefix = "\t",
+    )} \n }"
 }

@@ -23,8 +23,9 @@ internal class DiscreteEventExecutionImpl : AbstractSingleRunnerExecutionStrateg
             )
         }
         Runner.simulatedOf(
-            Activity.of {
+            Activity.of { controller ->
                 // Compute next executions
+                mas.agents.forEach { it.controller = controller }
                 val timeDistributions = mas.agents.associateWith { it.timeDistribution.invoke(time) }
                 val nextEventTime = timeDistributions.values.minOf { it }
                 val agentsToExecute = timeDistributions
@@ -42,7 +43,7 @@ internal class DiscreteEventExecutionImpl : AbstractSingleRunnerExecutionStrateg
                         val sideEffects = it.runOneCycle()
                         // mas.applyEnvironmentEffects(sideEffects)
                     }
-                synchronizedAgents.getAgents().ifEmpty { it.stop() }
+                synchronizedAgents.getAgents().ifEmpty { controller.stop() }
             },
             currentTime = { time },
         ).run()

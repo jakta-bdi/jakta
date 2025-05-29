@@ -7,11 +7,15 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import it.unibo.jakta.actions.ActionInvocationContext
 import it.unibo.jakta.actions.requests.ActionRequest
 import it.unibo.jakta.actions.stdlib.AbstractExecutionAction
+import it.unibo.jakta.actions.stdlib.Achieve
 import it.unibo.jakta.actions.stdlib.Print
+import it.unibo.jakta.actions.stdlib.Stop
 import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.beliefs.ASMutableBeliefBase
+import it.unibo.jakta.environment.BasicEnvironment
 import it.unibo.jakta.events.AchievementGoalInvocation
 import it.unibo.jakta.events.BeliefBaseAddition
+import it.unibo.jakta.fsm.Activity
 import it.unibo.jakta.fsm.time.Time
 import it.unibo.jakta.plans.ASPlan
 import it.unibo.tuprolog.core.Atom
@@ -20,7 +24,7 @@ import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.core.Term
 import it.unibo.tuprolog.core.Truth
 import org.gciatto.kt.math.BigInteger
-import java.util.*
+import kotlin.system.exitProcess
 
 class TestPlans : DescribeSpec({
     val strawberryDesire = ASBelief.fromSelfSource(Struct.of("desire", Atom.of("strawberry")))
@@ -29,6 +33,21 @@ class TestPlans : DescribeSpec({
 
     val plan = ASPlan.ofBeliefBaseAddition(genericDesire, emptyList())
     val planLibrary = listOf(plan)
+
+    data class VerifySubstitution(
+        val term: Term,
+        val expected: Int,
+    ) : AbstractExecutionAction.WithoutSideEffects() {
+        override fun applySubstitution(substitution: Substitution) = VerifySubstitution(
+            term = substitution.applyTo(term) ?: fail("Failed to apply substitution to $term"),
+            expected = expected,
+        )
+
+        override fun execute(context: ActionInvocationContext) {
+            println("The term is $term")
+            term.asInteger()?.value shouldBe BigInteger.of(expected)
+        }
+    }
 
     describe("A Plan") {
         it("should be relevant if its trigger is unified with the event value") {
@@ -81,21 +100,6 @@ class TestPlans : DescribeSpec({
         }
 
         it("should run if and only if the context is valid, and unify those values") {
-            data class VerifySubstitution(
-                val term: Term,
-                val expected: Int,
-            ) : AbstractExecutionAction.WithoutSideEffects() {
-                override fun applySubstitution(substitution: Substitution) = VerifySubstitution(
-                    term = substitution.applyTo(term) ?: fail("Failed to apply substitution to $term"),
-                    expected = expected,
-                )
-
-                override fun execute(context: ActionInvocationContext) {
-                    println("The term is $term")
-                    term.asInteger()?.value shouldBe BigInteger.of(expected)
-                }
-            }
-
             val event = AchievementGoalInvocation(Jakta.parseStruct("pippo(0)"))
             val p = ASPlan.ofAchievementGoalInvocation(
                 value = Jakta.parseStruct("pippo(S)"),
@@ -109,6 +113,48 @@ class TestPlans : DescribeSpec({
             ap.apply(event).first().invoke(ActionRequest.of(ASAgent.of().context, Time.real()))
             // ap.apply(event).first() shouldBe Atom.of("0")
             // ap.apply(event)[1] shouldBe Atom.of("1")
+        }
+    }
+
+    describe("Plan recursion") {
+        it("should unify with different values") {
+            val start = Jakta.parseStruct("start(0, 1)")
+            val alice = ASAgent.of(
+                name = "alice",
+                events = listOf(AchievementGoalInvocation(start)),
+                planLibrary = mutableListOf(
+                    ASPlan.ofAchievementGoalInvocation(
+                        value = Jakta.parseStruct("start(S, S)"),
+                        goals = listOf(
+                            VerifySubstitution(Jakta.parseVar("S"), 1),
+                            Stop,
+                        ),
+                    ),
+                    ASPlan.ofAchievementGoalInvocation(
+                        value = Jakta.parseStruct("start(S, M)"),
+                        guard = Jakta.parseStruct("S < M & N is S + 1"),
+                        goals = listOf(
+                            VerifySubstitution(Jakta.parseVar("S"), 0),
+                            Achieve(Jakta.parseStruct("start(N, M)")),
+                        ),
+                    ),
+                ),
+            )
+
+            alice.controller = object : Activity.Controller {
+                override fun restart() = TODO("Not yet implemented")
+                override fun pause() = TODO("Not yet implemented")
+                override fun resume() = TODO("Not yet implemented")
+                override fun stop() = exitProcess(0)
+                override fun currentTime(): Time = Time.real()
+                override fun sleep(millis: Long) = TODO("Not yet implemented")
+            }
+            while (true) {
+                ASAgentLifecycle.of(
+                    alice,
+                    BasicEnvironment(debugEnabled = false),
+                ).runOneCycle()
+            }
         }
     }
 })

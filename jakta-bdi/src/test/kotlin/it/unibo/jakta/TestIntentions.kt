@@ -57,7 +57,7 @@ class TestIntentions : DescribeSpec({
                 sideEffects.size shouldBe 1
                 sideEffects shouldContain BeliefChange.BeliefAddition(buySomething)
 
-                var newIntention = intention.pop()
+                val newIntention = intention.pop()
                 newIntention.recordStack.size shouldBe 1
                 newIntention.recordStack.first().nextActionToExecute().shouldBeInstanceOf<AddBelief>()
             }
