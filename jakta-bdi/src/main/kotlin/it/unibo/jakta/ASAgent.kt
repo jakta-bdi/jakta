@@ -118,11 +118,11 @@ interface ASAgent : Agent, Taggable<ASAgent> {
         intention: ASIntention,
     ): List<SideEffect>
 
-    fun sense(environment: BasicEnvironment, debugEnabled: Boolean): Event.Internal?
+    fun sense(environment: BasicEnvironment): Event.Internal?
 
-    fun deliberate(environment: BasicEnvironment, event: Event.Internal, debugEnabled: Boolean)
+    fun deliberate(environment: BasicEnvironment, event: Event.Internal)
 
-    fun act(environment: BasicEnvironment, debugEnabled: Boolean)
+    fun act(environment: BasicEnvironment)
 
     companion object {
         fun empty(controller: Activity.Controller? = null): ASAgent = AgentImpl(controller)

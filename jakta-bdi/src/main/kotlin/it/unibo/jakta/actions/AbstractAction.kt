@@ -24,12 +24,12 @@ abstract class AbstractAction : ASAction {
     fun postExec(intention: ASIntention) {
         var newIntention = intention.pop()
         if (result.isSuccess) {
-            if (newIntention.recordStack.isNotEmpty()) {
+            if (newIntention.stack.isNotEmpty()) {
                 newIntention = newIntention.applySubstitution(result)
             }
             effects.add(IntentionChange.IntentionUpdate(newIntention))
         } else {
-            val trigger = intention.currentPlan().trigger.value
+            val trigger = intention.currentPlan().trigger
             val failure = AchievementGoalFailure(trigger, intention)
             val failureEvent = EventChange.EventAddition(failure)
             effects.add(failureEvent) // Add Failure Event to be handled in future lifecycle steps

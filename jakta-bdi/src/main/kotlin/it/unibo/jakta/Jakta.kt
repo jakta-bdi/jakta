@@ -1,6 +1,7 @@
 package it.unibo.jakta
 
 import it.unibo.jakta.beliefs.ASBelief
+import it.unibo.jakta.events.AchievementGoalInvocation
 import it.unibo.tuprolog.core.Clause
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.TermFormatter
@@ -47,7 +48,7 @@ object Jakta {
                 val formatter = TermFormatter.prettyExpressions(operatorSet = OperatorSet.DEFAULT + Jakta.operators)
                 trigger = formatter.format(plan.trigger)
                 guard = formatter.format(plan.guard)
-                body = plan.tasks.joinToString("; ") {
+                body = plan.apply(AchievementGoalInvocation(plan.trigger)).joinToString("; ") {
                     it.toString()
                 } // it.javaClass.constructors.first().parameters.map { par -> Atom.of(par.name) }.asIterable())) }
             }

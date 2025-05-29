@@ -3,11 +3,13 @@ package it.unibo.jakta.impl
 import it.unibo.jakta.ASAgent
 import it.unibo.jakta.AgentID
 import it.unibo.jakta.AgentProcess
+import it.unibo.jakta.Jakta
 import it.unibo.jakta.actions.SideEffect
 import it.unibo.jakta.actions.effects.ActivitySideEffect
 import it.unibo.jakta.actions.effects.AgentChange
 import it.unibo.jakta.actions.effects.EnvironmentChange
 import it.unibo.jakta.actions.requests.ActionRequest
+import it.unibo.jakta.actions.responses.ActionResponse
 import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.beliefs.ASBeliefBase
 import it.unibo.jakta.beliefs.ASMutableBeliefBase
@@ -80,7 +82,7 @@ internal class AgentImpl(
     override fun scheduleIntention(): ASIntention = this.context.intentions.nextIntention()
 
     override fun runIntention(intention: ASIntention): ActionResponse =
-        intention.nextTask()?.run(ActionRequest.of(context, controller?.currentTime())) ?: ActionResponse(
+        intention.nextTask()?.runAction(ActionRequest.of(context, controller?.currentTime())) ?: ActionResponse(
             it.unibo.tuprolog.core.Substitution.failed(),
             emptyList(),
         )

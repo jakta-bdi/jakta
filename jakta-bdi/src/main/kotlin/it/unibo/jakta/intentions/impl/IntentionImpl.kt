@@ -51,7 +51,7 @@ internal class IntentionImpl(
             id,
         )
 
-    override fun toString(): String = "Intention { id = ${id.id} \n ${recordStack.joinToString(
+    override fun toString(): String = "Intention { id = ${id.id} \n ${stack.joinToString(
         separator = "\n\t",
         prefix = "\t",
     )} \n }"

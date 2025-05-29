@@ -13,6 +13,7 @@ interface Plan<Belief : Any, Query : Any, Result> {
 
     val id: PlanID
         get() = PlanID()
+
     fun apply(event: Event): List<Action<Belief, Query, Result>>
 
     /** Returns the computed applicable plan */
