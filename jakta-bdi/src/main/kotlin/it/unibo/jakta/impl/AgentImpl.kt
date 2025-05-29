@@ -3,35 +3,33 @@ package it.unibo.jakta.impl
 import it.unibo.jakta.ASAgent
 import it.unibo.jakta.AgentID
 import it.unibo.jakta.AgentProcess
-import it.unibo.jakta.Jakta
+import it.unibo.jakta.actions.SideEffect
 import it.unibo.jakta.actions.effects.ActivitySideEffect
 import it.unibo.jakta.actions.effects.AgentChange
 import it.unibo.jakta.actions.effects.EnvironmentChange
 import it.unibo.jakta.actions.requests.ActionRequest
-import it.unibo.jakta.actions.responses.ActionResponse
+import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.beliefs.ASBeliefBase
 import it.unibo.jakta.beliefs.ASMutableBeliefBase
 import it.unibo.jakta.environment.BasicEnvironment
-import it.unibo.jakta.events.ASEvent
-import it.unibo.jakta.events.AchievementGoalFailure
-import it.unibo.jakta.events.Event
-import it.unibo.jakta.events.TestGoalFailure
+import it.unibo.jakta.events.*
 import it.unibo.jakta.fsm.Activity
 import it.unibo.jakta.intentions.ASIntention
 import it.unibo.jakta.intentions.ASIntentionPool
 import it.unibo.jakta.intentions.ASMutableIntentionPool
 import it.unibo.jakta.intentions.IntentionPoolStaticFactory
-import it.unibo.jakta.plans.ASPlan
-import java.util.ArrayDeque
-import java.util.Queue
+import it.unibo.jakta.plans.Plan
+import it.unibo.jakta.plans.impl.PlanImpl
+import it.unibo.tuprolog.core.Struct
+import it.unibo.tuprolog.solve.Solution
 
 internal class AgentImpl(
     override var controller: Activity.Controller?,
     agentID: AgentID = AgentID(),
     agentName: String = "Agent-$agentID",
-    events: List<Event.AgentEvent> = emptyList(),
+    events: List<Event.Internal.Goal<ASBelief, Struct, Solution>> = emptyList(),
     beliefBase: ASMutableBeliefBase = ASMutableBeliefBase.of(),
-    plans: MutableCollection<ASPlan> = mutableListOf(),
+    plans: MutableCollection<Plan<ASBelief, Struct, Solution>> = mutableListOf(),
     intentions: ASMutableIntentionPool = IntentionPoolStaticFactory.empty(),
     override var tags: Map<String, Any> = emptyMap(),
 ) : ASAgent {
@@ -41,17 +39,35 @@ internal class AgentImpl(
         beliefBase,
         plans,
         intentions,
-        ArrayDeque(events),
+        events.asSequence(),
     )
 
     data class MutableContext(
         override val agentID: AgentID,
         override val agentName: String,
         override val beliefBase: ASMutableBeliefBase,
-        override val plans: MutableCollection<ASPlan>,
+        override val plans: MutableCollection<Plan<ASBelief, Struct, Solution>>,
         override val intentions: ASMutableIntentionPool,
-        override val events: Queue<Event.AgentEvent> = ArrayDeque(),
-    ) : ASAgent.ASAgentContext, ASAgent.ASMutableAgentContext
+        private var events: Sequence<Event.Internal.Goal<ASBelief, Struct, Solution>> = emptySequence(),
+    ) : ASAgent.ASAgentContext, ASAgent.ASMutableAgentContext {
+
+        override fun enqueue(event: Event.Internal.Goal<ASBelief, Struct, Solution>) {
+            events += event
+        }
+
+        override fun drop(event: Event.Internal.Goal<ASBelief, Struct, Solution>) {
+            // TODO: decide what to do if there are two events that are the same
+            events = events.filter { it != event }
+        }
+
+        override fun poll(): Event.Internal.Goal<ASBelief, Struct, Solution>? {
+            val localEvent = events.firstOrNull()
+            if (localEvent != null) {
+                events = events.drop(1)
+            }
+            return localEvent
+        }
+    }
 
     fun updateContext(function: (mutableContext: ASAgent.ASMutableAgentContext) -> Unit): Unit =
         function.invoke(context)
@@ -59,7 +75,7 @@ internal class AgentImpl(
     override fun toString(): String = Jakta.asAslSyntax(this, true)
 
     override fun selectEvent(environment: BasicEnvironment): Event? =
-        context.events.poll() ?: this.context.beliefBase.events.poll() ?: environment.events.poll()
+        context.poll() ?: this.context.beliefBase.poll() ?: environment.poll()
 
     override fun scheduleIntention(): ASIntention = this.context.intentions.nextIntention()
 
@@ -69,7 +85,7 @@ internal class AgentImpl(
             emptyList(),
         )
 
-    override fun sense(environment: BasicEnvironment): Event? {
+    override fun sense(environment: BasicEnvironment): Event.Internal? {
         // STEP1: Perceive the BasicEnvironment.
         val perceptions = environment.percept()
 
@@ -98,7 +114,7 @@ internal class AgentImpl(
 //        }
 
         // STEP5: Selecting an Event.
-        return selectEvent(environment)
+        return selectEvent(environment).let { it as? Event.Internal ?: TODO("Transform external events into internal events") }
     }
 
     override fun replaceTags(tags: Map<String, Any>): ASAgent {
@@ -106,90 +122,94 @@ internal class AgentImpl(
         return this
     }
 
-    override fun selectRelevantPlans(
-        event: ASEvent,
-        planLibrary: List<ASPlan>,
-    ): List<ASPlan> = planLibrary.filter { it.isRelevant(event) }
+    override fun selectRelevantPlans(event: Event.Internal, planLibrary: List<Plan<ASBelief, Struct, Solution>>): List<Plan<ASBelief, Struct, Solution>> =
+        planLibrary.filter { it.isRelevant(event) }
 
     override fun isPlanApplicable(
-        event: ASEvent,
-        plan: ASPlan,
+        event: Event.Internal,
+        plan: Plan<ASBelief, Struct, Solution>,
         beliefBase: ASBeliefBase,
     ): Boolean = plan.isApplicable(event, beliefBase)
 
-    override fun selectApplicablePlan(plans: List<ASPlan>): ASPlan? = plans.firstOrNull()
+    override fun selectApplicablePlan(plans: List<Plan<ASBelief, Struct, Solution>>): Plan<ASBelief, Struct, Solution>? = plans.firstOrNull()
 
     override fun assignPlanToIntention(
-        event: ASEvent,
-        plan: ASPlan,
+        event: Event.Internal,
+        plan: Plan<ASBelief, Struct, Solution>,
         intentions: ASIntentionPool,
-    ): ASIntention? = when (event.isExternal()) {
-        true -> ASIntention.of(plan)
-        false -> {
-            when (event) {
-                is AchievementGoalFailure, is TestGoalFailure ->
-                    event.intention?.copy(recordStack = mutableListOf(plan.toActivationRecord()))
-                // else -> intentions[event.intention!!.id]!!.push(plan.toActivationRecord())
-                else -> {
-                    event.intention?.pop()
-                    event.intention?.push(plan.toActivationRecord())
-                    event.intention
-                }
-            }
+    ): ASIntention? = when (event) {
+        // TODO: when brought "upstairs", use the common type
+        is AchievementGoalFailure ->
+            event.intention?.copy(recordStack = mutableListOf(plan.toActivationRecord()))
+        is TestGoalFailure ->
+            event.intention?.copy(recordStack = mutableListOf(plan.toActivationRecord()))
+        // else -> intentions[event.intention!!.id]!!.push(plan.toActivationRecord())
+        is AchievementGoalInvocation -> {
+            event.intention?.pop()
+            event.intention?.push(plan.toActivationRecord())
+            event.intention
+        }
+        is TestGoalInvocation -> {
+            event.intention?.pop()
+            event.intention?.push(plan.toActivationRecord())
+            event.intention
         }
     }
 
-    override fun sense(agentProcess: AgentProcess): Event? = when {
+    override fun sense(agentProcess: AgentProcess): Event.Internal? = when {
         agentProcess is BasicEnvironment -> sense(agentProcess)
         else -> null
     }
 
-    override fun deliberate(agentProcess: AgentProcess, event: Event) = when {
+    override fun deliberate(agentProcess: AgentProcess, event: Event.Internal) = when {
         agentProcess is BasicEnvironment -> deliberate(agentProcess, event)
         else -> Unit
     }
 
-    override fun deliberate(environment: BasicEnvironment, event: Event) {
-        when {
-            event is ASEvent -> {
-                // STEP6: Retrieving all Relevant Plans.
-                val relevantPlans = selectRelevantPlans(event, this.context.plans.toList())
-                // if the set of relevant plans is empty, the event is simply discarded.
+    override fun deliberate(environment: BasicEnvironment, event: Event.Internal) {
+        // STEP6: Retrieving all Relevant Plans.
+        val relevantPlans = selectRelevantPlans(event, this.context.plans.toList())
+        // if the set of relevant plans is empty, the event is simply discarded.
 
-                // STEP7: Determining the Applicable Plans.
-                val applicablePlans = relevantPlans.filter {
-                    isPlanApplicable(event, it, this.context.beliefBase)
-                }
+        // STEP7: Determining the Applicable Plans.
+        val applicablePlans = relevantPlans.filter {
+            isPlanApplicable(event, it, this.context.beliefBase)
+        }
 
-                // STEP8: Selecting one Applicable Plan.
-                val selectedPlan = selectApplicablePlan(applicablePlans)
+        // STEP8: Selecting one Applicable Plan.
+        val selectedPlan = selectApplicablePlan(applicablePlans)
 
-                // Add plan to intentions
-                if (selectedPlan != null) {
-                    if (environment.debugEnabled) {
-                        println("${this.context.agentName}] Selected the event: $event")
-                    }
-                    // if (debugEnabled) println("[${agent.agentName}] Selected the plan: $selectedPlan")
-                    val updatedIntention = assignPlanToIntention(
-                        event,
-                        selectedPlan.applicablePlan(event, this.context.beliefBase),
-                        this.context.intentions,
-                    )
-                    // if (debugEnabled) println("[${agent.agentName}] Updated Intention: $updatedIntention")
-                    if (updatedIntention != null) {
-                        this.context.intentions.updateIntention(updatedIntention)
-                    }
-                } else {
-                    if (environment.debugEnabled) {
-                        println("[${this.context.agentName}] WARNING: There's no applicable plan for the event: $event")
-                    }
-                    if (event.isInternal()) {
-                        this.context.intentions.deleteIntention(event.intention!!.id)
-                    }
-                }
+        // Add plan to intentions
+        if (selectedPlan != null) {
+            if (environment.debugEnabled) {
+                println("[${this.context.agentName}] Selected the event: $event")
             }
-
-            else -> Unit
+            // if (debugEnabled) println("[${agent.agentName}] Selected the plan: $selectedPlan")
+            val updatedIntention = assignPlanToIntention(
+                event,
+                selectedPlan.applicablePlan(event, this.context.beliefBase),
+                this.context.intentions,
+            )
+            // if (debugEnabled) println("[${agent.agentName}] Updated Intention: $updatedIntention")
+            if (updatedIntention != null) {
+                this.context.intentions.updateIntention(updatedIntention)
+            }
+        } else {
+            if (environment.debugEnabled) {
+                println("[${this.context.agentName}] WARNING: There's no applicable plan for the event: $event")
+            }
+            when (event) {
+                // TODO: when brought "upstairs", use the common type
+                is AchievementGoalFailure ->
+                    this.context.intentions.deleteIntention(event.intention!!.id)
+                is TestGoalFailure ->
+                    this.context.intentions.deleteIntention(event.intention!!.id)
+                is AchievementGoalInvocation ->
+                    this.context.intentions.deleteIntention(event.intention!!.id)
+                is TestGoalInvocation ->
+                    this.context.intentions.deleteIntention(event.intention!!.id)
+                else -> error("Marmellata")
+            }
         }
     }
 
@@ -217,14 +237,10 @@ internal class AgentImpl(
             val intentionToExecute = scheduleIntention()
 
             // STEP10: Executing one Step on an Intention
-            if (intentionToExecute.recordStack.isNotEmpty()) {
-                if (environment.debugEnabled) {
-                    println(
-                        "[${context.agentName}] RUN -> ${intentionToExecute.nextActionToExecute()}",
-                    )
-                }
+            if (intentionToExecute.stack.isNotEmpty()) {
+                if (environment.debugEnabled)
+                    println("[${context.agentName}] RUN -> ${intentionToExecute.nextActionToExecute()}")
                 val sideEffects = runIntention(intentionToExecute)
-
                 sideEffects.forEach { sideEffect ->
                     val processController = controller
                     when {
@@ -236,6 +252,7 @@ internal class AgentImpl(
                     }
                 }
             }
+            // println("post run -> ${newAgent.context}")
         }
 
 //        // Generate BasicEnvironment Changes

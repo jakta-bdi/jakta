@@ -1,7 +1,6 @@
 package it.unibo.jakta.dsl.plans
 
 import it.unibo.jakta.Prolog2Jakta
-import it.unibo.jakta.beliefs.Belief
 import it.unibo.jakta.events.AchievementGoalTrigger
 import it.unibo.jakta.events.BeliefBaseRevision
 import it.unibo.jakta.events.TestGoalTrigger

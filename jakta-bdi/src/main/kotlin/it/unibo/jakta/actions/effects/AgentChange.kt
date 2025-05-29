@@ -5,7 +5,10 @@ import it.unibo.jakta.actions.SideEffect
 import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.events.Event
 import it.unibo.jakta.intentions.ASIntention
-import it.unibo.jakta.plans.ASPlan
+import it.unibo.jakta.plans.Plan
+import it.unibo.jakta.plans.impl.PlanImpl
+import it.unibo.tuprolog.core.Struct
+import it.unibo.tuprolog.solve.Solution
 
 fun interface AgentChange : SideEffect, (ASAgent.ASMutableAgentContext) -> Unit
 
@@ -32,17 +35,17 @@ interface BeliefChange : AgentChange {
 }
 
 interface EventChange : AgentChange {
-    val event: Event.AgentEvent
+    val event: Event.Internal.Goal<ASBelief, Struct, Solution>
 
-    data class EventAddition(override val event: Event.AgentEvent) : EventChange {
+    data class EventAddition(override val event: Event.Internal.Goal<ASBelief, Struct, Solution>) : EventChange {
         override fun invoke(mutableAgentContext: ASAgent.ASMutableAgentContext) {
-            mutableAgentContext.events.add(event)
+            mutableAgentContext.enqueue(event)
         }
     }
 
-    data class EventRemoval(override val event: Event.AgentEvent) : EventChange {
+    data class EventRemoval(override val event: Event.Internal.Goal<ASBelief, Struct, Solution>) : EventChange {
         override fun invoke(mutableAgentContext: ASAgent.ASMutableAgentContext) {
-            mutableAgentContext.events.remove(event)
+            mutableAgentContext.drop(event)
         }
     }
 }
@@ -70,15 +73,15 @@ interface IntentionChange : AgentChange {
 }
 
 interface PlanChange : AgentChange {
-    val plan: ASPlan
+    val plan: Plan<ASBelief, Struct, Solution>
 
-    data class PlanAddition(override val plan: ASPlan) : PlanChange {
+    data class PlanAddition(override val plan: Plan<ASBelief, Struct, Solution>) : PlanChange {
         override fun invoke(mutableAgentContext: ASAgent.ASMutableAgentContext) {
             mutableAgentContext.plans.add(plan)
         }
     }
 
-    data class PlanRemoval(override val plan: ASPlan) : PlanChange {
+    data class PlanRemoval(override val plan: Plan<ASBelief, Struct, Solution>) : PlanChange {
         override fun invoke(mutableAgentContext: ASAgent.ASMutableAgentContext) {
             mutableAgentContext.plans.remove(plan)
         }

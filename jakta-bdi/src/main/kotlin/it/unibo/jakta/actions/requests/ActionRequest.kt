@@ -4,10 +4,15 @@ import it.unibo.jakta.ASAgent
 import it.unibo.jakta.actions.ActionInvocationContext
 import it.unibo.jakta.actions.SideEffect
 import it.unibo.jakta.actions.responses.ActionResponse
+import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.fsm.time.Time
+import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
+import it.unibo.tuprolog.solve.Solution
 
-interface ActionRequest : ActionInvocationContext {
+typealias ASActionContext = ActionInvocationContext<ASBelief, Struct, Solution>
+
+interface ActionRequest : ASActionContext {
 
     override val agentContext: ASAgent.ASAgentContext
 

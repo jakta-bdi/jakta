@@ -1,26 +1,27 @@
 package it.unibo.jakta.intentions
 
 import it.unibo.jakta.actions.ASAction
-import it.unibo.jakta.plans.ASPlan
+import it.unibo.jakta.actions.Action
+import it.unibo.jakta.beliefs.ASBelief
+import it.unibo.jakta.plans.Plan
+import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
+import it.unibo.tuprolog.solve.Solution
 
 data class ASActivationRecord(
-    val generatingPlan: ASPlan,
-    val taskQueue: List<ASAction>,
-) {
-    fun isLastActionToExecute(): Boolean = taskQueue.size == 1
-    fun nextActionToExecute(): ASAction? = taskQueue.firstOrNull()
-    fun pop(): ASActivationRecord = ASActivationRecord(
-        generatingPlan,
-        when (nextActionToExecute() != null) {
-            true -> taskQueue - nextActionToExecute()!!
-            false -> taskQueue
-        },
-    )
+    override val origin: Plan<ASBelief, Struct, Solution>,
+    override val queue: Sequence<Action<ASBelief, Struct, Solution>>,
+) : ActivationRecord<ASBelief, Struct, Solution> {
 
-    override fun toString(): String = "AR(${generatingPlan.trigger.value}) :- $taskQueue"
+    override fun pop(): ActivationRecord<ASBelief, Struct, Solution> = ASActivationRecord(origin, when (nextActionToExecute() != null) {
+        true -> queue - nextActionToExecute()!!
+        false -> queue
+    })
+
+    override fun toString(): String = "AR(${origin.trigger}) :- $queue"
+
     fun applySubstitution(substitution: Substitution) = ASActivationRecord(
-        generatingPlan,
-        taskQueue.map { it.applySubstitution(substitution) },
+        origin,
+        queue.map { (it as? ASAction)?.applySubstitution(substitution) ?: error("Unsupported action type $it")}
     )
 }

@@ -10,7 +10,6 @@ import it.unibo.alchemist.model.Position
 import it.unibo.alchemist.model.molecules.SimpleMolecule
 import it.unibo.jakta.ASAgent
 import it.unibo.jakta.AgentID
-import it.unibo.jakta.beliefs.Belief
 import it.unibo.jakta.environment.BasicEnvironment
 import it.unibo.jakta.messages.Message
 import it.unibo.jakta.messages.MessageQueue
