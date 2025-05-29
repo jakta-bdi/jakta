@@ -1,9 +1,7 @@
 package it.unibo.jakta.intentions
 
-import it.unibo.jakta.ActivationRecord
 import it.unibo.jakta.actions.ASAction
 import it.unibo.jakta.beliefs.ASBelief
-import it.unibo.jakta.plans.ASPlan
 import it.unibo.jakta.plans.Plan
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution

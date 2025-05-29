@@ -1,13 +1,10 @@
 package it.unibo.jakta.plans.impl
 
 import it.unibo.jakta.actions.ASAction
-import it.unibo.jakta.actions.Action
 import it.unibo.jakta.beliefs.ASBelief
-import it.unibo.jakta.beliefs.ASBeliefBase
 import it.unibo.jakta.beliefs.BeliefBase
 import it.unibo.jakta.events.*
 import it.unibo.jakta.intentions.ASActivationRecord
-import it.unibo.jakta.plans.ASPlan
 import it.unibo.jakta.plans.Plan
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.solve.Solution

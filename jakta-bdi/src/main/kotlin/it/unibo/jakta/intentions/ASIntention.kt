@@ -1,9 +1,6 @@
 package it.unibo.jakta.intentions
 
-import it.unibo.jakta.ActivationRecord
-import it.unibo.jakta.Intention
 import it.unibo.jakta.actions.ASAction
-import it.unibo.jakta.actions.Action
 import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.intentions.impl.IntentionImpl
 import it.unibo.jakta.plans.ASPlan

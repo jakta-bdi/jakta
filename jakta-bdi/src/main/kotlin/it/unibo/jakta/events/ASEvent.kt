@@ -1,6 +1,5 @@
 package it.unibo.jakta.events
 
-import it.unibo.jakta.Intention
 import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.intentions.ASIntention
 import it.unibo.tuprolog.core.Struct

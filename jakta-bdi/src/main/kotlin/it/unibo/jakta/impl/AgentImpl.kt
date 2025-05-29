@@ -22,8 +22,6 @@ import it.unibo.jakta.plans.Plan
 import it.unibo.jakta.plans.impl.PlanImpl
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.solve.Solution
-import java.util.ArrayDeque
-import java.util.Queue
 
 internal class AgentImpl(
     override val controller: Activity.Controller?,
@@ -75,7 +73,7 @@ internal class AgentImpl(
         function.invoke(context)
 
     override fun selectEvent(environment: BasicEnvironment): Event? =
-        context.poll() ?: this.context.beliefBase.poll() ?: environment.events.poll()
+        context.poll() ?: this.context.beliefBase.poll() ?: environment.poll()
 
     override fun scheduleIntention(): ASIntention = this.context.intentions.nextIntention()
     // TODO(Does this implementation update the intention pool?)
