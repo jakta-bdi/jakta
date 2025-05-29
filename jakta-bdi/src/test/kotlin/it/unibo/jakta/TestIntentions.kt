@@ -6,10 +6,10 @@ import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
-import it.unibo.jakta.actions.ActionInvocationContext
+import it.unibo.jakta.actions.AbstractAction
 import it.unibo.jakta.actions.effects.BeliefChange
+import it.unibo.jakta.actions.requests.ASActionContext
 import it.unibo.jakta.actions.requests.ActionRequest
-import it.unibo.jakta.actions.stdlib.AbstractExecutionAction
 import it.unibo.jakta.actions.stdlib.Achieve
 import it.unibo.jakta.actions.stdlib.AddBelief
 import it.unibo.jakta.beliefs.ASBelief
@@ -17,7 +17,7 @@ import it.unibo.jakta.fsm.time.Time
 import it.unibo.jakta.intentions.ASIntention
 import it.unibo.jakta.intentions.ASMutableIntentionPool
 import it.unibo.jakta.intentions.IntentionPoolStaticFactory
-import it.unibo.jakta.plans.ASPlan
+import it.unibo.jakta.plans.ASNewPlan
 import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
@@ -30,7 +30,7 @@ class TestIntentions : DescribeSpec({
     val buySomething = ASBelief.fromSelfSource(Struct.of("buy", X))
     val eatSomething = ASBelief.fromSelfSource(Struct.of("eat", X))
 
-    val plan = ASPlan.ofAchievementGoalInvocation(
+    val plan = ASNewPlan.ofAchievementGoalInvocation(
         Struct.of("test"),
         listOf(AddBelief(buySomething), AddBelief(eatSomething)),
     )
@@ -58,13 +58,13 @@ class TestIntentions : DescribeSpec({
                 sideEffects shouldContain BeliefChange.BeliefAddition(buySomething)
 
                 val newIntention = intention.pop()
-                newIntention.recordStack.size shouldBe 1
-                newIntention.recordStack.first().nextActionToExecute().shouldBeInstanceOf<AddBelief>()
+                newIntention.stack.size shouldBe 1
+                newIntention.stack.first().nextActionToExecute().shouldBeInstanceOf<AddBelief>()
             }
         }
 
         it("should add on top of the record stack after a push() invocation") {
-            val newActivationRecord = ASPlan.ofAchievementGoalInvocation(
+            val newActivationRecord = ASNewPlan.ofAchievementGoalInvocation(
                 Struct.of("test"),
                 listOf(Achieve(Atom.of("clean"))),
             ).toActivationRecord()
@@ -77,12 +77,12 @@ class TestIntentions : DescribeSpec({
 
             data class VerifySubstitution(
                 var value: Term,
-            ) : AbstractExecutionAction.WithoutSideEffects() {
+            ) : AbstractAction.WithoutSideEffects() {
                 override fun applySubstitution(substitution: Substitution) = VerifySubstitution(
                     value = substitution.applyTo(value) ?: error("Cannot apply substitution to $value"),
                 )
 
-                override fun execute(context: ActionInvocationContext) {
+                override fun execute(context: ASActionContext) {
                     value.isAtom shouldBe true
                     value.castToAtom().value shouldBe "chocolate"
                 }
@@ -91,25 +91,25 @@ class TestIntentions : DescribeSpec({
             val substitution = Substitution.of(X, Atom.of("chocolate"))
             val newIntention = ASIntention.of(
                 (
-                    intention.recordStack + ASPlan.ofAchievementGoalInvocation(
+                    intention.stack + ASNewPlan.ofAchievementGoalInvocation(
                         Struct.of("test"),
                         listOf(VerifySubstitution(X)),
                     ).toActivationRecord()
                     ).toMutableList(),
             )
-            newIntention.recordStack.size shouldBe 2
+            newIntention.stack.size shouldBe 2
             val substitutedIntention = newIntention.applySubstitution(substitution)
-            substitutedIntention.recordStack.size shouldBe 2
+            substitutedIntention.stack.size shouldBe 2
             println(substitutedIntention)
-            substitutedIntention.recordStack.first().nextActionToExecute().shouldBeInstanceOf<AddBelief>()
-            substitutedIntention.recordStack.last().nextActionToExecute().shouldBeInstanceOf<VerifySubstitution>()
+            substitutedIntention.stack.first().nextActionToExecute().shouldBeInstanceOf<AddBelief>()
+            substitutedIntention.stack.last().nextActionToExecute().shouldBeInstanceOf<VerifySubstitution>()
             newIntention.nextActionToExecute()?.invoke(ActionRequest.of(ASAgent.of().context, Time.real()))
         }
     }
 
     describe("An intention pool") {
         val intention2 = ASIntention.of(
-            ASPlan.ofAchievementGoalInvocation(
+            ASNewPlan.ofAchievementGoalInvocation(
                 Struct.of("test"),
                 listOf(Achieve(Struct.of("clean", Atom.of("home")))),
             ),
@@ -142,7 +142,7 @@ class TestIntentions : DescribeSpec({
             val i3 = intention2.pop()
             println(i3)
             intentionPool2.updateIntention(i3)
-            i3.recordStack.isEmpty() shouldBe true
+            i3.stack.isEmpty() shouldBe true
             println(intentionPool2)
             intentionPool2.size shouldBe 1
         }

@@ -4,9 +4,9 @@ import io.kotest.assertions.fail
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
-import it.unibo.jakta.actions.ActionInvocationContext
+import it.unibo.jakta.actions.AbstractAction
+import it.unibo.jakta.actions.requests.ASActionContext
 import it.unibo.jakta.actions.requests.ActionRequest
-import it.unibo.jakta.actions.stdlib.AbstractExecutionAction
 import it.unibo.jakta.actions.stdlib.Achieve
 import it.unibo.jakta.actions.stdlib.Print
 import it.unibo.jakta.actions.stdlib.Stop
@@ -15,9 +15,10 @@ import it.unibo.jakta.beliefs.ASMutableBeliefBase
 import it.unibo.jakta.environment.BasicEnvironment
 import it.unibo.jakta.events.AchievementGoalInvocation
 import it.unibo.jakta.events.BeliefBaseAddition
+import it.unibo.jakta.events.value
 import it.unibo.jakta.fsm.Activity
 import it.unibo.jakta.fsm.time.Time
-import it.unibo.jakta.plans.ASPlan
+import it.unibo.jakta.plans.ASNewPlan
 import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
@@ -31,19 +32,19 @@ class TestPlans : DescribeSpec({
     val chocolateNeed = ASBelief.fromSelfSource(Struct.of("need", Atom.of("chocolate")))
     val genericDesire = ASBelief.fromSelfSource(Struct.of("desire", Jakta.parseVar("X")))
 
-    val plan = ASPlan.ofBeliefBaseAddition(genericDesire, emptyList())
+    val plan = ASNewPlan.ofBeliefBaseAddition(genericDesire, emptyList())
     val planLibrary = listOf(plan)
 
     data class VerifySubstitution(
         val term: Term,
         val expected: Int,
-    ) : AbstractExecutionAction.WithoutSideEffects() {
+    ) : AbstractAction.WithoutSideEffects() {
         override fun applySubstitution(substitution: Substitution) = VerifySubstitution(
             term = substitution.applyTo(term) ?: fail("Failed to apply substitution to $term"),
             expected = expected,
         )
 
-        override fun execute(context: ActionInvocationContext) {
+        override fun execute(context: ASActionContext) {
             println("The term is $term")
             term.asInteger()?.value shouldBe BigInteger.of(expected)
         }
@@ -62,7 +63,7 @@ class TestPlans : DescribeSpec({
             relevantPlans.size shouldBe 1
             relevantPlans.first() shouldBe plan
 
-            val planLibrary2 = listOf(ASPlan.ofBeliefBaseRemoval(genericDesire, emptyList()))
+            val planLibrary2 = listOf(ASNewPlan.ofBeliefBaseRemoval(genericDesire, emptyList()))
             planLibrary2.count {
                 it.isRelevant(event)
             } shouldBe 0
@@ -75,33 +76,33 @@ class TestPlans : DescribeSpec({
 
             plan.isApplicable(event, bb) shouldBe true
 
-            val plan2 = ASPlan.ofBeliefBaseAddition(
+            val plan2 = ASNewPlan.ofBeliefBaseAddition(
                 belief = genericDesire,
                 guard = Truth.FALSE,
                 goals = emptyList(),
             )
             plan2.isApplicable(event, bb) shouldBe false
 
-            val plan3 = ASPlan.ofBeliefBaseRemoval(genericDesire, emptyList())
+            val plan3 = ASNewPlan.ofBeliefBaseRemoval(genericDesire, emptyList())
             plan3.isApplicable(event, bb) shouldBe false
         }
 
         it("should unify the triggering event variables") {
             val action = Print(Jakta.parseVar("S"))
             val event = AchievementGoalInvocation(Jakta.parseStruct("start(0, 10)"))
-            val p = ASPlan.ofAchievementGoalInvocation(
+            val p = ASNewPlan.ofAchievementGoalInvocation(
                 value = Jakta.parseStruct("start(S, M)"),
                 goals = listOf(action),
             )
             p.isApplicable(event, ASMutableBeliefBase.of()) shouldBe true
             val ap = p.applicablePlan(event, ASMutableBeliefBase.of())
-            ap.trigger.value shouldBe event.value
+            ap.trigger shouldBe event.value
             ap.apply(event).first().shouldBeInstanceOf<Print>()
         }
 
         it("should run if and only if the context is valid, and unify those values") {
             val event = AchievementGoalInvocation(Jakta.parseStruct("pippo(0)"))
-            val p = ASPlan.ofAchievementGoalInvocation(
+            val p = ASNewPlan.ofAchievementGoalInvocation(
                 value = Jakta.parseStruct("pippo(S)"),
                 guard = Jakta.parseStruct("S < 5 & N is S + 1"),
                 goals = listOf(
@@ -123,14 +124,14 @@ class TestPlans : DescribeSpec({
                 name = "alice",
                 events = listOf(AchievementGoalInvocation(start)),
                 planLibrary = mutableListOf(
-                    ASPlan.ofAchievementGoalInvocation(
+                    ASNewPlan.ofAchievementGoalInvocation(
                         value = Jakta.parseStruct("start(S, S)"),
                         goals = listOf(
                             VerifySubstitution(Jakta.parseVar("S"), 1),
                             Stop,
                         ),
                     ),
-                    ASPlan.ofAchievementGoalInvocation(
+                    ASNewPlan.ofAchievementGoalInvocation(
                         value = Jakta.parseStruct("start(S, M)"),
                         guard = Jakta.parseStruct("S < M & N is S + 1"),
                         goals = listOf(

@@ -4,7 +4,7 @@ import it.unibo.jakta.actions.stdlib.Achieve
 import it.unibo.jakta.actions.stdlib.Print
 import it.unibo.jakta.environment.BasicEnvironment
 import it.unibo.jakta.events.AchievementGoalInvocation
-import it.unibo.jakta.plans.ASPlan
+import it.unibo.jakta.plans.ASNewPlan
 
 fun main() {
     val agent = ASAgent.of(
@@ -14,11 +14,11 @@ fun main() {
             AchievementGoalInvocation(Jakta.parseStruct("count(100, 90, down)")),
         ),
         planLibrary = mutableListOf(
-            ASPlan.ofAchievementGoalInvocation(
+            ASNewPlan.ofAchievementGoalInvocation(
                 value = Jakta.parseStruct("count(N, N, Dir)"),
                 goals = listOf(Print(Jakta.parseStruct("print(\"End of\", Dir)"))),
             ),
-            ASPlan.ofAchievementGoalInvocation(
+            ASNewPlan.ofAchievementGoalInvocation(
                 value = Jakta.parseStruct("count(N, M, up)"),
                 guard = Jakta.parseStruct("N < M & S is N + 1"),
                 goals = listOf(
@@ -26,7 +26,7 @@ fun main() {
                     Achieve(Jakta.parseStruct("count(S, M, up)")),
                 ),
             ),
-            ASPlan.ofAchievementGoalInvocation(
+            ASNewPlan.ofAchievementGoalInvocation(
                 value = Jakta.parseStruct("count(N, M, down)"),
                 guard = Jakta.parseStruct("N > M & S is N - 1"),
                 goals = listOf(

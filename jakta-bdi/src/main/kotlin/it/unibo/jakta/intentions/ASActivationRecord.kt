@@ -13,15 +13,18 @@ data class ASActivationRecord(
     override val queue: Sequence<Action<ASBelief, Struct, Solution>>,
 ) : ActivationRecord<ASBelief, Struct, Solution> {
 
-    override fun pop(): ActivationRecord<ASBelief, Struct, Solution> = ASActivationRecord(origin, when (nextActionToExecute() != null) {
-        true -> queue - nextActionToExecute()!!
-        false -> queue
-    })
+    override fun pop(): ActivationRecord<ASBelief, Struct, Solution> = ASActivationRecord(
+        origin,
+        when (nextActionToExecute() != null) {
+            true -> queue - nextActionToExecute()!!
+            false -> queue
+        },
+    )
 
     override fun toString(): String = "AR(${origin.trigger}) :- $queue"
 
     fun applySubstitution(substitution: Substitution) = ASActivationRecord(
         origin,
-        queue.map { (it as? ASAction)?.applySubstitution(substitution) ?: error("Unsupported action type $it")}
+        queue.map { (it as? ASAction)?.applySubstitution(substitution) ?: error("Unsupported action type $it") },
     )
 }

@@ -1,6 +1,5 @@
 package it.unibo.jakta.intentions.impl
 
-import it.unibo.jakta.actions.ASAction
 import it.unibo.jakta.actions.Action
 import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.intentions.ASActivationRecord
@@ -46,7 +45,10 @@ internal class IntentionImpl(
 
     override fun applySubstitution(substitution: Substitution) =
         IntentionImpl(
-            stack.apply { (stack.first() as? ASActivationRecord)?.applySubstitution(substitution) ?: error("Invalid activation record type") },
+            stack.apply {
+                (stack.first() as? ASActivationRecord)?.applySubstitution(substitution)
+                    ?: error("Invalid activation record type")
+            },
             isSuspended,
             id,
         )

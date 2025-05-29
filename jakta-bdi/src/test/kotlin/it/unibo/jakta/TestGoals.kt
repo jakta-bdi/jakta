@@ -17,7 +17,7 @@ class TestGoals : DescribeSpec({
     describe("A PrologGoal") {
         it("should apply a substitution to its variables") {
             val substitution = ASMutableBeliefBase.of(listOf(strawberryDesire))
-                .getSolutionOf(belief)
+                .select(belief.content.head)
                 .substitution
 
             val goal = Achieve(belief.content)

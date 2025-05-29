@@ -7,7 +7,7 @@ import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.beliefs.ASMutableBeliefBase
 import it.unibo.jakta.environment.BasicEnvironment
 import it.unibo.jakta.events.AchievementGoalInvocation
-import it.unibo.jakta.plans.ASPlan
+import it.unibo.jakta.plans.ASNewPlan
 import it.unibo.tuprolog.core.Atom
 
 fun main() {
@@ -17,7 +17,7 @@ fun main() {
         beliefBase = ASMutableBeliefBase.of(ASBelief.fromSelfSource(Jakta.parseStruct("run"))),
         events = listOf(AchievementGoalInvocation(start)),
         planLibrary = mutableListOf(
-            ASPlan.ofAchievementGoalInvocation(
+            ASNewPlan.ofAchievementGoalInvocation(
                 value = Jakta.parseStruct("start"),
                 goals = listOf(
                     Print(Atom.of("Before Sleep")),

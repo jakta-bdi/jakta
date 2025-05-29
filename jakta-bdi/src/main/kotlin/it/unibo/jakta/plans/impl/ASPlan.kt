@@ -4,7 +4,8 @@ import it.unibo.jakta.Jakta
 import it.unibo.jakta.actions.ASAction
 import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.beliefs.BeliefBase
-import it.unibo.jakta.events.*
+import it.unibo.jakta.events.Event
+import it.unibo.jakta.events.value
 import it.unibo.jakta.intentions.ASActivationRecord
 import it.unibo.jakta.plans.Plan
 import it.unibo.tuprolog.core.Struct
@@ -13,7 +14,7 @@ import it.unibo.tuprolog.core.operators.OperatorSet
 import it.unibo.tuprolog.solve.Solution
 import it.unibo.tuprolog.unify.Unificator.Companion.mguWith
 
-data class PlanImpl(
+data class ASPlan(
     override val trigger: Struct,
     override val guard: Struct,
     val tasks: List<ASAction>,
@@ -34,18 +35,21 @@ data class PlanImpl(
         return "+!$t : $g <- $body\n"
     }
 
-    override fun applicablePlan(event: Event.Internal, beliefBase: BeliefBase<ASBelief, Struct, Solution>): Plan<ASBelief, Struct, Solution> =
+    override fun applicablePlan(
+        event: Event.Internal,
+        beliefBase: BeliefBase<ASBelief, Struct, Solution>,
+    ): Plan<ASBelief, Struct, Solution> =
         when (isApplicable(event, beliefBase)) {
             true -> {
                 val mgu = event.value mguWith this.trigger
                 val actualGuard = guard.apply(mgu).castToStruct()
                 val solvedGuard = beliefBase.select(actualGuard)
-                PlanImpl(
+                ASPlan(
                     trigger = event.value,
                     guard = actualGuard,
                     tasks = tasks.map {
                         it.applySubstitution(mgu).applySubstitution(solvedGuard.substitution)
-                    }
+                    },
                 )
             }
             else -> this

@@ -7,6 +7,7 @@ import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.beliefs.ASMutableBeliefBase
 import it.unibo.jakta.events.BeliefBaseAddition
 import it.unibo.jakta.events.BeliefBaseRemoval
+import it.unibo.jakta.events.value
 import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Var
@@ -25,8 +26,8 @@ class TestBeliefs : DescribeSpec({
         it("Should be added to a Belief Base") {
             emptybb.count() shouldBe 0
             emptybb.add(chocolateDesire) shouldBe true
-            emptybb.events.size shouldBe 1
-            emptybb.events.first().shouldBeInstanceOf<BeliefBaseAddition>()
+            // emptybb.events.size shouldBe 1
+            emptybb.poll().shouldBeInstanceOf<BeliefBaseAddition>()
             emptybb.isEmpty() shouldBe false
             emptybb.count() shouldBe 1
             emptybb.size shouldBe 1
@@ -60,10 +61,10 @@ class TestBeliefs : DescribeSpec({
             bb.remove(genericNeed)
             bb.count() shouldBe 2
             bb.remove(strawberryDesire)
-            bb.events.size shouldBe 2
-            bb.events.forEach {
-                it.shouldBeInstanceOf<BeliefBaseRemoval>()
-            }
+            // bb.events.size shouldBe 2
+            bb.poll().shouldBeInstanceOf<BeliefBaseRemoval>()
+            bb.poll().shouldBeInstanceOf<BeliefBaseRemoval>()
+
             bb.count() shouldBe 1
             bb.first() shouldBe chocolateDesire
         }
@@ -78,11 +79,12 @@ class TestBeliefs : DescribeSpec({
             bb2.count() shouldBe 2
 
             bb.addAll(bb2)
-            bb.events.size shouldBe 2
-            bb.events.filterIsInstance<BeliefBaseAddition>().count() shouldBe 2
-            bb.events.filterIsInstance<BeliefBaseAddition>().map {
+            // bb.events.size shouldBe 2
+            val e1 = bb.poll().shouldBeInstanceOf<BeliefBaseAddition>()
+            val e2 = bb.poll().shouldBeInstanceOf<BeliefBaseAddition>()
+            listOf(e1, e2).map {
                 ASBelief.from(it.value)
-            } shouldBe listOf(genericNeed, chocolateDesire) // TODO("Not sure this is working")
+            } shouldBe listOf(genericNeed, chocolateDesire)
             bb.count() shouldBe 3
         }
 
@@ -94,9 +96,10 @@ class TestBeliefs : DescribeSpec({
             bb2.count() shouldBe 2
 
             bb.removeAll(bb2)
-            bb.events.count() shouldBe 2
-            bb.events.filterIsInstance<BeliefBaseRemoval>().count() shouldBe 2
-            bb.events.filterIsInstance<BeliefBaseRemoval>().map {
+            // bb.events.count() shouldBe 2
+            val e1 = bb.poll().shouldBeInstanceOf<BeliefBaseRemoval>()
+            val e2 = bb.poll().shouldBeInstanceOf<BeliefBaseRemoval>()
+            listOf(e1, e2).map {
                 ASBelief.from(it.value)
             } shouldBe listOf(chocolateDesire, strawberryDesire)
 
@@ -105,12 +108,14 @@ class TestBeliefs : DescribeSpec({
         }
 
         it("should be solved") {
-            var substitution = ASMutableBeliefBase.of(listOf(strawberryDesire))
-                .getSolutionOf(genericDesire).substitution
+            var substitution = ASMutableBeliefBase.of(listOf(strawberryDesire)).also {
+                it.isEmpty() shouldBe false
+                it.size shouldBe 1
+            }.select(genericDesire.content.head).substitution
             substitution.isFailed shouldBe false
             substitution.values.first() shouldBe Atom.of("strawberry")
             substitution = ASMutableBeliefBase.of(listOf(genericDesire))
-                .getSolutionOf(strawberryDesire).substitution
+                .select(strawberryDesire.content.head).substitution
             substitution.isSuccess shouldBe true
             substitution.values.size shouldBe 0
         }
@@ -121,7 +126,8 @@ class TestBeliefs : DescribeSpec({
             val belief = ASBelief.fromSelfSource(Struct.of("something", Var.of("X")))
             val bb = ASMutableBeliefBase.of()
             bb.update(belief)
-            bb.events.size shouldBe 0
+            // bb.events.size shouldBe 0
+            bb.poll() shouldBe null
             bb.count() shouldBe 0
         }
     }
@@ -129,7 +135,7 @@ class TestBeliefs : DescribeSpec({
     describe("A belief annotation") {
         it("should be solved as well") {
             val bb = ASMutableBeliefBase.of(ASBelief.fromSelfSource(Struct.of("coffee", Atom.of("hot"))))
-            bb.getSolutionOf(
+            bb.select(
                 Struct.of("coffee", Struct.of("source", Var.of("X")), Atom.of("hot")),
             ).substitution.values.first() shouldBe Atom.of("self")
         }

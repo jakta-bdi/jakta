@@ -4,7 +4,7 @@ import it.unibo.jakta.actions.stdlib.Achieve
 import it.unibo.jakta.actions.stdlib.Print
 import it.unibo.jakta.environment.BasicEnvironment
 import it.unibo.jakta.events.AchievementGoalInvocation
-import it.unibo.jakta.plans.ASPlan
+import it.unibo.jakta.plans.ASNewPlan
 import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.Var
 
@@ -16,13 +16,13 @@ fun main() {
         name = "alice",
         events = listOf(AchievementGoalInvocation(start)),
         planLibrary = mutableListOf(
-            ASPlan.ofAchievementGoalInvocation(
+            ASNewPlan.ofAchievementGoalInvocation(
                 value = Jakta.parseStruct("start(N, N)"),
                 goals = listOf(
                     Print(Atom.of("hello world"), Var.of("N")),
                 ),
             ),
-            ASPlan.ofAchievementGoalInvocation(
+            ASNewPlan.ofAchievementGoalInvocation(
                 value = Jakta.parseStruct("start(N, M)"),
                 guard = Jakta.parseStruct("N < M & S is N + 1"),
                 goals = listOf(
@@ -37,7 +37,7 @@ fun main() {
         name = "bob",
         events = listOf(AchievementGoalInvocation(start)),
         planLibrary = mutableListOf(
-            ASPlan.ofAchievementGoalInvocation(
+            ASNewPlan.ofAchievementGoalInvocation(
                 value = start,
                 goals = listOf(
                     Print(Atom.of("Hello, my name is Bob")),

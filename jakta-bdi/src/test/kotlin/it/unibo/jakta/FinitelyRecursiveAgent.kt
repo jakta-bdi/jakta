@@ -4,7 +4,7 @@ import it.unibo.jakta.actions.stdlib.Achieve
 import it.unibo.jakta.actions.stdlib.Print
 import it.unibo.jakta.environment.BasicEnvironment
 import it.unibo.jakta.events.AchievementGoalInvocation
-import it.unibo.jakta.plans.ASPlan
+import it.unibo.jakta.plans.ASNewPlan
 
 fun main() {
     val start = Jakta.parseStruct("start(0, 120)")
@@ -13,13 +13,13 @@ fun main() {
         name = "alice",
         events = listOf(AchievementGoalInvocation(start)),
         planLibrary = mutableListOf(
-            ASPlan.ofAchievementGoalInvocation(
+            ASNewPlan.ofAchievementGoalInvocation(
                 value = Jakta.parseStruct("start(S, S)"),
                 goals = listOf(
                     Print(Jakta.parseStruct("print(\"hello world\", S)")),
                 ),
             ),
-            ASPlan.ofAchievementGoalInvocation(
+            ASNewPlan.ofAchievementGoalInvocation(
                 value = Jakta.parseStruct("start(S, M)"),
                 guard = Jakta.parseStruct("S < M & N is S + 1"),
                 goals = listOf(

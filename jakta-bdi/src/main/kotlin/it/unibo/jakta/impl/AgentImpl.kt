@@ -4,7 +4,7 @@ import it.unibo.jakta.ASAgent
 import it.unibo.jakta.AgentID
 import it.unibo.jakta.AgentProcess
 import it.unibo.jakta.Jakta
-import it.unibo.jakta.actions.SideEffect
+import it.unibo.jakta.actions.ASAction
 import it.unibo.jakta.actions.effects.ActivitySideEffect
 import it.unibo.jakta.actions.effects.AgentChange
 import it.unibo.jakta.actions.effects.EnvironmentChange
@@ -14,14 +14,17 @@ import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.beliefs.ASBeliefBase
 import it.unibo.jakta.beliefs.ASMutableBeliefBase
 import it.unibo.jakta.environment.BasicEnvironment
-import it.unibo.jakta.events.*
+import it.unibo.jakta.events.AchievementGoalFailure
+import it.unibo.jakta.events.AchievementGoalInvocation
+import it.unibo.jakta.events.Event
+import it.unibo.jakta.events.TestGoalFailure
+import it.unibo.jakta.events.TestGoalInvocation
 import it.unibo.jakta.fsm.Activity
 import it.unibo.jakta.intentions.ASIntention
 import it.unibo.jakta.intentions.ASIntentionPool
 import it.unibo.jakta.intentions.ASMutableIntentionPool
 import it.unibo.jakta.intentions.IntentionPoolStaticFactory
 import it.unibo.jakta.plans.Plan
-import it.unibo.jakta.plans.impl.PlanImpl
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.solve.Solution
 
@@ -82,7 +85,10 @@ internal class AgentImpl(
     override fun scheduleIntention(): ASIntention = this.context.intentions.nextIntention()
 
     override fun runIntention(intention: ASIntention): ActionResponse =
-        intention.nextTask()?.runAction(ActionRequest.of(context, controller?.currentTime())) ?: ActionResponse(
+        intention.nextTask()?.let {
+            val asAction = it as? ASAction ?: error("Not executing the expected type of actions")
+            asAction.runAction(ActionRequest.of(this.context, controller?.currentTime()))
+        } ?: ActionResponse(
             it.unibo.tuprolog.core.Substitution.failed(),
             emptyList(),
         )
@@ -116,7 +122,9 @@ internal class AgentImpl(
 //        }
 
         // STEP5: Selecting an Event.
-        return selectEvent(environment).let { it as? Event.Internal ?: TODO("Transform external events into internal events") }
+        return selectEvent(
+            environment,
+        ).let { it as? Event.Internal ?: TODO("Transform external events into internal events") }
     }
 
     override fun replaceTags(tags: Map<String, Any>): ASAgent {
@@ -124,7 +132,10 @@ internal class AgentImpl(
         return this
     }
 
-    override fun selectRelevantPlans(event: Event.Internal, planLibrary: List<Plan<ASBelief, Struct, Solution>>): List<Plan<ASBelief, Struct, Solution>> =
+    override fun selectRelevantPlans(
+        event: Event.Internal,
+        planLibrary: List<Plan<ASBelief, Struct, Solution>>,
+    ): List<Plan<ASBelief, Struct, Solution>> =
         planLibrary.filter { it.isRelevant(event) }
 
     override fun isPlanApplicable(
@@ -133,7 +144,9 @@ internal class AgentImpl(
         beliefBase: ASBeliefBase,
     ): Boolean = plan.isApplicable(event, beliefBase)
 
-    override fun selectApplicablePlan(plans: List<Plan<ASBelief, Struct, Solution>>): Plan<ASBelief, Struct, Solution>? = plans.firstOrNull()
+    override fun selectApplicablePlan(
+        plans: List<Plan<ASBelief, Struct, Solution>>,
+    ): Plan<ASBelief, Struct, Solution>? = plans.firstOrNull()
 
     override fun assignPlanToIntention(
         event: Event.Internal,
@@ -156,6 +169,7 @@ internal class AgentImpl(
             event.intention?.push(plan.toActivationRecord())
             event.intention
         }
+        else -> null
     }
 
     override fun sense(agentProcess: AgentProcess): Event.Internal? = when {
@@ -240,8 +254,9 @@ internal class AgentImpl(
 
             // STEP10: Executing one Step on an Intention
             if (intentionToExecute.stack.isNotEmpty()) {
-                if (environment.debugEnabled)
+                if (environment.debugEnabled) {
                     println("[${context.agentName}] RUN -> ${intentionToExecute.nextActionToExecute()}")
+                }
                 val sideEffects = runIntention(intentionToExecute)
                 sideEffects.forEach { sideEffect ->
                     val processController = controller

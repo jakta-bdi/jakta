@@ -4,12 +4,14 @@ import it.unibo.jakta.actions.effects.EventChange
 import it.unibo.jakta.actions.effects.IntentionChange
 import it.unibo.jakta.actions.requests.ActionRequest
 import it.unibo.jakta.actions.responses.ActionResponse
+import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.events.AchievementGoalFailure
 import it.unibo.jakta.intentions.ASIntention
+import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
+import it.unibo.tuprolog.solve.Solution
 
 abstract class AbstractAction : ASAction {
-
     protected var result: Substitution = Substitution.empty()
     private val effects: MutableList<SideEffect> = mutableListOf()
 
@@ -21,7 +23,17 @@ abstract class AbstractAction : ASAction {
         result = Substitution.failed()
     }
 
-    fun postExec(intention: ASIntention) {
+    override fun runAction(request: ActionRequest): ActionResponse {
+        // val request = p1 as? ActionRequest ?: error("Not executing with a valid action request")
+        val intention = request.agentContext.intentions.nextIntention()
+        val effects = invoke(request)
+        postExec(intention)
+        val response = request.reply(result, effects.toMutableList() + this.effects)
+        // effects.clear()
+        return response
+    }
+
+    private fun postExec(intention: ASIntention) {
         var newIntention = intention.pop()
         if (result.isSuccess) {
             if (newIntention.stack.isNotEmpty()) {
@@ -36,21 +48,8 @@ abstract class AbstractAction : ASAction {
         }
     }
 
-    override fun run(request: ActionRequest): ActionResponse {
-        val intention = request.agentContext.intentions.nextIntention()
-
-        // STATIC CHECKING
-//        if (argument.arguments.size > signature.arity) {
-//            val failure = AchievementGoalFailure(intention.currentPlan().trigger.value, intention)
-//            val failureEvent = EventChange.EventAddition(failure)
-//            // throw IllegalArgumentException("ERROR: Wrong number of arguments for action ${signature.name}")
-//            effects.add(failureEvent)
-//        }
-
-        val effects = invoke(request)
-        postExec(intention)
-        val response = request.reply(result, effects.toMutableList() + this.effects)
-        // effects.clear()
-        return response
+    abstract class WithoutSideEffects : Action.WithoutSideEffect<ASBelief, Struct, Solution>, AbstractAction() {
+        final override fun invoke(context: ActionInvocationContext<ASBelief, Struct, Solution>): List<SideEffect> =
+            super.invoke(context)
     }
 }

@@ -13,7 +13,6 @@ import it.unibo.jakta.intentions.ASIntention
 import it.unibo.jakta.intentions.ASIntentionPool
 import it.unibo.jakta.intentions.ASMutableIntentionPool
 import it.unibo.jakta.plans.Plan
-import it.unibo.jakta.plans.impl.PlanImpl
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.solve.Solution
 import it.unibo.tuprolog.utils.Taggable
@@ -60,7 +59,10 @@ interface ASAgent : Agent, Taggable<ASAgent> {
      * @param planLibrary: the [Plan]s known by the Agent
      * @return the relevant [Plan]s
      */
-    fun selectRelevantPlans(event: Event.Internal, planLibrary: List<Plan<ASBelief, Struct, Solution>>): List<Plan<ASBelief, Struct, Solution>>
+    fun selectRelevantPlans(
+        event: Event.Internal,
+        planLibrary: List<Plan<ASBelief, Struct, Solution>>,
+    ): List<Plan<ASBelief, Struct, Solution>>
 
     /**
      * STEP 7 of reasoning cycle: Determining the Applicable Plans.

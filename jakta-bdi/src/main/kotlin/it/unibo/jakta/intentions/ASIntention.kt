@@ -1,10 +1,8 @@
 package it.unibo.jakta.intentions
 
-import it.unibo.jakta.actions.ASAction
 import it.unibo.jakta.actions.Action
 import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.intentions.impl.IntentionImpl
-import it.unibo.jakta.plans.ASPlan
 import it.unibo.jakta.plans.Plan
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
@@ -49,7 +47,9 @@ interface ASIntention : Intention<ASBelief, Struct, Solution> {
     ): ASIntention = of(recordStack, isSuspended, id)
 
     companion object {
-        fun of(plan: Plan<ASBelief, Struct, Solution>): ASIntention = IntentionImpl(mutableListOf(plan.toActivationRecord()))
+        fun of(
+            plan: Plan<ASBelief, Struct, Solution>,
+        ): ASIntention = IntentionImpl(mutableListOf(plan.toActivationRecord()))
 
         fun of(
             recordStack: MutableList<ActivationRecord<ASBelief, Struct, Solution>> = mutableListOf(),

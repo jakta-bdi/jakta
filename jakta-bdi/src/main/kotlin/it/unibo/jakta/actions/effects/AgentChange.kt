@@ -6,7 +6,6 @@ import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.events.Event
 import it.unibo.jakta.intentions.ASIntention
 import it.unibo.jakta.plans.Plan
-import it.unibo.jakta.plans.impl.PlanImpl
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.solve.Solution
 

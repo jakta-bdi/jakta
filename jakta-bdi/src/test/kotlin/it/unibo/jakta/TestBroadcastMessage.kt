@@ -1,13 +1,13 @@
 package it.unibo.jakta
 
 import it.unibo.jakta.actions.ASAction
-import it.unibo.jakta.actions.ActionInvocationContext
-import it.unibo.jakta.actions.stdlib.AbstractExecutionAction
+import it.unibo.jakta.actions.AbstractAction
+import it.unibo.jakta.actions.requests.ASActionContext
 import it.unibo.jakta.actions.stdlib.Print
 import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.environment.BasicEnvironment
 import it.unibo.jakta.events.AchievementGoalInvocation
-import it.unibo.jakta.plans.ASPlan
+import it.unibo.jakta.plans.ASNewPlan
 import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.core.Var
@@ -16,12 +16,12 @@ fun main() {
     class BroadcastAction(
         val type: String,
         val message: String,
-    ) : AbstractExecutionAction.WithoutSideEffects() {
+    ) : AbstractAction.WithoutSideEffects() {
         override fun applySubstitution(substitution: Substitution): ASAction {
             TODO("Can't this be generic?")
         }
 
-        override fun execute(context: ActionInvocationContext) {
+        override fun execute(context: ASActionContext) {
 //            when (type) {
 //                "tell" -> broadcastMessage(Message(request.sender, Tell, message))
 //                "achieve" -> broadcastMessage(
@@ -41,7 +41,7 @@ fun main() {
             AchievementGoalInvocation(Jakta.parseStruct("broadcast")),
         ),
         planLibrary = mutableListOf(
-            ASPlan.ofAchievementGoalInvocation(
+            ASNewPlan.ofAchievementGoalInvocation(
                 value = Jakta.parseStruct("broadcast"),
                 goals = listOf(
                     Print(Atom.of("Broadcast message")),
@@ -54,7 +54,7 @@ fun main() {
     fun agentGenerator(name: String) = ASAgent.of(
         name = name,
         planLibrary = mutableListOf(
-            ASPlan.ofBeliefBaseAddition(
+            ASNewPlan.ofBeliefBaseAddition(
                 belief = ASBelief.from(Jakta.parseStruct("greetings(source(Sender))")),
                 goals = listOf(
                     Print(Atom.of("Received message from: "), Var.of("Sender")),

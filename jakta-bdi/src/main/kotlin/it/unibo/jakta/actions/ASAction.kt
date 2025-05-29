@@ -9,6 +9,7 @@ import it.unibo.tuprolog.solve.Solution
 
 interface ASAction : Action<ASBelief, Struct, Solution> {
     fun applySubstitution(substitution: Substitution): ASAction
+
     fun runAction(request: ActionRequest): ActionResponse
     fun addResults(substitution: Substitution)
 }
