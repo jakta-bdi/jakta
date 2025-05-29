@@ -117,3 +117,13 @@ data class BeliefBaseAddition(
 data class BeliefBaseRemoval(
     override val belief: ASBelief,
 ) : Event.Internal.Belief.Remove<ASBelief>
+
+val Event.Internal.value get(): Struct = when (this) {
+    is TestGoalInvocation -> query
+    is TestGoalFailure -> query
+    is AchievementGoalInvocation -> goal
+    is AchievementGoalFailure -> goal
+    is BeliefBaseRemoval -> belief.content.head
+    is BeliefBaseAddition -> belief.content.head
+    else -> error("sadsadsada") // Unsupported event type for this plan
+}

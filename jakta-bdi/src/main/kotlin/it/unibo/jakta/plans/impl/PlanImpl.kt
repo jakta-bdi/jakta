@@ -16,16 +16,6 @@ data class PlanImpl(
     val tasks: List<ASAction>,
 ) : Plan<ASBelief, Struct, Solution> {
 
-    private val Event.Internal.value get(): Struct = when (this) {
-        is TestGoalInvocation -> query
-        is TestGoalFailure -> query
-        is AchievementGoalInvocation -> goal
-        is AchievementGoalFailure -> goal
-        is BeliefBaseRemoval -> belief.content.head
-        is BeliefBaseAddition -> belief.content.head
-        else -> error("sadsadsada") // Unsupported event type for this plan
-    }
-
     override fun isApplicable(event: Event.Internal, beliefBase: BeliefBase<ASBelief, Struct, Solution>): Boolean {
         val toMatch: Struct = event.value
         val mgu = toMatch mguWith this.trigger

@@ -1,19 +1,24 @@
 package it.unibo.jakta.intentions.impl
 
 import it.unibo.jakta.actions.ASAction
+import it.unibo.jakta.actions.Action
+import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.intentions.ASActivationRecord
 import it.unibo.jakta.intentions.ASIntention
+import it.unibo.jakta.intentions.ActivationRecord
 import it.unibo.jakta.intentions.IntentionID
+import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
+import it.unibo.tuprolog.solve.Solution
 
 internal class IntentionImpl(
-    override var recordStack: List<ASActivationRecord> = listOf(),
+    override var stack: List<ActivationRecord<ASBelief, Struct, Solution>> = listOf(),
     override val isSuspended: Boolean = false,
     override val id: IntentionID = IntentionID(),
 ) : ASIntention {
 
-    override fun nextActionToExecute(): ASAction? {
-        val record = recordStack.firstOrNull() ?: return null
+    override fun nextActionToExecute(): Action<ASBelief, Struct, Solution>? {
+        val record = stack.firstOrNull() ?: return null
         return if (record.isLastActionToExecute()) {
             return null
         } else {
@@ -22,32 +27,32 @@ internal class IntentionImpl(
     }
 
     override fun pop(): ASIntention {
-        val record = recordStack.firstOrNull() ?: return this
+        val record = stack.firstOrNull() ?: return this
         return if (record.isLastActionToExecute()) {
             IntentionImpl(
-                recordStack - record,
+                stack - record,
                 isSuspended,
                 id)
         } else {
             IntentionImpl(
-                listOf(record.pop()) + recordStack - record,
+                listOf(record.pop()) + stack - record,
                 isSuspended,
                 id
             )
         }
     }
 
-    override fun push(activationRecord: ASActivationRecord): Boolean {
-        recordStack = listOf(activationRecord) + recordStack
+    override fun push(activationRecord: ActivationRecord<ASBelief, Struct, Solution>): Boolean {
+        stack = listOf(activationRecord) + stack
         return true
     }
 
     override fun applySubstitution(substitution: Substitution) =
         IntentionImpl(
-            recordStack.apply { recordStack.first().applySubstitution(substitution) },
+            stack.apply { (stack.first() as? ASActivationRecord)?.applySubstitution(substitution) ?: error("Invalid activation record type") },
             isSuspended,
             id
         )
 
-    override fun toString(): String = "$id { \n ${recordStack.joinToString(separator = "\n", prefix = "\t")} \n }"
+    override fun toString(): String = "$id { \n ${stack.joinToString(separator = "\n", prefix = "\t")} \n }"
 }

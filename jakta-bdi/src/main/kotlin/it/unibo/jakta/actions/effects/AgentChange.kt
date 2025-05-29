@@ -5,7 +5,8 @@ import it.unibo.jakta.actions.SideEffect
 import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.events.Event
 import it.unibo.jakta.intentions.ASIntention
-import it.unibo.jakta.plans.ASPlan
+import it.unibo.jakta.plans.Plan
+import it.unibo.jakta.plans.impl.PlanImpl
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.solve.Solution
 
@@ -66,15 +67,15 @@ interface IntentionChange : AgentChange {
 }
 
 interface PlanChange : AgentChange {
-    val plan: ASPlan
+    val plan: Plan<ASBelief, Struct, Solution>
 
-    data class PlanAddition(override val plan: ASPlan) : PlanChange {
+    data class PlanAddition(override val plan: Plan<ASBelief, Struct, Solution>) : PlanChange {
         override fun invoke(mutableAgentContext: ASAgent.ASMutableAgentContext) {
             mutableAgentContext.plans.add(plan)
         }
     }
 
-    data class PlanRemoval(override val plan: ASPlan) : PlanChange {
+    data class PlanRemoval(override val plan: Plan<ASBelief, Struct, Solution>) : PlanChange {
         override fun invoke(mutableAgentContext: ASAgent.ASMutableAgentContext) {
             mutableAgentContext.plans.remove(plan)
         }

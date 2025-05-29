@@ -46,7 +46,7 @@ internal class AgentImpl(
         override val agentID: AgentID,
         override val agentName: String,
         override val beliefBase: ASMutableBeliefBase,
-        override val plans: MutableCollection<PlanImpl>,
+        override val plans: MutableCollection<Plan<ASBelief, Struct, Solution>>,
         override val intentions: ASMutableIntentionPool,
         private var events: Sequence<Event.Internal.Goal<ASBelief, Struct, Solution>> = emptySequence(),
     ) : ASAgent.ASAgentContext, ASAgent.ASMutableAgentContext {
@@ -110,7 +110,7 @@ internal class AgentImpl(
 //        }
 
         // STEP5: Selecting an Event.
-        return selectEvent(environment)
+        return selectEvent(environment).let { it as? Event.Internal ?: TODO("Transform external events into internal events") }
     }
 
     override fun replaceTags(tags: Map<String, Any>): ASAgent {
@@ -153,7 +153,7 @@ internal class AgentImpl(
         else -> error("Marmellata")
     }
 
-    override fun sense(agentProcess: AgentProcess): Event? = when {
+    override fun sense(agentProcess: AgentProcess): Event.Internal? = when {
         agentProcess is BasicEnvironment -> sense(agentProcess, false)
         else -> null
     }

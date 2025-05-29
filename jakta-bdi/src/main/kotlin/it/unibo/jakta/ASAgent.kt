@@ -29,13 +29,13 @@ interface ASAgent : Agent, Taggable<ASAgent> {
         override val beliefBase: ASBeliefBase
 
         /** [Plan]s collection of the BDI Agent */
-        override val plans: Collection<PlanImpl>
+        override val plans: Collection<Plan<ASBelief, Struct, Solution>>
         val intentions: ASIntentionPool
     }
 
     interface ASMutableAgentContext : ASAgentContext {
         override val beliefBase: ASMutableBeliefBase
-        override val plans: MutableCollection<PlanImpl>
+        override val plans: MutableCollection<Plan<ASBelief, Struct, Solution>>
         override val intentions: ASMutableIntentionPool
 
         fun enqueue(event: Event.Internal.Goal<ASBelief, Struct, Solution>)
