@@ -1,20 +1,20 @@
 package it.unibo.jakta.dsl.actions
 
 import it.unibo.jakta.actions.ASAction
+import it.unibo.jakta.actions.effects.ActionSideEffect
 import it.unibo.jakta.actions.requests.ActionRequest
 import it.unibo.jakta.actions.responses.ActionResponse
-import it.unibo.jakta.actions.effects.ActionSideEffect
 import it.unibo.jakta.dsl.Builder
 import it.unibo.tuprolog.core.Term
 import kotlin.reflect.KFunction
 
-abstract class ActionsScope<C, Res, Req, A, As> : Builder<Map<String, A>>
+abstract class ActionsScope<C, Res, Req, A, As> :
+    Builder<Map<String, A>>
     where C : ActionSideEffect,
           Res : ActionResponse<C>,
           Req : ActionRequest<C, Res>,
           A : ASAction<C, Res, Req>,
           As : ActionScope<C, Res, Req, A> {
-
     private val actions = mutableListOf<A>()
 
     fun action(name: String, arity: Int, f: As.() -> Unit) {
@@ -22,9 +22,10 @@ abstract class ActionsScope<C, Res, Req, A, As> : Builder<Map<String, A>>
     }
 
     fun action(method: KFunction<*>) {
-        actions += newAction(method.name, method.parameters.size) {
-            method.call(*arguments.toTypedArray())
-        }
+        actions +=
+            newAction(method.name, method.parameters.size) {
+                method.call(*arguments.toTypedArray())
+            }
     }
 
     fun action(action: A) {

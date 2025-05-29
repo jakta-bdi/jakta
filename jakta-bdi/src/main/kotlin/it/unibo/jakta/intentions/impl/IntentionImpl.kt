@@ -43,15 +43,14 @@ internal class IntentionImpl(
         return true
     }
 
-    override fun applySubstitution(substitution: Substitution) =
-        IntentionImpl(
-            stack.apply {
-                (stack.first() as? ASActivationRecord)?.applySubstitution(substitution)
-                    ?: error("Invalid activation record type")
-            },
-            isSuspended,
-            id,
-        )
+    override fun applySubstitution(substitution: Substitution) = IntentionImpl(
+        stack.apply {
+            (stack.first() as? ASActivationRecord)?.applySubstitution(substitution)
+                ?: error("Invalid activation record type")
+        },
+        isSuspended,
+        id,
+    )
 
     override fun toString(): String = "Intention { id = ${id.id} \n ${stack.joinToString(
         separator = "\n\t",

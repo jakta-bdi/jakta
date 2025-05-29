@@ -14,9 +14,7 @@ import it.unibo.tuprolog.solve.Solution
 /**
  * [Action] Task which adds a [ASBelief] into the [ASBeliefBase]
  */
-data class AddBelief(
-    val belief: ASBelief,
-) : AbstractAction() {
+data class AddBelief(val belief: ASBelief) : AbstractAction() {
     override fun applySubstitution(substitution: Substitution): AddBelief =
         AddBelief(belief.applySubstitution(substitution))
 
@@ -27,9 +25,7 @@ data class AddBelief(
 /**
  * [Action] which removes a [Belief] from the [BeliefBase]
  */
-data class RemoveBelief(
-    val belief: ASBelief,
-) : AbstractAction() {
+data class RemoveBelief(val belief: ASBelief) : AbstractAction() {
     override fun applySubstitution(substitution: Substitution): ASAction =
         RemoveBelief(belief.applySubstitution(substitution))
 
@@ -40,9 +36,7 @@ data class RemoveBelief(
 /**
  * [Action] Task which updates the [Belief]'s content in the [BeliefBase]
  */
-data class UpdateBelief(
-    val belief: ASBelief,
-) : AbstractAction() {
+data class UpdateBelief(val belief: ASBelief) : AbstractAction() {
     override fun applySubstitution(substitution: Substitution): ASAction =
         UpdateBelief(belief.applySubstitution(substitution))
 

@@ -16,14 +16,14 @@ import it.unibo.tuprolog.solve.Solution
 /**
  * [Task.PlanExecution] which looks for a Plan with [AchievementGoalInvocation] trigger.
  */
-data class Achieve(
-    val planTrigger: Struct,
-) : AbstractAction() {
+data class Achieve(val planTrigger: Struct) : AbstractAction() {
     override fun applySubstitution(substitution: Substitution): ASAction =
         Achieve(planTrigger.apply(substitution).castToStruct())
 
     override fun invoke(context: ASActionContext) = (context.agentContext as? ASAgent.ASAgentContext)
-        ?.intentions?.nextIntention()?.let {
+        ?.intentions
+        ?.nextIntention()
+        ?.let {
             listOf(
                 EventChange.EventAddition(AchievementGoalInvocation(planTrigger, it.pop())),
                 IntentionChange.IntentionRemoval(it), // It gets added back in the queue after plan execution
@@ -34,10 +34,7 @@ data class Achieve(
 /**
  * [Task.PlanExecution] which looks for a Plan with [TestGoalInvocation] trigger.
  */
-data class Test(
-    val planTrigger: Struct,
-) : AbstractAction() {
-
+data class Test(val planTrigger: Struct) : AbstractAction() {
     private var solution: Solution = Solution.no(planTrigger)
 
     override fun applySubstitution(substitution: Substitution): ASAction =
@@ -61,9 +58,7 @@ data class Test(
  * [Task.PlanExecution] which looks for a Plan with [AchievementGoalInvocation] trigger
  * and executes it in another intention.
  */
-data class Spawn(
-    val planTrigger: Struct,
-) : AbstractAction() {
+data class Spawn(val planTrigger: Struct) : AbstractAction() {
     override fun applySubstitution(substitution: Substitution): ASAction =
         Spawn(planTrigger.apply(substitution).castToStruct())
 

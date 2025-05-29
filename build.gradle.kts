@@ -54,7 +54,7 @@ allprojects {
     tasks.withType<KotlinCompile>().configureEach {
         compilerOptions {
             allWarningsAsErrors = true
-            freeCompilerArgs.add("-Xcontext-receivers")
+            freeCompilerArgs.add("-Xcontext-parameters")
             freeCompilerArgs.add("-opt-in=kotlin.RequiresOptIn")
         }
     }
@@ -99,7 +99,10 @@ allprojects {
                 showStandardStreams = true
                 showCauses = true
                 showStackTraces = true
-                events(*org.gradle.api.tasks.testing.logging.TestLogEvent.values())
+                events(
+                    *org.gradle.api.tasks.testing.logging.TestLogEvent
+                        .values(),
+                )
                 exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
             }
         }

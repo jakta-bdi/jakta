@@ -1,152 +1,74 @@
 package it.unibo.jakta
 
+import it.unibo.jakta.events.Event
+import it.unibo.jakta.plans.Matcher
 
-///** BDI Agent definition*/
-//interface AgentLifecycle<
-//    Query: Any,
-//    Belief,
-//    Event,
-//    ActionResult: ExecutionResult<Any>,
-//    Environment
-//> {
-//
-//    /**
-//     * STEP 1 of reasoning cycle: Belief Update Function.
-//     * This function defines how to merge new [perceptions] into the current [beliefBase]
-//     * @param perceptions: [BeliefBase] that collects all agent's perceptions of the environment
-//     * @param beliefBase: [MutableBeliefBase] the current agent's beliefs where the perceptions will be added.
-//     * @return true is the [MutableBeliefBase] is changed as a result of the operation
-//     */
-//    fun updateBelief(
-//        perceptions: BeliefBase<Query, Belief>,
-//        beliefBase: MutableBeliefBase<Query, Belief, BeliefBase<Query, Belief>>
-//    ): Boolean
-//
-//    /**
-//     * STEP 5 of reasoning cycle: Selecting an Event.
-//     * This function select an event to be handled in a particular reasoning cycle.
-//     * The default implementation follows a FIFO policy for the list of [Event]s.
-//     * @param events: list of [Event]s on which select the event
-//     * @return the selected [Event]
-//     */
-//    fun selectEvent(events: List<Event>): Event?
-//
-//    /**
-//     * STEP 6 of reasoning cycle: Retrieving all Relevant [Plan]s.
-//     * This function returns all [Plan]s that have a triggering event that can be unified
-//     * with the selected event.
-//     * @param event: the selected [Event]
-//     * @param planLibrary: the [Plan]s known by the Agent
-//     * @return the relevant [Plan]s
-//     */
-//    fun selectRelevantPlans(event: Event, planLibrary: List<Plan<ActionResult>>): List<Plan<ActionResult>>
-//
-//    /**
-//     * STEP 7 of reasoning cycle: Determining the Applicable Plans.
-//     * This function defines if a plan is applicable based on the agent's Belief Base.
-//     * @param event: the selected [Event] that triggered the [Plan]
-//     * @param plan: the triggered [Plan]
-//     * @param beliefBase: the agent's [BeliefBase]
-//     * @return yes if it's applicable, false otherwise.
-//     */
-//    fun isPlanApplicable(
-//        event: Event,
-//        plan: ActionResult,
-//        beliefBase: BeliefBase<Query, Belief>,
-//    ): Boolean
-//
-//    /**
-//     * Step 8 of reasoning cycle: Selecting one Applicable Plan.
-//     * Given all the applicable plans, this Selection Function returns the plan that the agent will commit to execute.
-//     * By default,
-//     * @param plans: applicable [Plan]s
-//     * @return the selected [Plan] to be executed
-//     */
-//    fun selectApplicablePlan(plans: List<ActionResult>): Plan<ActionResult>?
-//
-//    /**
-//     * Step 8 of reasoning cycle: Assign selected plan to an Intention.
-//     * If the event is external, then a new Intention is created. Otherwise, the selected plan is pushed on top of the
-//     * firing Intention.
-//     * @param event: the [Event] that triggered the [Plan]
-//     * @param plan: the selected [Plan]
-//     * @param intentions: the [IntentionPool] of the agent
-//     * @return the updated [Intention] or null if the intention is not found
-//     */
-//    fun assignPlanToIntention(
-//        event: Event,
-//        plan: Plan<ActionResult>,
-//        intentions: IntentionPool<ActionResult>
-//    ): Intention<ActionResult>?
-//
-//    /**
-//     * Step 9 of reasoning cycle: Selecting an Intention for Further Execution.
-//     * Given all agent's intentions, this Selection Function selects the intention to be scheduled to execution
-//     * by the agent. By default, this function implements Round Robin scheduling.
-//     * @param intentions: the agent's [IntentionPool]
-//     * @return the [Intention] to execute, or null if there's no intention
-//     */
-//    fun scheduleIntention(
-//        intentions: IntentionPool<ActionResult>
-//    ): Intention<ActionResult>?
-//
-//    /**
-//     * Step 10 of reasoning cycle: Executing One step of an Intention.
-//     * Depending on the formula on the top of the intention, the agent will execute the related action.
-//     * @param intention: [Intention] on which the agent is currently focused
-//     */
-//    fun runIntention(
-//        intention: Intention<ActionResult>,
-//        context: MutableAgentContext<
-//            Query,
-//            Belief,
-//            B,
-//            MutableBeliefBaseType,
-//            ActionResult,
-//            Event,
-//            Environment
-//            >,
-//        environment: Environment,
-//    )
-//
-//    /** Performs the whole procedure (10 steps) of the BDI Agent's Reasoning Cycle.
-//     *  @param environment the [Environment]
-//     *  @return true if the environment has been changed as a result of this operation
-//     */
-//    fun runOneCycle(
-//        environment: Environment,
-//        //controller: Activity.Controller? = null,
-//        debugEnabled: Boolean = false,
-//    ): Boolean {
-//        sense(environment)
-//        deliberate()
-//        return act(environment)
-//    }
-//
-//    /**
-//     * Performs the sensing phase of the reasoning cycle, in particular:
-//     *  - STEP1: Perceive the Environment
-//     *  - STEP2: Update the ASBeliefBase
-//     *  - STEP3: Receiving Communication from Other Agents
-//     *  - STEP4: Selecting "Socially Acceptable" Messages
-//     *  @param environment the [Environment]
-//     */
-//    fun sense(environment: Environment)
-//
-//    /** Performs the reason phase of the reasoning cycle, in particular:
-//     *  - STEP5: Selecting an Event
-//     *  - STEP6: Retrieving all Relevant Plans
-//     *  - STEP7: Determining the Applicable Plans
-//     *  - STEP8: Selecting one Applicable Plan
-//     */
-//    fun deliberate()
-//
-//    /**
-//     * Performs the reason phase of the reasoning cycle, in particular:
-//     *  - STEP9: Select an Intention for Further Execution
-//     *  - STEP10: Executing one Step on an Intention
-//     *  @param environment [Environment]
-//     *  @return true if the environment has been changed as a result of this operation.
-//     */
-//    fun act(environment: Environment): Boolean
-//}
+/** BDI Agent definition*/
+interface AgentLifecycle<Belief : Any, Query : Any, Response> {
+
+    val agent: Agent<Belief, Query, Response>
+    val environment: AgentProcess
+    val debugEnabled: Boolean
+
+    /** Performs the whole procedure (10 steps) of the BDI Agent's Reasoning Cycle.
+     *  @param environment the [AgentProcess]
+     *  @return true if the environment has been changed as a result of this operation
+     */
+    fun runOneCycle() {
+        val eventToManage = sense()
+        deliberate(eventToManage)
+        act()
+    }
+
+    /**
+     * Performs the sensing phase of the reasoning cycle, in particular:
+     *  - STEP1: Perceive the Environment
+     *  - STEP2: Update the ASBeliefBase
+     *  - STEP3: Receiving Communication from Other Agents
+     *  - STEP4: Selecting "Socially Acceptable" Messages
+     *  @param environment the [AgentProcess]
+     */
+    fun sense(): Event.Internal?
+
+    /** Performs the reason phase of the reasoning cycle, in particular:
+     *  - STEP5: Selecting an ASEvent
+     *  - STEP6: Retrieving all Relevant Plans
+     *  - STEP7: Determining the Applicable Plans
+     *  - STEP8: Selecting one Applicable Plan
+     */
+    fun deliberate(event: Event.Internal?)
+
+    /**
+     * Performs the reason phase of the reasoning cycle, in particular:
+     *  - STEP9: Select an Intention for Further Execution
+     *  - STEP10: Executing one Step on an Intention
+     *  @param environment [AgentProcess]
+     *  @return true if the environment has been changed as a result of this operation.
+     */
+    fun act()
+
+    companion object {
+        context(_: Matcher<Belief, Query, Response>)
+        fun <Belief : Any, Query : Any, Response> of(
+            agent: Agent<Belief, Query, Response>,
+            environment: AgentProcess,
+            debugEnabled: Boolean = false,
+        ) = object : AgentLifecycle<Belief, Query, Response> {
+            override val debugEnabled: Boolean
+                get() = debugEnabled
+            override val agent: Agent<Belief, Query, Response>
+                get() = agent
+            override val environment: AgentProcess
+                get() = environment
+
+            override fun sense(): Event.Internal? = agent.sense(environment)
+
+            override fun deliberate(event: Event.Internal?) = when {
+                event != null -> agent.deliberate(environment, event)
+                else -> Unit
+            }
+
+            override fun act() = agent.act(environment)
+        }
+    }
+}

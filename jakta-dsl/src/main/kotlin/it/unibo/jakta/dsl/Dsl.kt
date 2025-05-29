@@ -17,8 +17,8 @@ import it.unibo.tuprolog.core.Term
 annotation class JaktaDSL
 
 @JaktaDSL
-fun mas(f: MasScope.() -> Unit): Mas =
-    MasScope().also(f).build()
+fun mas(f: MasScope.() -> Unit): Mas = MasScope().also(f).build()
+
 fun internalAction(name: String, arity: Int, f: InternalActionScope.() -> Unit) =
     InternalActionsScope().newAction(name, arity, f)
 
@@ -33,8 +33,6 @@ fun agent(name: String, f: AgentScope.() -> Unit): ASAgent = AgentScope(name).al
 
 fun plans(f: PlansScope.() -> Unit): Iterable<Plan> = PlansScope().also(f).build()
 
-operator fun String.invoke(vararg terms: Term): Struct =
-    Struct.of(this, *terms)
+operator fun String.invoke(vararg terms: Term): Struct = Struct.of(this, *terms)
 
-operator fun String.invoke(terms: List<Term>): Struct =
-    Struct.of(this, terms)
+operator fun String.invoke(terms: List<Term>): Struct = Struct.of(this, terms)

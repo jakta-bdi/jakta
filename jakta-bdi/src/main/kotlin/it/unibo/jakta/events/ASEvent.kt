@@ -36,10 +36,8 @@ import it.unibo.tuprolog.solve.Solution
  * If the event is external, this value is set to null. It's default value is null.
  * @return a new instance of [Event]
  */
-data class AchievementGoalInvocation(
-    override val goal: Struct,
-    override val intention: ASIntention? = null,
-) : Event.Internal.Goal.Achieve.Add<ASBelief, Struct, Solution, Struct>
+data class AchievementGoalInvocation(override val goal: Struct, override val intention: ASIntention? = null) :
+    Event.Internal.Goal.Achieve.Add<ASBelief, Struct, Solution, Struct>
 
 /**
  * Generates an [Event] for doing something after a plan failure.
@@ -48,10 +46,8 @@ data class AchievementGoalInvocation(
  * If the event is external, this value is set to null. It's default value is null.
  * @return a new instance of [Event]
  */
-data class AchievementGoalFailure(
-    override val goal: Struct,
-    override val intention: ASIntention? = null,
-) : Event.Internal.Goal.Achieve.Remove<ASBelief, Struct, Solution, Struct>
+data class AchievementGoalFailure(override val goal: Struct, override val intention: ASIntention? = null) :
+    Event.Internal.Goal.Achieve.Remove<ASBelief, Struct, Solution, Struct>
 
 /**
  * Generates an [Event] to test a plan.
@@ -60,10 +56,8 @@ data class AchievementGoalFailure(
  * If the event is external, this value is set to null. It's default value is null.
  * @return a new instance of [Event]
  */
-data class TestGoalInvocation(
-    override val query: Struct,
-    override val intention: ASIntention? = null,
-) : Event.Internal.Goal.Test.Add<ASBelief, Struct, Solution>
+data class TestGoalInvocation(override val query: Struct, override val intention: ASIntention? = null) :
+    Event.Internal.Goal.Test.Add<ASBelief, Struct, Solution>
 
 /**
  * Generates an [Event] for doing something after the failure of the plan's tests.
@@ -72,10 +66,8 @@ data class TestGoalInvocation(
  * If the event is external, this value is set to null. It's default value is null.
  * @return a new instance of [Event]
  */
-data class TestGoalFailure(
-    override val query: Struct,
-    override val intention: ASIntention? = null,
-) : Event.Internal.Goal.Test.Remove<ASBelief, Struct, Solution>
+data class TestGoalFailure(override val query: Struct, override val intention: ASIntention? = null) :
+    Event.Internal.Goal.Test.Remove<ASBelief, Struct, Solution>
 
 /**
  * Generates an [Event] with a [BeliefBaseTrigger.Update] trigger.
@@ -103,9 +95,7 @@ data class TestGoalFailure(
  * If the event is external, this value is set to null. It's default value is null.
  * @return a new instance of [Event]
  */
-data class BeliefBaseAddition(
-    override val belief: ASBelief,
-) : Event.Internal.Belief.Add<ASBelief>
+data class BeliefBaseAddition(override val belief: ASBelief) : Event.Internal.Belief.Add<ASBelief>
 
 /**
  * Generates an [Event] triggered by a BeliefBase removal.
@@ -114,9 +104,7 @@ data class BeliefBaseAddition(
  * If the event is external, this value is set to null. It's default value is null.
  * @return a new instance of [Event]
  */
-data class BeliefBaseRemoval(
-    override val belief: ASBelief,
-) : Event.Internal.Belief.Remove<ASBelief>
+data class BeliefBaseRemoval(override val belief: ASBelief) : Event.Internal.Belief.Remove<ASBelief>
 
 val Event.Internal.value get(): Struct = when (this) {
     is TestGoalInvocation -> query

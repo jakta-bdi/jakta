@@ -34,14 +34,13 @@ interface JaktaLogicProgrammingScope :
             variablesProvider: VariablesProvider = VariablesProvider.of(scope),
             unificator: Unificator = defaultUnificator,
             theoryFactory: TheoryFactory = IndexedTheoryFactory(unificator),
-        ): JaktaLogicProgrammingScope =
-            JaktaLogicProgrammingScopeImpl(
-                scope,
-                if (termificator.scope === scope) termificator else termificator.copy(scope),
-                if (variablesProvider.scope === scope) variablesProvider else variablesProvider.copy(scope),
-                unificator,
-                if (theoryFactory.unificator === unificator) theoryFactory else theoryFactory.copy(unificator),
-            )
+        ): JaktaLogicProgrammingScope = JaktaLogicProgrammingScopeImpl(
+            scope,
+            if (termificator.scope === scope) termificator else termificator.copy(scope),
+            if (variablesProvider.scope === scope) variablesProvider else variablesProvider.copy(scope),
+            unificator,
+            if (theoryFactory.unificator === unificator) theoryFactory else theoryFactory.copy(unificator),
+        )
 
         fun of(
             unificator: Unificator,

@@ -25,23 +25,21 @@ internal class JaktaLogicProgrammingScopeImpl(
         }
     }
 
-    override fun copy(scope: Scope): JaktaLogicProgrammingScope =
-        JaktaLogicProgrammingScopeImpl(
-            scope,
-            termificator.copy(scope),
-            variablesProvider.copy(scope),
-            unificator,
-            theoryFactory,
-        )
+    override fun copy(scope: Scope): JaktaLogicProgrammingScope = JaktaLogicProgrammingScopeImpl(
+        scope,
+        termificator.copy(scope),
+        variablesProvider.copy(scope),
+        unificator,
+        theoryFactory,
+    )
 
-    override fun copy(unificator: Unificator): JaktaLogicProgrammingScope =
-        JaktaLogicProgrammingScopeImpl(
-            scope,
-            termificator,
-            variablesProvider,
-            unificator,
-            theoryFactory.copy(unificator),
-        )
+    override fun copy(unificator: Unificator): JaktaLogicProgrammingScope = JaktaLogicProgrammingScopeImpl(
+        scope,
+        termificator,
+        variablesProvider,
+        unificator,
+        theoryFactory.copy(unificator),
+    )
 
     override fun newScope(): JaktaLogicProgrammingScope = copy(Scope.empty())
 }

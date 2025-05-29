@@ -22,9 +22,9 @@ fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.entrypoint(): ASAgent {
 }
 
 @OptIn(ExperimentalStdlibApi::class)
-fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.entrypointWithColor(color: Color): ASAgent {
-    return tokenPassAgent("Agent#${color.rgb.toHexString()}@${node.id}", color)
-}
+fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.entrypointWithColor(color: Color): ASAgent =
+    tokenPassAgent("Agent#${color.rgb.toHexString()}@${node.id}", color)
+
 data class ColoredAgent(val name: String, val nodeId: Int, val color: Color)
 
 fun colorToStruct(color: Color): Struct = Struct.of(
@@ -54,9 +54,12 @@ fun <P : Position<P>> JaktaEnvironmentForAlchemist<P>.tokenPassAgent(name: Strin
                 "myColor"(X).fromSelf and "ball"(X).fromPercept
             } then {
                 execute(run, {
-                    val colors = data.filter { it.key.startsWith("Agent") }.values
-                        .filterIsInstance<ColoredAgent>()
-                        .subtract(setOf(myColor))
+                    val colors =
+                        data
+                            .filter { it.key.startsWith("Agent") }
+                            .values
+                            .filterIsInstance<ColoredAgent>()
+                            .subtract(setOf(myColor))
 
                     // val known = A.fix<Set<ColoredAgent>>() subtract setOf(myColor)
                     if (colors.isNotEmpty()) {

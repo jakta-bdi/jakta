@@ -21,10 +21,9 @@ import kotlin.reflect.KFunction
  * Builder for Jakta Agents Plan body.
  * @param scope the [JaktaLogicProgrammingScope] it inherits from.
  */
-class BodyScope(
-    private val lpScope: Scope,
-) : Builder<List<PrologGoal>>, JaktaLogicProgrammingScope by JaktaLogicProgrammingScope.of(lpScope) {
-
+class BodyScope(private val lpScope: Scope) :
+    Builder<List<PrologGoal>>,
+    JaktaLogicProgrammingScope by JaktaLogicProgrammingScope.of(lpScope) {
     /**
      * The list of goals that the agent is going to execute in the during the plan execution.
      */
@@ -148,14 +147,15 @@ class BodyScope(
             execute(externalAction.signature.name)
         }
         else -> {
-            val argRefs = args.map {
-                @Suppress("UNCHECKED_CAST")
-                when {
-                    it::class.qualifiedName != null -> ObjectRef.of(it)
-                    it is Function<*> -> NamedWrapperForLambdas(it as () -> Unit)
-                    else -> error("Unsupported argument type: ${it::class.simpleName}")
+            val argRefs =
+                args.map {
+                    @Suppress("UNCHECKED_CAST")
+                    when {
+                        it::class.qualifiedName != null -> ObjectRef.of(it)
+                        it is Function<*> -> NamedWrapperForLambdas(it as () -> Unit)
+                        else -> error("Unsupported argument type: ${it::class.simpleName}")
+                    }
                 }
-            }
             execute(externalAction.signature.name.invoke(ObjectRef.of(argRefs[0]), *argRefs.drop(1).toTypedArray()))
         }
     }

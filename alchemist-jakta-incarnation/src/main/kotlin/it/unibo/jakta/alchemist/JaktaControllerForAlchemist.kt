@@ -7,10 +7,7 @@ import it.unibo.jakta.fsm.Activity
 import it.unibo.alchemist.model.Time as AlchemistTime
 import it.unibo.jakta.fsm.time.Time as JaktaTime
 
-data class JaktaControllerForAlchemist(
-    val jaktaEnvironment: JaktaEnvironmentForAlchemist<*>,
-) : Activity.Controller {
-
+data class JaktaControllerForAlchemist(val jaktaEnvironment: JaktaEnvironmentForAlchemist<*>) : Activity.Controller {
     var minimumAwakeTime: AlchemistTime = AlchemistTime.ZERO
 
     override fun restart() = error("Cannot be performed during Alchemist execution")

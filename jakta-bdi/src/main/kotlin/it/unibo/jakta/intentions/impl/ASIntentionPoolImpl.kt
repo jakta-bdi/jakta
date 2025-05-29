@@ -5,9 +5,10 @@ import it.unibo.jakta.intentions.ASIntentionPool
 import it.unibo.jakta.intentions.ASMutableIntentionPool
 import it.unibo.jakta.intentions.IntentionID
 
-internal class ASIntentionPoolImpl(
-    from: MutableMap<IntentionID, ASIntention> = mutableMapOf(),
-) : ASIntentionPool, ASMutableIntentionPool, MutableMap<IntentionID, ASIntention> by from {
+internal class ASIntentionPoolImpl(from: MutableMap<IntentionID, ASIntention> = mutableMapOf()) :
+    ASIntentionPool,
+    ASMutableIntentionPool,
+    MutableMap<IntentionID, ASIntention> by from {
 
     override fun updateIntention(intention: ASIntention): Boolean {
         when (intention.stack.isEmpty()) {

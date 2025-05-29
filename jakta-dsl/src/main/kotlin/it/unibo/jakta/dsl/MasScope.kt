@@ -4,12 +4,15 @@ import it.unibo.jakta.ASAgent
 import it.unibo.jakta.Mas
 import it.unibo.jakta.dsl.environment.EnvironmentScope
 import it.unibo.jakta.environment.BasicEnvironment
+import it.unibo.jakta.executionstrategies.ExecutionStrategy
 
 @JaktaDSL
 class MasScope : Builder<Mas> {
     var env: BasicEnvironment = BasicEnvironment.of()
     var agents: List<ASAgent> = emptyList()
-    var executionStrategy = it.unibo.jakta.executionstrategies.ExecutionStrategy.oneThreadPerMas()
+    var executionStrategy =
+        ExecutionStrategy
+            .oneThreadPerMas()
 
     fun environment(f: EnvironmentScope.() -> Unit): MasScope {
         env = EnvironmentScope().also(f).build()
@@ -26,7 +29,7 @@ class MasScope : Builder<Mas> {
         return this
     }
 
-    fun executionStrategy(f: () -> it.unibo.jakta.executionstrategies.ExecutionStrategy): MasScope {
+    fun executionStrategy(f: () -> ExecutionStrategy): MasScope {
         executionStrategy = f()
         return this
     }

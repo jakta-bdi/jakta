@@ -63,20 +63,22 @@ class JaktaIncarnation<P> : Incarnation<Any?, P> where P : Position<P> {
          *       agent-factory: it.unibo.jakta.test.SharedToken.entrypoint
          *       parameters: []
          */
-        val (entrypoint: String, parameters: List<Any?>) = when (additionalParameters) {
-            is Map<*, *> ->
-                additionalParameters[factoryKey].toString() to (additionalParameters[parametersKey] as List<Any?>)
-            is String -> additionalParameters to emptyList()
-            else -> error(
-                """
+        val (entrypoint: String, parameters: List<Any?>) =
+            when (additionalParameters) {
+                is Map<*, *> ->
+                    additionalParameters[FACTORY_KEY].toString() to (additionalParameters[PARAMETERS_KEY] as List<Any?>)
+                is String -> additionalParameters to emptyList()
+                else ->
+                    error(
+                        """
                 |Invalid JaKtA parameters $additionalParameters, expected either:
                 |- a String with the agent factory method name, or
                 |- a Map with the following keys:
-                |   - $factoryKey: the agent factory method name
-                |   - $parametersKey: the list of parameters to pass to the agent factory method
-                """.trimMargin(),
-            )
-        }
+                |   - $FACTORY_KEY: the agent factory method name
+                |   - $PARAMETERS_KEY: the list of parameters to pass to the agent factory method
+                        """.trimMargin(),
+                    )
+            }
         return JaktaAgentForAlchemist(
             requireNotNull(node) { "Jakta can not execute as global reaction" },
             timeDistribution,
@@ -108,7 +110,7 @@ class JaktaIncarnation<P> : Incarnation<Any?, P> where P : Position<P> {
     }
 
     companion object {
-        const val factoryKey = "agent-factory"
-        const val parametersKey = "parameters"
+        const val FACTORY_KEY = "agent-factory"
+        const val PARAMETERS_KEY = "parameters"
     }
 }

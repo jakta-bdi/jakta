@@ -1,9 +1,11 @@
 package it.unibo.jakta
 
-import java.util.*
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 data class AgentID(val id: String = generateId()) {
     companion object {
-        private fun generateId(): String = UUID.randomUUID().toString()
+        @OptIn(ExperimentalUuidApi::class)
+        private fun generateId(): String = Uuid.random().toString()
     }
 }

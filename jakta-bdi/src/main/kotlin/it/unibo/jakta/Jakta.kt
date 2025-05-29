@@ -1,7 +1,6 @@
 package it.unibo.jakta
 
 import it.unibo.jakta.beliefs.ASBelief
-import it.unibo.jakta.events.AchievementGoalInvocation
 import it.unibo.tuprolog.core.Clause
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.TermFormatter
@@ -43,16 +42,16 @@ object Jakta {
         for (plan in agent.context.plans) {
             var trigger = plan.trigger.toString()
             var guard = plan.guard.toString()
-            var body = plan.toActivationRecord().queue.joinToString("; ") { it.toString() }
-            if (prettyFormatted) {
-                val formatter = TermFormatter.prettyExpressions(operatorSet = OperatorSet.DEFAULT + Jakta.operators)
-                trigger = formatter.format(plan.trigger)
-                guard = formatter.format(plan.guard)
-                body = plan.apply(AchievementGoalInvocation(plan.trigger)).joinToString("; ") {
-                    it.toString()
-                } // it.javaClass.constructors.first().parameters.map { par -> Atom.of(par.name) }.asIterable())) }
-            }
-            stringBuilder.append("+!$trigger : $guard <- $body\n")
+//            var body = plan.toActivationRecord().queue.joinToString("; ") { it.toString() }
+//            if (prettyFormatted) {
+//                val formatter = TermFormatter.prettyExpressions(operatorSet = OperatorSet.DEFAULT + Jakta.operators)
+//                trigger = formatter.format(plan.trigger)
+//                guard = formatter.format(plan.guard)
+//                body = plan.apply(AchievementGoalInvocation(plan.trigger)).joinToString("; ") {
+//                    it.toString()
+//                } // it.javaClass.constructors.first().parameters.map { par -> Atom.of(par.name) }.asIterable())) }
+//            }
+//            stringBuilder.append("+!$trigger : $guard <- $body\n")
         }
         return stringBuilder.toString()
     }

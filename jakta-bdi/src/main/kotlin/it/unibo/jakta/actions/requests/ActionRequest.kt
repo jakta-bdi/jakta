@@ -13,17 +13,14 @@ import it.unibo.tuprolog.solve.Solution
 typealias ASActionContext = ActionInvocationContext<ASBelief, Struct, Solution>
 
 interface ActionRequest : ASActionContext {
-
     override val agentContext: ASAgent.ASAgentContext
 
     fun reply(substitution: Substitution = Substitution.empty(), effects: List<SideEffect>): ActionResponse
+
     fun reply(substitution: Substitution = Substitution.empty(), vararg effects: SideEffect): ActionResponse
 
     companion object {
-        fun of(
-            agent: ASAgent.ASAgentContext,
-            invocationTimestamp: Time?,
-        ): ActionRequest = object : ActionRequest {
+        fun of(agent: ASAgent.ASAgentContext, invocationTimestamp: Time?): ActionRequest = object : ActionRequest {
             override val agentContext: ASAgent.ASAgentContext = agent
             override val invocationTimestamp: Time? = invocationTimestamp
 

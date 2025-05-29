@@ -6,11 +6,9 @@ import it.unibo.tuprolog.dsl.BaseLogicProgrammingScope
 
 interface LogicProgrammingScopeWithJaktaExtensions<S : LogicProgrammingScopeWithJaktaExtensions<S>> :
     BaseLogicProgrammingScope<S> {
-    fun Struct.source(name: String): Struct =
-        addFirst(Struct.of("source", Atom.of(name)))
+    fun Struct.source(name: String): Struct = addFirst(Struct.of("source", Atom.of(name)))
 
-    fun String.source(name: String): Struct =
-        atomOf(this).addFirst(Struct.of("source", Atom.of(name)))
+    fun String.source(name: String): Struct = atomOf(this).addFirst(Struct.of("source", Atom.of(name)))
 
     val Struct.fromSelf
         get() = source("self")

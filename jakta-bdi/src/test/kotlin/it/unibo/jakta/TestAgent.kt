@@ -12,7 +12,7 @@ import it.unibo.jakta.actions.stdlib.Test
 import it.unibo.jakta.beliefs.ASBelief
 import it.unibo.jakta.environment.BasicEnvironment
 import it.unibo.jakta.events.AchievementGoalInvocation
-import it.unibo.jakta.plans.ASNewPlan
+import it.unibo.jakta.executionstrategies.ExecutionStrategy
 import it.unibo.jakta.plans.impl.ASPlan
 import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.Struct
@@ -20,10 +20,7 @@ import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.core.Term
 import it.unibo.tuprolog.core.Var
 
-data class IncrementAction(
-    val first: Int,
-    val second: Var,
-) : AbstractAction.WithoutSideEffects() {
+data class IncrementAction(val first: Int, val second: Var) : AbstractAction.WithoutSideEffects() {
     override fun applySubstitution(substitution: Substitution) = IncrementAction(first, second)
 
     override fun execute(context: ASActionContext) {
@@ -32,20 +29,13 @@ data class IncrementAction(
     }
 }
 
-data class AddBeliefAction(
-    val belief: ASBelief,
-) : AbstractAction() {
+data class AddBeliefAction(val belief: ASBelief) : AbstractAction() {
     override fun applySubstitution(substitution: Substitution) = AddBeliefAction(belief)
 
-    override fun invoke(context: ASActionContext): List<SideEffect> =
-        listOf(BeliefChange.BeliefAddition(belief))
+    override fun invoke(context: ASActionContext): List<SideEffect> = listOf(BeliefChange.BeliefAddition(belief))
 }
 
-data class TestAction(
-    var first: Term,
-    var second: Term,
-) : AbstractAction.WithoutSideEffects() {
-
+data class TestAction(var first: Term, var second: Term) : AbstractAction.WithoutSideEffects() {
     override fun applySubstitution(substitution: Substitution) = TestAction(
         first = substitution.applyTo(first) ?: error("first parameter cannot be substituted."),
         second = substitution.applyTo(second) ?: error("second parameter cannot be substituted."),
@@ -72,105 +62,125 @@ object PassTestAction : AbstractAction.WithoutSideEffects() {
     }
 }
 
-class TestAgent : DescribeSpec({
+class TestAgent :
+    DescribeSpec({
 
-    val start = Atom.of("start")
+        val start = Atom.of("start")
 
-    fun agentGenerator(plans: MutableCollection<ASPlan>) = ASAgent.of(
-        events = listOf(AchievementGoalInvocation(start)),
-        planLibrary = plans.toList().toMutableList(),
-    )
+        fun agentGenerator(plans: MutableCollection<ASPlan>) = ASAgent.of(
+            events = listOf(AchievementGoalInvocation(start)),
+            planLibrary = plans.toList().toMutableList(),
+        )
 
-    val environment = BasicEnvironment()
+        val environment = BasicEnvironment()
 
-    describe("An agent") {
-        it("should call an internal action specifying its name") {
-            val newAgent = agentGenerator(
-                mutableListOf(
-                    ASNewPlan.ofAchievementGoalInvocation(start, listOf(TestAction(Atom.of("5"), Atom.of("5")))),
-                ),
-            )
-
-            Mas.of(
-                it.unibo.jakta.executionstrategies.ExecutionStrategy.oneThreadPerAgent(),
-                environment,
-                newAgent,
-            ).start()
-        }
-        it("can declare custom actions to be performed") {
-
-            @Suppress("VariableNaming")
-            val X = Var.of("X")
-            val newAgent = agentGenerator(
-                mutableListOf(
-                    ASNewPlan.ofAchievementGoalInvocation(
-                        value = start,
-                        goals = listOf(IncrementAction(5, X), TestAction(X, Atom.of("6"))),
-                    ),
-                ),
-            )
-            Mas.of(
-                it.unibo.jakta.executionstrategies.ExecutionStrategy.oneThreadPerAgent(),
-                environment,
-                newAgent,
-            ).start()
-        }
-        it("can fail its intention using the internal action fail") {
-            val newAgent = agentGenerator(
-                mutableListOf(
-                    ASNewPlan.ofAchievementGoalInvocation(start, listOf(Fail, FailTestAction)),
-                    ASNewPlan.ofAchievementGoalFailure(start, listOf(PassTestAction)),
-                ),
-            )
-            Mas.of(
-                it.unibo.jakta.executionstrategies.ExecutionStrategy.oneThreadPerAgent(),
-                environment,
-                newAgent,
-            ).start()
-        }
-        it("fails its intention if the action to execute is not found") {
-            val newAgent = agentGenerator(
-                mutableListOf(
-                    ASNewPlan.ofAchievementGoalInvocation(
-                        value = start,
-                        goals = listOf(
-                            // NOTE: with the new version of action a non-existing action cannot be put anymore.
-                            // ActInternally.of(Struct.of("nonexistingaction")),
-                            // ActInternally.of(Atom.of("failtest")),
+        describe("An agent") {
+            it("should call an internal action specifying its name") {
+                val newAgent =
+                    agentGenerator(
+                        mutableListOf(
+                            ASNewPlan.ofAchievementGoalInvocation(
+                                start,
+                                listOf(TestAction(Atom.of("5"), Atom.of("5"))),
+                            ),
                         ),
-                    ),
-                    ASNewPlan.ofAchievementGoalFailure(start, listOf(PassTestAction)),
-                ),
-            )
-            Mas.of(
-                it.unibo.jakta.executionstrategies.ExecutionStrategy.oneThreadPerAgent(),
-                environment,
-                newAgent,
-            ).start()
-        }
-        it("can modify agent's context declaring custom actions") {
-            val needChocolate = ASBelief.fromSelfSource(Struct.of("need", Atom.of("chocolate")))
+                    )
 
-            val newAgent = agentGenerator(
-                mutableListOf(
-                    ASNewPlan.ofAchievementGoalInvocation(
-                        value = start,
-                        goals = listOf(AddBeliefAction(needChocolate)),
-                    ),
-                    ASNewPlan.ofBeliefBaseAddition(
-                        belief = needChocolate,
-                        goals = listOf(
-                            Test(needChocolate.content),
-                            PassTestAction,
+                Mas
+                    .of(
+                        ExecutionStrategy
+                            .oneThreadPerAgent(),
+                        environment,
+                        newAgent,
+                    ).start()
+            }
+            it("can declare custom actions to be performed") {
+
+                val x = Var.of("X")
+                val newAgent =
+                    agentGenerator(
+                        mutableListOf(
+                            ASNewPlan.ofAchievementGoalInvocation(
+                                value = start,
+                                goals = listOf(IncrementAction(5, x), TestAction(x, Atom.of("6"))),
+                            ),
                         ),
-                    ),
-                ),
-            )
-            Mas.of(
-                it.unibo.jakta.executionstrategies.ExecutionStrategy.oneThreadPerAgent(),
-                environment,
-                newAgent,
-            ).start()
+                    )
+                Mas
+                    .of(
+                        ExecutionStrategy
+                            .oneThreadPerAgent(),
+                        environment,
+                        newAgent,
+                    ).start()
+            }
+            it("can fail its intention using the internal action fail") {
+                val newAgent =
+                    agentGenerator(
+                        mutableListOf(
+                            ASNewPlan.ofAchievementGoalInvocation(start, listOf(Fail, FailTestAction)),
+                            ASNewPlan.ofAchievementGoalFailure(start, listOf(PassTestAction)),
+                        ),
+                    )
+                Mas
+                    .of(
+                        ExecutionStrategy
+                            .oneThreadPerAgent(),
+                        environment,
+                        newAgent,
+                    ).start()
+            }
+            it("fails its intention if the action to execute is not found") {
+                val newAgent =
+                    agentGenerator(
+                        mutableListOf(
+                            ASNewPlan.ofAchievementGoalInvocation(
+                                value = start,
+                                goals =
+                                listOf(
+                                    // NOTE: with the new version of action a non-existing action cannot be put anymore.
+                                    // ActInternally.of(Struct.of("nonexistingaction")),
+                                    // ActInternally.of(Atom.of("failtest")),
+                                ),
+                            ),
+                            ASNewPlan.ofAchievementGoalFailure(start, listOf(PassTestAction)),
+                        ),
+                    )
+                Mas
+                    .of(
+                        ExecutionStrategy
+                            .oneThreadPerAgent(),
+                        environment,
+                        newAgent,
+                    ).start()
+            }
+            it("can modify agent's context declaring custom actions") {
+                val needChocolate = ASBelief.fromSelfSource(Struct.of("need", Atom.of("chocolate")))
+
+                val newAgent =
+                    agentGenerator(
+                        mutableListOf(
+                            ASNewPlan.ofAchievementGoalInvocation(
+                                value = start,
+                                goals = listOf(AddBeliefAction(needChocolate)),
+                            ),
+                            ASNewPlan.ofBeliefBaseAddition(
+                                belief = needChocolate,
+                                goals =
+                                listOf(
+                                    Test(needChocolate.content),
+                                    PassTestAction,
+                                ),
+                            ),
+                        ),
+                    )
+                Mas
+                    .of(
+                        ExecutionStrategy
+                            .oneThreadPerAgent(),
+                        environment,
+                        newAgent,
+                    ).start()
+            }
         }
-    }
-})
+    })

@@ -8,24 +8,21 @@ import it.unibo.jakta.actions.requests.ASActionContext
 import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.core.Term
 
-class Print(
-    vararg terms: Term,
-) : AbstractAction.WithoutSideEffects() {
-
+class Print(vararg terms: Term) : AbstractAction.WithoutSideEffects() {
     private val termsList: List<Term> = terms.toList()
 
     constructor(list: List<Term>) : this(*list.toTypedArray())
 
-    override fun applySubstitution(substitution: Substitution) =
-        Print(termsList.map { it.apply(substitution) })
+    override fun applySubstitution(substitution: Substitution) = Print(termsList.map { it.apply(substitution) })
 
     override fun execute(context: ASActionContext) {
-        val payload = termsList.joinToString(" ") {
-            when {
-                it.isAtom -> it.castToAtom().value
-                else -> it.toString()
+        val payload =
+            termsList.joinToString(" ") {
+                when {
+                    it.isAtom -> it.castToAtom().value
+                    else -> it.toString()
+                }
             }
-        }
         println("[${context.agentContext.agentName}] $payload")
     }
 
@@ -57,11 +54,8 @@ object Pause : AbstractAction() {
     override fun invoke(context: ASActionContext) = listOf(Pause)
 }
 
-class Sleep(
-    private val timeAmount: Term,
-) : AbstractAction() {
+class Sleep(private val timeAmount: Term) : AbstractAction() {
     override fun applySubstitution(substitution: Substitution) = Sleep(timeAmount.apply(substitution))
 
-    override fun invoke(context: ASActionContext) =
-        listOf(Sleep(timeAmount.castToInteger().value.toLong()))
+    override fun invoke(context: ASActionContext) = listOf(Sleep(timeAmount.castToInteger().value.toLong()))
 }

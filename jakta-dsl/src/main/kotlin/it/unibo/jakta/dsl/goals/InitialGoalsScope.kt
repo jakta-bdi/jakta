@@ -7,8 +7,9 @@ import it.unibo.jakta.events.Trigger
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.jakta.dsl.JaktaLogicProgrammingScope
 
-class InitialGoalsScope : Builder<Iterable<Trigger>>, JaktaLogicProgrammingScope by JaktaLogicProgrammingScope.empty() {
-
+class InitialGoalsScope :
+    Builder<Iterable<Trigger>>,
+    JaktaLogicProgrammingScope by JaktaLogicProgrammingScope.empty() {
     private val triggers = mutableListOf<Trigger>()
 
     fun achieve(goal: Struct) {

@@ -6,10 +6,7 @@ import it.unibo.jakta.ASAgent
 import it.unibo.jakta.dsl.actions.ExternalActionsScope
 import it.unibo.jakta.environment.BasicEnvironment
 
-class WrappedAgent(
-    val agent: ASAgent,
-    val actions: Map<String, ExternalAction>,
-)
+class WrappedAgent(val agent: ASAgent, val actions: Map<String, ExternalAction>)
 
 class JaktaForAlchemistMasScope : Builder<WrappedAgent> {
     lateinit var agents: ASAgent
@@ -34,7 +31,6 @@ class JaktaForAlchemistMasScope : Builder<WrappedAgent> {
 }
 
 class JaktaForAlchemistEnvironmentScope : Builder<Map<String, ExternalAction>> {
-
     private val actionsScopes by lazy { ExternalActionsScope() }
 
     infix fun actions(actions: ExternalActionsScope.() -> Unit): JaktaForAlchemistEnvironmentScope {

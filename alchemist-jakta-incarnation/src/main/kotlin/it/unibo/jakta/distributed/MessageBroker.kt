@@ -3,7 +3,6 @@ package it.unibo.jakta.distributed
 import it.unibo.jakta.messages.Message
 
 interface MessageBroker {
-
     fun putInMessageBox(receiver: String, message: Message): Unit
 
     fun send(receiver: String, host: String, message: Message): Unit

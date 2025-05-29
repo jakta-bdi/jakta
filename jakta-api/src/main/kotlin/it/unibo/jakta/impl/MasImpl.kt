@@ -1,16 +1,17 @@
 package it.unibo.jakta.impl
 
-import it.unibo.jakta.ASAgent
+import it.unibo.jakta.Agent
+import it.unibo.jakta.AgentProcess
 import it.unibo.jakta.Mas
 import it.unibo.jakta.actions.effects.EnvironmentChange
-import it.unibo.jakta.environment.BasicEnvironment
 import it.unibo.jakta.executionstrategies.ExecutionStrategy
+import kotlin.collections.forEach
 
-internal class MasImpl(
-    override val executionStrategy: ExecutionStrategy,
-    override var environment: BasicEnvironment,
-    override var agents: Iterable<ASAgent>,
-) : Mas {
+internal class MasImpl<Belief : Any, Query : Any, Response>(
+    override val executionStrategy: ExecutionStrategy<Belief, Query, Response>,
+    override var environment: AgentProcess,
+    override var agents: Iterable<Agent<Belief, Query, Response>>,
+) : Mas<Belief, Query, Response> {
 
     override fun start(debugEnabled: Boolean) = executionStrategy.dispatch(this, debugEnabled)
 

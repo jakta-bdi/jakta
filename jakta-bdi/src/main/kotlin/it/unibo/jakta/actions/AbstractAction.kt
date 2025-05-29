@@ -48,7 +48,9 @@ abstract class AbstractAction : ASAction {
         }
     }
 
-    abstract class WithoutSideEffects : Action.WithoutSideEffect<ASBelief, Struct, Solution>, AbstractAction() {
+    abstract class WithoutSideEffects :
+        AbstractAction(),
+        Action.WithoutSideEffect<ASBelief, Struct, Solution> {
         final override fun invoke(context: ActionInvocationContext<ASBelief, Struct, Solution>): List<SideEffect> =
             super.invoke(context)
     }

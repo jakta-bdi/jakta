@@ -11,9 +11,7 @@ import it.unibo.jakta.executionstrategies.setTimeDistribution
 import it.unibo.jakta.plans.Plan
 import it.unibo.jakta.plans.PlanLibrary
 
-class AgentScope(
-    val name: String? = null,
-) : Builder<ASAgent> {
+class AgentScope(val name: String? = null) : Builder<ASAgent> {
     private val beliefsScope by lazy { BeliefsScope() }
     private val goalsScope by lazy { InitialGoalsScope() }
     private val plansScope by lazy { PlansScope() }
@@ -52,13 +50,14 @@ class AgentScope(
     }
 
     override fun build(): ASAgent {
-        var agent = ASAgent.of(
-            name = name.orEmpty(),
-            beliefBase = beliefsScope.build(),
-            events = goalsScope.build().map { Event.of(it) },
-            planLibrary = PlanLibrary.of(plans + plansScope.build().toList()),
-            internalActions = ExecutionActions.default() + actionsScope.build(),
-        )
+        var agent =
+            ASAgent.of(
+                name = name.orEmpty(),
+                beliefBase = beliefsScope.build(),
+                events = goalsScope.build().map { Event.of(it) },
+                planLibrary = PlanLibrary.of(plans + plansScope.build().toList()),
+                internalActions = ExecutionActions.default() + actionsScope.build(),
+            )
         if (this::time.isInitialized) {
             agent = agent.setTimeDistribution(time)
         }

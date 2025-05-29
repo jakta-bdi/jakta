@@ -16,8 +16,7 @@ interface ASIntention : Intention<ASBelief, Struct, Solution> {
 
     override val id: IntentionID
 
-    fun nextTask(): Action<ASBelief, Struct, Solution>? =
-        stack.firstOrNull()?.queue?.firstOrNull()
+    fun nextTask(): Action<ASBelief, Struct, Solution>? = stack.firstOrNull()?.queue?.firstOrNull()
 
     fun currentPlan(): Plan<ASBelief, Struct, Solution> = stack.first().origin
 
@@ -47,9 +46,8 @@ interface ASIntention : Intention<ASBelief, Struct, Solution> {
     ): ASIntention = of(recordStack, isSuspended, id)
 
     companion object {
-        fun of(
-            plan: Plan<ASBelief, Struct, Solution>,
-        ): ASIntention = IntentionImpl(mutableListOf(plan.toActivationRecord()))
+//        fun of(plan: Plan<ASBelief, Struct, Solution>): ASIntention =
+//            IntentionImpl(mutableListOf(plan.toActivationRecord()))
 
         fun of(
             recordStack: MutableList<ActivationRecord<ASBelief, Struct, Solution>> = mutableListOf(),

@@ -47,23 +47,17 @@ interface ASBelief {
             )
         }
 
-        fun fromSelfSource(head: Struct, vararg body: Term): ASBelief =
-            fromSelfSource(head, body.asIterable())
+        fun fromSelfSource(head: Struct, vararg body: Term): ASBelief = fromSelfSource(head, body.asIterable())
 
-        fun fromSelfSource(head: Struct, body: Sequence<Term>): ASBelief =
-            fromSelfSource(head, body.asIterable())
+        fun fromSelfSource(head: Struct, body: Sequence<Term>): ASBelief = fromSelfSource(head, body.asIterable())
 
-        fun fromSelfSource(head: Struct, body: Iterable<Term>): ASBelief =
-            of(head, body, false)
+        fun fromSelfSource(head: Struct, body: Iterable<Term>): ASBelief = of(head, body, false)
 
-        fun fromPerceptSource(head: Struct, vararg body: Term): ASBelief =
-            fromPerceptSource(head, body.asIterable())
+        fun fromPerceptSource(head: Struct, vararg body: Term): ASBelief = fromPerceptSource(head, body.asIterable())
 
-        fun fromPerceptSource(head: Struct, body: Sequence<Term>): ASBelief =
-            fromPerceptSource(head, body.asIterable())
+        fun fromPerceptSource(head: Struct, body: Sequence<Term>): ASBelief = fromPerceptSource(head, body.asIterable())
 
-        fun fromPerceptSource(head: Struct, body: Iterable<Term>): ASBelief =
-            of(head, body, true)
+        fun fromPerceptSource(head: Struct, body: Iterable<Term>): ASBelief = of(head, body, true)
 
         fun fromMessageSource(from: String, head: Struct, vararg body: Term): ASBelief =
             fromMessageSource(from, head, body.asIterable())
@@ -71,8 +65,7 @@ interface ASBelief {
         fun fromMessageSource(from: String, head: Struct, body: Sequence<Term>): ASBelief =
             fromMessageSource(from, head, body.asIterable())
 
-        fun fromMessageSource(from: String, head: Struct, body: Iterable<Term>): ASBelief =
-            of(head, body, from)
+        fun fromMessageSource(from: String, head: Struct, body: Iterable<Term>): ASBelief = of(head, body, from)
 
         fun from(rule: Rule): ASBelief {
             if (rule.head.args.isNotEmpty() &&

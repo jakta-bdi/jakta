@@ -5,7 +5,6 @@ import it.unibo.jakta.dsl.actions.ExternalActionsScope
 import it.unibo.jakta.environment.BasicEnvironment
 
 class EnvironmentScope : Builder<BasicEnvironment> {
-
     private val actionsScopes by lazy { ExternalActionsScope() }
     private var environment = BasicEnvironment.of()
 

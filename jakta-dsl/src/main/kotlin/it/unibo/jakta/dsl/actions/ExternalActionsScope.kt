@@ -1,8 +1,8 @@
 package it.unibo.jakta.dsl.actions
 
-import it.unibo.jakta.actions.requests.ExternalRequest
-import it.unibo.jakta.actions.effects.EnvironmentChange
 import it.unibo.jakta.actions.AbstractExternalAction
+import it.unibo.jakta.actions.effects.EnvironmentChange
+import it.unibo.jakta.actions.requests.ExternalRequest
 
 class ExternalActionsScope :
     ActionsScope<EnvironmentChange, ExternalResponse, ExternalRequest, ExternalAction, ExternalActionScope>() {

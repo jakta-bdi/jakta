@@ -2,7 +2,8 @@ package it.unibo.jakta
 
 import io.kotest.core.spec.style.DescribeSpec
 
-class TestEvents : DescribeSpec({
+class TestEvents :
+    DescribeSpec({
 //    val belief = ASBelief.fromSelfSource(Atom.of("something"))
 //    val externalEvent = BeliefBaseAddition(belief)
 //    val internalEvent = BeliefBaseRemoval(belief, ASIntention.of())
@@ -16,4 +17,4 @@ class TestEvents : DescribeSpec({
 //            externalEvent.isInternal() shouldBe false
 //        }
 //    }
-})
+    })

@@ -1,37 +1,39 @@
 package it.unibo.jakta.plans
 
 import it.unibo.jakta.actions.Action
-import it.unibo.jakta.beliefs.BeliefBase
 import it.unibo.jakta.events.Event
-import it.unibo.jakta.intentions.ActivationRecord
+import kotlin.reflect.KClass
 
 // TODO: sealed
 interface Plan<Belief : Any, Query : Any, Result> {
-
+//    val id: PlanID
     val trigger: Query
     val guard: Query
+    val actions: List<Action<Belief, Query, Result>>
+    val type: Plan.Type
 
-    val id: PlanID
-        get() = PlanID()
+    enum class Type {
+        AddBelief(Event.Internal.Belief.Add::class),
+        RemoveBelief(Event.Internal.Belief.Remove::class),
+        AddGoal(Event.Internal.Goal.Achieve.Add::class),
+        RemoveGoal(Event.Internal.Goal.Achieve.Remove::class),
+        Test(Event.Internal.Goal.Test.Add::class),
+        FailTest(Event.Internal.Goal.Test.Remove::class),
+        ;
 
-    fun apply(event: Event): List<Action<Belief, Query, Result>>
+        private val eventType: KClass<out Event>
 
-    /** Returns the computed applicable plan */
-    fun applicablePlan(event: Event.Internal, beliefBase: BeliefBase<Belief, Query, Result>): Plan<Belief, Query, Result>
+        constructor(eventType: KClass<out Event>) {
+            this.eventType = eventType
+        }
 
-    /**
-     * Transforms the current plan into an [ActivationRecord] for the [Intention] that will execute it.
-     */
-    fun toActivationRecord(): ActivationRecord<Belief, Query, Result>
-
-    fun isApplicable(event: Event.Internal, beliefBase: BeliefBase<Belief, Query, Result>): Boolean
-
-    fun isRelevant(event: Event.Internal): Boolean
-
-    interface AddBelief<Belief : Any, Query : Any, Result> : Plan<Belief, Query, Result>
-    interface RemoveBelief<Belief : Any, Query : Any, Result> : Plan<Belief, Query, Result>
-    interface AddGoal<Belief : Any, Query : Any, Result> : Plan<Belief, Query, Result>
-    interface RemoveGoal<Belief : Any, Query : Any, Result> : Plan<Belief, Query, Result>
-    interface Test<Belief : Any, Query : Any, Result> : Plan<Belief, Query, Result>
-    interface FailTest<Belief : Any, Query : Any, Result> : Plan<Belief, Query, Result>
+        fun matches(event: Event.Internal): Boolean = eventType.isInstance(event)
+    }
 }
+
+data class SimplePlan<Belief : Any, Query : Any, Result>(
+    override val type: Plan.Type,
+    override val trigger: Query,
+    override val guard: Query,
+    override val actions: List<Action<Belief, Query, Result>>,
+) : Plan<Belief, Query, Result>

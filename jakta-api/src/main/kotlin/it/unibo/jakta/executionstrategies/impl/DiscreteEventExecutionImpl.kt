@@ -1,6 +1,6 @@
 package it.unibo.jakta.executionstrategies.impl
 
-import it.unibo.jakta.ASAgentLifecycle
+import it.unibo.jakta.AgentLifecycle
 import it.unibo.jakta.Mas
 import it.unibo.jakta.executionstrategies.hasTimeDistribution
 import it.unibo.jakta.executionstrategies.timeDistribution
@@ -19,7 +19,7 @@ internal class DiscreteEventExecutionImpl : AbstractSingleRunnerExecutionStrateg
         var time = Time.continuous(0.0)
         mas.agents.forEach {
             synchronizedAgents.addAgent(
-                ASAgentLifecycle.of(it, mas.environment, debugEnabled),
+                AgentLifecycle.of(it, mas.environment, debugEnabled),
             )
         }
         Runner.simulatedOf(

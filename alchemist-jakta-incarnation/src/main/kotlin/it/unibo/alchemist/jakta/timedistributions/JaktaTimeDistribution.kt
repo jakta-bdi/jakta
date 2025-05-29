@@ -26,17 +26,17 @@ class JaktaTimeDistribution(
     val deliberate: TimeDistribution<Any?>,
     val act: TimeDistribution<Any?>,
 ) : TimeDistribution<Any?> {
-
     var phase = SENSE
         private set
 
     val controller: JaktaControllerForAlchemist = JaktaControllerForAlchemist(node)
 
-    val currentBackingTimeDistribution get() = when (phase) {
-        SENSE -> sense
-        DELIBERATE -> deliberate
-        ACT -> act
-    }
+    val currentBackingTimeDistribution get() =
+        when (phase) {
+            SENSE -> sense
+            DELIBERATE -> deliberate
+            ACT -> act
+        }
 
     override fun update(currentTime: Time, executed: Boolean, param: Double, environment: Environment<Any?, *>) {
         if (executed) {

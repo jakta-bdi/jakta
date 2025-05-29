@@ -19,12 +19,14 @@ import java.util.concurrent.TimeUnit
  * Abstract implementation of a FSM [Runner].
  */
 abstract class AbstractRunner(override val activity: Activity) : Runner {
-
     /**
      * Operations that the FSM is going to perform in the next evaluation.
      */
     protected enum class Operation {
-        PAUSE, STOP, CONTINUE, RESTART
+        PAUSE,
+        STOP,
+        CONTINUE,
+        RESTART,
     }
 
     private var _state: State? = CREATED
@@ -34,38 +36,40 @@ abstract class AbstractRunner(override val activity: Activity) : Runner {
     override val isOver get() = state == null
     override val isPaused get() = state == PAUSED
 
-    private val controller = object : Activity.Controller {
-        override fun stop() {
-            nextOperation = STOP
-            if (isPaused) onResume()
-        }
+    private val controller =
+        object : Activity.Controller {
+            override fun stop() {
+                nextOperation = STOP
+                if (isPaused) onResume()
+            }
 
-        override fun currentTime(): Time = getCurrentTime()
+            override fun currentTime(): Time = getCurrentTime()
 
-        override fun sleep(millis: Long) {
-            pause()
-            // TODO("Executor Service to be removed")
-            Executors.newScheduledThreadPool(1)
-                .schedule({ resume() }, millis, TimeUnit.MILLISECONDS)
-        }
+            override fun sleep(millis: Long) {
+                pause()
+                // TODO("Executor Service to be removed")
+                Executors
+                    .newScheduledThreadPool(1)
+                    .schedule({ resume() }, millis, TimeUnit.MILLISECONDS)
+            }
 
-        override fun restart() {
-            nextOperation = RESTART
-            if (isPaused) onResume()
-        }
+            override fun restart() {
+                nextOperation = RESTART
+                if (isPaused) onResume()
+            }
 
-        override fun pause() {
-            nextOperation = PAUSE
-        }
+            override fun pause() {
+                nextOperation = PAUSE
+            }
 
-        override fun resume() {
-            if (isPaused) {
-                nextOperation = CONTINUE
-                _state = RUNNING
-                onResume()
+            override fun resume() {
+                if (isPaused) {
+                    nextOperation = CONTINUE
+                    _state = RUNNING
+                    onResume()
+                }
             }
         }
-    }
 
     /**
      * Method that evaluate the next state of the FSM and executes its callbacks.
