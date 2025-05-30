@@ -5,11 +5,14 @@ import it.unibo.jakta.plans.Plan
 
 interface ActivationRecord<Belief : Any, Query : Any, Result> {
     val origin: Plan<Belief, Query, Result>
-    val queue: Sequence<Action<Belief, Query, Result>>
+//    val queue: Sequence<Action<Belief, Query, Result>>
 
-    fun isLastActionToExecute(): Boolean = queue.count() == 1
+    fun isEmpty(): Boolean
 
-    fun nextActionToExecute(): Action<Belief, Query, Result>? = queue.firstOrNull()
+    fun pop(): Popped<Belief, Query, Result>
 
-    fun pop(): ActivationRecord<Belief, Query, Result>
+    data class Popped<Belief : Any, Query : Any, Result>(
+        val activationRecord: ActivationRecord<Belief, Query, Result>,
+        val action: Action<Belief, Query, Result>,
+    )
 }

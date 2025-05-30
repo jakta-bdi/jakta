@@ -1,21 +1,34 @@
 package it.unibo.jakta
 
 import it.unibo.jakta.beliefs.BeliefBase
+import it.unibo.jakta.beliefs.MutableBeliefBase
 import it.unibo.jakta.events.Event
 import it.unibo.jakta.events.EventGenerator
 import it.unibo.jakta.intentions.ActivationRecord
-import it.unibo.jakta.plans.Matcher
+import it.unibo.jakta.intentions.IntentionPool
+import it.unibo.jakta.intentions.MutableIntentionPool
+import it.unibo.jakta.resolution.Matcher
 import it.unibo.jakta.plans.Plan
 
 interface Agent<Belief : Any, Query : Any, Response> {
     // val environment: AgentProcess
+
+    val context: Context<Belief, Query, Response>
+
+    fun sense(agentProcess: AgentProcess<Belief>): Event.Internal?
+
+    context(_: Matcher<Belief, Query, Response>)
+    fun deliberate(agentProcess: AgentProcess<Belief>, event: Event.Internal)
+
+    fun act(agentProcess: AgentProcess<Belief>)
 
     interface Context<Belief : Any, Query : Any, Response> :
         EventGenerator<Event.Internal.Goal<Belief, Query, Response>> {
         val agentID: AgentID get() = AgentID()
         val agentName: String get() = "Agent-$agentID"
         val beliefBase: BeliefBase<Belief>
-        val plans: Collection<Plan<Belief, Query, Response>>
+        val plans: List<Plan<Belief, Query, Response>>
+        val intentions: IntentionPool<Belief, Query, Response>
 
         /**
          * STEP 6 of reasoning cycle: Retrieving all Relevant [Plan]s.
@@ -28,14 +41,13 @@ interface Agent<Belief : Any, Query : Any, Response> {
         context(matcher: Matcher<Belief, Query, Response>)
         fun activationRecordFor(event: Event.Internal): ActivationRecord<Belief, Query, Response>? =
             matcher.matchPlanFor(event, plans, beliefBase)
+
+        interface Mutable<Belief : Any, Query : Any, Response> : Context<Belief, Query, Response> {
+            override val beliefBase: MutableBeliefBase<Belief>
+            override val plans: MutableList<Plan<Belief, Query, Response>>
+            override val intentions: MutableIntentionPool<Belief, Query, Response>
+        }
     }
-
-    fun sense(agentProcess: AgentProcess): Event.Internal?
-
-    context(_: Matcher<Belief, Query, Response>)
-    fun deliberate(agentProcess: AgentProcess, event: Event.Internal)
-
-    fun act(agentProcess: AgentProcess)
 }
 
 // interface Agent<

@@ -2,9 +2,9 @@ package it.unibo.jakta.beliefs
 
 import it.unibo.jakta.events.Event
 
-internal data class BeliefBaseImpl<Belief : Any>(val believes: MutableList<Belief> = mutableListOf()) :
+internal data class BeliefBaseImpl<Belief : Any>(val believes: MutableSet<Belief> = mutableSetOf()) :
     MutableBeliefBase<Belief>,
-    Collection<Belief> by believes {
+    Set<Belief> by believes {
 
     private val eventQueue: MutableList<Event.Internal.Belief<Belief>> = mutableListOf()
 
@@ -22,7 +22,7 @@ internal data class BeliefBaseImpl<Belief : Any>(val believes: MutableList<Belie
 //            true
 //        } else {
 //            false
-//        }
+//        },
 //    }
 //
 //    override fun update(beliefBase: ASBeliefBase): Boolean {

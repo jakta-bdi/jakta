@@ -8,6 +8,7 @@ import it.unibo.jakta.events.Event
 import it.unibo.jakta.events.value
 import it.unibo.jakta.intentions.ASActivationRecord
 import it.unibo.jakta.intentions.ActivationRecord
+import it.unibo.jakta.resolution.Matcher
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.solve.Solution
 import it.unibo.tuprolog.solve.Solver

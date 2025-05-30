@@ -1,7 +1,7 @@
 package it.unibo.jakta
 
 import it.unibo.jakta.events.Event
-import it.unibo.jakta.plans.Matcher
+import it.unibo.jakta.resolution.Matcher
 
 /** BDI Agent definition*/
 interface AgentLifecycle<Belief : Any, Query : Any, Response> {

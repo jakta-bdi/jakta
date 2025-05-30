@@ -1,6 +1,5 @@
 package it.unibo.jakta.impl
 
-import it.unibo.jakta.ASAgent
 import it.unibo.jakta.Agent
 import it.unibo.jakta.AgentID
 import it.unibo.jakta.AgentProcess
@@ -11,33 +10,33 @@ import it.unibo.jakta.actions.effects.AgentChange
 import it.unibo.jakta.actions.effects.EnvironmentChange
 import it.unibo.jakta.actions.requests.ActionRequest
 import it.unibo.jakta.actions.responses.ActionResponse
-import it.unibo.jakta.beliefs.ASBelief
+import it.unibo.jakta.beliefs.BeliefBase
 import it.unibo.jakta.beliefs.MutableBeliefBase
+import it.unibo.jakta.beliefs.plus
 import it.unibo.jakta.environment.BasicEnvironment
-import it.unibo.jakta.events.AchievementGoalFailure
-import it.unibo.jakta.events.AchievementGoalInvocation
 import it.unibo.jakta.events.Event
-import it.unibo.jakta.events.TestGoalFailure
-import it.unibo.jakta.events.TestGoalInvocation
 import it.unibo.jakta.intentions.ASIntention
-import it.unibo.jakta.intentions.ASMutableIntentionPool
 import it.unibo.jakta.intentions.ActivationRecord
 import it.unibo.jakta.intentions.Intention
-import it.unibo.jakta.intentions.IntentionPoolStaticFactory
 import it.unibo.jakta.intentions.MutableIntentionPool
-import it.unibo.jakta.plans.Matcher
+import it.unibo.jakta.resolution.Matcher
 import it.unibo.jakta.plans.Plan
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
-internal class AgentImpl<Belief : Any, Query : Any, Response>(
+internal class AgentImpl<Belief : Any, Query : Any, Response> @JvmOverloads constructor(
 //    var controller: Activity.Controller?,
     agentID: AgentID = AgentID(),
     agentName: String = "Agent-$agentID",
     events: List<Event.Internal.Goal<Belief, Query, Response>> = emptyList(),
     beliefBase: MutableBeliefBase<Belief> = MutableBeliefBase.empty(),
-    plans: MutableCollection<Plan<Belief, Query, Response>> = mutableListOf(),
+    plans: MutableList<Plan<Belief, Query, Response>> = mutableListOf(),
     intentions: MutableIntentionPool<Belief, Query, Response>,
 ) : Agent<Belief, Query, Response> {
-    override val context: MutableContext = MutableContext(
+
+    override val context: Agent.Context<Belief, Query, Response> get() = internalContext
+
+    private val internalContext = MutableContext(
         agentID,
         agentName,
         beliefBase,
@@ -46,23 +45,26 @@ internal class AgentImpl<Belief : Any, Query : Any, Response>(
         events.asSequence(),
     )
 
-    data class MutableContext<Belief: Any, Query: Any, Result>(
+    private data class MutableContext<Belief: Any, Query: Any, Result>(
         override val agentID: AgentID,
         override val agentName: String,
-        override val beliefBase: MutableBeliefBase<Belief>,
-        override val plans: MutableCollection<Plan<Belief, Query, Result>>,
+        override val beliefBase: MutableBeliefBase<Belief> = MutableBeliefBase.empty(),
+        override val plans: MutableList<Plan<Belief, Query, Result>>,
         override val intentions: MutableIntentionPool<Belief, Query, Result>,
-        private var events: Sequence<Event.Internal.Goal<Belief, Query, Result>> = emptySequence(),
-    ) : Agent.Context<Belief, Query, Result>, Agent.MutableContext<Belief, Query, Result> {
+        var events: Sequence<Event.Internal.Goal<Belief, Query, Result>> = emptySequence(),
+    ) : Agent.Context.Mutable<Belief, Query, Result> {
 
-        override fun enqueue(event: Event.Internal.Goal<Belief, Query, Result>) {
-            events += event
-        }
+        var previousPercepts: BeliefBase<Belief> = MutableBeliefBase.empty()
 
-        override fun drop(event: Event.Internal.Goal<Belief, Query, Result>) {
-            // TODO: decide what to do if there are two events that are the same
-            events = events.filter { it != event }
-        }
+
+//        override fun enqueue(event: Event.Internal.Goal<Belief, Query, Result>) {
+//            events += event
+//        }
+//
+//        override fun drop(event: Event.Internal.Goal<Belief, Query, Result>) {
+//            // TODO: decide what to do if there are two events that are the same
+//            events = events.filter { it != event }
+//        }
 
         override fun poll(): Event.Internal.Goal<Belief, Query, Result>? {
             val localEvent = events.firstOrNull()
@@ -73,38 +75,36 @@ internal class AgentImpl<Belief : Any, Query : Any, Response>(
         }
     }
 
-    fun updateContext(function: (mutableContext: Agent.MutableContext) -> Unit): Unit =
-        function.invoke(context)
+//    fun updateContext(function: (mutableContext: Agent.MutableContext) -> Unit): Unit =
+//        function.invoke(context)
+//
+//    override fun toString(): String = Jakta.asAslSyntax(this, true)
+//
+//    override fun selectEvent(environment: BasicEnvironment): Event? =
+//        context.poll() ?: this.context.beliefBase.poll() ?: environment.poll()
+//
+//    override fun scheduleIntention(): ASIntention = this.context.intentions.nextIntention()
+//
+//    override fun runIntention(intention: ASIntention): ActionResponse = intention.nextTask()?.let {
+//        val asAction = it as? ASAction ?: error("Not executing the expected type of actions")
+//        asAction.runAction(ActionRequest.of(this.context, controller?.currentTime()))
+//    } ?: ActionResponse(
+//        it.unibo.tuprolog.core.Substitution.failed(),
+//        emptyList(),
+//    )
 
-    override fun toString(): String = Jakta.asAslSyntax(this, true)
-
-    override fun selectEvent(environment: BasicEnvironment): Event? =
-        context.poll() ?: this.context.beliefBase.poll() ?: environment.poll()
-
-    override fun scheduleIntention(): ASIntention = this.context.intentions.nextIntention()
-
-    override fun runIntention(intention: ASIntention): ActionResponse = intention.nextTask()?.let {
-        val asAction = it as? ASAction ?: error("Not executing the expected type of actions")
-        asAction.runAction(ActionRequest.of(this.context, controller?.currentTime()))
-    } ?: ActionResponse(
-        it.unibo.tuprolog.core.Substitution.failed(),
-        emptyList(),
-    )
-
-    override fun sense(agentProcess: AgentProcess): Event.Internal? {
+    override fun sense(agentProcess: AgentProcess<Belief>): Event.Internal? {
         // STEP1: Perceive the BasicEnvironment.
         val perceptions = agentProcess.percept()
-
         // STEP2: Update the ASBeliefBase
-        this.context.beliefBase.update(perceptions)
-
-        // println("pre-run -> $context")
-
+        val removedBelief = internalContext.previousPercepts - perceptions
+        internalContext.beliefBase.removeAll(removedBelief)
+        val newExternalBeliefs = perceptions - internalContext.previousPercepts
+        internalContext.beliefBase.addAll(newExternalBeliefs)
+        internalContext.previousPercepts = MutableBeliefBase.of(perceptions)
         // TODO(STEP3: Receiving Communication from Other Agents)
         // val message = environment.getNextMessage(agent.name)
-
         // TODO(STEP4: Selecting "Socially Acceptable" Messages)
-
         // Parse message
 //        if (message != null) {
 //            newEvents = when (message.type) {
@@ -118,11 +118,9 @@ internal class AgentImpl<Belief : Any, Query : Any, Response>(
 //            }
 //            cachedEffects = cachedEffects + PopMessage(this.agent.name)
 //        }
-
         // STEP5: Selecting an Event.
-        return selectEvent(
-            agentProcess,
-        ).let { it as? Event.Internal ?: TODO("Transform external events into internal events") }
+        return (context.poll() ?: this.context.beliefBase.poll() ?: agentProcess.poll()) as? Event.Internal
+            ?: TODO("Transform external events into internal events")
     }
 /*
     override fun replaceTags(tags: Map<String, Any>): Agent {
@@ -130,54 +128,71 @@ internal class AgentImpl<Belief : Any, Query : Any, Response>(
         return this
     }*/
 
-    private fun assignPlanToIntention(
-        event: Event.Internal,
-        activationRecord: ActivationRecord<Belief, Query, Response>,
-    ): Intention<Belief, Query, Response>? = when {
-        // TODO: when brought "upstairs", use the common type
-        event is Event.Internal.Goal.Achieve.Remove<*, *, *, *> || event is Event.Internal.Goal.Test.Remove<*, *, *> ->
-            event.intention?.copy(recordStack = mutableListOf(activationRecord))
-        // else -> intentions[event.intention!!.id]!!.push(activationRecord)
-        event is Event.Internal.Goal.Achieve.Add<*, *, *, *> || event is Event.Internal.Goal.Test.Add<*, *, *> -> {
-            event.intention?.pop()
-            event.intention?.push(activationRecord)
-            event.intention
-        }
-        else -> null
-    }
+//    private fun assignPlanToIntention(
+//        event: Event.Internal,
+//        activationRecord: ActivationRecord<Belief, Query, Response>,
+//    ): Intention<Belief, Query, Response>? = when {
+//        // TODO: when brought "upstairs", use the common type
+//        event is Event.Internal.Goal.Achieve.Remove<*, *, *, *> || event is Event.Internal.Goal.Test.Remove<*, *, *> ->
+//            event.intention?.copy(recordStack = mutableListOf(activationRecord))
+//        // else -> intentions[event.intention!!.id]!!.push(activationRecord)
+//        event is Event.Internal.Goal.Achieve.Add<*, *, *, *> || event is Event.Internal.Goal.Test.Add<*, *, *> -> {
+//            event.intention?.pop()
+//            event.intention?.push(activationRecord)
+//            event.intention
+//        }
+//        else -> null
+//    }
 
     context(matcher: Matcher<Belief, Query, Response>)
-    override fun deliberate(agentProcess: AgentProcess, event: Event.Internal) {
+    override fun deliberate(agentProcess: AgentProcess<Belief>, event: Event.Internal) {
         val newActivationRecord = matcher.matchPlanFor(event, context.plans, context.beliefBase)
         // Add plan to intentions
+        val eventIntention: Intention<Belief, Query, Response>? = (event as? Event.Internal.Goal<Belief, Query, Response>)
+            ?.intention
         if (newActivationRecord != null) {
+
 //            if (environment.debugEnabled) {
 //                println("[${this.context.agentName}] Selected the event: $event")
 //            }
             // if (debugEnabled) println("[${agent.agentName}] Selected the plan: $selectedPlan")
-            val updatedIntention = assignPlanToIntention(event, newActivationRecord)
-            // if (debugEnabled) println("[${agent.agentName}] Updated Intention: $updatedIntention")
-            if (updatedIntention != null) {
-                this.context.intentions.updateIntention(updatedIntention)
-            }
+            @Suppress("UNCHECKED_CAST")
+            val intention: Intention<Belief, Query, Response> = eventIntention
+                ?: Intention(newActivationRecord)
+            internalContext.intentions.put(intention)
         } else {
 //            if (environment.debugEnabled) {
 //                println("[${this.context.agentName}] WARNING: There's no applicable plan for the event: $event")
 //            }
             // Plan no longer applicable
-            when (event) {
-                // TODO: when brought "upstairs", use the common type
-                is Event.Internal.Goal<*,*,*> -> event.intention.also {
-                    if (it != null) {
-                        this.context.intentions.deleteIntention(it.id)
+            if (eventIntention != null) {
+                when (event) {
+                    is Event.Internal.Goal.Test.Add<*, *, *> ->
+                        internalContext.events += object : Event.Internal.Goal.Test.Remove<Belief, Query, Response> {
+                            override val intention: Intention<Belief, Query, Response>? = eventIntention
+                            @Suppress("UNCHECKED_CAST")
+                            override val query: Query = event.query as Query
+                        }
+                    is Event.Internal.Goal.Achieve.Add<*, *, *, *> -> {
+                        val goal = event.goal
+                        internalContext.events += object :
+                            Event.Internal.Goal.Achieve.Remove<Belief, Query, Response, Any?> {
+                            override val goal: Any? = goal
+                            override val intention: Intention<Belief, Query, Response> = eventIntention
+                        }
                     }
+                    // TODO: Samuele is wrong an thinks exploding is bad
+                    is Event.Internal.Goal.Test.Remove<*, *, *> -> error("Marmellata")
+                    is Event.Internal.Goal.Achieve.Remove<*, *, *, *> -> error("Marmellata")
+//                    if (it != null) {
+//                        this.context.intentions.deleteIntention(it.id)
+//                    }
                 }
-                else -> error("Marmellata")
             }
         }
     }
 
-    override fun act(agentProcess: AgentProcess) {
+    override fun act(agentProcess: AgentProcess<Belief>) {
         // Select intention to execute
 //        if(environment.debugEnabled) {
 //            println("----- INTENTIONS STACK -----")
@@ -191,6 +206,13 @@ internal class AgentImpl<Belief : Any, Query : Any, Response>(
 //            println("----------------------------")
 //
 //        }
+        CoroutineScope(context).launch(context) {
+            val sideEffects = action.invoke(actionScope)
+            sideEffects.forEach { sideEffect ->
+                TODO()
+            }
+        }
+
         if (!this.context.intentions.isEmpty()) {
             // STEP9: Select an Intention for Further Execution.
             val intentionToExecute = scheduleIntention()

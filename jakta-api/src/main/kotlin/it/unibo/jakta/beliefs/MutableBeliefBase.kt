@@ -19,7 +19,7 @@ interface MutableBeliefBase<Belief : Any> :
          * @return the new [ASBeliefBase]
          */
         fun <Belief : Any> of(beliefs: Iterable<Belief>): MutableBeliefBase<Belief> =
-            BeliefBaseImpl(beliefs.toMutableList())
+            BeliefBaseImpl(beliefs.toMutableSet())
 
         fun <Belief : Any> of(vararg beliefs: Belief): MutableBeliefBase<Belief> = of(beliefs.asList())
     }
