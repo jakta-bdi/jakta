@@ -1,3 +1,3 @@
 package it.unibo.jakta.messages
 
-typealias MessageQueue = List<Message>
+typealias MessageQueue = List<Message<out Any>>
