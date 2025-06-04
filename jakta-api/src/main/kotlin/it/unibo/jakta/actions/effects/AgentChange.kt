@@ -1,14 +1,13 @@
 package it.unibo.jakta.actions.effects
 
 import it.unibo.jakta.Agent
-import it.unibo.jakta.actions.SideEffect
 import it.unibo.jakta.events.Event
 import it.unibo.jakta.intentions.Intention
 import it.unibo.jakta.plans.Plan
 import it.unibo.jakta.resolution.Matcher
 
 fun interface AgentChange<Belief : Any, Query : Any, Response> :
-    SideEffect,
+    SideEffect<Belief, Query, Response>,
     (Agent.Context.Mutable<Belief, Query, Response>) -> Unit
 
 interface BeliefChange<Belief : Any, Query : Any, Response> : AgentChange<Belief, Query, Response> {
@@ -17,7 +16,7 @@ interface BeliefChange<Belief : Any, Query : Any, Response> : AgentChange<Belief
     data class Addition<Belief : Any, Query : Any, Response>(
         override val belief: Belief,
     ) : BeliefChange<Belief, Query, Response> {
-        override fun invoke(mutableAgentContext: Agent.Context.Mutable<Belief, Query, Response>) {
+        override operator fun invoke(mutableAgentContext: Agent.Context.Mutable<Belief, Query, Response>) {
             mutableAgentContext.beliefBase.add(belief)
         }
     }
@@ -25,7 +24,7 @@ interface BeliefChange<Belief : Any, Query : Any, Response> : AgentChange<Belief
     data class Removal<Belief : Any, Query : Any, Response>(
         override val belief: Belief,
     ) : BeliefChange<Belief, Query, Response> {
-        override fun invoke(mutableAgentContext: Agent.Context.Mutable<Belief, Query, Response>) {
+        override operator fun invoke(mutableAgentContext: Agent.Context.Mutable<Belief, Query, Response>) {
             mutableAgentContext.beliefBase.remove(belief)
         }
     }
@@ -33,15 +32,23 @@ interface BeliefChange<Belief : Any, Query : Any, Response> : AgentChange<Belief
     data class Update<Belief : Any, Query : Any, Response>(
         override val belief: Belief,
         val query: Query,
+        val matcher: Matcher<Belief, Query, Response>,
     ) : BeliefChange<Belief, Query, Response> {
 
-        context(matcher: Matcher<Belief, Query, Response>)
-        override fun invoke(mutableAgentContext: Agent.Context.Mutable<Belief, Query, Response>) {
+        override operator fun invoke(mutableAgentContext: Agent.Context.Mutable<Belief, Query, Response>) {
             val response = matcher.query(query, mutableAgentContext.beliefBase.snapshot())
             if (response != null) {
-                mutableAgentContext.beliefBase.remove(response.deduce().first()) // TODO("How can it understand the type of Response I am extending in Matcher?")
+                mutableAgentContext.beliefBase.remove(with(matcher) { response.deduce() }.first()) // TODO("How can it understand the type of Response I am extending in Matcher?")
                 mutableAgentContext.beliefBase.add(belief)
             }
+        }
+
+        companion object {
+            context(matcher: Matcher<Belief, Query, Response>)
+            operator fun <Belief : Any, Query : Any, Response> invoke(
+                belief: Belief,
+                query: Query,
+            ): Update<Belief, Query, Response> = Update(belief, query, matcher)
         }
     }
 }

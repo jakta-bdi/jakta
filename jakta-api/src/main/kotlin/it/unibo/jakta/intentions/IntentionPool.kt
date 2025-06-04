@@ -10,7 +10,7 @@ interface IntentionPool<Belief : Any, Query : Any, Result> {
 interface MutableIntentionPool<Belief : Any, Query : Any, Result> : IntentionPool<Belief, Query, Result> {
     fun put(intention: Intention<Belief, Query, Result>)
     var intentionSelectionFunction: (Collection<Intention<Belief, Query, Result>>) -> Intention<Belief, Query, Result>?
-    fun step(run: Action<Belief, Query, Result>.() -> Unit)
+    suspend fun step(run: suspend Action<Belief, Query, Result>.() -> Unit)
     fun drop(intentionID: IntentionID)
     fun snapshot(): IntentionPool<Belief, Query, Result>
 
@@ -33,7 +33,7 @@ private data class MutableIntentionPoolImpl<Belief : Any, Query : Any, Result>(
         selectable += intention.id to intention
     }
 
-    override fun step(run: Action<Belief, Query, Result>.() -> Unit) {
+    override suspend fun step(run: suspend Action<Belief, Query, Result>.() -> Unit) {
         val next = nextIntention()
         if (next != null) {
             selectable -= next.id

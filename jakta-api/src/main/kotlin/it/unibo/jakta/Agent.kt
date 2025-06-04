@@ -4,23 +4,34 @@ import it.unibo.jakta.beliefs.BeliefBase
 import it.unibo.jakta.beliefs.MutableBeliefBase
 import it.unibo.jakta.events.Event
 import it.unibo.jakta.events.EventGenerator
+import it.unibo.jakta.impl.ExecutionContext
 import it.unibo.jakta.intentions.ActivationRecord
 import it.unibo.jakta.intentions.IntentionPool
 import it.unibo.jakta.intentions.MutableIntentionPool
 import it.unibo.jakta.resolution.Matcher
 import it.unibo.jakta.plans.Plan
+import kotlinx.coroutines.Job
+import kotlin.coroutines.CoroutineContext
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 interface Agent<Belief : Any, Query : Any, Response> {
     // val environment: AgentProcess
 
     val context: Context<Belief, Query, Response>
+    val timeProvider: TimeProvider
 
     fun sense(agentProcess: AgentProcess<Belief>): Event.Internal?
 
     context(_: Matcher<Belief, Query, Response>)
     fun deliberate(agentProcess: AgentProcess<Belief>, event: Event.Internal)
 
-    fun act(agentProcess: AgentProcess<Belief>)
+    suspend fun act(agentProcess: AgentProcess<Belief>)
+
+    fun interface TimeProvider {
+        @OptIn(ExperimentalTime::class)
+        fun currentTime(): Instant
+    }
 
     interface Context<Belief : Any, Query : Any, Response> :
         EventGenerator<Event.Internal.Goal<Belief, Query, Response>> {
@@ -46,6 +57,10 @@ interface Agent<Belief : Any, Query : Any, Response> {
             override val beliefBase: MutableBeliefBase<Belief>
             override val plans: MutableList<Plan<Belief, Query, Response>>
             override val intentions: MutableIntentionPool<Belief, Query, Response>
+
+            fun enqueue(event: Event.Internal.Goal<Belief, Query, Response>)
+
+            fun drop(event: Event.Internal.Goal<Belief, Query, Response>)
         }
     }
 }

@@ -7,6 +7,7 @@ import it.unibo.jakta.actions.ActionInvocationContext
 import it.unibo.jakta.actions.effects.ActivitySideEffect
 import it.unibo.jakta.actions.effects.AgentChange
 import it.unibo.jakta.actions.effects.EnvironmentChange
+import it.unibo.jakta.actions.effects.SideEffect
 import it.unibo.jakta.beliefs.BeliefBase
 import it.unibo.jakta.beliefs.MutableBeliefBase
 import it.unibo.jakta.events.Event
@@ -15,7 +16,10 @@ import it.unibo.jakta.intentions.MutableIntentionPool
 import it.unibo.jakta.resolution.Matcher
 import it.unibo.jakta.plans.Plan
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.coroutines.CoroutineContext
 import kotlin.time.ExperimentalTime
 
 internal class AgentImpl<Belief : Any, Query : Any, Response> @JvmOverloads constructor(
@@ -26,6 +30,10 @@ internal class AgentImpl<Belief : Any, Query : Any, Response> @JvmOverloads cons
     beliefBase: MutableBeliefBase<Belief> = MutableBeliefBase.empty(),
     plans: MutableList<Plan<Belief, Query, Response>> = mutableListOf(),
     intentions: MutableIntentionPool<Belief, Query, Response>,
+    override val timeProvider: Agent.TimeProvider = object : Agent.TimeProvider {
+        @OptIn(ExperimentalTime::class)
+        override fun currentTime(): kotlin.time.Instant = kotlin.time.Clock.System.now()
+    }
 ) : Agent<Belief, Query, Response> {
 
     override val context: Agent.Context<Belief, Query, Response> get() = internalContext
@@ -183,35 +191,21 @@ internal class AgentImpl<Belief : Any, Query : Any, Response> @JvmOverloads cons
     }
 
     @OptIn(ExperimentalTime::class)
-    override fun act(agentProcess: AgentProcess<Belief>) {
-        // Select intention to execute
-//        if(environment.debugEnabled) {
-//            println("----- INTENTIONS STACK -----")
-//            if(context.intentions.isEmpty()) {
-//                println("EMPTY")
-//            } else {
-//                context.intentions.values.forEach {
-//                    println(it)
-//                }
-//            }
-//            println("----------------------------")
-//
-//        }
-        this.internalContext.intentions.step {
-            CoroutineScope(context).launch(context) {
-                val sideEffects = this@step.invoke(ActionInvocationContext(
+    override suspend fun act(agentProcess: AgentProcess<Belief>): List<Job> {
+        internalContext.intentions.step {
+            val sideEffects = this@step.invoke(
+                ActionInvocationContext(
                     this@AgentImpl.context,
-                    controller?.currentTime()))
-                sideEffects.forEach { sideEffect ->
-                    val processController = controller
-                    when {
-                        sideEffect is ActivitySideEffect && processController != null -> sideEffect.invoke(
-                            processController,
-                        )
-
-                        sideEffect is EnvironmentChange<*> -> sideEffect.invoke(agentProcess)
-                        sideEffect is AgentChange<*, *, *> -> sideEffect.invoke(this@AgentImpl.internalContext)
-                    }
+                    timeProvider.currentTime()
+                )
+            )
+            return sideEffects.asSequence().map { sideEffect ->
+                when {
+//                    sideEffect is ActivitySideEffect && processController != null -> sideEffect.invoke(
+//                        executionContext.scope,
+//                    )
+                    sideEffect is EnvironmentChange<Belief, Query, Response> -> sideEffect.invoke(agentProcess)
+                    sideEffect is AgentChange<Belief, Query, Response> -> sideEffect.invoke(this@AgentImpl.internalContext)
                 }
             }
         }
@@ -246,3 +240,15 @@ internal class AgentImpl<Belief : Any, Query : Any, Response> @JvmOverloads cons
 //        return environmentChangesToApply
     }
 }
+
+interface ExecutionContext {
+    val scope: CoroutineScope
+
+    suspend fun Agent<*, *, *>.stop()
+
+    suspend fun Agent<*, *, *>.start()
+}
+
+// Extension functions on CoroutineScope
+// ExecutionContext object with extension functions for agents
+// ExecutionContext object with functions taking an agent

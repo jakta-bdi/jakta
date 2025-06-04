@@ -1,13 +1,13 @@
 package it.unibo.jakta.actions
 
-interface SideEffect
+import it.unibo.jakta.actions.effects.SideEffect
 
-fun interface Action<Belief : Any, Query : Any, Result> :
-    suspend (ActionInvocationContext<Belief, Query, Result>) -> List<SideEffect> {
-    interface WithoutSideEffect<Belief : Any, Query : Any, Result> : Action<Belief, Query, Result> {
-        override suspend fun invoke(context: ActionInvocationContext<Belief, Query, Result>): List<SideEffect> =
-            emptyList<SideEffect>().also { execute(context) }
+fun interface Action<Belief : Any, Query : Any, Response> :
+    suspend (ActionInvocationContext<Belief, Query, Response>) -> List<SideEffect<Belief, Query, Response>> {
+    interface WithoutSideEffect<Belief : Any, Query : Any, Response> : Action<Belief, Query, Response> {
+        override suspend fun invoke(context: ActionInvocationContext<Belief, Query, Response>): List<SideEffect<Belief, Query, Response>> =
+            emptyList<SideEffect<Belief, Query, Response>>().also { execute(context) }
 
-        suspend fun execute(context: ActionInvocationContext<Belief, Query, Result>)
+        suspend fun execute(context: ActionInvocationContext<Belief, Query, Response>)
     }
 }
