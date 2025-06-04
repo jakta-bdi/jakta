@@ -15,7 +15,7 @@ data class Sleep(val millis: Long) : ActivitySideEffect {
 
 object Stop : ActivitySideEffect {
     override fun invoke(controller: Activity.Controller) {
-        controller.stop().also { "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee" }
+        controller.stop()
     }
 }
 
