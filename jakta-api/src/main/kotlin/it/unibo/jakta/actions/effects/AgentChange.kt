@@ -75,7 +75,7 @@ interface IntentionChange<Belief : Any, Query : Any, Response> : AgentChange<Bel
         override val intention: Intention<Belief, Query, Response>,
     ) : IntentionChange<Belief, Query, Response> {
         override fun invoke(mutableAgentContext: Agent.Context.Mutable<Belief, Query, Response>) {
-            mutableAgentContext.intentions.updateIntention(intention)
+            mutableAgentContext.intentions.put(intention)
         }
     }
 
@@ -83,15 +83,15 @@ interface IntentionChange<Belief : Any, Query : Any, Response> : AgentChange<Bel
         override val intention: Intention<Belief, Query, Response>,
     ) : IntentionChange<Belief, Query, Response> {
         override fun invoke(mutableAgentContext: Agent.Context.Mutable<Belief, Query, Response>) {
-            mutableAgentContext.intentions.deleteIntention(intention.id)
+            mutableAgentContext.intentions.drop(intention.id)
         }
     }
 
-    data class IntentionUpdate<Belief : Any, Query : Any, Response>(
+    data class Update<Belief : Any, Query : Any, Response>(
         override val intention: Intention<Belief, Query, Response>,
     ) : IntentionChange<Belief, Query, Response> {
         override fun invoke(mutableAgentContext: Agent.Context.Mutable<Belief, Query, Response>) {
-            mutableAgentContext.intentions.updateIntention(intention)
+            mutableAgentContext.intentions.put(intention)
         }
     }
 }

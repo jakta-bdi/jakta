@@ -39,7 +39,7 @@ abstract class AbstractAction : ASAction {
             if (newIntention.stack.isNotEmpty()) {
                 newIntention = newIntention.applySubstitution(result)
             }
-            effects.add(IntentionChange.IntentionUpdate(newIntention))
+            effects.add(IntentionChange.Update(newIntention))
         } else {
             val trigger = intention.currentPlan().trigger
             val failure = AchievementGoalFailure(trigger, intention)
