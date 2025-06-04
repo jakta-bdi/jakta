@@ -5,48 +5,64 @@ import it.unibo.jakta.actions.SideEffect
 import it.unibo.jakta.events.Event
 import it.unibo.jakta.intentions.Intention
 import it.unibo.jakta.plans.Plan
+import it.unibo.jakta.resolution.Matcher
 
 fun interface AgentChange<Belief : Any, Query : Any, Response> :
     SideEffect,
-    (Agent<Belief, Query, Response>.ASMutableAgentContext) -> Unit
+    (Agent.Context.Mutable<Belief, Query, Response>) -> Unit
 
 interface BeliefChange<Belief : Any, Query : Any, Response> : AgentChange<Belief, Query, Response> {
     val belief: Belief
 
-    data class BeliefAddition<Belief : Any, Query : Any, Response>(override val belief: Belief) : BeliefChange {
-        override fun invoke(mutableAgentContext: Agent<Belief, Query, Response>.ASMutableAgentContext) {
+    data class Addition<Belief : Any, Query : Any, Response>(
+        override val belief: Belief,
+    ) : BeliefChange<Belief, Query, Response> {
+        override fun invoke(mutableAgentContext: Agent.Context.Mutable<Belief, Query, Response>) {
             mutableAgentContext.beliefBase.add(belief)
         }
     }
 
-    data class BeliefRemoval<Belief : Any, Query : Any, Response>(override val belief: Belief) : BeliefChange {
-        override fun invoke(mutableAgentContext: Agent<Belief, Query, Response>.ASMutableAgentContext) {
+    data class Removal<Belief : Any, Query : Any, Response>(
+        override val belief: Belief,
+    ) : BeliefChange<Belief, Query, Response> {
+        override fun invoke(mutableAgentContext: Agent.Context.Mutable<Belief, Query, Response>) {
             mutableAgentContext.beliefBase.remove(belief)
         }
     }
 
-    data class BeliefUpdate<Belief : Any, Query : Any, Response>(override val belief: Belief) : BeliefChange {
-        override fun invoke(mutableAgentContext: Agent<Belief, Query, Response>.ASMutableAgentContext) {
-            mutableAgentContext.beliefBase.update(belief)
+    data class Update<Belief : Any, Query : Any, Response>(
+        override val belief: Belief,
+        val query: Query,
+    ) : BeliefChange<Belief, Query, Response> {
+
+        context(matcher: Matcher<Belief, Query, Response>)
+        override fun invoke(mutableAgentContext: Agent.Context.Mutable<Belief, Query, Response>) {
+            val response = matcher.query(query, mutableAgentContext.beliefBase.snapshot())
+            if (response != null) {
+                mutableAgentContext.beliefBase.remove(response.deduce().first()) // TODO("How can it understand the type of Response I am extending in Matcher?")
+                mutableAgentContext.beliefBase.add(belief)
+            }
         }
     }
 }
 
+
+// TODO("If our new implementation is reactive, how do we communicate to the agent lifecycle that we want to drop an event?")
 interface EventChange<Belief : Any, Query : Any, Response> : AgentChange<Belief, Query, Response> {
     val event: Event.Internal.Goal<Belief, Query, Response>
 
-    data class EventAddition<Belief : Any, Query : Any, Response>(
+    data class Addition<Belief : Any, Query : Any, Response>(
         override val event: Event.Internal.Goal<Belief, Query, Response>,
-    ) : EventChange {
-        override fun invoke(mutableAgentContext: Agent<Belief, Query, Response>.ASMutableAgentContext) {
+    ) : EventChange<Belief, Query, Response> {
+        override fun invoke(mutableAgentContext: Agent.Context.Mutable<Belief, Query, Response>) {
             mutableAgentContext.enqueue(event)
         }
     }
 
-    data class EventRemoval<Belief : Any, Query : Any, Response>(
+    data class Removal<Belief : Any, Query : Any, Response>(
         override val event: Event.Internal.Goal<Belief, Query, Response>,
-    ) : EventChange {
-        override fun invoke(mutableAgentContext: Agent<Belief, Query, Response>.ASMutableAgentContext) {
+    ) : EventChange<Belief, Query, Response> {
+        override fun invoke(mutableAgentContext: Agent.Context.Mutable<Belief, Query, Response>) {
             mutableAgentContext.drop(event)
         }
     }
@@ -55,24 +71,27 @@ interface EventChange<Belief : Any, Query : Any, Response> : AgentChange<Belief,
 interface IntentionChange<Belief : Any, Query : Any, Response> : AgentChange<Belief, Query, Response> {
     val intention: Intention<Belief, Query, Response>
 
-    data class IntentionAddition<Belief : Any, Query : Any, Response>(override val intention: ASIntention) :
-        IntentionChange {
-        override fun invoke(mutableAgentContext: Agent<Belief, Query, Response>.ASMutableAgentContext) {
+    data class Addition<Belief : Any, Query : Any, Response>(
+        override val intention: Intention<Belief, Query, Response>,
+    ) : IntentionChange<Belief, Query, Response> {
+        override fun invoke(mutableAgentContext: Agent.Context.Mutable<Belief, Query, Response>) {
             mutableAgentContext.intentions.updateIntention(intention)
         }
     }
 
-    data class IntentionRemoval<Belief : Any, Query : Any, Response>(override val intention: ASIntention) :
-        IntentionChange {
-        override fun invoke(mutableAgentContext: Agent<Belief, Query, Response>.ASMutableAgentContext) {
+    data class Removal<Belief : Any, Query : Any, Response>(
+        override val intention: Intention<Belief, Query, Response>,
+    ) : IntentionChange<Belief, Query, Response> {
+        override fun invoke(mutableAgentContext: Agent.Context.Mutable<Belief, Query, Response>) {
             mutableAgentContext.intentions.deleteIntention(intention.id)
         }
     }
 
-    data class IntentionUpdate<Belief : Any, Query : Any, Response>(override val intention: ASIntention) :
-        IntentionChange {
-        override fun invoke(mutableAgentContext: Agent<Belief, Query, Response>.ASMutableAgentContext) {
-            mutableAgentContext.intentions.updateIntention(intention).also { "Updated" }
+    data class IntentionUpdate<Belief : Any, Query : Any, Response>(
+        override val intention: Intention<Belief, Query, Response>,
+    ) : IntentionChange<Belief, Query, Response> {
+        override fun invoke(mutableAgentContext: Agent.Context.Mutable<Belief, Query, Response>) {
+            mutableAgentContext.intentions.updateIntention(intention)
         }
     }
 }
@@ -80,16 +99,18 @@ interface IntentionChange<Belief : Any, Query : Any, Response> : AgentChange<Bel
 interface PlanChange<Belief : Any, Query : Any, Response> : AgentChange<Belief, Query, Response> {
     val plan: Plan<Belief, Query, Response>
 
-    data class PlanAddition<Belief : Any, Query : Any, Response>(override val plan: Plan<Belief, Query, Response>) :
-        PlanChange {
-        override fun invoke(mutableAgentContext: Agent<Belief, Query, Response>.ASMutableAgentContext) {
+    data class Addition<Belief : Any, Query : Any, Response>(
+        override val plan: Plan<Belief, Query, Response>,
+    ) : PlanChange<Belief, Query, Response> {
+        override fun invoke(mutableAgentContext: Agent.Context.Mutable<Belief, Query, Response>) {
             mutableAgentContext.plans.add(plan)
         }
     }
 
-    data class PlanRemoval<Belief : Any, Query : Any, Response>(override val plan: Plan<Belief, Query, Response>) :
-        PlanChange {
-        override fun invoke(mutableAgentContext: Agent<Belief, Query, Response>.ASMutableAgentContext) {
+    data class Removal<Belief : Any, Query : Any, Response>(
+        override val plan: Plan<Belief, Query, Response>,
+    ) : PlanChange<Belief, Query, Response> {
+        override fun invoke(mutableAgentContext: Agent.Context.Mutable<Belief, Query, Response>) {
             mutableAgentContext.plans.remove(plan)
         }
     }

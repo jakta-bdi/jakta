@@ -28,7 +28,7 @@ internal class OneThreadPerAgentImpl<Belief : Any, Query : Any, Response> : Exec
         }
     }
 
-    override fun spawnAgent(agentLC: AgentLifecycle) {
+    override fun spawnAgent(agentLC: AgentLifecycle<Belief, Query, Response>) {
         Runner.threadOf(
             Activity.of {
                 val sideEffects = agentLC.runOneCycle()

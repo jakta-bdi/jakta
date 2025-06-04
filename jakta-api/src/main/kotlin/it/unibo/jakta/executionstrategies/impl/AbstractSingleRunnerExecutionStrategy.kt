@@ -3,11 +3,12 @@ package it.unibo.jakta.executionstrategies.impl
 import it.unibo.jakta.AgentLifecycle
 import it.unibo.jakta.executionstrategies.ExecutionStrategy
 
-abstract class AbstractSingleRunnerExecutionStrategy : ExecutionStrategy {
+abstract class AbstractSingleRunnerExecutionStrategy<Belief : Any, Query : Any, Response>
+    : ExecutionStrategy<Belief, Query, Response> {
 
-    protected val synchronizedAgents = SynchronizedAgents()
+    protected val synchronizedAgents = SynchronizedAgents<Belief, Query, Response>()
 
-    override fun spawnAgent(agentLC: AgentLifecycle) {
+    override fun spawnAgent(agentLC: AgentLifecycle<Belief, Query, Response>) {
         synchronizedAgents.addAgent(agentLC)
     }
 
@@ -15,11 +16,11 @@ abstract class AbstractSingleRunnerExecutionStrategy : ExecutionStrategy {
         synchronizedAgents.removeAgent(agentName)
     }
 
-    class SynchronizedAgents {
-        private var agents: List<AgentLifecycle> = listOf()
+    class SynchronizedAgents<Belief : Any, Query : Any, Response> {
+        private var agents: List<AgentLifecycle<Belief, Query, Response>> = listOf()
 
         @Synchronized
-        fun addAgent(agentLC: AgentLifecycle) {
+        fun addAgent(agentLC: AgentLifecycle<Belief, Query, Response>) {
             agents = agents + agentLC
         }
 
@@ -29,6 +30,6 @@ abstract class AbstractSingleRunnerExecutionStrategy : ExecutionStrategy {
         }
 
         @Synchronized
-        fun getAgents(): List<AgentLifecycle> = agents
+        fun getAgents(): List<AgentLifecycle<Belief, Query, Response>> = agents
     }
 }

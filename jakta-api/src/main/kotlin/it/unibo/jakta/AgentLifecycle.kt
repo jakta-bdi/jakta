@@ -7,11 +7,11 @@ import it.unibo.jakta.resolution.Matcher
 interface AgentLifecycle<Belief : Any, Query : Any, Response> {
 
     val agent: Agent<Belief, Query, Response>
-    val environment: AgentProcess
+    val environment: AgentProcess<Belief>
     val debugEnabled: Boolean
 
     /** Performs the whole procedure (10 steps) of the BDI Agent's Reasoning Cycle.
-     *  @param environment the [AgentProcess]
+     *  @param environment the [AgentProcess<Belief>]
      *  @return true if the environment has been changed as a result of this operation
      */
     fun runOneCycle() {
@@ -26,7 +26,7 @@ interface AgentLifecycle<Belief : Any, Query : Any, Response> {
      *  - STEP2: Update the ASBeliefBase
      *  - STEP3: Receiving Communication from Other Agents
      *  - STEP4: Selecting "Socially Acceptable" Messages
-     *  @param environment the [AgentProcess]
+     *  @param environment the [AgentProcess<Belief>]
      */
     fun sense(): Event.Internal?
 
@@ -42,7 +42,7 @@ interface AgentLifecycle<Belief : Any, Query : Any, Response> {
      * Performs the reason phase of the reasoning cycle, in particular:
      *  - STEP9: Select an Intention for Further Execution
      *  - STEP10: Executing one Step on an Intention
-     *  @param environment [AgentProcess]
+     *  @param environment [AgentProcess<Belief>]
      *  @return true if the environment has been changed as a result of this operation.
      */
     fun act()
@@ -51,14 +51,14 @@ interface AgentLifecycle<Belief : Any, Query : Any, Response> {
         context(_: Matcher<Belief, Query, Response>)
         fun <Belief : Any, Query : Any, Response> of(
             agent: Agent<Belief, Query, Response>,
-            environment: AgentProcess,
+            environment: AgentProcess<Belief>,
             debugEnabled: Boolean = false,
         ) = object : AgentLifecycle<Belief, Query, Response> {
             override val debugEnabled: Boolean
                 get() = debugEnabled
             override val agent: Agent<Belief, Query, Response>
                 get() = agent
-            override val environment: AgentProcess
+            override val environment: AgentProcess<Belief>
                 get() = environment
 
             override fun sense(): Event.Internal? = agent.sense(environment)

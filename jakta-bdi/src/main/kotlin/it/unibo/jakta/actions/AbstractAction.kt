@@ -43,7 +43,7 @@ abstract class AbstractAction : ASAction {
         } else {
             val trigger = intention.currentPlan().trigger
             val failure = AchievementGoalFailure(trigger, intention)
-            val failureEvent = EventChange.EventAddition(failure)
+            val failureEvent = EventChange.Addition(failure)
             effects.add(failureEvent) // Add Failure Event to be handled in future lifecycle steps
         }
     }

@@ -9,13 +9,13 @@ import kotlin.collections.forEach
 
 internal class MasImpl<Belief : Any, Query : Any, Response>(
     override val executionStrategy: ExecutionStrategy<Belief, Query, Response>,
-    override var environment: AgentProcess,
+    override var environment: AgentProcess<Belief>,
     override var agents: Iterable<Agent<Belief, Query, Response>>,
 ) : Mas<Belief, Query, Response> {
 
     override fun start(debugEnabled: Boolean) = executionStrategy.dispatch(this, debugEnabled)
 
-    override fun applyEnvironmentEffects(effects: Iterable<EnvironmentChange>) = effects.forEach {
+    override fun applyEnvironmentEffects(effects: Iterable<EnvironmentChange<Belief> >) = effects.forEach {
 //        when (it) {
 //            is BroadcastMessage -> environment = environment.broadcastMessage(it.message)
 //            is RemoveAgent -> {

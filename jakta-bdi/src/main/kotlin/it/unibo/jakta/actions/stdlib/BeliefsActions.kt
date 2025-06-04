@@ -19,7 +19,7 @@ data class AddBelief(val belief: ASBelief) : AbstractAction() {
         AddBelief(belief.applySubstitution(substitution))
 
     override fun invoke(context: ActionInvocationContext<ASBelief, Struct, Solution>): List<SideEffect> =
-        listOf(BeliefChange.BeliefAddition(belief))
+        listOf(BeliefChange.Addition(belief))
 }
 
 /**
@@ -30,7 +30,7 @@ data class RemoveBelief(val belief: ASBelief) : AbstractAction() {
         RemoveBelief(belief.applySubstitution(substitution))
 
     override fun invoke(context: ActionInvocationContext<ASBelief, Struct, Solution>): List<SideEffect> =
-        listOf(BeliefChange.BeliefRemoval(belief))
+        listOf(BeliefChange.Removal(belief))
 }
 
 /**
@@ -41,5 +41,5 @@ data class UpdateBelief(val belief: ASBelief) : AbstractAction() {
         UpdateBelief(belief.applySubstitution(substitution))
 
     override fun invoke(context: ActionInvocationContext<ASBelief, Struct, Solution>): List<SideEffect> =
-        listOf(BeliefChange.BeliefUpdate(belief))
+        listOf(BeliefChange.Update(belief))
 }

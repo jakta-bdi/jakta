@@ -17,7 +17,7 @@ interface Matcher<Belief : Any, Query : Any, Response> {
         beliefBase: BeliefBase<Belief>,
     ): ActivationRecord<Belief, Query, Response>?
 
-    fun Response.deduce(): List<Belief>
+    fun Response?.deduce(): List<Belief>
 }
 
 interface Modifier<Belief : Any, Modify : Any, Response> {

@@ -56,7 +56,7 @@ class TestIntentions :
                         )
 
                     sideEffects.size shouldBe 1
-                    sideEffects shouldContain BeliefChange.BeliefAddition(buySomething)
+                    sideEffects shouldContain BeliefChange.Addition(buySomething)
 
                     val newIntention = intention.pop()
                     newIntention.stack.size shouldBe 1

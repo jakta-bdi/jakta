@@ -13,6 +13,6 @@ interface ActivationRecord<Belief : Any, Query : Any, Result> {
 
     data class Popped<Belief : Any, Query : Any, Result>(
         val activationRecord: ActivationRecord<Belief, Query, Result>,
-        val action: Action<Belief, Query, Result>,
+        val action: Action<Belief, Query, Result>?,
     )
 }

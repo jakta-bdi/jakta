@@ -1,9 +1,9 @@
 package it.unibo.jakta.executionstrategies
 
-import it.unibo.jakta.ASAgent
+import it.unibo.jakta.Agent
 import it.unibo.jakta.actions.effects.EnvironmentChange
 
-data class ExecutionResult(
-    val newAgentContext: ASAgent,
-    val environmentEffects: Iterable<EnvironmentChange> = listOf(),
+data class ExecutionResult<Belief : Any, Query : Any, Response>(
+    val newAgentContext: Agent<Belief, Query, Response>,
+    val environmentEffects: Iterable<EnvironmentChange<Belief>> = listOf(),
 )

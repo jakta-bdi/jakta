@@ -3,26 +3,20 @@ package it.unibo.jakta.impl
 import it.unibo.jakta.Agent
 import it.unibo.jakta.AgentID
 import it.unibo.jakta.AgentProcess
-import it.unibo.jakta.Jakta
-import it.unibo.jakta.actions.ASAction
+import it.unibo.jakta.actions.ActionInvocationContext
 import it.unibo.jakta.actions.effects.ActivitySideEffect
 import it.unibo.jakta.actions.effects.AgentChange
 import it.unibo.jakta.actions.effects.EnvironmentChange
-import it.unibo.jakta.actions.requests.ActionRequest
-import it.unibo.jakta.actions.responses.ActionResponse
 import it.unibo.jakta.beliefs.BeliefBase
 import it.unibo.jakta.beliefs.MutableBeliefBase
-import it.unibo.jakta.beliefs.plus
-import it.unibo.jakta.environment.BasicEnvironment
 import it.unibo.jakta.events.Event
-import it.unibo.jakta.intentions.ASIntention
-import it.unibo.jakta.intentions.ActivationRecord
 import it.unibo.jakta.intentions.Intention
 import it.unibo.jakta.intentions.MutableIntentionPool
 import it.unibo.jakta.resolution.Matcher
 import it.unibo.jakta.plans.Plan
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlin.time.ExperimentalTime
 
 internal class AgentImpl<Belief : Any, Query : Any, Response> @JvmOverloads constructor(
 //    var controller: Activity.Controller?,
@@ -75,10 +69,6 @@ internal class AgentImpl<Belief : Any, Query : Any, Response> @JvmOverloads cons
         }
     }
 
-//    fun updateContext(function: (mutableContext: Agent.MutableContext) -> Unit): Unit =
-//        function.invoke(context)
-//
-//    override fun toString(): String = Jakta.asAslSyntax(this, true)
 //
 //    override fun selectEvent(environment: BasicEnvironment): Event? =
 //        context.poll() ?: this.context.beliefBase.poll() ?: environment.poll()
@@ -192,6 +182,7 @@ internal class AgentImpl<Belief : Any, Query : Any, Response> @JvmOverloads cons
         }
     }
 
+    @OptIn(ExperimentalTime::class)
     override fun act(agentProcess: AgentProcess<Belief>) {
         // Select intention to execute
 //        if(environment.debugEnabled) {
@@ -206,36 +197,48 @@ internal class AgentImpl<Belief : Any, Query : Any, Response> @JvmOverloads cons
 //            println("----------------------------")
 //
 //        }
-        CoroutineScope(context).launch(context) {
-            val sideEffects = action.invoke(actionScope)
-            sideEffects.forEach { sideEffect ->
-                TODO()
-            }
-        }
-
-        if (!this.context.intentions.isEmpty()) {
-            // STEP9: Select an Intention for Further Execution.
-            val intentionToExecute = scheduleIntention()
-
-            // STEP10: Executing one Step on an Intention
-            if (intentionToExecute.stack.isNotEmpty()) {
-                if (environment.debugEnabled) {
-                    println("[${context.agentName}] RUN -> ${intentionToExecute.nextActionToExecute()}")
-                }
-                val sideEffects = runIntention(intentionToExecute)
+        this.internalContext.intentions.step {
+            CoroutineScope(context).launch(context) {
+                val sideEffects = this@step.invoke(ActionInvocationContext(
+                    this@AgentImpl.context,
+                    controller?.currentTime()))
                 sideEffects.forEach { sideEffect ->
                     val processController = controller
                     when {
                         sideEffect is ActivitySideEffect && processController != null -> sideEffect.invoke(
                             processController,
                         )
-                        sideEffect is EnvironmentChange -> sideEffect.invoke(environment)
-                        sideEffect is AgentChange -> this.updateContext { sideEffect.invoke(context) }
+
+                        sideEffect is EnvironmentChange<*> -> sideEffect.invoke(agentProcess)
+                        sideEffect is AgentChange<*, *, *> -> sideEffect.invoke(this@AgentImpl.internalContext)
                     }
                 }
             }
-            // println("post run -> ${newAgent.context}")
         }
+
+ //       if (!this.context.intentions.isEmpty()) {
+            // STEP9: Select an Intention for Further Execution.
+//            val intentionToExecute = scheduleIntention()
+
+            // STEP10: Executing one Step on an Intention
+//            if (intentionToExecute.stack.isNotEmpty()) {
+//                if (environment.debugEnabled) {
+//                    println("[${context.agentName}] RUN -> ${intentionToExecute.nextActionToExecute()}")
+//                }
+//                val sideEffects = runIntention(intentionToExecute)
+//                sideEffects.forEach { sideEffect ->
+//                    val processController = controller
+//                    when {
+//                        sideEffect is ActivitySideEffect && processController != null -> sideEffect.invoke(
+//                            processController,
+//                        )
+//                        sideEffect is EnvironmentChange -> sideEffect.invoke(environment)
+//                        sideEffect is AgentChange -> this.updateContext { sideEffect.invoke(context) }
+//                    }
+//                }
+//            }
+            // println("post run -> ${newAgent.context}")
+  //      }
 
 //        // Generate BasicEnvironment Changes
 //        val environmentChangesToApply = executionResult.environmentEffects + cachedEffects

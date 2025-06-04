@@ -32,7 +32,7 @@ data class IncrementAction(val first: Int, val second: Var) : AbstractAction.Wit
 data class AddBeliefAction(val belief: ASBelief) : AbstractAction() {
     override fun applySubstitution(substitution: Substitution) = AddBeliefAction(belief)
 
-    override fun invoke(context: ASActionContext): List<SideEffect> = listOf(BeliefChange.BeliefAddition(belief))
+    override fun invoke(context: ASActionContext): List<SideEffect> = listOf(BeliefChange.Addition(belief))
 }
 
 data class TestAction(var first: Term, var second: Term) : AbstractAction.WithoutSideEffects() {

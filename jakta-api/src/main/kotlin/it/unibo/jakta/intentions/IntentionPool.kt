@@ -39,12 +39,14 @@ private data class MutableIntentionPoolImpl<Belief : Any, Query : Any, Result>(
             selectable -= next.id
             val (newIntention, record) = next.pop()
             val (newRecord, action) = record.pop()
-            action.run()
-            if (newIntention.id in allIntentions.keys) {
-                val modifiedIntention = if (newRecord.isEmpty()) { newIntention } else { newIntention.push(newRecord) }
-                when {
-                    modifiedIntention.isEmpty() -> drop(modifiedIntention.id)
-                    else -> put(modifiedIntention)
+            action?.run()
+            if (newIntention?.id in allIntentions.keys) {
+                val modifiedIntention = if (newRecord.isEmpty()) { newIntention } else { newIntention?.push(newRecord) }
+                if (modifiedIntention != null) {
+                    when {
+                        modifiedIntention.isEmpty() -> drop(modifiedIntention.id)
+                        else -> put(modifiedIntention)
+                    }
                 }
             }
         }

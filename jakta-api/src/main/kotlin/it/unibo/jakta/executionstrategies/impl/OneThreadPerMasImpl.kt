@@ -5,8 +5,9 @@ import it.unibo.jakta.Mas
 import it.unibo.jakta.fsm.Activity
 import it.unibo.jakta.fsm.Runner
 
-internal class OneThreadPerMasImpl : AbstractSingleRunnerExecutionStrategy() {
-    override fun dispatch(mas: Mas, debugEnabled: Boolean) {
+internal class OneThreadPerMasImpl<Belief : Any, Query : Any, Response>
+    : AbstractSingleRunnerExecutionStrategy<Belief, Query, Response>() {
+    override fun dispatch(mas: Mas<Belief, Query, Response>, debugEnabled: Boolean) {
         mas.agents.forEach {
             synchronizedAgents.addAgent(
                 AgentLifecycle.of(

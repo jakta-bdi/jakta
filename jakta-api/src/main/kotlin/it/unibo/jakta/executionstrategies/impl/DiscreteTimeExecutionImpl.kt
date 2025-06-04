@@ -6,8 +6,9 @@ import it.unibo.jakta.fsm.Activity
 import it.unibo.jakta.fsm.Runner
 import it.unibo.jakta.fsm.time.Time
 
-internal class DiscreteTimeExecutionImpl : AbstractSingleRunnerExecutionStrategy() {
-    override fun dispatch(mas: Mas, debugEnabled: Boolean) {
+internal class DiscreteTimeExecutionImpl<Belief : Any, Query : Any, Response>
+    : AbstractSingleRunnerExecutionStrategy<Belief, Query, Response>() {
+    override fun dispatch(mas: Mas<Belief, Query, Response>, debugEnabled: Boolean) {
         var time = 0
         mas.agents.forEach {
             synchronizedAgents.addAgent(

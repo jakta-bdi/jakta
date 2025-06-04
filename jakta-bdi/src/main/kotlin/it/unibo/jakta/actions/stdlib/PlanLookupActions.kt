@@ -25,8 +25,8 @@ data class Achieve(val planTrigger: Struct) : AbstractAction() {
         ?.nextIntention()
         ?.let {
             listOf(
-                EventChange.EventAddition(AchievementGoalInvocation(planTrigger, it.pop())),
-                IntentionChange.IntentionRemoval(it), // It gets added back in the queue after plan execution
+                EventChange.Addition(AchievementGoalInvocation(planTrigger, it.pop())),
+                IntentionChange.Removal(it), // It gets added back in the queue after plan execution
             )
         } ?: error("The action context is not an instance of Jakta AgentSpeak incarnation")
 }
@@ -43,7 +43,7 @@ data class Test(val planTrigger: Struct) : AbstractAction() {
     override fun invoke(context: ASActionContext): List<SideEffect> {
         solution = context.agentContext.beliefBase.select(planTrigger)
         return listOf(
-            EventChange.EventAddition(
+            EventChange.Addition(
                 AchievementGoalInvocation(
                     planTrigger,
                     (context.agentContext as? ASAgent.ASAgentContext)?.intentions?.nextIntention()
@@ -63,6 +63,6 @@ data class Spawn(val planTrigger: Struct) : AbstractAction() {
         Spawn(planTrigger.apply(substitution).castToStruct())
 
     override fun invoke(context: ASActionContext) = listOf(
-        EventChange.EventAddition(AchievementGoalInvocation(planTrigger)),
+        EventChange.Addition(AchievementGoalInvocation(planTrigger)),
     )
 }

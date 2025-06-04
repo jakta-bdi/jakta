@@ -11,7 +11,7 @@ interface Intention<Belief : Any, Query : Any, Result> {
     fun push(record: ActivationRecord<Belief, Query, Result>): Intention<Belief, Query, Result>
 
     data class Popped<Belief : Any, Query : Any, Result>(
-        val intention: Intention<Belief, Query, Result>,
+        val intention: Intention<Belief, Query, Result>?,
         val activationRecord: ActivationRecord<Belief, Query, Result>,
     )
 
