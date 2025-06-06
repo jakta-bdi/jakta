@@ -4,7 +4,6 @@ import it.unibo.jakta.beliefs.BeliefBase
 import it.unibo.jakta.beliefs.MutableBeliefBase
 import it.unibo.jakta.events.Event
 import it.unibo.jakta.events.EventGenerator
-import it.unibo.jakta.impl.ExecutionContext
 import it.unibo.jakta.intentions.ActivationRecord
 import it.unibo.jakta.intentions.IntentionPool
 import it.unibo.jakta.intentions.MutableIntentionPool
@@ -15,7 +14,7 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
-interface Agent<Belief : Any, Query : Any, Response> {
+interface  Agent<Belief : Any, Query : Any, Response> {
     // val environment: AgentProcess
 
     val context: Context<Belief, Query, Response>

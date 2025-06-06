@@ -14,7 +14,7 @@ interface AgentLifecycle<Belief : Any, Query : Any, Response> {
      *  @param environment the [AgentProcess<Belief>]
      *  @return true if the environment has been changed as a result of this operation
      */
-    fun runOneCycle() {
+    suspend fun runOneCycle() {
         val eventToManage = sense()
         deliberate(eventToManage)
         act()
@@ -45,7 +45,7 @@ interface AgentLifecycle<Belief : Any, Query : Any, Response> {
      *  @param environment [AgentProcess<Belief>]
      *  @return true if the environment has been changed as a result of this operation.
      */
-    fun act()
+    suspend fun act()
 
     companion object {
         context(_: Matcher<Belief, Query, Response>)
@@ -68,7 +68,7 @@ interface AgentLifecycle<Belief : Any, Query : Any, Response> {
                 else -> Unit
             }
 
-            override fun act() = agent.act(environment)
+            override suspend fun act() = agent.act(environment)
         }
     }
 }

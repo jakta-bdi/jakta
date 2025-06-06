@@ -12,7 +12,7 @@ interface Mas<Belief : Any, Query : Any, Response> {
 
     fun start(debugEnabled: Boolean = false)
 
-    fun applyEnvironmentEffects(effects: Iterable<EnvironmentChange<Belief>>)
+    fun applyEnvironmentEffects(effects: Iterable<EnvironmentChange<Belief, Query, Response>>)
 
     companion object {
         fun <Belief : Any, Query : Any, Response> of(

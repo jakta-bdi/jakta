@@ -15,7 +15,7 @@ internal class MasImpl<Belief : Any, Query : Any, Response>(
 
     override fun start(debugEnabled: Boolean) = executionStrategy.dispatch(this, debugEnabled)
 
-    override fun applyEnvironmentEffects(effects: Iterable<EnvironmentChange<Belief> >) = effects.forEach {
+    override fun applyEnvironmentEffects(effects: Iterable<EnvironmentChange<Belief, Query, Response>>) = effects.forEach {
 //        when (it) {
 //            is BroadcastMessage -> environment = environment.broadcastMessage(it.message)
 //            is RemoveAgent -> {

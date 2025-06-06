@@ -4,7 +4,6 @@ import it.unibo.jakta.Agent
 import it.unibo.jakta.AgentID
 import it.unibo.jakta.AgentProcess
 import it.unibo.jakta.actions.ActionInvocationContext
-import it.unibo.jakta.actions.effects.ActivitySideEffect
 import it.unibo.jakta.actions.effects.AgentChange
 import it.unibo.jakta.actions.effects.EnvironmentChange
 import it.unibo.jakta.actions.effects.SideEffect
@@ -47,7 +46,7 @@ internal class AgentImpl<Belief : Any, Query : Any, Response> @JvmOverloads cons
         events.asSequence(),
     )
 
-    private data class MutableContext<Belief: Any, Query: Any, Result>(
+    private data class MutableContext<Belief : Any, Query : Any, Result>(
         override val agentID: AgentID,
         override val agentName: String,
         override val beliefBase: MutableBeliefBase<Belief> = MutableBeliefBase.empty(),
@@ -59,14 +58,14 @@ internal class AgentImpl<Belief : Any, Query : Any, Response> @JvmOverloads cons
         var previousPercepts: BeliefBase<Belief> = MutableBeliefBase.empty()
 
 
-//        override fun enqueue(event: Event.Internal.Goal<Belief, Query, Result>) {
-//            events += event
-//        }
-//
-//        override fun drop(event: Event.Internal.Goal<Belief, Query, Result>) {
-//            // TODO: decide what to do if there are two events that are the same
-//            events = events.filter { it != event }
-//        }
+        override fun enqueue(event: Event.Internal.Goal<Belief, Query, Result>) {
+            events += event
+        }
+
+        override fun drop(event: Event.Internal.Goal<Belief, Query, Result>) {
+            // TODO: decide what to do if there are two events that are the same
+            events = events.filter { it != event }
+        }
 
         override fun poll(): Event.Internal.Goal<Belief, Query, Result>? {
             val localEvent = events.firstOrNull()
@@ -120,7 +119,7 @@ internal class AgentImpl<Belief : Any, Query : Any, Response> @JvmOverloads cons
         return (context.poll() ?: this.context.beliefBase.poll() ?: agentProcess.poll()) as? Event.Internal
             ?: TODO("Transform external events into internal events")
     }
-/*
+    /*
     override fun replaceTags(tags: Map<String, Any>): Agent {
         this.tags += tags
         return this
@@ -146,8 +145,9 @@ internal class AgentImpl<Belief : Any, Query : Any, Response> @JvmOverloads cons
     override fun deliberate(agentProcess: AgentProcess<Belief>, event: Event.Internal) {
         val newActivationRecord = matcher.matchPlanFor(event, context.plans, context.beliefBase)
         // Add plan to intentions
-        val eventIntention: Intention<Belief, Query, Response>? = (event as? Event.Internal.Goal<Belief, Query, Response>)
-            ?.intention
+        val eventIntention: Intention<Belief, Query, Response>? =
+            (event as? Event.Internal.Goal<Belief, Query, Response>)
+                ?.intention
         if (newActivationRecord != null) {
 
 //            if (environment.debugEnabled) {
@@ -168,9 +168,11 @@ internal class AgentImpl<Belief : Any, Query : Any, Response> @JvmOverloads cons
                     is Event.Internal.Goal.Test.Add<*, *, *> ->
                         internalContext.events += object : Event.Internal.Goal.Test.Remove<Belief, Query, Response> {
                             override val intention: Intention<Belief, Query, Response>? = eventIntention
+
                             @Suppress("UNCHECKED_CAST")
                             override val query: Query = event.query as Query
                         }
+
                     is Event.Internal.Goal.Achieve.Add<*, *, *, *> -> {
                         val goal = event.goal
                         internalContext.events += object :
@@ -191,7 +193,7 @@ internal class AgentImpl<Belief : Any, Query : Any, Response> @JvmOverloads cons
     }
 
     @OptIn(ExperimentalTime::class)
-    override suspend fun act(agentProcess: AgentProcess<Belief>): List<Job> {
+    override suspend fun act(agentProcess: AgentProcess<Belief>) =
         internalContext.intentions.step {
             val sideEffects = this@step.invoke(
                 ActionInvocationContext(
@@ -199,7 +201,8 @@ internal class AgentImpl<Belief : Any, Query : Any, Response> @JvmOverloads cons
                     timeProvider.currentTime()
                 )
             )
-            return sideEffects.asSequence().map { sideEffect ->
+            // TODO("Side effect applied here is conceptually wrong, to be moved outside of this suspend function.")
+            sideEffects.asSequence().map { sideEffect ->
                 when {
 //                    sideEffect is ActivitySideEffect && processController != null -> sideEffect.invoke(
 //                        executionContext.scope,
@@ -210,11 +213,12 @@ internal class AgentImpl<Belief : Any, Query : Any, Response> @JvmOverloads cons
             }
         }
 
- //       if (!this.context.intentions.isEmpty()) {
-            // STEP9: Select an Intention for Further Execution.
+
+    //       if (!this.context.intentions.isEmpty()) {
+    // STEP9: Select an Intention for Further Execution.
 //            val intentionToExecute = scheduleIntention()
 
-            // STEP10: Executing one Step on an Intention
+    // STEP10: Executing one Step on an Intention
 //            if (intentionToExecute.stack.isNotEmpty()) {
 //                if (environment.debugEnabled) {
 //                    println("[${context.agentName}] RUN -> ${intentionToExecute.nextActionToExecute()}")
@@ -231,14 +235,14 @@ internal class AgentImpl<Belief : Any, Query : Any, Response> @JvmOverloads cons
 //                    }
 //                }
 //            }
-            // println("post run -> ${newAgent.context}")
-  //      }
+    // println("post run -> ${newAgent.context}")
+    //      }
 
 //        // Generate BasicEnvironment Changes
 //        val environmentChangesToApply = executionResult.environmentEffects + cachedEffects
 //        cachedEffects = emptyList()
 //        return environmentChangesToApply
-    }
+
 }
 
 interface ExecutionContext {
