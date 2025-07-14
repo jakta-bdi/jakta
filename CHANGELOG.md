@@ -1,3 +1,10 @@
+## [0.14.35](https://github.com/jakta-bdi/jakta/compare/v0.14.34...v0.14.35) (2025-07-14)
+
+
+### Bug Fixes
+
+* **deps:** update alchemist to v42.2.5 ([#588](https://github.com/jakta-bdi/jakta/issues/588)) ([5ec5e60](https://github.com/jakta-bdi/jakta/commit/5ec5e6054da1a281edfc1c84b3c10a11a3295116))
+
 ## [0.14.34](https://github.com/jakta-bdi/jakta/compare/v0.14.33...v0.14.34) (2025-07-13)
 
 
