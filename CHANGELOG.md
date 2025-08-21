@@ -1,3 +1,10 @@
+## [0.14.59](https://github.com/jakta-bdi/jakta/compare/v0.14.58...v0.14.59) (2025-08-21)
+
+
+### Bug Fixes
+
+* **deps:** update actions/setup-java action to v5 ([#619](https://github.com/jakta-bdi/jakta/issues/619)) ([b9b64c3](https://github.com/jakta-bdi/jakta/commit/b9b64c359afeac87cd157c03d2fcf3915e9f86e1))
+
 ## [0.14.58](https://github.com/jakta-bdi/jakta/compare/v0.14.57...v0.14.58) (2025-08-20)
 
 
