@@ -63,7 +63,7 @@ allprojects {
     }
 
     publishOnCentral {
-        val repoOwner = "jakta-bdi"
+        repoOwner.set("jakta-bdi")
         projectLongName.set("JaKtA")
         projectDescription.set("A Kotlin internal DSL for the definition of BDI agents")
         scmConnection.set("scm:git:https://github.com/$repoOwner/${rootProject.name}")
