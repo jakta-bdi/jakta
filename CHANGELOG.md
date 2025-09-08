@@ -1,3 +1,11 @@
+## [0.15.2](https://github.com/jakta-bdi/jakta/compare/v0.15.1...v0.15.2) (2025-09-08)
+
+
+### Bug Fixes
+
+* **deps:** update plugin gitsemver to v7 ([#618](https://github.com/jakta-bdi/jakta/issues/618)) ([131d550](https://github.com/jakta-bdi/jakta/commit/131d550241a15ef83f785143d47f9809a52f091d))
+* **deps:** update plugin multijvmtesting to v4 ([#600](https://github.com/jakta-bdi/jakta/issues/600)) ([8a7383d](https://github.com/jakta-bdi/jakta/commit/8a7383d13485b69f51c1e2b8eed37698b7fe56cf))
+
 ## [0.15.1](https://github.com/jakta-bdi/jakta/compare/v0.15.0...v0.15.1) (2025-09-08)
 
 
