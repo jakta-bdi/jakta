@@ -1,3 +1,4 @@
+import org.danilopianini.gradle.gitsemver.UpdateType
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "it.unibo.jakta"
@@ -35,7 +36,9 @@ allprojects {
     gitSemVer {
         versionPrefix.set("v")
         excludeLightweightTags()
-        assignGitSemanticVersion()
+        commitNameBasedUpdateStrategy {
+            UpdateType.NONE
+        }
     }
 
     dependencies {
