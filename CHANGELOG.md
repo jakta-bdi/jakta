@@ -1,3 +1,15 @@
+## [0.15.1](https://github.com/jakta-bdi/jakta/compare/v0.15.0...v0.15.1) (2025-09-08)
+
+
+### Bug Fixes
+
+* **deps:** update alchemist to v42.3.1 ([#626](https://github.com/jakta-bdi/jakta/issues/626)) ([0cd2d55](https://github.com/jakta-bdi/jakta/commit/0cd2d5540d4103b7044d918eb8bceb8bec8ae4bc))
+* **deps:** update kotest to v6 (major) ([#616](https://github.com/jakta-bdi/jakta/issues/616)) ([9c13cc6](https://github.com/jakta-bdi/jakta/commit/9c13cc664a7945ab6de11305489c9042f2d2f4b7))
+* **deps:** update plugin kotlin-qa to v0.89.2 ([#572](https://github.com/jakta-bdi/jakta/issues/572)) ([cc0ba04](https://github.com/jakta-bdi/jakta/commit/cc0ba04e05d6e40d9af2bbc7ce07c89e5d0f6ba5))
+* **deps:** update plugin kotlin-qa to v0.90.2 ([#577](https://github.com/jakta-bdi/jakta/issues/577)) ([9562636](https://github.com/jakta-bdi/jakta/commit/956263685d9c1fbe535cc37e62a02b3c6a3ae2d4))
+* **deps:** update plugin kotlin-qa to v0.91.0 ([#585](https://github.com/jakta-bdi/jakta/issues/585)) ([1a2c20d](https://github.com/jakta-bdi/jakta/commit/1a2c20d6cf7cbe95e7a9f294f2555b0735328246))
+* **deps:** update plugin kotlin-qa to v0.94.0 ([#620](https://github.com/jakta-bdi/jakta/issues/620)) ([564120a](https://github.com/jakta-bdi/jakta/commit/564120a7f385e9657e61a014b6c98aa5d33d0998))
+
 # [0.15.0](https://github.com/jakta-bdi/jakta/compare/v0.14.59...v0.15.0) (2025-09-08)
 
 
