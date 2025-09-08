@@ -1,6 +1,5 @@
 package it.unibo.jakta.agents.bdi
 
-import io.kotest.assertions.fail
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
 import it.unibo.jakta.agents.bdi.beliefs.Belief
@@ -10,6 +9,7 @@ import it.unibo.jakta.agents.bdi.goals.ActInternally
 import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Var
+import org.junit.jupiter.api.Assertions.fail
 
 class TestGoals :
     DescribeSpec({
@@ -34,7 +34,7 @@ class TestGoals :
                 goal.value shouldBe strawberryDesire.rule
                 when (val goalCopy = goal.copy(belief.rule)) {
                     is ActInternally -> goalCopy.value shouldBe belief.rule
-                    else -> fail("Copy doesn't keep the Goal type")
+                    else -> fail { "Copy doesn't keep the Goal type" }
                 }
             }
         }
