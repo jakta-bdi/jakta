@@ -1,3 +1,16 @@
+# [0.15.0](https://github.com/jakta-bdi/jakta/compare/v0.14.60...v0.15.0) (2025-09-08)
+
+
+### Bug Fixes
+
+* **build:** migration from context-receivers to context-parameters ([aef8fff](https://github.com/jakta-bdi/jakta/commit/aef8fff0b410028e408840614b28349ac3fd865d))
+* **deps:** update alchemist to v42.2.14 ([#622](https://github.com/jakta-bdi/jakta/issues/622)) ([4ac03e1](https://github.com/jakta-bdi/jakta/commit/4ac03e1cbd501373e56f99bcae97b256a875951c))
+
+
+### Features
+
+* update publishing on central portal ([8f335d7](https://github.com/jakta-bdi/jakta/commit/8f335d7ce555db3ed7427945951d0eda13a9733d))
+
 ## [0.14.60](https://github.com/jakta-bdi/jakta/compare/v0.14.59...v0.14.60) (2025-08-25)
 
 
