@@ -47,7 +47,7 @@ allprojects {
     tasks.withType<KotlinCompile>().configureEach {
         compilerOptions {
             allWarningsAsErrors = true
-            freeCompilerArgs.add("-Xcontext-receivers")
+            freeCompilerArgs.add("-Xcontext-parameters")
             freeCompilerArgs.add("-opt-in=kotlin.RequiresOptIn")
         }
     }
