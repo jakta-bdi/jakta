@@ -1,6 +1,5 @@
 package it.unibo.jakta.agents.bdi
 
-import io.kotest.assertions.fail
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
 import it.unibo.jakta.agents.bdi.actions.InternalActions
@@ -20,6 +19,7 @@ import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.core.Var
+import org.junit.jupiter.api.Assertions.fail
 
 class TestAgent :
     DescribeSpec({
@@ -31,7 +31,7 @@ class TestAgent :
                         val second: Int = Integer.parseInt(request.arguments[1].castToAtom().value)
                         first shouldBe second
                     } else {
-                        fail("Wrong Arguments for test action")
+                        fail { "Wrong Arguments for test action" }
                     }
                 }
             }
@@ -39,7 +39,7 @@ class TestAgent :
         val failingTestInternalAction =
             object : AbstractInternalAction("failtest", 0) {
                 override fun action(request: InternalRequest) {
-                    fail("This action should not be executed by the agent")
+                    fail<Unit> { "This action should not be executed by the agent" }
                 }
             }
 

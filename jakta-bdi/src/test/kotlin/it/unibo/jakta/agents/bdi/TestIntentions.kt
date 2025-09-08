@@ -1,6 +1,5 @@
 package it.unibo.jakta.agents.bdi
 
-import io.kotest.assertions.fail
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
 import it.unibo.jakta.agents.bdi.beliefs.Belief
@@ -13,6 +12,7 @@ import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.core.Var
+import org.junit.jupiter.api.Assertions.fail
 
 class TestIntentions :
     DescribeSpec({
@@ -31,7 +31,7 @@ class TestIntentions :
             it("should return the next goal to satisfy with nextGoal() invocation") {
                 when (val nextGoal = intention.nextGoal()) {
                     is AddBelief -> nextGoal.belief shouldBe buySomething.rule.head
-                    else -> fail("Next Goal has wrong type")
+                    else -> fail { "Next Goal has wrong type" }
                 }
             }
 
