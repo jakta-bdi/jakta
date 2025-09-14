@@ -1,3 +1,11 @@
+## [0.15.12](https://github.com/jakta-bdi/jakta/compare/v0.15.11...v0.15.12) (2025-09-14)
+
+
+### Bug Fixes
+
+* **deps:** update alchemist to v42.3.4 ([#636](https://github.com/jakta-bdi/jakta/issues/636)) ([6885ef0](https://github.com/jakta-bdi/jakta/commit/6885ef019e2090f1e5eac199c3846eae12c7e147))
+* **deps:** update plugin multijvmtesting to v4.1.1 ([#633](https://github.com/jakta-bdi/jakta/issues/633)) ([1028025](https://github.com/jakta-bdi/jakta/commit/1028025751c487e3247affec1616ea1aecc8d744))
+
 ## [0.15.11](https://github.com/jakta-bdi/jakta/compare/v0.15.10...v0.15.11) (2025-09-11)
 
 
