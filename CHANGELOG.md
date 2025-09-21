@@ -1,3 +1,10 @@
+## [0.15.24](https://github.com/jakta-bdi/jakta/compare/v0.15.23...v0.15.24) (2025-09-21)
+
+
+### Bug Fixes
+
+* **deps:** update dependency org.mockito:mockito-core to v5.20.0 ([#648](https://github.com/jakta-bdi/jakta/issues/648)) ([068479c](https://github.com/jakta-bdi/jakta/commit/068479c6d7baba6189274051cea8ac2ad0f69ac3))
+
 ## [0.15.23](https://github.com/jakta-bdi/jakta/compare/v0.15.22...v0.15.23) (2025-09-20)
 
 
