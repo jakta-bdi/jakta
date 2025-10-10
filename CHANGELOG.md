@@ -1,3 +1,10 @@
+## [0.15.31](https://github.com/jakta-bdi/jakta/compare/v0.15.30...v0.15.31) (2025-10-10)
+
+
+### Bug Fixes
+
+* **deps:** update gradle/actions action to v5 ([#652](https://github.com/jakta-bdi/jakta/issues/652)) ([9f69700](https://github.com/jakta-bdi/jakta/commit/9f6970079887e148c4a5450bcca20e7c1bee1feb))
+
 ## [0.15.30](https://github.com/jakta-bdi/jakta/compare/v0.15.29...v0.15.30) (2025-10-10)
 
 
