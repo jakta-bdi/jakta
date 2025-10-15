@@ -1,3 +1,10 @@
+## [0.15.35](https://github.com/jakta-bdi/jakta/compare/v0.15.34...v0.15.35) (2025-10-15)
+
+
+### Bug Fixes
+
+* **deps:** update dependency io.kotest:kotest-runner-junit5-jvm to v6.0.4 ([#657](https://github.com/jakta-bdi/jakta/issues/657)) ([2b5aa97](https://github.com/jakta-bdi/jakta/commit/2b5aa9752726515d72ca73841b9cd032feff0049))
+
 ## [0.15.34](https://github.com/jakta-bdi/jakta/compare/v0.15.33...v0.15.34) (2025-10-14)
 
 
