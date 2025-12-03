@@ -1,3 +1,10 @@
+## [0.15.77](https://github.com/jakta-bdi/jakta/compare/v0.15.76...v0.15.77) (2025-12-03)
+
+
+### Bug Fixes
+
+* **deps:** update actions/checkout action to v6.0.1 ([#703](https://github.com/jakta-bdi/jakta/issues/703)) ([d90ac75](https://github.com/jakta-bdi/jakta/commit/d90ac758e2f2d4e5b840acf114f13d78e2a8cbf5))
+
 ## [0.15.76](https://github.com/jakta-bdi/jakta/compare/v0.15.75...v0.15.76) (2025-12-01)
 
 
