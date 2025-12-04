@@ -1,6 +1,3 @@
-import io.gitlab.arturbosch.detekt.Detekt
-import io.gitlab.arturbosch.detekt.DetektPlugin
-import io.gitlab.arturbosch.detekt.report.ReportMergeTask
 import org.danilopianini.gradle.gitsemver.UpdateType
 import org.jlleitschuh.gradle.ktlint.tasks.GenerateReportsTask
 import org.jlleitschuh.gradle.ktlint.tasks.KtLintCheckTask
@@ -140,8 +137,7 @@ allprojects {
 dependencies {
     listOf(
         "jakta-api",
-        "jakta-base-dsl",
-        "jakta-base-impl"
+        "jakta-dsl"
     ).forEach{
         kover(project(it))
     }
