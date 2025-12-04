@@ -1,59 +1,30 @@
 [versions]
-kotest = "6.0.7"
+coroutines = "1.10.2"
+dokka = "2.1.0"
+kermit = "2.0.4"
 kotlin = "2.2.21"
-mockito = "5.20.0"
-tuprolog = "1.1.5"
-alchemist = "42.3.18"
+
+
 
 [libraries]
-alchemist-api = { module = "it.unibo.alchemist:alchemist-api", version.ref = "alchemist" }
-alchemist = { module = "it.unibo.alchemist:alchemist", version.ref = "alchemist" }
-alchemist-swingui = { module = "it.unibo.alchemist:alchemist-swingui", version.ref = "alchemist" }
-alchemist-ui-tooling = {module = "it.unibo.alchemist:alchemist-ui-tooling", version.ref = "alchemist" }
-alchemist-euclidean-geometry = {module = "it.unibo.alchemist:alchemist-euclidean-geometry", version.ref = "alchemist" }
-alchemist-maps = {module = "it.unibo.alchemist:alchemist-maps", version.ref = "alchemist" }
-alchemist-physics = {module = "it.unibo.alchemist:alchemist-physics", version.ref = "alchemist" }
-kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
-kotlin-stdlib-jdk8 = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version.ref = "kotlin" }
-kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-stdlib-reflect", version.ref = "kotlin" }
-kotest-junit5-jvm = { module = "io.kotest:kotest-runner-junit5-jvm", version.ref = "kotest" }
-kotest-assertions-core-jvm = { module = "io.kotest:kotest-assertions-core-jvm", version.ref = "kotest" }
-mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
-tuprolog-full = { module = "it.unibo.tuprolog:2p-jvm", version.ref = "tuprolog" }
-tuprolog-ide = { module = "it.unibo.tuprolog:ide", version.ref = "tuprolog" }
-tuprolog-repl = { module = "it.unibo.tuprolog:repl-jvm", version.ref = "tuprolog" }
-tuprolog-core = { module = "it.unibo.tuprolog:core-jvm", version.ref = "tuprolog" }
-tuprolog-unify = { module = "it.unibo.tuprolog:unify-jvm", version.ref = "tuprolog" }
-tuprolog-theory = { module = "it.unibo.tuprolog:theory-jvm", version.ref = "tuprolog" }
-tuprolog-solve-classic = { module = "it.unibo.tuprolog:solve-classic-jvm", version.ref = "tuprolog" }
-tuprolog-parser-core = { module = "it.unibo.tuprolog:parser-core-jvm", version.ref = "tuprolog" }
-tuprolog-parser-theory = { module = "it.unibo.tuprolog:parser-theory-jvm", version.ref = "tuprolog" }
-tuprolog-dsl-core = { module = "it.unibo.tuprolog:dsl-core-jvm", version.ref = "tuprolog" }
-tuprolog-dsl-unify = { module = "it.unibo.tuprolog:dsl-unify-jvm", version.ref = "tuprolog" }
-tuprolog-dsl-theory = { module = "it.unibo.tuprolog:dsl-theory-jvm", version.ref = "tuprolog" }
-tuprolog-dsl-solve = { module = "it.unibo.tuprolog:dsl-solve-jvm", version.ref = "tuprolog" }
-tuprolog-oop-lib = { module = "it.unibo.tuprolog:oop-lib-jvm", version.ref = "tuprolog" }
+kermit = {module = "co.touchlab:kermit", version.ref = "kermit"}
+
+kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
+
+kotlinx-coroutines-core = {module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref="coroutines"}
+kotlinx-coroutines-test = {module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref="coroutines"}
+
 
 [bundles]
-kotlin-testing = [ "kotest-junit5-jvm", "kotest-assertions-core-jvm", "mockito-core" ]
-alchemist-api = [
-    "alchemist",
-    "alchemist-api"
-]
-
-alchemist-dev = [
-    "alchemist-euclidean-geometry",
-    "alchemist-maps",
-    "alchemist-physics",
-    "alchemist-ui-tooling",
-    "alchemist-swingui"
-]
 
 [plugins]
-dokka = "org.jetbrains.dokka:2.0.0"
-gitSemVer = { id = "org.danilopianini.git-sensitive-semantic-versioning", version = "7.0.7" }
-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
-kotlin-qa = { id = "org.danilopianini.gradle-kotlin-qa", version = "0.97.0" }
-multiJvmTesting = { id = "org.danilopianini.multi-jvm-test-plugin", version = "4.3.2" }
-publishOnCentral =  { id = "org.danilopianini.publish-on-central", version = "9.1.8"}
-taskTree = { id = "com.dorongold.task-tree", version = "4.0.1" }
+dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
+gitSemVer = "org.danilopianini.git-sensitive-semantic-versioning-gradle-plugin:7.0.7"
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+kotlin-qa = "org.danilopianini.gradle-kotlin-qa:0.96.0"
+kover = "org.jetbrains.kotlinx.kover:0.9.3"
+multiJvmTesting = "org.danilopianini.multi-jvm-test-plugin:4.3.2"
+npm-publish = "org.danilopianini.npm.publish:4.1.5"
+publishOnCentral = "org.danilopianini.publish-on-central:9.1.7"
+taskTree = "com.dorongold.task-tree:4.0.1"

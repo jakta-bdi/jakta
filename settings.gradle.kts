@@ -1,19 +1,34 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+    }
+}
+
 plugins {
-    id("org.danilopianini.gradle-pre-commit-git-hooks") version "2.1.5"
+    id("com.gradle.develocity") version "4.2.2"
+    id("org.danilopianini.gradle-pre-commit-git-hooks") version "2.1.4"
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
-gitHooks {
-    preCommit {
-        tasks("ktlintCheck")
+develocity {
+    buildScan {
+        termsOfUseUrl = "https://gradle.com/terms-of-service"
+        termsOfUseAgree = "yes"
+        uploadInBackground = !System.getenv("CI").toBoolean()
+        publishing.onlyIf { it.buildResult.failures.isNotEmpty() }
     }
+}
+
+gitHooks {
     commitMsg { conventionalCommits() }
     createHooks()
 }
 
 rootProject.name = "jakta"
-include(":jakta-state-machine")
-include(":jakta-bdi")
-include(":jakta-dsl")
-include("alchemist-jakta-incarnation")
-include("jakta-full")
+
+include(
+    "jakta-api",
+    "jakta-dsl"
+)
