@@ -79,6 +79,10 @@ sealed interface Event {
         data class Step(override val intention: Intention) : Internal
     }
 
-    // TODO external events
-    // interface External : Event
+    interface External : Event {
+        sealed interface Message : External
+        sealed interface Perception<Payload : Any> : External {
+            val payload: Payload
+        }
+    }
 }
