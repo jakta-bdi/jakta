@@ -5,6 +5,7 @@ import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import executeInTestScope
 import ifGoalMatch
+import it.unibo.jakta.agent
 import it.unibo.jakta.mas
 import it.unibo.jakta.plan.triggers
 import kotlin.test.Test
@@ -27,7 +28,7 @@ class TestSkillFeatureSimple {
     val mas = mas {
         environment { TestEnvironment() }
 
-        with(MyCapabilitiesSimple()) {
+
             agent("HelloAgent") {
                 hasInitialGoals {
                     !"goal"
@@ -36,6 +37,7 @@ class TestSkillFeatureSimple {
                     adding.goal {
                         ifGoalMatch("goal")
                     } triggers {
+                        with(MyCapabilitiesSimple()) {
                         agent.print("Hello World!")
                         pippo()
                         baudo()
