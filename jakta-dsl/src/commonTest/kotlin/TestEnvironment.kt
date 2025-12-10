@@ -4,7 +4,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.test.TestCoroutineScheduler
 
-class TestEnvironment(val seed: Int = 1234) : Environment {
+open class TestEnvironment(val seed: Int = 1234) : Environment {
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override suspend fun currentTime(): Long = currentCoroutineContext()[TestCoroutineScheduler]?.currentTime
