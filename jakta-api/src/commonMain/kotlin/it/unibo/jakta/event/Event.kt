@@ -1,4 +1,6 @@
 package it.unibo.jakta.event
+import it.unibo.jakta.environment.Environment
+import it.unibo.jakta.environment.Skill
 import it.unibo.jakta.intention.Intention
 import kotlin.reflect.KType
 import kotlinx.coroutines.CompletableDeferred
@@ -80,9 +82,7 @@ sealed interface Event {
     }
 
     interface External : Event {
-        sealed interface Message : External
-        sealed interface Perception<Payload : Any> : External {
-            val payload: Payload
-        }
+        interface Message : External
+        interface Perception<E: Environment, S: Skill<E>> : External
     }
 }

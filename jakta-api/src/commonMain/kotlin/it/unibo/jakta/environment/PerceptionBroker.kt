@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
  * @param agentFilteringFunction filtering function which potentially selects a subset of agents that will receive the information.
  */
 class PerceptionBroker<PerceptionPayload : Any, Belief : Any, Goal : Any, Env : Environment>(
-    private val channel: Channel<Event.External> = Channel(UNLIMITED),
+    private val channel: Channel<Event.External.Perception> = Channel(UNLIMITED),
     val perceptionToBeliefMappingFunction: PerceptionPayload.() -> Belief,
     val agentFilteringFunction: Agent<Belief, Goal, Env>.(PerceptionPayload) -> Boolean = {
         true
