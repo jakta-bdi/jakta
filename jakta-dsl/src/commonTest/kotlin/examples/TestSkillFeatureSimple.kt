@@ -23,7 +23,7 @@ class SshSkillSimpleImpl : SshSkillSimple
 
 class MyCapabilitiesSimple : HttpSkillSimple by HttpSkillSimpleImpl(), SshSkillSimple by SshSkillSimpleImpl()
 
-class TestSkillFeatureWithEnvironment {
+class TestSkillFeatureSimple {
     val mas = mas {
         environment { TestEnvironment() }
 
