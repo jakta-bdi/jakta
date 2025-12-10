@@ -1,11 +1,8 @@
 package it.unibo.jakta.environment
 
-import it.unibo.jakta.event.Event
 import kotlin.random.Random
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
 
 /**
  * Represents the environment in which the agent operates.
@@ -36,21 +33,4 @@ interface Environment {
      * @return A Random instance.
      */
     fun getRandomizer(seed: Int): Random = Random(seed)
-
-    /**
-     * Shares an [Event.External] to agents sharing this environment instance.
-     * @param [Event.External] the event that will be possibly notified to agents.
-     */
-    fun enqueueExternalEvent(event: Event.External)
-
-    /**
-     * The environment starts to listen for upcoming [Event.External] and informs agents about them.
-     * @param scope the [CoroutineScope] on which the environment will execute its process.
-     */
-    fun startPerceiving(scope: CoroutineScope)
-
-    /**
-     * The environment stops on listening for [Event.External].
-     */
-    fun stopPerceiving()
 }

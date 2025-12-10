@@ -1,46 +1,39 @@
 package it.unibo.jakta.environment
 
 import it.unibo.jakta.agent.Agent
-import it.unibo.jakta.event.BeliefAddEvent
 import it.unibo.jakta.event.Event
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.launch
 
-class PerceivingEnvironment<PerceptionPayload : Any, Belief : Any>(
-    private val agents: Set<Agent<*, *, PerceivingEnvironment<PerceptionPayload, Belief>>>,
-    val perceptionToBeliefMappingFunction: PerceptionPayload.() -> Belief,
+/**
+ * Environment which listens for external events and is capable to forward them to agents.
+ * @param perceptionToBeliefMappingFunction mapping function which defines how to convert from a [PerceptionPayload] type to a [Belief] type the information.
+ * @param agentFilteringFunction filtering function which potentially selects a subset of agents that will receive the information.
+ */
+class PerceivingEnvironment<PerceptionPayload : Any, Belief : Any, Goal : Any>(
+    val perceptionToBeliefMappingFunction: Any.() -> Belief,
+    val agentFilteringFunction: Agent<Belief, Goal, PerceivingEnvironment<PerceptionPayload, Belief, Goal>>.(
+        Any,
+    ) -> Boolean = { true }, // TODO(Maybe not enough)
 ) : Environment {
 
-    private val externalEvents: Channel<Event.External> = Channel(Channel.UNLIMITED)
-    private var job: Job? = null
+    private val perceptionBroker =
+        PerceptionBroker<PerceptionPayload, Belief, Goal, PerceivingEnvironment<PerceptionPayload, Belief, Goal>>(
+            perceptionToBeliefMappingFunction = perceptionToBeliefMappingFunction,
+            agentFilteringFunction = agentFilteringFunction,
+        )
 
-    override fun enqueueExternalEvent(event: Event.External) {
-        externalEvents.trySend(event) // Safe trySend() invocation since the Channel cannot overflow
+    /**
+     * Shares an [Event.External] to agents sharing this environment instance.
+     * @param [Event.External] the event that will be possibly notified to agents.
+     */
+    fun enqueueExternalEvent(event: Event.External) {
+        perceptionBroker.trySend(event) // Safe trySend() invocation since the Channel cannot overflow
     }
 
-    override fun startPerceiving(scope: CoroutineScope) {
-        job = scope.launch {
-            while (true) {
-                val event = externalEvents.receive()
-                when (event) {
-                    is Event.External.Message -> TODO()
-                    is Event.External.Perception<*> -> {
-                        agents.forEach {
-                            it.trySend(
-                                BeliefAddEvent(perceptionToBeliefMappingFunction(event.payload as PerceptionPayload)),
-                            )
-                        }
-                    }
-
-                    else -> error("Unrecognized event: $event")
-                }
-            }
-        }
-    }
-
-    override fun stopPerceiving() {
-        job?.cancel()
+    /**
+     * The environment listens for the next [Event.External] and informs agents about it.
+     * @param agents the [Agent]s that will be informed.
+     */
+    suspend fun perceive(agents: Set<Agent<Belief, Goal, PerceivingEnvironment<PerceptionPayload, Belief, Goal>>>) {
+        perceptionBroker.perceive(agents)
     }
 }
