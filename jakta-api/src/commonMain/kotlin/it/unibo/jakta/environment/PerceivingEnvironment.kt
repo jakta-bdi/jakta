@@ -133,11 +133,20 @@ data class GridMovement(override val environment: GridEnvironment) : Movement<Pa
 //TODO dani dice che usando KSP forse questi metodi qua del DSL si possono autogenerare
 // con tutte le possibili combinazioni di contesto che si trovano nel classpath (es. tutte le classi con annotazione @Skill)
 // https://kotlinlang.org/docs/ksp-overview.html
-context(movement: Movement<Pair<Int, Int>>, recharging: Recharging)
-suspend fun agent() {
+context(movement: M, recharging: R)
+suspend fun <M: Movement<Pair<Int, Int>> , R : Recharging> agent() {
     movement.moveTo(0 to 1)
     recharging.recharge()
 }
+
+//TODO using generics allows to generate multiple overloads without changing the name of the method "agent"
+// just like `context` is implemented..
+context(movement: M, recharging: R, skill: S)
+suspend fun <M: Movement<Pair<Int, Int>> , R : Recharging, S: Skill<Environment>> agent() {
+    movement.moveTo(0 to 1)
+    recharging.recharge()
+}
+
 
 suspend fun main() {
     val myEnv = GridEnvironment(0 to 0 )
