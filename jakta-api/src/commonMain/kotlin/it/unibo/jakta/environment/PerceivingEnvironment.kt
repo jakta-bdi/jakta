@@ -1,9 +1,11 @@
 package it.unibo.jakta.environment
 
 import it.unibo.jakta.agent.Agent
-import it.unibo.jakta.environment.Movement.Events.position
-import it.unibo.jakta.environment.Recharging.Events.chargeLevel
+import it.unibo.jakta.environment.Movement.Events.Factory.position
+import it.unibo.jakta.environment.Recharging.Events.Factory.chargeLevel
 import it.unibo.jakta.event.Event
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.delay
 
@@ -29,7 +31,7 @@ class PerceivingEnvironment<PerceptionPayload : Any, Belief : Any, Goal : Any>(
      * Shares an [Event.External] to agents sharing this environment instance.
      * @param [Event.External] the event that will be possibly notified to agents.
      */
-    fun enqueueExternalEvent(event: Event.External) {
+    fun enqueueExternalEvent(event: Event.External.Perception) {
         perceptionBroker.trySend(event) // Safe trySend() invocation since the Channel cannot overflow
     }
 
@@ -44,17 +46,18 @@ class PerceivingEnvironment<PerceptionPayload : Any, Belief : Any, Goal : Any>(
 
 //This will become the actual Environment interface
 interface BrokerEnvironment : Environment {
-    val broker : SendChannel<Event.External.Perception<out BrokerEnvironment, *>>
+    val broker : SendChannel<Event.External.Perception>
 }
 
+// an environment with some notion of spatial location
 interface SpatialEnvironment<Position> : BrokerEnvironment {
     val position: Position
 }
 
-//concrete implementation of an environment
-data class GridEnvironment(override val position: Pair<Int, Int>)
+//concrete implementation of an environment with spatial nature as int coordinates
+data class GridEnvironment(override var position: Pair<Int, Int>)
     : SpatialEnvironment<Pair<Int, Int>> {
-        override val broker : SendChannel<Event.External.Perception<out BrokerEnvironment, *>> = TODO()
+        override val broker : SendChannel<Event.External.Perception> = Channel(UNLIMITED)
     }
 
 //Interface for skills, skills depend on an environment to be able to send perceptions
@@ -69,16 +72,21 @@ interface Skill<Env: Environment> {
 interface Recharging : Skill<BrokerEnvironment> {
     suspend fun recharge()
 
-    //factory for events of Recharging
-    //receiver prevents usage from outside Recharging extensions
+    // in this namespace we define all events the skill can generate
     object Events {
-        fun Recharging.chargeLevel(level: Int): ChargeLevel =
-            ChargeLevel(level)
+        data class ChargeLevel internal constructor(val level: Int) :
+            Event.External.Perception
+
+        //factory for events of Recharging
+        //using the receiver prevents usage from outside extensions of the Recharging interface
+        object Factory {
+            fun Recharging.chargeLevel(level: Int): ChargeLevel =
+                ChargeLevel(level)
+        }
     }
 }
 
-data class ChargeLevel internal constructor(val level: Int) :
-    Event.External.Perception<BrokerEnvironment, Recharging>
+
 
 //Implementation of the actual skill for recharging
 data class FixedTimeRecharging(override val environment: BrokerEnvironment) : Recharging {
@@ -86,41 +94,57 @@ data class FixedTimeRecharging(override val environment: BrokerEnvironment) : Re
         println("Recharging...")
         delay(3000)
         println("Recharged!")
-        environment.broker.trySend(this.chargeLevel(100))
+        environment.broker.trySend(chargeLevel(100)) // I can use here the factory, but not elsewhere
     }
 }
 
 //This is a generic movement skill that depends on an environment with some spatial nature
 interface Movement<P> : Skill<SpatialEnvironment<P>> {
-    fun moveTo(direction: P) : P
+    fun moveTo(newPosition: P) : P
 
     object Events {
-        fun <P> Movement<P>.position(pos: P): Position<P> =
-            Position(pos)
+        data class Position<P> internal constructor (val position: P) :
+            Event.External.Perception
+
+        object Factory {
+            fun <P> Movement<P>.position(pos: P): Position<P> =
+                Position(pos)
+        }
     }
 }
 
-data class Position<P> internal constructor (val position: P) :
-    Event.External.Perception<SpatialEnvironment<P>, Movement<P>>
-
-
+//Concrete implementation of the movement skill for a grid environment
 data class GridMovement(override val environment: GridEnvironment) : Movement<Pair<Int, Int>> {
-    override fun moveTo(direction: Pair<Int, Int>) : Pair<Int, Int> {
-        val (x, y) = environment.position
-        val (dx, dy) = direction
-        val newPos =  (x+dx to y+dy)
-        environment.broker.trySend(this.position(newPos))
-        return newPos
-
+    override fun moveTo(newPosition: Pair<Int, Int>) : Pair<Int, Int> {
+        environment.position = newPosition
+        environment.broker.trySend(position(newPosition)) //notify the position!
+        return newPosition
     }
 }
 
-val myEnv = GridEnvironment(0 to 0 )
+// TODO se uso il context non mi serve passare fare cake pattern con i delegate?
+//object SkillSet :
+//    Recharging by FixedTimeRecharging(myEnv),
+//    Movement<Pair<Int, Int>> by GridMovement(myEnv) {
+//    override val environment: GridEnvironment = myEnv
+//}
 
-object SkillSet :
-    Recharging by FixedTimeRecharging(myEnv),
-    Movement<Pair<Int, Int>> by GridMovement(myEnv) {
-    override val environment: GridEnvironment = myEnv
+
+//TODO dani dice che usando KSP forse questi metodi qua del DSL si possono autogenerare
+// con tutte le possibili combinazioni di contesto che si trovano nel classpath (es. tutte le classi con annotazione @Skill)
+// https://kotlinlang.org/docs/ksp-overview.html
+context(movement: Movement<Pair<Int, Int>>, recharging: Recharging)
+suspend fun agent() {
+    movement.moveTo(0 to 1)
+    recharging.recharge()
 }
 
-
+suspend fun main() {
+    val myEnv = GridEnvironment(0 to 0 )
+    context(
+        GridMovement(myEnv),
+        FixedTimeRecharging(myEnv)
+     ) {
+        agent()
+    }
+}
