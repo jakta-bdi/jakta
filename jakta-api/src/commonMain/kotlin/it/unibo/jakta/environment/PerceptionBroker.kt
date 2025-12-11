@@ -20,7 +20,7 @@ class PerceptionBroker<PerceptionPayload : Any, Belief : Any, Goal : Any, Env : 
     val agentFilteringFunction: Agent<Belief, Goal, Env>.(PerceptionPayload) -> Boolean = {
         true
     }, // TODO(Maybe not enough)
-) : SendChannel<Event.External> by channel {
+) : SendChannel<Event.External.Perception> by channel {
 
     suspend fun perceive(agents: Set<Agent<Belief, Goal, Env>>) {
         coroutineScope {
@@ -29,11 +29,11 @@ class PerceptionBroker<PerceptionPayload : Any, Belief : Any, Goal : Any, Env : 
                 val event = channel.receive()
                 when (event) {
                     is Event.External.Message -> TODO()
-                    is Event.External.Perception<*> -> {
-                        val p: PerceptionPayload = event.payload as PerceptionPayload
-                        agents.filter { it.agentFilteringFunction(p) }.forEach {
-                            it.trySend(BeliefAddEvent(perceptionToBeliefMappingFunction(p)))
-                        }
+                    is Event.External.Perception -> {
+//                        val p: PerceptionPayload = event.payload as PerceptionPayload
+//                        agents.filter { it.agentFilteringFunction(p) }.forEach {
+//                            it.trySend(BeliefAddEvent(perceptionToBeliefMappingFunction(p)))
+//                        }
                     }
                     else -> error("Unrecognized event: $event")
                 }

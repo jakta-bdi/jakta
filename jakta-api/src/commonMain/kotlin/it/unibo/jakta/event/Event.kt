@@ -83,6 +83,6 @@ sealed interface Event {
 
     interface External : Event {
         interface Message : External
-        interface Perception<E: Environment, S: Skill<E>> : External
+        interface Perception : External
     }
 }
