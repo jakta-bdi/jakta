@@ -2,7 +2,7 @@
 coroutines = "1.10.2"
 dokka = "2.1.0"
 kermit = "2.0.4"
-kotlin = "2.2.21"
+kotlin = "2.2.21"s
 
 
 
