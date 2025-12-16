@@ -31,8 +31,9 @@ class TestHelloDelay {
                         } triggers {
                             agent.print("Hello...")
                             delay(timeToWait)
-                            agent.print("Time perceived by the agent: ${environment.currentTime()}")
-                            assertEquals(environment.currentTime(), timeToWait)
+                            // TODO time will be a skill
+                            //agent.print("Time perceived by the agent: ${environment.currentTime()}")
+                            //assertEquals(environment.currentTime(), timeToWait)
                             agent.print("...World!")
                             agent.terminate()
                         }

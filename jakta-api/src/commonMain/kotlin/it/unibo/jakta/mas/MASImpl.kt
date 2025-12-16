@@ -9,7 +9,7 @@ import kotlinx.coroutines.supervisorScope
 /**
  * Implementation of a [MAS].
  */
-data class MASImpl<Belief : Any, Goal : Any, Env : Environment<Belief, Goal>>(
+data class MASImpl<Belief : Any, Goal : Any, Env : Environment>(
     override val environment: Env,
 ) : MAS<Belief, Goal, Env> {
     private val log =

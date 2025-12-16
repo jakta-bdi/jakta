@@ -10,18 +10,18 @@ import kotlinx.coroutines.channels.SendChannel
  * Environment which listens for external events and is capable to forward them to agents.
  * @param agentFilteringFunction filtering function which potentially selects a subset of agents that will receive the information.
  */
-open class BaseEnvironment<Belief : Any, Goal : Any>(
-    initialAgents: Set<Agent<Belief, Goal>> = emptySet(),
+open class BaseEnvironment(
+    initialAgents: Set<Agent<*, *>> = emptySet(),
     private val channel: Channel<Event.External> = Channel(UNLIMITED),
-    val agentFilteringFunction: Agent<Belief, Goal>.() -> Boolean = { true },  // TODO(Maybe not enough)
-) : Environment<Belief, Goal>, SendChannel<Event.External> by channel  {
+    val agentFilteringFunction: Agent<*, *>.() -> Boolean = { true },  // TODO(Maybe not enough)
+) : Environment, SendChannel<Event.External> by channel  {
 
-    private val _agents: MutableSet<Agent<Belief, Goal>> = initialAgents.toMutableSet()
+    private val _agents: MutableSet<Agent<*, *>> = initialAgents.toMutableSet()
 
-    override val agents : Set<Agent<Belief, Goal>>
+    override val agents : Set<Agent<*, *>>
         get() = _agents.toSet()
 
-    override fun addAgent(agent: Agent<Belief, Goal>) {
+    override fun addAgent(agent: Agent<*, *>) {
         _agents.add(agent)
     }
 

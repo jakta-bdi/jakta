@@ -12,12 +12,15 @@ import it.unibo.jakta.plan.PlanBuilder
 import it.unibo.jakta.plan.TriggerAdditionImpl
 import it.unibo.jakta.plan.TriggerRemovalImpl
 
+//TODO For now let's focus on the FULL DSL syntax with only the main entrypoint,
+// then we will add more features to isolate components...
+
 /**
  * Entry point for creating a multi-agent system using the Jakta DSL.
  * @return an instantiated MAS.
  */
 @JaktaDSL
-fun <Belief : Any, Goal : Any, Env : Environment<Belief, Goal>> mas(
+fun <Belief : Any, Goal : Any, Env : Environment> mas(
     block: MasBuilder<Belief, Goal, Env>.() -> Unit,
 ): MAS<Belief, Goal, Env> {
     val mb = MasBuilderImpl<Belief, Goal, Env>()
@@ -25,18 +28,19 @@ fun <Belief : Any, Goal : Any, Env : Environment<Belief, Goal>> mas(
     return mb.build()
 }
 
-/**
- * Entry point for creating an agent using the Jakta DSL.
- * @return an instantiated Agent.
- */
-@JaktaDSL
-fun <Belief : Any, Goal : Any, Skills : Any> agent(
-    block: AgentBuilder<Belief, Goal, Skills>.() -> Unit,
-): Agent<Belief, Goal> {
-    val ab = AgentBuilderImpl<Belief, Goal, Skills>()
-    ab.apply(block)
-    return ab.build()
-}
+//TODO Fix this (now it needs to have a reference to the environment to instantiate skills)
+///**
+// * Entry point for creating an agent using the Jakta DSL.
+// * @return an instantiated Agent.
+// */
+//@JaktaDSL
+//fun <Belief : Any, Goal : Any, Skills : Any> agent(
+//    block: AgentBuilder<Belief, Goal, Skills>.() -> Unit,
+//): Agent<Belief, Goal> {
+//    val ab = AgentBuilderImpl<Belief, Goal, Skills>()
+//    ab.apply(block)
+//    return ab.build()
+//}
 
 // TODO entrypoint for plans???
 // this is tricky due to the way the DSL is constructed

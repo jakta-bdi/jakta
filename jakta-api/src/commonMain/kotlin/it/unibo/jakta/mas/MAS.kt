@@ -6,7 +6,7 @@ import it.unibo.jakta.environment.Environment
 /**
  * Represents a Multi-Agent System (MAS) composed of agents operating within a shared environment.
  */
-interface MAS<Belief : Any, Goal : Any, Env : Environment<Belief, Goal>> {
+interface MAS<Belief : Any, Goal : Any, Env : Environment> {
     /**
      * The shared environment in which the agents operate.
      */
