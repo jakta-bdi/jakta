@@ -75,6 +75,7 @@ open class MasBuilderImpl<Belief : Any, Goal : Any, Env : Environment<Belief, Go
 
     override fun build(): MAS<Belief, Goal, Env> {
         val env = environment ?: error { "Must provide an Environment for the MAS" }
-        return MASImpl(env, agents.toSet())
+        agents.forEach {env.addAgent(it)} //TODO here like this? or change the DSL?
+        return MASImpl(env)
     }
 }
