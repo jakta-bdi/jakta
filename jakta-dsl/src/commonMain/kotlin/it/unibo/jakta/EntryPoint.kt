@@ -17,7 +17,7 @@ import it.unibo.jakta.plan.TriggerRemovalImpl
  * @return an instantiated MAS.
  */
 @JaktaDSL
-fun <Belief : Any, Goal : Any, Env : Environment> mas(
+fun <Belief : Any, Goal : Any, Env : Environment<Belief, Goal>> mas(
     block: MasBuilder<Belief, Goal, Env>.() -> Unit,
 ): MAS<Belief, Goal, Env> {
     val mb = MasBuilderImpl<Belief, Goal, Env>()

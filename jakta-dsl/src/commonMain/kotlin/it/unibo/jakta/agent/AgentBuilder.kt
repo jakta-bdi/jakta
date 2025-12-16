@@ -2,6 +2,8 @@ package it.unibo.jakta.agent
 
 import it.unibo.jakta.JaktaDSL
 import it.unibo.jakta.environment.Environment
+import it.unibo.jakta.environment.Skill
+import it.unibo.jakta.event.Event
 import it.unibo.jakta.plan.PlanLibraryBuilder
 import it.unibo.jakta.plan.PlanLibraryBuilderImpl
 
@@ -9,7 +11,7 @@ import it.unibo.jakta.plan.PlanLibraryBuilderImpl
  * Builder interface for defining an agent with beliefs, goals, and plans.
  */
 @JaktaDSL
-interface AgentBuilder<Belief : Any, Goal : Any, Env : Environment> {
+interface AgentBuilder<Belief : Any, Goal : Any, Skills: Any> {
     /**
      * Defines the initial beliefs of the agent using a builder block.
      */
@@ -38,38 +40,51 @@ interface AgentBuilder<Belief : Any, Goal : Any, Env : Environment> {
     /**
      * Adds a belief plan to the agent's plan library.
      */
-    fun addBeliefPlan(plan: it.unibo.jakta.plan.Plan.Belief<Belief, Goal, Env, *, *>)
+    fun addBeliefPlan(plan: it.unibo.jakta.plan.Plan.Belief<Belief, Goal, *, *, *>)
 
     /**
      * Adds a goal plan to the agent's plan library.
      */
-    fun addGoalPlan(plan: it.unibo.jakta.plan.Plan.Goal<Belief, Goal, Env, *, *>)
+    fun addGoalPlan(plan: it.unibo.jakta.plan.Plan.Goal<Belief, Goal, *, *, *>)
 
     /**
      * Adds multiple belief plans to the agent's plan library.
      */
-    fun withBeliefPlans(vararg plans: it.unibo.jakta.plan.Plan.Belief<Belief, Goal, Env, *, *>)
+    fun withBeliefPlans(vararg plans: it.unibo.jakta.plan.Plan.Belief<Belief, Goal, *, *, *>)
 
     /**
      * Adds multiple goal plans to the agent's plan library.
      */
-    fun withGoalPlans(vararg plans: it.unibo.jakta.plan.Plan.Goal<Belief, Goal, Env, *, *>)
+    fun withGoalPlans(vararg plans: it.unibo.jakta.plan.Plan.Goal<Belief, Goal, *, *, *>)
+
+    /**
+     * Defines how this agent maps [Event.External] to [Event.Internal].
+     * By default, all [Event.External] are ignored.
+     */
+    fun eventMappingFunction(f: Event.External.() -> Event.Internal?)
+
+    /**
+     * Define the skills this agent can use in his plans.
+     */
+    fun skills(skills: Skills)
 
     /**
      * Builds and returns the agent instance.
      */
-    fun build(): Agent<Belief, Goal, Env>
+    fun build(): Agent<Belief, Goal>
 }
 
 /**
  * Implementation of the AgentBuilder interface.
  */
-class AgentBuilderImpl<Belief : Any, Goal : Any, Env : Environment>(private val name: String? = null) :
-    AgentBuilder<Belief, Goal, Env> {
+class AgentBuilderImpl<Belief : Any, Goal : Any, Skills: Any>(private val name: String? = null) :
+    AgentBuilder<Belief, Goal, Skills> {
     private var initialBeliefs = listOf<Belief>()
     private var initialGoals = listOf<Goal>()
-    private var beliefPlans = listOf<it.unibo.jakta.plan.Plan.Belief<Belief, Goal, Env, *, *>>()
-    private var goalPlans = listOf<it.unibo.jakta.plan.Plan.Goal<Belief, Goal, Env, *, *>>()
+    private var beliefPlans = listOf<it.unibo.jakta.plan.Plan.Belief<Belief, Goal, *, *, *>>()
+    private var goalPlans = listOf<it.unibo.jakta.plan.Plan.Goal<Belief, Goal, *, *, *>>()
+    private var eventMappingFunction: Event.External.() -> Event.Internal? = { null }
+    private lateinit var skills: Skills
 
     override fun believes(block: BeliefBuilder<Belief>.() -> Unit) {
         val builder = BeliefBuilderImpl(::addBelief)
@@ -79,6 +94,14 @@ class AgentBuilderImpl<Belief : Any, Goal : Any, Env : Environment>(private val 
     override fun hasInitialGoals(block: GoalBuilder<Goal>.() -> Unit) {
         val builder = GoalBuilderImpl(::addGoal)
         builder.apply(block)
+    }
+
+    override fun eventMappingFunction(f: Event.External.() -> Event.Internal?) {
+        this.eventMappingFunction = f
+    }
+
+    override fun skills(skills: Skills) {
+        this.skills = skills
     }
 
     override fun hasPlans(block: PlanLibraryBuilder<Belief, Goal, Env>.() -> Unit) {
@@ -94,28 +117,33 @@ class AgentBuilderImpl<Belief : Any, Goal : Any, Env : Environment>(private val 
         initialGoals += goal
     }
 
-    override fun addBeliefPlan(plan: it.unibo.jakta.plan.Plan.Belief<Belief, Goal, Env, *, *>) {
+    override fun addBeliefPlan(plan: it.unibo.jakta.plan.Plan.Belief<Belief, Goal, *, *, *>) {
         beliefPlans += plan
     }
 
-    override fun addGoalPlan(plan: it.unibo.jakta.plan.Plan.Goal<Belief, Goal, Env, *, *>) {
+    override fun addGoalPlan(plan: it.unibo.jakta.plan.Plan.Goal<Belief, Goal, *, *, *>) {
         goalPlans += plan
     }
 
-    override fun withBeliefPlans(vararg plans: it.unibo.jakta.plan.Plan.Belief<Belief, Goal, Env, *, *>) {
+    override fun withBeliefPlans(vararg plans: it.unibo.jakta.plan.Plan.Belief<Belief, Goal, *, *, *>) {
         beliefPlans += plans
     }
 
-    override fun withGoalPlans(vararg plans: it.unibo.jakta.plan.Plan.Goal<Belief, Goal, Env, *, *>) {
+    override fun withGoalPlans(vararg plans: it.unibo.jakta.plan.Plan.Goal<Belief, Goal, *, *, *>) {
         goalPlans += plans
     }
 
-    override fun build(): Agent<Belief, Goal, Env> = AgentImpl(
+
+
+
+    override fun build(): Agent<Belief, Goal> = AgentImpl(
         initialBeliefs,
         initialGoals,
         beliefPlans,
         goalPlans,
+        eventMappingFunction,
+        skills,
         name?.let { AgentID(it) }
             ?: AgentID(),
     )
-}
+}q

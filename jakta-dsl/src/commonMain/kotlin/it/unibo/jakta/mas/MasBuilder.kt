@@ -10,25 +10,25 @@ import it.unibo.jakta.environment.Environment
  * Builder interface for defining a Multi-Agent System (MAS) with agents and an environment.
  */
 @JaktaDSL
-interface MasBuilder<Belief : Any, Goal : Any, Env : Environment> {
+interface MasBuilder<Belief : Any, Goal : Any, Env : Environment<Belief, Goal>> {
 
     /**
      * Defines an agent using the provided builder block.
      * @return the constructed agent.
      */
     @JaktaDSL
-    fun agent(block: AgentBuilder<Belief, Goal, Env>.() -> Unit): Agent<Belief, Goal, Env>
+    fun agent(block: AgentBuilder<Belief, Goal, Env>.() -> Unit): Agent<Belief, Goal>
 
     /**
      * Defines an agent with a specific name using the provided builder block.
      * @return the constructed agent.
      */
-    fun agent(name: String, block: AgentBuilder<Belief, Goal, Env>.() -> Unit): Agent<Belief, Goal, Env>
+    fun agent(name: String, block: AgentBuilder<Belief, Goal, Env>.() -> Unit): Agent<Belief, Goal>
 
     /**
      * Adds multiple agents to the MAS.
      */
-    fun withAgents(vararg agents: Agent<Belief, Goal, Env>)
+    fun withAgents(vararg agents: Agent<Belief, Goal>)
 
     /**
      * Defines the environment instance for the MAS.
@@ -45,27 +45,27 @@ interface MasBuilder<Belief : Any, Goal : Any, Env : Environment> {
 /**
  * Implementation of the MasBuilder interface.
  */
-open class MasBuilderImpl<Belief : Any, Goal : Any, Env : Environment> : MasBuilder<Belief, Goal, Env> {
+open class MasBuilderImpl<Belief : Any, Goal : Any, Env : Environment<Belief, Goal>> : MasBuilder<Belief, Goal, Env> {
     protected var environment: Env? = null
-    protected val agents = mutableListOf<Agent<Belief, Goal, Env>>()
+    protected val agents = mutableListOf<Agent<Belief, Goal>>()
 
-    override fun agent(block: AgentBuilder<Belief, Goal, Env>.() -> Unit): Agent<Belief, Goal, Env> =
+    override fun agent(block: AgentBuilder<Belief, Goal, Env>.() -> Unit): Agent<Belief, Goal> =
         buildAgent(null, block)
 
-    override fun agent(name: String, block: AgentBuilder<Belief, Goal, Env>.() -> Unit): Agent<Belief, Goal, Env> =
+    override fun agent(name: String, block: AgentBuilder<Belief, Goal, Env>.() -> Unit): Agent<Belief, Goal> =
         buildAgent(name, block)
 
     private fun buildAgent(
         name: String?,
         block: AgentBuilder<Belief, Goal, Env>.() -> Unit,
-    ): Agent<Belief, Goal, Env> {
+    ): Agent<Belief, Goal> {
         val agentBuilder = AgentBuilderImpl<Belief, Goal, Env>(name)
         val agent = agentBuilder.apply(block).build()
         agents += agent
         return agent
     }
 
-    override fun withAgents(vararg agents: Agent<Belief, Goal, Env>) {
+    override fun withAgents(vararg agents: Agent<Belief, Goal>) {
         this.agents += agents
     }
 

@@ -6,16 +6,16 @@ import it.unibo.jakta.environment.Environment
 /**
  * Scope available when defining a Plan body.
  */
-interface PlanScope<Belief : Any, Goal : Any, Env : Environment, Context : Any> {
+interface PlanScope<Belief : Any, Goal : Any, Skills: Any, Context : Any> {
     /**
      * The actions that can be performed on the agent that is executing the plan.
      */
     val agent: AgentActions<Belief, Goal>
 
     /**
-     * The environment in which the agent is operating.
+     * The skills this Plan can use.
      */
-    val environment: Env
+    val skills: Skills
 
     /**
      * The context provided by the trigger that activated the plan (and optionally, filtered by the guard).
@@ -26,8 +26,8 @@ interface PlanScope<Belief : Any, Goal : Any, Env : Environment, Context : Any> 
 /**
  * Implementation of PlanScope.
  */
-data class PlanScopeImpl<Belief : Any, Goal : Any, Env : Environment, Context : Any>(
+data class PlanScopeImpl<Belief : Any, Goal : Any, Skills: Any, Context : Any>(
     override val agent: AgentActions<Belief, Goal>,
-    override val environment: Env,
+    override val skills: Skills,
     override val context: Context,
-) : PlanScope<Belief, Goal, Env, Context>
+) : PlanScope<Belief, Goal, Skills, Context>

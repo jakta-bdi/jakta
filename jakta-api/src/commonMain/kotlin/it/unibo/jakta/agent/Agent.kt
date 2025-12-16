@@ -9,7 +9,7 @@ import kotlinx.coroutines.channels.SendChannel
 /**
  * Represents a generic agent in the MAS.
  */
-interface Agent<Belief : Any, Goal : Any, Env : Environment> : SendChannel<Event.Internal> {
+interface Agent<Belief : Any, Goal : Any> : SendChannel<Event> {
     /**
      * The name of the agent.
      */
@@ -23,12 +23,19 @@ interface Agent<Belief : Any, Goal : Any, Env : Environment> : SendChannel<Event
     /**
      * The plans available to handle belief-related events.
      */
-    val beliefPlans: List<Plan.Belief<Belief, Goal, Env, *, *>>
+    val beliefPlans: List<Plan.Belief<Belief, Goal, *, *, *>>
 
     /**
      * The plans available to handle goal-related events.
      */
-    val goalPlans: List<Plan.Goal<Belief, Goal, Env, *, *>>
+    val goalPlans: List<Plan.Goal<Belief, Goal, *, *, *>>
+
+    /**
+     * Mapping function which defines how to convert a [Event.External] into a [Event.Internal].
+     * The implementation of this mapping function is specific to each [Agent] specialization,
+     * since [Event.External] types can be application-specific.
+     */
+    val eventMappingFunction: Event.External.() -> Event.Internal?
 
     // TODO all of the stuff above should probably move to AgentActions
     //  the stuff below should stay separate instead as it is internal

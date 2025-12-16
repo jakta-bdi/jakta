@@ -28,16 +28,15 @@ class TestSkillFeatureSimple {
     val mas = mas {
         environment { TestEnvironment() }
 
-
-            agent("HelloAgent") {
-                hasInitialGoals {
-                    !"goal"
-                }
-                hasPlans {
-                    adding.goal {
-                        ifGoalMatch("goal")
-                    } triggers {
-                        with(MyCapabilitiesSimple()) {
+        agent("HelloAgent") {
+            hasInitialGoals {
+                !"goal"
+            }
+            hasPlans {
+                adding.goal {
+                    ifGoalMatch("goal")
+                } triggers {
+                    with(MyCapabilitiesSimple()) {
                         agent.print("Hello World!")
                         pippo()
                         baudo()

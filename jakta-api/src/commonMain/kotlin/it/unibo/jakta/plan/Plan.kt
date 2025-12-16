@@ -1,7 +1,6 @@
 package it.unibo.jakta.plan
 
 import it.unibo.jakta.agent.AgentActions
-import it.unibo.jakta.environment.Environment
 import it.unibo.jakta.reflection.isSubtypeOfMultiPlatform // TODO can we avoid needing this?
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
@@ -14,7 +13,7 @@ import kotlin.reflect.typeOf
  * Once triggered and applicable, the plan's body is executed
  * allowing the agent to perform actions in its environment to achieve the desired outcome.
  */
-sealed interface Plan<Belief : Any, Goal : Any, Env : Environment, TriggerEntity : Any, Context : Any, PlanResult> {
+sealed interface Plan<Belief : Any, Goal : Any, Skills : Any, TriggerEntity : Any, Context : Any, PlanResult> {
     /**
      * The unique identifier of the plan.
      */
@@ -40,7 +39,7 @@ sealed interface Plan<Belief : Any, Goal : Any, Env : Environment, TriggerEntity
      * when the plan is executed. It operates within a [PlanScope] that provides access
      * to the agent's actions, the environment, and the context of the triggering event.
      */
-    val body: suspend (PlanScope<Belief, Goal, Env, Context>) -> PlanResult
+    val body: suspend (PlanScope<Belief, Goal, Skills, Context>) -> PlanResult
 
     /**
      * The type of result produced by the plan upon execution.
@@ -84,12 +83,12 @@ sealed interface Plan<Belief : Any, Goal : Any, Env : Environment, TriggerEntity
     suspend fun run(
         agent: AgentActions<Belief, Goal>,
         guardScope: GuardScope<Belief>,
-        environment: Env,
+        skills: Skills,
         entity: TriggerEntity,
     ): PlanResult = body(
         PlanScopeImpl(
             agent,
-            environment,
+            skills,
             getPlanContext(guardScope, entity),
         ),
     )
@@ -99,43 +98,43 @@ sealed interface Plan<Belief : Any, Goal : Any, Env : Environment, TriggerEntity
      */
     // TODO It does not make sense for Belief Plans to have a PlanResult as it will never be awaited on... right?
     // What are the implication on the overall design? Remove it or bind it as Unit?
-    sealed interface Belief<B : Any, G : Any, Env : Environment, Context : Any, PlanResult> :
-        Plan<B, G, Env, B, Context, PlanResult> {
+    sealed interface Belief<B : Any, G : Any, Skills: Any, Context : Any, PlanResult> :
+        Plan<B, G, Skills, B, Context, PlanResult> {
         /**
          * Plans that are triggered by the addition of a belief.
          */
-        interface Addition<B : Any, G : Any, Env : Environment, Context : Any, PlanResult> :
-            Belief<B, G, Env, Context, PlanResult>
+        interface Addition<B : Any, G : Any, Skills: Any, Context : Any, PlanResult> :
+            Belief<B, G, Skills, Context, PlanResult>
 
         /**
          * Plans that are triggered by the removal of a belief.
          */
-        interface Removal<B : Any, G : Any, Env : Environment, Context : Any, PlanResult> :
-            Belief<B, G, Env, Context, PlanResult>
+        interface Removal<B : Any, G : Any, Skills: Any, Context : Any, PlanResult> :
+            Belief<B, G, Skills, Context, PlanResult>
     }
 
     /**
      * Plans that are triggered by changes in goals.
      */
-    sealed interface Goal<B : Any, G : Any, Env : Environment, Context : Any, PlanResult> :
-        Plan<B, G, Env, G, Context, PlanResult> {
+    sealed interface Goal<B : Any, G : Any, Skills: Any, Context : Any, PlanResult> :
+        Plan<B, G, Skills, G, Context, PlanResult> {
 
         /**
          * Plans that are triggered by the addition of a goal.
          */
-        interface Addition<B : Any, G : Any, Env : Environment, Context : Any, PlanResult> :
-            Goal<B, G, Env, Context, PlanResult>
+        interface Addition<B : Any, G : Any, Skills: Any, Context : Any, PlanResult> :
+            Goal<B, G, Skills, Context, PlanResult>
 
         /**
          * Plans that are triggered by the removal of a goal.
          */
-        interface Removal<B : Any, G : Any, Env : Environment, Context : Any, PlanResult> :
-            Goal<B, G, Env, Context, PlanResult>
+        interface Removal<B : Any, G : Any, Skills: Any, Context : Any, PlanResult> :
+            Goal<B, G, Skills, Context, PlanResult>
 
         /**
          * Plans that are triggered by the failure of a goal.
          */
-        interface Failure<B : Any, G : Any, Env : Environment, Context : Any, PlanResult> :
-            Goal<B, G, Env, Context, PlanResult>
+        interface Failure<B : Any, G : Any, Skills: Any, Context : Any, PlanResult> :
+            Goal<B, G, Skills, Context, PlanResult>
     }
 }
