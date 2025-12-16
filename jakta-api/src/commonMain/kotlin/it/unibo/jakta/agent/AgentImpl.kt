@@ -2,8 +2,6 @@ package it.unibo.jakta.agent
 
 import co.touchlab.kermit.Logger
 import it.unibo.jakta.belief.BeliefBase
-import it.unibo.jakta.environment.Environment
-import it.unibo.jakta.environment.EnvironmentContext
 import it.unibo.jakta.event.Event
 import it.unibo.jakta.event.GoalAddEvent
 import it.unibo.jakta.event.GoalFailedEvent
@@ -28,17 +26,19 @@ import kotlinx.coroutines.launch
 /**
  * Default implementation of an [Agent].
  */
-open class AgentImpl<Belief : Any, Goal : Any, Env : Environment>(
+open class AgentImpl<Belief : Any, Goal : Any, in Skills: Any>(
     initialBeliefs: Collection<Belief>,
     initialGoals: List<Goal>,
-    override val beliefPlans: List<Plan.Belief<Belief, Goal, Env, *, *>>,
-    override val goalPlans: List<Plan.Goal<Belief, Goal, Env, *, *>>,
+    override val beliefPlans: List<Plan.Belief<Belief, Goal, *, *, *>>,
+    override val goalPlans: List<Plan.Goal<Belief, Goal, *, *, *>>,
+    override val eventMappingFunction: Event.External.() -> Event.Internal?,
+    private val skills: Skills,
     private val agentID: AgentID = AgentID(),
-    private val events: Channel<Event.Internal> = Channel(Channel.UNLIMITED),
-) : Agent<Belief, Goal, Env>,
+    private val events: Channel<Event> = Channel(Channel.UNLIMITED),
+) : Agent<Belief, Goal>,
     AgentActions<Belief, Goal>,
     GuardScope<Belief>,
-    SendChannel<Event.Internal> by events {
+    SendChannel<Event> by events {
     private val log =
         Logger(
             Logger.config,
@@ -68,6 +68,7 @@ open class AgentImpl<Belief : Any, Goal : Any, Env : Environment>(
             is Event.Internal.Belief<*> -> scope.handleBeliefEvent(event as Event.Internal.Belief<Belief>)
             is Event.Internal.Goal<*, *> -> scope.handleGoalEvent(event as Event.Internal.Goal<Goal, Any?>)
             is Event.Internal.Step -> handleStepEvent(event)
+            is Event.External -> eventMappingFunction(event)?.let { events.send(it) }
         }
     }
 
@@ -130,11 +131,11 @@ open class AgentImpl<Belief : Any, Goal : Any, Env : Environment>(
     private suspend fun <TriggerEntity : Any> CoroutineScope.launchPlan(
         event: Event.Internal,
         entity: TriggerEntity,
-        plan: Plan<Belief, Goal, Env, TriggerEntity, *, *>,
+        plan: Plan<Belief, Goal, Skills, TriggerEntity, *, *>,
         completion: CompletableDeferred<Any?>? = null, // TODO Check if this Any? can be improved
     ) {
         log.d { "Launching plan $plan for event $event" }
-        val environment: Env = currentCoroutineContext()[EnvironmentContext.Key]?.environment as Env
+        //val environment: S = currentCoroutineContext()[EnvironmentContext.Key]?.environment as Env
         val intention = intentionPool.nextIntention(event)
 
         val interceptor =
@@ -145,7 +146,7 @@ open class AgentImpl<Belief : Any, Goal : Any, Env : Environment>(
             @Suppress("TooGenericExceptionCaught")
             try {
                 log.d { "Running plan $plan" }
-                val result = plan.run(this@AgentImpl, this@AgentImpl, environment, entity)
+                val result = plan.run(this@AgentImpl, this@AgentImpl, skills, entity)
                 completion?.complete(result)
             } catch (e: Exception) {
                 handleFailure(event, e)
@@ -157,10 +158,10 @@ open class AgentImpl<Belief : Any, Goal : Any, Env : Environment>(
     private fun <TriggerEntity : Any> selectPlan(
         entity: TriggerEntity,
         entityMessage: String,
-        planList: List<Plan<Belief, Goal, Env, TriggerEntity, *, *>>,
-        relevantFilter: (Plan<Belief, Goal, Env, TriggerEntity, *, *>) -> Boolean,
-        applicableFilter: (Plan<Belief, Goal, Env, TriggerEntity, *, *>) -> Boolean,
-    ): Plan<Belief, Goal, Env, TriggerEntity, *, *>? {
+        planList: List<Plan<Belief, Goal, *, TriggerEntity, *, *>>,
+        relevantFilter: (Plan<Belief, Goal, *, TriggerEntity, *, *>) -> Boolean,
+        applicableFilter: (Plan<Belief, Goal, *, TriggerEntity, *, *>) -> Boolean,
+    ): Plan<Belief, Goal, Skills, TriggerEntity, *, *>? {
         val relevant = planList.filter(relevantFilter)
 
         if (relevant.isEmpty()) {
@@ -175,7 +176,8 @@ open class AgentImpl<Belief : Any, Goal : Any, Env : Environment>(
 
         return applicable.firstOrNull()?.let {
             log.d { "Selected plan $it for $entityMessage: $entity" }
-            it
+            it as Plan<Belief, Goal, Skills, TriggerEntity, *, *> // TODO: This is not entirely safe, check from DSL that
+                // the type of the agent skill must implement the plan skill type.
         } ?: run {
             log.w { "No plan selected for $entityMessage: $entity" }
             null
