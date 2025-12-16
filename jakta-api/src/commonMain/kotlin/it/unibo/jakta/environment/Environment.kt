@@ -9,18 +9,18 @@ import kotlinx.coroutines.channels.SendChannel
  * Provides access to shared resources, including time and randomness.
  * Can be extended to include environment-specific features that should be accessible to all agents within the MAS.
  */
-interface Environment<Belief : Any, Goal : Any>: SendChannel<Event.External> {
+interface Environment: SendChannel<Event.External> {
 
     /**
      * The set of agents that are part of the MAS.
      */
-    val agents: Set<Agent<Belief, Goal>>
+    val agents: Set<Agent<*, *>>
 
     /**
      * Adds an agent to the environment.
      * @param agent The agent to be added.
      */
-    fun addAgent(agent: Agent<Belief, Goal>)
+    fun addAgent(agent: Agent<*, *>)
 
     /**
      * The environment listens for the next [Event.External] and informs agents about it.

@@ -1,6 +1,8 @@
 package it.unibo.jakta.agent
 
 import it.unibo.jakta.JaktaDSL
+import it.unibo.jakta.environment.DefaultSkills
+import it.unibo.jakta.environment.Environment
 import it.unibo.jakta.event.Event
 import it.unibo.jakta.plan.PlanLibraryBuilder
 import it.unibo.jakta.plan.PlanLibraryBuilderImpl
@@ -9,7 +11,7 @@ import it.unibo.jakta.plan.PlanLibraryBuilderImpl
  * Builder interface for defining an agent with beliefs, goals, and plans.
  */
 @JaktaDSL
-interface AgentBuilder<Belief : Any, Goal : Any, Skills: Any> {
+interface AgentBuilder<Belief : Any, Goal : Any, Skills: Any, Env : Environment> {
     /**
      * Defines the initial beliefs of the agent using a builder block.
      */
@@ -64,25 +66,27 @@ interface AgentBuilder<Belief : Any, Goal : Any, Skills: Any> {
     /**
      * Define the skills this agent can use in his plans.
      */
-    fun withSkills(skills: Skills)
+    fun withSkills(skillFactory: (Env) -> Skills)
 
     /**
      * Builds and returns the agent instance.
      */
-    fun build(): Agent<Belief, Goal>
+    fun build(environment: Env): Agent<Belief, Goal>
 }
 
 /**
  * Implementation of the AgentBuilder interface.
  */
-class AgentBuilderImpl<Belief : Any, Goal : Any, Skills: Any>(private val name: String? = null) :
-    AgentBuilder<Belief, Goal, Skills> {
+class AgentBuilderImpl<Belief : Any, Goal : Any, Skills: Any, Env: Environment> (
+        private val name: String? = null,
+    ):
+    AgentBuilder<Belief, Goal, Skills, Env> {
     private var initialBeliefs = listOf<Belief>()
     private var initialGoals = listOf<Goal>()
     private var beliefPlans = listOf<it.unibo.jakta.plan.Plan.Belief<Belief, Goal, *, *, *>>()
     private var goalPlans = listOf<it.unibo.jakta.plan.Plan.Goal<Belief, Goal, *, *, *>>()
     private var eventMappingFunction: Event.External.() -> Event.Internal? = { null }
-    private lateinit var skills: Skills
+    private var skillsFactory: ((Env) -> Skills) ? = null // TODO improve
 
     override fun believes(block: BeliefBuilder<Belief>.() -> Unit) {
         val builder = BeliefBuilderImpl(::addBelief)
@@ -98,8 +102,8 @@ class AgentBuilderImpl<Belief : Any, Goal : Any, Skills: Any>(private val name: 
         this.eventMappingFunction = f
     }
 
-    override fun withSkills(skills: Skills) {
-        this.skills = skills
+    override fun withSkills(skillFactory: (Env) -> Skills) {
+        this.skillsFactory = skillFactory
     }
 
     override fun hasPlans(block: PlanLibraryBuilder<Belief, Goal, Skills>.() -> Unit) {
@@ -131,14 +135,14 @@ class AgentBuilderImpl<Belief : Any, Goal : Any, Skills: Any>(private val name: 
         goalPlans += plans
     }
 
-    override fun build(): Agent<Belief, Goal> = AgentImpl(
+    override fun build(environment: Env): Agent<Belief, Goal> = AgentImpl(
         initialBeliefs,
         initialGoals,
         beliefPlans,
         goalPlans,
         eventMappingFunction,
-        skills,
-        name?.let { AgentID(it) }
-            ?: AgentID(),
+        //TODO improve, do we have/need default skills? What if we don't?
+        skillsFactory?.let {it(environment)} ?: DefaultSkills,
+        name?.let { AgentID(it) } ?: AgentID(),
     )
 }
