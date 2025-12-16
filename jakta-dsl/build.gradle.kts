@@ -15,6 +15,9 @@ kotlinMultiplatform {
             implementation(kotlin("test"))
             implementation(libs.kotlinx.coroutines.test)
         }
+        all {
+            languageSettings.enableLanguageFeature("ContextParameters")
+        }
     }
 }
 
