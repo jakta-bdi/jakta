@@ -11,7 +11,7 @@ import kotlinx.coroutines.channels.SendChannel
  * @param agentFilteringFunction filtering function which potentially selects a subset of agents that will receive the information.
  */
 open class BaseEnvironment<Belief : Any, Goal : Any>(
-    initialAgents: Set<Agent<Belief, Goal>>,
+    initialAgents: Set<Agent<Belief, Goal>> = emptySet(),
     private val channel: Channel<Event.External> = Channel(UNLIMITED),
     val agentFilteringFunction: Agent<Belief, Goal>.() -> Boolean = { true },  // TODO(Maybe not enough)
 ) : Environment<Belief, Goal>, SendChannel<Event.External> by channel  {
