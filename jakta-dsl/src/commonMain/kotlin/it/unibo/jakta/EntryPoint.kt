@@ -30,10 +30,10 @@ fun <Belief : Any, Goal : Any, Env : Environment<Belief, Goal>> mas(
  * @return an instantiated Agent.
  */
 @JaktaDSL
-fun <Belief : Any, Goal : Any, Env : Environment> agent(
-    block: AgentBuilder<Belief, Goal, Env>.() -> Unit,
-): Agent<Belief, Goal, Env> {
-    val ab = AgentBuilderImpl<Belief, Goal, Env>()
+fun <Belief : Any, Goal : Any, Skills : Any> agent(
+    block: AgentBuilder<Belief, Goal, Skills>.() -> Unit,
+): Agent<Belief, Goal> {
+    val ab = AgentBuilderImpl<Belief, Goal, Skills>()
     ab.apply(block)
     return ab.build()
 }
@@ -50,7 +50,7 @@ fun <Belief : Any, Goal : Any, Env : Environment> agent(
 /**
  * Entry point for belief addition only plans.
  */
-interface BeliefOnlyAdditionTrigger<Belief : Any, Goal : Any, Env : Environment> {
+interface BeliefOnlyAdditionTrigger<Belief : Any, Goal : Any, Skills : Any> {
     /**
      * Given a @param[beliefQuery] as a function that matches a belief
      * and extracts a context from it if the belief matches.
@@ -58,13 +58,13 @@ interface BeliefOnlyAdditionTrigger<Belief : Any, Goal : Any, Env : Environment>
      */
     fun <Context : Any> belief(
         beliefQuery: Belief.() -> Context?,
-    ): PlanBuilder.Addition.Belief<Belief, Goal, Env, Context>
+    ): PlanBuilder.Addition.Belief<Belief, Goal, Skills, Context>
 }
 
 /**
  * Entry point for belief removal only plans.
  */
-interface BeliefOnlyRemovalTrigger<Belief : Any, Goal : Any, Env : Environment> {
+interface BeliefOnlyRemovalTrigger<Belief : Any, Goal : Any, Skills : Any> {
     /**
      * Given a @param[beliefQuery] as a function that matches a belief
      * and extracts a context from it if the belief matches.
@@ -72,33 +72,33 @@ interface BeliefOnlyRemovalTrigger<Belief : Any, Goal : Any, Env : Environment> 
      */
     fun <Context : Any> belief(
         beliefQuery: Belief.() -> Context?,
-    ): PlanBuilder.Removal.Belief<Belief, Goal, Env, Context>
+    ): PlanBuilder.Removal.Belief<Belief, Goal, Skills, Context>
 }
 
-private class BeliefPlan<Belief : Any, Goal : Any, Env : Environment> {
-    val adding: BeliefOnlyAdditionTrigger<Belief, Goal, Env>
+private class BeliefPlan<Belief : Any, Goal : Any, Skills : Any> {
+    val adding: BeliefOnlyAdditionTrigger<Belief, Goal, Skills>
         get() =
-            object : BeliefOnlyAdditionTrigger<Belief, Goal, Env> {
-                val trigger = TriggerAdditionImpl<Belief, Goal, Env>({}, {})
+            object : BeliefOnlyAdditionTrigger<Belief, Goal, Skills> {
+                val trigger = TriggerAdditionImpl<Belief, Goal, Skills>({}, {})
 
                 override fun <Context : Any> belief(
                     beliefQuery: Belief.() -> Context?,
-                ): PlanBuilder.Addition.Belief<Belief, Goal, Env, Context> = trigger.belief(beliefQuery)
+                ): PlanBuilder.Addition.Belief<Belief, Goal, Skills, Context> = trigger.belief(beliefQuery)
             }
 
-    val removing: BeliefOnlyRemovalTrigger<Belief, Goal, Env>
+    val removing: BeliefOnlyRemovalTrigger<Belief, Goal, Skills>
         get() =
-            object : BeliefOnlyRemovalTrigger<Belief, Goal, Env> {
-                val trigger = TriggerRemovalImpl<Belief, Goal, Env>({}, {})
+            object : BeliefOnlyRemovalTrigger<Belief, Goal, Skills> {
+                val trigger = TriggerRemovalImpl<Belief, Goal, Skills>({}, {})
 
                 override fun <Context : Any> belief(
                     beliefQuery: Belief.() -> Context?,
-                ): PlanBuilder.Removal.Belief<Belief, Goal, Env, Context> = trigger.belief(beliefQuery)
+                ): PlanBuilder.Removal.Belief<Belief, Goal, Skills, Context> = trigger.belief(beliefQuery)
             }
 
     companion object {
-        fun <Belief : Any, Goal : Any, Env : Environment> of(
-            block: BeliefPlan<Belief, Goal, Env>.() -> Plan.Belief<Belief, Goal, Env, *, *>,
-        ): Plan.Belief<Belief, Goal, Env, *, *> = block(BeliefPlan())
+        fun <Belief : Any, Goal : Any, Skills : Any> of(
+            block: BeliefPlan<Belief, Goal, Skills>.() -> Plan.Belief<Belief, Goal, Skills, *, *>,
+        ): Plan.Belief<Belief, Goal, Skills, *, *> = block(BeliefPlan())
     }
 }

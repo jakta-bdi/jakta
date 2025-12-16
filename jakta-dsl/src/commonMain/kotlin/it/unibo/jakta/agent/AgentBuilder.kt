@@ -1,8 +1,6 @@
 package it.unibo.jakta.agent
 
 import it.unibo.jakta.JaktaDSL
-import it.unibo.jakta.environment.Environment
-import it.unibo.jakta.environment.Skill
 import it.unibo.jakta.event.Event
 import it.unibo.jakta.plan.PlanLibraryBuilder
 import it.unibo.jakta.plan.PlanLibraryBuilderImpl
@@ -25,7 +23,7 @@ interface AgentBuilder<Belief : Any, Goal : Any, Skills: Any> {
     /**
      * Defines the plans of the agent using a plan library builder block.
      */
-    fun hasPlans(block: PlanLibraryBuilder<Belief, Goal, Env>.() -> Unit)
+    fun hasPlans(block: PlanLibraryBuilder<Belief, Goal, Skills>.() -> Unit)
 
     /**
      * Adds a belief to the agent's initial beliefs.
@@ -66,7 +64,7 @@ interface AgentBuilder<Belief : Any, Goal : Any, Skills: Any> {
     /**
      * Define the skills this agent can use in his plans.
      */
-    fun skills(skills: Skills)
+    fun withSkills(skills: Skills)
 
     /**
      * Builds and returns the agent instance.
@@ -100,12 +98,12 @@ class AgentBuilderImpl<Belief : Any, Goal : Any, Skills: Any>(private val name: 
         this.eventMappingFunction = f
     }
 
-    override fun skills(skills: Skills) {
+    override fun withSkills(skills: Skills) {
         this.skills = skills
     }
 
-    override fun hasPlans(block: PlanLibraryBuilder<Belief, Goal, Env>.() -> Unit) {
-        val builder = PlanLibraryBuilderImpl(::addBeliefPlan, ::addGoalPlan)
+    override fun hasPlans(block: PlanLibraryBuilder<Belief, Goal, Skills>.() -> Unit) {
+        val builder = PlanLibraryBuilderImpl<Belief, Goal, Skills>(::addBeliefPlan, ::addGoalPlan)
         builder.apply(block)
     }
 
@@ -133,9 +131,6 @@ class AgentBuilderImpl<Belief : Any, Goal : Any, Skills: Any>(private val name: 
         goalPlans += plans
     }
 
-
-
-
     override fun build(): Agent<Belief, Goal> = AgentImpl(
         initialBeliefs,
         initialGoals,
@@ -146,4 +141,4 @@ class AgentBuilderImpl<Belief : Any, Goal : Any, Skills: Any>(private val name: 
         name?.let { AgentID(it) }
             ?: AgentID(),
     )
-}q
+}

@@ -1,10 +1,6 @@
 package it.unibo.jakta.plan
 
 import it.unibo.jakta.JaktaDSL
-import it.unibo.jakta.environment.Environment
-import it.unibo.jakta.plan.GuardScope
-import it.unibo.jakta.plan.Plan
-import it.unibo.jakta.plan.PlanScope
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
 
@@ -12,24 +8,24 @@ import kotlin.reflect.typeOf
  * Builder interface for defining plans triggered by various events.
  */
 @JaktaDSL
-sealed interface PlanBuilder<B : Any, G : Any, Env : Environment, Context : Any> {
+sealed interface PlanBuilder<B : Any, G : Any, Skills: Any, Context : Any> {
 
     /**
      * Builder interface for defining plans triggered by additions of beliefs or goals.
      */
-    sealed interface Addition<B : Any, G : Any, Env : Environment, Context : Any> : PlanBuilder<B, G, Env, Context> {
+    sealed interface Addition<B : Any, G : Any, Skills: Any, Context : Any> : PlanBuilder<B, G, Skills, Context> {
 
         /**
          * Builder interface for defining plans triggered by additions of beliefs.
          */
-        interface Belief<B : Any, G : Any, Env : Environment, Context : Any> : Addition<B, G, Env, Context> {
+        interface Belief<B : Any, G : Any, Skills: Any, Context : Any> : Addition<B, G, Skills, Context> {
 
             /**
              * Adds a guard condition to the plan that must be satisfied for the plan to trigger.
              * @param guard a function that takes the context and returns a modified context or null to block the plan
              * @return the updated plan builder with the guard applied
              */
-            infix fun onlyWhen(guard: GuardScope<B>.(Context) -> Context?): Belief<B, G, Env, Context>
+            infix fun onlyWhen(guard: GuardScope<B>.(Context) -> Context?): Belief<B, G, Skills, Context>
 
             /**
              * Defines the body of the plan to be executed when triggered.
@@ -40,21 +36,21 @@ sealed interface PlanBuilder<B : Any, G : Any, Env : Environment, Context : Any>
             @Deprecated("Use triggers instead", ReplaceWith("triggers(body)"), DeprecationLevel.ERROR)
             fun <PlanResult> triggersImpl(
                 resultType: KType,
-                body: suspend PlanScope<B, G, Env, Context>.() -> PlanResult,
-            ): Plan.Belief.Addition<B, G, Env, Context, PlanResult>
+                body: suspend PlanScope<B, G, Skills, Context>.() -> PlanResult,
+            ): Plan.Belief.Addition<B, G, Skills, Context, PlanResult>
         }
 
         /**
          * Builder interface for defining plans triggered by additions of goals.
          */
-        interface Goal<B : Any, G : Any, Env : Environment, Context : Any> : Addition<B, G, Env, Context> {
+        interface Goal<B : Any, G : Any, Skills: Any, Context : Any> : Addition<B, G, Skills, Context> {
 
             /**
              * Adds a guard condition to the plan that must be satisfied for the plan to trigger.
              * @param guard a function that takes the context and returns a modified context or null to block the plan
              * @return the updated plan builder with the guard applied
              */
-            infix fun onlyWhen(guard: GuardScope<B>.(Context) -> Context?): Goal<B, G, Env, Context>
+            infix fun onlyWhen(guard: GuardScope<B>.(Context) -> Context?): Goal<B, G, Skills, Context>
 
             /**
              * Defines the body of the plan to be executed when triggered.
@@ -65,26 +61,26 @@ sealed interface PlanBuilder<B : Any, G : Any, Env : Environment, Context : Any>
             @Deprecated("Use triggers instead", ReplaceWith("triggers(body)"), DeprecationLevel.ERROR)
             fun <PlanResult> triggersImpl(
                 resultType: KType,
-                body: suspend PlanScope<B, G, Env, Context>.() -> PlanResult,
-            ): Plan.Goal.Addition<B, G, Env, Context, PlanResult>
+                body: suspend PlanScope<B, G, Skills, Context>.() -> PlanResult,
+            ): Plan.Goal.Addition<B, G, Skills, Context, PlanResult>
         }
     }
 
     /**
      * Builder interface for defining plans triggered by removals of beliefs or goals.
      */
-    sealed interface Removal<B : Any, G : Any, Env : Environment, Context : Any> : PlanBuilder<B, G, Env, Context> {
+    sealed interface Removal<B : Any, G : Any, Skills: Any, Context : Any> : PlanBuilder<B, G, Skills, Context> {
 
         /**
          * Builder interface for defining plans triggered by removals of beliefs.
          */
-        interface Belief<B : Any, G : Any, Env : Environment, Context : Any> : Removal<B, G, Env, Context> {
+        interface Belief<B : Any, G : Any, Skills: Any, Context : Any> : Removal<B, G, Skills, Context> {
             /**
              * Adds a guard condition to the plan that must be satisfied for the plan to trigger.
              * @param guard a function that takes the context and returns a modified context or null to block the plan
              * @return the updated plan builder with the guard applied
              */
-            infix fun onlyWhen(guard: GuardScope<B>.(Context) -> Context?): Belief<B, G, Env, Context>
+            infix fun onlyWhen(guard: GuardScope<B>.(Context) -> Context?): Belief<B, G, Skills, Context>
 
             /**
              * Defines the body of the plan to be executed when triggered.
@@ -95,20 +91,20 @@ sealed interface PlanBuilder<B : Any, G : Any, Env : Environment, Context : Any>
             @Deprecated("Use triggers instead", ReplaceWith("triggers(body)"), DeprecationLevel.ERROR)
             fun <PlanResult> triggersImpl(
                 resultType: KType,
-                body: suspend PlanScope<B, G, Env, Context>.() -> PlanResult,
-            ): Plan.Belief.Removal<B, G, Env, Context, PlanResult>
+                body: suspend PlanScope<B, G, Skills, Context>.() -> PlanResult,
+            ): Plan.Belief.Removal<B, G, Skills, Context, PlanResult>
         }
 
         /**
          * Builder interface for defining plans triggered by removals of goals.
          */
-        interface Goal<B : Any, G : Any, Env : Environment, Context : Any> : Removal<B, G, Env, Context> {
+        interface Goal<B : Any, G : Any, Skills: Any, Context : Any> : Removal<B, G, Skills, Context> {
             /**
              * Adds a guard condition to the plan that must be satisfied for the plan to trigger.
              * @param guard a function that takes the context and returns a modified context or null to block the plan
              * @return the updated plan builder with the guard applied
              */
-            infix fun onlyWhen(guard: GuardScope<B>.(Context) -> Context?): Goal<B, G, Env, Context>
+            infix fun onlyWhen(guard: GuardScope<B>.(Context) -> Context?): Goal<B, G, Skills, Context>
 
             /**
              * Defines the body of the plan to be executed when triggered.
@@ -119,28 +115,28 @@ sealed interface PlanBuilder<B : Any, G : Any, Env : Environment, Context : Any>
             @Deprecated("Use triggers instead", ReplaceWith("triggers(body)"), DeprecationLevel.ERROR)
             fun <PlanResult> triggersImpl(
                 resultType: KType,
-                body: suspend PlanScope<B, G, Env, Context>.() -> PlanResult,
-            ): Plan.Goal.Removal<B, G, Env, Context, PlanResult>
+                body: suspend PlanScope<B, G, Skills, Context>.() -> PlanResult,
+            ): Plan.Goal.Removal<B, G, Skills, Context, PlanResult>
         }
     }
 
     /**
      * Builder interface for defining plans triggered by failure interceptions.
      */
-    sealed interface FailureInterception<B : Any, G : Any, Env : Environment, Context : Any> :
-        PlanBuilder<B, G, Env, Context> {
+    sealed interface FailureInterception<B : Any, G : Any, Skills: Any, Context : Any> :
+        PlanBuilder<B, G, Skills, Context> {
         // TODO should we add Belief failure interception??
         /**
          * Builder interface for defining plans triggered by goal failure interceptions.
          */
-        interface Goal<B : Any, G : Any, Env : Environment, Context : Any> :
-            FailureInterception<B, G, Env, Context> {
+        interface Goal<B : Any, G : Any, Skills: Any, Context : Any> :
+            FailureInterception<B, G, Skills, Context> {
             /**
              * Adds a guard condition to the plan that must be satisfied for the plan to trigger.
              * @param guard a function that takes the context and returns a modified context or null to block the plan
              * @return the updated plan builder with the guard applied
              */
-            infix fun onlyWhen(guard: GuardScope<B>.(Context) -> Context?): Goal<B, G, Env, Context>
+            infix fun onlyWhen(guard: GuardScope<B>.(Context) -> Context?): Goal<B, G, Skills, Context>
 
             /**
              * Defines the body of the plan to be executed when triggered.
@@ -151,8 +147,8 @@ sealed interface PlanBuilder<B : Any, G : Any, Env : Environment, Context : Any>
             @Deprecated("Use triggers instead", ReplaceWith("triggers(body)"), DeprecationLevel.ERROR)
             fun <PlanResult> triggersImpl(
                 resultType: KType,
-                body: suspend PlanScope<B, G, Env, Context>.() -> PlanResult,
-            ): Plan.Goal.Failure<B, G, Env, Context, PlanResult>
+                body: suspend PlanScope<B, G, Skills, Context>.() -> PlanResult,
+            ): Plan.Goal.Failure<B, G, Skills, Context, PlanResult>
         }
     }
 }
@@ -163,9 +159,9 @@ sealed interface PlanBuilder<B : Any, G : Any, Env : Environment, Context : Any>
  * @return the constructed belief addition plan
  */
 @Suppress("DEPRECATION_ERROR")
-inline infix fun <B, G, Env, Context, reified PlanResult> PlanBuilder.Addition.Belief<B, G, Env, Context>.triggers(
-    noinline body: suspend PlanScope<B, G, Env, Context>.() -> PlanResult,
-): Plan.Belief.Addition<B, G, Env, Context, PlanResult> where B : Any, G : Any, Env : Environment, Context : Any =
+inline infix fun <B, G, Skills, Context, reified PlanResult> PlanBuilder.Addition.Belief<B, G, Skills, Context>.triggers(
+    noinline body: suspend PlanScope<B, G, Skills, Context>.() -> PlanResult,
+): Plan.Belief.Addition<B, G, Skills, Context, PlanResult> where B : Any, G : Any, Skills: Any, Context : Any =
     this.triggersImpl(typeOf<PlanResult>(), body)
 
 /**
@@ -174,9 +170,9 @@ inline infix fun <B, G, Env, Context, reified PlanResult> PlanBuilder.Addition.B
  * @return the constructed goal addition plan
  */
 @Suppress("DEPRECATION_ERROR")
-inline infix fun <B, G, Env, Context, reified PlanResult> PlanBuilder.Addition.Goal<B, G, Env, Context>.triggers(
-    noinline body: suspend PlanScope<B, G, Env, Context>.() -> PlanResult,
-): Plan.Goal.Addition<B, G, Env, Context, PlanResult> where B : Any, G : Any, Env : Environment, Context : Any =
+inline infix fun <B, G, Skills, Context, reified PlanResult> PlanBuilder.Addition.Goal<B, G, Skills, Context>.triggers(
+    noinline body: suspend PlanScope<B, G, Skills, Context>.() -> PlanResult,
+): Plan.Goal.Addition<B, G, Skills, Context, PlanResult> where B : Any, G : Any, Skills: Any, Context : Any =
     this.triggersImpl(typeOf<PlanResult>(), body)
 
 /**
@@ -185,9 +181,9 @@ inline infix fun <B, G, Env, Context, reified PlanResult> PlanBuilder.Addition.G
  * @return the constructed belief removal plan
  */
 @Suppress("DEPRECATION_ERROR")
-inline infix fun <B, G, Env, Context, reified PlanResult> PlanBuilder.Removal.Belief<B, G, Env, Context>.triggers(
-    noinline body: suspend PlanScope<B, G, Env, Context>.() -> PlanResult,
-): Plan.Belief.Removal<B, G, Env, Context, PlanResult> where B : Any, G : Any, Env : Environment, Context : Any =
+inline infix fun <B, G, Skills, Context, reified PlanResult> PlanBuilder.Removal.Belief<B, G, Skills, Context>.triggers(
+    noinline body: suspend PlanScope<B, G, Skills, Context>.() -> PlanResult,
+): Plan.Belief.Removal<B, G, Skills, Context, PlanResult> where B : Any, G : Any, Skills: Any, Context : Any =
     this.triggersImpl(typeOf<PlanResult>(), body)
 
 /**
@@ -196,9 +192,9 @@ inline infix fun <B, G, Env, Context, reified PlanResult> PlanBuilder.Removal.Be
  * @return the constructed goal removal plan
  */
 @Suppress("DEPRECATION_ERROR")
-inline infix fun <B, G, Env, Context, reified PlanResult> PlanBuilder.Removal.Goal<B, G, Env, Context>.triggers(
-    noinline body: suspend PlanScope<B, G, Env, Context>.() -> PlanResult,
-): Plan.Goal.Removal<B, G, Env, Context, PlanResult> where B : Any, G : Any, Env : Environment, Context : Any =
+inline infix fun <B, G, Skills, Context, reified PlanResult> PlanBuilder.Removal.Goal<B, G, Skills, Context>.triggers(
+    noinline body: suspend PlanScope<B, G, Skills, Context>.() -> PlanResult,
+): Plan.Goal.Removal<B, G, Skills, Context, PlanResult> where B : Any, G : Any, Skills: Any, Context : Any =
     this.triggersImpl(typeOf<PlanResult>(), body)
 
 /**
@@ -210,16 +206,16 @@ inline infix fun <B, G, Env, Context, reified PlanResult> PlanBuilder.Removal.Go
 inline infix fun <
     B,
     G,
-    Env,
+    Skills,
     Context,
     reified PlanResult,
     > PlanBuilder.FailureInterception.Goal<
     B,
     G,
-    Env,
+    Skills,
     Context,
     >.triggers(
-    noinline body: suspend PlanScope<B, G, Env, Context>.() -> PlanResult,
-): Plan.Goal.Failure<B, G, Env, Context, PlanResult>
-    where B : Any, G : Any, Env : Environment, Context : Any =
+    noinline body: suspend PlanScope<B, G, Skills, Context>.() -> PlanResult,
+): Plan.Goal.Failure<B, G, Skills, Context, PlanResult>
+    where B : Any, G : Any, Skills: Any, Context : Any =
     this.triggersImpl(typeOf<PlanResult>(), body)

@@ -1,18 +1,17 @@
 package it.unibo.jakta.plan
 
 import it.unibo.jakta.JaktaDSL
-import it.unibo.jakta.environment.Environment
 
 /**
  * Builder interface for defining triggers based on belief and goal events.
  */
 @JaktaDSL
-sealed interface TriggerBuilder<Belief : Any, Goal : Any, Env : Environment> {
+sealed interface TriggerBuilder<Belief : Any, Goal : Any, Skills : Any> {
 
     /**
      * Builder interface for defining triggers based on belief additions and goal additions.
      */
-    sealed interface Addition<Belief : Any, Goal : Any, Env : Environment> : TriggerBuilder<Belief, Goal, Env> {
+    sealed interface Addition<Belief : Any, Goal : Any, Skills : Any> : TriggerBuilder<Belief, Goal, Skills> {
 
         /**
          * Given a @param[beliefQuery] as a function that matches a belief
@@ -21,20 +20,20 @@ sealed interface TriggerBuilder<Belief : Any, Goal : Any, Env : Environment> {
          */
         fun <Context : Any> belief(
             beliefQuery: Belief.() -> Context?,
-        ): PlanBuilder.Addition.Belief<Belief, Goal, Env, Context>
+        ): PlanBuilder.Addition.Belief<Belief, Goal, Skills, Context>
 
         /**
          * Given a @param[goalQuery] as a function that matches a goal
          * and extracts a context from it if the goal matches.
          * @return a plan builder for goal addition triggers.
          */
-        fun <Context : Any> goal(goalQuery: Goal.() -> Context?): PlanBuilder.Addition.Goal<Belief, Goal, Env, Context>
+        fun <Context : Any> goal(goalQuery: Goal.() -> Context?): PlanBuilder.Addition.Goal<Belief, Goal, Skills, Context>
     }
 
     /**
      * Builder interface for defining triggers based on belief removals and goal removals.
      */
-    sealed interface Removal<Belief : Any, Goal : Any, Env : Environment> : TriggerBuilder<Belief, Goal, Env> {
+    sealed interface Removal<Belief : Any, Goal : Any, Skills : Any> : TriggerBuilder<Belief, Goal, Skills> {
 
         /**
          * Given a @param[beliefQuery] as a function that matches a belief
@@ -43,21 +42,21 @@ sealed interface TriggerBuilder<Belief : Any, Goal : Any, Env : Environment> {
          */
         fun <Context : Any> belief(
             beliefQuery: Belief.() -> Context?,
-        ): PlanBuilder.Removal.Belief<Belief, Goal, Env, Context>
+        ): PlanBuilder.Removal.Belief<Belief, Goal, Skills, Context>
 
         /**
          * Given a @param[goalQuery] as a function that matches a goal
          * and extracts a context from it if the goal matches.
          * @return a plan builder for goal removal triggers.
          */
-        fun <Context : Any> goal(goalQuery: Goal.() -> Context?): PlanBuilder.Removal.Goal<Belief, Goal, Env, Context>
+        fun <Context : Any> goal(goalQuery: Goal.() -> Context?): PlanBuilder.Removal.Goal<Belief, Goal, Skills, Context>
     }
 
     /**
      * Builder interface for defining triggers based on goal failure interceptions.
      */
-    sealed interface FailureInterception<Belief : Any, Goal : Any, Env : Environment> :
-        TriggerBuilder<Belief, Goal, Env> {
+    sealed interface FailureInterception<Belief : Any, Goal : Any, Skills : Any> :
+        TriggerBuilder<Belief, Goal, Skills> {
 
         /**
          * Given a @param[goalQuery] as a function that matches a goal
@@ -66,55 +65,55 @@ sealed interface TriggerBuilder<Belief : Any, Goal : Any, Env : Environment> {
          */
         fun <Context : Any> goal(
             goalQuery: Goal.() -> Context?,
-        ): PlanBuilder.FailureInterception.Goal<Belief, Goal, Env, Context>
+        ): PlanBuilder.FailureInterception.Goal<Belief, Goal, Skills, Context>
     }
 }
 
 /**
  * Implementation of the TriggerBuilder for belief additions and goal additions.
  */
-class TriggerAdditionImpl<Belief : Any, Goal : Any, Env : Environment>(
-    private val addBeliefPlan: (plan: Plan.Belief<Belief, Goal, Env, *, *>) -> Unit,
-    private val addGoalPlan: (plan: Plan.Goal<Belief, Goal, Env, *, *>) -> Unit,
+class TriggerAdditionImpl<Belief : Any, Goal : Any, Skills : Any>(
+    private val addBeliefPlan: (plan: Plan.Belief<Belief, Goal, Skills, *, *>) -> Unit,
+    private val addGoalPlan: (plan: Plan.Goal<Belief, Goal, Skills, *, *>) -> Unit,
 
-) : TriggerBuilder.Addition<Belief, Goal, Env> {
+) : TriggerBuilder.Addition<Belief, Goal, Skills> {
 
     override fun <Context : Any> belief(
         beliefQuery: Belief.() -> Context?,
-    ): PlanBuilder.Addition.Belief<Belief, Goal, Env, Context> =
+    ): PlanBuilder.Addition.Belief<Belief, Goal, Skills, Context> =
         BeliefAdditionPlanBuilderImpl(addBeliefPlan, beliefQuery)
 
     override fun <Context : Any> goal(
         goalQuery: Goal.() -> Context?,
-    ): PlanBuilder.Addition.Goal<Belief, Goal, Env, Context> = GoalAdditionPlanBuilderImpl(addGoalPlan, goalQuery)
+    ): PlanBuilder.Addition.Goal<Belief, Goal, Skills, Context> = GoalAdditionPlanBuilderImpl(addGoalPlan, goalQuery)
 }
 
 /**
  * Implementation of the TriggerBuilder for belief removals and goal removals.
  */
-class TriggerRemovalImpl<Belief : Any, Goal : Any, Env : Environment>(
-    private val addBeliefPlan: (plan: Plan.Belief<Belief, Goal, Env, *, *>) -> Unit,
-    private val addGoalPlan: (plan: Plan.Goal<Belief, Goal, Env, *, *>) -> Unit,
-) : TriggerBuilder.Removal<Belief, Goal, Env> {
+class TriggerRemovalImpl<Belief : Any, Goal : Any, Skills : Any>(
+    private val addBeliefPlan: (plan: Plan.Belief<Belief, Goal, Skills, *, *>) -> Unit,
+    private val addGoalPlan: (plan: Plan.Goal<Belief, Goal, Skills, *, *>) -> Unit,
+) : TriggerBuilder.Removal<Belief, Goal, Skills> {
 
     override fun <Context : Any> belief(
         beliefQuery: Belief.() -> Context?,
-    ): PlanBuilder.Removal.Belief<Belief, Goal, Env, Context> = BeliefRemovalPlanBuilderImpl(addBeliefPlan, beliefQuery)
+    ): PlanBuilder.Removal.Belief<Belief, Goal, Skills, Context> = BeliefRemovalPlanBuilderImpl(addBeliefPlan, beliefQuery)
 
     override fun <Context : Any> goal(
         goalQuery: Goal.() -> Context?,
-    ): PlanBuilder.Removal.Goal<Belief, Goal, Env, Context> = GoalRemovalPlanBuilderImpl(addGoalPlan, goalQuery)
+    ): PlanBuilder.Removal.Goal<Belief, Goal, Skills, Context> = GoalRemovalPlanBuilderImpl(addGoalPlan, goalQuery)
 }
 
 /**
  * Implementation of the TriggerBuilder for goal failure interceptions.
  */
-class TriggerFailureInterceptionImpl<Belief : Any, Goal : Any, Env : Environment>(
-    private val addGoalPlan: (plan: Plan.Goal<Belief, Goal, Env, *, *>) -> Unit,
-) : TriggerBuilder.FailureInterception<Belief, Goal, Env> {
+class TriggerFailureInterceptionImpl<Belief : Any, Goal : Any, Skills : Any>(
+    private val addGoalPlan: (plan: Plan.Goal<Belief, Goal, Skills, *, *>) -> Unit,
+) : TriggerBuilder.FailureInterception<Belief, Goal, Skills> {
 
     override fun <Context : Any> goal(
         goalQuery: Goal.() -> Context?,
-    ): PlanBuilder.FailureInterception.Goal<Belief, Goal, Env, Context> =
+    ): PlanBuilder.FailureInterception.Goal<Belief, Goal, Skills, Context> =
         GoalFailurePlanBuilderImpl(addGoalPlan, goalQuery)
 }

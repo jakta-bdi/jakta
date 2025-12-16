@@ -16,6 +16,19 @@ interface Environment<Belief : Any, Goal : Any>: SendChannel<Event.External> {
      */
     val agents: Set<Agent<Belief, Goal>>
 
+    /**
+     * Adds an agent to the environment.
+     * @param agent The agent to be added.
+     */
+    fun addAgent(agent: Agent<Belief, Goal>)
+
+    /**
+     * The environment listens for the next [Event.External] and informs agents about it.
+     */
+    suspend fun processEvent()
+
+// TODO this will be skills
+
 //    /**
 //     * Gets the current time in milliseconds since the epoch.
 //     * Can be overridden to provide custom time sources (e.g., simulated time).
@@ -39,8 +52,4 @@ interface Environment<Belief : Any, Goal : Any>: SendChannel<Event.External> {
 //     */
 //    fun getRandomizer(seed: Int): Random = Random(seed)
 
-    /**
-     * The environment listens for the next [Event.External] and informs agents about it.
-     */
-    suspend fun processEvent()
 }
