@@ -12,13 +12,6 @@ import kotlinx.coroutines.job
  * Represents a pool of intentions managed by an agent.
  */
 interface IntentionPool {
-    /**
-     * Given an event, it returns an intention to handle it.
-     * @param[event] the event to get the intention for.
-     * @return a new intention if the event does not reference any existing intention,
-     *        or the referenced intention if it exists.
-     */
-    suspend fun nextIntention(event: Event.Internal): Intention
 
     /**
      * Returns the set of intentions currently in the pool.
@@ -41,6 +34,14 @@ interface AddableIntentionPool : IntentionPool {
  * A mutable intention pool that allows adding and dropping intentions.
  */
 interface MutableIntentionPool : AddableIntentionPool {
+
+    /**
+     * Given an event, it returns an intention to handle it.
+     * @param[event] the event to get the intention for.
+     * @return a new intention if the event does not reference any existing intention,
+     *        or the referenced intention if it exists.
+     */
+    suspend fun nextIntention(event: Event.Internal): Intention
     /**
      * Drops the intention with the given ID from the pool.
      * @return true if the intention was found and dropped, false otherwise.

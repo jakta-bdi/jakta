@@ -1,6 +1,7 @@
 package it.unibo.jakta.belief
 
 import it.unibo.jakta.event.Event
+import it.unibo.jakta.event.EventReceiver
 import kotlinx.coroutines.channels.SendChannel
 
 // TODO support more complex Belief bases that have e.g. production rules for inference.
@@ -25,7 +26,7 @@ interface BeliefBase<Belief : Any> : MutableCollection<Belief> {
          * @param[agentEvents] the channel to send internal belief events to the agent.
          * @return the created empty BeliefBase.
          */
-        fun <Belief : Any> empty(agentEvents: SendChannel<Event.Internal.Belief<Belief>>): BeliefBase<Belief> =
+        fun <Belief : Any> empty(agentEvents: EventReceiver<Event.Internal.Belief<Belief>>): BeliefBase<Belief> =
             BeliefBaseImpl(agentEvents)
 
         /**
@@ -35,7 +36,7 @@ interface BeliefBase<Belief : Any> : MutableCollection<Belief> {
          * @return the created BeliefBase.
          */
         fun <Belief : Any> of(
-            agentEvents: SendChannel<Event.Internal.Belief<Belief>>,
+            agentEvents: EventReceiver<Event.Internal.Belief<Belief>>,
             beliefs: Iterable<Belief>,
         ): BeliefBase<Belief> = BeliefBaseImpl(agentEvents, beliefs)
     }
