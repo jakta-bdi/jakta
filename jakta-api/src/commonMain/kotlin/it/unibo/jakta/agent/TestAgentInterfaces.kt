@@ -125,7 +125,7 @@ interface Environment<Body: AgentBody> {
 }
 
 
-// Example for spatial environmentsv
+// Example for spatial environment
 
 interface SpatialBody<P: Any> : AgentBody {
     val position: P
