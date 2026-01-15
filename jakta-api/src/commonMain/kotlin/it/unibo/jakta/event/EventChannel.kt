@@ -2,19 +2,16 @@ package it.unibo.jakta.event
 
 import kotlinx.coroutines.channels.Channel
 
-internal class EventChannel (
-    private val channel: Channel<Event> = Channel(Channel.UNLIMITED),
-) : EventReceiver, EventSource {
-    override fun trySend(event: Event) {
+internal class EventChannel<E: Event>: EventReceiver<E>, EventSource<E> {
+
+    private val channel: Channel<E> = Channel(Channel.UNLIMITED)
+
+    override fun trySend(event: E) {
         channel.trySend(event)
     }
 
-    override suspend fun next(): Event =
+    override suspend fun next(): E =
         channel.receive()
-
-    override suspend fun send(event: Event) {
-        channel.send(event)
-    }
 }
 
 

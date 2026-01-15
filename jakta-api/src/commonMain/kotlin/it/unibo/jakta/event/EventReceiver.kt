@@ -2,10 +2,9 @@ package it.unibo.jakta.event
 
 import kotlinx.coroutines.channels.Channel
 
-interface EventReceiver {
-    fun trySend(event: Event)
+interface EventReceiver<in E: Event> {
+    fun trySend(event: E)
 
-    suspend fun send(event: Event)
 }
 
 
