@@ -8,7 +8,7 @@ import examples.TemperatureSensing.Events.Factory.temperature
 import executeInTestScope
 import ifGoalMatch
 import it.unibo.jakta.agent.basImpl.BaseAgentID
-import it.unibo.jakta.environment.BaseEnvironment
+import it.unibo.jakta.environment.baseImpl.AbstractEnvironment
 import it.unibo.jakta.environment.Environment
 import it.unibo.jakta.event.Event
 import it.unibo.jakta.mas
@@ -18,7 +18,7 @@ import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.delay
 
 
-open class SpatialEnvironment<P> : BaseEnvironment() {
+open class SpatialEnvironment<P> : AbstractEnvironment() {
     val positions: Map<BaseAgentID, P> = emptyMap()
 }
 

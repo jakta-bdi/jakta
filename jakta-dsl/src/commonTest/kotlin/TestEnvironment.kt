@@ -1,11 +1,6 @@
-import it.unibo.jakta.environment.BaseEnvironment
-import it.unibo.jakta.environment.Environment
-import kotlin.random.Random
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.test.TestCoroutineScheduler
+import it.unibo.jakta.environment.baseImpl.AbstractEnvironment
 
-open class TestEnvironment(val seed: Int = 1234) : BaseEnvironment() {
+open class TestEnvironment(val seed: Int = 1234) : AbstractEnvironment() {
 
 //    @OptIn(ExperimentalCoroutinesApi::class)
 //    override suspend fun currentTime(): Long = currentCoroutineContext()[TestCoroutineScheduler]?.currentTime

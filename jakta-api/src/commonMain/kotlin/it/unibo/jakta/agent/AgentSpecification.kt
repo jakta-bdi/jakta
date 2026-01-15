@@ -1,6 +1,7 @@
 package it.unibo.jakta.agent
 
-// TODO is this a DSL Concept? Probably yes.
+import it.unibo.jakta.environment.AgentBody
+
 /**
  * The specification of an [Agent], which includes its [body], [initialState], and [initialGoals].
  */

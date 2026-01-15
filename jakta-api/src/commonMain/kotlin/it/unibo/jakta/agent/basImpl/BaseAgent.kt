@@ -1,7 +1,8 @@
 package it.unibo.jakta.agent.basImpl
 
 import it.unibo.jakta.agent.Agent
-import it.unibo.jakta.agent.AgentBody
+import it.unibo.jakta.environment.AgentBody
+import it.unibo.jakta.agent.AgentSpecification
 import it.unibo.jakta.agent.AgentState
 import it.unibo.jakta.agent.MutableAgentState
 import it.unibo.jakta.event.Event
@@ -13,9 +14,7 @@ import it.unibo.jakta.event.EventStream
  * Default implementation of an [it.unibo.jakta.agent.Agent].
  */
 class BaseAgent<Belief : Any, Goal : Any, Skills: Any, Body: AgentBody>(
-    override val body: Body,
-    initialState: AgentState<Belief, Goal, Skills>,
-    initialGoals: List<Goal>,
+    agentSpecification: AgentSpecification<Belief, Goal, Skills, Body>,
 ) : Agent<Belief, Goal, Skills, Body> {
 
     private val eventBus: EventBus<Event> = EventBus()
@@ -29,8 +28,10 @@ class BaseAgent<Belief : Any, Goal : Any, Skills: Any, Body: AgentBody>(
     override val externalInbox: EventInbox<Event.External>
         get() = eventBus
 
+    override val body: Body = agentSpecification.body
+
     override val state: MutableAgentState<Belief, Goal, Skills> = BaseMutableAgentState(
-        initialState,
+        agentSpecification.initialState,
         internalInbox,
         {}, //TODO(!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!)
     )
@@ -39,6 +40,6 @@ class BaseAgent<Belief : Any, Goal : Any, Skills: Any, Body: AgentBody>(
      * Initialize the agent by triggering the achievement of the initial goals.
      */
     init {
-        initialGoals.forEach { state.alsoAchieve(it)}
+        agentSpecification.initialGoals.forEach { state.alsoAchieve(it)}
     }
 }
