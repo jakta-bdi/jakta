@@ -10,7 +10,7 @@ interface EnvironmentAgent<out Body: AgentBody> {
     /**
      * [Event.External] that must be managed by the agent.
      */
-    val inbox : EventReceiver
+    val inbox : EventReceiver<Event.External>
 
     /**
      * The [AgentBody].

@@ -1,11 +1,15 @@
 package it.unibo.jakta.agent
 
 import it.unibo.jakta.event.Event
+import it.unibo.jakta.event.EventReceiver
+import it.unibo.jakta.event.EventSource
 import it.unibo.jakta.intention.MutableIntentionPool
 import it.unibo.jakta.plan.Plan
 import kotlin.reflect.KType
 
 interface AgentMutableState<Belief: Any, Goal: Any, Skills: Any> : AgentState<Belief, Goal, Skills> {
+
+    val internalInbox: EventReceiver<Event.Internal>
 
     val mutableIntentionPool: MutableIntentionPool
 
@@ -63,5 +67,11 @@ interface AgentMutableState<Belief: Any, Goal: Any, Skills: Any> : AgentState<Be
      * @param belief The belief to be removed.
      */
     suspend fun forget(belief: Belief)
+
+    /**
+     * Logs a message to the agent's output.
+     * @param[message] The message to be printed.
+     */
+    fun print(message: String)
 
 }
