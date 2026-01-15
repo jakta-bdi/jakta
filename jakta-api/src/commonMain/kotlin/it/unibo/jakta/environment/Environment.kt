@@ -4,8 +4,7 @@ import it.unibo.jakta.agent.Agent
 import it.unibo.jakta.agent.AgentBody
 import it.unibo.jakta.agent.AgentState
 import it.unibo.jakta.event.Event
-import it.unibo.jakta.event.EventReceiver
-import kotlinx.coroutines.channels.SendChannel
+import it.unibo.jakta.event.EventInbox
 
 /**
  * Represents the environment in which the agent operates.
@@ -13,7 +12,7 @@ import kotlinx.coroutines.channels.SendChannel
  * Can be extended to include environment-specific features that should be accessible to all agents within the MAS.
  */
 interface Environment<Body: AgentBody> {
-    val eventBroker: EventReceiver
+    val eventBroker: EventInbox
 
     fun createAgent(body: Body, state: AgentState<*, *, *>)
 

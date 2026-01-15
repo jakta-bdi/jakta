@@ -2,8 +2,7 @@ package it.unibo.jakta.intention
 
 import co.touchlab.kermit.Logger
 import it.unibo.jakta.event.Event
-import it.unibo.jakta.event.EventReceiver
-import it.unibo.jakta.event.EventSource
+import it.unibo.jakta.event.EventInbox
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.currentCoroutineContext
@@ -59,7 +58,7 @@ interface MutableIntentionPool : AddableIntentionPool {
  * Implementation of a mutable intention pool.
  * @param events the channel to send internal events when intentions are ready to step.
  */
-class MutableIntentionPoolImpl(val eventReceiver: EventReceiver) : MutableIntentionPool {
+class MutableIntentionPoolImpl(val eventInbox: EventInbox) : MutableIntentionPool {
     private val log =
         Logger(
             Logger.config,
@@ -110,6 +109,6 @@ class MutableIntentionPoolImpl(val eventReceiver: EventReceiver) : MutableIntent
 
     private fun onIntentionReadyToStep(intention: Intention) {
         log.d { "Intention ${intention.id.id} is ready to step" }
-        eventReceiver.trySend(Event.Internal.Step(intention))
+        eventInbox.trySend(Event.Internal.Step(intention))
     }
 }

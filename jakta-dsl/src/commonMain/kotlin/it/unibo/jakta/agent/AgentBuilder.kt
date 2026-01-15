@@ -1,6 +1,8 @@
 package it.unibo.jakta.agent
 
 import it.unibo.jakta.JaktaDSL
+import it.unibo.jakta.agent.basImpl.BaseAgent
+import it.unibo.jakta.agent.basImpl.BaseAgentID
 import it.unibo.jakta.environment.DefaultSkills
 import it.unibo.jakta.environment.Environment
 import it.unibo.jakta.event.Event
@@ -135,14 +137,14 @@ class AgentBuilderImpl<Belief : Any, Goal : Any, Skills: Any, Env: Environment> 
         goalPlans += plans
     }
 
-    override fun build(environment: Env): Agent<Belief, Goal> = AgentImpl(
+    override fun build(environment: Env): Agent<Belief, Goal> = BaseAgent(
         initialBeliefs,
         initialGoals,
         beliefPlans,
         goalPlans,
         eventMappingFunction,
         //TODO improve, do we have/need default skills? What if we don't?
-        skillsFactory?.let {it(environment)} ?: DefaultSkills,
-        name?.let { AgentID(it) } ?: AgentID(),
+        skillsFactory?.let { it(environment) } ?: DefaultSkills,
+        name?.let { BaseAgentID(it) } ?: BaseAgentID(),
     )
 }

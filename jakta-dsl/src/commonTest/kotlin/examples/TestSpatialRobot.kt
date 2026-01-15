@@ -7,9 +7,8 @@ import examples.Recharging.Events.Factory.chargeLevel
 import examples.TemperatureSensing.Events.Factory.temperature
 import executeInTestScope
 import ifGoalMatch
-import it.unibo.jakta.agent.AgentID
+import it.unibo.jakta.agent.basImpl.BaseAgentID
 import it.unibo.jakta.environment.BaseEnvironment
-import it.unibo.jakta.environment.DefaultSkills
 import it.unibo.jakta.environment.Environment
 import it.unibo.jakta.event.Event
 import it.unibo.jakta.mas
@@ -20,7 +19,7 @@ import kotlinx.coroutines.delay
 
 
 open class SpatialEnvironment<P> : BaseEnvironment() {
-    val positions: Map<AgentID, P> = emptyMap()
+    val positions: Map<BaseAgentID, P> = emptyMap()
 }
 
 

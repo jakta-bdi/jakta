@@ -1,16 +1,19 @@
 package it.unibo.jakta.agent
 
 import it.unibo.jakta.event.Event
-import it.unibo.jakta.event.EventReceiver
-import it.unibo.jakta.event.EventSource
 import it.unibo.jakta.intention.MutableIntentionPool
 import it.unibo.jakta.plan.Plan
 import kotlin.reflect.KType
+import kotlin.reflect.typeOf
 
-interface AgentMutableState<Belief: Any, Goal: Any, Skills: Any> : AgentState<Belief, Goal, Skills> {
+/**
+ * Mutable state of an agent, allowing modifications to its beliefs, plans, and event handlers.
+ */
+interface MutableAgentState<Belief: Any, Goal: Any, Skills: Any> : AgentState<Belief, Goal, Skills> {
 
-    val internalInbox: EventReceiver<Event.Internal>
-
+    /**
+     * The mutable pool of intentions that the agent is currently pursuing.
+     */
     val mutableIntentionPool: MutableIntentionPool
 
     /**
@@ -27,7 +30,7 @@ interface AgentMutableState<Belief: Any, Goal: Any, Skills: Any> : AgentState<Be
 
     /**
      * Adds a new [Plan.Goal] that agent can use for its reasoning process.
-     * @param plan the new [Plan].
+     * @param plan the new [Plan.Goal].
      */
     fun addPlan(plan: Plan.Goal<Belief, Goal, Skills,*, *>)
 
@@ -36,6 +39,8 @@ interface AgentMutableState<Belief: Any, Goal: Any, Skills: Any> : AgentState<Be
      * @param plan the new [Plan.Belief].
      */
     fun addPlan(plan: Plan.Belief<Belief, Goal, Skills,*, *>)
+
+    // TODO How to remove plans??
 
     /**
      * Adds an event to the agent's queue to achieve a goal and suspends until the goal is achieved.
@@ -68,10 +73,21 @@ interface AgentMutableState<Belief: Any, Goal: Any, Skills: Any> : AgentState<Be
      */
     suspend fun forget(belief: Belief)
 
+    //TODO more advanced belief management? update belief? filter? etc.
+    // do we provide these as utility extension functions?
+
     /**
      * Logs a message to the agent's output.
      * @param[message] The message to be printed.
      */
     fun print(message: String)
-
 }
+
+/**
+ * Public-facing extension function to achieve a goal with a specific return type, using reified type parameters.
+ * @param goal The goal to be achieved.
+ * @return The result of the plan execution of type [PlanResult].
+ */
+@Suppress("DEPRECATION_ERROR")
+suspend inline fun <B : Any, G : Any, S: Any, reified PlanResult> MutableAgentState<B, G, S>.achieve(goal: G): PlanResult =
+    internalAchieve(goal, typeOf<PlanResult>())

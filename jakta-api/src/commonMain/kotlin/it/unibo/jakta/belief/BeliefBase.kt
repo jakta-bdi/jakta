@@ -1,8 +1,7 @@
 package it.unibo.jakta.belief
 
 import it.unibo.jakta.event.Event
-import it.unibo.jakta.event.EventReceiver
-import kotlinx.coroutines.channels.SendChannel
+import it.unibo.jakta.event.EventInbox
 
 // TODO support more complex Belief bases that have e.g. production rules for inference.
 //  How would one customize this component?? Right now it is "hidden" inside the AgentImpl..
@@ -22,22 +21,22 @@ interface BeliefBase<Belief : Any> : MutableCollection<Belief> {
      */
     companion object {
         /**
-         * Creates an empty BeliefBase.
-         * @param[agentEvents] the channel to send internal belief events to the agent.
-         * @return the created empty BeliefBase.
+         * Creates an empty [BeliefBase].
+         * @param[internalInbox] allows to send [Event.Internal.Belief] events to the agent.
+         * @return the created empty [BeliefBase].
          */
-        fun <Belief : Any> empty(agentEvents: EventReceiver): BeliefBase<Belief> =
-            BeliefBaseImpl(agentEvents)
+        fun <Belief : Any> empty(internalInbox: EventInbox<Event.Internal.Belief<Belief>>): BeliefBase<Belief> =
+            BeliefBaseImpl(internalInbox)
 
         /**
-         * Creates a BeliefBase initialized with the given beliefs.
-         * @param[agentEvents] the channel to send internal belief events to the agent.
+         * Creates a [BeliefBase] initialized with the given initial [beliefs].
+         * @param[internalInbox] the channel to send internal belief events to the agent.
          * @param[beliefs] the initial beliefs to populate the belief base with.
          * @return the created BeliefBase.
          */
         fun <Belief : Any> of(
-            agentEvents: EventReceiver,
+            internalInbox: EventInbox<Event.Internal.Belief<Belief>>,
             beliefs: Iterable<Belief>,
-        ): BeliefBase<Belief> = BeliefBaseImpl(agentEvents, beliefs)
+        ): BeliefBase<Belief> = BeliefBaseImpl(internalInbox, beliefs)
     }
 }

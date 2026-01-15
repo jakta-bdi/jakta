@@ -13,14 +13,17 @@ interface AgentLifecycle<Belief: Any, Goal: Any, Skills: Any> {
     val runnableAgent: RunnableAgent<Belief, Goal, Skills>
 
     /**
-     * Non-blocking run of a reasoning cycle step, i.e. it suspends until the next event is available and process it.
+     * Runs a reasoning cycle step.
+     * Suspends until the next [it.unibo.jakta.event.Event] is available and process it.
      * Potentially launches plans as a response to the event.
      * @param scope must be a SupervisorScope
      */
+    //TODO can we remove the scope?
+    //TODO we can definitely improve the documentation here
     suspend fun step(scope: CoroutineScope)
 
     /**
-     * Non-blocking stop of the agent, cancelling the scheduling of its next iteration.
+     * Stops the agent, cancelling the scheduling of its next iteration.
      */
     suspend fun stop()
 }

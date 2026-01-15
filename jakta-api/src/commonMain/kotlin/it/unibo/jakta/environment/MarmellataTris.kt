@@ -1,6 +1,6 @@
 //package it.unibo.jakta.environment
 //
-//import it.unibo.jakta.agent.AgentID
+//import it.unibo.jakta.agent.basImpl.AgentID
 //import it.unibo.jakta.environment.Movement.Events.Factory.position
 //import it.unibo.jakta.environment.Recharging.Events.Factory.chargeLevel
 //import it.unibo.jakta.event.Event
