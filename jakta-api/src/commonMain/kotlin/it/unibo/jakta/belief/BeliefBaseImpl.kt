@@ -3,28 +3,30 @@ package it.unibo.jakta.belief
 import it.unibo.jakta.event.BeliefAddEvent
 import it.unibo.jakta.event.BeliefRemoveEvent
 import it.unibo.jakta.event.Event
-import it.unibo.jakta.event.EventReceiver
-import kotlinx.coroutines.channels.SendChannel
+import it.unibo.jakta.event.EventInbox
 
 internal data class BeliefBaseImpl<Belief : Any>(
-    private val events: EventReceiver,
+    private val events: EventInbox<Event.Internal.Belief<Belief>>,
     val initialBeliefs: Iterable<Belief> = emptyList(),
     private val beliefs: MutableSet<Belief> = mutableSetOf()
 ) : BeliefBase<Belief>,
     MutableSet<Belief> by beliefs {
 
+    /**
+     * Triggers events for the addition of the initial beliefs.
+      */
     init {
-        initialBeliefs.forEach { add(it) } // ✅ triggers event
+        initialBeliefs.forEach { add(it) }
     }
 
     override fun snapshot(): Collection<Belief> = this.copy()
 
     override fun add(element: Belief): Boolean = beliefs.add(element).alsoWhenTrue {
-        events.trySend(BeliefAddEvent(element))
+        events.send(BeliefAddEvent(element))
     }
 
     override fun remove(element: Belief): Boolean = beliefs.remove(element).alsoWhenTrue {
-        events.trySend(BeliefRemoveEvent(element))
+        events.send(BeliefRemoveEvent(element))
     }
 
     override fun addAll(elements: Collection<Belief>): Boolean = elements.map { add(it) }.any { it }
@@ -36,7 +38,7 @@ internal data class BeliefBaseImpl<Belief : Any>(
         .any { it }
 
     override fun clear() = beliefs.map { BeliefRemoveEvent(it) }
-        .forEach { events.trySend(it) }
+        .forEach { events.send(it) }
         .run { beliefs.clear() }
 
     companion object {

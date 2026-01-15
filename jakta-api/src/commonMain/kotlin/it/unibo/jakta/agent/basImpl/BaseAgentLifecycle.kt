@@ -1,6 +1,8 @@
-package it.unibo.jakta.agent
+package it.unibo.jakta.agent.basImpl
 
 import co.touchlab.kermit.Logger
+import it.unibo.jakta.agent.AgentLifecycle
+import it.unibo.jakta.agent.RunnableAgent
 import it.unibo.jakta.event.Event
 import it.unibo.jakta.event.GoalFailedEvent
 import it.unibo.jakta.intention.IntentionDispatcher
@@ -12,7 +14,7 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 
-class AgentLifecycleImpl<Belief: Any, Goal: Any, Skills: Any>(
+class BaseAgentLifecycle<Belief: Any, Goal: Any, Skills: Any>(
     override val runnableAgent: RunnableAgent<Belief, Goal, Skills>
 ) : AgentLifecycle<Belief, Goal, Skills> {
     private val log =
@@ -33,7 +35,7 @@ class AgentLifecycleImpl<Belief: Any, Goal: Any, Skills: Any>(
 
     override suspend fun step(scope: CoroutineScope) {
         log.i { "waiting for event..." }
-        val event = runnableAgent.agentEvents.next()
+        val event = runnableAgent.events.next()
         log.i { "received event: $event" }
 
         when (event) {
@@ -42,12 +44,12 @@ class AgentLifecycleImpl<Belief: Any, Goal: Any, Skills: Any>(
             is Event.Internal.Belief<*> -> scope.handleBeliefEvent(event as Event.Internal.Belief<Belief>)
             is Event.Internal.Goal<*, *> -> scope.handleGoalEvent(event as Event.Internal.Goal<Goal, Any?>)
             is Event.Internal.Step -> handleStepEvent(event)
-            is Event.External -> handleExternalEvent(event)?.let { runnableAgent.state.internalInbox.trySend(it) }
+            is Event.External -> handleExternalEvent(event)
         }
     }
 
-    private fun handleExternalEvent(event: Event.External): Event.Internal? {
-        return when (event) {
+    private fun handleExternalEvent(event: Event.External) {
+        when (event) {
             is Event.External.Perception -> runnableAgent.state.perceptionHandler(event)
             is Event.External.Message -> runnableAgent.state.messageHandler(event)
             else -> {
@@ -57,9 +59,9 @@ class AgentLifecycleImpl<Belief: Any, Goal: Any, Skills: Any>(
                 }
                 null
             }
-            // TODO(Question: is it still possible to handle custom events
+            //TODO(Question: is it still possible to handle custom events
             // if the agent internals is implemented in this way?)
-        }
+        }?.let { runnableAgent.internalInbox.send(it) }
     }
 
     /**
@@ -92,7 +94,7 @@ class AgentLifecycleImpl<Belief: Any, Goal: Any, Skills: Any>(
 
     // TODO In order to be capable to complete the completion, i had to remove the star projection and put Any?
     //  This requires refactoring of type management
-    private suspend fun CoroutineScope.handleGoalEvent(event: it.unibo.jakta.event.Event.Internal.Goal<Goal, Any?>) {
+    private suspend fun CoroutineScope.handleGoalEvent(event: Event.Internal.Goal<Goal, Any?>) {
         selectPlan(
             entity = event.goal,
             entityMessage = when (event) {
@@ -180,7 +182,7 @@ class AgentLifecycleImpl<Belief: Any, Goal: Any, Skills: Any>(
         when (event) {
             is Event.Internal.Goal.Add<*, *> -> {
                 log.d { "Attempting to handle the failure of goal: $event.goal" }
-                runnableAgent.state.internalInbox.trySend(
+                runnableAgent.internalInbox.send(
                     GoalFailedEvent(
                         event.goal,
                         event.completion,
