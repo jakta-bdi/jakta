@@ -1,5 +1,6 @@
 package it.unibo.jakta.agent
 
+import it.unibo.jakta.environment.AgentBody
 import it.unibo.jakta.event.Event
 import it.unibo.jakta.event.EventInbox
 

@@ -3,7 +3,6 @@ package it.unibo.jakta.agent
 import it.unibo.jakta.JaktaDSL
 import it.unibo.jakta.agent.basImpl.BaseAgent
 import it.unibo.jakta.agent.basImpl.BaseAgentID
-import it.unibo.jakta.environment.DefaultSkills
 import it.unibo.jakta.environment.Environment
 import it.unibo.jakta.event.Event
 import it.unibo.jakta.plan.PlanLibraryBuilder
