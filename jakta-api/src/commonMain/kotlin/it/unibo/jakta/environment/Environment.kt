@@ -1,7 +1,10 @@
 package it.unibo.jakta.environment
 
 import it.unibo.jakta.agent.Agent
+import it.unibo.jakta.agent.AgentBody
+import it.unibo.jakta.agent.AgentState
 import it.unibo.jakta.event.Event
+import it.unibo.jakta.event.EventReceiver
 import kotlinx.coroutines.channels.SendChannel
 
 /**
@@ -9,12 +12,15 @@ import kotlinx.coroutines.channels.SendChannel
  * Provides access to shared resources, including time and randomness.
  * Can be extended to include environment-specific features that should be accessible to all agents within the MAS.
  */
-interface Environment: SendChannel<Event.External> {
+interface Environment<Body: AgentBody> {
+    val eventBroker: EventReceiver
+
+    fun createAgent(body: Body, state: AgentState<*, *, *>)
 
     /**
-     * The set of agents that are part of the MAS.
+     * The agents observable information from the environment of agents that are part of the MAS.
      */
-    val agents: Set<Agent<*, *>>
+    val agentBodies: Collection<Body>
 
     /**
      * Adds an agent to the environment.

@@ -26,7 +26,7 @@ interface BeliefBase<Belief : Any> : MutableCollection<Belief> {
          * @param[agentEvents] the channel to send internal belief events to the agent.
          * @return the created empty BeliefBase.
          */
-        fun <Belief : Any> empty(agentEvents: EventReceiver<Event.Internal.Belief<Belief>>): BeliefBase<Belief> =
+        fun <Belief : Any> empty(agentEvents: EventReceiver): BeliefBase<Belief> =
             BeliefBaseImpl(agentEvents)
 
         /**
@@ -36,7 +36,7 @@ interface BeliefBase<Belief : Any> : MutableCollection<Belief> {
          * @return the created BeliefBase.
          */
         fun <Belief : Any> of(
-            agentEvents: EventReceiver<Event.Internal.Belief<Belief>>,
+            agentEvents: EventReceiver,
             beliefs: Iterable<Belief>,
         ): BeliefBase<Belief> = BeliefBaseImpl(agentEvents, beliefs)
     }

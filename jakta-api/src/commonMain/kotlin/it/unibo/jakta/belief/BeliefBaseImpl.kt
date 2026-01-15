@@ -3,10 +3,11 @@ package it.unibo.jakta.belief
 import it.unibo.jakta.event.BeliefAddEvent
 import it.unibo.jakta.event.BeliefRemoveEvent
 import it.unibo.jakta.event.Event
+import it.unibo.jakta.event.EventReceiver
 import kotlinx.coroutines.channels.SendChannel
 
 internal data class BeliefBaseImpl<Belief : Any>(
-    private val events: SendChannel<Event.Internal.Belief<Belief>>,
+    private val events: EventReceiver,
     val initialBeliefs: Iterable<Belief> = emptyList(),
     private val beliefs: MutableSet<Belief> = mutableSetOf()
 ) : BeliefBase<Belief>,

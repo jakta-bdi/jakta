@@ -10,6 +10,10 @@ import kotlin.uuid.Uuid
  */
 data class AgentID(private val name: String? = null, private val id: String = generateId()) {
     private companion object {
+        /**
+         * Generates a new random [Uuid].
+         * @return a [String] representing the [Uuid].
+         */
         @OptIn(ExperimentalUuidApi::class)
         private fun generateId(): String = Uuid.random().toString()
     }
@@ -18,8 +22,4 @@ data class AgentID(private val name: String? = null, private val id: String = ge
      * The display name of the agent, which is either its name or its id if no name is set.
      */
     val displayName: String get() = name ?: "Agent-$id"
-
-    override fun equals(other: Any?): Boolean = other is AgentID && other.id == this.id
-
-    override fun hashCode(): Int = id.hashCode()
 }

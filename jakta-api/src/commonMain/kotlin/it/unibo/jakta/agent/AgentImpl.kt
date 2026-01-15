@@ -3,10 +3,14 @@ package it.unibo.jakta.agent
 import co.touchlab.kermit.Logger
 import it.unibo.jakta.belief.BeliefBase
 import it.unibo.jakta.event.Event
+import it.unibo.jakta.event.EventChannel
+import it.unibo.jakta.event.EventReceiver
+import it.unibo.jakta.event.EventSource
 import it.unibo.jakta.event.GoalAddEvent
 import it.unibo.jakta.event.GoalFailedEvent
 import it.unibo.jakta.intention.Intention
 import it.unibo.jakta.intention.IntentionDispatcher
+import it.unibo.jakta.intention.IntentionPool
 import it.unibo.jakta.intention.MutableIntentionPool
 import it.unibo.jakta.intention.MutableIntentionPoolImpl
 import it.unibo.jakta.plan.GuardScope
@@ -26,49 +30,81 @@ import kotlinx.coroutines.launch
 /**
  * Default implementation of an [Agent].
  */
-open class AgentImpl<Belief : Any, Goal : Any, in Skills: Any>(
+open class AgentImpl<Belief : Any, Goal : Any, Skills: Any, Body: AgentBody>(
     initialBeliefs: Collection<Belief>,
     initialGoals: List<Goal>,
-    override val beliefPlans: List<Plan.Belief<Belief, Goal, *, *, *>>,
-    override val goalPlans: List<Plan.Goal<Belief, Goal, *, *, *>>,
-    override val eventMappingFunction: Event.External.() -> Event.Internal?,
+    //private val agentID: AgentID = AgentID(),
+    beliefPlans: List<Plan.Belief<Belief, Goal, Skills, *, *>>,
+    goalPlans: List<Plan.Goal<Belief, Goal, Skills, *, *>>,
+    perceptionHandler: (Event.External.Perception) -> Event.Internal?,
+    messageHandler: (Event.External.Message) -> Event.Internal?,
+    override val body: Body,
     private val skills: Skills,
-    private val agentID: AgentID = AgentID(),
-    private val events: Channel<Event> = Channel(Channel.UNLIMITED),
-) : Agent<Belief, Goal>,
-    AgentActions<Belief, Goal>,
-    GuardScope<Belief>,
-    SendChannel<Event> by events {
+    override val runnableAgent: RunnableAgent<Belief, Goal, Skills>,
+) : Agent<Belief, Goal, Skills, Body>,
+    AgentLifecycle<Belief, Goal, Skills> {
     private val log =
         Logger(
             Logger.config,
-            this.name,
+            body.id.displayName,
         )
-    override val name: String
-        get() = agentID.displayName
 
-    override val beliefs: Collection<Belief>
-        get() = beliefBase.snapshot()
+    private val eventChannel: EventChannel = EventChannel()
+    override val agentEvents: EventSource
+        get() = eventChannel
+    override val inbox: EventReceiver
+        get() = eventChannel
 
-    private val beliefBase: BeliefBase<Belief> = BeliefBase.of(this, initialBeliefs)
-    private val intentionPool: MutableIntentionPool =
-        MutableIntentionPoolImpl(this)
+    override val state: AgentMutableState<Belief, Goal, Skills> = AgentStateImpl(
+        inbox,
+        log,
+        { stop() },
+        initialGoals,
+        initialBeliefs,
+        beliefPlans,
+        goalPlans,
+        perceptionHandler,
+        messageHandler,
+    )
 
-    init {
-        initialGoals.forEach { alsoAchieve(it) }
+    override suspend fun stop() {
+        // TODO not sure this is ok
+        // Am I killing the MAS?
+        log.d { "Terminating agent" }
+        currentCoroutineContext()
+            .job.parent
+            ?.parent
+            ?.cancel()
     }
 
     override suspend fun step(scope: CoroutineScope) {
         log.i { "waiting for event..." }
-        val event = events.receive()
+        val event = agentEvents.next()
         log.i { "received event: $event" }
+
         when (event) {
             // TODO per rimuovere questo cast dovrei tipare Event.Internal
             //  con Belief e Goal (si può fare ma è subottimo?)
             is Event.Internal.Belief<*> -> scope.handleBeliefEvent(event as Event.Internal.Belief<Belief>)
             is Event.Internal.Goal<*, *> -> scope.handleGoalEvent(event as Event.Internal.Goal<Goal, Any?>)
             is Event.Internal.Step -> handleStepEvent(event)
-            is Event.External -> eventMappingFunction(event)?.let { events.send(it) }
+            is Event.External -> handleExternalEvent(event)?.let { inbox.send(it) }
+        }
+    }
+
+    private fun handleExternalEvent(event: Event.External): Event.Internal? {
+        return when (event) {
+            is Event.External.Perception -> state.perceptionHandler(event)
+            is Event.External.Message -> state.messageHandler(event)
+            else -> {
+                log.d {
+                    "The agent doesn't know what how to handle the event of type ${event::class.qualifiedName}, " +
+                        "the default behaviour is skipping it."
+                }
+                null
+            }
+            // TODO(Question: is it still possible to handle custom events
+            // if the agent internals is implemented in this way?)
         }
     }
 
@@ -83,7 +119,7 @@ open class AgentImpl<Belief : Any, Goal : Any, in Skills: Any>(
                 is Event.Internal.Belief.Add<Belief> -> "addition of belief"
                 is Event.Internal.Belief.Remove<Belief> -> "removal of belief"
             },
-            planList = beliefPlans,
+            planList = state.beliefPlans,
             relevantFilter = {
                 when (event) {
                     is Event.Internal.Belief.Add<Belief> -> it is Plan.Belief.Addition
@@ -91,7 +127,7 @@ open class AgentImpl<Belief : Any, Goal : Any, in Skills: Any>(
                 } && it.isRelevant(event.belief)
             },
             applicableFilter = {
-                it.isApplicable(this@AgentImpl, event.belief)
+                it.isApplicable(state, event.belief)
             },
         )?.let {
             launchPlan(event, event.belief, it)
@@ -110,7 +146,7 @@ open class AgentImpl<Belief : Any, Goal : Any, in Skills: Any>(
                 is Event.Internal.Goal.Remove<Goal, *> -> "removal of goal"
                 is Event.Internal.Goal.Failed<Goal, *> -> "failure of goal"
             },
-            planList = goalPlans,
+            planList = state.goalPlans,
             relevantFilter = {
                 when (event) {
                     is Event.Internal.Goal.Add<Goal, *> -> it is Plan.Goal.Addition
@@ -119,7 +155,7 @@ open class AgentImpl<Belief : Any, Goal : Any, in Skills: Any>(
                 } && it.isRelevant(event.goal)
             },
             applicableFilter = {
-                it.isApplicable(this@AgentImpl, event.goal)
+                it.isApplicable(state, event.goal)
             },
         )?.let {
             launchPlan(event, event.goal, it, event.completion)
@@ -136,7 +172,7 @@ open class AgentImpl<Belief : Any, Goal : Any, in Skills: Any>(
     ) {
         log.d { "Launching plan $plan for event $event" }
         //val environment: S = currentCoroutineContext()[EnvironmentContext.Key]?.environment as Env
-        val intention = intentionPool.nextIntention(event)
+        val intention = state.mutableIntentionPool.nextIntention(event)
 
         val interceptor =
             currentCoroutineContext()[ContinuationInterceptor] ?: error { "No ContinuationInterceptor in context" }
@@ -146,7 +182,7 @@ open class AgentImpl<Belief : Any, Goal : Any, in Skills: Any>(
             @Suppress("TooGenericExceptionCaught")
             try {
                 log.d { "Running plan $plan" }
-                val result = plan.run(this@AgentImpl, this@AgentImpl, skills, entity)
+                val result = plan.run(this@AgentImpl, state, skills, entity)
                 completion?.complete(result)
             } catch (e: Exception) {
                 handleFailure(event, e)
@@ -190,7 +226,7 @@ open class AgentImpl<Belief : Any, Goal : Any, in Skills: Any>(
         when (event) {
             is Event.Internal.Goal.Add<*, *> -> {
                 log.d { "Attempting to handle the failure of goal: $event.goal" }
-                events.trySend(
+                inbox.trySend(
                     GoalFailedEvent(
                         event.goal,
                         event.completion,
@@ -212,47 +248,6 @@ open class AgentImpl<Belief : Any, Goal : Any, in Skills: Any>(
     // TODO(Missing implementation for greedy event selection in case Step.intention was removed from intention pool)
     private suspend fun handleStepEvent(event: Event.Internal.Step) {
         log.d { "Handling step event for intention ${event.intention.id.id}" }
-        intentionPool.stepIntention(event)
-    }
-
-    @Deprecated("Use achieve instead", replaceWith = ReplaceWith("achieve(goal)"), level = DeprecationLevel.ERROR)
-    override suspend fun <PlanResult> internalAchieve(goal: Goal, resultType: KType): PlanResult {
-        val completion = CompletableDeferred<PlanResult>()
-        val intention = currentCoroutineContext()[Intention]
-
-        check(intention != null) { "Cannot happen that an achieve invocation comes from a null intention." }
-
-        log.d { "Achieving $goal. Previous intention $intention" }
-        events.trySend(GoalAddEvent(goal, resultType, completion, intention))
-        return completion.await() // Blocking the continuation
-    }
-
-    override fun print(message: String) {
-        log.a { message }
-    }
-
-    override fun alsoAchieve(goal: Goal) {
-        events.trySend(GoalAddEvent.withNoResult(goal))
-    }
-
-    override suspend fun believe(belief: Belief) {
-        this.beliefBase.add(belief)
-    }
-
-    // TODO should I have also update belief?
-    override suspend fun forget(belief: Belief) {
-        this.beliefBase.remove(belief)
-    }
-
-    override suspend fun terminate() = stop()
-
-    override suspend fun stop() {
-        // TODO not sure this is ok
-        // Am I killing the MAS?
-        log.d { "Terminating agent" }
-        currentCoroutineContext()
-            .job.parent
-            ?.parent
-            ?.cancel()
+        state.mutableIntentionPool.stepIntention(event)
     }
 }
