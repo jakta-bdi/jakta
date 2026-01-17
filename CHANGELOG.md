@@ -1,3 +1,10 @@
+## [0.15.98](https://github.com/jakta-bdi/jakta/compare/v0.15.97...v0.15.98) (2026-01-17)
+
+
+### Bug Fixes
+
+* **deps:** update gradle to v9.3.0 ([#729](https://github.com/jakta-bdi/jakta/issues/729)) ([1d54120](https://github.com/jakta-bdi/jakta/commit/1d541207568deb61f270ef147009d927fb3d3071))
+
 ## [0.15.97](https://github.com/jakta-bdi/jakta/compare/v0.15.96...v0.15.97) (2026-01-17)
 
 
