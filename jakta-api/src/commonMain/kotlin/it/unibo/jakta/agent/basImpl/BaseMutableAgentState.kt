@@ -93,6 +93,7 @@ internal class BaseMutableAgentState<Belief: Any, Goal: Any, Skills: Any>(
         internalInbox.send(GoalAddEvent.withNoResult(goal))
     }
 
+    //TODO maybe terminate should be a skill that removes the agent from the environment...
     override suspend fun terminate() = onStop()
 
     override suspend fun believe(belief: Belief) {

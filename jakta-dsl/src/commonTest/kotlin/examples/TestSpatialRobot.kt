@@ -93,7 +93,7 @@ interface TemperatureSensing : Skill {
 }
 
 
-// This skill is a singleton, shared by all agents using it
+// This skill is a singleton, shared by all positions using it
 object FixedIntervalTemperatureSensing : TemperatureSensing {
 
     override suspend fun startSensing(e: Environment) {

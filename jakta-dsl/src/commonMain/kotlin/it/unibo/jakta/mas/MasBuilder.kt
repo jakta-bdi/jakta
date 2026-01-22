@@ -7,7 +7,7 @@ import it.unibo.jakta.agent.AgentBuilderImpl
 import it.unibo.jakta.environment.Environment
 
 /**
- * Builder interface for defining a Multi-Agent System (MAS) with agents and an environment.
+ * Builder interface for defining a Multi-Agent System (MAS) with positions and an environment.
  */
 @JaktaDSL
 interface MasBuilder<Belief : Any, Goal : Any, Env : Environment> {
@@ -26,9 +26,9 @@ interface MasBuilder<Belief : Any, Goal : Any, Env : Environment> {
     fun <Skills : Any> agent(name: String, block: AgentBuilder<Belief, Goal, Skills, Env>.() -> Unit)
 
 //    /**
-//     * Adds multiple agents to the MAS.
+//     * Adds multiple positions to the MAS.
 //     */
-//    fun withAgents(vararg agents: Agent<Belief, Goal>)
+//    fun withAgents(vararg positions: Agent<Belief, Goal>)
 
     /**
      * Defines the environment instance for the MAS.
@@ -66,8 +66,8 @@ open class MasBuilderImpl<Belief : Any, Goal : Any, Env : Environment> : MasBuil
         agents += agent
     }
 
-//    override fun withAgents(vararg agents: Agent<Belief, Goal>) {
-//        this.agents += agents
+//    override fun withAgents(vararg positions: Agent<Belief, Goal>) {
+//        this.positions += positions
 //    }
 
     override fun environment(block: () -> Env) {
