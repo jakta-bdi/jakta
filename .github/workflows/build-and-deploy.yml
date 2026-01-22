@@ -46,7 +46,7 @@ jobs:
       )
     steps:
       - name: Fetch sources
-        uses: actions/checkout@v6.0.1
+        uses: actions/checkout@v6.0.2
         with:
           fetch-depth: 0
       - name: semver
