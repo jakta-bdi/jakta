@@ -10,13 +10,13 @@ import it.unibo.jakta.event.EventInbox
 interface EnvironmentAgent<out Body: AgentBody> {
 
     /**
-     * An inbox of [Event.External] that the [it.unibo.jakta.environment.Environment] can use
+     * An inbox of [it.unibo.jakta.event.Event.External] that the [it.unibo.jakta.environment.Environment] can use
      * to send events to the agent.
      */
     val externalInbox : EventInbox<Event.External>
 
     /**
-     * The [AgentBody] that represents the agent in the environment and can be visible from other agents.
+     * The [AgentBody] that represents the agent in the environment and can be visible from other positions.
      */
     val body: Body
 }

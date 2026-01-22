@@ -62,7 +62,7 @@ class MutableIntentionPoolImpl(val eventInbox: EventInbox) : MutableIntentionPoo
     private val log =
         Logger(
             Logger.config,
-            "IntentionPool", // TODO differentiate between multiple agents e.g. with AgentID
+            "IntentionPool", // TODO differentiate between multiple positions e.g. with AgentID
         )
 
     /** List of intentions currently managed by the agent. **/
