@@ -1,6 +1,7 @@
 package it.unibo.jakta.intention
 
-import it.unibo.jakta.intention.baseImpl.IntentionID
+import it.unibo.jakta.intention.baseImpl.BaseIntention
+import it.unibo.jakta.intention.baseImpl.BaseIntentionID
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
@@ -10,10 +11,10 @@ class IntentionTest {
 
     @Test
     fun testEquality() {
-        val id = IntentionID()
-        val intention1 = Intention(id = id, job = Job())
-        val intention2 = Intention(id = id, job = Job())
-        val intention3 = Intention(id = IntentionID(), job = Job())
+        val id = BaseIntentionID()
+        val intention1 = BaseIntention(id = id, job = Job())
+        val intention2 = BaseIntention(id = id, job = Job())
+        val intention3 = BaseIntention(id = BaseIntentionID(), job = Job())
 
         assertEquals(
             intention1,

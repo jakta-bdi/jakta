@@ -3,7 +3,6 @@ package it.unibo.jakta.environment
 import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.agent.AgentSpecification
 import it.unibo.jakta.event.AgentEvent
-import it.unibo.jakta.event.EventInbox
 import it.unibo.jakta.event.EventStream
 import it.unibo.jakta.event.SystemEvent
 
@@ -15,7 +14,7 @@ interface Environment<Position: Any, Displacement: Any, Body: AgentBody> {
 
     val topology: Topology<Position, Displacement>
 
-    val agents: Map<Body, Position>
+    val agentPositions: Map<Body, Position>
 
     val systemEvents: EventStream<SystemEvent>
 
@@ -41,15 +40,17 @@ interface Environment<Position: Any, Displacement: Any, Body: AgentBody> {
 
     fun terminateMAS()
 
+    fun getBodyByAgentID(id: AgentID): Body?
+
     fun getNeighbors(body: Body, range: Double): List<Body> {
-        val position = agents[body] ?: return emptyList()
-        return agents.filter { (otherBody, otherPosition) ->
+        val position = agentPositions[body] ?: return emptyList()
+        return agentPositions.filter { (otherBody, otherPosition) ->
             otherBody != body && topology.distance(position, otherPosition) <= range
         }.keys.toList()
     }
 
     fun getAgentsInRange(position: Position, range: Double): List<Body> {
-        return agents.filter { (_, otherPosition) ->
+        return agentPositions.filter { (_, otherPosition) ->
             topology.distance(position, otherPosition) <= range
         }.keys.toList()
     }

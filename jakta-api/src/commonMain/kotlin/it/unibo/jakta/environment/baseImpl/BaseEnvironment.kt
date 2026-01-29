@@ -21,7 +21,7 @@ class BaseEnvironment<Position: Any, Displacement: Any, Body: AgentBody>(
 
     private val _agents: MutableMap<BaseAgent<*, *, *, Body>, Position> = mutableMapOf()
 
-    override val agents: Map<Body, Position>
+    override val agentPositions: Map<Body, Position>
         get() = _agents.map{ (agent, position) -> agent.body to position }.toMap()
 
 
@@ -50,6 +50,9 @@ class BaseEnvironment<Position: Any, Displacement: Any, Body: AgentBody>(
     override fun terminateMAS() {
         _systemEvents.send(ShutDownMASEvent)
     }
+
+    override fun getBodyByAgentID(id: AgentID): Body? =
+        _agents.keys.firstOrNull{it.id == id}?.body
 
     override fun sendEvent(
         event: AgentEvent.External,
