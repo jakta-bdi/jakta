@@ -9,7 +9,7 @@ import kotlin.reflect.typeOf
 /**
  * Mutable state of an agent, allowing modifications to its beliefs, plans, and event handlers.
  */
-interface MutableAgentState<Belief: Any, Goal: Any, Skills: Any> : AgentState<Belief, Goal, Skills> {
+interface MutableAgentState<Belief: Any, Goal: Any, Skills: Any> : AgentState<Belief, Goal, Skills>, Agent {
 
     /**
      * The mutable pool of intentions that the agent is currently pursuing.
@@ -57,9 +57,6 @@ interface MutableAgentState<Belief: Any, Goal: Any, Skills: Any> : AgentState<Be
      * @param[goal] The goal to be achieved.
      */
     fun alsoAchieve(goal: Goal)
-
-    /** Terminates the execution of the agent. **/
-    suspend fun terminate()
 
     /**
      * Add the belief to the agent's belief base (eventually generating events).

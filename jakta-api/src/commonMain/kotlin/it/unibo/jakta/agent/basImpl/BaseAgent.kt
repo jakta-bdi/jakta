@@ -38,7 +38,7 @@ class BaseAgent<Belief : Any, Goal : Any, Skills: Any, Body: AgentBody>(
     override val state: MutableAgentState<Belief, Goal, Skills> = BaseMutableAgentState(
         agentSpecification.initialState,
         internalInbox,
-        {}, //TODO(!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!)
+        id,
     )
 
     /**

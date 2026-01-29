@@ -1,7 +1,6 @@
 package it.unibo.jakta.plan
 
 import it.unibo.jakta.agent.MutableAgentState
-import it.unibo.jakta.environment.Environment
 
 /**
  * Scope available when defining a Plan body.

@@ -1,6 +1,7 @@
 package it.unibo.jakta.agent.basImpl
 
 import co.touchlab.kermit.Logger
+import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.agent.AgentState
 import it.unibo.jakta.agent.MutableAgentState
 import it.unibo.jakta.belief.BeliefBase
@@ -23,12 +24,12 @@ import kotlinx.coroutines.currentCoroutineContext
 internal class BaseMutableAgentState<Belief: Any, Goal: Any, Skills: Any>(
     initialAgentState: AgentState<Belief, Goal, Skills>,
     val internalInbox: EventInbox<Internal>,
-    private val onStop: suspend () -> Unit,
+    override val id: AgentID,
 ): MutableAgentState<Belief, Goal, Skills> {
 
     private val logger: Logger =  Logger(
         Logger.config,
-        // TODO(Agent Name here)
+        id.displayName
     )
 
     //TODO BeliefBase should be injected?
@@ -92,9 +93,6 @@ internal class BaseMutableAgentState<Belief: Any, Goal: Any, Skills: Any>(
     override fun alsoAchieve(goal: Goal) {
         internalInbox.send(GoalAddEvent.withNoResult(goal))
     }
-
-    //TODO maybe terminate should be a skill that removes the agent from the environment...
-    override suspend fun terminate() = onStop()
 
     override suspend fun believe(belief: Belief) {
         this.beliefBase.add(belief)
