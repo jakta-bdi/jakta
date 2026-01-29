@@ -4,14 +4,14 @@ import co.touchlab.kermit.Logger
 import it.unibo.jakta.agent.AgentState
 import it.unibo.jakta.agent.MutableAgentState
 import it.unibo.jakta.belief.BeliefBase
-import it.unibo.jakta.event.Event.External.Message
-import it.unibo.jakta.event.Event.External.Perception
-import it.unibo.jakta.event.Event.Internal
+import it.unibo.jakta.event.AgentEvent.External.Message
+import it.unibo.jakta.event.AgentEvent.External.Perception
+import it.unibo.jakta.event.AgentEvent.Internal
 import it.unibo.jakta.event.EventInbox
-import it.unibo.jakta.event.GoalAddEvent
+import it.unibo.jakta.event.baseImpl.GoalAddEvent
 import it.unibo.jakta.intention.Intention
 import it.unibo.jakta.intention.MutableIntentionPool
-import it.unibo.jakta.intention.MutableIntentionPoolImpl
+import it.unibo.jakta.intention.baseImpl.BaseIntentionPoolImpl
 import it.unibo.jakta.plan.Plan
 import kotlin.reflect.KType
 import kotlinx.coroutines.CompletableDeferred
@@ -37,7 +37,7 @@ internal class BaseMutableAgentState<Belief: Any, Goal: Any, Skills: Any>(
         get() = beliefBase.snapshot()
 
     //TODO IntentionPool should be injected?
-    override val mutableIntentionPool: MutableIntentionPool = MutableIntentionPoolImpl(internalInbox)
+    override val mutableIntentionPool: MutableIntentionPool = BaseIntentionPoolImpl(internalInbox)
     override val intentions: Set<Intention>
         get() = mutableIntentionPool.getIntentionsSet()
 

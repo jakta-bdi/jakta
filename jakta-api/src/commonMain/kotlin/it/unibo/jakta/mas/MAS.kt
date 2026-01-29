@@ -2,18 +2,14 @@ package it.unibo.jakta.mas
 
 import it.unibo.jakta.agent.Agent
 import it.unibo.jakta.environment.Environment
+import it.unibo.jakta.event.EventInbox
 
 /**
- * Represents a Multi-Agent System (MAS) composed of positions operating within a shared environment.
+ * Represents a Multi-Agent System (MAS) composed of agents operating within a shared environment.
  */
-interface MAS<Belief : Any, Goal : Any, Env : Environment<*, *, *>> {
+interface MAS {
     /**
-     * The shared environment in which the positions operate.
-     */
-    val environment: Env
-
-    /**
-     * Starts the execution of the MAS.
+     * Starts the execution of the MAS, running all the agents.
      */
     suspend fun run(): Unit
 }

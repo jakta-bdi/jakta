@@ -1,5 +1,6 @@
-package it.unibo.jakta.event
+package it.unibo.jakta.event.baseImpl
 
+import it.unibo.jakta.event.AgentEvent
 import it.unibo.jakta.intention.Intention
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
@@ -17,7 +18,7 @@ data class GoalAddEvent<G : Any, PlanResult>(
     override val resultType: KType,
     override val completion: CompletableDeferred<PlanResult>? = null,
     override val intention: Intention? = null,
-) : Event.Internal.Goal.Add<G, PlanResult> {
+) : AgentEvent.Internal.Goal.Add<G, PlanResult> {
     /**
      * Factory methods for GoalAddEvent.
      */
@@ -45,7 +46,7 @@ data class GoalRemoveEvent<G : Any, PlanResult>(
     override val completion: CompletableDeferred<PlanResult>? = null,
     override val intention: Intention? = null,
     override val resultType: KType,
-) : Event.Internal.Goal.Remove<G, PlanResult>
+) : AgentEvent.Internal.Goal.Remove<G, PlanResult>
 
 /**
  * Implements a Goal Failed event.
@@ -59,7 +60,7 @@ data class GoalFailedEvent<G : Any, PlanResult>(
     override val completion: CompletableDeferred<PlanResult>? = null,
     override val intention: Intention? = null,
     override val resultType: KType,
-) : Event.Internal.Goal.Failed<G, PlanResult>
+) : AgentEvent.Internal.Goal.Failed<G, PlanResult>
 
 /**
  * Implements a Belief Addition event.
@@ -67,7 +68,7 @@ data class GoalFailedEvent<G : Any, PlanResult>(
  * @param[intention] the intention from which the event has been generated, if any.
  */
 data class BeliefAddEvent<B : Any>(override val belief: B, override val intention: Intention? = null) :
-    Event.Internal.Belief.Add<B>
+    AgentEvent.Internal.Belief.Add<B>
 
 /**
  * Implements a Belief Removal event.
@@ -75,4 +76,4 @@ data class BeliefAddEvent<B : Any>(override val belief: B, override val intentio
  * @param[intention] the intention from which the event has been generated, if any.
  */
 data class BeliefRemoveEvent<B : Any>(override val belief: B, override val intention: Intention? = null) :
-    Event.Internal.Belief.Remove<B>
+    AgentEvent.Internal.Belief.Remove<B>

@@ -3,15 +3,14 @@ package it.unibo.jakta.agent.basImpl
 import co.touchlab.kermit.Logger
 import it.unibo.jakta.agent.AgentLifecycle
 import it.unibo.jakta.agent.RunnableAgent
-import it.unibo.jakta.event.Event
-import it.unibo.jakta.event.GoalFailedEvent
+import it.unibo.jakta.event.AgentEvent
+import it.unibo.jakta.event.baseImpl.GoalFailedEvent
 import it.unibo.jakta.intention.IntentionDispatcher
 import it.unibo.jakta.plan.Plan
 import kotlin.coroutines.ContinuationInterceptor
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 
 class BaseAgentLifecycle<Belief: Any, Goal: Any, Skills: Any>(
@@ -20,17 +19,13 @@ class BaseAgentLifecycle<Belief: Any, Goal: Any, Skills: Any>(
     private val log =
         Logger(
             Logger.config,
-            // TODO(Agent Name here)
+            runnableAgent.id.displayName
         )
 
     override suspend fun stop() {
-        // TODO not sure this is ok
-        // Am I killing the MAS?
+        //TODO probably thees needs to be removed from here, as the termination is handled directly by the MAS
+        // we could keep it to gracefully shutdown the agent internals (?)
         log.d { "Terminating agent" }
-        currentCoroutineContext()
-            .job.parent
-            ?.parent
-            ?.cancel()
     }
 
     override suspend fun step(scope: CoroutineScope) {
@@ -41,17 +36,17 @@ class BaseAgentLifecycle<Belief: Any, Goal: Any, Skills: Any>(
         when (event) {
             // TODO per rimuovere questo cast dovrei tipare Event.Internal
             //  con Belief e Goal (si può fare ma è subottimo?)
-            is Event.Internal.Belief<*> -> scope.handleBeliefEvent(event as Event.Internal.Belief<Belief>)
-            is Event.Internal.Goal<*, *> -> scope.handleGoalEvent(event as Event.Internal.Goal<Goal, Any?>)
-            is Event.Internal.Step -> handleStepEvent(event)
-            is Event.External -> handleExternalEvent(event)
+            is AgentEvent.Internal.Belief<*> -> scope.handleBeliefEvent(event as AgentEvent.Internal.Belief<Belief>)
+            is AgentEvent.Internal.Goal<*, *> -> scope.handleGoalEvent(event as AgentEvent.Internal.Goal<Goal, Any?>)
+            is AgentEvent.Internal.Step -> handleStepEvent(event)
+            is AgentEvent.External -> handleExternalEvent(event)
         }
     }
 
-    private fun handleExternalEvent(event: Event.External) {
+    private fun handleExternalEvent(event: AgentEvent.External) {
         when (event) {
-            is Event.External.Perception -> runnableAgent.state.perceptionHandler(event)
-            is Event.External.Message -> runnableAgent.state.messageHandler(event)
+            is AgentEvent.External.Perception -> runnableAgent.state.perceptionHandler(event)
+            is AgentEvent.External.Message -> runnableAgent.state.messageHandler(event)
             else -> {
                 log.d {
                     "The agent doesn't know what how to handle the event of type ${event::class.qualifiedName}, " +
@@ -68,18 +63,18 @@ class BaseAgentLifecycle<Belief: Any, Goal: Any, Skills: Any>(
      * Launches plans in the SupervisorScope of the Step.
      * @param event the belief event that triggered the plan execution.
      */
-    private suspend fun CoroutineScope.handleBeliefEvent(event: Event.Internal.Belief<Belief>) {
+    private suspend fun CoroutineScope.handleBeliefEvent(event: AgentEvent.Internal.Belief<Belief>) {
         selectPlan(
             entity = event.belief,
             entityMessage = when (event) {
-                is Event.Internal.Belief.Add<Belief> -> "addition of belief"
-                is Event.Internal.Belief.Remove<Belief> -> "removal of belief"
+                is AgentEvent.Internal.Belief.Add<Belief> -> "addition of belief"
+                is AgentEvent.Internal.Belief.Remove<Belief> -> "removal of belief"
             },
             planList = runnableAgent.state.beliefPlans,
             relevantFilter = {
                 when (event) {
-                    is Event.Internal.Belief.Add<Belief> -> it is Plan.Belief.Addition
-                    is Event.Internal.Belief.Remove<Belief> -> it is Plan.Belief.Removal
+                    is AgentEvent.Internal.Belief.Add<Belief> -> it is Plan.Belief.Addition
+                    is AgentEvent.Internal.Belief.Remove<Belief> -> it is Plan.Belief.Removal
                 } && it.isRelevant(event.belief)
             },
             applicableFilter = {
@@ -94,20 +89,20 @@ class BaseAgentLifecycle<Belief: Any, Goal: Any, Skills: Any>(
 
     // TODO In order to be capable to complete the completion, i had to remove the star projection and put Any?
     //  This requires refactoring of type management
-    private suspend fun CoroutineScope.handleGoalEvent(event: Event.Internal.Goal<Goal, Any?>) {
+    private suspend fun CoroutineScope.handleGoalEvent(event: AgentEvent.Internal.Goal<Goal, Any?>) {
         selectPlan(
             entity = event.goal,
             entityMessage = when (event) {
-                is Event.Internal.Goal.Add<Goal, *> -> "addition of goal"
-                is Event.Internal.Goal.Remove<Goal, *> -> "removal of goal"
-                is Event.Internal.Goal.Failed<Goal, *> -> "failure of goal"
+                is AgentEvent.Internal.Goal.Add<Goal, *> -> "addition of goal"
+                is AgentEvent.Internal.Goal.Remove<Goal, *> -> "removal of goal"
+                is AgentEvent.Internal.Goal.Failed<Goal, *> -> "failure of goal"
             },
             planList = runnableAgent.state.goalPlans,
             relevantFilter = {
                 when (event) {
-                    is Event.Internal.Goal.Add<Goal, *> -> it is Plan.Goal.Addition
-                    is Event.Internal.Goal.Remove<Goal, *> -> it is Plan.Goal.Removal
-                    is Event.Internal.Goal.Failed<Goal, *> -> it is Plan.Goal.Failure
+                    is AgentEvent.Internal.Goal.Add<Goal, *> -> it is Plan.Goal.Addition
+                    is AgentEvent.Internal.Goal.Remove<Goal, *> -> it is Plan.Goal.Removal
+                    is AgentEvent.Internal.Goal.Failed<Goal, *> -> it is Plan.Goal.Failure
                 } && it.isRelevant(event.goal)
             },
             applicableFilter = {
@@ -121,7 +116,7 @@ class BaseAgentLifecycle<Belief: Any, Goal: Any, Skills: Any>(
     }
 
     private suspend fun <TriggerEntity : Any> CoroutineScope.launchPlan(
-        event: Event.Internal,
+        event: AgentEvent.Internal,
         entity: TriggerEntity,
         plan: Plan<Belief, Goal, Skills, TriggerEntity, *, *>,
         completion: CompletableDeferred<Any?>? = null, // TODO Check if this Any? can be improved
@@ -138,7 +133,7 @@ class BaseAgentLifecycle<Belief: Any, Goal: Any, Skills: Any>(
             @Suppress("TooGenericExceptionCaught")
             try {
                 log.d { "Running plan $plan" }
-                val result = plan.run(runnableAgent, runnableAgent.state, runnableAgent.state.skills, entity)
+                val result = plan.run(runnableAgent.state, entity)
                 completion?.complete(result)
             } catch (e: Exception) {
                 handleFailure(event, e)
@@ -168,7 +163,8 @@ class BaseAgentLifecycle<Belief: Any, Goal: Any, Skills: Any>(
 
         return applicable.firstOrNull()?.let {
             log.d { "Selected plan $it for $entityMessage: $entity" }
-            it as Plan<Belief, Goal, Skills, TriggerEntity, *, *> // TODO: This is not entirely safe, check from DSL that
+            it as Plan<Belief, Goal, Skills, TriggerEntity, *, *>
+            //TODO: This is not entirely safe, check from DSL that
             // the type of the agent skill must implement the plan skill type.
         } ?: run {
             log.w { "No plan selected for $entityMessage: $entity" }
@@ -176,11 +172,11 @@ class BaseAgentLifecycle<Belief: Any, Goal: Any, Skills: Any>(
         }
     }
 
-    // TODO check if this is enough
+    //TODO check if this is enough
     // what happens if a belief plan fails?
-    private fun handleFailure(event: Event.Internal, e: Exception) {
+    private fun handleFailure(event: AgentEvent.Internal, e: Exception) {
         when (event) {
-            is Event.Internal.Goal.Add<*, *> -> {
+            is AgentEvent.Internal.Goal.Add<*, *> -> {
                 log.d { "Attempting to handle the failure of goal: $event.goal" }
                 runnableAgent.internalInbox.send(
                     GoalFailedEvent(
@@ -191,7 +187,7 @@ class BaseAgentLifecycle<Belief: Any, Goal: Any, Skills: Any>(
                     ),
                 )
             }
-            is Event.Internal.Goal.Failed<*, *> -> {
+            is AgentEvent.Internal.Goal.Failed<*, *> -> {
                 log.d { "An error occurred when attempting to handle the failure of goal: $event.goal" }
                 event.completion?.completeExceptionally(e)
             }
@@ -202,8 +198,8 @@ class BaseAgentLifecycle<Belief: Any, Goal: Any, Skills: Any>(
     }
 
     // TODO(Missing implementation for greedy event selection in case Step.intention was removed from intention pool)
-    private suspend fun handleStepEvent(event: Event.Internal.Step) {
-        log.d { "Handling step event for intention ${event.intention.id.id}" }
+    private suspend fun handleStepEvent(event: AgentEvent.Internal.Step) {
+        log.d { "Handling step event for intention ${event.intention.id.displayId}" }
         runnableAgent.state.mutableIntentionPool.stepIntention(event)
     }
 }

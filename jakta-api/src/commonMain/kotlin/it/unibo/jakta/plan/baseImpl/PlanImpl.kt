@@ -1,6 +1,8 @@
-package it.unibo.jakta.plan
+package it.unibo.jakta.plan.baseImpl
 
-import it.unibo.jakta.environment.Environment
+import it.unibo.jakta.plan.GuardScope
+import it.unibo.jakta.plan.Plan
+import it.unibo.jakta.plan.PlanScope
 import kotlin.reflect.KType
 
 /**

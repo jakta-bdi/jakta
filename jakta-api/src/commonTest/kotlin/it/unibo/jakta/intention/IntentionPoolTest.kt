@@ -1,6 +1,7 @@
 package it.unibo.jakta.intention
 
-import it.unibo.jakta.event.GoalAddEvent
+import it.unibo.jakta.event.baseImpl.GoalAddEvent
+import it.unibo.jakta.intention.baseImpl.BaseIntentionPoolImpl
 import kotlin.reflect.typeOf
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -26,7 +27,7 @@ class IntentionPoolTest {
 
     @BeforeTest
     fun init() {
-        intentionPool = MutableIntentionPoolImpl(Channel())
+        intentionPool = BaseIntentionPoolImpl(Channel())
         agentJob = SupervisorJob()
         intentionJob = Job(agentJob)
         otherJob = Job(agentJob)
