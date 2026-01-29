@@ -1,12 +1,12 @@
 package it.unibo.jakta.belief
 
-import it.unibo.jakta.event.BeliefAddEvent
-import it.unibo.jakta.event.BeliefRemoveEvent
-import it.unibo.jakta.event.Event
+import it.unibo.jakta.event.baseImpl.BeliefAddEvent
+import it.unibo.jakta.event.baseImpl.BeliefRemoveEvent
+import it.unibo.jakta.event.AgentEvent
 import it.unibo.jakta.event.EventInbox
 
 internal data class BeliefBaseImpl<Belief : Any>(
-    private val events: EventInbox<Event.Internal.Belief<Belief>>,
+    private val events: EventInbox<AgentEvent.Internal.Belief<Belief>>,
     val initialBeliefs: Iterable<Belief> = emptyList(),
     private val beliefs: MutableSet<Belief> = mutableSetOf()
 ) : BeliefBase<Belief>,

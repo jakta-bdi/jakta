@@ -1,6 +1,7 @@
 package it.unibo.jakta.plan
 
-import it.unibo.jakta.agent.AgentActions
+import it.unibo.jakta.agent.MutableAgentState
+import it.unibo.jakta.plan.baseImpl.BasePlanScope
 import it.unibo.jakta.reflection.isSubtypeOfMultiPlatform // TODO can we avoid needing this?
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
@@ -81,15 +82,13 @@ sealed interface Plan<Belief : Any, Goal : Any, Skills : Any, TriggerEntity : An
      * The plan's body is then executed within this scope, and the result is returned.
      */
     suspend fun run(
-        agent: AgentActions<Belief, Goal>,
-        guardScope: GuardScope<Belief>,
-        skills: Skills,
+        agent: MutableAgentState<Belief, Goal, Skills>,
         entity: TriggerEntity,
     ): PlanResult = body(
-        PlanScopeImpl(
+        BasePlanScope(
             agent,
-            skills,
-            getPlanContext(guardScope, entity),
+            agent.skills,
+            getPlanContext(agent, entity),
         ),
     )
 

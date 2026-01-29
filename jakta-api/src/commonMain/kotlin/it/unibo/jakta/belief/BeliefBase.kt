@@ -1,6 +1,6 @@
 package it.unibo.jakta.belief
 
-import it.unibo.jakta.event.Event
+import it.unibo.jakta.event.AgentEvent
 import it.unibo.jakta.event.EventInbox
 
 // TODO support more complex Belief bases that have e.g. production rules for inference.
@@ -22,10 +22,10 @@ interface BeliefBase<Belief : Any> : MutableCollection<Belief> {
     companion object {
         /**
          * Creates an empty [BeliefBase].
-         * @param[internalInbox] allows to send [Event.Internal.Belief] events to the agent.
+         * @param[internalInbox] allows to send [AgentEvent.Internal.Belief] events to the agent.
          * @return the created empty [BeliefBase].
          */
-        fun <Belief : Any> empty(internalInbox: EventInbox<Event.Internal.Belief<Belief>>): BeliefBase<Belief> =
+        fun <Belief : Any> empty(internalInbox: EventInbox<AgentEvent.Internal.Belief<Belief>>): BeliefBase<Belief> =
             BeliefBaseImpl(internalInbox)
 
         /**
@@ -35,7 +35,7 @@ interface BeliefBase<Belief : Any> : MutableCollection<Belief> {
          * @return the created BeliefBase.
          */
         fun <Belief : Any> of(
-            internalInbox: EventInbox<Event.Internal.Belief<Belief>>,
+            internalInbox: EventInbox<AgentEvent.Internal.Belief<Belief>>,
             beliefs: Iterable<Belief>,
         ): BeliefBase<Belief> = BeliefBaseImpl(internalInbox, beliefs)
     }

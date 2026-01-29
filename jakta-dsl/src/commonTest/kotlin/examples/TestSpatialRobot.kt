@@ -10,7 +10,7 @@ import ifGoalMatch
 import it.unibo.jakta.agent.basImpl.BaseAgentID
 import it.unibo.jakta.environment.baseImpl.AbstractEnvironment
 import it.unibo.jakta.environment.Environment
-import it.unibo.jakta.event.Event
+import it.unibo.jakta.event.AgentEvent
 import it.unibo.jakta.mas
 import it.unibo.jakta.plan.triggers
 import kotlin.test.Test
@@ -35,7 +35,7 @@ interface Recharging : Skill {
     suspend fun recharge()
 
     object Events {
-        data class ChargeLevel internal constructor(val level: Int) : Event.External.Perception
+        data class ChargeLevel internal constructor(val level: Int) : AgentEvent.External.Perception
 
         // factory for events of Recharging
         // using the receiver prevents usage from outside extensions of the Recharging interface
@@ -50,7 +50,7 @@ interface Movement<P> : Skill {
     fun moveTo(newPos: P)
 
     object Events {
-        data class Position<P> internal constructor(val position: P) : Event.External.Perception
+        data class Position<P> internal constructor(val position: P) : AgentEvent.External.Perception
 
         object Factory {
             fun <P> Movement<P>.position(pos: P): Position<P> = Position(pos)
@@ -58,7 +58,7 @@ interface Movement<P> : Skill {
     }
 }
 
-class FixedTimeRecharging(val e: SendChannel<Event.External.Perception>) : Recharging {
+class FixedTimeRecharging(val e: SendChannel<AgentEvent.External.Perception>) : Recharging {
     override suspend fun recharge() {
         delay(3000)
         e.send(chargeLevel(100))
@@ -84,7 +84,7 @@ interface TemperatureSensing : Skill {
     suspend fun startSensing(e: Environment)
 
     object Events {
-        data class Temperature internal constructor(val value: Float) : Event.External.Perception
+        data class Temperature internal constructor(val value: Float) : AgentEvent.External.Perception
 
         object Factory {
             fun TemperatureSensing.temperature(value: Float): Temperature = Temperature(value)
@@ -93,7 +93,7 @@ interface TemperatureSensing : Skill {
 }
 
 
-// This skill is a singleton, shared by all positions using it
+// This skill is a singleton, shared by all agents using it
 object FixedIntervalTemperatureSensing : TemperatureSensing {
 
     override suspend fun startSensing(e: Environment) {

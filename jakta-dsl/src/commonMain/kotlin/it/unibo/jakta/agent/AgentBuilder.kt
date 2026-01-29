@@ -4,7 +4,7 @@ import it.unibo.jakta.JaktaDSL
 import it.unibo.jakta.agent.basImpl.BaseAgent
 import it.unibo.jakta.agent.basImpl.BaseAgentID
 import it.unibo.jakta.environment.Environment
-import it.unibo.jakta.event.Event
+import it.unibo.jakta.event.AgentEvent
 import it.unibo.jakta.plan.PlanLibraryBuilder
 import it.unibo.jakta.plan.PlanLibraryBuilderImpl
 
@@ -59,10 +59,10 @@ interface AgentBuilder<Belief : Any, Goal : Any, Skills: Any, Env : Environment>
     fun withGoalPlans(vararg plans: it.unibo.jakta.plan.Plan.Goal<Belief, Goal, *, *, *>)
 
     /**
-     * Defines how this agent maps [Event.External] to [Event.Internal].
-     * By default, all [Event.External] are ignored.
+     * Defines how this agent maps [AgentEvent.External] to [AgentEvent.Internal].
+     * By default, all [AgentEvent.External] are ignored.
      */
-    fun eventMappingFunction(f: Event.External.() -> Event.Internal?)
+    fun eventMappingFunction(f: AgentEvent.External.() -> AgentEvent.Internal?)
 
     /**
      * Define the skills this agent can use in his plans.
@@ -86,7 +86,7 @@ class AgentBuilderImpl<Belief : Any, Goal : Any, Skills: Any, Env: Environment> 
     private var initialGoals = listOf<Goal>()
     private var beliefPlans = listOf<it.unibo.jakta.plan.Plan.Belief<Belief, Goal, *, *, *>>()
     private var goalPlans = listOf<it.unibo.jakta.plan.Plan.Goal<Belief, Goal, *, *, *>>()
-    private var eventMappingFunction: Event.External.() -> Event.Internal? = { null }
+    private var eventMappingFunction: AgentEvent.External.() -> AgentEvent.Internal? = { null }
     private var skillsFactory: ((Env) -> Skills) ? = null // TODO improve
 
     override fun believes(block: BeliefBuilder<Belief>.() -> Unit) {
@@ -99,7 +99,7 @@ class AgentBuilderImpl<Belief : Any, Goal : Any, Skills: Any, Env: Environment> 
         builder.apply(block)
     }
 
-    override fun eventMappingFunction(f: Event.External.() -> Event.Internal?) {
+    override fun eventMappingFunction(f: AgentEvent.External.() -> AgentEvent.Internal?) {
         this.eventMappingFunction = f
     }
 

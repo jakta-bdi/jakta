@@ -1,9 +1,9 @@
 package it.unibo.jakta.agent.basImpl
 
 import it.unibo.jakta.agent.AgentState
-import it.unibo.jakta.event.Event.External.Message
-import it.unibo.jakta.event.Event.External.Perception
-import it.unibo.jakta.event.Event.Internal
+import it.unibo.jakta.event.AgentEvent.External.Message
+import it.unibo.jakta.event.AgentEvent.External.Perception
+import it.unibo.jakta.event.AgentEvent.Internal
 import it.unibo.jakta.intention.Intention
 import it.unibo.jakta.plan.Plan
 

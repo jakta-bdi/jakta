@@ -1,6 +1,6 @@
 package it.unibo.jakta.plan
 
-import it.unibo.jakta.agent.AgentActions
+import it.unibo.jakta.agent.MutableAgentState
 import it.unibo.jakta.environment.Environment
 
 /**
@@ -10,7 +10,7 @@ interface PlanScope<Belief : Any, Goal : Any, Skills: Any, Context : Any> {
     /**
      * The actions that can be performed on the agent that is executing the plan.
      */
-    val agent: AgentActions<Belief, Goal>
+    val agent: MutableAgentState<Belief, Goal, Skills>
 
     /**
      * The skills this Plan can use.
@@ -22,12 +22,3 @@ interface PlanScope<Belief : Any, Goal : Any, Skills: Any, Context : Any> {
      */
     val context: Context
 }
-
-/**
- * Implementation of PlanScope.
- */
-data class PlanScopeImpl<Belief : Any, Goal : Any, Skills: Any, Context : Any>(
-    override val agent: AgentActions<Belief, Goal>,
-    override val skills: Skills,
-    override val context: Context,
-) : PlanScope<Belief, Goal, Skills, Context>

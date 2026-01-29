@@ -1,8 +1,7 @@
 package it.unibo.jakta.agent
 
-import it.unibo.jakta.event.Event
+import it.unibo.jakta.event.AgentEvent
 import it.unibo.jakta.intention.Intention
-import it.unibo.jakta.intention.IntentionPool
 import it.unibo.jakta.plan.GuardScope
 import it.unibo.jakta.plan.Plan
 
@@ -26,24 +25,24 @@ interface AgentState<Belief: Any, Goal: Any, Skills: Any> : GuardScope<Belief> {
     val intentions: Set<Intention>
 
     /**
-     * The list of [Plan.Belief] available to handle [Event.Internal.Belief] events.
+     * The list of [Plan.Belief] available to handle [AgentEvent.Internal.Belief] events.
      */
     val beliefPlans: List<Plan.Belief<Belief, Goal, Skills, *, *>>
 
     /**
-     * The list of [Plan.Goal] available to handle [Event.Internal.Goal] events.
+     * The list of [Plan.Goal] available to handle [AgentEvent.Internal.Goal] events.
      */
     val goalPlans: List<Plan.Goal<Belief, Goal, Skills, *, *>>
 
     /**
-     * Mapping function which defines how to (optionally) convert a [Event.External.Perception] into a [Event.Internal].
+     * Mapping function which defines how to (optionally) convert a [AgentEvent.External.Perception] into a [AgentEvent.Internal].
      */
-    val perceptionHandler: (Event.External.Perception) -> Event.Internal?
+    val perceptionHandler: (AgentEvent.External.Perception) -> AgentEvent.Internal?
 
     /**
-     * Mapping function which defines how to (optionally) convert a [Event.External.Message] into a [Event.Internal].
+     * Mapping function which defines how to (optionally) convert a [AgentEvent.External.Message] into a [AgentEvent.Internal].
      */
-    val messageHandler: (Event.External.Message) -> Event.Internal?
+    val messageHandler: (AgentEvent.External.Message) -> AgentEvent.Internal?
 
     /**
      * The [Skills] the agent is allowed to use.

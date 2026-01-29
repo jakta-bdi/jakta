@@ -1,8 +1,11 @@
 package it.unibo.jakta.agent
 
-import it.unibo.jakta.environment.AgentBody
-import it.unibo.jakta.agent.EnvironmentAgent
-
-interface Agent<Belief: Any, Goal: Any, Skills: Any, Body: AgentBody> :
-    RunnableAgent<Belief, Goal, Skills>,
-    EnvironmentAgent<Body>
+/**
+ * Top-level interface representing an agent as an entity with a unique identifier.
+ */
+interface Agent {
+    /**
+     * The unique identifier of the agent.
+     */
+    val id: AgentID
+}

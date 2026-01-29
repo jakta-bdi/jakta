@@ -1,12 +1,15 @@
 package it.unibo.jakta.agent.basImpl
 
 import it.unibo.jakta.agent.Agent
+import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.environment.AgentBody
 import it.unibo.jakta.agent.AgentSpecification
-import it.unibo.jakta.agent.AgentState
+import it.unibo.jakta.agent.EnvironmentAgent
 import it.unibo.jakta.agent.MutableAgentState
-import it.unibo.jakta.event.Event
+import it.unibo.jakta.agent.RunnableAgent
+import it.unibo.jakta.event.AgentEvent
 import it.unibo.jakta.event.EventBus
+import it.unibo.jakta.event.baseImpl.UnlimitedChannelBus
 import it.unibo.jakta.event.EventInbox
 import it.unibo.jakta.event.EventStream
 
@@ -15,17 +18,19 @@ import it.unibo.jakta.event.EventStream
  */
 class BaseAgent<Belief : Any, Goal : Any, Skills: Any, Body: AgentBody>(
     agentSpecification: AgentSpecification<Belief, Goal, Skills, Body>,
-) : Agent<Belief, Goal, Skills, Body> {
+) : Agent, RunnableAgent<Belief, Goal, Skills>, EnvironmentAgent<Body> {
 
-    private val eventBus: EventBus<Event> = EventBus()
+    override val id: AgentID = agentSpecification.id
 
-    override val events: EventStream<Event>
+    private val eventBus: EventBus<AgentEvent> = UnlimitedChannelBus()
+
+    override val events: EventStream<AgentEvent>
         get() = eventBus
 
-    override val internalInbox: EventInbox<Event.Internal>
+    override val internalInbox: EventInbox<AgentEvent.Internal>
         get() = eventBus
 
-    override val externalInbox: EventInbox<Event.External>
+    override val externalInbox: EventInbox<AgentEvent.External>
         get() = eventBus
 
     override val body: Body = agentSpecification.body

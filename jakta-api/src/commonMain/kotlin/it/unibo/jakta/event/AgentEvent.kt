@@ -6,11 +6,11 @@ import kotlinx.coroutines.CompletableDeferred
 /**
  * Represents a generic event in the MAS.
  */
-sealed interface Event {
+sealed interface AgentEvent {
     /**
      * Represents an internal event within the agent which can trigger plans.
      */
-    sealed interface Internal : Event {
+    sealed interface Internal : AgentEvent {
         /**
          * The intention from which the event has been generated, if any.
          */
@@ -79,7 +79,7 @@ sealed interface Event {
         data class Step(override val intention: Intention) : Internal
     }
 
-    interface External : Event {
+    interface External : AgentEvent {
         interface Message : External
         interface Perception : External
     }

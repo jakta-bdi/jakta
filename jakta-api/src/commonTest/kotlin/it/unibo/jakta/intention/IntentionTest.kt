@@ -1,5 +1,6 @@
 package it.unibo.jakta.intention
 
+import it.unibo.jakta.intention.baseImpl.IntentionID
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals

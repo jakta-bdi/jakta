@@ -1,6 +1,9 @@
 package it.unibo.jakta.intention
 
 import co.touchlab.kermit.Logger
+import it.unibo.jakta.event.EventInbox
+import it.unibo.jakta.intention.baseImpl.BaseIntention
+import it.unibo.jakta.intention.baseImpl.BaseIntentionID
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.CoroutineContext.Key
 import kotlinx.coroutines.Job
@@ -14,7 +17,7 @@ import kotlinx.coroutines.channels.Channel
  * in a cooperative multitasking fashion.
  * The agent schedules the execution of intention, running an atomic *step* of each intention when possible.
  */
-sealed interface Intention : CoroutineContext.Element {
+interface Intention : CoroutineContext.Element {
     /**
      * Unique identifier of the intention.
      */
@@ -32,13 +35,13 @@ sealed interface Intention : CoroutineContext.Element {
      * When the intention resumes from a suspension point, the continuation is sent to this channel.
      * This is used as a blocking queue of continuations to be executed when the intention is stepped.
      */
-    val continuations: Channel<() -> Unit>
+    val continuations: EventInbox<() -> Unit>
 
     /**
      * Executes one step of the intention, i.e. executes one continuation from the channel, if available.
      * If no continuation is available, the method does nothing.
      */
-    fun step(): Unit
+    suspend fun step(): Unit
 
     /**
      * Registers a callback to be invoked when the intention is ready to step.
@@ -54,59 +57,6 @@ sealed interface Intention : CoroutineContext.Element {
     /**
      * Key object for the Intention CoroutineContext element.
      */
-    companion object Key : CoroutineContext.Key<Intention> {
-        /**
-         * Factory method to create an Intention.
-         * @param id the unique identifier of the intention.
-         * @param job the Job of the intention.
-         * @param continuations the channel of continuations of the intention.
-         * @return the created Intention.
-         */
-        operator fun invoke(
-            id: IntentionID = IntentionID(),
-            job: Job,
-            continuations: Channel<() -> Unit> = Channel(Channel.UNLIMITED),
-        ): Intention = IntentionImpl(id, job, continuations)
-    }
+    companion object Key : CoroutineContext.Key<Intention>
 }
 
-internal data class IntentionImpl(
-    override val id: IntentionID = IntentionID(),
-    override val job: Job,
-    override val continuations: Channel<() -> Unit> = Channel(Channel.UNLIMITED),
-) : Intention {
-    private val log =
-        Logger(
-            Logger.config,
-            "Intention[${id.id}]",
-        )
-
-    override val key: Key<Intention> = Intention.Key
-
-    val observers: MutableList<(Intention) -> Unit> = mutableListOf()
-
-    override fun equals(other: Any?): Boolean = (other is Intention && id == other.id)
-
-    override fun hashCode(): Int = id.hashCode()
-
-    override fun step() {
-        continuations.tryReceive().getOrNull()?.let {
-            log.d { "Running one step" }
-            it()
-        }
-    }
-
-    override fun onReadyToStep(callback: (Intention) -> Unit) {
-        observers.add(callback)
-    }
-
-    private fun notifyReadyToStep() {
-        observers.forEach { it(this) }
-    }
-
-    override fun enqueue(continuation: () -> Unit) {
-        log.d { "Resumed continuation and notify ready to step" }
-        continuations.trySend(continuation)
-        notifyReadyToStep()
-    }
-}
