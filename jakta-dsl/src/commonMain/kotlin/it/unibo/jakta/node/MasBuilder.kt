@@ -1,17 +1,16 @@
-package it.unibo.jakta.mas
+package it.unibo.jakta.node
 
 import it.unibo.jakta.JaktaDSL
-import it.unibo.jakta.agent.Agent
 import it.unibo.jakta.agent.AgentBuilder
 import it.unibo.jakta.agent.AgentBuilderImpl
-import it.unibo.jakta.environment.Environment
-import it.unibo.jakta.mas.baseImpl.MASImpl
+import it.unibo.jakta.environment.Runtime
+import it.unibo.jakta.node.baseImpl.MASImpl
 
 /**
  * Builder interface for defining a Multi-Agent System (MAS) with agents and an environment.
  */
 @JaktaDSL
-interface MasBuilder<Belief : Any, Goal : Any, Env : Environment> {
+interface MasBuilder<Belief : Any, Goal : Any, Env : Runtime> {
 
     /**
      * Defines an agent using the provided builder block.
@@ -40,13 +39,13 @@ interface MasBuilder<Belief : Any, Goal : Any, Env : Environment> {
     /**
      * Builds and returns the MAS instance.
      */
-    fun build(): MAS<Belief, Goal, Env>
+    fun build(): Node<Belief, Goal, Env>
 }
 
 /**
  * Implementation of the MasBuilder interface.
  */
-open class MasBuilderImpl<Belief : Any, Goal : Any, Env : Environment> : MasBuilder<Belief, Goal, Env> {
+open class MasBuilderImpl<Belief : Any, Goal : Any, Env : Runtime> : MasBuilder<Belief, Goal, Env> {
     protected var environment: Env? = null
     protected val agents = mutableListOf<AgentBuilder<Belief, Goal, *, Env>>()
 
@@ -75,7 +74,7 @@ open class MasBuilderImpl<Belief : Any, Goal : Any, Env : Environment> : MasBuil
         environment = block()
     }
 
-    override fun build(): MAS<Belief, Goal, Env> {
+    override fun build(): Node<Belief, Goal, Env> {
         val env = environment ?: error { "Must provide an Environment for the MAS" }
         agents.forEach {env.addAgent(it.build(env))} //TODO here like this? or change the DSL?
         return MASImpl(env)

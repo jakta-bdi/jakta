@@ -3,7 +3,7 @@ package it.unibo.jakta.agent
 import it.unibo.jakta.JaktaDSL
 import it.unibo.jakta.agent.basImpl.BaseAgent
 import it.unibo.jakta.agent.basImpl.BaseAgentID
-import it.unibo.jakta.environment.Environment
+import it.unibo.jakta.environment.Runtime
 import it.unibo.jakta.event.AgentEvent
 import it.unibo.jakta.plan.PlanLibraryBuilder
 import it.unibo.jakta.plan.PlanLibraryBuilderImpl
@@ -12,7 +12,7 @@ import it.unibo.jakta.plan.PlanLibraryBuilderImpl
  * Builder interface for defining an agent with beliefs, goals, and plans.
  */
 @JaktaDSL
-interface AgentBuilder<Belief : Any, Goal : Any, Skills: Any, Env : Environment> {
+interface AgentBuilder<Belief : Any, Goal : Any, Skills: Any, Env : Runtime> {
     /**
      * Defines the initial beliefs of the agent using a builder block.
      */
@@ -78,7 +78,7 @@ interface AgentBuilder<Belief : Any, Goal : Any, Skills: Any, Env : Environment>
 /**
  * Implementation of the AgentBuilder interface.
  */
-class AgentBuilderImpl<Belief : Any, Goal : Any, Skills: Any, Env: Environment> (
+class AgentBuilderImpl<Belief : Any, Goal : Any, Skills: Any, Env: Runtime> (
         private val name: String? = null,
     ):
     AgentBuilder<Belief, Goal, Skills, Env> {

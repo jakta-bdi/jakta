@@ -4,7 +4,7 @@ import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.agent.AgentSpecification
 import it.unibo.jakta.agent.basImpl.BaseAgent
 import it.unibo.jakta.environment.AgentBody
-import it.unibo.jakta.environment.Environment
+import it.unibo.jakta.environment.Runtime
 import it.unibo.jakta.environment.Topology
 import it.unibo.jakta.event.AgentEvent
 import it.unibo.jakta.event.EventBus
@@ -15,9 +15,9 @@ import it.unibo.jakta.event.baseImpl.AgentAdditionEvent
 import it.unibo.jakta.event.baseImpl.AgentRemovalEvent
 import it.unibo.jakta.event.baseImpl.ShutDownMASEvent
 
-class BaseEnvironment<Position: Any, Displacement: Any, Body: AgentBody>(
+class BaseRuntime<Position: Any, Displacement: Any, Body: AgentBody>(
     override val topology: Topology<Position, Displacement>,
-) : Environment<Position, Displacement, Body> {
+) : Runtime<Position, Displacement, Body> {
 
     private val _agents: MutableMap<BaseAgent<*, *, *, Body>, Position> = mutableMapOf()
 
@@ -56,7 +56,7 @@ class BaseEnvironment<Position: Any, Displacement: Any, Body: AgentBody>(
 
     override fun sendEvent(
         event: AgentEvent.External,
-        filterFunction: Environment<Position, Displacement, Body>.(Body) -> Boolean,
+        filterFunction: Runtime<Position, Displacement, Body>.(Body) -> Boolean,
         source: Body?
     ) {
         _agents.keys

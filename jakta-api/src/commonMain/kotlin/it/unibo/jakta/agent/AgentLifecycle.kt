@@ -3,14 +3,14 @@ package it.unibo.jakta.agent
 import kotlinx.coroutines.CoroutineScope
 
 /**
- * Specifies how a [RunnableAgent] can run.
+ * Specifies how a [ExecutableAgent] can run.
  */
 interface AgentLifecycle<Belief: Any, Goal: Any, Skills: Any> {
 
     /**
-     * The [RunnableAgent] that is currently executing.
+     * The [ExecutableAgent] that is currently executing.
      */
-    val runnableAgent: RunnableAgent<Belief, Goal, Skills>
+    val executableAgent: ExecutableAgent<Belief, Goal, Skills>
 
     /**
      * Runs a reasoning cycle step.

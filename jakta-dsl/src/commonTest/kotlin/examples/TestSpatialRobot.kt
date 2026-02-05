@@ -9,7 +9,7 @@ import executeInTestScope
 import ifGoalMatch
 import it.unibo.jakta.agent.basImpl.BaseAgentID
 import it.unibo.jakta.environment.baseImpl.AbstractEnvironment
-import it.unibo.jakta.environment.Environment
+import it.unibo.jakta.environment.Runtime
 import it.unibo.jakta.event.AgentEvent
 import it.unibo.jakta.mas
 import it.unibo.jakta.plan.triggers
@@ -25,7 +25,7 @@ open class SpatialEnvironment<P> : AbstractEnvironment() {
 
 //TODO if we have this, bound the generics everywhere??
 interface Skill {
-    suspend fun start(e: Environment) {
+    suspend fun start(e: Runtime) {
         // default no-op implementation
     }
 }
@@ -77,11 +77,11 @@ class GridMovement(val e: GridEnvironment) : Movement<Pair<Int, Int>> {
 interface TemperatureSensing : Skill {
     //TODO we need a way to have skills that have an active behavior
     // who calls this method??
-    override suspend fun start(e: Environment) {
+    override suspend fun start(e: Runtime) {
         startSensing(e)
     }
 
-    suspend fun startSensing(e: Environment)
+    suspend fun startSensing(e: Runtime)
 
     object Events {
         data class Temperature internal constructor(val value: Float) : AgentEvent.External.Perception
@@ -96,7 +96,7 @@ interface TemperatureSensing : Skill {
 // This skill is a singleton, shared by all agents using it
 object FixedIntervalTemperatureSensing : TemperatureSensing {
 
-    override suspend fun startSensing(e: Environment) {
+    override suspend fun startSensing(e: Runtime) {
         while (true) {
             delay(5000)
             val temp = (15..30).random() + (0..99).random() / 100f
@@ -118,7 +118,7 @@ class CustomSkillSet(val env: GridEnvironment) :
     //TODO this seems doable, but you need to remember to actually start everything
     // And you should know what needs to start... not great
     // and then who calls this??
-    override suspend fun start(e: Environment) {
+    override suspend fun start(e: Runtime) {
         FixedIntervalTemperatureSensing.start(e)
     }
 }

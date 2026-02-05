@@ -1,7 +1,6 @@
 package it.unibo.jakta.plan
 
 import it.unibo.jakta.JaktaDSL
-import it.unibo.jakta.environment.Environment
 
 /**
  * Builder interface for defining a plan library with various types of plans.

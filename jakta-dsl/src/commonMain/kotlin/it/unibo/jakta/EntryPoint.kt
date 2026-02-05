@@ -1,12 +1,9 @@
 package it.unibo.jakta
 
-import it.unibo.jakta.agent.Agent
-import it.unibo.jakta.agent.AgentBuilder
-import it.unibo.jakta.agent.AgentBuilderImpl
-import it.unibo.jakta.environment.Environment
-import it.unibo.jakta.mas.MAS
-import it.unibo.jakta.mas.MasBuilder
-import it.unibo.jakta.mas.MasBuilderImpl
+import it.unibo.jakta.environment.Runtime
+import it.unibo.jakta.node.Node
+import it.unibo.jakta.node.MasBuilder
+import it.unibo.jakta.node.MasBuilderImpl
 import it.unibo.jakta.plan.Plan
 import it.unibo.jakta.plan.PlanBuilder
 import it.unibo.jakta.plan.TriggerAdditionImpl
@@ -20,9 +17,9 @@ import it.unibo.jakta.plan.TriggerRemovalImpl
  * @return an instantiated MAS.
  */
 @JaktaDSL
-fun <Belief : Any, Goal : Any, Env : Environment> mas(
+fun <Belief : Any, Goal : Any, Env : Runtime> mas(
     block: MasBuilder<Belief, Goal, Env>.() -> Unit,
-): MAS<Belief, Goal, Env> {
+): Node<Belief, Goal, Env> {
     val mb = MasBuilderImpl<Belief, Goal, Env>()
     mb.apply(block)
     return mb.build()
