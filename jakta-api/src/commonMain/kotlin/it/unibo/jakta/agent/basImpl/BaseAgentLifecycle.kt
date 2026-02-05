@@ -2,7 +2,7 @@ package it.unibo.jakta.agent.basImpl
 
 import co.touchlab.kermit.Logger
 import it.unibo.jakta.agent.AgentLifecycle
-import it.unibo.jakta.agent.RunnableAgent
+import it.unibo.jakta.agent.ExecutableAgent
 import it.unibo.jakta.event.AgentEvent
 import it.unibo.jakta.event.baseImpl.GoalFailedEvent
 import it.unibo.jakta.intention.IntentionDispatcher
@@ -14,12 +14,12 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.launch
 
 class BaseAgentLifecycle<Belief: Any, Goal: Any, Skills: Any>(
-    override val runnableAgent: RunnableAgent<Belief, Goal, Skills>
+    override val executableAgent: ExecutableAgent<Belief, Goal, Skills>
 ) : AgentLifecycle<Belief, Goal, Skills> {
     private val log =
         Logger(
             Logger.config,
-            runnableAgent.id.displayName
+            executableAgent.id.displayName
         )
 
     override suspend fun stop() {
@@ -30,7 +30,7 @@ class BaseAgentLifecycle<Belief: Any, Goal: Any, Skills: Any>(
 
     override suspend fun step(scope: CoroutineScope) {
         log.i { "waiting for event..." }
-        val event = runnableAgent.events.next()
+        val event = executableAgent.events.next()
         log.i { "received event: $event" }
 
         when (event) {
@@ -45,8 +45,8 @@ class BaseAgentLifecycle<Belief: Any, Goal: Any, Skills: Any>(
 
     private fun handleExternalEvent(event: AgentEvent.External) {
         when (event) {
-            is AgentEvent.External.Perception -> runnableAgent.state.perceptionHandler(event)
-            is AgentEvent.External.Message -> runnableAgent.state.messageHandler(event)
+            is AgentEvent.External.Perception -> executableAgent.state.perceptionHandler(event)
+            is AgentEvent.External.Message -> executableAgent.state.messageHandler(event)
             else -> {
                 log.d {
                     "The agent doesn't know what how to handle the event of type ${event::class.qualifiedName}, " +
@@ -56,7 +56,7 @@ class BaseAgentLifecycle<Belief: Any, Goal: Any, Skills: Any>(
             }
             //TODO(Question: is it still possible to handle custom events
             // if the agent internals is implemented in this way?)
-        }?.let { runnableAgent.internalInbox.send(it) }
+        }?.let { executableAgent.internalInbox.send(it) }
     }
 
     /**
@@ -70,7 +70,7 @@ class BaseAgentLifecycle<Belief: Any, Goal: Any, Skills: Any>(
                 is AgentEvent.Internal.Belief.Add<Belief> -> "addition of belief"
                 is AgentEvent.Internal.Belief.Remove<Belief> -> "removal of belief"
             },
-            planList = runnableAgent.state.beliefPlans,
+            planList = executableAgent.state.beliefPlans,
             relevantFilter = {
                 when (event) {
                     is AgentEvent.Internal.Belief.Add<Belief> -> it is Plan.Belief.Addition
@@ -78,7 +78,7 @@ class BaseAgentLifecycle<Belief: Any, Goal: Any, Skills: Any>(
                 } && it.isRelevant(event.belief)
             },
             applicableFilter = {
-                it.isApplicable(runnableAgent.state, event.belief)
+                it.isApplicable(executableAgent.state, event.belief)
             },
         )?.let {
             launchPlan(event, event.belief, it)
@@ -97,7 +97,7 @@ class BaseAgentLifecycle<Belief: Any, Goal: Any, Skills: Any>(
                 is AgentEvent.Internal.Goal.Remove<Goal, *> -> "removal of goal"
                 is AgentEvent.Internal.Goal.Failed<Goal, *> -> "failure of goal"
             },
-            planList = runnableAgent.state.goalPlans,
+            planList = executableAgent.state.goalPlans,
             relevantFilter = {
                 when (event) {
                     is AgentEvent.Internal.Goal.Add<Goal, *> -> it is Plan.Goal.Addition
@@ -106,7 +106,7 @@ class BaseAgentLifecycle<Belief: Any, Goal: Any, Skills: Any>(
                 } && it.isRelevant(event.goal)
             },
             applicableFilter = {
-                it.isApplicable(runnableAgent.state, event.goal)
+                it.isApplicable(executableAgent.state, event.goal)
             },
         )?.let {
             launchPlan(event, event.goal, it, event.completion)
@@ -123,7 +123,7 @@ class BaseAgentLifecycle<Belief: Any, Goal: Any, Skills: Any>(
     ) {
         log.d { "Launching plan $plan for event $event" }
         //val environment: S = currentCoroutineContext()[EnvironmentContext.Key]?.environment as Env
-        val intention = runnableAgent.state.mutableIntentionPool.nextIntention(event)
+        val intention = executableAgent.state.mutableIntentionPool.nextIntention(event)
 
         val interceptor =
             currentCoroutineContext()[ContinuationInterceptor] ?: error { "No ContinuationInterceptor in context" }
@@ -133,7 +133,7 @@ class BaseAgentLifecycle<Belief: Any, Goal: Any, Skills: Any>(
             @Suppress("TooGenericExceptionCaught")
             try {
                 log.d { "Running plan $plan" }
-                val result = plan.run(runnableAgent.state, entity)
+                val result = plan.run(executableAgent.state, entity)
                 completion?.complete(result)
             } catch (e: Exception) {
                 handleFailure(event, e)
@@ -178,7 +178,7 @@ class BaseAgentLifecycle<Belief: Any, Goal: Any, Skills: Any>(
         when (event) {
             is AgentEvent.Internal.Goal.Add<*, *> -> {
                 log.d { "Attempting to handle the failure of goal: $event.goal" }
-                runnableAgent.internalInbox.send(
+                executableAgent.internalInbox.send(
                     GoalFailedEvent(
                         event.goal,
                         event.completion,
@@ -200,6 +200,6 @@ class BaseAgentLifecycle<Belief: Any, Goal: Any, Skills: Any>(
     // TODO(Missing implementation for greedy event selection in case Step.intention was removed from intention pool)
     private suspend fun handleStepEvent(event: AgentEvent.Internal.Step) {
         log.d { "Handling step event for intention ${event.intention.id.displayId}" }
-        runnableAgent.state.mutableIntentionPool.stepIntention(event)
+        executableAgent.state.mutableIntentionPool.stepIntention(event)
     }
 }
