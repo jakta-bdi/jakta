@@ -1,0 +1,168 @@
+package examples
+
+import co.touchlab.kermit.Logger
+import co.touchlab.kermit.Severity
+import examples.Movement.Events.Factory.position
+import examples.Recharging.Events.Factory.chargeLevel
+import examples.TemperatureSensing.Events.Factory.temperature
+import executeInTestScope
+import ifGoalMatch
+import it.unibo.jakta.agent.basImpl.BaseAgentID
+import it.unibo.jakta.environment.baseImpl.AbstractEnvironment
+import it.unibo.jakta.environment.Runtime
+import it.unibo.jakta.event.AgentEvent
+import it.unibo.jakta.mas
+import it.unibo.jakta.plan.triggers
+import kotlin.test.Test
+import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.delay
+
+
+open class SpatialEnvironment<P> : AbstractEnvironment() {
+    val positions: Map<BaseAgentID, P> = emptyMap()
+}
+
+
+//TODO if we have this, bound the generics everywhere??
+interface Skill {
+    suspend fun start(e: Runtime) {
+        // default no-op implementation
+    }
+}
+
+
+interface Recharging : Skill {
+    suspend fun recharge()
+
+    object Events {
+        data class ChargeLevel internal constructor(val level: Int) : AgentEvent.External.Perception
+
+        // factory for events of Recharging
+        // using the receiver prevents usage from outside extensions of the Recharging interface
+        object Factory {
+            fun Recharging.chargeLevel(level: Int): ChargeLevel = ChargeLevel(level)
+        }
+    }
+}
+
+interface Movement<P> : Skill {
+    //context(s1: Recharging) TODO this does not work right yet due to "triggers" not having context propagation
+    fun moveTo(newPos: P)
+
+    object Events {
+        data class Position<P> internal constructor(val position: P) : AgentEvent.External.Perception
+
+        object Factory {
+            fun <P> Movement<P>.position(pos: P): Position<P> = Position(pos)
+        }
+    }
+}
+
+class FixedTimeRecharging(val e: SendChannel<AgentEvent.External.Perception>) : Recharging {
+    override suspend fun recharge() {
+        delay(3000)
+        e.send(chargeLevel(100))
+    }
+}
+
+class GridMovement(val e: GridEnvironment) : Movement<Pair<Int, Int>> {
+    //context(s1: Recharging)
+    override fun moveTo(newPos: Pair<Int, Int>) {
+        e.trySend(position(newPos))
+    }
+}
+
+
+// Skill with active behavior that "runs" in the environment
+interface TemperatureSensing : Skill {
+    //TODO we need a way to have skills that have an active behavior
+    // who calls this method??
+    override suspend fun start(e: Runtime) {
+        startSensing(e)
+    }
+
+    suspend fun startSensing(e: Runtime)
+
+    object Events {
+        data class Temperature internal constructor(val value: Float) : AgentEvent.External.Perception
+
+        object Factory {
+            fun TemperatureSensing.temperature(value: Float): Temperature = Temperature(value)
+        }
+    }
+}
+
+
+// This skill is a singleton, shared by all agents using it
+object FixedIntervalTemperatureSensing : TemperatureSensing {
+
+    override suspend fun startSensing(e: Runtime) {
+        while (true) {
+            delay(5000)
+            val temp = (15..30).random() + (0..99).random() / 100f
+            Logger.i { "Sensed temperature: $temp °C" }
+            // here we would send the event to the environment or agent
+            e.send(this.temperature(temp))
+        }
+    }
+}
+
+
+class GridEnvironment : SpatialEnvironment<Pair<Int, Int>>()
+
+class CustomSkillSet(val env: GridEnvironment) :
+    Recharging by FixedTimeRecharging(env),
+    Movement<Pair<Int, Int>> by GridMovement(env),
+    TemperatureSensing by FixedIntervalTemperatureSensing
+{
+    //TODO this seems doable, but you need to remember to actually start everything
+    // And you should know what needs to start... not great
+    // and then who calls this??
+    override suspend fun start(e: Runtime) {
+        FixedIntervalTemperatureSensing.start(e)
+    }
+}
+
+//TODO Attenzione
+// ogni agente ha le sue skill, non condivise con altri agenti
+// le skill possono mantenere stato interno
+// lo stato condiviso tra agenti deve essere mantenuto nell'environment
+// oppure con skill che sono dei singleton ??
+
+class TestSpatialRobot {
+
+    val mas = mas {
+
+        environment {
+            GridEnvironment()
+        }
+
+        agent("Vacuum") {
+
+            withSkills {
+                CustomSkillSet(it)
+            }
+
+            hasInitialGoals {
+                !"goal"
+            }
+            hasPlans {
+                    adding.goal {
+                        ifGoalMatch("goal")
+                    } triggers {
+                        agent.print("Hello World!")
+                        skills.recharge()
+                        skills.moveTo(1 to 1)
+                        agent.terminate()
+                    }
+            }
+        }
+    }
+
+    @Test
+    fun testSkillFeature() {
+        Logger.setMinSeverity(Severity.Debug)
+        executeInTestScope { mas }
+    }
+
+}
