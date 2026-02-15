@@ -50,7 +50,7 @@ alchemist-dev = [
 ]
 
 [plugins]
-dokka = "org.jetbrains.dokka:2.0.0"
+dokka = "org.jetbrains.dokka:2.1.0"
 gitSemVer = { id = "org.danilopianini.git-sensitive-semantic-versioning", version = "7.0.12" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-qa = { id = "org.danilopianini.gradle-kotlin-qa", version = "0.97.0" }
