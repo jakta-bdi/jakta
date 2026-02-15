@@ -53,7 +53,7 @@ alchemist-dev = [
 dokka = "org.jetbrains.dokka:2.0.0"
 gitSemVer = { id = "org.danilopianini.git-sensitive-semantic-versioning", version = "7.0.12" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
-kotlin-qa = { id = "org.danilopianini.gradle-kotlin-qa", version = "0.97.0" }
+kotlin-qa = { id = "org.danilopianini.gradle-kotlin-qa", version = "0.99.0" }
 multiJvmTesting = { id = "org.danilopianini.multi-jvm-test-plugin", version = "4.3.2" }
 publishOnCentral =  { id = "org.danilopianini.publish-on-central", version = "9.1.13"}
 taskTree = { id = "com.dorongold.task-tree", version = "4.0.1" }
