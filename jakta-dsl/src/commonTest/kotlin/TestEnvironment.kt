@@ -1,4 +1,4 @@
-import it.unibo.jakta.environment.baseImpl.AbstractEnvironment
+import it.unibo.jakta.node.baseImpl.AbstractEnvironment
 
 open class TestEnvironment(val seed: Int = 1234) : AbstractEnvironment() {
 

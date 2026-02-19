@@ -1,16 +1,12 @@
-package it.unibo.jakta.environment
+package it.unibo.jakta.node
 
-import it.unibo.jakta.agent.Agent
-import it.unibo.jakta.agent.MutableAgentState
-import it.unibo.jakta.plan.baseImpl.GoalAdditionPlan
-
-interface Skill
+//interface Skill
 
 //class MovementSkill<P: Any, D: Any, B: AgentBody, E: Environment<P, D, B>>(val env: Environment<P, D, B>) {
 //
 //    fun Agent.move(displacement: D){
 //        env.getBodyByAgentID(id)?.let {
-//            env.topology.move(env.agentPositions[it]!!, displacement)
+//            env.topology.move(env.agents[it]!!, displacement)
 //        }
 //    }
 //}

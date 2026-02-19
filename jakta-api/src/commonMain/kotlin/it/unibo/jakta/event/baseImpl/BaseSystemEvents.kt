@@ -12,4 +12,4 @@ data class AgentRemovalEvent(
     override val id: AgentID
 ) : SystemEvent.AgentRemoval
 
-object ShutDownMASEvent : SystemEvent.ShutDownMAS
+object ShutDownNodeEvent : SystemEvent.ShutDownNode

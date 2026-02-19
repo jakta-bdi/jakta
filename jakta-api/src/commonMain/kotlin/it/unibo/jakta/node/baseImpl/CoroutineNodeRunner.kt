@@ -1,16 +1,13 @@
 package it.unibo.jakta.node.baseImpl
 
+import co.touchlab.kermit.Logger
 import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.agent.AgentLifecycle
-import it.unibo.jakta.agent.AgentSpecification
 import it.unibo.jakta.agent.ExecutableAgent
 import it.unibo.jakta.agent.basImpl.BaseAgentLifecycle
-import it.unibo.jakta.environment.AgentBody
-import it.unibo.jakta.environment.Runtime
 import it.unibo.jakta.event.SystemEvent
 import it.unibo.jakta.node.Node
-import kotlin.collections.component1
-import kotlin.collections.component2
+import it.unibo.jakta.node.NodeRunner
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -18,36 +15,42 @@ import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 
-class BaseNode<Body: AgentBody, Position: Any, R : Runtime<Position,*,Body>> (
-    private val runtime: R,
-    private val agentSpecifications: Map<AgentSpecification<*, *, *, Body>, Position>
-) : Node {
+class CoroutineNodeRunner<N : Node<*, *>>
+    : NodeRunner<N> {
 
     private val agents: MutableMap<AgentLifecycle<*, *, *>, Job> = mutableMapOf()
 
-    override suspend fun run() = supervisorScope {
-        launch {
-            while (true) {
-                when (val event = runtime.systemEvents.next()) {
-                    is SystemEvent.AgentAddition<*, *, *> -> addAgent(event.executableAgent)
-                    is SystemEvent.AgentRemoval -> removeAgent(event.id)
-                    is SystemEvent.ShutDownMAS -> {
-                        this.coroutineContext.job.cancel(CancellationException("ShutDownMAS requested"))
-                        //agents.forEach { removeAgent(it.key.executableAgent.id) }
-                        //return@launch
+    private val _nodes: MutableSet<N> = mutableSetOf()
+
+    override val nodes: Set<N>
+        get() = _nodes.toSet()
+
+    private val logger: Logger =  Logger(
+        Logger.config,
+        this.toString()
+    )
+
+    override suspend fun run(node: N) {
+        _nodes += node
+        supervisorScope {
+            launch {
+                while (true) {
+                    when (val event = node.systemEvents.next()) {
+                        is SystemEvent.AgentAddition<*, *, *> -> addAgent(node, event.executableAgent)
+                        is SystemEvent.AgentRemoval -> removeAgent(event.id)
+                        is SystemEvent.ShutDownNode -> stopNode(node)
                     }
                 }
             }
         }
-
-        agentSpecifications.forEach{(a, p) -> runtime.addAgent(a, p)}
+        logger.i("Node $node START")
     }
 
-    private fun CoroutineScope.addAgent(agent: ExecutableAgent<*,*,*>) {
+    private fun CoroutineScope.addAgent(node: N, agent: ExecutableAgent<*, *, *>) {
         val newAgent = BaseAgentLifecycle(agent)
         val newJob = launch {
             supervisorScope {
-                while(true) {
+                while (true) {
                     newAgent.step(this)
                 }
             }
@@ -59,7 +62,7 @@ class BaseNode<Body: AgentBody, Position: Any, R : Runtime<Position,*,Body>> (
             when(it) {
                 is CancellationException -> {} // intentional removal
                 else -> {
-                    runtime.removeAgent(agent.id)
+                    node.removeAgent(agent.id)
                 }
             }
         }
@@ -70,5 +73,13 @@ class BaseNode<Body: AgentBody, Position: Any, R : Runtime<Position,*,Body>> (
         //TODO is it ok to cancel if it has been already stopped with exception?
         job.cancel(CancellationException("The agent has been removed from the MAS"))
         agents.remove(agent)
+    }
+
+    private fun CoroutineScope.stopNode(node: N){
+        this.coroutineContext.job.cancel(CancellationException("ShutDownMAS requested"))
+        //agents.forEach { removeAgent(it.key.executableAgent.id) }
+        //return@launch
+        _nodes -= node
+        logger.i("Node $node has been stopped")
     }
 }

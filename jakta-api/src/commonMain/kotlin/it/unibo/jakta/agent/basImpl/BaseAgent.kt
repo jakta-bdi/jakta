@@ -2,7 +2,7 @@ package it.unibo.jakta.agent.basImpl
 
 import it.unibo.jakta.agent.Agent
 import it.unibo.jakta.agent.AgentID
-import it.unibo.jakta.environment.AgentBody
+import it.unibo.jakta.node.AgentBody
 import it.unibo.jakta.agent.AgentSpecification
 import it.unibo.jakta.agent.RuntimeAgent
 import it.unibo.jakta.agent.MutableAgentState
