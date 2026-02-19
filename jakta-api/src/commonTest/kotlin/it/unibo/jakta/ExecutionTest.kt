@@ -5,44 +5,32 @@ import it.unibo.jakta.agent.AgentSpecification
 import it.unibo.jakta.agent.AgentState
 import it.unibo.jakta.agent.basImpl.BaseAgentID
 import it.unibo.jakta.agent.basImpl.BaseAgentState
-import it.unibo.jakta.environment.AgentBody
-import it.unibo.jakta.environment.Runtime
-import it.unibo.jakta.environment.Topology
-import it.unibo.jakta.environment.baseImpl.BaseRuntime
-import it.unibo.jakta.node.baseImpl.BaseNode
+import it.unibo.jakta.node.AgentBody
+import it.unibo.jakta.node.Node
+import it.unibo.jakta.node.baseImpl.LocalNode
+import it.unibo.jakta.node.baseImpl.CoroutineNodeRunner
 import it.unibo.jakta.plan.baseImpl.GoalAdditionPlan
-import kotlin.reflect.KType
 import kotlin.reflect.typeOf
 import kotlin.test.Test
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.test.runTest
 
 class ExecutionTest {
 
-    object CustomTopology : Topology<Int, Int> {
-        override val defaultPosition: Int = 0
-
-        override fun isValid(position: Int): Boolean  = true
-
-        override fun distance(from: Int, to: Int): Double = 0.0
-
-        override fun move(from: Int, displacement: Int): Int = from + displacement
-    }
-
-    class MyPrint(val runtime: Runtime<*, *, AgentBody>) {
-        fun prettyPrint(value: String) = println(value)
+    class MyPrint(val node: Node<AgentBody, *>) {
+        suspend fun prettyPrint(value: String) = println("${currentCoroutineContext()} - $value")
         fun stop() {
-            runtime.terminateMAS()
+            node.terminateNode()
         }
     }
 
     @Test
     fun testAgentExecution() {
 
-        val runtime = BaseRuntime<Int, Int, AgentBody>(CustomTopology)
+        val node = LocalNode<AgentBody, MyPrint>()
+        val node2 = LocalNode<AgentBody, MyPrint>()
 
-
-
-        val agentsSpec: Map<AgentSpecification<*, *, *, AgentBody>, Int> = mapOf(
+        val agentsSpec = setOf(
             object : AgentSpecification<String, String, MyPrint, AgentBody> {
                 override val body: AgentBody = object: AgentBody {}
                 override val initialState: AgentState<String, String, MyPrint> = BaseAgentState(
@@ -62,17 +50,48 @@ class ExecutionTest {
                     ),
                     perceptionHandler = { null } ,
                     messageHandler = { null },
-                    skills = MyPrint(runtime),
+                    skills = MyPrint(node),
                 )
                 override val initialGoals: List<String> = listOf("hello")
-                override val id: AgentID = BaseAgentID("MI PIACE")
-            } to 0
+                override val id: AgentID = BaseAgentID("Agent1")
+            }
         )
 
-        val node = BaseNode(runtime, agentsSpec)
+        val agentsSpec2 = setOf(
+            object : AgentSpecification<String, String, MyPrint, AgentBody> {
+                override val body: AgentBody = object: AgentBody {}
+                override val initialState: AgentState<String, String, MyPrint> = BaseAgentState(
+                    beliefs = listOf(),
+                    intentions = setOf(),
+                    beliefPlans = listOf(),
+                    goalPlans = listOf(
+                        GoalAdditionPlan(
+                            trigger = { it == "hello" },
+                            guard = { it },
+                            body = {
+                                it.skills.prettyPrint("PLKUTO")
+                                it.skills.stop()
+                            },
+                            resultType = typeOf<Unit>()
+                        )
+                    ),
+                    perceptionHandler = { null } ,
+                    messageHandler = { null },
+                    skills = MyPrint(node2),
+                )
+                override val initialGoals: List<String> = listOf("hello")
+                override val id: AgentID = BaseAgentID("Agent2")
+            }
+        )
+
+        val runner = CoroutineNodeRunner<LocalNode<*, *>>()
 
         runTest {
-            node.run()
+            agentsSpec.forEach { node.addAgent(it) }
+            runner.run(node)
+
+            agentsSpec2.forEach { node2.addAgent(it) }
+            runner.run(node2)
         }
     }
 }

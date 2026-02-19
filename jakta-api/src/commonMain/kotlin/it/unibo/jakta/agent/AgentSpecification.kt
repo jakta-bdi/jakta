@@ -1,7 +1,6 @@
 package it.unibo.jakta.agent
 
-import it.unibo.jakta.agent.basImpl.BaseAgentID
-import it.unibo.jakta.environment.AgentBody
+import it.unibo.jakta.node.AgentBody
 
 /**
  * The specification of an [Agent], which includes its [body], [initialState], and [initialGoals].

@@ -1,4 +1,4 @@
-import it.unibo.jakta.node.Node
+import it.unibo.jakta.node.NodeRunner
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
@@ -7,10 +7,10 @@ fun <T> String.ifGoalMatch(goal: String, returnValue: T): T? = if (this == goal)
 
 fun String.ifGoalMatch(goal: String): Unit? = if (this == goal) Unit else null
 
-fun executeInTestScope(node: TestScope.() -> Node<*, *, *>) {
+fun executeInTestScope(nodeRunner: TestScope.() -> NodeRunner<*, *, *>) {
     runTest {
         val job = launch {
-            node().run()
+            nodeRunner().run()
         }
         job.join()
     }

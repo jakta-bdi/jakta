@@ -1,6 +1,4 @@
-package it.unibo.jakta.environment
-
-import it.unibo.jakta.agent.AgentID
+package it.unibo.jakta.node
 
 /**
  * The unique body of an [it.unibo.jakta.agent.Agent],

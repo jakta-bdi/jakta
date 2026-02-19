@@ -14,5 +14,5 @@ sealed interface SystemEvent {
         val id: AgentID
     }
 
-    interface ShutDownMAS : SystemEvent
+    interface ShutDownNode : SystemEvent
 }
