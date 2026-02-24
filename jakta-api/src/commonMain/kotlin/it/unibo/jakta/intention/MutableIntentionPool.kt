@@ -2,7 +2,6 @@ package it.unibo.jakta.intention
 
 import it.unibo.jakta.event.AgentEvent
 
-
 /**
  * A mutable intention pool that allows adding and dropping intentions.
  */
@@ -21,6 +20,7 @@ interface MutableIntentionPool : IntentionPool {
      *        or the referenced intention if it exists.
      */
     suspend fun nextIntention(event: AgentEvent.Internal): Intention
+
     /**
      * Drops the intention with the given ID from the pool.
      * @return true if the intention was found and dropped, false otherwise.
@@ -32,4 +32,3 @@ interface MutableIntentionPool : IntentionPool {
      */
     suspend fun stepIntention(event: AgentEvent.Internal.Step): Unit
 }
-

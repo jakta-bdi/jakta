@@ -1,14 +1,14 @@
 package examples
 
-import TestEnvironment
+import TerminationSkillImpl
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import executeInTestScope
 import ifGoalMatch
-import it.unibo.jakta.mas
+import it.unibo.jakta.jakta
+import it.unibo.jakta.node.AgentBody
 import it.unibo.jakta.plan.triggers
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlinx.coroutines.delay
 
 class TestHelloDelay {
@@ -19,9 +19,10 @@ class TestHelloDelay {
         val timeToWait = 10000L
 
         executeInTestScope {
-            mas {
-                environment { TestEnvironment() }
+            jakta {
                 agent {
+                    body = object : AgentBody {}
+                    withSkills { TerminationSkillImpl(this@jakta.node) }
                     hasInitialGoals {
                         !"goal"
                     }
@@ -32,10 +33,10 @@ class TestHelloDelay {
                             agent.print("Hello...")
                             delay(timeToWait)
                             // TODO time will be a skill
-                            //agent.print("Time perceived by the agent: ${environment.currentTime()}")
-                            //assertEquals(environment.currentTime(), timeToWait)
+                            // agent.print("Time perceived by the agent: ${environment.currentTime()}")
+                            // assertEquals(environment.currentTime(), timeToWait)
                             agent.print("...World!")
-                            agent.terminate()
+                            skills.terminate()
                         }
                     }
                 }

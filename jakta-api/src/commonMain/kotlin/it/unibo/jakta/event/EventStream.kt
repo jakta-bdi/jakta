@@ -9,5 +9,5 @@ interface EventStream<E> {
      * If none, it suspends the execution until an event is available.
      * @return the next [E] to be parsed.
      */
-    suspend fun next() : E
+    suspend fun next(): E
 }

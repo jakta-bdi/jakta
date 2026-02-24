@@ -9,7 +9,9 @@ import kotlin.reflect.typeOf
 /**
  * Mutable state of an agent, allowing modifications to its beliefs, plans, and event handlers.
  */
-interface MutableAgentState<Belief: Any, Goal: Any, Skills: Any> : AgentState<Belief, Goal, Skills>, Agent {
+interface MutableAgentState<Belief : Any, Goal : Any, Skills : Any> :
+    AgentState<Belief, Goal, Skills>,
+    Agent {
 
     /**
      * The mutable pool of intentions that the agent is currently pursuing.
@@ -32,13 +34,13 @@ interface MutableAgentState<Belief: Any, Goal: Any, Skills: Any> : AgentState<Be
      * Adds a new [Plan.Goal] that agent can use for its reasoning process.
      * @param plan the new [Plan.Goal].
      */
-    fun addPlan(plan: Plan.Goal<Belief, Goal, Skills,*, *>)
+    fun addPlan(plan: Plan.Goal<Belief, Goal, Skills, *, *>)
 
     /**
      * Adds a new [Plan.Belief] that agent can use for its reasoning process.
      * @param plan the new [Plan.Belief].
      */
-    fun addPlan(plan: Plan.Belief<Belief, Goal, Skills,*, *>)
+    fun addPlan(plan: Plan.Belief<Belief, Goal, Skills, *, *>)
 
     // TODO How to remove plans??
 
@@ -70,7 +72,7 @@ interface MutableAgentState<Belief: Any, Goal: Any, Skills: Any> : AgentState<Be
      */
     suspend fun forget(belief: Belief)
 
-    //TODO more advanced belief management? update belief? filter? etc.
+    // TODO more advanced belief management? update belief? filter? etc.
     // do we provide these as utility extension functions?
 
     /**
@@ -86,5 +88,6 @@ interface MutableAgentState<Belief: Any, Goal: Any, Skills: Any> : AgentState<Be
  * @return The result of the plan execution of type [PlanResult].
  */
 @Suppress("DEPRECATION_ERROR")
-suspend inline fun <B : Any, G : Any, S: Any, reified PlanResult> MutableAgentState<B, G, S>.achieve(goal: G): PlanResult =
-    internalAchieve(goal, typeOf<PlanResult>())
+suspend inline fun <B : Any, G : Any, S : Any, reified PlanResult> MutableAgentState<B, G, S>.achieve(
+    goal: G,
+): PlanResult = internalAchieve(goal, typeOf<PlanResult>())

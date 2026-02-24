@@ -12,7 +12,7 @@ import it.unibo.jakta.plan.Plan
  * @param Goal The type representing the agent's *goals*.
  * @param Skills The type representing the agent's *skills*.
  */
-interface AgentState<Belief: Any, Goal: Any, Skills: Any> : GuardScope<Belief> {
+interface AgentState<Belief : Any, Goal : Any, Skills : Any> : GuardScope<Belief> {
 
     /**
      * The *beliefs* held by the agent.
@@ -49,4 +49,3 @@ interface AgentState<Belief: Any, Goal: Any, Skills: Any> : GuardScope<Belief> {
      */
     val skills: Skills
 }
-

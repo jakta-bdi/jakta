@@ -1,19 +1,21 @@
 package examples
 
-import TestEnvironment
+import TerminationSkillImpl
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import executeInTestScope
 import ifGoalMatch
-import it.unibo.jakta.mas
+import it.unibo.jakta.jakta
+import it.unibo.jakta.node.AgentBody
 import it.unibo.jakta.plan.triggers
 import kotlin.test.Test
 
 class TestHelloWorld {
 
-    val helloWorld = mas {
-        environment { TestEnvironment() }
+    val helloWorld = jakta {
         agent("HelloAgent") {
+            body = object : AgentBody {}
+            withSkills { TerminationSkillImpl(this@jakta.node) }
             hasInitialGoals {
                 !"goal"
             }
@@ -22,7 +24,7 @@ class TestHelloWorld {
                     ifGoalMatch("goal")
                 } triggers {
                     agent.print("Hello World!")
-                    agent.terminate()
+                    skills.terminate()
                 }
             }
         }

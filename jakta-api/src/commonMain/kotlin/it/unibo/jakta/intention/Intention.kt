@@ -59,4 +59,3 @@ interface Intention : CoroutineContext.Element {
      */
     companion object Key : CoroutineContext.Key<Intention>
 }
-

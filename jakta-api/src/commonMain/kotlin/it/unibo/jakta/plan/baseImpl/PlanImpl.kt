@@ -8,7 +8,7 @@ import kotlin.reflect.KType
 /**
  * Implementation of Plan for belief additions.
  */
-data class BeliefAdditionPlan<Belief : Any, Goal : Any, Skills: Any, Context : Any, PlanResult>(
+data class BeliefAdditionPlan<Belief : Any, Goal : Any, Skills : Any, Context : Any, PlanResult>(
     override val trigger: (Belief) -> Context?,
     override val guard: GuardScope<Belief>.(Context) -> Context?,
     override val body: suspend (PlanScope<Belief, Goal, Skills, Context>) -> PlanResult,
@@ -18,7 +18,7 @@ data class BeliefAdditionPlan<Belief : Any, Goal : Any, Skills: Any, Context : A
 /**
  * Implementation of Plan for belief removals.
  */
-data class BeliefRemovalPlan<Belief : Any, Goal : Any, Skills: Any, Context : Any, PlanResult>(
+data class BeliefRemovalPlan<Belief : Any, Goal : Any, Skills : Any, Context : Any, PlanResult>(
     override val trigger: (Belief) -> Context?,
     override val guard: GuardScope<Belief>.(Context) -> Context?,
     override val body: suspend (PlanScope<Belief, Goal, Skills, Context>) -> PlanResult,
@@ -28,7 +28,7 @@ data class BeliefRemovalPlan<Belief : Any, Goal : Any, Skills: Any, Context : An
 /**
  *
  */
-data class GoalAdditionPlan<Belief : Any, Goal : Any, Skills: Any, Context : Any, PlanResult>(
+data class GoalAdditionPlan<Belief : Any, Goal : Any, Skills : Any, Context : Any, PlanResult>(
     override val trigger: (Goal) -> Context?,
     override val guard: GuardScope<Belief>.(Context) -> Context?,
     override val body: suspend (PlanScope<Belief, Goal, Skills, Context>) -> PlanResult,
@@ -38,7 +38,7 @@ data class GoalAdditionPlan<Belief : Any, Goal : Any, Skills: Any, Context : Any
 /**
  * Implementation of Plan for goal removals.
  */
-data class GoalRemovalPlan<Belief : Any, Goal : Any, Skills: Any, Context : Any, PlanResult>(
+data class GoalRemovalPlan<Belief : Any, Goal : Any, Skills : Any, Context : Any, PlanResult>(
     override val trigger: (Goal) -> Context?,
     override val guard: GuardScope<Belief>.(Context) -> Context?,
     override val body: suspend (PlanScope<Belief, Goal, Skills, Context>) -> PlanResult,
@@ -48,7 +48,7 @@ data class GoalRemovalPlan<Belief : Any, Goal : Any, Skills: Any, Context : Any,
 /**
  * Implementation of Plan for goal failures.
  */
-data class GoalFailurePlan<Belief : Any, Goal : Any, Skills: Any, Context : Any, PlanResult>(
+data class GoalFailurePlan<Belief : Any, Goal : Any, Skills : Any, Context : Any, PlanResult>(
     override val trigger: (Goal) -> Context?,
     override val guard: GuardScope<Belief>.(Context) -> Context?,
     override val body: suspend (PlanScope<Belief, Goal, Skills, Context>) -> PlanResult,

@@ -1,5 +1,7 @@
 package examples
 
+import TerminationSkill
+import TerminationSkillImpl
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import examples.Movement.Events.Factory.position
@@ -7,29 +9,24 @@ import examples.Recharging.Events.Factory.chargeLevel
 import examples.TemperatureSensing.Events.Factory.temperature
 import executeInTestScope
 import ifGoalMatch
-import it.unibo.jakta.agent.basImpl.BaseAgentID
-import it.unibo.jakta.node.baseImpl.AbstractEnvironment
-import it.unibo.jakta.node.Node
 import it.unibo.jakta.event.AgentEvent
-import it.unibo.jakta.mas
+import it.unibo.jakta.jakta
+import it.unibo.jakta.node.AgentBody
+import it.unibo.jakta.node.Node
 import it.unibo.jakta.plan.triggers
 import kotlin.test.Test
-import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.delay
 
-
-open class SpatialEnvironment<P> : AbstractEnvironment() {
-    val positions: Map<BaseAgentID, P> = emptyMap()
+class BodyWithPosition : AgentBody {
+    val position2D: DoubleArray = doubleArrayOf(0.0, 0.0)
 }
 
-
-//TODO if we have this, bound the generics everywhere??
+// TODO if we have this, bound the generics everywhere??
 interface Skill {
-    suspend fun start(e: Node) {
+    suspend fun start(node: Node<BodyWithPosition, *>) {
         // default no-op implementation
     }
 }
-
 
 interface Recharging : Skill {
     suspend fun recharge()
@@ -46,7 +43,7 @@ interface Recharging : Skill {
 }
 
 interface Movement<P> : Skill {
-    //context(s1: Recharging) TODO this does not work right yet due to "triggers" not having context propagation
+    // context(s1: Recharging) TODO this does not work right yet due to "triggers" not having context propagation
     fun moveTo(newPos: P)
 
     object Events {
@@ -58,30 +55,31 @@ interface Movement<P> : Skill {
     }
 }
 
-class FixedTimeRecharging(val e: SendChannel<AgentEvent.External.Perception>) : Recharging {
+class FixedTimeRecharging(val node: Node<BodyWithPosition, *>) : Recharging {
     override suspend fun recharge() {
         delay(3000)
-        e.send(chargeLevel(100))
+        node.agents.forEach { it.externalInbox.send(chargeLevel(100)) } // TODO: wrong
     }
 }
 
-class GridMovement(val e: GridEnvironment) : Movement<Pair<Int, Int>> {
-    //context(s1: Recharging)
+class GridMovement(val node: Node<BodyWithPosition, *>) : Movement<Pair<Int, Int>> {
+    // context(s1: Recharging)
     override fun moveTo(newPos: Pair<Int, Int>) {
-        e.trySend(position(newPos))
+        node.agents.forEach {
+            it.externalInbox.send(position(newPos))
+        } // TODO: Not correct, all agents try to go to the same position
     }
 }
-
 
 // Skill with active behavior that "runs" in the environment
 interface TemperatureSensing : Skill {
-    //TODO we need a way to have skills that have an active behavior
+    // TODO we need a way to have skills that have an active behavior
     // who calls this method??
-    override suspend fun start(e: Node) {
-        startSensing(e)
+    override suspend fun start(node: Node<BodyWithPosition, *>) {
+        startSensing(node)
     }
 
-    suspend fun startSensing(e: Node)
+    suspend fun startSensing(node: Node<BodyWithPosition, *>)
 
     object Events {
         data class Temperature internal constructor(val value: Float) : AgentEvent.External.Perception
@@ -92,69 +90,56 @@ interface TemperatureSensing : Skill {
     }
 }
 
-
 // This skill is a singleton, shared by all agents using it
 object FixedIntervalTemperatureSensing : TemperatureSensing {
 
-    override suspend fun startSensing(e: Node) {
+    override suspend fun startSensing(node: Node<BodyWithPosition, *>) {
         while (true) {
             delay(5000)
             val temp = (15..30).random() + (0..99).random() / 100f
             Logger.i { "Sensed temperature: $temp °C" }
             // here we would send the event to the environment or agent
-            e.send(this.temperature(temp))
+            node.agents.forEach {
+                it.externalInbox.send(this.temperature(temp))
+            } // TODO: Not correct, all agents see the same position
         }
     }
 }
 
-
-class GridEnvironment : SpatialEnvironment<Pair<Int, Int>>()
-
-class CustomSkillSet(val env: GridEnvironment) :
-    Recharging by FixedTimeRecharging(env),
-    Movement<Pair<Int, Int>> by GridMovement(env),
-    TemperatureSensing by FixedIntervalTemperatureSensing
-{
-    //TODO this seems doable, but you need to remember to actually start everything
+class CustomSkillSet(val node: Node<BodyWithPosition, *>) :
+    Recharging by FixedTimeRecharging(node),
+    Movement<Pair<Int, Int>> by GridMovement(node),
+    TemperatureSensing by FixedIntervalTemperatureSensing,
+    TerminationSkill by TerminationSkillImpl(node) {
+    // TODO this seems doable, but you need to remember to actually start everything
     // And you should know what needs to start... not great
     // and then who calls this??
-    override suspend fun start(e: Node) {
-        FixedIntervalTemperatureSensing.start(e)
+    override suspend fun start(node: Node<BodyWithPosition, *>) {
+        FixedIntervalTemperatureSensing.start(node)
     }
 }
-
-//TODO Attenzione
-// ogni agente ha le sue skill, non condivise con altri agenti
-// le skill possono mantenere stato interno
-// lo stato condiviso tra agenti deve essere mantenuto nell'environment
-// oppure con skill che sono dei singleton ??
 
 class TestSpatialRobot {
 
-    val mas = mas {
-
-        environment {
-            GridEnvironment()
-        }
-
+    val mas = jakta {
         agent("Vacuum") {
-
+            body = BodyWithPosition()
             withSkills {
-                CustomSkillSet(it)
+                CustomSkillSet(this@jakta.node)
             }
 
             hasInitialGoals {
                 !"goal"
             }
             hasPlans {
-                    adding.goal {
-                        ifGoalMatch("goal")
-                    } triggers {
-                        agent.print("Hello World!")
-                        skills.recharge()
-                        skills.moveTo(1 to 1)
-                        agent.terminate()
-                    }
+                adding.goal {
+                    ifGoalMatch("goal")
+                } triggers {
+                    agent.print("Hello World!")
+                    skills.recharge()
+                    skills.moveTo(1 to 1)
+                    skills.terminate()
+                }
             }
         }
     }
@@ -164,5 +149,4 @@ class TestSpatialRobot {
         Logger.setMinSeverity(Severity.Debug)
         executeInTestScope { mas }
     }
-
 }

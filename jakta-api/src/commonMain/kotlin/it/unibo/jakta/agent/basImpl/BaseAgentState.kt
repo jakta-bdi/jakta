@@ -10,7 +10,7 @@ import it.unibo.jakta.plan.Plan
 /**
  * Default implementation of an [AgentState].
  */
-internal class BaseAgentState<Belief: Any, Goal: Any, Skills: Any>(
+class BaseAgentState<Belief : Any, Goal : Any, Skills : Any>(
     override val beliefs: Collection<Belief>,
     override val intentions: Set<Intention>,
     override val beliefPlans: List<Plan.Belief<Belief, Goal, Skills, *, *>>,
@@ -18,5 +18,4 @@ internal class BaseAgentState<Belief: Any, Goal: Any, Skills: Any>(
     override val perceptionHandler: (Perception) -> Internal?,
     override val messageHandler: (Message) -> Internal?,
     override val skills: Skills,
-): AgentState<Belief, Goal, Skills>
-
+) : AgentState<Belief, Goal, Skills>

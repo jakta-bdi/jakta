@@ -5,7 +5,7 @@ import kotlinx.coroutines.CoroutineScope
 /**
  * Specifies how a [ExecutableAgent] can run.
  */
-interface AgentLifecycle<Belief: Any, Goal: Any, Skills: Any> {
+interface AgentLifecycle<Belief : Any, Goal : Any, Skills : Any> {
 
     /**
      * The [ExecutableAgent] that is currently executing.
@@ -18,8 +18,8 @@ interface AgentLifecycle<Belief: Any, Goal: Any, Skills: Any> {
      * Potentially launches plans as a response to the event.
      * @param scope must be a SupervisorScope
      */
-    //TODO can we remove the scope?
-    //TODO we can definitely improve the documentation here
+    // TODO can we remove the scope?
+    // TODO we can definitely improve the documentation here
     suspend fun step(scope: CoroutineScope)
 
     /**

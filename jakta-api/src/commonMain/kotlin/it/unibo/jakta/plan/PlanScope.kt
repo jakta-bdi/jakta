@@ -5,7 +5,7 @@ import it.unibo.jakta.agent.MutableAgentState
 /**
  * Scope available when defining a Plan body.
  */
-interface PlanScope<Belief : Any, Goal : Any, Skills: Any, Context : Any> {
+interface PlanScope<Belief : Any, Goal : Any, Skills : Any, Context : Any> {
     /**
      * The actions that can be performed on the agent that is executing the plan.
      */

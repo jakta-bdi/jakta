@@ -1,20 +1,20 @@
 package it.unibo.jakta.belief
 
-import it.unibo.jakta.event.baseImpl.BeliefAddEvent
-import it.unibo.jakta.event.baseImpl.BeliefRemoveEvent
 import it.unibo.jakta.event.AgentEvent
 import it.unibo.jakta.event.EventInbox
+import it.unibo.jakta.event.baseImpl.BeliefAddEvent
+import it.unibo.jakta.event.baseImpl.BeliefRemoveEvent
 
 internal data class BeliefBaseImpl<Belief : Any>(
     private val events: EventInbox<AgentEvent.Internal.Belief<Belief>>,
     val initialBeliefs: Iterable<Belief> = emptyList(),
-    private val beliefs: MutableSet<Belief> = mutableSetOf()
+    private val beliefs: MutableSet<Belief> = mutableSetOf(),
 ) : BeliefBase<Belief>,
     MutableSet<Belief> by beliefs {
 
     /**
      * Triggers events for the addition of the initial beliefs.
-      */
+     */
     init {
         initialBeliefs.forEach { add(it) }
     }

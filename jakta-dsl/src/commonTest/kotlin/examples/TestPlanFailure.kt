@@ -1,12 +1,13 @@
 package examples
 
-import TestEnvironment
+import TerminationSkillImpl
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import executeInTestScope
 import ifGoalMatch
 import it.unibo.jakta.agent.achieve
-import it.unibo.jakta.mas
+import it.unibo.jakta.jakta
+import it.unibo.jakta.node.AgentBody
 import it.unibo.jakta.plan.triggers
 import kotlin.test.Test
 
@@ -16,9 +17,10 @@ class TestPlanFailure {
     fun testPlanFailureHandling() {
         Logger.setMinSeverity(Severity.Warn)
         executeInTestScope {
-            mas {
-                environment { TestEnvironment() }
+            jakta {
                 agent {
+                    body = object : AgentBody {}
+                    withSkills { TerminationSkillImpl(this@jakta.node) }
                     hasInitialGoals { !"goalChain" }
                     hasPlans {
                         adding.goal {
@@ -26,7 +28,7 @@ class TestPlanFailure {
                         } triggers {
                             val x: Unit = agent.achieve("failingPlan")
                             agent.print("The plan has failed but recovered")
-                            agent.terminate()
+                            skills.terminate()
                         }
                         adding.goal {
                             ifGoalMatch("failingPlan")
@@ -38,7 +40,7 @@ class TestPlanFailure {
                             ifGoalMatch("goalChain")
                         } triggers {
                             agent.print("Goal chain failed as expected.")
-                            agent.terminate()
+                            skills.terminate()
                         }
 //                            failing.goal {
 //                                ifGoalMatch("failingPlan")

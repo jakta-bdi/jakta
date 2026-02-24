@@ -81,10 +81,7 @@ sealed interface Plan<Belief : Any, Goal : Any, Skills : Any, TriggerEntity : An
      * by applying the trigger and guard functions to the entity.
      * The plan's body is then executed within this scope, and the result is returned.
      */
-    suspend fun run(
-        agent: MutableAgentState<Belief, Goal, Skills>,
-        entity: TriggerEntity,
-    ): PlanResult = body(
+    suspend fun run(agent: MutableAgentState<Belief, Goal, Skills>, entity: TriggerEntity): PlanResult = body(
         BasePlanScope(
             agent,
             agent.skills,
@@ -97,43 +94,43 @@ sealed interface Plan<Belief : Any, Goal : Any, Skills : Any, TriggerEntity : An
      */
     // TODO It does not make sense for Belief Plans to have a PlanResult as it will never be awaited on... right?
     // What are the implication on the overall design? Remove it or bind it as Unit?
-    sealed interface Belief<B : Any, G : Any, Skills: Any, Context : Any, PlanResult> :
+    sealed interface Belief<B : Any, G : Any, Skills : Any, Context : Any, PlanResult> :
         Plan<B, G, Skills, B, Context, PlanResult> {
         /**
          * Plans that are triggered by the addition of a belief.
          */
-        interface Addition<B : Any, G : Any, Skills: Any, Context : Any, PlanResult> :
+        interface Addition<B : Any, G : Any, Skills : Any, Context : Any, PlanResult> :
             Belief<B, G, Skills, Context, PlanResult>
 
         /**
          * Plans that are triggered by the removal of a belief.
          */
-        interface Removal<B : Any, G : Any, Skills: Any, Context : Any, PlanResult> :
+        interface Removal<B : Any, G : Any, Skills : Any, Context : Any, PlanResult> :
             Belief<B, G, Skills, Context, PlanResult>
     }
 
     /**
      * Plans that are triggered by changes in goals.
      */
-    sealed interface Goal<B : Any, G : Any, Skills: Any, Context : Any, PlanResult> :
+    sealed interface Goal<B : Any, G : Any, Skills : Any, Context : Any, PlanResult> :
         Plan<B, G, Skills, G, Context, PlanResult> {
 
         /**
          * Plans that are triggered by the addition of a goal.
          */
-        interface Addition<B : Any, G : Any, Skills: Any, Context : Any, PlanResult> :
+        interface Addition<B : Any, G : Any, Skills : Any, Context : Any, PlanResult> :
             Goal<B, G, Skills, Context, PlanResult>
 
         /**
          * Plans that are triggered by the removal of a goal.
          */
-        interface Removal<B : Any, G : Any, Skills: Any, Context : Any, PlanResult> :
+        interface Removal<B : Any, G : Any, Skills : Any, Context : Any, PlanResult> :
             Goal<B, G, Skills, Context, PlanResult>
 
         /**
          * Plans that are triggered by the failure of a goal.
          */
-        interface Failure<B : Any, G : Any, Skills: Any, Context : Any, PlanResult> :
+        interface Failure<B : Any, G : Any, Skills : Any, Context : Any, PlanResult> :
             Goal<B, G, Skills, Context, PlanResult>
     }
 }
