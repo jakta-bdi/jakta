@@ -1,15 +1,15 @@
 package it.unibo.jakta
 
+import it.unibo.jakta.node.AgentBody
 import it.unibo.jakta.node.Node
-import it.unibo.jakta.node.NodeRunner
-import it.unibo.jakta.node.MasBuilder
-import it.unibo.jakta.node.MasBuilderImpl
+import it.unibo.jakta.node.NodeBuilder
+import it.unibo.jakta.node.NodeBuilderImpl
 import it.unibo.jakta.plan.Plan
 import it.unibo.jakta.plan.PlanBuilder
 import it.unibo.jakta.plan.TriggerAdditionImpl
 import it.unibo.jakta.plan.TriggerRemovalImpl
 
-//TODO For now let's focus on the FULL DSL syntax with only the main entrypoint,
+// TODO For now let's focus on the FULL DSL syntax with only the main entrypoint,
 // then we will add more features to isolate components...
 
 /**
@@ -17,27 +17,27 @@ import it.unibo.jakta.plan.TriggerRemovalImpl
  * @return an instantiated MAS.
  */
 @JaktaDSL
-fun <Belief : Any, Goal : Any, Env : Node> mas(
-    block: MasBuilder<Belief, Goal, Env>.() -> Unit,
-): NodeRunner<Belief, Goal, Env> {
-    val mb = MasBuilderImpl<Belief, Goal, Env>()
-    mb.apply(block)
-    return mb.build()
+fun <Belief : Any, Goal : Any, Skills : Any, Body : AgentBody> jakta(
+    block: NodeBuilder<Belief, Goal, Skills, Body>.() -> Unit,
+): Node<Body, Skills> {
+    val nodeBuilder = NodeBuilderImpl<Belief, Goal, Skills, Body>()
+    nodeBuilder.apply(block)
+    return nodeBuilder.build()
 }
 
-//TODO Fix this (now it needs to have a reference to the environment to instantiate skills)
-///**
+// TODO Fix this (now it needs to have a reference to the environment to instantiate skills)
+// /**
 // * Entry point for creating an agent using the Jakta DSL.
 // * @return an instantiated Agent.
 // */
-//@JaktaDSL
-//fun <Belief : Any, Goal : Any, Skills : Any> agent(
+// @JaktaDSL
+// fun <Belief : Any, Goal : Any, Skills : Any> agent(
 //    block: AgentBuilder<Belief, Goal, Skills>.() -> Unit,
-//): Agent<Belief, Goal> {
+// ): Agent<Belief, Goal> {
 //    val ab = AgentBuilderImpl<Belief, Goal, Skills>()
 //    ab.apply(block)
 //    return ab.build()
-//}
+// }
 
 // TODO entrypoint for plans???
 // this is tricky due to the way the DSL is constructed

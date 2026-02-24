@@ -15,8 +15,7 @@ import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 
-class CoroutineNodeRunner<N : Node<*, *>>
-    : NodeRunner<N> {
+class CoroutineNodeRunner<N : Node<*, *>> : NodeRunner<N> {
 
     private val agents: MutableMap<AgentLifecycle<*, *, *>, Job> = mutableMapOf()
 
@@ -25,9 +24,9 @@ class CoroutineNodeRunner<N : Node<*, *>>
     override val nodes: Set<N>
         get() = _nodes.toSet()
 
-    private val logger: Logger =  Logger(
+    private val logger: Logger = Logger(
         Logger.config,
-        this.toString()
+        this.toString(),
     )
 
     override suspend fun run(node: N) {
@@ -59,7 +58,7 @@ class CoroutineNodeRunner<N : Node<*, *>>
 
         // remove the agent from the environment if the agent stops for unexpected reasons
         newJob.invokeOnCompletion {
-            when(it) {
+            when (it) {
                 is CancellationException -> {} // intentional removal
                 else -> {
                     node.removeAgent(agent.id)
@@ -69,16 +68,16 @@ class CoroutineNodeRunner<N : Node<*, *>>
     }
 
     private fun removeAgent(id: AgentID) {
-        val (agent,job) = agents.entries.find { (agent, _) -> agent.executableAgent.id == id } ?: return
-        //TODO is it ok to cancel if it has been already stopped with exception?
+        val (agent, job) = agents.entries.find { (agent, _) -> agent.executableAgent.id == id } ?: return
+        // TODO is it ok to cancel if it has been already stopped with exception?
         job.cancel(CancellationException("The agent has been removed from the MAS"))
         agents.remove(agent)
     }
 
-    private fun CoroutineScope.stopNode(node: N){
+    private fun CoroutineScope.stopNode(node: N) {
         this.coroutineContext.job.cancel(CancellationException("ShutDownMAS requested"))
-        //agents.forEach { removeAgent(it.key.executableAgent.id) }
-        //return@launch
+        // agents.forEach { removeAgent(it.key.executableAgent.id) }
+        // return@launch
         _nodes -= node
         logger.i("Node $node has been stopped")
     }

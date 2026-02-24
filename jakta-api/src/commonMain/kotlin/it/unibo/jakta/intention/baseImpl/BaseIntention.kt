@@ -9,11 +9,7 @@ import it.unibo.jakta.intention.IntentionID
 import kotlin.coroutines.CoroutineContext.Key
 import kotlinx.coroutines.Job
 
-
-data class BaseIntention(
-    override val job: Job,
-    override val id: IntentionID = BaseIntentionID(),
-) : Intention {
+data class BaseIntention(override val job: Job, override val id: IntentionID = BaseIntentionID()) : Intention {
     private val log =
         Logger(
             Logger.config,

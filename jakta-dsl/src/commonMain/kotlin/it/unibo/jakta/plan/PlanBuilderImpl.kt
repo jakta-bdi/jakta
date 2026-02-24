@@ -108,10 +108,10 @@ private fun <B, G, S, TE, C, PR, P> buildAndRegisterPlan(
     guard: GuardScope<B>.(C) -> C?,
     body: suspend PlanScope<B, G, S, C>.() -> PR,
     builder: (
-            (TE) -> C?,
-            GuardScope<B>.(C) -> C?,
-            suspend PlanScope<B, G, S, C>.() -> PR,
-            KType,
+        (TE) -> C?,
+        GuardScope<B>.(C) -> C?,
+        suspend PlanScope<B, G, S, C>.() -> PR,
+        KType,
     ) -> P,
     register: (P) -> Unit,
 ): P where B : Any, G : Any, S : Any, TE : Any, C : Any, P : Plan<B, G, S, TE, C, PR> =

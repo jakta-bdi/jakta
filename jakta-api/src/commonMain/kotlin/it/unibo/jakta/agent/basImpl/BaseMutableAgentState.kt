@@ -21,32 +21,36 @@ import kotlinx.coroutines.currentCoroutineContext
 /**
  * Default implementation of a [MutableAgentState].
  */
-internal class BaseMutableAgentState<Belief: Any, Goal: Any, Skills: Any>(
+internal class BaseMutableAgentState<Belief : Any, Goal : Any, Skills : Any>(
     initialAgentState: AgentState<Belief, Goal, Skills>,
     val internalInbox: EventInbox<Internal>,
     override val id: AgentID,
-): MutableAgentState<Belief, Goal, Skills> {
+) : MutableAgentState<Belief, Goal, Skills> {
 
-    private val logger: Logger =  Logger(
+    private val logger: Logger = Logger(
         Logger.config,
-        id.displayName
+        id.displayName,
     )
 
-    //TODO BeliefBase should be injected?
+    // TODO BeliefBase should be injected?
     private val beliefBase: BeliefBase<Belief> = BeliefBase.of(internalInbox, initialAgentState.beliefs)
     override val beliefs: Collection<Belief>
         get() = beliefBase.snapshot()
 
-    //TODO IntentionPool should be injected?
+    // TODO IntentionPool should be injected?
     override val mutableIntentionPool: MutableIntentionPool = BaseIntentionPoolImpl(internalInbox)
     override val intentions: Set<Intention>
         get() = mutableIntentionPool.getIntentionsSet()
 
-    private val _beliefPlans: MutableList<Plan.Belief<Belief, Goal, Skills, *, *>> = initialAgentState.beliefPlans.toMutableList()
+    private val _beliefPlans: MutableList<Plan.Belief<Belief, Goal, Skills, *, *>> =
+        initialAgentState.beliefPlans.toMutableList()
+
     override val beliefPlans: List<Plan.Belief<Belief, Goal, Skills, *, *>>
         get() = _beliefPlans.toList()
 
-    private val _goalPlans: MutableList<Plan.Goal<Belief, Goal, Skills, *, *>> = initialAgentState.goalPlans.toMutableList()
+    private val _goalPlans: MutableList<Plan.Goal<Belief, Goal, Skills, *, *>> =
+        initialAgentState.goalPlans.toMutableList()
+
     override val goalPlans: List<Plan.Goal<Belief, Goal, Skills, *, *>>
         get() = _goalPlans.toList()
 
@@ -60,7 +64,6 @@ internal class BaseMutableAgentState<Belief: Any, Goal: Any, Skills: Any>(
 
     // TODO(Is this mutable?)
     override val skills: Skills = initialAgentState.skills
-
 
     override fun setPerceptionHandler(handler: (Perception) -> Internal?) {
         this._perceptionHandler = handler
@@ -106,8 +109,4 @@ internal class BaseMutableAgentState<Belief: Any, Goal: Any, Skills: Any>(
     override fun print(message: String) {
         logger.a { message }
     }
-
-
-
-
 }

@@ -27,7 +27,9 @@ sealed interface TriggerBuilder<Belief : Any, Goal : Any, Skills : Any> {
          * and extracts a context from it if the goal matches.
          * @return a plan builder for goal addition triggers.
          */
-        fun <Context : Any> goal(goalQuery: Goal.() -> Context?): PlanBuilder.Addition.Goal<Belief, Goal, Skills, Context>
+        fun <Context : Any> goal(
+            goalQuery: Goal.() -> Context?,
+        ): PlanBuilder.Addition.Goal<Belief, Goal, Skills, Context>
     }
 
     /**
@@ -49,7 +51,9 @@ sealed interface TriggerBuilder<Belief : Any, Goal : Any, Skills : Any> {
          * and extracts a context from it if the goal matches.
          * @return a plan builder for goal removal triggers.
          */
-        fun <Context : Any> goal(goalQuery: Goal.() -> Context?): PlanBuilder.Removal.Goal<Belief, Goal, Skills, Context>
+        fun <Context : Any> goal(
+            goalQuery: Goal.() -> Context?,
+        ): PlanBuilder.Removal.Goal<Belief, Goal, Skills, Context>
     }
 
     /**
@@ -98,7 +102,8 @@ class TriggerRemovalImpl<Belief : Any, Goal : Any, Skills : Any>(
 
     override fun <Context : Any> belief(
         beliefQuery: Belief.() -> Context?,
-    ): PlanBuilder.Removal.Belief<Belief, Goal, Skills, Context> = BeliefRemovalPlanBuilderImpl(addBeliefPlan, beliefQuery)
+    ): PlanBuilder.Removal.Belief<Belief, Goal, Skills, Context> =
+        BeliefRemovalPlanBuilderImpl(addBeliefPlan, beliefQuery)
 
     override fun <Context : Any> goal(
         goalQuery: Goal.() -> Context?,

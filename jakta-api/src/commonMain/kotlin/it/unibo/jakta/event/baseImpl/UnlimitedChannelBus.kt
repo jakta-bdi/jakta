@@ -5,7 +5,7 @@ import it.unibo.jakta.event.EventInbox
 import it.unibo.jakta.event.EventStream
 import kotlinx.coroutines.channels.Channel
 
-class UnlimitedChannelBus<E>: EventBus<E> {
+class UnlimitedChannelBus<E> : EventBus<E> {
 
     private val channel: Channel<E> = Channel(Channel.Factory.UNLIMITED)
 
@@ -13,6 +13,5 @@ class UnlimitedChannelBus<E>: EventBus<E> {
         channel.trySend(event)
     }
 
-    override suspend fun next(): E =
-        channel.receive()
+    override suspend fun next(): E = channel.receive()
 }

@@ -13,17 +13,17 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.launch
 
-class BaseAgentLifecycle<Belief: Any, Goal: Any, Skills: Any>(
-    override val executableAgent: ExecutableAgent<Belief, Goal, Skills>
+class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
+    override val executableAgent: ExecutableAgent<Belief, Goal, Skills>,
 ) : AgentLifecycle<Belief, Goal, Skills> {
     private val log =
         Logger(
             Logger.config,
-            executableAgent.id.displayName
+            executableAgent.id.displayName,
         )
 
     override suspend fun stop() {
-        //TODO probably thees needs to be removed from here, as the termination is handled directly by the MAS
+        // TODO probably thees needs to be removed from here, as the termination is handled directly by the MAS
         // we could keep it to gracefully shutdown the agent internals (?)
         log.d { "Terminating agent" }
     }
@@ -49,12 +49,12 @@ class BaseAgentLifecycle<Belief: Any, Goal: Any, Skills: Any>(
             is AgentEvent.External.Message -> executableAgent.state.messageHandler(event)
             else -> {
                 log.d {
-                    "The agent doesn't know what how to handle the event of type ${event::class.qualifiedName}, " +
+                    "The agent doesn't know what how to handle the event of type ${event::class.simpleName}, " +
                         "the default behaviour is skipping it."
                 }
                 null
             }
-            //TODO(Question: is it still possible to handle custom events
+            // TODO(Question: is it still possible to handle custom events
             // if the agent internals is implemented in this way?)
         }?.let { executableAgent.internalInbox.send(it) }
     }
@@ -122,7 +122,7 @@ class BaseAgentLifecycle<Belief: Any, Goal: Any, Skills: Any>(
         completion: CompletableDeferred<Any?>? = null, // TODO Check if this Any? can be improved
     ) {
         log.d { "Launching plan $plan for event $event" }
-        //val environment: S = currentCoroutineContext()[EnvironmentContext.Key]?.environment as Env
+        // val environment: S = currentCoroutineContext()[EnvironmentContext.Key]?.environment as Env
         val intention = executableAgent.state.mutableIntentionPool.nextIntention(event)
 
         val interceptor =
@@ -164,7 +164,7 @@ class BaseAgentLifecycle<Belief: Any, Goal: Any, Skills: Any>(
         return applicable.firstOrNull()?.let {
             log.d { "Selected plan $it for $entityMessage: $entity" }
             it as Plan<Belief, Goal, Skills, TriggerEntity, *, *>
-            //TODO: This is not entirely safe, check from DSL that
+            // TODO: This is not entirely safe, check from DSL that
             // the type of the agent skill must implement the plan skill type.
         } ?: run {
             log.w { "No plan selected for $entityMessage: $entity" }
@@ -172,7 +172,7 @@ class BaseAgentLifecycle<Belief: Any, Goal: Any, Skills: Any>(
         }
     }
 
-    //TODO check if this is enough
+    // TODO check if this is enough
     // what happens if a belief plan fails?
     private fun handleFailure(event: AgentEvent.Internal, e: Exception) {
         when (event) {

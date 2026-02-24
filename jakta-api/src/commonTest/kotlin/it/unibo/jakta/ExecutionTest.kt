@@ -7,8 +7,8 @@ import it.unibo.jakta.agent.basImpl.BaseAgentID
 import it.unibo.jakta.agent.basImpl.BaseAgentState
 import it.unibo.jakta.node.AgentBody
 import it.unibo.jakta.node.Node
-import it.unibo.jakta.node.baseImpl.LocalNode
 import it.unibo.jakta.node.baseImpl.CoroutineNodeRunner
+import it.unibo.jakta.node.baseImpl.LocalNode
 import it.unibo.jakta.plan.baseImpl.GoalAdditionPlan
 import kotlin.reflect.typeOf
 import kotlin.test.Test
@@ -26,13 +26,15 @@ class ExecutionTest {
 
     @Test
     fun testAgentExecution() {
-
         val node = LocalNode<AgentBody, MyPrint>()
         val node2 = LocalNode<AgentBody, MyPrint>()
 
-        val agentsSpec = setOf(
+        fun agentSpecGenerator(
+            agentname: String,
+            node: LocalNode<AgentBody, MyPrint>,
+        ): Set<AgentSpecification<String, String, MyPrint, AgentBody>> = setOf(
             object : AgentSpecification<String, String, MyPrint, AgentBody> {
-                override val body: AgentBody = object: AgentBody {}
+                override val body: AgentBody = object : AgentBody {}
                 override val initialState: AgentState<String, String, MyPrint> = BaseAgentState(
                     beliefs = listOf(),
                     intentions = setOf(),
@@ -45,52 +47,25 @@ class ExecutionTest {
                                 it.skills.prettyPrint("PLKUTO")
                                 it.skills.stop()
                             },
-                            resultType = typeOf<Unit>()
-                        )
+                            resultType = typeOf<Unit>(),
+                        ),
                     ),
-                    perceptionHandler = { null } ,
+                    perceptionHandler = { null },
                     messageHandler = { null },
                     skills = MyPrint(node),
                 )
                 override val initialGoals: List<String> = listOf("hello")
-                override val id: AgentID = BaseAgentID("Agent1")
-            }
-        )
-
-        val agentsSpec2 = setOf(
-            object : AgentSpecification<String, String, MyPrint, AgentBody> {
-                override val body: AgentBody = object: AgentBody {}
-                override val initialState: AgentState<String, String, MyPrint> = BaseAgentState(
-                    beliefs = listOf(),
-                    intentions = setOf(),
-                    beliefPlans = listOf(),
-                    goalPlans = listOf(
-                        GoalAdditionPlan(
-                            trigger = { it == "hello" },
-                            guard = { it },
-                            body = {
-                                it.skills.prettyPrint("PLKUTO")
-                                it.skills.stop()
-                            },
-                            resultType = typeOf<Unit>()
-                        )
-                    ),
-                    perceptionHandler = { null } ,
-                    messageHandler = { null },
-                    skills = MyPrint(node2),
-                )
-                override val initialGoals: List<String> = listOf("hello")
-                override val id: AgentID = BaseAgentID("Agent2")
-            }
+                override val id: AgentID = BaseAgentID(agentname)
+            },
         )
 
         val runner = CoroutineNodeRunner<LocalNode<*, *>>()
 
         runTest {
-            agentsSpec.forEach { node.addAgent(it) }
+            agentSpecGenerator("Agent1", node).forEach { node.addAgent(it) }
             runner.run(node)
 
-            agentsSpec2.forEach { node2.addAgent(it) }
+            agentSpecGenerator("Agent2", node2).forEach { node2.addAgent(it) }
             runner.run(node2)
         }
     }
