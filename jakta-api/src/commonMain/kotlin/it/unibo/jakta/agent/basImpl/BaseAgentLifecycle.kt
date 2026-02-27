@@ -13,6 +13,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.launch
 
+/**
+ * A base implementation of the [AgentLifecycle] interface
+ * that defines the core logic for handling agent events and executing plans.
+ */
 class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
     override val executableAgent: ExecutableAgent<Belief, Goal, Skills>,
 ) : AgentLifecycle<Belief, Goal, Skills> {

@@ -1,12 +1,11 @@
 package examples
 
-import TerminationSkillImpl
+import NodeTerminationSkillImpl
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import executeInTestScope
 import ifGoalMatch
 import it.unibo.jakta.jakta
-import it.unibo.jakta.node.AgentBody
 import it.unibo.jakta.plan.triggers
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -15,8 +14,8 @@ class TestBeliefRemoval {
     val helloWorld =
         jakta {
             agent {
-                body = object : AgentBody {}
-                withSkills { TerminationSkillImpl(this@jakta.node) }
+                body = object {}
+                withSkills { NodeTerminationSkillImpl(this@jakta.node) }
                 believes {
                     +"testBelief"
                 }
@@ -33,7 +32,7 @@ class TestBeliefRemoval {
                         this.takeIf { it == "testBelief" }
                     } triggers {
                         agent.print("Belief removed: $context")
-                        skills.terminate()
+                        skills.terminateNode()
                     }
                 }
             }

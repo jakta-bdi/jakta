@@ -9,6 +9,9 @@ import it.unibo.jakta.intention.IntentionID
 import kotlin.coroutines.CoroutineContext.Key
 import kotlinx.coroutines.Job
 
+/**
+ * A default implementation of the [Intention] interface.
+ */
 data class BaseIntention(override val job: Job, override val id: IntentionID = BaseIntentionID()) : Intention {
     private val log =
         Logger(
@@ -23,6 +26,9 @@ data class BaseIntention(override val job: Job, override val id: IntentionID = B
 
     override val key: Key<Intention> = Intention.Key
 
+    /**
+     * Observers that are notified when the intention is ready to step, i.e. when a new continuation is enqueued.
+     */
     val observers: MutableList<(Intention) -> Unit> = mutableListOf()
 
     override fun equals(other: Any?): Boolean = (other is Intention && id == other.id)

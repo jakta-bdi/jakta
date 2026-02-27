@@ -1,6 +1,5 @@
 package it.unibo.jakta
 
-import it.unibo.jakta.node.AgentBody
 import it.unibo.jakta.node.Node
 import it.unibo.jakta.node.NodeBuilder
 import it.unibo.jakta.node.NodeBuilderImpl
@@ -17,7 +16,7 @@ import it.unibo.jakta.plan.TriggerRemovalImpl
  * @return an instantiated MAS.
  */
 @JaktaDSL
-fun <Belief : Any, Goal : Any, Skills : Any, Body : AgentBody> jakta(
+fun <Belief : Any, Goal : Any, Skills : Any, Body : Any> jakta(
     block: NodeBuilder<Belief, Goal, Skills, Body>.() -> Unit,
 ): Node<Body, Skills> {
     val nodeBuilder = NodeBuilderImpl<Belief, Goal, Skills, Body>()

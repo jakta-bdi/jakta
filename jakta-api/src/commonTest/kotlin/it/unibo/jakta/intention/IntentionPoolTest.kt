@@ -3,7 +3,7 @@ package it.unibo.jakta.intention
 import it.unibo.jakta.event.baseImpl.GoalAddEvent
 import it.unibo.jakta.event.baseImpl.UnlimitedChannelBus
 import it.unibo.jakta.intention.baseImpl.BaseIntention
-import it.unibo.jakta.intention.baseImpl.BaseIntentionPoolImpl
+import it.unibo.jakta.intention.baseImpl.BaseIntentionPool
 import kotlin.reflect.typeOf
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -14,7 +14,6 @@ import kotlin.test.assertTrue
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.test.runTest
 
 class IntentionPoolTest {
@@ -29,7 +28,7 @@ class IntentionPoolTest {
 
     @BeforeTest
     fun init() {
-        intentionPool = BaseIntentionPoolImpl(UnlimitedChannelBus())
+        intentionPool = BaseIntentionPool(UnlimitedChannelBus())
         agentJob = SupervisorJob()
         intentionJob = Job(agentJob)
         otherJob = Job(agentJob)

@@ -2,7 +2,6 @@ package it.unibo.jakta.node.baseImpl
 
 import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.agent.AgentSpecification
-import it.unibo.jakta.agent.RuntimeAgent
 import it.unibo.jakta.agent.basImpl.BaseAgent
 import it.unibo.jakta.event.AgentEvent
 import it.unibo.jakta.event.EventBus
@@ -12,15 +11,17 @@ import it.unibo.jakta.event.baseImpl.AgentAdditionEvent
 import it.unibo.jakta.event.baseImpl.AgentRemovalEvent
 import it.unibo.jakta.event.baseImpl.ShutDownNodeEvent
 import it.unibo.jakta.event.baseImpl.UnlimitedChannelBus
-import it.unibo.jakta.node.AgentBody
 import it.unibo.jakta.node.Node
 
-class LocalNode<Body : AgentBody, Skills : Any> : Node<Body, Skills> {
+/**
+ * A local implementation of the [Node] interface that manages agents and system events within a single node.
+ */
+class LocalNode<Body : Any, Skills : Any> : Node<Body, Skills> {
 
     private val _agents: MutableSet<BaseAgent<*, *, *, Body>> = mutableSetOf()
 
-    override val agents: Set<RuntimeAgent<Body>>
-        get() = _agents.toSet()
+    override val agents: Map<AgentID, Body>
+        get() = _agents.associate { it.id to it.body }
 
     private val _systemEvents: EventBus<SystemEvent> = UnlimitedChannelBus()
 
@@ -44,15 +45,8 @@ class LocalNode<Body : AgentBody, Skills : Any> : Node<Body, Skills> {
         _systemEvents.send(ShutDownNodeEvent)
     }
 
-    override fun getBodyByAgentID(id: AgentID): Body? = _agents.firstOrNull { it.id == id }?.body
-
-    override fun sendEvent(
-        event: AgentEvent.External,
-        filterFunction: Node<Body, Skills>.(Body) -> Boolean,
-        source: Body?,
-    ) {
-        _agents.filterNot { source != null && it.body == source }
-            .filter { filterFunction(it.body) }
+    override fun sendEvent(event: AgentEvent.External, filterFunction: Node<Body, Skills>.(Body) -> Boolean) {
+        _agents.filter { filterFunction(it.body) }
             .forEach { it.externalInbox.send(event) }
     }
 }

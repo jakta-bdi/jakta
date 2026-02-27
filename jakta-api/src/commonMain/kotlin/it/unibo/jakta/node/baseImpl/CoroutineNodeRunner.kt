@@ -15,6 +15,9 @@ import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 
+/**
+ * A [NodeRunner] implementation that uses Kotlin coroutines to manage the execution of agents within a node.
+ */
 class CoroutineNodeRunner<N : Node<*, *>> : NodeRunner<N> {
 
     private val agents: MutableMap<AgentLifecycle<*, *, *>, Job> = mutableMapOf()
