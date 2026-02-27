@@ -11,7 +11,7 @@ import ifGoalMatch
 import it.unibo.jakta.agent.Agent
 import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.event.AgentEvent
-import it.unibo.jakta.jakta
+import it.unibo.jakta.node
 import it.unibo.jakta.node.Node
 import it.unibo.jakta.plan.triggers
 import kotlin.test.Test
@@ -120,11 +120,11 @@ class CustomSkillSet(val node: Node<BodyWithPosition, *>) :
 
 class TestSpatialRobot {
 
-    val mas = jakta {
+    val mas = node {
         agent("Vacuum") {
             body = BodyWithPosition()
             withSkills {
-                CustomSkillSet(this@jakta.node)
+                CustomSkillSet(this@node.node)
             }
 
             hasInitialGoals {

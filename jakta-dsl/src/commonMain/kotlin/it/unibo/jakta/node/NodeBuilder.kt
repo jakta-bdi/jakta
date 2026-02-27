@@ -9,12 +9,12 @@ import it.unibo.jakta.node.baseImpl.LocalNode
  * Builder interface for defining a Multi-Agent System (MAS) with agents and an environment.
  */
 @JaktaDSL
-interface NodeBuilder<Belief : Any, Goal : Any, Skills : Any, Body : Any> {
+interface NodeBuilder<Belief : Any, Goal : Any, Skills : Any, Body : Any, N: Node<Body, Skills>> {
 
     /**
      * The node that will execute jakta application.
      */
-    val node: Node<Body, Skills>
+    val node: N
 
     /**
      * Defines an agent using the provided builder block.
@@ -34,23 +34,17 @@ interface NodeBuilder<Belief : Any, Goal : Any, Skills : Any, Body : Any> {
 //     */
 //    fun withAgents(vararg agents: Agent<Belief, Goal>)
 
-//    /**
-//     * Defines the environment instance for the MAS.
-//     * @param[block] a function that constructs the environment.
-//     */
-//    fun environment(block: () -> Env)
-
     /**
-     * Builds and returns the MAS instance.
+     * Builds and returns the Node instance.
      */
-    fun build(): Node<Body, Skills>
+    fun build(): N
 }
 
 /**
  * Implementation of the MasBuilder interface.
  */
-open class NodeBuilderImpl<Belief : Any, Goal : Any, Skills : Any, Body : Any> :
-    NodeBuilder<Belief, Goal, Skills, Body> {
+open class LocalNodeBuilder<Belief : Any, Goal : Any, Skills : Any, Body : Any> :
+    NodeBuilder<Belief, Goal, Skills, Body, LocalNode<Body, Skills>> {
     protected val agents = mutableListOf<AgentBuilder<Belief, Goal, Skills, Body>>()
     override val node = LocalNode<Body, Skills>()
 
@@ -73,7 +67,7 @@ open class NodeBuilderImpl<Belief : Any, Goal : Any, Skills : Any, Body : Any> :
 //        environment = block()
 //    }
 
-    override fun build(): Node<Body, Skills> {
+    override fun build(): LocalNode<Body, Skills> {
         // val env = environment ?: error { "Must provide an Environment for the MAS" }
         agents.forEach { node.addAgent(it.build()) }
         return node

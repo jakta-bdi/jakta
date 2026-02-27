@@ -6,7 +6,7 @@ import co.touchlab.kermit.Severity
 import executeInTestScope
 import ifGoalMatch
 import it.unibo.jakta.agent.achieve
-import it.unibo.jakta.jakta
+import it.unibo.jakta.node
 import it.unibo.jakta.plan.triggers
 import kotlin.test.Test
 
@@ -16,10 +16,10 @@ class TestPlanFailure {
     fun testPlanFailureHandling() {
         Logger.setMinSeverity(Severity.Warn)
         executeInTestScope {
-            jakta {
+            node {
                 agent {
                     body = object {}
-                    withSkills { NodeTerminationSkillImpl(this@jakta.node) }
+                    withSkills { NodeTerminationSkillImpl(this@node.node) }
                     hasInitialGoals { !"goalChain" }
                     hasPlans {
                         adding.goal {

@@ -2,7 +2,8 @@ package it.unibo.jakta
 
 import it.unibo.jakta.node.Node
 import it.unibo.jakta.node.NodeBuilder
-import it.unibo.jakta.node.NodeBuilderImpl
+import it.unibo.jakta.node.LocalNodeBuilder
+import it.unibo.jakta.node.baseImpl.LocalNode
 import it.unibo.jakta.plan.Plan
 import it.unibo.jakta.plan.PlanBuilder
 import it.unibo.jakta.plan.TriggerAdditionImpl
@@ -16,13 +17,13 @@ import it.unibo.jakta.plan.TriggerRemovalImpl
  * @return an instantiated MAS.
  */
 @JaktaDSL
-fun <Belief : Any, Goal : Any, Skills : Any, Body : Any> jakta(
-    block: NodeBuilder<Belief, Goal, Skills, Body>.() -> Unit,
+fun <Belief : Any, Goal : Any, Skills : Any, Body : Any> node(
+    block: LocalNodeBuilder<Belief, Goal, Skills, Body>.() -> Unit,
 ): Node<Body, Skills> {
-    val nodeBuilder = NodeBuilderImpl<Belief, Goal, Skills, Body>()
+    val nodeBuilder = LocalNodeBuilder<Belief, Goal, Skills, Body>()
     nodeBuilder.apply(block)
     return nodeBuilder.build()
-}
+} //TODO now this is bound to local
 
 // TODO Fix this (now it needs to have a reference to the environment to instantiate skills)
 // /**
