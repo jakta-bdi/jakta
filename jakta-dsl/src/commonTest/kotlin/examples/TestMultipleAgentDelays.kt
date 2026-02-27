@@ -8,7 +8,7 @@ import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import executeInTestScope
 import ifGoalMatch
-import it.unibo.jakta.jakta
+import it.unibo.jakta.node
 import it.unibo.jakta.plan.triggers
 import kotlin.test.Test
 import kotlinx.coroutines.delay
@@ -19,10 +19,10 @@ class SkillSet(val node: it.unibo.jakta.node.Node<*, *>) :
 
 class TestMultipleAgentDelays {
     val helloWorld =
-        jakta {
+        node {
             agent {
                 body = object {}
-                withSkills { SkillSet(this@jakta.node) }
+                withSkills { SkillSet(this@node.node) }
                 hasInitialGoals {
                     !"goal"
                 }
@@ -39,7 +39,7 @@ class TestMultipleAgentDelays {
             }
             agent {
                 body = object {}
-                withSkills { SkillSet(this@jakta.node) }
+                withSkills { SkillSet(this@node.node) }
                 hasInitialGoals {
                     !"goal"
                 }

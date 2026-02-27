@@ -5,7 +5,7 @@ import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import executeInTestScope
 import ifGoalMatch
-import it.unibo.jakta.jakta
+import it.unibo.jakta.node
 import it.unibo.jakta.plan.triggers
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -14,10 +14,10 @@ import kotlinx.coroutines.delay
 class TestConcurrentDelay {
 
     val helloWorld =
-        jakta {
+        node {
             agent {
                 body = object {}
-                withSkills { NodeTerminationSkillImpl(this@jakta.node) }
+                withSkills { NodeTerminationSkillImpl(this@node.node) }
                 hasInitialGoals {
                     !"goal"
                     !"anotherGoal"
