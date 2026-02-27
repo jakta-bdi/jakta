@@ -11,12 +11,11 @@ import it.unibo.jakta.event.EventBus
 import it.unibo.jakta.event.EventInbox
 import it.unibo.jakta.event.EventStream
 import it.unibo.jakta.event.baseImpl.UnlimitedChannelBus
-import it.unibo.jakta.node.AgentBody
 
 /**
  * Default implementation of an [it.unibo.jakta.agent.Agent].
  */
-class BaseAgent<Belief : Any, Goal : Any, Skills : Any, Body : AgentBody>(
+class BaseAgent<Belief : Any, Goal : Any, Skills : Any, Body : Any>(
     agentSpecification: AgentSpecification<Belief, Goal, Skills, Body>,
 ) : Agent,
     ExecutableAgent<Belief, Goal, Skills>,

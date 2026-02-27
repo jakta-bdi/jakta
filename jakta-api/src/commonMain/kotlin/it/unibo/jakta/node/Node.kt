@@ -1,5 +1,6 @@
 package it.unibo.jakta.node
 
+import it.unibo.jakta.agent.Agent
 import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.agent.AgentSpecification
 import it.unibo.jakta.agent.RuntimeAgent
@@ -7,40 +8,47 @@ import it.unibo.jakta.event.AgentEvent
 import it.unibo.jakta.event.EventStream
 import it.unibo.jakta.event.SystemEvent
 
+// TODO right now all operations on a node are local to the node itself.
+//  we may need to revisit the semantics of the operations when moving to a system of multiple nodes.
 /**
  * Represents the shared node in which the agents operate.
- * @param Body The type of [AgentBody] used by agents in this node.
+ * @param Body The type of body used by agents in this node.
  */
-interface Node<Body : AgentBody, Skills : Any> {
+interface Node<Body : Any, Skills : Any> {
 
-    val agents: Set<RuntimeAgent<Body>>
+    /**
+     * A map of agents currently present in the node,
+     * where the key is the unique identifier of the agent and the value is the body of the agent.
+     */
+    val agents: Map<AgentID, Body>
 
+    /**
+     * An event stream that emits system events related to the node.
+     */
     val systemEvents: EventStream<SystemEvent>
 
     /**
      * Sends an external [event] to all agents in the node that satisfy the [filterFunction].
-     * Optionally, a [source] body can be specified if the event originates from a specific agent (e.g. sending a message).
      * @param event The external event to be sent.
      * @param filterFunction A function that determines the conditions under which an agent should receive the event.
-     * @param source The body of the agent sending the event, if applicable.
      */
-    // TODO maybe this won't be limited to work on the same node, and different implementations may change how it works
-    // or is it better to add messages
-    fun sendEvent(
-        event: AgentEvent.External,
-        filterFunction: Node<Body, Skills>.(Body) -> Boolean = { true },
-        source: Body? = null,
-    )
 
-    // TODO(The addition of an agent has effect on the SAME node.)
+    fun sendEvent(event: AgentEvent.External, filterFunction: Node<Body, Skills>.(Body) -> Boolean = { true })
+
+    /**
+     * Adds a new agent to the node based on the provided [agentSpecification].
+     * @param agentSpecification The specification of the agent to be added.
+     */
     fun addAgent(agentSpecification: AgentSpecification<*, *, Skills, Body>)
 
-    // TODO(The removal of an agent has effect on the SAME node.)
+    /**
+     * Removes an agent from the node based on its [id].
+     * @param id The unique identifier of the agent to be removed.
+     */
     fun removeAgent(id: AgentID)
 
-    // TODO(this will terminate all agents in the same node)
-    // TODO(How to implement the termination of the mas?)
+    /**
+     * Terminates the node, effectively shutting down all agents and stopping any ongoing processes within the node.
+     */
     fun terminateNode()
-
-    fun getBodyByAgentID(id: AgentID): Body?
 }

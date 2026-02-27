@@ -9,7 +9,7 @@ import it.unibo.jakta.node.baseImpl.LocalNode
  * Builder interface for defining a Multi-Agent System (MAS) with agents and an environment.
  */
 @JaktaDSL
-interface NodeBuilder<Belief : Any, Goal : Any, Skills : Any, Body : AgentBody> {
+interface NodeBuilder<Belief : Any, Goal : Any, Skills : Any, Body : Any> {
 
     /**
      * The node that will execute jakta application.
@@ -49,7 +49,7 @@ interface NodeBuilder<Belief : Any, Goal : Any, Skills : Any, Body : AgentBody> 
 /**
  * Implementation of the MasBuilder interface.
  */
-open class NodeBuilderImpl<Belief : Any, Goal : Any, Skills : Any, Body : AgentBody> :
+open class NodeBuilderImpl<Belief : Any, Goal : Any, Skills : Any, Body : Any> :
     NodeBuilder<Belief, Goal, Skills, Body> {
     protected val agents = mutableListOf<AgentBuilder<Belief, Goal, Skills, Body>>()
     override val node = LocalNode<Body, Skills>()

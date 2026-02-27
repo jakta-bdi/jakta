@@ -5,7 +5,13 @@ package it.unibo.jakta.node
  */
 interface NodeRunner<N : Node<*, *>> {
 
+    /**
+     * The set of nodes that this runner is responsible for managing and executing.
+     */
     val nodes: Set<N>
 
+    /**
+     * Runs the specified [node] on this runner.
+     */
     suspend fun run(node: N)
 }

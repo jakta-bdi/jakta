@@ -13,9 +13,9 @@ import kotlinx.coroutines.job
 
 /**
  * Implementation of a mutable intention pool.
- * @param events the channel to send internal events when intentions are ready to step.
+ * @param eventInbox the inbox to send internal events when intentions are ready to step.
  */
-class BaseIntentionPoolImpl(val eventInbox: EventInbox<AgentEvent.Internal.Step>) : MutableIntentionPool {
+class BaseIntentionPool(val eventInbox: EventInbox<AgentEvent.Internal.Step>) : MutableIntentionPool {
     private val log =
         Logger(
             Logger.config,

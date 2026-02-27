@@ -79,8 +79,18 @@ sealed interface AgentEvent {
         data class Step(override val intention: Intention) : Internal
     }
 
+    /**
+     * Represents an external event that can be sent to agents, such as messages or perceptions.
+     */
     interface External : AgentEvent {
+        /**
+         * Messages are events sent to communicate with agents.
+         */
         interface Message : External
+
+        /**
+         * Perceptions are events representing information that can be perceived from the environment.
+         */
         interface Perception : External
     }
 }

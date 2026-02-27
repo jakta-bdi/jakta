@@ -5,7 +5,6 @@ import it.unibo.jakta.agent.AgentSpecification
 import it.unibo.jakta.agent.AgentState
 import it.unibo.jakta.agent.basImpl.BaseAgentID
 import it.unibo.jakta.agent.basImpl.BaseAgentState
-import it.unibo.jakta.node.AgentBody
 import it.unibo.jakta.node.Node
 import it.unibo.jakta.node.baseImpl.CoroutineNodeRunner
 import it.unibo.jakta.node.baseImpl.LocalNode
@@ -17,7 +16,7 @@ import kotlinx.coroutines.test.runTest
 
 class ExecutionTest {
 
-    class MyPrint(val node: Node<AgentBody, *>) {
+    class MyPrint(val node: Node<*, *>) {
         suspend fun prettyPrint(value: String) = println("${currentCoroutineContext()} - $value")
         fun stop() {
             node.terminateNode()
@@ -26,15 +25,15 @@ class ExecutionTest {
 
     @Test
     fun testAgentExecution() {
-        val node = LocalNode<AgentBody, MyPrint>()
-        val node2 = LocalNode<AgentBody, MyPrint>()
+        val node = LocalNode<Any, MyPrint>()
+        val node2 = LocalNode<Any, MyPrint>()
 
         fun agentSpecGenerator(
             agentname: String,
-            node: LocalNode<AgentBody, MyPrint>,
-        ): Set<AgentSpecification<String, String, MyPrint, AgentBody>> = setOf(
-            object : AgentSpecification<String, String, MyPrint, AgentBody> {
-                override val body: AgentBody = object : AgentBody {}
+            node: LocalNode<*, MyPrint>,
+        ): Set<AgentSpecification<String, String, MyPrint, Any>> = setOf(
+            object : AgentSpecification<String, String, MyPrint, Any> {
+                override val body = object {}
                 override val initialState: AgentState<String, String, MyPrint> = BaseAgentState(
                     beliefs = listOf(),
                     intentions = setOf(),

@@ -1,22 +1,28 @@
 package examples
 
-import TerminationSkillImpl
+import AgentTerminationSkill
+import AgentTerminationSkillImpl
+import NodeTerminationSkill
+import NodeTerminationSkillImpl
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import executeInTestScope
 import ifGoalMatch
 import it.unibo.jakta.jakta
-import it.unibo.jakta.node.AgentBody
 import it.unibo.jakta.plan.triggers
 import kotlin.test.Test
 import kotlinx.coroutines.delay
+
+class SkillSet(val node: it.unibo.jakta.node.Node<*, *>) :
+    NodeTerminationSkill by NodeTerminationSkillImpl(node),
+    AgentTerminationSkill by AgentTerminationSkillImpl(node)
 
 class TestMultipleAgentDelays {
     val helloWorld =
         jakta {
             agent {
-                body = object : AgentBody {}
-                withSkills { TerminationSkillImpl(this@jakta.node) }
+                body = object {}
+                withSkills { SkillSet(this@jakta.node) }
                 hasInitialGoals {
                     !"goal"
                 }
@@ -27,13 +33,13 @@ class TestMultipleAgentDelays {
                         agent.print("Hello...")
                         delay(10000)
                         agent.print("...World!")
-                        skills.terminate()
+                        skills.terminateNode()
                     }
                 }
             }
             agent {
-                body = object : AgentBody {}
-                withSkills { TerminationSkillImpl(this@jakta.node) }
+                body = object {}
+                withSkills { SkillSet(this@jakta.node) }
                 hasInitialGoals {
                     !"goal"
                 }
@@ -44,6 +50,9 @@ class TestMultipleAgentDelays {
                         agent.print("I will be faster...")
                         delay(5000)
                         agent.print("...than you!")
+                        with(skills) {
+                            agent.terminate()
+                        }
                     }
                 }
             }

@@ -7,7 +7,6 @@ import it.unibo.jakta.event.AgentEvent
 import it.unibo.jakta.event.AgentEvent.External.Message
 import it.unibo.jakta.event.AgentEvent.External.Perception
 import it.unibo.jakta.event.AgentEvent.Internal
-import it.unibo.jakta.node.AgentBody
 import it.unibo.jakta.plan.Plan
 import it.unibo.jakta.plan.PlanLibraryBuilder
 import it.unibo.jakta.plan.PlanLibraryBuilderImpl
@@ -17,7 +16,7 @@ import kotlin.properties.Delegates
  * Builder interface for defining an agent with beliefs, goals, and plans.
  */
 @JaktaDSL
-interface AgentBuilder<Belief : Any, Goal : Any, Skills : Any, Body : AgentBody> {
+interface AgentBuilder<Belief : Any, Goal : Any, Skills : Any, Body : Any> {
 
     /**
      * Defines the body of the agent, i.e. the information visible to other agents and that can modified by their skill.
@@ -101,7 +100,7 @@ interface AgentBuilder<Belief : Any, Goal : Any, Skills : Any, Body : AgentBody>
 /**
  * Implementation of the AgentBuilder interface.
  */
-class AgentBuilderImpl<Belief : Any, Goal : Any, Skills : Any, Body : AgentBody>(private val name: String? = null) :
+class AgentBuilderImpl<Belief : Any, Goal : Any, Skills : Any, Body : Any>(private val name: String? = null) :
     AgentBuilder<Belief, Goal, Skills, Body> {
     private var initialBeliefs = listOf<Belief>()
     private var initialGoals = listOf<Goal>()
