@@ -23,7 +23,7 @@ interface AgentLifecycle<Belief : Any, Goal : Any, Skills : Any> {
     suspend fun step(scope: CoroutineScope)
 
     /**
-     * Stops the agent, cancelling the scheduling of its next iteration.
+     * Runs a reasoning cycle step if an event is available, otherwise does nothing.
      */
-    suspend fun stop()
+    fun tryStep(scope: CoroutineScope)
 }

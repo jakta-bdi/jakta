@@ -8,9 +8,11 @@ import it.unibo.jakta.event.baseImpl.GoalFailedEvent
 import it.unibo.jakta.intention.IntentionDispatcher
 import it.unibo.jakta.plan.Plan
 import kotlin.coroutines.ContinuationInterceptor
+import kotlin.coroutines.coroutineContext
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 
 /**
@@ -26,17 +28,20 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
             executableAgent.id.displayName,
         )
 
-    override suspend fun stop() {
-        // TODO probably thees needs to be removed from here, as the termination is handled directly by the MAS
-        // we could keep it to gracefully shutdown the agent internals (?)
-        log.d { "Terminating agent" }
-    }
-
     override suspend fun step(scope: CoroutineScope) {
         log.i { "waiting for event..." }
         val event = executableAgent.events.next()
         log.i { "received event: $event" }
+        handleEvent(event, scope)
+    }
 
+    override fun tryStep(scope: CoroutineScope) {
+        executableAgent.events.tryNext()?.let {
+            handleEvent(it, scope)
+        }
+    }
+
+    private fun handleEvent(event: AgentEvent, scope: CoroutineScope) {
         when (event) {
             // TODO per rimuovere questo cast dovrei tipare Event.Internal
             //  con Belief e Goal (si può fare ma è subottimo?)
@@ -67,7 +72,7 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
      * Launches plans in the SupervisorScope of the Step.
      * @param event the belief event that triggered the plan execution.
      */
-    private suspend fun CoroutineScope.handleBeliefEvent(event: AgentEvent.Internal.Belief<Belief>) {
+    private fun CoroutineScope.handleBeliefEvent(event: AgentEvent.Internal.Belief<Belief>) {
         selectPlan(
             entity = event.belief,
             entityMessage = when (event) {
@@ -93,7 +98,7 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
 
     // TODO In order to be capable to complete the completion, i had to remove the star projection and put Any?
     //  This requires refactoring of type management
-    private suspend fun CoroutineScope.handleGoalEvent(event: AgentEvent.Internal.Goal<Goal, Any?>) {
+    private fun CoroutineScope.handleGoalEvent(event: AgentEvent.Internal.Goal<Goal, Any?>) {
         selectPlan(
             entity = event.goal,
             entityMessage = when (event) {
@@ -119,18 +124,17 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
         }
     }
 
-    private suspend fun <TriggerEntity : Any> CoroutineScope.launchPlan(
+    private fun <TriggerEntity : Any> CoroutineScope.launchPlan(
         event: AgentEvent.Internal,
         entity: TriggerEntity,
         plan: Plan<Belief, Goal, Skills, TriggerEntity, *, *>,
         completion: CompletableDeferred<Any?>? = null, // TODO Check if this Any? can be improved
     ) {
         log.d { "Launching plan $plan for event $event" }
-        // val environment: S = currentCoroutineContext()[EnvironmentContext.Key]?.environment as Env
-        val intention = executableAgent.state.mutableIntentionPool.nextIntention(event)
+        val intention = executableAgent.state.mutableIntentionPool.nextIntention(event, this.coroutineContext.job)
 
         val interceptor =
-            currentCoroutineContext()[ContinuationInterceptor] ?: error { "No ContinuationInterceptor in context" }
+            this.coroutineContext[ContinuationInterceptor] ?: error { "No ContinuationInterceptor in context" }
 
         launch(IntentionDispatcher(interceptor) + intention + intention.job) {
             // TODO maybe I should not suppress?? But I want to catch ALL exceptions..
@@ -202,7 +206,7 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
     }
 
     // TODO(Missing implementation for greedy event selection in case Step.intention was removed from intention pool)
-    private suspend fun handleStepEvent(event: AgentEvent.Internal.Step) {
+    private fun handleStepEvent(event: AgentEvent.Internal.Step) {
         log.d { "Handling step event for intention ${event.intention.id.displayId}" }
         executableAgent.state.mutableIntentionPool.stepIntention(event)
     }

@@ -79,6 +79,7 @@ class CoroutineNodeRunner<N : Node<*, *>> : NodeRunner<N> {
 
     private fun CoroutineScope.stopNode(node: N) {
         this.coroutineContext.job.cancel(CancellationException("ShutDownMAS requested"))
+        //TODO we are brutally killing the agents
         // agents.forEach { removeAgent(it.key.executableAgent.id) }
         // return@launch
         _nodes -= node

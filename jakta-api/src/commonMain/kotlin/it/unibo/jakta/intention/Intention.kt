@@ -41,7 +41,7 @@ interface Intention : CoroutineContext.Element {
      * Executes one step of the intention, i.e. executes one continuation from the channel, if available.
      * If no continuation is available, the method does nothing.
      */
-    suspend fun step(): Unit
+    fun step(): Unit
 
     /**
      * Registers a callback to be invoked when the intention is ready to step.
