@@ -17,4 +17,6 @@ class UnlimitedChannelBus<E> : EventBus<E> {
     }
 
     override suspend fun next(): E = channel.receive()
+
+    override fun tryNext(): E? = channel.tryReceive().getOrNull()
 }

@@ -33,7 +33,7 @@ class BaseIntentionPool(val eventInbox: EventInbox<AgentEvent.Internal.Step>) : 
 
     override fun tryPut(intention: Intention): Boolean = intentions.add(intention)
 
-    override suspend fun nextIntention(event: AgentEvent.Internal): Intention {
+    override fun nextIntention(event: AgentEvent.Internal, currentJob: Job): Intention {
         val nextIntention =
             event.intention?.let {
                 // If the referenced intention exists, use its context
@@ -43,7 +43,7 @@ class BaseIntentionPool(val eventInbox: EventInbox<AgentEvent.Internal.Step>) : 
                     it
                 }
             } ?: run {
-                val intentionJob = Job(currentCoroutineContext().job)
+                val intentionJob = Job(currentJob)
                 val newIntention = BaseIntention(intentionJob)
                 newIntention.onReadyToStep(::onIntentionReadyToStep)
                 // This is removing the intention if for some reason the job is manually completed
@@ -55,7 +55,7 @@ class BaseIntentionPool(val eventInbox: EventInbox<AgentEvent.Internal.Step>) : 
         return nextIntention
     }
 
-    override suspend fun stepIntention(event: AgentEvent.Internal.Step) {
+    override fun stepIntention(event: AgentEvent.Internal.Step) {
         log.d { "Stepping intention ${event.intention.id.displayId}" }
         intentions.find { it == event.intention }?.step() ?: run {
             log.e { "Intention ${event.intention.id.displayId} not found" }

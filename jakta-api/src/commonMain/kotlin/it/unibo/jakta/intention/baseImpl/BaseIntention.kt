@@ -35,8 +35,8 @@ data class BaseIntention(override val job: Job, override val id: IntentionID = B
 
     override fun hashCode(): Int = id.hashCode()
 
-    override suspend fun step() {
-        _continuations.next().let {
+    override fun step() {
+        _continuations.tryNext()?.let {
             log.d { "Running one step" }
             it()
         }
