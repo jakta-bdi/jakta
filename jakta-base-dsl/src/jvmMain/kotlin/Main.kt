@@ -4,11 +4,10 @@ import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import it.unibo.jakta.mas.mas
 import it.unibo.jakta.node.LocalNodeBuilder
-import it.unibo.jakta.node.baseImpl.CoroutineNodeRunner
+import it.unibo.jakta.node.CoroutineNodeRunner
 import it.unibo.jakta.plan.triggers
 import java.util.concurrent.Executors
 import kotlinx.coroutines.asCoroutineDispatcher
-import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
