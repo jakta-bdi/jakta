@@ -1,13 +1,8 @@
 package it.unibo.jakta.intention
 
-import co.touchlab.kermit.Logger
 import it.unibo.jakta.event.EventInbox
-import it.unibo.jakta.intention.baseImpl.BaseIntention
-import it.unibo.jakta.intention.baseImpl.BaseIntentionID
 import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.CoroutineContext.Key
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.Channel
 
 /**
  * Represents an *intention* in the agent.

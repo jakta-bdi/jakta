@@ -1,7 +1,6 @@
 package it.unibo.jakta.plan
 
 import it.unibo.jakta.agent.MutableAgentState
-import it.unibo.jakta.plan.baseImpl.BasePlanScope
 import it.unibo.jakta.reflection.isSubtypeOfMultiPlatform // TODO can we avoid needing this?
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf

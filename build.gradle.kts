@@ -140,7 +140,8 @@ allprojects {
 dependencies {
     listOf(
         "jakta-api",
-        "jakta-dsl"
+        "jakta-base-dsl",
+        "jakta-base-impl"
     ).forEach{
         kover(project(it))
     }

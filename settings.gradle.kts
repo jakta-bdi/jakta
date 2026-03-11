@@ -30,5 +30,6 @@ rootProject.name = "jakta"
 
 include(
     "jakta-api",
-    "jakta-dsl"
+    "jakta-base-dsl",
+    "jakta-base-impl",
 )
