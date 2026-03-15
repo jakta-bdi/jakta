@@ -1,3 +1,11 @@
+## [0.15.131](https://github.com/jakta-bdi/jakta/compare/v0.15.130...v0.15.131) (2026-03-15)
+
+
+### Bug Fixes
+
+* **deps:** update dependency org.mockito:mockito-core to v5.23.0 ([#769](https://github.com/jakta-bdi/jakta/issues/769)) ([7bfc10b](https://github.com/jakta-bdi/jakta/commit/7bfc10bfad4767269fefb61b08e1aec0d6c7d413))
+* **deps:** update kotest to v6.1.7 ([#772](https://github.com/jakta-bdi/jakta/issues/772)) ([8977b1a](https://github.com/jakta-bdi/jakta/commit/8977b1a4e56b60b84e61d21f7040c0eb2d5def52))
+
 ## [0.15.130](https://github.com/jakta-bdi/jakta/compare/v0.15.129...v0.15.130) (2026-03-10)
 
 
