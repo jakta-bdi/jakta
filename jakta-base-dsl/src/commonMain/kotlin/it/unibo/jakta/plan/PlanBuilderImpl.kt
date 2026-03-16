@@ -1,10 +1,5 @@
 package it.unibo.jakta.plan
 
-import it.unibo.jakta.plan.BeliefAdditionPlan
-import it.unibo.jakta.plan.BeliefRemovalPlan
-import it.unibo.jakta.plan.GoalAdditionPlan
-import it.unibo.jakta.plan.GoalFailurePlan
-import it.unibo.jakta.plan.GoalRemovalPlan
 import kotlin.reflect.KType
 
 /**
