@@ -3,25 +3,28 @@ coroutines = "1.10.2"
 dokka = "2.1.0"
 kermit = "2.0.4"
 kotlin = "2.2.21"
-
-
+alchemist = "42.4.2"
 
 [libraries]
 kermit = {module = "co.touchlab:kermit", version.ref = "kermit"}
-
-kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+alchemist-api = { module = "it.unibo.alchemist:alchemist-api", version.ref = "alchemist" }
+alchemist = { module = "it.unibo.alchemist:alchemist", version.ref = "alchemist" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
-
 kotlinx-coroutines-core = {module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref="coroutines"}
 kotlinx-coroutines-test = {module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref="coroutines"}
-
+kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 
 [bundles]
+alchemist-api = [
+    "alchemist",
+    "alchemist-api"
+]
 
 [plugins]
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 gitSemVer = "org.danilopianini.git-sensitive-semantic-versioning-gradle-plugin:7.0.7"
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-qa = "org.danilopianini.gradle-kotlin-qa:0.96.0"
 kover = "org.jetbrains.kotlinx.kover:0.9.3"
 multiJvmTesting = "org.danilopianini.multi-jvm-test-plugin:4.3.2"

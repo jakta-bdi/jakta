@@ -32,4 +32,5 @@ include(
     "jakta-api",
     "jakta-base-dsl",
     "jakta-base-impl",
+    "alchemist-jakta-incarnation",
 )
