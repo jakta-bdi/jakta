@@ -1,6 +1,6 @@
 [versions]
 kotest = "6.1.7"
-kotlin = "2.3.10"
+kotlin = "2.3.20"
 mockito = "5.23.0"
 tuprolog = "1.1.5"
 alchemist = "42.4.2"
