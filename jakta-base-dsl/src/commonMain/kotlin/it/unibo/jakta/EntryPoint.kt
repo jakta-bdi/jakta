@@ -14,7 +14,6 @@ import it.unibo.jakta.plan.TriggerRemovalImpl
  * Entry point for creating a multi-agent system using the Jakta DSL.
  * @return an instantiated MAS.
  */
-@JaktaDSL
 fun <Belief : Any, Goal : Any, Skills : Any, Body : Any> node(
     block: LocalNodeBuilder<Belief, Goal, Skills, Body>.() -> Unit,
 ): Node<Body, Skills> {

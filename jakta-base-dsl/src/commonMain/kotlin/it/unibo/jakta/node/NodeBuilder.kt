@@ -20,7 +20,6 @@ interface NodeBuilder<Belief : Any, Goal : Any, Skills : Any, Body : Any, N: Nod
      * Defines an agent using the provided builder block.
      * @return the constructed agent.
      */
-    @JaktaDSL
     fun agent(block: AgentBuilder<Belief, Goal, Skills, Body>.() -> Unit)
 
     /**
