@@ -6,11 +6,13 @@ import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import examples.Movement.Events.Factory.position
 import examples.Recharging.Events.Factory.chargeLevel
+import examples.TemperatureSensing.Events.Factory.temperature
 import executeInTestScope
 import ifGoalMatch
 import it.unibo.jakta.agent.Agent
 import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.event.AgentEvent
+import it.unibo.jakta.event.BeliefAddEvent
 import it.unibo.jakta.node
 import it.unibo.jakta.node.Node
 import it.unibo.jakta.plan.triggers
@@ -21,14 +23,7 @@ class BodyWithPosition {
     var position2D: DoubleArray = doubleArrayOf(0.0, 0.0)
 }
 
-// TODO if we have this, bound the generics everywhere??
-interface Skill {
-    suspend fun start(node: Node<BodyWithPosition, *>) {
-        // default no-op implementation
-    }
-}
-
-interface Recharging : Skill {
+interface Recharging {
     suspend fun Agent.recharge()
 
     object Events {
@@ -42,7 +37,7 @@ interface Recharging : Skill {
     }
 }
 
-interface Movement<P> : Skill {
+interface Movement<P> {
     // context(s1: Recharging) TODO this does not work right yet due to "triggers" not having context propagation
     fun Agent.moveTo(newPos: P)
 
@@ -71,14 +66,9 @@ class GridMovement(val node: Node<BodyWithPosition, *>) : Movement<DoubleArray> 
 }
 
 // Skill with active behavior that "runs" in the environment
-interface TemperatureSensing : Skill {
-    // TODO we need a way to have skills that have an active behavior
-    // who calls this method??
-    override suspend fun start(node: Node<BodyWithPosition, *>) {
-        startSensing(node)
-    }
+interface TemperatureSensing {
 
-    suspend fun startSensing(node: Node<BodyWithPosition, *>)
+    suspend fun startSensing()
 
     object Events {
         class Temperature internal constructor(val value: Float) : AgentEvent.External.Perception
@@ -90,17 +80,14 @@ interface TemperatureSensing : Skill {
 }
 
 // This skill is a singleton, shared by all agents using it
-object FixedIntervalTemperatureSensing : TemperatureSensing {
+class FixedIntervalTemperatureSensing(val node: Node<BodyWithPosition, *>) : TemperatureSensing {
 
-    override suspend fun startSensing(node: Node<BodyWithPosition, *>) {
+    //TODO WHO Invokes this? This is a behavior that should be handled by the node, and not by an agent
+    override suspend fun startSensing() {
         while (true) {
-            delay(5000)
+            delay(100)
             val temp = (15..30).random() + (0..99).random() / 100f
-            Logger.i { "Sensed temperature: $temp °C" }
-            // here we would send the event to the environment or agent
-//            node.agents.forEach {
-//                it.externalInbox.send(this.temperature(temp))
-//            } // TODO: Not correct, all agents see the same position
+            node.sendEvent(temperature(temp)) // TODO: all agents in the node will perceive the temperature
         }
     }
 }
@@ -108,15 +95,8 @@ object FixedIntervalTemperatureSensing : TemperatureSensing {
 class CustomSkillSet(val node: Node<BodyWithPosition, *>) :
     Recharging by FixedTimeRecharging(node),
     Movement<DoubleArray> by GridMovement(node),
-    TemperatureSensing by FixedIntervalTemperatureSensing,
-    NodeTerminationSkill by NodeTerminationSkillImpl(node) {
-    // TODO this seems doable, but you need to remember to actually start everything
-    // And you should know what needs to start... not great
-    // and then who calls this??
-    override suspend fun start(node: Node<BodyWithPosition, *>) {
-        FixedIntervalTemperatureSensing.start(node)
-    }
-}
+    TemperatureSensing by FixedIntervalTemperatureSensing(node),
+    NodeTerminationSkill by NodeTerminationSkillImpl(node)
 
 class TestSpatialRobot {
 
@@ -125,7 +105,24 @@ class TestSpatialRobot {
             body = BodyWithPosition()
             withSkills {
                 CustomSkillSet(it)
+                //TODO the factory is ok, but then the agent when running should start its skills
             }
+
+            perceptionHandler = {
+                when (it) {
+                    is Movement.Events.Position<*> ->
+                        BeliefAddEvent("position(${it.agentId}, ${it.position})")
+
+                    is Recharging.Events.ChargeLevel ->
+                        BeliefAddEvent("chargeLevel(${it.level})")
+
+                    is TemperatureSensing.Events.Temperature ->
+                        BeliefAddEvent("temp(${it.value})")
+
+                    else -> null
+                }
+            }
+
 
             hasInitialGoals {
                 !"goal"
@@ -137,9 +134,15 @@ class TestSpatialRobot {
                     with(skills) {
                         agent.print("Hello World!")
                         agent.recharge()
+                        agent.print("Recharged!")
                         agent.moveTo(doubleArrayOf(0.0, 1.0))
-                        skills.terminateNode()
+                        agent.print("Moved!")
+                        terminateNode()
                     }
+                }
+
+                adding.belief { this } triggers {
+                    agent.print("Now I believe ${this.context}")
                 }
             }
         }
@@ -147,7 +150,7 @@ class TestSpatialRobot {
 
     @Test
     fun testSkillFeature() {
-        Logger.setMinSeverity(Severity.Debug)
+        Logger.setMinSeverity(Severity.Error)
         executeInTestScope { mas }
     }
 }
