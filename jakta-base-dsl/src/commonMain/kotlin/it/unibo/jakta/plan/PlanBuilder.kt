@@ -175,6 +175,7 @@ sealed interface PlanBuilder<B : Any, G : Any, Skills : Any, Context : Any> {
  * @return the constructed belief addition plan
  */
 @Suppress("DEPRECATION_ERROR")
+@JaktaDSL
 inline infix fun <B, G, Skills, Ctx, reified PlanResult> PlanBuilder.Addition.Belief<B, G, Skills, Ctx>.triggers(
     noinline body: suspend PlanScope<B, G, Skills, Ctx>.() -> PlanResult,
 ): Plan.Belief.Addition<B, G, Skills, Ctx, PlanResult> where B : Any, G : Any, Skills : Any, Ctx : Any =
@@ -186,6 +187,7 @@ inline infix fun <B, G, Skills, Ctx, reified PlanResult> PlanBuilder.Addition.Be
  * @return the constructed goal addition plan
  */
 @Suppress("DEPRECATION_ERROR")
+@JaktaDSL
 inline infix fun <B, G, Skills, Context, reified PlanResult> PlanBuilder.Addition.Goal<B, G, Skills, Context>.triggers(
     noinline body: suspend PlanScope<B, G, Skills, Context>.() -> PlanResult,
 ): Plan.Goal.Addition<B, G, Skills, Context, PlanResult> where B : Any, G : Any, Skills : Any, Context : Any =
@@ -197,6 +199,7 @@ inline infix fun <B, G, Skills, Context, reified PlanResult> PlanBuilder.Additio
  * @return the constructed belief removal plan
  */
 @Suppress("DEPRECATION_ERROR")
+@JaktaDSL
 inline infix fun <B, G, Skills, Context, reified PlanResult> PlanBuilder.Removal.Belief<B, G, Skills, Context>.triggers(
     noinline body: suspend PlanScope<B, G, Skills, Context>.() -> PlanResult,
 ): Plan.Belief.Removal<B, G, Skills, Context, PlanResult> where B : Any, G : Any, Skills : Any, Context : Any =
@@ -208,6 +211,7 @@ inline infix fun <B, G, Skills, Context, reified PlanResult> PlanBuilder.Removal
  * @return the constructed goal removal plan
  */
 @Suppress("DEPRECATION_ERROR")
+@JaktaDSL
 inline infix fun <B, G, Skills, Context, reified PlanResult> PlanBuilder.Removal.Goal<B, G, Skills, Context>.triggers(
     noinline body: suspend PlanScope<B, G, Skills, Context>.() -> PlanResult,
 ): Plan.Goal.Removal<B, G, Skills, Context, PlanResult> where B : Any, G : Any, Skills : Any, Context : Any =
