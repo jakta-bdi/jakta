@@ -7,6 +7,7 @@ import it.unibo.jakta.event.AgentEvent
 import it.unibo.jakta.event.AgentEvent.External.Message
 import it.unibo.jakta.event.AgentEvent.External.Perception
 import it.unibo.jakta.event.AgentEvent.Internal
+import it.unibo.jakta.node.Node
 import it.unibo.jakta.plan.Plan
 import it.unibo.jakta.plan.PlanLibraryBuilder
 import it.unibo.jakta.plan.PlanLibraryBuilderImpl
@@ -89,12 +90,12 @@ interface AgentBuilder<Belief : Any, Goal : Any, Skills : Any, Body : Any> {
     /**
      * Define the skills this agent can use in his plans.
      */
-    fun withSkills(skillFactory: () -> Skills)
+    fun withSkills(skillFactory: (Node<Body, Skills>) -> Skills)
 
     /**
      * Builds and returns the agent instance.
      */
-    fun build(): AgentSpecification<Belief, Goal, Skills, Body>
+    fun build(node: Node<Body, Skills>): AgentSpecification<Belief, Goal, Skills, Body>
 }
 
 /**
@@ -107,7 +108,7 @@ class AgentBuilderImpl<Belief : Any, Goal : Any, Skills : Any, Body : Any>(priva
     private var beliefPlans = listOf<Plan.Belief<Belief, Goal, Skills, *, *>>()
     private var goalPlans = listOf<Plan.Goal<Belief, Goal, Skills, *, *>>()
     private var eventMappingFunction: AgentEvent.External.() -> AgentEvent.Internal? = { null }
-    private lateinit var skillsFactory: () -> Skills // TODO improve
+    private lateinit var skillsFactory: (Node<Body, Skills>) -> Skills // TODO improve
 
     override var body: Body by Delegates.notNull()
     override var messageHandler: (Message) -> Internal? = { null } // By default, all messages are discarded.
@@ -127,7 +128,7 @@ class AgentBuilderImpl<Belief : Any, Goal : Any, Skills : Any, Body : Any>(priva
         this.eventMappingFunction = f
     }
 
-    override fun withSkills(skillFactory: () -> Skills) {
+    override fun withSkills(skillFactory: (Node<Body, Skills>) -> Skills) {
         this.skillsFactory = skillFactory
     }
 
@@ -160,7 +161,7 @@ class AgentBuilderImpl<Belief : Any, Goal : Any, Skills : Any, Body : Any>(priva
         goalPlans += plans
     }
 
-    override fun build(): AgentSpecification<Belief, Goal, Skills, Body> =
+    override fun build(node: Node<Body, Skills>): AgentSpecification<Belief, Goal, Skills, Body> =
         object : AgentSpecification<Belief, Goal, Skills, Body> {
             override val body: Body = this@AgentBuilderImpl.body
             override val initialState: AgentState<Belief, Goal, Skills> = BaseAgentState(
@@ -170,7 +171,7 @@ class AgentBuilderImpl<Belief : Any, Goal : Any, Skills : Any, Body : Any>(priva
                 goalPlans = this@AgentBuilderImpl.goalPlans,
                 perceptionHandler = perceptionHandler,
                 messageHandler = messageHandler,
-                skills = skillsFactory(),
+                skills = skillsFactory(node),
             )
             override val initialGoals: List<Goal> = this@AgentBuilderImpl.initialGoals
             override val id: AgentID = this@AgentBuilderImpl.name?.let { BaseAgentID(it) } ?: BaseAgentID()

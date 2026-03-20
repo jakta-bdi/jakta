@@ -124,7 +124,7 @@ class TestSpatialRobot {
         agent("Vacuum") {
             body = BodyWithPosition()
             withSkills {
-                CustomSkillSet(this@node.node)
+                CustomSkillSet(it)
             }
 
             hasInitialGoals {

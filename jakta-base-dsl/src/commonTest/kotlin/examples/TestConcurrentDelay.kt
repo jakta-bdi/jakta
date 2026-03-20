@@ -17,7 +17,7 @@ class TestConcurrentDelay {
         node {
             agent {
                 body = object {}
-                withSkills { NodeTerminationSkillImpl(this@node.node) }
+                withSkills { NodeTerminationSkillImpl(it) }
                 hasInitialGoals {
                     !"goal"
                     !"anotherGoal"

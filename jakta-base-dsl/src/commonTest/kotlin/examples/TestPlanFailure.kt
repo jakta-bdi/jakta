@@ -19,7 +19,7 @@ class TestPlanFailure {
             node {
                 agent {
                     body = object {}
-                    withSkills { NodeTerminationSkillImpl(this@node.node) }
+                    withSkills { NodeTerminationSkillImpl(it) }
                     hasInitialGoals { !"goalChain" }
                     hasPlans {
                         adding.goal {

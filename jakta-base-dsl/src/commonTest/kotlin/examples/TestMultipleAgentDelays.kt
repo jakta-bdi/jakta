@@ -22,7 +22,7 @@ class TestMultipleAgentDelays {
         node {
             agent {
                 body = object {}
-                withSkills { SkillSet(this@node.node) }
+                withSkills { SkillSet(it) }
                 hasInitialGoals {
                     !"goal"
                 }
@@ -39,7 +39,7 @@ class TestMultipleAgentDelays {
             }
             agent {
                 body = object {}
-                withSkills { SkillSet(this@node.node) }
+                withSkills { SkillSet(it) }
                 hasInitialGoals {
                     !"goal"
                 }

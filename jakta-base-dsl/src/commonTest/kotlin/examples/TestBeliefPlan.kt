@@ -14,7 +14,7 @@ class TestBeliefPlan {
     val helloWorld = node {
         agent("Hello world agent") {
             body = object {}
-            withSkills { NodeTerminationSkillImpl(this@node.node) }
+            withSkills { NodeTerminationSkillImpl(it) }
             believes {
                 +"testBelief"
             }
