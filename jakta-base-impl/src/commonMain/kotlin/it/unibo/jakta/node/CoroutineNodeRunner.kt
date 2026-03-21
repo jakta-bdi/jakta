@@ -9,14 +9,15 @@ import it.unibo.jakta.event.SystemEvent
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.job
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 
 /**
  * A [it.unibo.jakta.node.NodeRunner] implementation that uses Kotlin coroutines to manage the execution of agents within a node.
  */
-class CoroutineNodeRunner<N : Node<*, *>> : NodeRunner<N> {
+class CoroutineNodeRunner<Body: Any, Skills: Any, N : Node<Body, Skills>> : NodeRunner<N> {
 
     private val agents: MutableMap<AgentLifecycle<*, *, *>, Job> = mutableMapOf()
 
@@ -31,17 +32,19 @@ class CoroutineNodeRunner<N : Node<*, *>> : NodeRunner<N> {
     )
 
     override suspend fun run(node: N) {
-        _nodes += node
         supervisorScope {
+            val appScope = this
+            _nodes += node
             launch {
-                while (true) {
+                while (isActive) {
                     when (val event = node.systemEvents.next()) {
-                        is SystemEvent.AgentAddition<*, *, *> -> addAgent(node, event.executableAgent)
+                        is SystemEvent.AgentAddition<*, *, *> -> appScope.addAgent(node, event.executableAgent)
                         is SystemEvent.AgentRemoval -> removeAgent(event.id)
-                        is SystemEvent.ShutDownNode -> stopNode(node)
+                        is SystemEvent.ShutDownNode -> appScope.stopNode(node)
                     }
                 }
             }
+            node.behaviors.forEach { launch {it.start(node)} }
         }
         logger.i("Node $node START")
     }
@@ -50,7 +53,7 @@ class CoroutineNodeRunner<N : Node<*, *>> : NodeRunner<N> {
         val newAgent = BaseAgentLifecycle(agent)
         val newJob = launch {
             supervisorScope {
-                while (true) {
+                while (isActive) {
                     newAgent.step(this)
                 }
             }
@@ -76,7 +79,7 @@ class CoroutineNodeRunner<N : Node<*, *>> : NodeRunner<N> {
     }
 
     private fun CoroutineScope.stopNode(node: N) {
-        this.coroutineContext.job.cancel(CancellationException("ShutDownMAS requested"))
+        this.coroutineContext.cancel(CancellationException("Termination requested"))
         //TODO we are brutally killing the agents
         // agents.forEach { removeAgent(it.key.executableAgent.id) }
         // return@launch
