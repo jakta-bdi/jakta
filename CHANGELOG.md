@@ -1,3 +1,10 @@
+## [0.15.136](https://github.com/jakta-bdi/jakta/compare/v0.15.135...v0.15.136) (2026-03-24)
+
+
+### Bug Fixes
+
+* **deps:** update gradle/actions action to v6 ([#780](https://github.com/jakta-bdi/jakta/issues/780)) ([3b68594](https://github.com/jakta-bdi/jakta/commit/3b68594075e3eb2e4fab0f0be460a6c2b39e60aa))
+
 ## [0.15.135](https://github.com/jakta-bdi/jakta/compare/v0.15.134...v0.15.135) (2026-03-20)
 
 
