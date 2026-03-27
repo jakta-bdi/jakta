@@ -3,7 +3,7 @@ coroutines = "1.10.2"
 dokka = "2.1.0"
 kermit = "2.0.4"
 kotlin = "2.2.21"
-alchemist = "42.4.2"
+alchemist = "43.0.14"
 
 [libraries]
 kermit = {module = "co.touchlab:kermit", version.ref = "kermit"}
@@ -13,6 +13,7 @@ kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref =
 kotlinx-coroutines-core = {module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref="coroutines"}
 kotlinx-coroutines-test = {module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref="coroutines"}
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+caffeine = "com.github.ben-manes.caffeine:caffeine:3.2.3"
 
 [bundles]
 alchemist-api = [
