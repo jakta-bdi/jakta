@@ -7,6 +7,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Delay
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.job
 
 /**
  * A [ContinuationInterceptor] that wraps another interceptor and implements [Delay] by delegating
@@ -47,6 +48,9 @@ class IntentionDispatcher(wrappedInterceptor: ContinuationInterceptor) :
     override fun dispatch(context: CoroutineContext, block: Runnable) {
         log.d { "Intercepting continuation with context: $context" }
         val currentIntention: Intention = context[Intention] as Intention
-        currentIntention.enqueue { block.run() }
+        //TODO is this enough
+        if(currentIntention.job.isActive) {
+            currentIntention.enqueue { block.run() }
+        }
     }
 }

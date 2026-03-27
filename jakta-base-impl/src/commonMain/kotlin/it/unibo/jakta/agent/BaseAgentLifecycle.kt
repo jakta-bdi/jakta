@@ -127,9 +127,8 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
         plan: Plan<Belief, Goal, Skills, TriggerEntity, *, *>,
         completion: CompletableDeferred<Any?>? = null, // TODO Check if this Any? can be improved
     ) {
-        log.d { "Launching plan $plan for event $event" }
         val intention = executableAgent.state.mutableIntentionPool.nextIntention(event, this.coroutineContext.job)
-
+        log.d { "Launching plan $plan for event $event on intention $intention" }
         val interceptor =
             this.coroutineContext[ContinuationInterceptor] ?: error { "No ContinuationInterceptor in context" }
 
@@ -137,14 +136,15 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
             // TODO maybe I should not suppress?? But I want to catch ALL exceptions..
             @Suppress("TooGenericExceptionCaught")
             try {
-                log.d { "Running plan $plan" }
+                log.d { "Running plan $plan for event $event" }
                 val result = plan.run(executableAgent.state, entity)
                 completion?.complete(result)
             } catch (e: Exception) {
                 handleFailure(event, e)
             }
+        }.invokeOnCompletion {
+            log.d {"Plan Completed: $plan for event $event" }
         }
-        log.d { "Launched plan $plan" }
     }
 
     private fun <TriggerEntity : Any> selectPlan(
