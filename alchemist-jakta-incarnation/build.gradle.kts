@@ -20,9 +20,14 @@ kotlinJvm {
     sourceSets {
         val main by getting {
             dependencies {
-                api(project(":jakta-base-dsl"))
+                implementation(project(":jakta-base-dsl"))
+                implementation(project(":jakta-base-impl"))
                 api(project(":jakta-api"))
                 api(libs.bundles.alchemist.api)
+                implementation(libs.kotlinx.coroutines.core)
+                implementation(libs.caffeine)
+                implementation(kotlin("reflect"))
+                implementation(libs.kermit)
             }
         }
         val test by getting {

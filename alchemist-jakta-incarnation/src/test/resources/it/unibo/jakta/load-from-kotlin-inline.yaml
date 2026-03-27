@@ -1,0 +1,15 @@
+network-model:
+  type: ConnectWithinDistance
+  parameters: [ 5 ]
+
+incarnation: jakta
+
+_pool: &program
+  - program:
+      entrypoint: it.unibo.jakta.test.HelloWorldMolecule.entrypoint
+
+deployments:
+  - type: Point
+    parameters: [ 2, 2 ]
+    programs:
+      - program: it.unibo.jakta.test.HelloWorldMolecule.entrypoint
