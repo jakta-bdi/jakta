@@ -29,6 +29,8 @@ interface NodeBuilder<Belief : Any, Goal : Any, Skills : Any, Body : Any, N: Nod
 //     */
 //    fun withAgents(vararg agents: Agent<Belief, Goal>)
 
+    fun withBehavior(block: () -> NodeBehavior<Body, Skills>)
+
     /**
      * Builds and returns the Node instance.
      */
@@ -40,13 +42,19 @@ interface NodeBuilder<Belief : Any, Goal : Any, Skills : Any, Body : Any, N: Nod
  */
 open class LocalNodeBuilder<Belief : Any, Goal : Any, Skills : Any, Body : Any> :
     NodeBuilder<Belief, Goal, Skills, Body, LocalNode<Body, Skills>> {
-    protected val agents = mutableListOf<AgentBuilder<Belief, Goal, Skills, Body>>()
+
     private val node = LocalNode<Body, Skills>()
+
+    protected val agents = mutableListOf<AgentBuilder<Belief, Goal, Skills, Body>>()
 
     override fun agent(block: AgentBuilder<Belief, Goal, Skills, Body>.() -> Unit) = buildAgent(null, block)
 
     override fun agent(name: String, block: AgentBuilder<Belief, Goal, Skills, Body>.() -> Unit) =
         buildAgent(name, block)
+
+    override fun withBehavior(block: () -> NodeBehavior<Body, Skills>) {
+            node.addBehavior(block())
+    }
 
     private fun buildAgent(name: String?, block: AgentBuilder<Belief, Goal, Skills, Body>.() -> Unit) {
         val agentBuilder = AgentBuilderImpl<Belief, Goal, Skills, Body>(name)
