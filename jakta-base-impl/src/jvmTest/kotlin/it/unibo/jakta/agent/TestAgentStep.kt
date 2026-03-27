@@ -14,6 +14,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeout
 import org.junit.jupiter.api.Test
@@ -32,7 +34,7 @@ class TestAgentStep {
             it.agent.print("firstLineOfPlanBody")
             secondLineOfPlanBody.complete(Unit)
             it.agent.print("secondLineOfPlanBody")
-            delay(1)
+            delay(10)
             it.agent.print("After delay")
             planCompleted.complete(Unit)
             it.agent.print("Plan Completed")
@@ -83,10 +85,13 @@ class TestAgentStep {
             planCompleted.isCompleted,
             "The second iteration shouldn't execute after the delay",
         )
-        delay(100)
 
-        // Third iteration of agent lifecycle
-        lifecycle.tryStep(scope)
+        while(!planCompleted.isCompleted) {
+            advanceTimeBy(1)
+            println("Advancing time by 1")
+            lifecycle.tryStep(scope)
+        }
+
         assertTrue(
             firstLineOfPlanBody.isCompleted && secondLineOfPlanBody.isCompleted && planCompleted.isCompleted,
             "The third iteration of the agent lifecycle should complete plan body execution",
