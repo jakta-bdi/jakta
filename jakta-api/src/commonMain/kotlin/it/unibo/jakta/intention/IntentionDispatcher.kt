@@ -48,7 +48,6 @@ class IntentionDispatcher(wrappedInterceptor: ContinuationInterceptor) :
     override fun dispatch(context: CoroutineContext, block: Runnable) {
         log.d { "Intercepting continuation with context: $context" }
         val currentIntention: Intention = context[Intention] as Intention
-        //TODO is this enough
         if(currentIntention.job.isActive) {
             currentIntention.enqueue { block.run() }
         }

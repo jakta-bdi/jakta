@@ -11,6 +11,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlin.collections.filter
+import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.currentCoroutineContext
 
 /**
  * A base implementation of the [it.unibo.jakta.agent.AgentLifecycle] interface
@@ -25,15 +29,21 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
             executableAgent.id.displayName,
         )
 
-    override suspend fun step(scope: CoroutineScope) {
+    //TODO consider making this public or add a method to cancel it e.g. stop()
+    // so far it does not seem to be necessary
+    private val agentJob = SupervisorJob()
+
+    override suspend fun step() {
         log.i { "waiting for event..." }
         val event = executableAgent.events.next()
         log.i { "received event: $event" }
+        val scope = CoroutineScope(currentCoroutineContext() + agentJob)
         handleEvent(event, scope)
     }
 
-    override fun tryStep(scope: CoroutineScope) {
+    override fun tryStep(dispatcher: CoroutineDispatcher) {
         executableAgent.events.tryNext()?.let {
+            val scope = CoroutineScope(dispatcher + agentJob)
             handleEvent(it, scope)
         }
     }

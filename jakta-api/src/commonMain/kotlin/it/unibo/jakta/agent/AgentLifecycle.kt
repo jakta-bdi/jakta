@@ -1,5 +1,7 @@
 package it.unibo.jakta.agent
 
+import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 
 /**
@@ -18,12 +20,10 @@ interface AgentLifecycle<Belief : Any, Goal : Any, Skills : Any> {
      * Potentially launches plans as a response to the event.
      * @param scope must be a SupervisorScope
      */
-    // TODO can we remove the scope?
-    // TODO we can definitely improve the documentation here
-    suspend fun step(scope: CoroutineScope)
+    suspend fun step()
 
     /**
      * Runs a reasoning cycle step if an event is available, otherwise does nothing.
      */
-    fun tryStep(scope: CoroutineScope)
+    fun tryStep(dispatcher: CoroutineDispatcher)
 }

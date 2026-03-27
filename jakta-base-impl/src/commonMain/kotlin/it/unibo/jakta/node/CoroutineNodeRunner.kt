@@ -9,8 +9,11 @@ import it.unibo.jakta.event.SystemEvent
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 
@@ -52,10 +55,8 @@ class CoroutineNodeRunner<Body: Any, Skills: Any, N : Node<Body, Skills>> : Node
     private fun CoroutineScope.addAgent(node: N, agent: ExecutableAgent<*, *, *>) {
         val newAgent = BaseAgentLifecycle(agent)
         val newJob = launch {
-            supervisorScope {
-                while (isActive) {
-                    newAgent.step(this)
-                }
+            while (isActive) {
+                newAgent.step()
             }
         }
         agents += newAgent to newJob

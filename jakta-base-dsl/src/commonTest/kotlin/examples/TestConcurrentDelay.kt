@@ -29,7 +29,7 @@ class TestConcurrentDelay {
                         agent.print("Hello...")
                         delay(10000)
                         agent.print("...World!")
-                        //skills.terminateNode()
+                        skills.terminateNode()
                     }
                     adding.goal {
                         ifGoalMatch("anotherGoal")
@@ -39,9 +39,6 @@ class TestConcurrentDelay {
                         delay(5000)
                         agent.print("I'm still faster!")
                         skills.terminateNode()
-                        //TODO killing the agent while a plan is suspended
-                        // does not cancel the agent and the app remains dangling
-                        // this is a bug
                     }
                 }
             }
