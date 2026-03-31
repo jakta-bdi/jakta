@@ -19,8 +19,13 @@ class LocalNode<Body : Any, Skills : Any> : Node<Body, Skills> {
 
     private val _agents: MutableSet<BaseAgent<*, *, *, Body>> = mutableSetOf()
 
+    private val _behaviors: MutableList<NodeBehavior<Body, Skills>> = mutableListOf()
+
     override val agents: Map<AgentID, Body>
         get() = _agents.associate { it.id to it.body }
+
+    override val behaviors: Collection<NodeBehavior<Body, Skills>>
+        get() = _behaviors.toList()
 
     private val _systemEvents: EventBus<SystemEvent> = UnlimitedChannelBus()
 
@@ -38,6 +43,10 @@ class LocalNode<Body : Any, Skills : Any> : Node<Body, Skills> {
             _agents.remove(it)
             _systemEvents.send(AgentRemovalEvent(id))
         }
+    }
+
+    override fun addBehavior(behavior: NodeBehavior<Body, Skills>) {
+        _behaviors.add(behavior)
     }
 
     override fun terminateNode() {

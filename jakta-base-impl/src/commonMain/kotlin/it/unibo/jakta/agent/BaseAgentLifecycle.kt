@@ -11,6 +11,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlin.collections.filter
+import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.currentCoroutineContext
 
 /**
  * A base implementation of the [it.unibo.jakta.agent.AgentLifecycle] interface
@@ -25,15 +29,21 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
             executableAgent.id.displayName,
         )
 
-    override suspend fun step(scope: CoroutineScope) {
+    //TODO consider making this public or add a method to cancel it e.g. stop()
+    // so far it does not seem to be necessary
+    private val agentJob = SupervisorJob()
+
+    override suspend fun step() {
         log.i { "waiting for event..." }
         val event = executableAgent.events.next()
         log.i { "received event: $event" }
+        val scope = CoroutineScope(currentCoroutineContext() + agentJob)
         handleEvent(event, scope)
     }
 
-    override fun tryStep(scope: CoroutineScope) {
+    override fun tryStep(dispatcher: CoroutineDispatcher) {
         executableAgent.events.tryNext()?.let {
+            val scope = CoroutineScope(dispatcher + agentJob)
             handleEvent(it, scope)
         }
     }
@@ -127,9 +137,8 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
         plan: Plan<Belief, Goal, Skills, TriggerEntity, *, *>,
         completion: CompletableDeferred<Any?>? = null, // TODO Check if this Any? can be improved
     ) {
-        log.d { "Launching plan $plan for event $event" }
         val intention = executableAgent.state.mutableIntentionPool.nextIntention(event, this.coroutineContext.job)
-
+        log.d { "Launching plan $plan for event $event on intention $intention" }
         val interceptor =
             this.coroutineContext[ContinuationInterceptor] ?: error { "No ContinuationInterceptor in context" }
 
@@ -137,15 +146,16 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
             // TODO maybe I should not suppress?? But I want to catch ALL exceptions..
             @Suppress("TooGenericExceptionCaught")
             try {
-                log.d { "Running plan $plan" }
+                log.d { "Running plan $plan for event $event" }
                 val result = plan.run(executableAgent.state, entity)
                 completion?.complete(result)
             } catch (e: Exception) {
                 log.w("Goal failed for exception: ${e.message}")
                 handleFailure(event, e)
             }
+        }.invokeOnCompletion {
+            log.d {"Plan Completed: $plan for event $event" }
         }
-        log.d { "Launched plan $plan" }
     }
 
     private fun <TriggerEntity : Any> selectPlan(

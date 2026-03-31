@@ -1,5 +1,6 @@
 package examples
 
+import NodeTerminationSkill
 import NodeTerminationSkillImpl
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
@@ -17,7 +18,7 @@ class TestHelloDelay {
         Logger.setMinSeverity(Severity.Debug)
         val timeToWait = 10000L
 
-        executeInTestScope {
+        executeInTestScope<Any, NodeTerminationSkill> {
             node {
                 agent {
                     body = object {}

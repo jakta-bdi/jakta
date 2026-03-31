@@ -58,7 +58,7 @@ class ExecutionTest {
             },
         )
 
-        val runner = CoroutineNodeRunner<LocalNode<*, *>>()
+        val runner = CoroutineNodeRunner<Any, MyPrint, LocalNode<Any, MyPrint>>()
 
         runTest {
             agentSpecGenerator("Agent1", node).forEach { node.addAgent(it) }

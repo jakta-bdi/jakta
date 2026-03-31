@@ -15,9 +15,14 @@ import it.unibo.jakta.event.AgentEvent
 import it.unibo.jakta.event.BeliefAddEvent
 import it.unibo.jakta.node
 import it.unibo.jakta.node.Node
+import it.unibo.jakta.node.NodeBehavior
 import it.unibo.jakta.plan.triggers
 import kotlin.test.Test
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class BodyWithPosition {
     var position2D: DoubleArray = doubleArrayOf(0.0, 0.0)
@@ -66,46 +71,43 @@ class GridMovement(val node: Node<BodyWithPosition, *>) : Movement<DoubleArray> 
 }
 
 // Skill with active behavior that "runs" in the environment
-interface TemperatureSensing {
-
-    suspend fun startSensing()
+interface TemperatureSensing<Body: Any, Skills: Any> : NodeBehavior<Body, Skills> {
 
     object Events {
         class Temperature internal constructor(val value: Float) : AgentEvent.External.Perception
 
         object Factory {
-            fun TemperatureSensing.temperature(value: Float): Temperature = Temperature(value)
+            fun TemperatureSensing<*, *>.temperature(value: Float): Temperature = Temperature(value)
         }
     }
 }
 
-// This skill is a singleton, shared by all agents using it
-class FixedIntervalTemperatureSensing(val node: Node<BodyWithPosition, *>) : TemperatureSensing {
-
-    //TODO WHO Invokes this? This is a behavior that should be handled by the node, and not by an agent
-    override suspend fun startSensing() {
+class FixedIntervalTemperatureSensing<Body: Any, Skills: Any> : TemperatureSensing<Body, Skills> {
+    override suspend fun start(node: Node<Body, Skills>) {
         while (true) {
-            delay(100)
+            delay(1000)
             val temp = (15..30).random() + (0..99).random() / 100f
             node.sendEvent(temperature(temp)) // TODO: all agents in the node will perceive the temperature
         }
     }
+
 }
 
 class CustomSkillSet(val node: Node<BodyWithPosition, *>) :
     Recharging by FixedTimeRecharging(node),
     Movement<DoubleArray> by GridMovement(node),
-    TemperatureSensing by FixedIntervalTemperatureSensing(node),
     NodeTerminationSkill by NodeTerminationSkillImpl(node)
 
 class TestSpatialRobot {
 
     val mas = node {
+
+        withBehavior { FixedIntervalTemperatureSensing() }
+
         agent("Vacuum") {
             body = BodyWithPosition()
             withSkills {
                 CustomSkillSet(it)
-                //TODO the factory is ok, but then the agent when running should start its skills
             }
 
             perceptionHandler = {
@@ -123,6 +125,9 @@ class TestSpatialRobot {
                 }
             }
 
+            believes {
+                +"temp(0)"
+            }
 
             hasInitialGoals {
                 !"goal"
@@ -141,11 +146,23 @@ class TestSpatialRobot {
                     }
                 }
 
+                adding.belief {
+                    """temp\(([\d.]+)\)""".toRegex()
+                        .find(this)
+                        ?.groupValues?.getOrNull(1)
+                        ?.toDoubleOrNull()
+                        ?.takeIf { it > 25 }
+                } triggers {
+                    agent.print("Temperature > 25: ${this.context}, terminating the node!")
+                    skills.terminateNode() //TODO broken termination
+                }
+
                 adding.belief { this } triggers {
                     agent.print("Now I believe ${this.context}")
                 }
             }
         }
+
     }
 
     @Test
