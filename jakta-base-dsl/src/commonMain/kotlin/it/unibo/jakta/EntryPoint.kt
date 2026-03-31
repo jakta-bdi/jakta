@@ -1,5 +1,9 @@
 package it.unibo.jakta
 
+import it.unibo.jakta.agent.Agent
+import it.unibo.jakta.agent.AgentBuilder
+import it.unibo.jakta.agent.AgentBuilderImpl
+import it.unibo.jakta.agent.AgentSpecification
 import it.unibo.jakta.node.Node
 import it.unibo.jakta.node.LocalNodeBuilder
 import it.unibo.jakta.plan.Plan
@@ -22,19 +26,20 @@ fun <Belief : Any, Goal : Any, Skills : Any, Body : Any> node(
     return nodeBuilder.build()
 } //TODO now this is bound to local
 
-// TODO Fix this (now it needs to have a reference to the environment to instantiate skills)
-// /**
-// * Entry point for creating an agent using the Jakta DSL.
-// * @return an instantiated Agent.
-// */
-// @JaktaDSL
-// fun <Belief : Any, Goal : Any, Skills : Any> agent(
-//    block: AgentBuilder<Belief, Goal, Skills>.() -> Unit,
-// ): Agent<Belief, Goal> {
-//    val ab = AgentBuilderImpl<Belief, Goal, Skills>()
-//    ab.apply(block)
-//    return ab.build()
-// }
+
+ /**
+ * Entry point for creating an agent using the Jakta DSL.
+ * @return an instantiated Agent.
+ */
+ @JaktaDSL
+ fun <Belief : Any, Goal : Any, Skills : Any, Body: Any> agent(
+     node: Node<Body, Skills>,
+     block: AgentBuilder<Belief, Goal, Skills, Body>.() -> Unit,
+ ): AgentSpecification<Belief, Goal, Skills, Body> {
+    val ab = AgentBuilderImpl<Belief, Goal, Skills, Body>()
+    ab.apply(block)
+    return ab.build(node)
+ }
 
 // TODO entrypoint for plans???
 // this is tricky due to the way the DSL is constructed

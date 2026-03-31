@@ -15,7 +15,7 @@ class TestBeliefRemoval {
         node {
             agent {
                 body = object {}
-                withSkills { NodeTerminationSkillImpl(this@node.node) }
+                withSkills { NodeTerminationSkillImpl(it) }
                 believes {
                     +"testBelief"
                 }

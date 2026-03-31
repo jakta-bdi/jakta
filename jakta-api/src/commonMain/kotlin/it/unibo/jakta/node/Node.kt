@@ -23,6 +23,11 @@ interface Node<Body : Any, Skills : Any> {
     val agents: Map<AgentID, Body>
 
     /**
+     * A collection of behaviors that should run within the node in parallel with agents.
+     */
+    val behaviors: Collection<NodeBehavior<Body, Skills>>
+
+    /**
      * An event stream that emits system events related to the node.
      */
     val systemEvents: EventStream<SystemEvent>
@@ -46,6 +51,11 @@ interface Node<Body : Any, Skills : Any> {
      * @param id The unique identifier of the agent to be removed.
      */
     fun removeAgent(id: AgentID)
+
+    /**
+     * Adds a new behavior to the node.
+     */
+    fun addBehavior(behavior: NodeBehavior<Body,Skills>)
 
     /**
      * Terminates the node, effectively shutting down all agents and stopping any ongoing processes within the node.

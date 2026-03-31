@@ -1,5 +1,6 @@
 package examples
 
+import NodeTerminationSkill
 import NodeTerminationSkillImpl
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
@@ -15,11 +16,11 @@ class TestPlanFailure {
     @Test
     fun testPlanFailureHandling() {
         Logger.setMinSeverity(Severity.Warn)
-        executeInTestScope {
+        executeInTestScope<Any, NodeTerminationSkill> {
             node {
                 agent {
                     body = object {}
-                    withSkills { NodeTerminationSkillImpl(this@node.node) }
+                    withSkills { NodeTerminationSkillImpl(it) }
                     hasInitialGoals { !"goalChain" }
                     hasPlans {
                         adding.goal {

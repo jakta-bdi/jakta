@@ -17,7 +17,7 @@ class TestConcurrentDelay {
         node {
             agent {
                 body = object {}
-                withSkills { NodeTerminationSkillImpl(this@node.node) }
+                withSkills { NodeTerminationSkillImpl(it) }
                 hasInitialGoals {
                     !"goal"
                     !"anotherGoal"
@@ -38,6 +38,7 @@ class TestConcurrentDelay {
                         agent.print("Running while waiting...")
                         delay(5000)
                         agent.print("I'm still faster!")
+                        skills.terminateNode()
                     }
                 }
             }
@@ -45,7 +46,7 @@ class TestConcurrentDelay {
 
     @BeforeTest
     fun setup() {
-        Logger.setMinSeverity(Severity.Error)
+        Logger.setMinSeverity(Severity.Debug)
     }
 
     @Test

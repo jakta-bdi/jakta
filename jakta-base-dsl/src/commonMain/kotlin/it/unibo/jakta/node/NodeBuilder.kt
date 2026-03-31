@@ -12,11 +12,6 @@ import it.unibo.jakta.node.LocalNode
 interface NodeBuilder<Belief : Any, Goal : Any, Skills : Any, Body : Any, N: Node<Body, Skills>> {
 
     /**
-     * The node that will execute jakta application.
-     */
-    val node: N
-
-    /**
      * Defines an agent using the provided builder block.
      * @return the constructed agent.
      */
@@ -33,6 +28,8 @@ interface NodeBuilder<Belief : Any, Goal : Any, Skills : Any, Body : Any, N: Nod
 //     */
 //    fun withAgents(vararg agents: Agent<Belief, Goal>)
 
+    fun withBehavior(block: () -> NodeBehavior<Body, Skills>)
+
     /**
      * Builds and returns the Node instance.
      */
@@ -44,13 +41,19 @@ interface NodeBuilder<Belief : Any, Goal : Any, Skills : Any, Body : Any, N: Nod
  */
 open class LocalNodeBuilder<Belief : Any, Goal : Any, Skills : Any, Body : Any> :
     NodeBuilder<Belief, Goal, Skills, Body, LocalNode<Body, Skills>> {
+
+    private val node = LocalNode<Body, Skills>()
+
     protected val agents = mutableListOf<AgentBuilder<Belief, Goal, Skills, Body>>()
-    override val node = LocalNode<Body, Skills>()
 
     override fun agent(block: AgentBuilder<Belief, Goal, Skills, Body>.() -> Unit) = buildAgent(null, block)
 
     override fun agent(name: String, block: AgentBuilder<Belief, Goal, Skills, Body>.() -> Unit) =
         buildAgent(name, block)
+
+    override fun withBehavior(block: () -> NodeBehavior<Body, Skills>) {
+            node.addBehavior(block())
+    }
 
     private fun buildAgent(name: String?, block: AgentBuilder<Belief, Goal, Skills, Body>.() -> Unit) {
         val agentBuilder = AgentBuilderImpl<Belief, Goal, Skills, Body>(name)
@@ -68,7 +71,7 @@ open class LocalNodeBuilder<Belief : Any, Goal : Any, Skills : Any, Body : Any> 
 
     override fun build(): LocalNode<Body, Skills> {
         // val env = environment ?: error { "Must provide an Environment for the MAS" }
-        agents.forEach { node.addAgent(it.build()) }
+        agents.forEach { node.addAgent(it.build(node)) }
         return node
     }
 }

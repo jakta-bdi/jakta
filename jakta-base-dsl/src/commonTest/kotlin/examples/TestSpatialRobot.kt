@@ -6,29 +6,29 @@ import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import examples.Movement.Events.Factory.position
 import examples.Recharging.Events.Factory.chargeLevel
+import examples.TemperatureSensing.Events.Factory.temperature
 import executeInTestScope
 import ifGoalMatch
 import it.unibo.jakta.agent.Agent
 import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.event.AgentEvent
+import it.unibo.jakta.event.BeliefAddEvent
 import it.unibo.jakta.node
 import it.unibo.jakta.node.Node
+import it.unibo.jakta.node.NodeBehavior
 import it.unibo.jakta.plan.triggers
 import kotlin.test.Test
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class BodyWithPosition {
     var position2D: DoubleArray = doubleArrayOf(0.0, 0.0)
 }
 
-// TODO if we have this, bound the generics everywhere??
-interface Skill {
-    suspend fun start(node: Node<BodyWithPosition, *>) {
-        // default no-op implementation
-    }
-}
-
-interface Recharging : Skill {
+interface Recharging {
     suspend fun Agent.recharge()
 
     object Events {
@@ -42,7 +42,7 @@ interface Recharging : Skill {
     }
 }
 
-interface Movement<P> : Skill {
+interface Movement<P> {
     // context(s1: Recharging) TODO this does not work right yet due to "triggers" not having context propagation
     fun Agent.moveTo(newPos: P)
 
@@ -71,60 +71,62 @@ class GridMovement(val node: Node<BodyWithPosition, *>) : Movement<DoubleArray> 
 }
 
 // Skill with active behavior that "runs" in the environment
-interface TemperatureSensing : Skill {
-    // TODO we need a way to have skills that have an active behavior
-    // who calls this method??
-    override suspend fun start(node: Node<BodyWithPosition, *>) {
-        startSensing(node)
-    }
-
-    suspend fun startSensing(node: Node<BodyWithPosition, *>)
+interface TemperatureSensing<Body: Any, Skills: Any> : NodeBehavior<Body, Skills> {
 
     object Events {
         class Temperature internal constructor(val value: Float) : AgentEvent.External.Perception
 
         object Factory {
-            fun TemperatureSensing.temperature(value: Float): Temperature = Temperature(value)
+            fun TemperatureSensing<*, *>.temperature(value: Float): Temperature = Temperature(value)
         }
     }
 }
 
-// This skill is a singleton, shared by all agents using it
-object FixedIntervalTemperatureSensing : TemperatureSensing {
-
-    override suspend fun startSensing(node: Node<BodyWithPosition, *>) {
+class FixedIntervalTemperatureSensing<Body: Any, Skills: Any> : TemperatureSensing<Body, Skills> {
+    override suspend fun start(node: Node<Body, Skills>) {
         while (true) {
-            delay(5000)
+            delay(1000)
             val temp = (15..30).random() + (0..99).random() / 100f
-            Logger.i { "Sensed temperature: $temp °C" }
-            // here we would send the event to the environment or agent
-//            node.agents.forEach {
-//                it.externalInbox.send(this.temperature(temp))
-//            } // TODO: Not correct, all agents see the same position
+            node.sendEvent(temperature(temp)) // TODO: all agents in the node will perceive the temperature
         }
     }
+
 }
 
 class CustomSkillSet(val node: Node<BodyWithPosition, *>) :
     Recharging by FixedTimeRecharging(node),
     Movement<DoubleArray> by GridMovement(node),
-    TemperatureSensing by FixedIntervalTemperatureSensing,
-    NodeTerminationSkill by NodeTerminationSkillImpl(node) {
-    // TODO this seems doable, but you need to remember to actually start everything
-    // And you should know what needs to start... not great
-    // and then who calls this??
-    override suspend fun start(node: Node<BodyWithPosition, *>) {
-        FixedIntervalTemperatureSensing.start(node)
-    }
-}
+    NodeTerminationSkill by NodeTerminationSkillImpl(node)
 
 class TestSpatialRobot {
 
     val mas = node {
+
+        withBehavior { FixedIntervalTemperatureSensing() }
+
         agent("Vacuum") {
             body = BodyWithPosition()
             withSkills {
-                CustomSkillSet(this@node.node)
+                CustomSkillSet(it)
+            }
+
+            perceptionHandler = {
+                when (it) {
+                    is Movement.Events.Position<*> ->
+                        BeliefAddEvent("position(${it.agentId}, ${it.position})")
+
+                    is Recharging.Events.ChargeLevel ->
+                        BeliefAddEvent("chargeLevel(${it.level})")
+
+                    is TemperatureSensing.Events.Temperature ->
+                        BeliefAddEvent("temp(${it.value})")
+
+                    else -> null
+                }
+            }
+
+            believes {
+                +"temp(0)"
             }
 
             hasInitialGoals {
@@ -137,17 +139,35 @@ class TestSpatialRobot {
                     with(skills) {
                         agent.print("Hello World!")
                         agent.recharge()
+                        agent.print("Recharged!")
                         agent.moveTo(doubleArrayOf(0.0, 1.0))
-                        skills.terminateNode()
+                        agent.print("Moved!")
+                        terminateNode()
                     }
+                }
+
+                adding.belief {
+                    """temp\(([\d.]+)\)""".toRegex()
+                        .find(this)
+                        ?.groupValues?.getOrNull(1)
+                        ?.toDoubleOrNull()
+                        ?.takeIf { it > 25 }
+                } triggers {
+                    agent.print("Temperature > 25: ${this.context}, terminating the node!")
+                    skills.terminateNode() //TODO broken termination
+                }
+
+                adding.belief { this } triggers {
+                    agent.print("Now I believe ${this.context}")
                 }
             }
         }
+
     }
 
     @Test
     fun testSkillFeature() {
-        Logger.setMinSeverity(Severity.Debug)
+        Logger.setMinSeverity(Severity.Error)
         executeInTestScope { mas }
     }
 }
