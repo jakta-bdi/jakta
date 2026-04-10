@@ -6,21 +6,9 @@ import it.unibo.alchemist.model.NodeProperty
 import it.unibo.alchemist.model.Position
 import it.unibo.alchemist.model.Node as AlchemistNode
 import it.unibo.jakta.node.Node as JaktaNode
-import it.unibo.jakta.agent.AgentID
-import it.unibo.jakta.agent.AgentLifecycle
-import it.unibo.jakta.agent.BaseAgentLifecycle
 import it.unibo.jakta.agent.ExecutableAgent
 import it.unibo.jakta.dsl.RuntimeNodes
 import it.unibo.jakta.event.SystemEvent
-import kotlin.collections.component1
-import kotlin.collections.component2
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.job
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.supervisorScope
 
 /** One Alchemist Node may contain more than one Jakta Node.
  * This Alchemist property connects JaKtA meta-model to alchemist representation.
@@ -34,7 +22,11 @@ class JaktaForAlchemistRuntime<P: Position<P>>(
     private val agentActions : MutableMap<JaktaNode<*,*>, JaktaForAlchemistAgent<P>> = mutableMapOf()
 
     private fun addAgentAction(node: JaktaNode<*,*>, agent: ExecutableAgent<*, *, *>) {
-        val newAgentAction = JaktaForAlchemistAgent<P>(this.node, agent)
+        val newAgentAction = JaktaForAlchemistAgent<P>(
+            this.node,
+            agent,
+            alchemistEnvironment,
+        )
         agentActions += node to newAgentAction
     }
 
