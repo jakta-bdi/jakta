@@ -14,7 +14,7 @@ class TestBeliefRemoval {
     val helloWorld =
         node {
             agent {
-                body = object {}
+                embodiedAs { object {} }
                 withSkills { NodeTerminationSkillImpl(it) }
                 believes {
                     +"testBelief"

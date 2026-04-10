@@ -13,7 +13,7 @@ class TestHelloWorld {
 
     val helloWorld = node {
         agent("HelloAgent") {
-            body = object {}
+            embodiedAs { object {} }
             withSkills { NodeTerminationSkillImpl(it) }
             hasInitialGoals {
                 !"goal"

@@ -19,7 +19,7 @@ class TestPlanFailure {
         executeInTestScope<Any, NodeTerminationSkill> {
             node {
                 agent {
-                    body = object {}
+                    embodiedAs { object {} }
                     withSkills { NodeTerminationSkillImpl(it) }
                     hasInitialGoals { !"goalChain" }
                     hasPlans {

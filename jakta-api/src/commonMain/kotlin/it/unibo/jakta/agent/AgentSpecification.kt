@@ -5,8 +5,8 @@ package it.unibo.jakta.agent
  * which includes its [body], [initialState], [initialGoals], and [id].
  */
 interface AgentSpecification<Belief : Any, Goal : Any, Skills : Any, Body : Any> {
-    val body: Body
-    val initialState: AgentState<Belief, Goal, Skills>
-    val initialGoals: List<Goal>
     val id: AgentID
+    val body: Body
+    val initialGoals: List<Goal>
+    val initialState: AgentState<Belief, Goal, Skills>
 }

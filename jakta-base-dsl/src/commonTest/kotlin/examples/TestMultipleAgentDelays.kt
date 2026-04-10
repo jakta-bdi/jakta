@@ -21,7 +21,7 @@ class TestMultipleAgentDelays {
     val helloWorld =
         node {
             agent {
-                body = object {}
+                embodiedAs { object {} }
                 withSkills { SkillSet(it) }
                 hasInitialGoals {
                     !"goal"
@@ -38,7 +38,7 @@ class TestMultipleAgentDelays {
                 }
             }
             agent {
-                body = object {}
+                embodiedAs { object {} }
                 withSkills { SkillSet(it) }
                 hasInitialGoals {
                     !"goal"

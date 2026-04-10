@@ -16,7 +16,7 @@ class TestConcurrentDelay {
     val helloWorld =
         node {
             agent {
-                body = object {}
+                embodiedAs { object {} }
                 withSkills { NodeTerminationSkillImpl(it) }
                 hasInitialGoals {
                     !"goal"

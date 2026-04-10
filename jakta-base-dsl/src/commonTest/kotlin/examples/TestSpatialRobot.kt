@@ -75,12 +75,12 @@ class TestSpatialRobot {
     val mas = node {
 
         agent("Vacuum") {
-            body = BodyWithPosition()
+            embodiedAs { BodyWithPosition() }
             withSkills {
                 CustomSkillSet(it)
             }
 
-            perceptionHandler = {
+            handlesPerceptionEvents {
                 when (it) {
                     is Movement.Events.Position<*> ->
                         BeliefAddEvent("position(${it.agentId}, ${it.position})")

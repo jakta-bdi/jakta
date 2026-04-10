@@ -27,7 +27,7 @@ class TestTryStep {
 
     val helloWorld: Node<Any, NodeTerminationSkillImpl> = node {
         agent("Hello world agent") {
-            body = object {}
+            embodiedAs { object {} }
             withSkills { NodeTerminationSkillImpl(it) }
             believes {
                 +"testBelief"
