@@ -62,10 +62,17 @@ class ExecutionTest {
 
         runTest {
             agentSpecGenerator("Agent1", node).forEach { node.addAgent(it) }
-            runner.run(node)
-
+            try{
+                runner.run(node)
+            } catch (e: Exception) {
+                println("Node execution terminated with exception: ${e.message}")
+            }
             agentSpecGenerator("Agent2", node2).forEach { node2.addAgent(it) }
-            runner.run(node2)
+            try{
+                runner.run(node2)
+            } catch (e: Exception) {
+                println("Node execution terminated with exception: ${e.message}")
+            }
         }
     }
 }

@@ -17,7 +17,8 @@ interface MutableIntentionPool : IntentionPool {
     /**
      * Given an event, it returns an intention to handle it.
      * @param[event] the event to get the intention for.
-     * @param[currentJob] the job of the current intention, to set as parent of the new intention if a new one is created.
+     * @param[currentJob] the job of the current intention,
+     * to set as parent of the new intention if a new one is created.
      * @return a new intention if the event does not reference any existing intention,
      *        or the referenced intention if it exists.
      */

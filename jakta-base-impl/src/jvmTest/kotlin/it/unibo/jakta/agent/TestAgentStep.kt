@@ -8,14 +8,11 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.advanceTimeBy
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeout
 import org.junit.jupiter.api.Test
@@ -44,28 +41,26 @@ class TestAgentStep {
 
 	@Test
 	fun tryStepReturnsImmediatelyWhenNoEventsAreAvailable() = runTest {
-        val scope = CoroutineScope(Dispatchers.Main) //TODO("Can we put this directly inside tryStep?")
 
 		val lifecycle = createLifecycle()
 
 		withTimeout(250) {
-			lifecycle.tryStep(scope)
+			lifecycle.tryStep(Dispatchers.Main)
 		}
 	}
 
 	@Test
 	@OptIn(ExperimentalCoroutinesApi::class)
 	fun tryStepDoesNotWaitForPlanCompletion()  {
-       // val scope = CoroutineScope(Dispatchers.Default) //TODO("Can we put this directly inside tryStep?")
 		val lifecycle = createLifecycle(goalPlans = listOf(slowPlan))
-		lifecycle.executableAgent.internalInbox.send(GoalAddEvent.Companion.withNoResult("slow"))
+		lifecycle.executableAgent.internalInbox.send(GoalAddEvent.withNoResult("slow"))
 
         // First iteration of the agent lifecycle
         runTest {
-            val scope = CoroutineScope(this.coroutineContext[CoroutineDispatcher]!! + SupervisorJob())
+            val dispatcher = this.coroutineContext[CoroutineDispatcher]!!
             try {
                 withTimeout(250) {
-                    lifecycle.tryStep(scope)
+                    lifecycle.tryStep(dispatcher)
                 }
             } catch (e: TimeoutCancellationException) {
                 fail("The invocation of tryStep never returned")
@@ -76,7 +71,7 @@ class TestAgentStep {
             "The first iteration of agent lifecycle should schedule plan for execution, not execute it",
         )
         // Second iteration of agent lifecycle
-        lifecycle.tryStep(scope)
+        lifecycle.tryStep(dispatcher)
         assertTrue(
             firstLineOfPlanBody.isCompleted && secondLineOfPlanBody.isCompleted,
             "The second iteration of the agent lifecycle should execute the plan body until reaching the delay",
@@ -89,7 +84,7 @@ class TestAgentStep {
         while(!planCompleted.isCompleted) {
             advanceTimeBy(1)
             println("Advancing time by 1")
-            lifecycle.tryStep(scope)
+            lifecycle.tryStep(dispatcher)
         }
 
         assertTrue(

@@ -35,12 +35,14 @@ interface AgentState<Belief : Any, Goal : Any, Skills : Any> : GuardScope<Belief
     val goalPlans: List<Plan.Goal<Belief, Goal, Skills, *, *>>
 
     /**
-     * Mapping function which defines how to (optionally) convert a [AgentEvent.External.Perception] into a [AgentEvent.Internal].
+     * Mapping function which defines how to (optionally)
+     * convert a [AgentEvent.External.Perception] into a [AgentEvent.Internal].
      */
     val perceptionHandler: (AgentEvent.External.Perception) -> AgentEvent.Internal?
 
     /**
-     * Mapping function which defines how to (optionally) convert a [AgentEvent.External.Message] into a [AgentEvent.Internal].
+     * Mapping function which defines how to (optionally)
+     * convert a [AgentEvent.External.Message] into a [AgentEvent.Internal].
      */
     val messageHandler: (AgentEvent.External.Message) -> AgentEvent.Internal?
 

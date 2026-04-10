@@ -29,7 +29,6 @@ interface NodeBuilder<Belief : Any, Goal : Any, Skills : Any, Body : Any, N: Nod
 //     */
 //    fun withAgents(vararg agents: Agent<Belief, Goal>)
 
-    fun withBehavior(block: () -> NodeBehavior<Body, Skills>)
 
     /**
      * Builds and returns the Node instance.
@@ -51,10 +50,6 @@ open class LocalNodeBuilder<Belief : Any, Goal : Any, Skills : Any, Body : Any> 
 
     override fun agent(name: String, block: AgentBuilder<Belief, Goal, Skills, Body>.() -> Unit) =
         buildAgent(name, block)
-
-    override fun withBehavior(block: () -> NodeBehavior<Body, Skills>) {
-            node.addBehavior(block())
-    }
 
     private fun buildAgent(name: String?, block: AgentBuilder<Belief, Goal, Skills, Body>.() -> Unit) {
         val agentBuilder = AgentBuilderImpl<Belief, Goal, Skills, Body>(name)

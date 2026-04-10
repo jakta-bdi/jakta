@@ -6,7 +6,6 @@ import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import examples.Movement.Events.Factory.position
 import examples.Recharging.Events.Factory.chargeLevel
-import examples.TemperatureSensing.Events.Factory.temperature
 import executeInTestScope
 import ifGoalMatch
 import it.unibo.jakta.agent.Agent
@@ -15,14 +14,9 @@ import it.unibo.jakta.event.AgentEvent
 import it.unibo.jakta.event.BeliefAddEvent
 import it.unibo.jakta.node
 import it.unibo.jakta.node.Node
-import it.unibo.jakta.node.NodeBehavior
 import it.unibo.jakta.plan.triggers
 import kotlin.test.Test
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 class BodyWithPosition {
     var position2D: DoubleArray = doubleArrayOf(0.0, 0.0)
@@ -70,28 +64,6 @@ class GridMovement(val node: Node<BodyWithPosition, *>) : Movement<DoubleArray> 
     }
 }
 
-// Skill with active behavior that "runs" in the environment
-interface TemperatureSensing<Body: Any, Skills: Any> : NodeBehavior<Body, Skills> {
-
-    object Events {
-        class Temperature internal constructor(val value: Float) : AgentEvent.External.Perception
-
-        object Factory {
-            fun TemperatureSensing<*, *>.temperature(value: Float): Temperature = Temperature(value)
-        }
-    }
-}
-
-class FixedIntervalTemperatureSensing<Body: Any, Skills: Any> : TemperatureSensing<Body, Skills> {
-    override suspend fun start(node: Node<Body, Skills>) {
-        while (true) {
-            delay(1000)
-            val temp = (15..30).random() + (0..99).random() / 100f
-            node.sendEvent(temperature(temp)) // TODO: all agents in the node will perceive the temperature
-        }
-    }
-
-}
 
 class CustomSkillSet(val node: Node<BodyWithPosition, *>) :
     Recharging by FixedTimeRecharging(node),
@@ -101,8 +73,6 @@ class CustomSkillSet(val node: Node<BodyWithPosition, *>) :
 class TestSpatialRobot {
 
     val mas = node {
-
-        withBehavior { FixedIntervalTemperatureSensing() }
 
         agent("Vacuum") {
             body = BodyWithPosition()
@@ -117,9 +87,6 @@ class TestSpatialRobot {
 
                     is Recharging.Events.ChargeLevel ->
                         BeliefAddEvent("chargeLevel(${it.level})")
-
-                    is TemperatureSensing.Events.Temperature ->
-                        BeliefAddEvent("temp(${it.value})")
 
                     else -> null
                 }
@@ -144,17 +111,6 @@ class TestSpatialRobot {
                         agent.print("Moved!")
                         terminateNode()
                     }
-                }
-
-                adding.belief {
-                    """temp\(([\d.]+)\)""".toRegex()
-                        .find(this)
-                        ?.groupValues?.getOrNull(1)
-                        ?.toDoubleOrNull()
-                        ?.takeIf { it > 25 }
-                } triggers {
-                    agent.print("Temperature > 25: ${this.context}, terminating the node!")
-                    skills.terminateNode() //TODO broken termination
                 }
 
                 adding.belief { this } triggers {

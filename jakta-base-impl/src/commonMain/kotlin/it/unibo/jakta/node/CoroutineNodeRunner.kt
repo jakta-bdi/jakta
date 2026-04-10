@@ -47,7 +47,6 @@ class CoroutineNodeRunner<Body: Any, Skills: Any, N : Node<Body, Skills>> : Node
                     }
                 }
             }
-            node.behaviors.forEach { launch {it.start(node)} }
         }
         logger.i("Node $node START")
     }
