@@ -5,9 +5,9 @@ import it.unibo.jakta.agent.AgentSpecification
 import it.unibo.jakta.agent.AgentState
 import it.unibo.jakta.agent.BaseAgentID
 import it.unibo.jakta.agent.BaseAgentState
-import it.unibo.jakta.node.Node
 import it.unibo.jakta.node.CoroutineNodeRunner
 import it.unibo.jakta.node.LocalNode
+import it.unibo.jakta.node.Node
 import it.unibo.jakta.plan.GoalAdditionPlan
 import kotlin.reflect.typeOf
 import kotlin.test.Test
@@ -62,13 +62,13 @@ class ExecutionTest {
 
         runTest {
             agentSpecGenerator("Agent1", node).forEach { node.addAgent(it) }
-            try{
+            try {
                 runner.run(node)
             } catch (e: Exception) {
                 println("Node execution terminated with exception: ${e.message}")
             }
             agentSpecGenerator("Agent2", node2).forEach { node2.addAgent(it) }
-            try{
+            try {
                 runner.run(node2)
             } catch (e: Exception) {
                 println("Node execution terminated with exception: ${e.message}")

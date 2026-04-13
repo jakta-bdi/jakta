@@ -56,7 +56,5 @@ interface Node<Body : Any, Skills : Any> {
      * Retrieves the unique identifier of an agent based on its body.
      * @param body The body of the agent for which to retrieve the identifier.
      */
-    fun getAgentIDfromBody(body: Body): AgentID? {
-        return agents.entries.find { it.value == body }?.key
-    }
+    fun getAgentIDfromBody(body: Body): AgentID? = agents.entries.find { it.value == body }?.key
 }

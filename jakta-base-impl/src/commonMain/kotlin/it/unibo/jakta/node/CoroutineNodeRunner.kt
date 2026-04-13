@@ -3,8 +3,8 @@ package it.unibo.jakta.node
 import co.touchlab.kermit.Logger
 import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.agent.AgentLifecycle
-import it.unibo.jakta.agent.ExecutableAgent
 import it.unibo.jakta.agent.BaseAgentLifecycle
+import it.unibo.jakta.agent.ExecutableAgent
 import it.unibo.jakta.event.SystemEvent
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -18,9 +18,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 
 /**
- * A [it.unibo.jakta.node.NodeRunner] implementation that uses Kotlin coroutines to manage the execution of agents within a node.
+ * A [it.unibo.jakta.node.NodeRunner] implementation that uses Kotlin coroutines
+ * to manage the execution of agents within a node.
  */
-class CoroutineNodeRunner<Body: Any, Skills: Any, N : Node<Body, Skills>> : NodeRunner<N> {
+class CoroutineNodeRunner<Body : Any, Skills : Any, N : Node<Body, Skills>> : NodeRunner<N> {
 
     private val agents: MutableMap<AgentLifecycle<*, *, *>, Job> = mutableMapOf()
 
@@ -80,7 +81,7 @@ class CoroutineNodeRunner<Body: Any, Skills: Any, N : Node<Body, Skills>> : Node
 
     private fun CoroutineScope.stopNode(node: N) {
         this.coroutineContext.cancel(CancellationException("Termination requested"))
-        //TODO we are brutally killing the agents
+        // TODO we are brutally killing the agents
         // agents.forEach { removeAgent(it.key.executableAgent.id) }
         // return@launch
         _nodes -= node

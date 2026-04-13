@@ -13,7 +13,8 @@ import it.unibo.jakta.event.SystemEvent
 import it.unibo.jakta.event.UnlimitedChannelBus
 
 /**
- * A local implementation of the [it.unibo.jakta.node.Node] interface that manages agents and system events within a single node.
+ * A local implementation of the [it.unibo.jakta.node.Node] interface
+ * that manages agents and system events within a single node.
  */
 class LocalNode<Body : Any, Skills : Any> : Node<Body, Skills> {
 
@@ -21,7 +22,6 @@ class LocalNode<Body : Any, Skills : Any> : Node<Body, Skills> {
 
     override val agents: Map<AgentID, Body>
         get() = _agents.associate { it.id to it.body }
-
 
     private val _systemEvents: EventBus<SystemEvent> = UnlimitedChannelBus()
 

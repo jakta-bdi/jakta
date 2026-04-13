@@ -64,7 +64,6 @@ class GridMovement(val node: Node<BodyWithPosition, *>) : Movement<DoubleArray> 
     }
 }
 
-
 class CustomSkillSet(val node: Node<BodyWithPosition, *>) :
     Recharging by FixedTimeRecharging(node),
     Movement<DoubleArray> by GridMovement(node),
@@ -118,7 +117,6 @@ class TestSpatialRobot {
                 }
             }
         }
-
     }
 
     @Test

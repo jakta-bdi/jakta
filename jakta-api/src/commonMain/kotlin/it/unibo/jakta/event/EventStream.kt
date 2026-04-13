@@ -16,5 +16,4 @@ interface EventStream<E> {
      * @return the next [E] to be parsed, or null if no event is available.
      */
     fun tryNext(): E?
-
 }

@@ -5,16 +5,16 @@ import it.unibo.jakta.event.AgentEvent
 import it.unibo.jakta.event.GoalFailedEvent
 import it.unibo.jakta.intention.IntentionDispatcher
 import it.unibo.jakta.plan.Plan
-import kotlin.coroutines.ContinuationInterceptor
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.job
-import kotlinx.coroutines.launch
 import kotlin.collections.filter
+import kotlin.coroutines.ContinuationInterceptor
 import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.job
+import kotlinx.coroutines.launch
 
 /**
  * A base implementation of the [it.unibo.jakta.agent.AgentLifecycle] interface
@@ -29,7 +29,7 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
             executableAgent.id.displayName,
         )
 
-    //TODO consider making this public or add a method to cancel it e.g. stop()
+    // TODO consider making this public or add a method to cancel it e.g. stop()
     // so far it does not seem to be necessary
     private val agentJob = SupervisorJob()
 
@@ -154,7 +154,7 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
                 handleFailure(event, e)
             }
         }.invokeOnCompletion {
-            log.d {"Plan Completed: $plan for event $event" }
+            log.d { "Plan Completed: $plan for event $event" }
         }
     }
 

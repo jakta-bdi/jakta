@@ -8,9 +8,9 @@ import it.unibo.jakta.event.AgentEvent.External.Perception
 import it.unibo.jakta.event.AgentEvent.Internal
 import it.unibo.jakta.event.EventInbox
 import it.unibo.jakta.event.GoalAddEvent
+import it.unibo.jakta.intention.BaseIntentionPool
 import it.unibo.jakta.intention.Intention
 import it.unibo.jakta.intention.MutableIntentionPool
-import it.unibo.jakta.intention.BaseIntentionPool
 import it.unibo.jakta.plan.Plan
 import kotlin.reflect.KType
 import kotlinx.coroutines.CompletableDeferred

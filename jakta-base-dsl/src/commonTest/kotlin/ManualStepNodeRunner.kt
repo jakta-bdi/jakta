@@ -1,9 +1,9 @@
 package it.unibo.jakta.node
 
+import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.agent.AgentLifecycle
 import it.unibo.jakta.agent.BaseAgentLifecycle
 import it.unibo.jakta.agent.ExecutableAgent
-import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.event.SystemEvent
 import kotlinx.coroutines.CoroutineDispatcher
 
@@ -11,7 +11,7 @@ import kotlinx.coroutines.CoroutineDispatcher
  * A NodeRunner where agent stepping is performed manually, one step at a time.
  * Includes a method to step until no more events are available.
  */
-class ManualStepNodeRunner<Body: Any, Skills: Any, N : Node<Body, Skills>> : NodeRunner<N> {
+class ManualStepNodeRunner<Body : Any, Skills : Any, N : Node<Body, Skills>> : NodeRunner<N> {
 
     private val agents: MutableMap<AgentLifecycle<*, *, *>, Unit> = mutableMapOf()
     private val _nodes: MutableSet<N> = mutableSetOf()

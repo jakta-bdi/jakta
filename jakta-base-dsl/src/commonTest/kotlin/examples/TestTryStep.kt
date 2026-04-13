@@ -21,9 +21,9 @@ import kotlinx.coroutines.test.runTest
 
 class TestTryStep {
 
-    var firstStep = false;
-    var secondStep = false;
-    var done = false;
+    var firstStep = false
+    var secondStep = false
+    var done = false
 
     val helloWorld: Node<Any, NodeTerminationSkillImpl> = node {
         agent("Hello world agent") {
@@ -37,14 +37,14 @@ class TestTryStep {
                     this.takeIf { it == "testBelief" }
                 } triggers {
                     agent.print("Belief added: $context")
-                    agent.print("First step");
-                    firstStep = true;
-                    delay(1000);
-                    agent.print("Second step");
-                    secondStep = true;
+                    agent.print("First step")
+                    firstStep = true
                     delay(1000)
-                    agent.print("Third step, done!");
-                    done = true;
+                    agent.print("Second step")
+                    secondStep = true
+                    delay(1000)
+                    agent.print("Third step, done!")
+                    done = true
                     skills.terminateNode()
                 }
             }
@@ -87,5 +87,4 @@ class TestTryStep {
             assertTrue(done, "Done should have been executed")
         }
     }
-
 }

@@ -4,8 +4,8 @@ import it.unibo.jakta.agent.Agent
 import it.unibo.jakta.agent.AgentBuilder
 import it.unibo.jakta.agent.AgentBuilderImpl
 import it.unibo.jakta.agent.AgentSpecification
-import it.unibo.jakta.node.Node
 import it.unibo.jakta.node.LocalNodeBuilder
+import it.unibo.jakta.node.Node
 import it.unibo.jakta.plan.Plan
 import it.unibo.jakta.plan.PlanBuilder
 import it.unibo.jakta.plan.TriggerAdditionImpl
@@ -25,22 +25,21 @@ fun <Belief : Any, Goal : Any, Skills : Any, Body : Any> node(
     val nodeBuilder = LocalNodeBuilder<Belief, Goal, Skills, Body>()
     nodeBuilder.apply(block)
     return nodeBuilder.build()
-} //TODO now this is bound to local
+} // TODO now this is bound to local
 
-
- /**
+/**
  * Entry point for creating an agent using the Jakta DSL.
  * @return an instantiated Agent.
  */
- @JaktaDSL
- fun <Belief : Any, Goal : Any, Skills : Any, Body: Any> agent(
-     node: Node<Body, Skills>,
-     block: AgentBuilder<Belief, Goal, Skills, Body>.() -> Unit,
- ): AgentSpecification<Belief, Goal, Skills, Body> {
+@JaktaDSL
+fun <Belief : Any, Goal : Any, Skills : Any, Body : Any> agent(
+    node: Node<Body, Skills>,
+    block: AgentBuilder<Belief, Goal, Skills, Body>.() -> Unit,
+): AgentSpecification<Belief, Goal, Skills, Body> {
     val ab = AgentBuilderImpl<Belief, Goal, Skills, Body>()
     ab.apply(block)
     return ab.build(node)
- }
+}
 
 // TODO entrypoint for plans???
 // this is tricky due to the way the DSL is constructed
