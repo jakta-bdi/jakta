@@ -51,4 +51,12 @@ interface Node<Body : Any, Skills : Any> {
      * Terminates the node, effectively shutting down all agents and stopping any ongoing processes within the node.
      */
     fun terminateNode()
+
+    /**
+     * Retrieves the unique identifier of an agent based on its body.
+     * @param body The body of the agent for which to retrieve the identifier.
+     */
+    fun getAgentIDfromBody(body: Body): AgentID? {
+        return agents.entries.find { it.value == body }?.key
+    }
 }
