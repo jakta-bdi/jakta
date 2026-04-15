@@ -9,19 +9,19 @@ import it.unibo.jakta.node.LocalNode
  * Builder interface for defining a Multi-Agent System (MAS) with agents and an environment.
  */
 @JaktaDSL
-interface NodeBuilder<Belief : Any, Goal : Any, Skills : Any, Body : Any, N : Node<Body, Skills>> {
+interface NodeBuilder<Belief : Any, Goal : Any, Body : Any, N : Node<Body>> {
 
     /**
      * Defines an agent using the provided builder block.
      * @return the constructed agent.
      */
-    fun agent(block: AgentBuilder<Belief, Goal, Skills, Body>.() -> Unit)
+    fun agent(block: AgentBuilder<Belief, Goal, Body>.() -> Unit)
 
     /**
      * Defines an agent with a specific name using the provided builder block.
      * @return the constructed agent.
      */
-    fun agent(name: String, block: AgentBuilder<Belief, Goal, Skills, Body>.() -> Unit)
+    fun agent(name: String, block: AgentBuilder<Belief, Goal, Body>.() -> Unit)
 
 //    /**
 //     * Adds multiple agents to the MAS.
@@ -37,21 +37,20 @@ interface NodeBuilder<Belief : Any, Goal : Any, Skills : Any, Body : Any, N : No
 /**
  * Implementation of the MasBuilder interface.
  */
-open class LocalNodeBuilder<Belief : Any, Goal : Any, Skills : Any, Body : Any> :
-    NodeBuilder<Belief, Goal, Skills, Body, LocalNode<Body, Skills>> {
+open class LocalNodeBuilder<Belief : Any, Goal : Any, Body : Any> :
+    NodeBuilder<Belief, Goal, Body, LocalNode<Body>> {
 
-    private val node = LocalNode<Body, Skills>()
+    private val node = LocalNode<Body>()
 
-    protected val agents = mutableListOf<AgentBuilder<Belief, Goal, Skills, Body>>()
+    protected val agents = mutableListOf<AgentBuilder<Belief, Goal, Body>>()
 
-    override fun agent(block: AgentBuilder<Belief, Goal, Skills, Body>.() -> Unit) = buildAgent(null, block)
+    override fun agent(block: AgentBuilder<Belief, Goal, Body>.() -> Unit) = buildAgent(null, block)
 
-    override fun agent(name: String, block: AgentBuilder<Belief, Goal, Skills, Body>.() -> Unit) =
-        buildAgent(name, block)
+    override fun agent(name: String, block: AgentBuilder<Belief, Goal, Body>.() -> Unit) = buildAgent(name, block)
 
-    private fun buildAgent(name: String?, block: AgentBuilder<Belief, Goal, Skills, Body>.() -> Unit) {
-        val agentBuilder = AgentBuilderImpl<Belief, Goal, Skills, Body>(name)
-        val agent: AgentBuilder<Belief, Goal, Skills, Body> = agentBuilder.apply(block)
+    private fun buildAgent(name: String?, block: AgentBuilder<Belief, Goal, Body>.() -> Unit) {
+        val agentBuilder = AgentBuilderImpl<Belief, Goal, Body>(name)
+        val agent: AgentBuilder<Belief, Goal, Body> = agentBuilder.apply(block)
         agents += agent
     }
 
@@ -63,7 +62,7 @@ open class LocalNodeBuilder<Belief : Any, Goal : Any, Skills : Any, Body : Any> 
 //        environment = block()
 //    }
 
-    override fun build(): LocalNode<Body, Skills> {
+    override fun build(): LocalNode<Body> {
         // val env = environment ?: error { "Must provide an Environment for the MAS" }
         agents.forEach { node.addAgent(it.build(node)) }
         return node

@@ -19,10 +19,8 @@ import it.unibo.jakta.plan.TriggerRemovalImpl
  * @return an instantiated MAS.
  */
 @JaktaDSL
-fun <Belief : Any, Goal : Any, Skills : Any, Body : Any> node(
-    block: LocalNodeBuilder<Belief, Goal, Skills, Body>.() -> Unit,
-): Node<Body, Skills> {
-    val nodeBuilder = LocalNodeBuilder<Belief, Goal, Skills, Body>()
+fun <Belief : Any, Goal : Any, Body : Any> node(block: LocalNodeBuilder<Belief, Goal, Body>.() -> Unit): Node<Body> {
+    val nodeBuilder = LocalNodeBuilder<Belief, Goal, Body>()
     nodeBuilder.apply(block)
     return nodeBuilder.build()
 } // TODO now this is bound to local
@@ -32,11 +30,11 @@ fun <Belief : Any, Goal : Any, Skills : Any, Body : Any> node(
  * @return an instantiated Agent.
  */
 @JaktaDSL
-fun <Belief : Any, Goal : Any, Skills : Any, Body : Any> agent(
-    node: Node<Body, Skills>,
-    block: AgentBuilder<Belief, Goal, Skills, Body>.() -> Unit,
-): AgentSpecification<Belief, Goal, Skills, Body> {
-    val ab = AgentBuilderImpl<Belief, Goal, Skills, Body>()
+fun <Belief : Any, Goal : Any, Body : Any> agent(
+    node: Node<Body>,
+    block: AgentBuilder<Belief, Goal, Body>.() -> Unit,
+): AgentSpecification<Belief, Goal, Body> {
+    val ab = AgentBuilderImpl<Belief, Goal, Body>()
     ab.apply(block)
     return ab.build(node)
 }
@@ -53,55 +51,51 @@ fun <Belief : Any, Goal : Any, Skills : Any, Body : Any> agent(
 /**
  * Entry point for belief addition only plans.
  */
-interface BeliefOnlyAdditionTrigger<Belief : Any, Goal : Any, Skills : Any> {
+interface BeliefOnlyAdditionTrigger<Belief : Any, Goal : Any> {
     /**
      * Given a @param[beliefQuery] as a function that matches a belief
      * and extracts a context from it if the belief matches.
      * @return a plan builder for belief addition triggers.
      */
-    fun <Context : Any> belief(
-        beliefQuery: Belief.() -> Context?,
-    ): PlanBuilder.Addition.Belief<Belief, Goal, Skills, Context>
+    fun <Context : Any> belief(beliefQuery: Belief.() -> Context?): PlanBuilder.Addition.Belief<Belief, Goal, Context>
 }
 
 /**
  * Entry point for belief removal only plans.
  */
-interface BeliefOnlyRemovalTrigger<Belief : Any, Goal : Any, Skills : Any> {
+interface BeliefOnlyRemovalTrigger<Belief : Any, Goal : Any> {
     /**
      * Given a @param[beliefQuery] as a function that matches a belief
      * and extracts a context from it if the belief matches.
      * @return a plan builder for belief removal triggers.
      */
-    fun <Context : Any> belief(
-        beliefQuery: Belief.() -> Context?,
-    ): PlanBuilder.Removal.Belief<Belief, Goal, Skills, Context>
+    fun <Context : Any> belief(beliefQuery: Belief.() -> Context?): PlanBuilder.Removal.Belief<Belief, Goal, Context>
 }
 
-private class BeliefPlan<Belief : Any, Goal : Any, Skills : Any> {
-    val adding: BeliefOnlyAdditionTrigger<Belief, Goal, Skills>
+private class BeliefPlan<Belief : Any, Goal : Any> {
+    val adding: BeliefOnlyAdditionTrigger<Belief, Goal>
         get() =
-            object : BeliefOnlyAdditionTrigger<Belief, Goal, Skills> {
-                val trigger = TriggerAdditionImpl<Belief, Goal, Skills>({}, {})
+            object : BeliefOnlyAdditionTrigger<Belief, Goal> {
+                val trigger = TriggerAdditionImpl<Belief, Goal>({}, {})
 
                 override fun <Context : Any> belief(
                     beliefQuery: Belief.() -> Context?,
-                ): PlanBuilder.Addition.Belief<Belief, Goal, Skills, Context> = trigger.belief(beliefQuery)
+                ): PlanBuilder.Addition.Belief<Belief, Goal, Context> = trigger.belief(beliefQuery)
             }
 
-    val removing: BeliefOnlyRemovalTrigger<Belief, Goal, Skills>
+    val removing: BeliefOnlyRemovalTrigger<Belief, Goal>
         get() =
-            object : BeliefOnlyRemovalTrigger<Belief, Goal, Skills> {
-                val trigger = TriggerRemovalImpl<Belief, Goal, Skills>({}, {})
+            object : BeliefOnlyRemovalTrigger<Belief, Goal> {
+                val trigger = TriggerRemovalImpl<Belief, Goal>({}, {})
 
                 override fun <Context : Any> belief(
                     beliefQuery: Belief.() -> Context?,
-                ): PlanBuilder.Removal.Belief<Belief, Goal, Skills, Context> = trigger.belief(beliefQuery)
+                ): PlanBuilder.Removal.Belief<Belief, Goal, Context> = trigger.belief(beliefQuery)
             }
 
     companion object {
-        fun <Belief : Any, Goal : Any, Skills : Any> of(
-            block: BeliefPlan<Belief, Goal, Skills>.() -> Plan.Belief<Belief, Goal, Skills, *, *>,
-        ): Plan.Belief<Belief, Goal, Skills, *, *> = block(BeliefPlan())
+        fun <Belief : Any, Goal : Any> of(
+            block: BeliefPlan<Belief, Goal>.() -> Plan.Belief<Belief, Goal, *, *>,
+        ): Plan.Belief<Belief, Goal, *, *> = block(BeliefPlan())
     }
 }

@@ -16,9 +16,9 @@ import it.unibo.jakta.event.UnlimitedChannelBus
  * A local implementation of the [it.unibo.jakta.node.Node] interface
  * that manages agents and system events within a single node.
  */
-class LocalNode<Body : Any, Skills : Any> : Node<Body, Skills> {
+class LocalNode<Body : Any> : Node<Body> {
 
-    private val _agents: MutableSet<BaseAgent<*, *, *, Body>> = mutableSetOf()
+    private val _agents: MutableSet<BaseAgent<*, *, Body>> = mutableSetOf()
 
     override val agents: Map<AgentID, Body>
         get() = _agents.associate { it.id to it.body }
@@ -28,7 +28,7 @@ class LocalNode<Body : Any, Skills : Any> : Node<Body, Skills> {
     override val systemEvents: EventStream<SystemEvent>
         get() = _systemEvents
 
-    override fun addAgent(agentSpecification: AgentSpecification<*, *, Skills, Body>) {
+    override fun addAgent(agentSpecification: AgentSpecification<*, *, Body>) {
         val agent = BaseAgent(agentSpecification)
         _agents += agent
         _systemEvents.send(AgentAdditionEvent(agent))
@@ -45,7 +45,7 @@ class LocalNode<Body : Any, Skills : Any> : Node<Body, Skills> {
         _systemEvents.send(ShutDownNodeEvent)
     }
 
-    override fun sendEvent(event: AgentEvent.External, filterFunction: Node<Body, Skills>.(Body) -> Boolean) {
+    override fun sendEvent(event: AgentEvent.External, filterFunction: Node<Body>.(Body) -> Boolean) {
         _agents.filter { filterFunction(it.body) }
             .forEach { it.externalInbox.send(event) }
     }

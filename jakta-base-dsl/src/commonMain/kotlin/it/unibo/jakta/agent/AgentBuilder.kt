@@ -14,7 +14,7 @@ import kotlin.properties.Delegates
  * Builder interface for defining an agent with beliefs, goals, and plans.
  */
 @JaktaDSL
-interface AgentBuilder<Belief : Any, Goal : Any, Skills : Any, Body : Any> {
+interface AgentBuilder<Belief : Any, Goal : Any, Body : Any> {
 
     /**
      * Defines how and whether a [Perception] is mapped into a [Internal] Event.
@@ -41,7 +41,7 @@ interface AgentBuilder<Belief : Any, Goal : Any, Skills : Any, Body : Any> {
     /**
      * Defines the plans of the agent using a plan library builder block.
      */
-    fun hasPlans(block: PlanLibraryBuilder<Belief, Goal, Skills>.() -> Unit)
+    fun hasPlans(block: PlanLibraryBuilder<Belief, Goal>.() -> Unit)
 
     /**
      * Adds a belief to the agent's initial beliefs.
@@ -56,27 +56,27 @@ interface AgentBuilder<Belief : Any, Goal : Any, Skills : Any, Body : Any> {
     /**
      * Adds a belief plan to the agent's plan library.
      */
-    fun addBeliefPlan(plan: Plan.Belief<Belief, Goal, Skills, *, *>)
+    fun addBeliefPlan(plan: Plan.Belief<Belief, Goal, *, *>)
 
     /**
      * Adds a goal plan to the agent's plan library.
      */
-    fun addGoalPlan(plan: Plan.Goal<Belief, Goal, Skills, *, *>)
+    fun addGoalPlan(plan: Plan.Goal<Belief, Goal, *, *>)
 
     /**
      * Adds multiple belief plans to the agent's plan library.
      */
-    fun withBeliefPlans(vararg plans: Plan.Belief<Belief, Goal, Skills, *, *>)
+    fun withBeliefPlans(vararg plans: Plan.Belief<Belief, Goal, *, *>)
 
     /**
      * Adds multiple goal plans to the agent's plan library.
      */
-    fun withGoalPlans(vararg plans: Plan.Goal<Belief, Goal, Skills, *, *>)
+    fun withGoalPlans(vararg plans: Plan.Goal<Belief, Goal, *, *>)
 
     /**
      * Define the skills this agent can use in his plans.
      */
-    fun withSkills(skillFactory: (Node<Body, Skills>) -> Skills)
+    fun withSkills(skillFactory: (Node<Body>) -> Skills)
 
     /**
      * Define how an agent can be embodied in the node.
@@ -86,20 +86,20 @@ interface AgentBuilder<Belief : Any, Goal : Any, Skills : Any, Body : Any> {
     /**
      * Builds and returns the agent instance.
      */
-    fun build(node: Node<Body, Skills>): AgentSpecification<Belief, Goal, Skills, Body>
+    fun build(node: Node<Body>): AgentSpecification<Belief, Goal, Body>
 }
 
 /**
  * Implementation of the AgentBuilder interface.
  */
-class AgentBuilderImpl<Belief : Any, Goal : Any, Skills : Any, Body : Any>(private val name: String? = null) :
-    AgentBuilder<Belief, Goal, Skills, Body> {
+class AgentBuilderImpl<Belief : Any, Goal : Any, Body : Any>(private val name: String? = null) :
+    AgentBuilder<Belief, Goal, Body> {
     private var initialBeliefs = listOf<Belief>()
     private var initialGoals = listOf<Goal>()
-    private var beliefPlans = listOf<Plan.Belief<Belief, Goal, Skills, *, *>>()
-    private var goalPlans = listOf<Plan.Goal<Belief, Goal, Skills, *, *>>()
+    private var beliefPlans = listOf<Plan.Belief<Belief, Goal, *, *>>()
+    private var goalPlans = listOf<Plan.Goal<Belief, Goal, *, *>>()
 
-    private var skillsFactory: (Node<Body, Skills>) -> Skills by Delegates.notNull()
+    private var skillsFactory: (Node<Body>) -> Skills by Delegates.notNull()
     private var bodyFactory: (AgentID) -> Body by Delegates.notNull()
     private var messageHandler: (Message) -> Internal? = { null } // By default, all messages are discarded.
     private var perceptionHandler: (Perception) -> Internal? = { null } // By default, percept do not generate events.
@@ -122,7 +122,7 @@ class AgentBuilderImpl<Belief : Any, Goal : Any, Skills : Any, Body : Any>(priva
         builder.apply(block)
     }
 
-    override fun withSkills(skillFactory: (Node<Body, Skills>) -> Skills) {
+    override fun withSkills(skillFactory: (Node<Body>) -> Skills) {
         this.skillsFactory = skillFactory
     }
 
@@ -130,8 +130,8 @@ class AgentBuilderImpl<Belief : Any, Goal : Any, Skills : Any, Body : Any>(priva
         this.bodyFactory = bodyFactory
     }
 
-    override fun hasPlans(block: PlanLibraryBuilder<Belief, Goal, Skills>.() -> Unit) {
-        val builder = PlanLibraryBuilderImpl<Belief, Goal, Skills>(::addBeliefPlan, ::addGoalPlan)
+    override fun hasPlans(block: PlanLibraryBuilder<Belief, Goal>.() -> Unit) {
+        val builder = PlanLibraryBuilderImpl<Belief, Goal>(::addBeliefPlan, ::addGoalPlan)
         builder.apply(block)
     }
 
@@ -143,28 +143,28 @@ class AgentBuilderImpl<Belief : Any, Goal : Any, Skills : Any, Body : Any>(priva
         initialGoals += goal
     }
 
-    override fun addBeliefPlan(plan: Plan.Belief<Belief, Goal, Skills, *, *>) {
+    override fun addBeliefPlan(plan: Plan.Belief<Belief, Goal, *, *>) {
         beliefPlans += plan
     }
 
-    override fun addGoalPlan(plan: Plan.Goal<Belief, Goal, Skills, *, *>) {
+    override fun addGoalPlan(plan: Plan.Goal<Belief, Goal, *, *>) {
         goalPlans += plan
     }
 
-    override fun withBeliefPlans(vararg plans: Plan.Belief<Belief, Goal, Skills, *, *>) {
+    override fun withBeliefPlans(vararg plans: Plan.Belief<Belief, Goal, *, *>) {
         beliefPlans += plans
     }
 
-    override fun withGoalPlans(vararg plans: Plan.Goal<Belief, Goal, Skills, *, *>) {
+    override fun withGoalPlans(vararg plans: Plan.Goal<Belief, Goal, *, *>) {
         goalPlans += plans
     }
 
-    override fun build(node: Node<Body, Skills>): AgentSpecification<Belief, Goal, Skills, Body> =
-        object : AgentSpecification<Belief, Goal, Skills, Body> {
+    override fun build(node: Node<Body>): AgentSpecification<Belief, Goal, Body> =
+        object : AgentSpecification<Belief, Goal, Body> {
             override val id: AgentID = this@AgentBuilderImpl.name?.let { BaseAgentID(it) } ?: BaseAgentID()
             override val body: Body = this@AgentBuilderImpl.bodyFactory(id)
             override val initialGoals: List<Goal> = this@AgentBuilderImpl.initialGoals
-            override val initialState: AgentState<Belief, Goal, Skills> = BaseAgentState(
+            override val initialState: AgentState<Belief, Goal> = BaseAgentState(
                 beliefs = initialBeliefs,
                 intentions = setOf(),
                 beliefPlans = this@AgentBuilderImpl.beliefPlans,

@@ -12,7 +12,7 @@ import it.unibo.jakta.plan.Plan
  * @param Goal The type representing the agent's *goals*.
  * @param Skills The type representing the agent's *skills*.
  */
-interface AgentState<Belief : Any, Goal : Any, Skills : Any> : GuardScope<Belief> {
+interface AgentState<Belief : Any, Goal : Any> : GuardScope<Belief> {
 
     /**
      * The *beliefs* held by the agent.
@@ -27,12 +27,12 @@ interface AgentState<Belief : Any, Goal : Any, Skills : Any> : GuardScope<Belief
     /**
      * The list of [Plan.Belief] available to handle [AgentEvent.Internal.Belief] events.
      */
-    val beliefPlans: List<Plan.Belief<Belief, Goal, Skills, *, *>>
+    val beliefPlans: List<Plan.Belief<Belief, Goal, *, *>>
 
     /**
      * The list of [Plan.Goal] available to handle [AgentEvent.Internal.Goal] events.
      */
-    val goalPlans: List<Plan.Goal<Belief, Goal, Skills, *, *>>
+    val goalPlans: List<Plan.Goal<Belief, Goal, *, *>>
 
     /**
      * Mapping function which defines how to (optionally)
@@ -45,9 +45,4 @@ interface AgentState<Belief : Any, Goal : Any, Skills : Any> : GuardScope<Belief
      * convert a [AgentEvent.External.Message] into a [AgentEvent.Internal].
      */
     val messageHandler: (AgentEvent.External.Message) -> AgentEvent.Internal?
-
-    /**
-     * The [Skills] the agent is allowed to use.
-     */
-    val skills: Skills
 }

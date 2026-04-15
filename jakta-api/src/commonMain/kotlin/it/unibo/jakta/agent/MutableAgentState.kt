@@ -9,8 +9,8 @@ import kotlin.reflect.typeOf
 /**
  * Mutable state of an agent, allowing modifications to its beliefs, plans, and event handlers.
  */
-interface MutableAgentState<Belief : Any, Goal : Any, Skills : Any> :
-    AgentState<Belief, Goal, Skills>,
+interface MutableAgentState<Belief : Any, Goal : Any> :
+    AgentState<Belief, Goal>,
     Agent {
 
     /**
@@ -34,13 +34,13 @@ interface MutableAgentState<Belief : Any, Goal : Any, Skills : Any> :
      * Adds a new [Plan.Goal] that agent can use for its reasoning process.
      * @param plan the new [Plan.Goal].
      */
-    fun addPlan(plan: Plan.Goal<Belief, Goal, Skills, *, *>)
+    fun addPlan(plan: Plan.Goal<Belief, Goal, *, *>)
 
     /**
      * Adds a new [Plan.Belief] that agent can use for its reasoning process.
      * @param plan the new [Plan.Belief].
      */
-    fun addPlan(plan: Plan.Belief<Belief, Goal, Skills, *, *>)
+    fun addPlan(plan: Plan.Belief<Belief, Goal, *, *>)
 
     // TODO How to remove plans??
 
@@ -88,6 +88,5 @@ interface MutableAgentState<Belief : Any, Goal : Any, Skills : Any> :
  * @return The result of the plan execution of type [PlanResult].
  */
 @Suppress("DEPRECATION_ERROR")
-suspend inline fun <B : Any, G : Any, S : Any, reified PlanResult> MutableAgentState<B, G, S>.achieve(
-    goal: G,
-): PlanResult = internalAchieve(goal, typeOf<PlanResult>())
+suspend inline fun <B : Any, G : Any, reified PlanResult> MutableAgentState<B, G>.achieve(goal: G): PlanResult =
+    internalAchieve(goal, typeOf<PlanResult>())

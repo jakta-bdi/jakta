@@ -20,9 +20,8 @@ import kotlinx.coroutines.launch
  * A base implementation of the [it.unibo.jakta.agent.AgentLifecycle] interface
  * that defines the core logic for handling agent events and executing plans.
  */
-class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
-    override val executableAgent: ExecutableAgent<Belief, Goal, Skills>,
-) : AgentLifecycle<Belief, Goal, Skills> {
+class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent: ExecutableAgent<Belief, Goal>) :
+    AgentLifecycle<Belief, Goal> {
     private val log =
         Logger(
             Logger.config,
@@ -134,7 +133,7 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
     private fun <TriggerEntity : Any> CoroutineScope.launchPlan(
         event: AgentEvent.Internal,
         entity: TriggerEntity,
-        plan: Plan<Belief, Goal, Skills, TriggerEntity, *, *>,
+        plan: Plan<Belief, Goal, TriggerEntity, *, *>,
         completion: CompletableDeferred<Any?>? = null, // TODO Check if this Any? can be improved
     ) {
         val intention = executableAgent.state.mutableIntentionPool.nextIntention(event, this.coroutineContext.job)
@@ -161,10 +160,10 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
     private fun <TriggerEntity : Any> selectPlan(
         entity: TriggerEntity,
         entityMessage: String,
-        planList: List<Plan<Belief, Goal, *, TriggerEntity, *, *>>,
-        relevantFilter: (Plan<Belief, Goal, *, TriggerEntity, *, *>) -> Boolean,
-        applicableFilter: (Plan<Belief, Goal, *, TriggerEntity, *, *>) -> Boolean,
-    ): Plan<Belief, Goal, Skills, TriggerEntity, *, *>? {
+        planList: List<Plan<Belief, Goal, TriggerEntity, *, *>>,
+        relevantFilter: (Plan<Belief, Goal, TriggerEntity, *, *>) -> Boolean,
+        applicableFilter: (Plan<Belief, Goal, TriggerEntity, *, *>) -> Boolean,
+    ): Plan<Belief, Goal, TriggerEntity, *, *>? {
         val relevant = planList.filter(relevantFilter)
 
         if (relevant.isEmpty()) {
@@ -179,7 +178,7 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
 
         return applicable.firstOrNull()?.let {
             log.d { "Selected plan $it for $entityMessage: $entity" }
-            it as Plan<Belief, Goal, Skills, TriggerEntity, *, *>
+            it as Plan<Belief, Goal, TriggerEntity, *, *>
             // TODO: This is not entirely safe, check from DSL that
             // the type of the agent skill must implement the plan skill type.
         } ?: run {

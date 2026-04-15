@@ -9,10 +9,10 @@ fun <T> String.ifGoalMatch(goal: String, returnValue: T): T? = if (this == goal)
 fun String.ifGoalMatch(goal: String): Unit? = if (this == goal) Unit else null
 
 // TODO Io questa la rimuoverei e proverei a creare un CoroutineTestRunner
-fun <Body : Any, Skills : Any> executeInTestScope(node: TestScope.() -> Node<Body, Skills>) {
+fun <Body : Any> executeInTestScope(node: TestScope.() -> Node<Body>) {
     runTest {
         val job = launch {
-            CoroutineNodeRunner<Body, Skills, Node<Body, Skills>>().run(node())
+            CoroutineNodeRunner<Body, Node<Body>>().run(node())
         }
         job.join()
     }
