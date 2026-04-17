@@ -6,10 +6,10 @@ incarnation: jakta
 
 _pool: &program
   - program:
-      entrypoint: it.unibo.jakta.test.HelloWorldMolecule.entrypoint
+      entrypoint: it.unibo.jakta.test.TwoAgentsSameNode.entrypoint
 
 deployments:
   - type: Point
     parameters: [ 2, 2 ]
     programs:
-      - program: it.unibo.jakta.test.HelloWorldMolecule.entrypoint
+      - program: it.unibo.jakta.test.TwoAgentsSameNode.entrypoint

@@ -93,7 +93,8 @@ class JaktaIncarnation<P: Position<P>> : Incarnation<Any?, P> {
         runtime.setInitialJaktaNodes(jaktaNodes)
 
         val event = Event(node, timeDistribution)
-        event.actions = runtime.getAgentActions().map { it.second }
+        val actions = runtime.getAgentActions().map { it.first }
+        event.actions = actions
         return event
     }
 
@@ -123,7 +124,6 @@ class JaktaIncarnation<P: Position<P>> : Incarnation<Any?, P> {
             }
 
             val `class` = Class.forName(className)
-            println(`class`.methods)
             val callableFunction = `class`.methods
                 .asSequence()
                 .mapNotNull { it.kotlinFunction }

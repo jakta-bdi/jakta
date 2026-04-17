@@ -19,7 +19,7 @@ class JaktaForAlchemistRuntime<P: Position<P>>(
 ): NodeProperty<Any?> {
 
     private lateinit var jaktaNodes: RuntimeNodes<JaktaNode<*,*>>
-    private val agentActions : MutableMap<JaktaNode<*,*>, JaktaForAlchemistAgent<P>> = mutableMapOf()
+    private val agentActions : MutableMap<JaktaForAlchemistAgent<P>, JaktaNode<*,*>, > = mutableMapOf()
 
     private fun addAgentAction(node: JaktaNode<*,*>, agent: ExecutableAgent<*, *, *>) {
         val newAgentAction = JaktaForAlchemistAgent<P>(
@@ -27,7 +27,7 @@ class JaktaForAlchemistRuntime<P: Position<P>>(
             agent,
             alchemistEnvironment,
         )
-        agentActions += node to newAgentAction
+        agentActions += newAgentAction to node
     }
 
     /**

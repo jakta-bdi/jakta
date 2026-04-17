@@ -21,7 +21,7 @@ class TestLoadingWithAlchemist {
     }
 
     private fun testRunning(fileName: String, fileUrl: URL) {
-        Logger.setMinSeverity(Severity.Verbose)
+        Logger.setMinSeverity(Severity.Info)
         println("Running $fileName")
         val loader = LoadAlchemist.from(fileUrl)
         assertNotNull(loader)
