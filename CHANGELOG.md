@@ -1,3 +1,12 @@
+## [0.15.142](https://github.com/jakta-bdi/jakta/compare/v0.15.141...v0.15.142) (2026-04-19)
+
+
+### Bug Fixes
+
+* **deps:** update anitvam/conventionalcommit-semantic-releasing action to v0.7.104 ([21042e1](https://github.com/jakta-bdi/jakta/commit/21042e1f04eb33f865f82ba34d03d27d96fedd2e))
+* **deps:** update kotest to v6.1.11 ([29d951f](https://github.com/jakta-bdi/jakta/commit/29d951f5b0946e76148cebb141f7ae54757b423a))
+* **deps:** update plugin org.danilopianini.gradle-pre-commit-git-hooks to v2.1.13 ([#790](https://github.com/jakta-bdi/jakta/issues/790)) ([be48201](https://github.com/jakta-bdi/jakta/commit/be48201a359407ddd48c8b484d7341f08b422f76))
+
 ## [0.15.141](https://github.com/jakta-bdi/jakta/compare/v0.15.140...v0.15.141) (2026-03-30)
 
 
