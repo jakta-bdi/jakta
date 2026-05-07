@@ -31,6 +31,5 @@ class TestLoadingWithAlchemist {
         simulation.play()
         simulation.run()
         simulation.error.ifPresent { throw it }
-
     }
 }

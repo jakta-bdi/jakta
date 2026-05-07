@@ -1,0 +1,67 @@
+package it.unibo.jakta.dsl.examples
+
+import co.touchlab.kermit.Logger
+import co.touchlab.kermit.Severity
+import it.unibo.jakta.dsl.AgentTerminationSkill
+import it.unibo.jakta.dsl.AgentTerminationSkillImpl
+import it.unibo.jakta.dsl.NodeTerminationSkill
+import it.unibo.jakta.dsl.NodeTerminationSkillImpl
+import it.unibo.jakta.dsl.executeInTestScope
+import it.unibo.jakta.dsl.ifGoalMatch
+import it.unibo.jakta.dsl.node
+import it.unibo.jakta.dsl.plan.triggers
+import it.unibo.jakta.node.Node
+import kotlin.test.Test
+import kotlinx.coroutines.delay
+
+class SkillSet(val node: Node<*, *>) :
+    NodeTerminationSkill by NodeTerminationSkillImpl(node),
+    AgentTerminationSkill by AgentTerminationSkillImpl(node)
+
+class TestMultipleAgentDelays {
+    val helloWorld =
+        node {
+            agent {
+                embodiedAs { object {} }
+                withSkills { SkillSet(it) }
+                hasInitialGoals {
+                    !"goal"
+                }
+                hasPlans {
+                    adding.goal {
+                        ifGoalMatch("goal")
+                    } triggers {
+                        agent.print("Hello...")
+                        delay(10000)
+                        agent.print("...World!")
+                        skills.terminateNode()
+                    }
+                }
+            }
+            agent {
+                embodiedAs { object {} }
+                withSkills { SkillSet(it) }
+                hasInitialGoals {
+                    !"goal"
+                }
+                hasPlans {
+                    adding.goal {
+                        ifGoalMatch("goal")
+                    } triggers {
+                        agent.print("I will be faster...")
+                        delay(5000)
+                        agent.print("...than you!")
+                        with(skills) {
+                            agent.terminate()
+                        }
+                    }
+                }
+            }
+        }
+
+    @Test
+    fun testMultipleAgentsDelays() {
+        Logger.setMinSeverity(Severity.Error)
+        executeInTestScope { helloWorld }
+    }
+}

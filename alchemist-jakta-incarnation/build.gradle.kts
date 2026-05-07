@@ -1,6 +1,6 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     `java-library`
@@ -20,7 +20,7 @@ kotlinJvm {
     sourceSets {
         val main by getting {
             dependencies {
-                implementation(project(":jakta-base-dsl"))
+                implementation(project(":jakta-dsl"))
                 implementation(project(":jakta-base-impl"))
                 api(project(":jakta-api"))
                 api(libs.bundles.alchemist.api)

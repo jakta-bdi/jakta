@@ -30,7 +30,7 @@ rootProject.name = "jakta"
 
 include(
     "jakta-api",
-    "jakta-base-dsl",
+    "jakta-dsl",
     "jakta-base-impl",
     "alchemist-jakta-incarnation",
 )

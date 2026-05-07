@@ -1,15 +1,40 @@
-package it.unibo.jakta
+package it.unibo.jakta.reflection
 
-import kotlinx.coroutines.*
+import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
-import kotlin.coroutines.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
+/**
+ * Testing it.unibo.jakta.reflection.Event.
+ */
 sealed interface Event {
+    /**
+     * Goal related to this event.
+     * @param block
+     * @return an [Event]
+     */
     class Goal(val block: suspend () -> Unit) : Event
+
+    /**
+     * Continuation related to this event.
+     * @param runnable [Runnable]
+     * @return an [Event]
+     */
     class Continuation(val runnable: Runnable) : Event
 }
 
-fun main() = runBlocking {
+/**
+ * Testing behavior of coroutine for Jakta new engine implementation.
+ */
+fun main(): Unit = runBlocking {
     // Unlimited channel for events
     val eventChannel = Channel<Event>(Channel.UNLIMITED)
 
@@ -31,12 +56,11 @@ fun main() = runBlocking {
     val processor = scope.launch {
         while (isActive) {
             when (val event = eventChannel.receive()) {
-
                 is Event.Goal -> {
                     // Start a new coroutine
-                    //THIS IS THE KEY -> The plans should not be children of the agent, but siblings of the agent
+                    // THIS IS THE KEY -> The plans should not be children of the agent, but siblings of the agent
                     scope.launch(dispatcher) {
-                            event.block()
+                        event.block()
                     }
                 }
 
@@ -48,20 +72,24 @@ fun main() = runBlocking {
         }
     }
 
-    // Event 1: long-running
-    eventChannel.send(Event.Goal {
-        println("Event 1 start")
-        delay(1000)
-        println("Event 1 end")
-    })
+    // it.unibo.jakta.reflection.Event 1: long-running
+    eventChannel.send(
+        Event.Goal {
+            println("it.unibo.jakta.reflection.Event 1 start")
+            delay(1000)
+            println("it.unibo.jakta.reflection.Event 1 end")
+        },
+    )
 
-    eventChannel.send(Event.Goal {
-        println("Event 2 start")
-        delay(300)
-        println("Cancelling scope")
-        scope.cancel()
-        println("Event 2 end")
-    })
+    eventChannel.send(
+        Event.Goal {
+            println("it.unibo.jakta.reflection.Event 2 start")
+            delay(300)
+            println("Cancelling scope")
+            scope.cancel()
+            println("it.unibo.jakta.reflection.Event 2 end")
+        },
+    )
 
     // Give enough time for events to process
     processor.join()

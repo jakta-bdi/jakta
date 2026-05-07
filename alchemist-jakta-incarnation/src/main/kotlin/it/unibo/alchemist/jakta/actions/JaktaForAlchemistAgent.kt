@@ -12,6 +12,9 @@ import it.unibo.jakta.agent.BaseAgentLifecycle
 import it.unibo.jakta.agent.ExecutableAgent
 import it.unibo.jakta.alchemist.AlchemistDispatcher
 
+/**
+ * Alchemist Action executing the JaKtA agent lifecycle.
+ */
 class JaktaForAlchemistAgent<P : Position<P>>(
     alchemistNode: AlchemistNode<Any?>,
     private val agent: ExecutableAgent<*, *, *>,
@@ -24,18 +27,16 @@ class JaktaForAlchemistAgent<P : Position<P>>(
     private val dispatcher = AlchemistDispatcher.of(alchemistEnvironment)
     private val logger = Logger(Logger.config, "Agent Action")
 
-    override fun cloneAction(
-        node: AlchemistNode<Any?>,
-        reaction: Reaction<Any?>,
-    ): Action<Any?> = JaktaForAlchemistAgent(
-        node,
-        agent,
-        alchemistEnvironment,
-    )
+    override fun cloneAction(node: AlchemistNode<Any?>, reaction: Reaction<Any?>): Action<Any?> =
+        JaktaForAlchemistAgent(
+            node,
+            agent,
+            alchemistEnvironment,
+        )
 
     override fun execute() {
         logger.d { "Executing Agent Step" }
-        //dispatcher.runDueTasks()
+        // dispatcher.runDueTasks()
         agentLifecycle.tryStep(dispatcher)
         dispatcher.runDueTasks() // TODO: This is not the best position to invoke this
     }

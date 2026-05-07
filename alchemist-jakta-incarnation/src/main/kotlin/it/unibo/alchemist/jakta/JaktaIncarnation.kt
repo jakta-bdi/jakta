@@ -24,19 +24,19 @@ import kotlin.collections.get
 import kotlin.reflect.KCallable
 import kotlin.reflect.full.isSubtypeOf
 import kotlin.reflect.full.starProjectedType
-import org.apache.commons.math3.random.RandomGenerator
 import kotlin.reflect.jvm.kotlinFunction
+import org.apache.commons.math3.random.RandomGenerator
 
-class JaktaIncarnation<P: Position<P>> : Incarnation<Any?, P> {
-    override fun getProperty(
-        node: Node<Any?>,
-        molecule: Molecule,
-        property: String
-    ): Double = when (val concentration = node.getConcentration(molecule)) {
-        is Number -> concentration.toDouble()
-        is String -> concentration.toDoubleOrNull()
-        else -> null
-    } ?: Double.NaN
+/**
+ * Jakta incarnation for executing on Alchemist.
+ */
+class JaktaIncarnation<P : Position<P>> : Incarnation<Any?, P> {
+    override fun getProperty(node: Node<Any?>, molecule: Molecule, property: String): Double =
+        when (val concentration = node.getConcentration(molecule)) {
+            is Number -> concentration.toDouble()
+            is String -> concentration.toDoubleOrNull()
+            else -> null
+        } ?: Double.NaN
 
     override fun createMolecule(s: String): Molecule = SimpleMolecule(s)
 
@@ -58,7 +58,7 @@ class JaktaIncarnation<P: Position<P>> : Incarnation<Any?, P> {
         environment: Environment<Any?, P>,
         node: Node<Any?>?,
         parameter: Any?,
-    ): TimeDistribution<Any?> = DiracComb( //TODO("What if I create a different type of reaction from yaml?")
+    ): TimeDistribution<Any?> = DiracComb( // TODO("What if I create a different type of reaction from yaml?")
         when (parameter) {
             is Number -> parameter.toDouble()
             is String -> parameter.toDouble()
@@ -71,9 +71,9 @@ class JaktaIncarnation<P: Position<P>> : Incarnation<Any?, P> {
         environment: Environment<Any?, P>,
         node: Node<Any?>?,
         actionable: Actionable<Any?>,
-        additionalParameters: Any?
+        additionalParameters: Any?,
     ): Action<Any?> {
-        //requireNotNull(node) { "JaKtA cannot execute as a Global Reaction" }
+        // requireNotNull(node) { "JaKtA cannot execute as a Global Reaction" }
         error { "Alchemist actions direct creation is not supported by Jakta" }
     }
 
@@ -82,7 +82,7 @@ class JaktaIncarnation<P: Position<P>> : Incarnation<Any?, P> {
         environment: Environment<Any?, P>,
         node: Node<Any?>?,
         timeDistribution: TimeDistribution<Any?>,
-        parameter: Any?
+        parameter: Any?,
     ): Reaction<Any?> {
         requireNotNull(node) { "JaKtA cannot execute as a Global Reaction" }
         val jaktaNodes = loadEntrypointFromClasspath(parameter, node)
@@ -103,15 +103,24 @@ class JaktaIncarnation<P: Position<P>> : Incarnation<Any?, P> {
         environment: Environment<Any?, P>?,
         node: Node<Any?>?,
         actionable: Actionable<Any?>?,
-        additionalParameters: Any?
+        additionalParameters: Any?,
     ): Condition<Any?> = object : AbstractCondition<Any>(requireNotNull(node)) {
         override fun getContext() = Context.LOCAL
         override fun getPropensityContribution(): Double = 1.0
         override fun isValid(): Boolean = true
     }
 
+    /**
+     * Utilities for Jakta incarnation.
+     */
     companion object {
-        fun loadEntrypointFromClasspath(entrypoint: Any?, node: Node<Any?>): RuntimeNodes<JaktaNode<*,*>> {
+        /**
+         * Function that loads the value passed as entrypoint in the simulation from the classpath.
+         * @param entrypoint the parameter specified in the simulation configuraiton.
+         * @param node the alchemist Node on which the jakta entrypoint should be executed.
+         * @return an instance of [RuntimeNodes] which contains the jakta nodes to be executed on the alchemist node.
+         */
+        fun loadEntrypointFromClasspath(entrypoint: Any?, node: Node<Any?>): RuntimeNodes<JaktaNode<*, *>> {
             require(entrypoint is String) {
                 "JaKtA expects the program to be the classpath String pointing to program entrypoint."
             }
@@ -128,7 +137,7 @@ class JaktaIncarnation<P: Position<P>> : Incarnation<Any?, P> {
                 .asSequence()
                 .mapNotNull { it.kotlinFunction }
                 .filter { it.returnType.isSubtypeOf(RuntimeNodes::class.starProjectedType) }
-                .filterIsInstance<KCallable<RuntimeNodes<JaktaNode<*,*>>>>()
+                .filterIsInstance<KCallable<RuntimeNodes<JaktaNode<*, *>>>>()
                 .first { it.name == method }
 
             val jaktaRuntime = node.properties

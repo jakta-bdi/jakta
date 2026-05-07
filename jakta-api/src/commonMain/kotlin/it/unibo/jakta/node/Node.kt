@@ -55,7 +55,7 @@ interface Node<Body : Any, Skills : Any> {
     /**
      * Adds a new behavior to the node.
      */
-    fun addBehavior(behavior: NodeBehavior<Body,Skills>)
+    fun addBehavior(behavior: NodeBehavior<Body, Skills>)
 
     /**
      * Terminates the node, effectively shutting down all agents and stopping any ongoing processes within the node.
