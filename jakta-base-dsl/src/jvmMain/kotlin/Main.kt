@@ -26,7 +26,7 @@ fun main(): Unit = runBlocking {
                 }
 
                 agent("Pippo") {
-                    body = object {}
+                    embodiedAs { object{} }
                     withSkills { skills }
                     believes {
                         +"testBelief"
@@ -42,7 +42,7 @@ fun main(): Unit = runBlocking {
                     }
                 }
                 agent("Pluto") {
-                    body = object {}
+                    embodiedAs { object{} }
                     withSkills { skills }
                     believes {
                         +"testBelief"
@@ -62,7 +62,7 @@ fun main(): Unit = runBlocking {
                 val skills = object { val node = this@node}
 
                 agent("Paperino") {
-                    body = object {}
+                    embodiedAs { object{} }
                     withSkills { skills }
                     believes {
                         +"testBelief"

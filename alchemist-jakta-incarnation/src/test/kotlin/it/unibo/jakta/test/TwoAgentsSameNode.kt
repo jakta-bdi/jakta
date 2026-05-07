@@ -29,9 +29,9 @@ private fun <Belief : Any, Goal : Any> LocalNodeBuilder<Belief, Goal, MessagingS
     block: AgentBuilder<Belief, Goal, MessagingSkill, BodyWithName>.() -> Unit,
 ) {
     agent(name) {
-        body = BodyWithName(name)
+        embodiedAs { BodyWithName(name) }
         withSkills { MessagingSkill(it) }
-        messageHandler = { BeliefAddEvent(it) }
+        handlesMessageEvents { BeliefAddEvent(it) }
         block()
     }
 }
