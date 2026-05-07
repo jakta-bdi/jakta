@@ -208,7 +208,7 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
                 event.completion?.completeExceptionally(e)
             }
             else -> {
-                log.w { "Handling of event $event failed with exception:${e.message}\n${e.stackTraceToString()}" }
+                log.w { "Handling of event $event failed with exception:${e.message}" }
             }
         }
     }
