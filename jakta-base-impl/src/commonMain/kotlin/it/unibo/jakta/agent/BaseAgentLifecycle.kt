@@ -63,15 +63,6 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
         when (event) {
             is AgentEvent.External.Perception -> executableAgent.state.perceptionHandler(event)
             is AgentEvent.External.Message -> executableAgent.state.messageHandler(event)
-            else -> {
-                log.d {
-                    "The agent doesn't know what how to handle the event of type ${event::class.simpleName}, " +
-                        "the default behaviour is skipping it."
-                }
-                null
-            }
-            // TODO(Question: is it still possible to handle custom events
-            // if the agent internals is implemented in this way?)
         }?.let { executableAgent.internalInbox.send(it) }
     }
 
@@ -143,7 +134,6 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
             this.coroutineContext[ContinuationInterceptor] ?: error { "No ContinuationInterceptor in context" }
 
         launch(IntentionDispatcher(interceptor) + intention + intention.job) {
-            // TODO maybe I should not suppress?? But I want to catch ALL exceptions..
             @Suppress("TooGenericExceptionCaught")
             try {
                 log.d { "Running plan $plan for event $event" }
@@ -188,8 +178,6 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
         }
     }
 
-    // TODO check if this is enough
-    // what happens if a belief plan fails?
     private fun handleFailure(event: AgentEvent.Internal, e: Exception) {
         when (event) {
             is AgentEvent.Internal.Goal.Add<*, *> -> {
@@ -213,7 +201,6 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
         }
     }
 
-    // TODO(Missing implementation for greedy event selection in case Step.intention was removed from intention pool)
     private fun handleStepEvent(event: AgentEvent.Internal.Step) {
         log.d { "Handling step event for intention ${event.intention.id.displayId}" }
         executableAgent.state.mutableIntentionPool.stepIntention(event)

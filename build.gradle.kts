@@ -99,7 +99,7 @@ allprojects {
 //        }
 //    }
 
-    //TODO copy past from collektive not sure if needed
+
     plugins.withType<DetektPlugin> {
         val detektTasks = tasks.withType<Detekt>()
             .matching { task ->

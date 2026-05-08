@@ -8,8 +8,6 @@ import it.unibo.jakta.event.AgentEvent
 import it.unibo.jakta.event.EventStream
 import it.unibo.jakta.event.SystemEvent
 
-// TODO right now all operations on a node are local to the node itself.
-//  we may need to revisit the semantics of the operations when moving to a system of multiple nodes.
 /**
  * Represents the shared node in which the agents operate.
  * @param Body The type of body used by agents in this node.

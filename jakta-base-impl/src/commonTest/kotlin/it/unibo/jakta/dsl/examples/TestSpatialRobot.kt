@@ -37,7 +37,7 @@ interface Recharging {
 }
 
 interface Movement<P> {
-    // context(s1: Recharging) TODO this does not work right yet due to "triggers" not having context propagation
+    context(s1: Recharging)
     fun Agent.moveTo(newPos: P)
 
     object Events {
@@ -58,6 +58,7 @@ class FixedTimeRecharging(val node: Node<BodyWithPosition, *>) : Recharging {
 }
 
 class GridMovement(val node: Node<BodyWithPosition, *>) : Movement<DoubleArray> {
+    context(s1: Recharging)
     override fun Agent.moveTo(newPos: DoubleArray) {
         node.agents[this.id]?.position2D = newPos
         node.sendEvent(position(this.id, newPos))

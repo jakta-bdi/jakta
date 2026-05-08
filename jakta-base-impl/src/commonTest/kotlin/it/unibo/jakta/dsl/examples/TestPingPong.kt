@@ -26,14 +26,14 @@ class TestPingPong {
         NodeTerminationSkill by NodeTerminationSkillImpl(node),
         MessagingSkill by MessagingSkillImpl(node)
 
-    private fun <Belief : Any, Goal : Any> LocalNodeBuilder<
-        Belief,
+    private fun < Goal : Any> LocalNodeBuilder<
+        SimpleMessage,
         Goal,
         CustomSkillSet,
         BodyWithName,
         >.messageEnabledAgent(
         name: String,
-        block: AgentBuilder<Belief, Goal, CustomSkillSet, BodyWithName>.() -> Unit,
+        block: AgentBuilder<SimpleMessage, Goal, CustomSkillSet, BodyWithName>.() -> Unit,
     ) {
         agent(name) {
             embodiedAs { BodyWithName(name) }
@@ -45,10 +45,6 @@ class TestPingPong {
 
     val node = node {
         messageEnabledAgent("Bob") {
-            // withBeliefsType<SimpleMessage>() //TODO(Does this work instead of specifying the believes {}
-            believes {
-                +SimpleMessage("pippo", "pluto") // TODO(It cannot infer Belief type from plans directly)
-            }
             hasPlans {
                 adding.belief {
                     this.takeIf { it == SimpleMessage("Message", "Alice") }

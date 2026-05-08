@@ -30,12 +30,10 @@ internal class BaseMutableAgentState<Belief : Any, Goal : Any, Skills : Any>(
         id.displayName,
     )
 
-    // TODO BeliefBase should be injected?
     private val beliefBase: BeliefBase<Belief> = BeliefBaseFactory.of(internalInbox, initialAgentState.beliefs)
     override val beliefs: Collection<Belief>
         get() = beliefBase.snapshot()
 
-    // TODO IntentionPool should be injected?
     override val mutableIntentionPool: MutableIntentionPool = BaseIntentionPool(internalInbox)
     override val intentions: Set<Intention>
         get() = mutableIntentionPool.getIntentionsSet()
@@ -60,7 +58,6 @@ internal class BaseMutableAgentState<Belief : Any, Goal : Any, Skills : Any>(
     override val messageHandler: (Message) -> Internal?
         get() = _messageHandler
 
-    // TODO(Is this mutable?)
     override val skills: Skills = initialAgentState.skills
 
     override fun setPerceptionHandler(handler: (Perception) -> Internal?) {
@@ -99,7 +96,7 @@ internal class BaseMutableAgentState<Belief : Any, Goal : Any, Skills : Any>(
         this.beliefBase.add(belief)
     }
 
-    // TODO should I have also update belief?
+
     override suspend fun forget(belief: Belief) {
         this.beliefBase.remove(belief)
     }

@@ -24,7 +24,6 @@ kotlinMultiplatform {
 tasks.withType(Cpd::class).configureEach {
     exclude("**PlanBuilder**")
     // TODO decide what to do with this, the PlanBuilder is problematic as there is duplication
-//    minimumTokenCount = 100
     reports {
         text.required.set(true)
     }

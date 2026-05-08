@@ -82,7 +82,7 @@ sealed interface AgentEvent {
     /**
      * Represents an external event that can be sent to agents, such as messages or perceptions.
      */
-    interface External : AgentEvent {
+    sealed interface External : AgentEvent {
         /**
          * Messages are events sent to communicate with agents.
          */

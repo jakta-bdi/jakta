@@ -140,7 +140,6 @@ interface PlanBuilder<B : Any, G : Any, Skills : Any, Context : Any> {
      */
     interface FailureInterception<B : Any, G : Any, Skills : Any, Context : Any> :
         PlanBuilder<B, G, Skills, Context> {
-        // TODO should we add Belief failure interception??
         /**
          * Builder interface for defining plans triggered by goal failure interceptions.
          */

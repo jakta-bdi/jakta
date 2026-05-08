@@ -2,6 +2,7 @@ package it.unibo.jakta.dsl.examples
 
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
+import it.unibo.jakta.dsl.BeliefPlan
 import it.unibo.jakta.dsl.NodeTerminationSkillImpl
 import it.unibo.jakta.dsl.executeInTestScope
 import it.unibo.jakta.dsl.ifGoalMatch
