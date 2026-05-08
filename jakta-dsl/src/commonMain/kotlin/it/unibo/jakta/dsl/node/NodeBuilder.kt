@@ -3,7 +3,6 @@ package it.unibo.jakta.dsl.node
 import it.unibo.jakta.dsl.JaktaDSL
 import it.unibo.jakta.dsl.agent.AgentBuilder
 import it.unibo.jakta.node.Node
-import it.unibo.jakta.node.NodeBehavior
 
 /**
  * Builder interface for defining a Multi-Agent System (MAS) with agents and an environment.
@@ -27,8 +26,6 @@ interface NodeBuilder<Belief : Any, Goal : Any, Skills : Any, Body : Any, N : No
 //     * Adds multiple agents to the MAS.
 //     */
 //    fun withAgents(vararg agents: Agent<Belief, Goal>)
-
-    fun withBehavior(block: () -> NodeBehavior<Body, Skills>)
 
     /**
      * Builds and returns the Node instance.

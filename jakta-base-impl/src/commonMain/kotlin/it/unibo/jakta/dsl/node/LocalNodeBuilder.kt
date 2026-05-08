@@ -3,7 +3,6 @@ package it.unibo.jakta.dsl.node
 import it.unibo.jakta.dsl.agent.AgentBuilder
 import it.unibo.jakta.dsl.agent.AgentBuilderImpl
 import it.unibo.jakta.node.LocalNode
-import it.unibo.jakta.node.NodeBehavior
 
 /**
  * Implementation of the MasBuilder interface.
@@ -19,10 +18,6 @@ open class LocalNodeBuilder<Belief : Any, Goal : Any, Skills : Any, Body : Any> 
 
     override fun agent(name: String, block: AgentBuilder<Belief, Goal, Skills, Body>.() -> Unit) =
         buildAgent(name, block)
-
-    override fun withBehavior(block: () -> NodeBehavior<Body, Skills>) {
-        node.addBehavior(block())
-    }
 
     private fun buildAgent(name: String?, block: AgentBuilder<Belief, Goal, Skills, Body>.() -> Unit) {
         val agentBuilder = AgentBuilderImpl<Belief, Goal, Skills, Body>(name)
