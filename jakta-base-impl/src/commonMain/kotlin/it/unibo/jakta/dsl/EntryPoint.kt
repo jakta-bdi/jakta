@@ -45,7 +45,7 @@ fun <Belief : Any, Goal : Any, Skills : Any, Body : Any> agent(
 /**
  * Entry point for belief addition only plans.
  */
-//interface BeliefOnlyAdditionTrigger<Belief : Any, Goal : Any, Skills : Any> {
+// interface BeliefOnlyAdditionTrigger<Belief : Any, Goal : Any, Skills : Any> {
 //    /**
 //     * Given a @param[beliefQuery] as a function that matches a belief
 //     * and extracts a context from it if the belief matches.
@@ -54,12 +54,12 @@ fun <Belief : Any, Goal : Any, Skills : Any, Body : Any> agent(
 //    fun <Context : Any> belief(
 //        beliefQuery: Belief.() -> Context?,
 //    ): PlanBuilder.Addition.Belief<Belief, Goal, Skills, Context>
-//}
+// }
 //
-///**
+// /**
 // * Entry point for belief removal only plans.
 // */
-//interface BeliefOnlyRemovalTrigger<Belief : Any, Goal : Any, Skills : Any> {
+// interface BeliefOnlyRemovalTrigger<Belief : Any, Goal : Any, Skills : Any> {
 //    /**
 //     * Given a @param[beliefQuery] as a function that matches a belief
 //     * and extracts a context from it if the belief matches.
@@ -68,9 +68,9 @@ fun <Belief : Any, Goal : Any, Skills : Any, Body : Any> agent(
 //    fun <Context : Any> belief(
 //        beliefQuery: Belief.() -> Context?,
 //    ): PlanBuilder.Removal.Belief<Belief, Goal, Skills, Context>
-//}
+// }
 //
-//public class BeliefPlan<Belief : Any, Goal : Any, Skills : Any> {
+// public class BeliefPlan<Belief : Any, Goal : Any, Skills : Any> {
 //    val adding: BeliefOnlyAdditionTrigger<Belief, Goal, Skills>
 //        get() =
 //            object : BeliefOnlyAdditionTrigger<Belief, Goal, Skills> {
@@ -96,4 +96,4 @@ fun <Belief : Any, Goal : Any, Skills : Any, Body : Any> agent(
 //            block: BeliefPlan<Belief, Goal, Skills>.() -> Plan.Belief<Belief, Goal, Skills, *, *>,
 //        ): Plan.Belief<Belief, Goal, Skills, *, *> = block(BeliefPlan())
 //    }
-//}
+// }

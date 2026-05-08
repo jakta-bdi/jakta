@@ -1,6 +1,6 @@
 [versions]
 coroutines = "1.10.2"
-dokka = "2.2.0"
+dokka = "1.9.20"
 kermit = "2.0.4"
 kotlin = "2.2.21"
 alchemist = "43.0.14"

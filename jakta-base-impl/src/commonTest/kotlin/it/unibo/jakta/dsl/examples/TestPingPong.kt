@@ -26,7 +26,7 @@ class TestPingPong {
         NodeTerminationSkill by NodeTerminationSkillImpl(node),
         MessagingSkill by MessagingSkillImpl(node)
 
-    private fun < Goal : Any> LocalNodeBuilder<
+    private fun <Goal : Any> LocalNodeBuilder<
         SimpleMessage,
         Goal,
         CustomSkillSet,

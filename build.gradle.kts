@@ -5,7 +5,6 @@ import org.danilopianini.gradle.gitsemver.UpdateType
 import org.jlleitschuh.gradle.ktlint.tasks.GenerateReportsTask
 import org.jlleitschuh.gradle.ktlint.tasks.KtLintCheckTask
 import org.jlleitschuh.gradle.ktlint.tasks.KtLintFormatTask
-import org.jetbrains.dokka.gradle.tasks.DokkaGenerateTask
 
 plugins {
     alias(libs.plugins.dokka)

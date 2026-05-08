@@ -4,7 +4,6 @@ import it.unibo.jakta.dsl.agent.AgentBuilder
 import it.unibo.jakta.dsl.mas.mas
 import it.unibo.jakta.dsl.node.LocalNodeBuilder
 import it.unibo.jakta.dsl.plan.triggers
-import it.unibo.jakta.event.BeliefAddEvent
 import it.unibo.jakta.node.CoroutineNodeRunner
 import java.util.concurrent.Executors
 import kotlinx.coroutines.asCoroutineDispatcher
@@ -12,8 +11,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
+/** Runs a simple MAS with two nodes, each containing agents that react to a belief being added. */
 fun main(): Unit = runBlocking {
-    val dispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+    // val dispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
 
     fun <Goal : Any, Skills : Any> LocalNodeBuilder<
         Any,

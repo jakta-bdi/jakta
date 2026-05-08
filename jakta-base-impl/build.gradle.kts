@@ -27,7 +27,7 @@ kotlinMultiplatform {
     }
 
     tasks.withType(Cpd::class).configureEach {
-        //TODO find a way to avoid repeated code for the data classes?
+        // TODO find a way to avoid repeated code for the data classes?
         exclude("**PlanImpl**")
         reports {
             text.required.set(true)

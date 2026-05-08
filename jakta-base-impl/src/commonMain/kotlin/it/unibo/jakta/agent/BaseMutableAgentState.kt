@@ -96,7 +96,6 @@ internal class BaseMutableAgentState<Belief : Any, Goal : Any, Skills : Any>(
         this.beliefBase.add(belief)
     }
 
-
     override suspend fun forget(belief: Belief) {
         this.beliefBase.remove(belief)
     }
