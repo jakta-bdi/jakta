@@ -1,7 +1,7 @@
 package it.unibo.jakta.plan
 
 import it.unibo.jakta.agent.MutableAgentState
-import it.unibo.jakta.reflection.isSubtypeOfMultiPlatform // TODO can we avoid needing this?
+import it.unibo.jakta.reflection.isSubtypeOfMultiPlatform
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
 
@@ -18,7 +18,7 @@ sealed interface Plan<Belief : Any, Goal : Any, Skills : Any, TriggerEntity : An
      * The unique identifier of the plan.
      */
     val id: PlanID
-        get() = PlanID() // TODO check
+        get() = PlanID() // TODO check, maybe we want to allow users to specify their own IDs for better readability of logs and debugging
 
     /**
      * Function to determine if the plan is triggered by the given [TriggerEntity].

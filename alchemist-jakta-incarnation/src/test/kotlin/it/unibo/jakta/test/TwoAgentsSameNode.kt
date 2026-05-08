@@ -25,9 +25,9 @@ class MessagingSkill(val node: Node<BodyWithName, *>) {
     }
 }
 
-private fun <Belief : Any, Goal : Any> LocalNodeBuilder<Belief, Goal, MessagingSkill, BodyWithName>.messageEnabledAgent(
+private fun <Goal : Any> LocalNodeBuilder<SimpleMessage, Goal, MessagingSkill, BodyWithName>.messageEnabledAgent(
     name: String,
-    block: AgentBuilder<Belief, Goal, MessagingSkill, BodyWithName>.() -> Unit,
+    block: AgentBuilder<SimpleMessage, Goal, MessagingSkill, BodyWithName>.() -> Unit,
 ) {
     agent(name) {
         embodiedAs { BodyWithName(name) }
@@ -40,11 +40,6 @@ private fun <Belief : Any, Goal : Any> LocalNodeBuilder<Belief, Goal, MessagingS
 fun <P : Position<P>> JaktaForAlchemistRuntime<P>.entrypoint() = device(LocalNodeBuilder()) {
     node {
         messageEnabledAgent("Bob") {
-            // withBeliefsType<SimpleMessage>() //TODO(Does this work instead of specifying the believes {}
-            believes {
-                +SimpleMessage("pippo", "pluto") // TODO(It cannot infer Belief type from plans directly)
-            }
-
             hasPlans {
                 adding.belief {
                     this.takeIf { it == SimpleMessage("Message", "Alice") }

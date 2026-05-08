@@ -42,8 +42,6 @@ interface MutableAgentState<Belief : Any, Goal : Any, Skills : Any> :
      */
     fun addPlan(plan: Plan.Belief<Belief, Goal, Skills, *, *>)
 
-    // TODO How to remove plans??
-
     /**
      * Adds an event to the agent's queue to achieve a goal and suspends until the goal is achieved.
      * !! This method is deprecated as it is an internal method that should not be used directly.
@@ -71,9 +69,6 @@ interface MutableAgentState<Belief : Any, Goal : Any, Skills : Any> :
      * @param belief The belief to be removed.
      */
     suspend fun forget(belief: Belief)
-
-    // TODO more advanced belief management? update belief? filter? etc.
-    // do we provide these as utility extension functions?
 
     /**
      * Logs a message to the agent's output.
