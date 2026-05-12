@@ -19,12 +19,12 @@ class JaktaForAlchemistAgent<P : Position<P>>(
     alchemistNode: AlchemistNode<Any?>,
     private val agent: ExecutableAgent<*, *, *>,
     private val alchemistEnvironment: Environment<Any?, P>,
+    private val dispatcher: AlchemistDispatcher<P> = AlchemistDispatcher(alchemistEnvironment),
 ) : AbstractAction<Any?>(alchemistNode) {
 
     override fun getContext(): Context = Context.LOCAL
 
     private val agentLifecycle = BaseAgentLifecycle(agent)
-    private val dispatcher = AlchemistDispatcher.of(alchemistEnvironment)
     private val logger = Logger(Logger.config, "Agent Action")
 
     override fun cloneAction(node: AlchemistNode<Any?>, reaction: Reaction<Any?>): Action<Any?> =
@@ -32,12 +32,11 @@ class JaktaForAlchemistAgent<P : Position<P>>(
             node,
             agent,
             alchemistEnvironment,
+            dispatcher,
         )
 
     override fun execute() {
-        logger.d { "Executing Agent Step" }
-        // dispatcher.runDueTasks()
+        dispatcher.runDueTasks()
         agentLifecycle.tryStep(dispatcher)
-        dispatcher.runDueTasks() // TODO: This is not the best position to invoke this
     }
 }

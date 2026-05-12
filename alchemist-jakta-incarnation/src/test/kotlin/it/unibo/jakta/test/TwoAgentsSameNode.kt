@@ -12,6 +12,7 @@ import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.event.AgentEvent
 import it.unibo.jakta.event.BeliefAddEvent
 import it.unibo.jakta.node.Node
+import kotlinx.coroutines.delay
 
 class BodyWithName(val name: String)
 data class SimpleMessage(val payload: String, val sender: String) : AgentEvent.External.Message
@@ -60,9 +61,12 @@ fun <P : Position<P>> JaktaForAlchemistRuntime<P>.entrypoint() = device(LocalNod
                     ifGoalMatch("sendMessage")
                 } triggers {
                     agent.print("Hello World!")
+                    agent.print("Time: ${alchemistEnvironment.simulation.time}")
+                    delay(5000)
                     with(skills) {
                         agent.sendMessage("Message", "Bob")
                     }
+                    agent.print("Time after delay of 5000: ${alchemistEnvironment.simulation.time}")
                 }
                 adding.belief {
                     this.takeIf { it == SimpleMessage("Hello Back!", "Bob") }

@@ -5,6 +5,9 @@ import it.unibo.alchemist.model.Position
 import java.util.PriorityQueue
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.resume
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Delay
@@ -27,11 +30,11 @@ class AlchemistDispatcher<P : Position<P>>(private val alchemistEnvironment: Env
     }
 
     override fun scheduleResumeAfterDelay(timeMillis: Long, continuation: CancellableContinuation<Unit>) {
-        val targetTime = alchemistEnvironment.simulation.time.toDouble() + timeMillis
+        val targetTime = alchemistEnvironment.simulation.time.toDouble() + (timeMillis / 1000)
         queue.add(
             ScheduledTask(targetTime) {
                 continuation.resume(Unit)
-            },
+            }.also { println(it) },
         )
     }
 
@@ -40,30 +43,11 @@ class AlchemistDispatcher<P : Position<P>>(private val alchemistEnvironment: Env
      */
     fun runDueTasks() {
         val now = alchemistEnvironment.simulation.time.toDouble()
+        println("Manage tasks until: $now")
         while (queue.isNotEmpty() && queue.peek().time <= now) {
             queue.poll().action.run()
         }
     }
 
     private data class ScheduledTask(val time: Double, val action: Runnable)
-
-    /**
-     * Utilities for the Jakta incarnation custom dispatcher.
-     */
-    companion object {
-        /**
-         * The singleton dispatcher.
-         * TODO("This needs to be changed. -> Each agent will have its own dispatcher")
-         */
-        var dispatcher: AlchemistDispatcher<*>? = null
-
-        /**
-         * Creates a singleton instance of the Jakta dispatcher.
-         * @param alchemistEnvironment the alchemist Environment instance
-         * @return the singleton instance of dispatcher.
-         */
-        @Suppress("UNCHECKED_CAST")
-        fun <P : Position<P>> of(alchemistEnvironment: Environment<Any?, P>): AlchemistDispatcher<P> =
-            dispatcher as? AlchemistDispatcher<P> ?: AlchemistDispatcher(alchemistEnvironment)
-    }
 }
