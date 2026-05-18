@@ -34,3 +34,5 @@ include(
     "jakta-base-impl",
     "alchemist-jakta-incarnation",
 )
+
+include("jakta-string-incarnation")
