@@ -8,6 +8,7 @@ import it.unibo.jakta.dsl.MessagingSkillImpl
 import it.unibo.jakta.dsl.NodeTerminationSkill
 import it.unibo.jakta.dsl.NodeTerminationSkillImpl
 import it.unibo.jakta.dsl.SimpleMessage
+import it.unibo.jakta.dsl.agent
 import it.unibo.jakta.dsl.agent.AgentBuilder
 import it.unibo.jakta.dsl.executeInTestScope
 import it.unibo.jakta.dsl.ifGoalMatch
@@ -26,12 +27,7 @@ class TestPingPong {
         NodeTerminationSkill by NodeTerminationSkillImpl(node),
         MessagingSkill by MessagingSkillImpl(node)
 
-    private fun <Goal : Any> LocalNodeBuilder<
-        SimpleMessage,
-        Goal,
-        CustomSkillSet,
-        BodyWithName,
-        >.messageEnabledAgent(
+    private fun <Goal : Any> LocalNodeBuilder<CustomSkillSet, BodyWithName>.messageEnabledAgent(
         name: String,
         block: AgentBuilder<SimpleMessage, Goal, CustomSkillSet, BodyWithName>.() -> Unit,
     ) {
@@ -49,13 +45,14 @@ class TestPingPong {
                 adding.belief {
                     this.takeIf { it == SimpleMessage("Message", "Alice") }
                 } triggers {
-                    agent.print(context.toString())
-                    with(skills) {
-                        agent.sendMessage("Hello Back!", context.sender)
-                    }
+                        agent.print(context.toString())
+                        with(skills) {
+                            agent.sendMessage("Hello Back!", context.sender)
+                        }
                 }
             }
         }
+
         messageEnabledAgent("Alice") {
             hasInitialGoals {
                 !"sendMessage"

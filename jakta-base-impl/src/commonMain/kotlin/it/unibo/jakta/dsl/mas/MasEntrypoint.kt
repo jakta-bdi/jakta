@@ -10,7 +10,7 @@ import it.unibo.jakta.node.NodeRunner
  * It takes a [NodeBuilder] and a block of code that defines the MAS structure.
  */
 @JaktaDSL
-fun <N : Node<*, *>, NB : NodeBuilder<*, *, *, *, N>> mas(
+fun <N : Node<*, *>, NB : NodeBuilder<*, *, N>> mas(
     builder: NB,
     block: MasBuilder<N, NB>.() -> Unit,
 ): MasBuilder<N, NB> = object : MasBuilder<N, NB> {

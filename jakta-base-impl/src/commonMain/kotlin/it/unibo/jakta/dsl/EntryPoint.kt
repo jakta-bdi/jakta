@@ -14,10 +14,10 @@ import it.unibo.jakta.plan.Plan
  * Entry point for creating a multi-agent system using the Jakta DSL and a localnode.
  * @return an instantiated MAS.
  */
-fun <Belief : Any, Goal : Any, Skills : Any, Body : Any> node(
-    block: LocalNodeBuilder<Belief, Goal, Skills, Body>.() -> Unit,
+fun <Skills : Any, Body : Any> node(
+    block: LocalNodeBuilder<Skills, Body>.() -> Unit,
 ): Node<Body, Skills> {
-    val nodeBuilder = LocalNodeBuilder<Belief, Goal, Skills, Body>()
+    val nodeBuilder = LocalNodeBuilder<Skills, Body>()
     nodeBuilder.apply(block)
     return nodeBuilder.build()
 }

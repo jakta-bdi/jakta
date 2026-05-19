@@ -15,15 +15,13 @@ import kotlinx.coroutines.runBlocking
 fun main(): Unit = runBlocking {
     // val dispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
 
-    fun <Goal : Any, Skills : Any> LocalNodeBuilder<
-        Any,
-        Goal,
+    fun <Skills : Any> LocalNodeBuilder<
         Skills,
         Any,
         >.simpleAgentBuilder(
         name: String,
         skills: Skills,
-        block: AgentBuilder<Any, Goal, Skills, Any>.() -> Unit,
+        block: AgentBuilder<String, String, Skills, Any>.() -> Unit,
     ) {
         agent(name) {
             embodiedAs { object {} }
