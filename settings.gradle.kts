@@ -33,6 +33,7 @@ include(
     "jakta-dsl",
     "jakta-base-impl",
     "alchemist-jakta-incarnation",
+    "jakta-string-incarnation",
+    "jakta-prolog-incarnation",
 )
 
-include("jakta-string-incarnation")
