@@ -16,10 +16,10 @@ import kotlin.reflect.KType
 class BeliefAdditionPlanBuilderImpl<Belief : Any, Goal : Any, Skills : Any, Context : Any>(
     private val addBeliefPlan: (plan: Plan.Belief<Belief, Goal, Skills, *, *>) -> Unit,
     private val trigger: Belief.() -> Context?,
-    private var guard: GuardScope<Belief>.(Context) -> Context? = { x -> x },
+    private var guard: GuardScope<Belief, Context>.() -> Context? = { this.context },
 ) : PlanBuilder.Addition.Belief<Belief, Goal, Skills, Context> {
     override fun onlyWhen(
-        guard: GuardScope<Belief>.(Context) -> Context?,
+        guard: GuardScope<Belief, Context>.() -> Context?,
     ): PlanBuilder.Addition.Belief<Belief, Goal, Skills, Context> = this.also { this.guard = guard }
 
     override fun <PlanResult> triggersImpl(
@@ -35,10 +35,10 @@ class BeliefAdditionPlanBuilderImpl<Belief : Any, Goal : Any, Skills : Any, Cont
 class GoalAdditionPlanBuilderImpl<Belief : Any, Goal : Any, Skills : Any, Context : Any>(
     private val addGoalPlan: (plan: Plan.Goal<Belief, Goal, Skills, *, *>) -> Unit,
     private val trigger: Goal.() -> Context?,
-    private var guard: GuardScope<Belief>.(Context) -> Context? = { x -> x },
+    private var guard: GuardScope<Belief, Context>.() -> Context? = { this.context },
 ) : PlanBuilder.Addition.Goal<Belief, Goal, Skills, Context> {
     override fun onlyWhen(
-        guard: GuardScope<Belief>.(Context) -> Context?,
+        guard: GuardScope<Belief, Context>.() -> Context?,
     ): PlanBuilder.Addition.Goal<Belief, Goal, Skills, Context> = this.also { this.guard = guard }
 
     override fun <PlanResult> triggersImpl(
@@ -54,10 +54,10 @@ class GoalAdditionPlanBuilderImpl<Belief : Any, Goal : Any, Skills : Any, Contex
 class BeliefRemovalPlanBuilderImpl<Belief : Any, Goal : Any, Skills : Any, Context : Any>(
     private val removeBeliefPlan: (plan: Plan.Belief<Belief, Goal, Skills, *, *>) -> Unit,
     private val trigger: Belief.() -> Context?,
-    private var guard: GuardScope<Belief>.(Context) -> Context? = { x -> x },
+    private var guard: GuardScope<Belief, Context>.() -> Context? = { this.context },
 ) : PlanBuilder.Removal.Belief<Belief, Goal, Skills, Context> {
     override fun onlyWhen(
-        guard: GuardScope<Belief>.(Context) -> Context?,
+        guard: GuardScope<Belief, Context>.() -> Context?,
     ): PlanBuilder.Removal.Belief<Belief, Goal, Skills, Context> = this.also { this.guard = guard }
 
     override fun <PlanResult> triggersImpl(
@@ -73,10 +73,10 @@ class BeliefRemovalPlanBuilderImpl<Belief : Any, Goal : Any, Skills : Any, Conte
 class GoalRemovalPlanBuilderImpl<Belief : Any, Goal : Any, Skills : Any, Context : Any>(
     private val removeGoalPlan: (plan: Plan.Goal<Belief, Goal, Skills, *, *>) -> Unit,
     private val trigger: Goal.() -> Context?,
-    private var guard: GuardScope<Belief>.(Context) -> Context? = { x -> x },
+    private var guard: GuardScope<Belief, Context>.() -> Context? = { this.context },
 ) : PlanBuilder.Removal.Goal<Belief, Goal, Skills, Context> {
     override fun onlyWhen(
-        guard: GuardScope<Belief>.(Context) -> Context?,
+        guard: GuardScope<Belief, Context>.() -> Context?,
     ): PlanBuilder.Removal.Goal<Belief, Goal, Skills, Context> = this.also { this.guard = guard }
 
     override fun <PlanResult> triggersImpl(
@@ -92,10 +92,10 @@ class GoalRemovalPlanBuilderImpl<Belief : Any, Goal : Any, Skills : Any, Context
 class GoalFailurePlanBuilderImpl<Belief : Any, Goal : Any, Skills : Any, Context : Any>(
     private val failingGoalPlan: (plan: Plan.Goal<Belief, Goal, Skills, *, *>) -> Unit,
     private val trigger: Goal.() -> Context?,
-    private var guard: GuardScope<Belief>.(Context) -> Context? = { x -> x },
+    private var guard: GuardScope<Belief, Context>.() -> Context? = { this.context },
 ) : PlanBuilder.FailureInterception.Goal<Belief, Goal, Skills, Context> {
     override fun onlyWhen(
-        guard: GuardScope<Belief>.(Context) -> Context?,
+        guard: GuardScope<Belief, Context>.() -> Context?,
     ): PlanBuilder.FailureInterception.Goal<Belief, Goal, Skills, Context> = this.also { this.guard = guard }
 
     override fun <PlanResult> triggersImpl(
@@ -108,11 +108,11 @@ class GoalFailurePlanBuilderImpl<Belief : Any, Goal : Any, Skills : Any, Context
 private fun <B, G, S, TE, C, PR, P> buildAndRegisterPlan(
     resultType: KType,
     trigger: TE.() -> C?,
-    guard: GuardScope<B>.(C) -> C?,
+    guard: GuardScope<B, C>.() -> C?,
     body: suspend PlanScope<B, G, S, C>.() -> PR,
     builder: (
         (TE) -> C?,
-        GuardScope<B>.(C) -> C?,
+        GuardScope<B, C>.() -> C?,
         suspend PlanScope<B, G, S, C>.() -> PR,
         KType,
     ) -> P,

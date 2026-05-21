@@ -85,7 +85,7 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
                 } && it.isRelevant(event.belief)
             },
             applicableFilter = {
-                it.isApplicable(executableAgent.state, event.belief)
+                it.isApplicable(executableAgent.state.beliefs, event.belief)
             },
         )?.let {
             launchPlan(event, event.belief, it)
@@ -113,7 +113,7 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
                 } && it.isRelevant(event.goal)
             },
             applicableFilter = {
-                it.isApplicable(executableAgent.state, event.goal)
+                it.isApplicable(executableAgent.state.beliefs, event.goal)
             },
         )?.let {
             launchPlan(event, event.goal, it, event.completion)

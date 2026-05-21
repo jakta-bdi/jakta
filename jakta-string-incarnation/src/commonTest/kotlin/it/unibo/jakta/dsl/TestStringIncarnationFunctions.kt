@@ -2,8 +2,9 @@ package it.unibo.jakta.dsl
 
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
-import it.unibo.jakta.dsl.mas.containsBeliefMatching
-import it.unibo.jakta.dsl.mas.ifGoalMatches
+import it.unibo.jakta.belief.containsBeliefMatching
+import it.unibo.jakta.belief.ifGoalMatches
+import it.unibo.jakta.belief.matchesRegex
 import it.unibo.jakta.dsl.mas.mas
 import it.unibo.jakta.dsl.node.LocalNodeBuilder
 import it.unibo.jakta.dsl.plan.PlanLibraryBuilder
@@ -11,7 +12,6 @@ import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.node.CoroutineNodeRunner
 import kotlin.test.BeforeTest
 import kotlin.test.Test
-import kotlin.test.fail
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 
@@ -21,6 +21,8 @@ class TestStringIncarnationFunctions {
     fun setup() {
         Logger.setMinSeverity(Severity.Error)
     }
+
+    private fun fail(message: String = ""): Unit = kotlin.test.fail(message)
 
     private fun runMas(block: PlanLibraryBuilder<String, String, TerminationSkill>.() -> Unit) {
         runTest {
@@ -51,7 +53,7 @@ class TestStringIncarnationFunctions {
             adding.goal {
                 ifGoalMatches("goal")
             } onlyWhen {
-                this.beliefs.containsBeliefMatching("goal")
+                containsBeliefMatching("goal")
             } triggers {
                 agent.print("Hello World!")
                 skills.terminateNode()
@@ -65,10 +67,9 @@ class TestStringIncarnationFunctions {
             adding.goal {
                 ifGoalMatches("goal")
             } onlyWhen {
-                this.beliefs.containsBeliefMatching("non-existing-belief")
+                containsBeliefMatching("non-existing-belief")
             } triggers {
                 fail()
-                Unit
             }
             failing.goal {
                 ifGoalMatches("goal")
@@ -85,7 +86,21 @@ class TestStringIncarnationFunctions {
             adding.belief {
                 ifGoalMatches("goal")
             } onlyWhen {
-                this.beliefs.containsBeliefMatching("goal")
+                containsBeliefMatching("goal")
+            } triggers {
+                agent.print("Hello World!")
+                skills.terminateNode()
+            }
+        }
+    }
+
+    @Test
+    fun `test trigger using regex`() {
+        runMas {
+            adding.goal {
+                matchesRegex("g+")
+            } onlyWhen {
+                containsBeliefMatching("goal")
             } triggers {
                 agent.print("Hello World!")
                 skills.terminateNode()
