@@ -1,4 +1,4 @@
-package it.unibo.jakta.belief
+package it.unibo.jakta.logic
 
 import it.unibo.tuprolog.core.Clause
 import it.unibo.tuprolog.core.Struct

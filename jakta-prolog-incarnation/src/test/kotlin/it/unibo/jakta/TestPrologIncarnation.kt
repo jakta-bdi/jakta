@@ -2,22 +2,17 @@ package it.unibo.jakta
 
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
-import it.unibo.jakta.agent.achieve
-import it.unibo.jakta.belief.condition
-import it.unibo.jakta.dsl.JaktaLogicProgrammingScope
-import it.unibo.jakta.dsl.JaktaLogicProgrammingScope.Companion.logicProgram
-import it.unibo.jakta.dsl.achieve
-import it.unibo.jakta.dsl.goal
-import it.unibo.jakta.dsl.goalQuery
+import it.unibo.jakta.dsl.goal.goal
+import it.unibo.jakta.dsl.goal.goalQuery
+import it.unibo.jakta.dsl.goal.initialGoal
+import it.unibo.jakta.dsl.goal.matching
 import it.unibo.jakta.dsl.mas.mas
 import it.unibo.jakta.dsl.node.LocalNodeBuilder
+import it.unibo.jakta.dsl.plan.achieve
+import it.unibo.jakta.dsl.plan.condition
 import it.unibo.jakta.dsl.plan.triggers
-import it.unibo.jakta.goal.PrologGoal
-import it.unibo.jakta.goal.asInt
-import it.unibo.jakta.goal.matching
-import it.unibo.jakta.goal.value
+import it.unibo.jakta.logic.JaktaLogicProgrammingScope.Companion.prologPlan
 import it.unibo.jakta.node.CoroutineNodeRunner
-import it.unibo.tuprolog.dsl.logicProgramming
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlinx.coroutines.launch
@@ -40,22 +35,18 @@ class TestPrologIncarnation {
                             embodiedAs { object {} }
                             withSkills { TerminationSkill(it) }
                             hasInitialGoals {
-                                logicProgram {
-                                    !goal { "start"(0, 10) }
-                                }
+                                !initialGoal { "start"(0, 10) }
                             }
                             hasPlans {
-                                logicProgram {
+                                prologPlan {
                                     adding.goal {
                                         matching(goalQuery { "start"(N, N) })
                                     } triggers {
-                                        with(this.context) {
-                                            val n = N.value!!.asInt()
-                                            agent.print("Counting...$n done!")
-                                        }
+                                        val n = N.valueFromContext(context)
+                                        agent.print("Counting...$n done!")
                                     }
                                 }
-                                logicProgram {
+                                prologPlan {
                                     adding.goal {
                                         matching(goalQuery { "start"(N, X) })
                                     } onlyWhen {
@@ -64,12 +55,8 @@ class TestPrologIncarnation {
                                         }
                                     } triggers {
                                         with(this.context) {
-                                            agent.print("Counting..." + N.value?.asInt())
-                                            agent.achieve(
-                                                goal {
-                                                    "start"(S.value!!.term, X.value!!.term)
-                                                },
-                                            )
+                                            agent.print("Counting..." + N.value)
+                                            agent.achieve(goal { "start"(S.value, X.value) })
                                             assert(true)
                                             skills.terminateNode()
                                         }
