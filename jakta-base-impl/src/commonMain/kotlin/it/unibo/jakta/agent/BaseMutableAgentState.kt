@@ -1,6 +1,7 @@
 package it.unibo.jakta.agent
 
 import co.touchlab.kermit.Logger
+import it.unibo.jakta.InternalJaktaAPI
 import it.unibo.jakta.belief.BeliefBase
 import it.unibo.jakta.belief.BeliefBaseFactory
 import it.unibo.jakta.event.AgentEvent.External.Message
@@ -76,7 +77,7 @@ internal class BaseMutableAgentState<Belief : Any, Goal : Any, Skills : Any>(
         this._goalPlans += plan
     }
 
-    @Deprecated("Use achieve instead", replaceWith = ReplaceWith("achieve(goal)"), level = DeprecationLevel.ERROR)
+    @InternalJaktaAPI
     override suspend fun <PlanResult> internalAchieve(goal: Goal, resultType: KType): PlanResult {
         val completion = CompletableDeferred<PlanResult>()
         val intention = currentCoroutineContext()[Intention]
