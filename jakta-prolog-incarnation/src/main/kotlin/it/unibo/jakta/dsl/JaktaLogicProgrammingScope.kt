@@ -20,7 +20,7 @@ open class JaktaLogicProgrammingScope(
     override val variablesProvider: VariablesProvider = VariablesProvider.of(scope),
     override val unificator: Unificator = Unificator.default,
     override val theoryFactory: TheoryFactory = IndexedTheoryFactory(unificator),
-): MinimalLogicProgrammingScope<JaktaLogicProgrammingScope>,
+) : MinimalLogicProgrammingScope<JaktaLogicProgrammingScope>,
     LogicProgrammingScopeWithSubstitutions<JaktaLogicProgrammingScope>,
     LogicProgrammingScopeWithPrologStandardLibrary<JaktaLogicProgrammingScope>,
     LogicProgrammingScopeWithOperators<JaktaLogicProgrammingScope>,
@@ -29,8 +29,7 @@ open class JaktaLogicProgrammingScope(
     LogicProgrammingScopeWithTheories<JaktaLogicProgrammingScope>,
     VariablesProvider by variablesProvider,
     Unificator by unificator,
-    TheoryFactory by theoryFactory
-{
+    TheoryFactory by theoryFactory {
     override fun copy(scope: Scope): JaktaLogicProgrammingScope = JaktaLogicProgrammingScope(
         scope,
         termificator.copy(scope),
