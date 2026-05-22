@@ -25,7 +25,6 @@ class JaktaForAlchemistAgent<P : Position<P>>(
     override fun getContext(): Context = Context.LOCAL
 
     private val agentLifecycle = BaseAgentLifecycle(agent)
-    private val logger = Logger(Logger.config, "Agent Action")
 
     override fun cloneAction(node: AlchemistNode<Any?>, reaction: Reaction<Any?>): Action<Any?> =
         JaktaForAlchemistAgent(
