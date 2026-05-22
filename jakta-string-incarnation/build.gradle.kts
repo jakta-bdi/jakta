@@ -7,7 +7,7 @@ kotlinMultiplatform {
         commonMain.dependencies {
             api(jakta("api"))
             api(jakta("dsl"))
-            implementation(jakta("base-impl"))
+            implementation(jakta("core"))
             implementation(libs.kermit)
             implementation(libs.kotlinx.coroutines.core)
         }

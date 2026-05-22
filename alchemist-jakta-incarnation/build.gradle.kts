@@ -21,7 +21,7 @@ kotlinJvm {
         val main by getting {
             dependencies {
                 implementation(project(":jakta-dsl"))
-                implementation(project(":jakta-base-impl"))
+                implementation(project(":jakta-core"))
                 api(project(":jakta-api"))
                 api(libs.bundles.alchemist.api)
                 implementation(libs.kotlinx.coroutines.core)

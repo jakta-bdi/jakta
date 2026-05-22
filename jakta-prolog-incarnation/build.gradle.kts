@@ -23,7 +23,7 @@ kotlinJvm {
             dependencies {
                 api(jakta("api"))
                 api(jakta("dsl"))
-                implementation(jakta("base-impl"))
+                implementation(jakta("core"))
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.kermit)
 
