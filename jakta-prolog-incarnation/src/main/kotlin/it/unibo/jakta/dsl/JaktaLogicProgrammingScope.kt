@@ -1,5 +1,9 @@
 package it.unibo.jakta.dsl
 
+import it.unibo.jakta.belief.PrologBelief
+import it.unibo.jakta.dsl.agent.GoalBuilder
+import it.unibo.jakta.dsl.plan.PlanLibraryBuilder
+import it.unibo.jakta.goal.PrologGoal
 import it.unibo.tuprolog.core.Scope
 import it.unibo.tuprolog.core.VariablesProvider
 import it.unibo.tuprolog.dsl.LogicProgrammingScopeWithOperators
@@ -55,5 +59,14 @@ open class JaktaLogicProgrammingScope(
         require(unificator == theoryFactory.unificator) {
             "The provided Unificator should be the same object for both Unificator and TheoryFactory"
         }
+    }
+
+    companion object {
+        inline fun <reified R> GoalBuilder<PrologGoal>.logicProgram(block: JaktaLogicProgrammingScope.() -> R): R =
+            with(JaktaLogicProgrammingScope(), block)
+
+        inline fun <reified R> PlanLibraryBuilder<PrologBelief, PrologGoal, *>.logicProgram(
+            block: JaktaLogicProgrammingScope.() -> R,
+        ): R = with(JaktaLogicProgrammingScope(), block)
     }
 }
