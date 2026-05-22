@@ -19,7 +19,7 @@ class RuntimeNodes<N : Node<*, *>>(
  * A device corresponds to a simulated node, which inside can host one or more JaKtA nodes.
  * @param builder the NodeBuilder instance.
  */
-class DeviceBuilder<N : Node<*, *>, NB : NodeBuilder<*, *, *, *, N>>(val builder: NB) {
+class DeviceBuilder<N : Node<*, *>, NB : NodeBuilder<*, *, N>>(val builder: NB) {
 
     /**
      * JaKtA nodes executing inside of this alchemist node.
@@ -38,7 +38,7 @@ class DeviceBuilder<N : Node<*, *>, NB : NodeBuilder<*, *, *, *, N>>(val builder
  * Device entrypoint for the simulation custom DSL.
  */
 @JaktaDSL
-fun <N : Node<*, *>, NB : NodeBuilder<*, *, *, *, N>> device(
+fun <N : Node<*, *>, NB : NodeBuilder<*, *, N>> device(
     builder: NB,
     block: DeviceBuilder<N, NB>.() -> Unit,
 ): RuntimeNodes<N> = RuntimeNodes(DeviceBuilder(builder).apply(block).nodes)
