@@ -155,7 +155,6 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
         relevantFilter: (Plan<Belief, Goal, *, TriggerEntity, *, *>) -> Boolean,
         applicableFilter: (Plan<Belief, Goal, *, TriggerEntity, *, *>) -> Boolean,
     ): Plan<Belief, Goal, Skills, TriggerEntity, *, *>? {
-
         val relevant = planList.filter(relevantFilter)
 
         if (relevant.isEmpty()) {
