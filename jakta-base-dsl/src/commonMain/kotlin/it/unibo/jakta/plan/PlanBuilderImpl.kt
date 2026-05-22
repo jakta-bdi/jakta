@@ -97,17 +97,17 @@ class GoalFailurePlanBuilderImpl<Belief : Any, Goal : Any, Context : Any>(
         buildAndRegisterPlan(resultType, trigger, guard, body, ::GoalFailurePlan, addGoalPlan)
 }
 
-private fun <B, G, S, TE, C, PR, P> buildAndRegisterPlan(
+private fun <B, G, TE, C, PR, P> buildAndRegisterPlan(
     resultType: KType,
     trigger: TE.() -> C?,
     guard: GuardScope<B>.(C) -> C?,
-    body: suspend PlanScope<B, G, S, C>.() -> PR,
+    body: suspend PlanScope<B, G, C>.() -> PR,
     builder: (
         (TE) -> C?,
         GuardScope<B>.(C) -> C?,
-        suspend PlanScope<B, G, S, C>.() -> PR,
+        suspend PlanScope<B, G, C>.() -> PR,
         KType,
     ) -> P,
     register: (P) -> Unit,
-): P where B : Any, G : Any, S : Any, TE : Any, C : Any, P : Plan<B, G, S, TE, C, PR> =
+): P where B : Any, G : Any, TE : Any, C : Any, P : Plan<B, G, TE, C, PR> =
     builder(trigger, guard, body, resultType).also { register(it) }

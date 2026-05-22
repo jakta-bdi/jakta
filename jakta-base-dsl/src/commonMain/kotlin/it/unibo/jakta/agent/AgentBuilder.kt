@@ -74,11 +74,6 @@ interface AgentBuilder<Belief : Any, Goal : Any, Body : Any> {
     fun withGoalPlans(vararg plans: Plan.Goal<Belief, Goal, *, *>)
 
     /**
-     * Define the skills this agent can use in his plans.
-     */
-    fun withSkills(skillFactory: (Node<Body>) -> Skills)
-
-    /**
      * Define how an agent can be embodied in the node.
      */
     fun embodiedAs(bodyFactory: (AgentID) -> Body)
@@ -99,7 +94,6 @@ class AgentBuilderImpl<Belief : Any, Goal : Any, Body : Any>(private val name: S
     private var beliefPlans = listOf<Plan.Belief<Belief, Goal, *, *>>()
     private var goalPlans = listOf<Plan.Goal<Belief, Goal, *, *>>()
 
-    private var skillsFactory: (Node<Body>) -> Skills by Delegates.notNull()
     private var bodyFactory: (AgentID) -> Body by Delegates.notNull()
     private var messageHandler: (Message) -> Internal? = { null } // By default, all messages are discarded.
     private var perceptionHandler: (Perception) -> Internal? = { null } // By default, percept do not generate events.
@@ -120,10 +114,6 @@ class AgentBuilderImpl<Belief : Any, Goal : Any, Body : Any>(private val name: S
     override fun hasInitialGoals(block: GoalBuilder<Goal>.() -> Unit) {
         val builder = GoalBuilderImpl(::addGoal)
         builder.apply(block)
-    }
-
-    override fun withSkills(skillFactory: (Node<Body>) -> Skills) {
-        this.skillsFactory = skillFactory
     }
 
     override fun embodiedAs(bodyFactory: (AgentID) -> Body) {
@@ -171,7 +161,6 @@ class AgentBuilderImpl<Belief : Any, Goal : Any, Body : Any>(private val name: S
                 goalPlans = this@AgentBuilderImpl.goalPlans,
                 perceptionHandler = perceptionHandler,
                 messageHandler = messageHandler,
-                skills = skillsFactory(node),
             )
         }
 }

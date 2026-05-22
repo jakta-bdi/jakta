@@ -220,13 +220,11 @@ inline infix fun <B, G, Context, reified PlanResult> PlanBuilder.Removal.Goal<B,
 inline infix fun <
     B,
     G,
-    Skills,
     Context,
     reified PlanResult,
     > PlanBuilder.FailureInterception.Goal<
     B,
     G,
-    Skills,
     Context,
     >.triggers(
     noinline body: suspend PlanScope<B, G, Context>.() -> PlanResult,

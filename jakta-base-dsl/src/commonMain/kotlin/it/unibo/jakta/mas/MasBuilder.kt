@@ -8,7 +8,7 @@ import it.unibo.jakta.node.NodeRunner
 /**
  * A builder for a Multi-Agent System (MAS). It allows defining nodes and running them with a given runner.
  */
-interface MasBuilder<N : Node<*, *>, NB : NodeBuilder<*, *, *, *, N>> {
+interface MasBuilder<Belief: Any, Goal: Any, Body: Any, N : Node<Body>, NB : NodeBuilder<Belief, Goal, Body, N>> {
 
     /**
      * Opens a scope for adding a node to the MAS.
@@ -20,7 +20,7 @@ interface MasBuilder<N : Node<*, *>, NB : NodeBuilder<*, *, *, *, N>> {
      *
      * @param runner The [NodeRunner] to use for running the nodes.
      */
-    suspend fun run(runner: NodeRunner<N>)
+    suspend fun run(runner: NodeRunner<Body, N>)
 }
 
 /**
@@ -28,10 +28,10 @@ interface MasBuilder<N : Node<*, *>, NB : NodeBuilder<*, *, *, *, N>> {
  * It takes a [NodeBuilder] and a block of code that defines the MAS structure.
  */
 @JaktaDSL
-fun <N : Node<*, *>, NB : NodeBuilder<*, *, *, *, N>> mas(
+fun <Belief: Any, Goal: Any, Body : Any, N : Node<Body>, NB : NodeBuilder<Belief, Goal, Body, N>> mas(
     builder: NB,
-    block: MasBuilder<N, NB>.() -> Unit,
-): MasBuilder<N, NB> = object : MasBuilder<N, NB> {
+    block: MasBuilder<Belief, Goal, Body, N, NB>.() -> Unit,
+): MasBuilder<Belief, Goal, Body, N, NB> = object : MasBuilder<Belief, Goal, Body, N, NB> {
 
     val nodes = mutableListOf<N>()
 
@@ -39,7 +39,7 @@ fun <N : Node<*, *>, NB : NodeBuilder<*, *, *, *, N>> mas(
         nodes += builder.apply(block).build()
     }
 
-    override suspend fun run(runner: NodeRunner<N>) {
+    override suspend fun run(runner: NodeRunner<Body, N>) {
         nodes.forEach { runner.run(it) }
     }
 }.apply(block)

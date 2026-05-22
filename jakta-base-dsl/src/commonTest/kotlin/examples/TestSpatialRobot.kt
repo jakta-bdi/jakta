@@ -69,6 +69,7 @@ class CustomSkillSet(val node: Node<BodyWithPosition, *>) :
     Movement<DoubleArray> by GridMovement(node),
     NodeTerminationSkill by NodeTerminationSkillImpl(node)
 
+
 class TestSpatialRobot {
 
     val mas = node {

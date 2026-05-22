@@ -9,13 +9,13 @@ interface AgentTerminationSkill {
     fun Agent.terminate()
 }
 
-class NodeTerminationSkillImpl(val node: Node<*, *>) : NodeTerminationSkill {
+class NodeTerminationSkillImpl(val node: Node<*>) : NodeTerminationSkill {
     override fun terminateNode() {
         node.terminateNode()
     }
 }
 
-class AgentTerminationSkillImpl(val node: Node<*, *>) : AgentTerminationSkill {
+class AgentTerminationSkillImpl(val node: Node<*>) : AgentTerminationSkill {
     override fun Agent.terminate() {
         node.removeAgent(id)
     }
