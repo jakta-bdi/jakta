@@ -9,12 +9,11 @@ import it.unibo.tuprolog.core.parsing.TermParser
 
 object JaktaParser {
 
-    val operators =
-        OperatorSet(
-            Operator("&", Specifier.XFY, 1000),
-            Operator("|", Specifier.XFY, 1100),
-            Operator("~", Specifier.FX, 900),
-        )
+    val operators = OperatorSet(
+        Operator("&", Specifier.XFY, 1000),
+        Operator("|", Specifier.XFY, 1100),
+        Operator("~", Specifier.FX, 900),
+    )
 
     private val parser = TermParser.withOperators(OperatorSet.DEFAULT + operators)
 
