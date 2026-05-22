@@ -10,25 +10,24 @@ import it.unibo.tuprolog.unify.Unificator.Companion.mguWith
 
 typealias PrologGoal = Fact
 
-fun PrologGoal.matching(goal: PrologGoal): Substitution? =
-    when (val substitution = this mguWith goal) {
-        is Substitution.Fail -> null
-        else -> substitution
-    }
+fun PrologGoal.matching(goal: PrologGoal): Substitution? = when (val substitution = this mguWith goal) {
+    is Substitution.Fail -> null
+    else -> substitution
+}
 
 data class SubstituedTerm(val term: Term)
 
-context(substitution: Substitution )
+context(substitution: Substitution)
 val Var.value: SubstituedTerm?
     get() = substitution[this]?.let { SubstituedTerm(it) }
 
 fun SubstituedTerm.asInt(): Int? = this.term.asInteger()?.value?.toInt()
 
-context(substitution: Substitution )
+context(substitution: Substitution)
 fun SubstituedTerm.asString(): String? = this.term.asAtom()?.value
 
-context(substitution: Substitution )
+context(substitution: Substitution)
 fun SubstituedTerm.asBoolean(): Boolean? = this.term.asTruth()?.isTrue
 
-context(substitution: Substitution )
+context(substitution: Substitution)
 fun SubstituedTerm.asDouble(): Double? = this.term.asReal()?.value?.toDouble()
