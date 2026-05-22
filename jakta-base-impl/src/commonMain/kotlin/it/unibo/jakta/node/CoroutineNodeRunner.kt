@@ -65,7 +65,12 @@ class CoroutineNodeRunner<Body : Any, Skills : Any, N : Node<Body, Skills>> : No
         newJob.invokeOnCompletion {
             when (it) {
                 is CancellationException -> {} // intentional removal
+//                is IllegalArgumentException -> {
+//                    this.stopNode(node)
+//                    throw it
+//                }
                 else -> {
+                    logger.e { "Agent ${agent.id} has stopped unexpectedly with cause: $it" }
                     node.removeAgent(agent.id)
                 }
             }

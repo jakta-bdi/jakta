@@ -72,7 +72,7 @@ sealed interface Plan<Belief : Any, Goal : Any, Skills : Any, TriggerEntity : An
      * The invocation of this method is supposed to be performed during execution,
      * this implies that this plan has a valid context that can be executed.
      */
-    private fun getPlanContext(beliefs: Collection<Belief>, e: TriggerEntity): Context = trigger(e)?.also {
+    private fun getPlanContext(beliefs: Collection<Belief>, e: TriggerEntity): Context = trigger(e)?.let {
         guard(GuardScope(beliefs, it))
     } ?: error { "Execution not possible without a plan context" }
 

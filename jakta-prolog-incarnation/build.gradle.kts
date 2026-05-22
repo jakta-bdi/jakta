@@ -1,6 +1,7 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     `java-library`
@@ -24,6 +25,7 @@ kotlinJvm {
                 api(jakta("dsl"))
                 implementation(jakta("base-impl"))
                 implementation(libs.kotlinx.coroutines.core)
+                implementation(libs.kermit)
 
                 api(libs.tuprolog.core)
                 api(libs.tuprolog.solve.classic)
@@ -43,6 +45,7 @@ kotlinJvm {
     }
     compilerOptions {
         jvmTarget.set(targetJvm)
+        freeCompilerArgs.add("-Xcontext-parameters")
     }
     tasks.withType<Test> {
         useJUnitPlatform()
@@ -55,4 +58,8 @@ kotlinJvm {
 }
 dependencies {
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+}
+val compileKotlin: KotlinCompile by tasks
+compileKotlin.compilerOptions {
+    freeCompilerArgs.set(listOf("-Xcontext-parameters"))
 }

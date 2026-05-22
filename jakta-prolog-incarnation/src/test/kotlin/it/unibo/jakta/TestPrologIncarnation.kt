@@ -1,19 +1,31 @@
 package it.unibo.jakta
 
+import co.touchlab.kermit.Logger
+import co.touchlab.kermit.Severity
 import it.unibo.jakta.agent.achieve
-import it.unibo.jakta.belief.planIsApplicableFor
+import it.unibo.jakta.belief.condition
+import it.unibo.jakta.dsl.JaktaLogicProgrammingScope
 import it.unibo.jakta.dsl.mas.mas
 import it.unibo.jakta.dsl.node.LocalNodeBuilder
 import it.unibo.jakta.dsl.plan.triggers
-import it.unibo.jakta.dsl.prologGoal
-import it.unibo.jakta.goal.ifGoalMatches
+import it.unibo.jakta.dsl.goal
+import it.unibo.jakta.dsl.goalQuery
+import it.unibo.jakta.goal.asInt
+import it.unibo.jakta.goal.matching
+import it.unibo.jakta.goal.value
 import it.unibo.jakta.node.CoroutineNodeRunner
-import it.unibo.tuprolog.core.Var
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 
 class TestPrologIncarnation {
+
+
+    @BeforeTest
+    fun setup() {
+        Logger.setMinSeverity(Severity.Warn)
+    }
 
     @Test
     fun `test prolog recursion`() {
@@ -23,34 +35,41 @@ class TestPrologIncarnation {
                     node {
                         agent("Alice") {
                             embodiedAs { object {} }
-                            withSkills { object {} }
+                            withSkills { TerminationSkill(it) }
                             hasInitialGoals {
-                                !prologGoal { "start"(0, 10) }
+                                with(JaktaLogicProgrammingScope()) {
+                                    ! goal { "start"(0, 10) }
+                                }
                             }
                             hasPlans {
-                                val myVar: Var = Var.of("X")
-                                val upper: Var = Var.of("M")
-                                val esse: Var = Var.of("S")
-                                adding.goal {
-                                    ifGoalMatches(prologGoal { "start"(myVar, myVar) })
-                                } triggers {
-                                    val terms = this.context[myVar]
-                                    agent.print(terms.toString())
-                                }
-
-                                adding.goal {
-                                    ifGoalMatches(prologGoal { "start"(myVar, upper) })
-                                } onlyWhen {
-                                    planIsApplicableFor {
-                                        (myVar lowerThan upper) and ( esse `is` (myVar + 1))
+                                with(JaktaLogicProgrammingScope()){
+                                    adding.goal {
+                                        matching(goalQuery { "start"(N, N) })
+                                    } triggers {
+                                        with(this.context) {
+                                            val n = N.value!!.asInt()
+                                            agent.print("Counting...$n done!")
+                                        }
                                     }
-                                } triggers {
-                                    println("TEST: " + this.context[myVar])
-                                    println("Context received from Guard: ${this.context}")
-                                    val newGoal = prologGoal { "start"(this.context[esse]!!, this.context[upper]!!) }
-                                    val pippo: Unit = agent.achieve(newGoal)
                                 }
 
+                                with(JaktaLogicProgrammingScope()) {
+                                    adding.goal {
+                                        matching(goalQuery { "start"(N, X) })
+                                    } onlyWhen {
+                                        condition {
+                                            (N lowerThan X) and (S `is` (N + 1))
+                                        }
+                                    } triggers {
+                                        with(this.context) {
+                                            agent.print("Counting..." + N.value?.asInt())
+                                            val pippo: Unit = agent.achieve(goal { "start"(S.value?.term!!, X.value?.term!!) })
+                                            assert(true)
+                                            skills.terminateNode()
+                                        }
+
+                                    }
+                                }
                             }
                         }
                     }

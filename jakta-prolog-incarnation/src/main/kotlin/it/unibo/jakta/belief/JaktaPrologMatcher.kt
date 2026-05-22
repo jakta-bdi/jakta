@@ -3,6 +3,7 @@ package it.unibo.jakta.belief
 import it.unibo.jakta.dsl.JaktaLogicProgrammingScope
 import it.unibo.jakta.plan.GuardScope
 import it.unibo.tuprolog.collections.ClauseMultiSet
+import it.unibo.tuprolog.core.Fact
 import it.unibo.tuprolog.core.Rule
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
@@ -16,10 +17,11 @@ import it.unibo.tuprolog.unify.Unificator.Companion.mguWith
 
 typealias PrologBelief = Rule
 
-fun Collection<PrologBelief>.toClauseMultiSet(): ClauseMultiSet =
-    ClauseMultiSet.of(Unificator.default, this.map { it })
 
-fun Collection<PrologBelief>.containsBeliefMatching(belief: Struct): Solution =
+private fun Collection<PrologBelief>.toClauseMultiSet(): ClauseMultiSet =
+    ClauseMultiSet.of(Unificator.default, this)
+
+private fun Collection<PrologBelief>.unifiesWith(belief: Struct): Solution =
     Solver.prolog
         .newBuilder()
         .flag(Unknown, Unknown.FAIL)
@@ -28,23 +30,22 @@ fun Collection<PrologBelief>.containsBeliefMatching(belief: Struct): Solution =
         .build()
         .solveOnce(belief)
 
-fun PrologBelief.ifBeliefMatches(belief: PrologBelief): Substitution? =
+fun PrologBelief.matching(belief: Fact): Substitution? =
     when (val substitution = this mguWith belief) {
         is Substitution.Fail -> null
         else -> substitution
     }
 
-fun <Context: Substitution> GuardScope<PrologBelief, Context>.planIsApplicableFor(
+context(scope: JaktaLogicProgrammingScope)
+fun <Context: Substitution> GuardScope<PrologBelief, Context>.condition(
     guard: JaktaLogicProgrammingScope.() -> Struct,
 ): Substitution? {
-    val guard = JaktaLogicProgrammingScope().guard()
+    val guard = scope.guard()
     val substitutedGuard = guard.apply(this.context).castToStruct()
-    val x = when (val solution = this.beliefs.containsBeliefMatching(substitutedGuard)) {
+    return when (val solution = this.beliefs.unifiesWith(substitutedGuard)) {
         is Solution.Yes -> solution.substitution + this.context
         else -> null
     }
-    println("Substitution being returned by guard: $x")
-    return x
 }
 
 private val operatorExtension = Theory.of(
@@ -53,3 +54,5 @@ private val operatorExtension = Theory.of(
     JaktaParser.parseClause("|(_, B) :- B"),
     JaktaParser.parseClause("~(X) :- not(X)"),
 )
+
+val specialFunctors = listOf(".", "{}", ":-", "/", "[]", ",")

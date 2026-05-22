@@ -140,7 +140,7 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
                 val result = plan.run(executableAgent.state, entity)
                 completion?.complete(result)
             } catch (e: Exception) {
-                log.w("Goal failed for exception: ${e.message}")
+                log.e("Goal failed for exception: ${e.message} ${e.stackTraceToString()}")
                 handleFailure(event, e)
             }
         }.invokeOnCompletion {
@@ -155,6 +155,7 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
         relevantFilter: (Plan<Belief, Goal, *, TriggerEntity, *, *>) -> Boolean,
         applicableFilter: (Plan<Belief, Goal, *, TriggerEntity, *, *>) -> Boolean,
     ): Plan<Belief, Goal, Skills, TriggerEntity, *, *>? {
+
         val relevant = planList.filter(relevantFilter)
 
         if (relevant.isEmpty()) {
