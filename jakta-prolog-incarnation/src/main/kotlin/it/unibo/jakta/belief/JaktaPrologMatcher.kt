@@ -17,18 +17,15 @@ import it.unibo.tuprolog.unify.Unificator.Companion.mguWith
 
 typealias PrologBelief = Rule
 
+private fun Collection<PrologBelief>.toClauseMultiSet(): ClauseMultiSet = ClauseMultiSet.of(Unificator.default, this)
 
-private fun Collection<PrologBelief>.toClauseMultiSet(): ClauseMultiSet =
-    ClauseMultiSet.of(Unificator.default, this)
-
-private fun Collection<PrologBelief>.unifiesWith(belief: Struct): Solution =
-    Solver.prolog
-        .newBuilder()
-        .flag(Unknown, Unknown.FAIL)
-        .staticKb(operatorExtension + Theory.of(this.toClauseMultiSet()))
-        .flag(TrackVariables) { ON }
-        .build()
-        .solveOnce(belief)
+private fun Collection<PrologBelief>.unifiesWith(belief: Struct): Solution = Solver.prolog
+    .newBuilder()
+    .flag(Unknown, Unknown.FAIL)
+    .staticKb(operatorExtension + Theory.of(this.toClauseMultiSet()))
+    .flag(TrackVariables) { ON }
+    .build()
+    .solveOnce(belief)
 
 fun PrologBelief.matching(belief: Fact): Substitution? =
     when (val substitution = this mguWith belief) {
