@@ -5,22 +5,25 @@ import co.touchlab.kermit.Severity
 import it.unibo.jakta.agent.achieve
 import it.unibo.jakta.belief.condition
 import it.unibo.jakta.dsl.JaktaLogicProgrammingScope
+import it.unibo.jakta.dsl.JaktaLogicProgrammingScope.Companion.logicProgram
+import it.unibo.jakta.dsl.achieve
+import it.unibo.jakta.dsl.goal
+import it.unibo.jakta.dsl.goalQuery
 import it.unibo.jakta.dsl.mas.mas
 import it.unibo.jakta.dsl.node.LocalNodeBuilder
 import it.unibo.jakta.dsl.plan.triggers
-import it.unibo.jakta.dsl.goal
-import it.unibo.jakta.dsl.goalQuery
+import it.unibo.jakta.goal.PrologGoal
 import it.unibo.jakta.goal.asInt
 import it.unibo.jakta.goal.matching
 import it.unibo.jakta.goal.value
 import it.unibo.jakta.node.CoroutineNodeRunner
+import it.unibo.tuprolog.dsl.logicProgramming
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 
 class TestPrologIncarnation {
-
 
     @BeforeTest
     fun setup() {
@@ -37,12 +40,12 @@ class TestPrologIncarnation {
                             embodiedAs { object {} }
                             withSkills { TerminationSkill(it) }
                             hasInitialGoals {
-                                with(JaktaLogicProgrammingScope()) {
-                                    ! goal { "start"(0, 10) }
+                                logicProgram {
+                                    !goal { "start"(0, 10) }
                                 }
                             }
                             hasPlans {
-                                with(JaktaLogicProgrammingScope()){
+                                logicProgram {
                                     adding.goal {
                                         matching(goalQuery { "start"(N, N) })
                                     } triggers {
@@ -52,8 +55,7 @@ class TestPrologIncarnation {
                                         }
                                     }
                                 }
-
-                                with(JaktaLogicProgrammingScope()) {
+                                logicProgram {
                                     adding.goal {
                                         matching(goalQuery { "start"(N, X) })
                                     } onlyWhen {
@@ -63,11 +65,14 @@ class TestPrologIncarnation {
                                     } triggers {
                                         with(this.context) {
                                             agent.print("Counting..." + N.value?.asInt())
-                                            val pippo: Unit = agent.achieve(goal { "start"(S.value?.term!!, X.value?.term!!) })
+                                            agent.achieve(
+                                                goal {
+                                                    "start"(S.value!!.term, X.value!!.term)
+                                                },
+                                            )
                                             assert(true)
                                             skills.terminateNode()
                                         }
-
                                     }
                                 }
                             }

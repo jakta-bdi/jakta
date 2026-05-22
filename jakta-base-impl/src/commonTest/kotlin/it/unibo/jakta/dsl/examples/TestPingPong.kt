@@ -45,10 +45,10 @@ class TestPingPong {
                 adding.belief {
                     this.takeIf { it == SimpleMessage("Message", "Alice") }
                 } triggers {
-                        agent.print(context.toString())
-                        with(skills) {
-                            agent.sendMessage("Hello Back!", context.sender)
-                        }
+                    agent.print(context.toString())
+                    with(skills) {
+                        agent.sendMessage("Hello Back!", context.sender)
+                    }
                 }
             }
         }
