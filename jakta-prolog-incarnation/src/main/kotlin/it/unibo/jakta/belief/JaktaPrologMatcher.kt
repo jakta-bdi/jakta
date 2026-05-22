@@ -33,9 +33,7 @@ fun PrologBelief.matching(belief: Fact): Substitution? = when (val substitution 
 }
 
 context(scope: JaktaLogicProgrammingScope)
-fun <Context: Substitution> GuardScope<PrologBelief, Context>.condition(
-    guard: JaktaLogicProgrammingScope.() -> Struct,
-): Substitution? {
+fun GuardScope<PrologBelief, Substitution>.condition(guard: JaktaLogicProgrammingScope.() -> Struct): Substitution? {
     val guard = scope.guard()
     val substitutedGuard = guard.apply(this.context).castToStruct()
     return when (val solution = this.beliefs.unifiesWith(substitutedGuard)) {
