@@ -27,11 +27,10 @@ private fun Collection<PrologBelief>.unifiesWith(belief: Struct): Solution = Sol
     .build()
     .solveOnce(belief)
 
-fun PrologBelief.matching(belief: Fact): Substitution? =
-    when (val substitution = this mguWith belief) {
-        is Substitution.Fail -> null
-        else -> substitution
-    }
+fun PrologBelief.matching(belief: Fact): Substitution? = when (val substitution = this mguWith belief) {
+    is Substitution.Fail -> null
+    else -> substitution
+}
 
 context(scope: JaktaLogicProgrammingScope)
 fun <Context: Substitution> GuardScope<PrologBelief, Context>.condition(
