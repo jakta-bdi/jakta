@@ -63,13 +63,13 @@ interface MutableAgentState<Belief : Any, Goal : Any, Skills : Any> :
      * Add the belief to the agent's belief base (eventually generating events).
      * @param belief The belief to be added.
      */
-    suspend fun believe(belief: Belief)
+    fun believe(belief: Belief)
 
     /**
      * Remove the belief from the agent's belief base (eventually generating events).
      * @param belief The belief to be removed.
      */
-    suspend fun forget(belief: Belief)
+    fun forget(belief: Belief)
 
     /**
      * Logs a message to the agent's output.

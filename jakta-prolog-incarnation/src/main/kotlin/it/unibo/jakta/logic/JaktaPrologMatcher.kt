@@ -28,3 +28,9 @@ private val operatorExtension = Theory.of(
 )
 
 val specialFunctors = listOf(".", "{}", ":-", "/", "[]", ",")
+
+fun requirePredicate(struct: Struct, message: (Struct) -> String = { "Struct $it must be a predicate" }) =
+    require(struct.functor !in specialFunctors) { message(struct) }
+
+fun requireGround(struct: Struct, message: (Struct) -> String = { "Struct $it must be ground" }) =
+    require(struct.isGround) { message(struct) }

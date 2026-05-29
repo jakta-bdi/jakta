@@ -1,6 +1,10 @@
 package it.unibo.jakta.dsl.belief
 
+import it.unibo.jakta.dsl.JaktaDSL
+import it.unibo.jakta.dsl.goal.PrologGoal
 import it.unibo.jakta.logic.JaktaLogicProgrammingScope
+import it.unibo.jakta.logic.requireGround
+import it.unibo.jakta.logic.requirePredicate
 import it.unibo.tuprolog.core.Fact
 import it.unibo.tuprolog.core.Rule
 import it.unibo.tuprolog.core.Struct
@@ -9,16 +13,36 @@ import it.unibo.tuprolog.unify.Unificator.Companion.mguWith
 
 typealias PrologBelief = Rule
 
+@JaktaDSL
 fun PrologBelief.matching(belief: Fact): Substitution? = when (val substitution = this mguWith belief) {
     is Substitution.Fail -> null
     else -> substitution
 }
 
-fun belief(block: JaktaLogicProgrammingScope.() -> Struct): Fact = Fact.of(JaktaLogicProgrammingScope().block()).also {
-    require(it.isGround) { "Belief must be ground" }
-}
+@JaktaDSL
+context(scope: JaktaLogicProgrammingScope)
+fun PrologBelief.matching(block: JaktaLogicProgrammingScope.() -> Struct): Substitution? = matching(beliefQuery(block))
+
+fun initialBelief(block: JaktaLogicProgrammingScope.() -> Struct): PrologGoal = Fact.of(
+    JaktaLogicProgrammingScope().block().also {
+        requirePredicate(it) { "Belief must be a predicate, but got $it" }
+        requireGround(it) { "Belief must be ground, but got $it" }
+    },
+)
+
+context(scope: JaktaLogicProgrammingScope)
+fun belief(block: JaktaLogicProgrammingScope.() -> Struct): Fact = Fact.of(
+    scope.block().also {
+        requirePredicate(it) { "Belief must be a predicate, but got $it" }
+        requireGround(it) { "Belief must be ground, but got $it" }
+    },
+)
 
 fun rule(block: JaktaLogicProgrammingScope.() -> Struct): Rule = Rule.of(JaktaLogicProgrammingScope().block())
 
 context(scope: JaktaLogicProgrammingScope)
-fun beliefQuery(block: JaktaLogicProgrammingScope.() -> Struct): Fact = Fact.of(scope.block())
+fun beliefQuery(block: JaktaLogicProgrammingScope.() -> Struct): Fact = Fact.of(
+    scope.block().also {
+        requirePredicate(it) { "Belief query must be a predicate, but got $it" }
+    },
+)

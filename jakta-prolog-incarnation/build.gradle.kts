@@ -33,6 +33,7 @@ kotlinJvm {
                 api(libs.tuprolog.dsl.core)
                 api(libs.tuprolog.dsl.unify)
                 api(libs.tuprolog.dsl.theory)
+                api(libs.tuprolog.serialize.core)
             }
         }
         val test by getting {
@@ -58,7 +59,9 @@ kotlinJvm {
 dependencies {
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
 }
-val compileKotlin: KotlinCompile by tasks
-compileKotlin.compilerOptions {
-    freeCompilerArgs.set(listOf("-Xcontext-parameters"))
+
+tasks.withType<KotlinCompile>().configureEach {
+    compilerOptions {
+        allWarningsAsErrors.set(false)
+    }
 }

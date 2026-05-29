@@ -22,6 +22,7 @@ tuprolog-parser-core = { module = "it.unibo.tuprolog:parser-core", version.ref =
 tuprolog-dsl-core = { module = "it.unibo.tuprolog:dsl-core", version.ref = "tuprolog" }
 tuprolog-dsl-unify = { module = "it.unibo.tuprolog:dsl-unify", version.ref = "tuprolog" }
 tuprolog-dsl-theory = { module = "it.unibo.tuprolog:dsl-theory", version.ref = "tuprolog" }
+tuprolog-serialize-core = { module = "it.unibo.tuprolog:serialize-core", version.ref = "tuprolog" }
 
 
 tuprolog-unify = { module = "it.unibo.tuprolog:unify", version.ref = "tuprolog" }

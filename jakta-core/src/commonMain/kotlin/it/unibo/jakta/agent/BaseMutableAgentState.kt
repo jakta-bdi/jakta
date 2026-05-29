@@ -93,11 +93,11 @@ internal class BaseMutableAgentState<Belief : Any, Goal : Any, Skills : Any>(
         internalInbox.send(GoalAddEvent.withNoResult(goal))
     }
 
-    override suspend fun believe(belief: Belief) {
+    override fun believe(belief: Belief) {
         this.beliefBase.add(belief)
     }
 
-    override suspend fun forget(belief: Belief) {
+    override fun forget(belief: Belief) {
         this.beliefBase.remove(belief)
     }
 
