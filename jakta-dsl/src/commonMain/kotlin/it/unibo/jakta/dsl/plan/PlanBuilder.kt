@@ -28,7 +28,8 @@ interface PlanBuilder<B : Any, G : Any, Skills : Any, Context : Any> {
              * @param guard a function that takes the context and returns a modified context or null to block the plan
              * @return the updated plan builder with the guard applied
              */
-            infix fun onlyWhen(guard: GuardScope<B>.(Context) -> Context?): Belief<B, G, Skills, Context>
+            @JaktaDSL
+            infix fun onlyWhen(guard: GuardScope<B, Context>.() -> Context?): Belief<B, G, Skills, Context>
 
             /**
              * Defines the body of the plan to be executed when triggered.
@@ -53,7 +54,8 @@ interface PlanBuilder<B : Any, G : Any, Skills : Any, Context : Any> {
              * @param guard a function that takes the context and returns a modified context or null to block the plan
              * @return the updated plan builder with the guard applied
              */
-            infix fun onlyWhen(guard: GuardScope<B>.(Context) -> Context?): Goal<B, G, Skills, Context>
+            @JaktaDSL
+            infix fun onlyWhen(guard: GuardScope<B, Context>.() -> Context?): Goal<B, G, Skills, Context>
 
             /**
              * Defines the body of the plan to be executed when triggered.
@@ -87,7 +89,7 @@ interface PlanBuilder<B : Any, G : Any, Skills : Any, Context : Any> {
              * @param guard a function that takes the context and returns a modified context or null to block the plan
              * @return the updated plan builder with the guard applied
              */
-            infix fun onlyWhen(guard: GuardScope<B>.(Context) -> Context?): Belief<B, G, Skills, Context>
+            infix fun onlyWhen(guard: GuardScope<B, Context>.() -> Context?): Belief<B, G, Skills, Context>
 
             /**
              * Defines the body of the plan to be executed when triggered.
@@ -115,7 +117,7 @@ interface PlanBuilder<B : Any, G : Any, Skills : Any, Context : Any> {
              * @param guard a function that takes the context and returns a modified context or null to block the plan
              * @return the updated plan builder with the guard applied
              */
-            infix fun onlyWhen(guard: GuardScope<B>.(Context) -> Context?): Goal<B, G, Skills, Context>
+            infix fun onlyWhen(guard: GuardScope<B, Context>.() -> Context?): Goal<B, G, Skills, Context>
 
             /**
              * Defines the body of the plan to be executed when triggered.
@@ -150,7 +152,7 @@ interface PlanBuilder<B : Any, G : Any, Skills : Any, Context : Any> {
              * @param guard a function that takes the context and returns a modified context or null to block the plan
              * @return the updated plan builder with the guard applied
              */
-            infix fun onlyWhen(guard: GuardScope<B>.(Context) -> Context?): Goal<B, G, Skills, Context>
+            infix fun onlyWhen(guard: GuardScope<B, Context>.() -> Context?): Goal<B, G, Skills, Context>
 
             /**
              * Defines the body of the plan to be executed when triggered.

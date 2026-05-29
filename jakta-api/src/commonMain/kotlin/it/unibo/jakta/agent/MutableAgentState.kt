@@ -1,5 +1,6 @@
 package it.unibo.jakta.agent
 
+import it.unibo.jakta.InternalJaktaAPI
 import it.unibo.jakta.event.AgentEvent
 import it.unibo.jakta.intention.MutableIntentionPool
 import it.unibo.jakta.plan.Plan
@@ -49,7 +50,7 @@ interface MutableAgentState<Belief : Any, Goal : Any, Skills : Any> :
      * @param[resultType] The type of result expected from the plan that will handle this goal.
      * @return The result of the plan that achieved the goal.
      */
-    @Deprecated("Use achieve instead", ReplaceWith("achieve(goal)"), DeprecationLevel.ERROR)
+    @InternalJaktaAPI
     suspend fun <PlanResult> internalAchieve(goal: Goal, resultType: KType): PlanResult
 
     /**
@@ -62,13 +63,13 @@ interface MutableAgentState<Belief : Any, Goal : Any, Skills : Any> :
      * Add the belief to the agent's belief base (eventually generating events).
      * @param belief The belief to be added.
      */
-    suspend fun believe(belief: Belief)
+    fun believe(belief: Belief)
 
     /**
      * Remove the belief from the agent's belief base (eventually generating events).
      * @param belief The belief to be removed.
      */
-    suspend fun forget(belief: Belief)
+    fun forget(belief: Belief)
 
     /**
      * Logs a message to the agent's output.
@@ -82,7 +83,6 @@ interface MutableAgentState<Belief : Any, Goal : Any, Skills : Any> :
  * @param goal The goal to be achieved.
  * @return The result of the plan execution of type [PlanResult].
  */
-@Suppress("DEPRECATION_ERROR")
-suspend inline fun <B : Any, G : Any, S : Any, reified PlanResult> MutableAgentState<B, G, S>.achieve(
-    goal: G,
-): PlanResult = internalAchieve(goal, typeOf<PlanResult>())
+@OptIn(InternalJaktaAPI::class)
+suspend inline fun <Goal : Any, reified PlanResult> MutableAgentState<*, Goal, *>.achieve(goal: Goal): PlanResult =
+    internalAchieve(goal, typeOf<PlanResult>())

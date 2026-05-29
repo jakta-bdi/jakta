@@ -31,6 +31,9 @@ rootProject.name = "jakta"
 include(
     "jakta-api",
     "jakta-dsl",
-    "jakta-base-impl",
+    "jakta-core",
     "alchemist-jakta-incarnation",
+    "jakta-string-incarnation",
+    "jakta-prolog-incarnation",
 )
+

@@ -4,6 +4,7 @@ dokka = "1.9.20"
 kermit = "2.0.4"
 kotlin = "2.2.21"
 alchemist = "43.0.14"
+tuprolog = "1.1.5"
 
 [libraries]
 kermit = {module = "co.touchlab:kermit", version.ref = "kermit"}
@@ -14,6 +15,25 @@ kotlinx-coroutines-core = {module = "org.jetbrains.kotlinx:kotlinx-coroutines-co
 kotlinx-coroutines-test = {module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref="coroutines"}
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 caffeine = "com.github.ben-manes.caffeine:caffeine:3.2.3"
+
+tuprolog-core = { module = "it.unibo.tuprolog:core", version.ref = "tuprolog" }
+tuprolog-solve-classic = { module = "it.unibo.tuprolog:solve-classic", version.ref = "tuprolog" }
+tuprolog-parser-core = { module = "it.unibo.tuprolog:parser-core", version.ref = "tuprolog" }
+tuprolog-dsl-core = { module = "it.unibo.tuprolog:dsl-core", version.ref = "tuprolog" }
+tuprolog-dsl-unify = { module = "it.unibo.tuprolog:dsl-unify", version.ref = "tuprolog" }
+tuprolog-dsl-theory = { module = "it.unibo.tuprolog:dsl-theory", version.ref = "tuprolog" }
+tuprolog-serialize-core = { module = "it.unibo.tuprolog:serialize-core", version.ref = "tuprolog" }
+
+
+tuprolog-unify = { module = "it.unibo.tuprolog:unify", version.ref = "tuprolog" }
+
+tuprolog-full = { module = "it.unibo.tuprolog:2p", version.ref = "tuprolog" }
+tuprolog-ide = { module = "it.unibo.tuprolog:ide", version.ref = "tuprolog" }
+tuprolog-repl = { module = "it.unibo.tuprolog:repl-jvm", version.ref = "tuprolog" }
+tuprolog-theory = { module = "it.unibo.tuprolog:theory-jvm", version.ref = "tuprolog" }
+tuprolog-parser-theory = { module = "it.unibo.tuprolog:parser-theory-jvm", version.ref = "tuprolog" }
+tuprolog-dsl-solve = { module = "it.unibo.tuprolog:dsl-solve-jvm", version.ref = "tuprolog" }
+tuprolog-oop-lib = { module = "it.unibo.tuprolog:oop-lib-jvm", version.ref = "tuprolog" }
 
 [bundles]
 alchemist-api = [

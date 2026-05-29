@@ -26,7 +26,7 @@ class MessagingSkill(val node: Node<BodyWithName, *>) {
     }
 }
 
-private fun <Goal : Any> LocalNodeBuilder<SimpleMessage, Goal, MessagingSkill, BodyWithName>.messageEnabledAgent(
+private fun <Goal : Any> LocalNodeBuilder<MessagingSkill, BodyWithName>.messageEnabledAgent(
     name: String,
     block: AgentBuilder<SimpleMessage, Goal, MessagingSkill, BodyWithName>.() -> Unit,
 ) {

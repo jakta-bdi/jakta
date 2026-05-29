@@ -1,0 +1,97 @@
+package it.unibo.jakta.dsl
+
+import it.unibo.jakta.agent.AgentSpecification
+import it.unibo.jakta.dsl.agent.AgentBuilder
+import it.unibo.jakta.dsl.agent.AgentBuilderImpl
+import it.unibo.jakta.dsl.node.LocalNodeBuilder
+import it.unibo.jakta.dsl.plan.PlanBuilder
+import it.unibo.jakta.dsl.plan.TriggerAdditionImpl
+import it.unibo.jakta.dsl.plan.TriggerRemovalImpl
+import it.unibo.jakta.node.Node
+import it.unibo.jakta.plan.Plan
+
+/**
+ * Entry point for creating a multi-agent system using the Jakta DSL and a localnode.
+ * @return an instantiated MAS.
+ */
+fun <Skills : Any, Body : Any> node(block: LocalNodeBuilder<Skills, Body>.() -> Unit): Node<Body, Skills> {
+    val nodeBuilder = LocalNodeBuilder<Skills, Body>()
+    nodeBuilder.apply(block)
+    return nodeBuilder.build()
+}
+
+/**
+ * Entry point for creating an agent using the Jakta DSL.
+ * @return an instantiated Agent.
+ */
+@JaktaDSL
+fun <Belief : Any, Goal : Any, Skills : Any, Body : Any> agent(
+    node: Node<Body, Skills>,
+    block: AgentBuilder<Belief, Goal, Skills, Body>.() -> Unit,
+): AgentSpecification<Belief, Goal, Skills, Body> {
+    val ab = AgentBuilderImpl<Belief, Goal, Skills, Body>()
+    ab.apply(block)
+    return ab.build(node)
+}
+
+// TODO entrypoint for plans???
+// this is tricky due to the way the DSL is constructed
+// create an entrypoint for a single standalone plan is hard...
+
+// TODO maybe actually make the triggerBuilder implement these interfaces?
+
+/**
+ * Entry point for belief addition only plans.
+ */
+// interface BeliefOnlyAdditionTrigger<Belief : Any, Goal : Any, Skills : Any> {
+//    /**
+//     * Given a @param[beliefQuery] as a function that matches a belief
+//     * and extracts a context from it if the belief matches.
+//     * @return a plan builder for belief addition triggers.
+//     */
+//    fun <Context : Any> belief(
+//        beliefQuery: Belief.() -> Context?,
+//    ): PlanBuilder.Addition.Belief<Belief, Goal, Skills, Context>
+// }
+//
+// /**
+// * Entry point for belief removal only plans.
+// */
+// interface BeliefOnlyRemovalTrigger<Belief : Any, Goal : Any, Skills : Any> {
+//    /**
+//     * Given a @param[beliefQuery] as a function that matches a belief
+//     * and extracts a context from it if the belief matches.
+//     * @return a plan builder for belief removal triggers.
+//     */
+//    fun <Context : Any> belief(
+//        beliefQuery: Belief.() -> Context?,
+//    ): PlanBuilder.Removal.Belief<Belief, Goal, Skills, Context>
+// }
+//
+// public class BeliefPlan<Belief : Any, Goal : Any, Skills : Any> {
+//    val adding: BeliefOnlyAdditionTrigger<Belief, Goal, Skills>
+//        get() =
+//            object : BeliefOnlyAdditionTrigger<Belief, Goal, Skills> {
+//                val trigger = TriggerAdditionImpl<Belief, Goal, Skills>({}, {})
+//
+//                override fun <Context : Any> belief(
+//                    beliefQuery: Belief.() -> Context?,
+//                ): PlanBuilder.Addition.Belief<Belief, Goal, Skills, Context> = trigger.belief(beliefQuery)
+//            }
+//
+//    val removing: BeliefOnlyRemovalTrigger<Belief, Goal, Skills>
+//        get() =
+//            object : BeliefOnlyRemovalTrigger<Belief, Goal, Skills> {
+//                val trigger = TriggerRemovalImpl<Belief, Goal, Skills>({}, {})
+//
+//                override fun <Context : Any> belief(
+//                    beliefQuery: Belief.() -> Context?,
+//                ): PlanBuilder.Removal.Belief<Belief, Goal, Skills, Context> = trigger.belief(beliefQuery)
+//            }
+//
+//    companion object {
+//        fun <Belief : Any, Goal : Any, Skills : Any> of(
+//            block: BeliefPlan<Belief, Goal, Skills>.() -> Plan.Belief<Belief, Goal, Skills, *, *>,
+//        ): Plan.Belief<Belief, Goal, Skills, *, *> = block(BeliefPlan())
+//    }
+// }

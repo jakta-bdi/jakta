@@ -34,7 +34,7 @@ sealed interface Plan<Belief : Any, Goal : Any, Skills : Any, TriggerEntity : An
      * It takes a [GuardScope] and the [Context] returned by the trigger function
      * and returns a possibly modified [Context] if the guard condition is met, or null otherwise.
      */
-    val guard: GuardScope<Belief>.(Context) -> Context?
+    val guard: GuardScope<Belief, Context>.() -> Context?
 
     /**
      * The body of the plan, which is a suspend function that defines the actions to be performed
@@ -63,17 +63,17 @@ sealed interface Plan<Belief : Any, Goal : Any, Skills : Any, TriggerEntity : An
      * and if the guard condition is satisfied in the given guard scope
      * returning a non-null context.
      */
-    fun isApplicable(guardScope: GuardScope<Belief>, e: TriggerEntity, desiredResult: KType = typeOf<Any>()): Boolean =
+    fun isApplicable(beliefs: Collection<Belief>, e: TriggerEntity, desiredResult: KType = typeOf<Any>()): Boolean =
         resultType.isSubtypeOfMultiPlatform(desiredResult) &&
-            trigger(e)?.let { guard(guardScope, it) != null } ?: false
+            trigger(e)?.let { guard(GuardScope(beliefs, it)) != null } ?: false
 
     /**
      * @return the Context of this Plan applied to the trigger and the guard.
      * The invocation of this method is supposed to be performed during execution,
      * this implies that this plan has a valid context that can be executed.
      */
-    private fun getPlanContext(guardScope: GuardScope<Belief>, e: TriggerEntity): Context = trigger(e)?.also {
-        guard(guardScope, it)
+    private fun getPlanContext(beliefs: Collection<Belief>, e: TriggerEntity): Context = trigger(e)?.let {
+        guard(GuardScope(beliefs, it))
     } ?: error { "Execution not possible without a plan context" }
 
     /**
@@ -86,7 +86,7 @@ sealed interface Plan<Belief : Any, Goal : Any, Skills : Any, TriggerEntity : An
         BasePlanScope(
             agent,
             agent.skills,
-            getPlanContext(agent, entity),
+            getPlanContext(agent.beliefs, entity),
         ),
     )
 
