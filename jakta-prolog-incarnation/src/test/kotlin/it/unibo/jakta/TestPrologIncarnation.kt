@@ -17,6 +17,8 @@ import it.unibo.jakta.dsl.plan.condition
 import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.logic.JaktaLogicProgrammingScope.Companion.prologPlan
 import it.unibo.jakta.node.CoroutineNodeRunner
+import it.unibo.tuprolog.core.Atom
+import it.unibo.tuprolog.core.Var
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.milliseconds
@@ -143,6 +145,41 @@ class TestPrologIncarnation {
                                             delay(1.milliseconds) // TODO starvation issue if not present...
                                             agent.believe(belief { "belief"(n + 1) })
                                         }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }.run(CoroutineNodeRunner())
+            }
+            job.join()
+        }
+    }
+
+    @Test
+    fun `test belief matching in guards`() {
+        runTest {
+            val job = launch {
+                mas(LocalNodeBuilder()) {
+                    node {
+                        agent("Alice") {
+                            embodiedAs { object {} }
+                            withSkills { TerminationSkill(it) }
+                            believes {
+                                +initialBelief { "belief"(1) }
+                            }
+                            hasInitialGoals {
+                                !initialGoal { "start"(1) }
+                            }
+                            hasPlans {
+                                prologPlan {
+                                    adding.goal {
+                                        matching { "start"(`_`) }
+                                    } onlyWhen {
+                                        condition { "belief"(N) }
+                                    } triggers {
+                                        agent.print("Belief is ${N.valueFromContext(context)}")
+                                        skills.terminateNode()
                                     }
                                 }
                             }
