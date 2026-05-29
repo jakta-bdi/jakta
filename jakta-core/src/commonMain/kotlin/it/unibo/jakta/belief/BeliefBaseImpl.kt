@@ -8,16 +8,9 @@ import it.unibo.jakta.event.EventInbox
 internal data class BeliefBaseImpl<Belief : Any>(
     private val events: EventInbox<AgentEvent.Internal.Belief<Belief>>,
     val initialBeliefs: Iterable<Belief> = emptyList(),
-    private val beliefs: MutableSet<Belief> = mutableSetOf(),
+    private val beliefs: MutableSet<Belief> = initialBeliefs.toMutableSet(),
 ) : BeliefBase<Belief>,
     MutableSet<Belief> by beliefs {
-
-    /**
-     * Triggers events for the addition of the initial beliefs.
-     */
-    init {
-        initialBeliefs.forEach { add(it) }
-    }
 
     override fun snapshot(): Collection<Belief> = this.copy()
 

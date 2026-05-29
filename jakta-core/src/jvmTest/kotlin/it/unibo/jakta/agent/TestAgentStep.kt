@@ -6,6 +6,7 @@ import it.unibo.jakta.plan.Plan
 import kotlin.reflect.typeOf
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -25,13 +26,13 @@ class TestAgentStep {
     private val planCompleted = CompletableDeferred<Unit>()
     private val slowPlan = GoalAdditionPlan<String, String, Unit, String, Unit>(
         trigger = { goal -> goal.takeIf { it == "slow" } },
-        guard = { it },
+        guard = { "slow" },
         body = {
             firstLineOfPlanBody.complete(Unit)
             it.agent.print("firstLineOfPlanBody")
             secondLineOfPlanBody.complete(Unit)
             it.agent.print("secondLineOfPlanBody")
-            delay(10)
+            delay(10.milliseconds)
             it.agent.print("After delay")
             planCompleted.complete(Unit)
             it.agent.print("Plan Completed")
@@ -43,7 +44,7 @@ class TestAgentStep {
     fun tryStepReturnsImmediatelyWhenNoEventsAreAvailable() = runTest {
         val lifecycle = createLifecycle()
 
-        withTimeout(250) {
+        withTimeout(250.milliseconds) {
             lifecycle.tryStep(Dispatchers.Main)
         }
     }
@@ -58,7 +59,7 @@ class TestAgentStep {
         runTest {
             val dispatcher = this.coroutineContext[CoroutineDispatcher]!!
             try {
-                withTimeout(250) {
+                withTimeout(250.milliseconds) {
                     lifecycle.tryStep(dispatcher)
                 }
             } catch (e: TimeoutCancellationException) {
@@ -81,7 +82,7 @@ class TestAgentStep {
             )
 
             while (!planCompleted.isCompleted) {
-                advanceTimeBy(1)
+                advanceTimeBy(1.milliseconds)
                 println("Advancing time by 1")
                 lifecycle.tryStep(dispatcher)
             }

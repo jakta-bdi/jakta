@@ -13,15 +13,15 @@ import it.unibo.tuprolog.unify.Unificator.Companion.mguWith
 
 typealias PrologBelief = Rule
 
-@JaktaDSL
-fun PrologBelief.matching(belief: Fact): Substitution? = when (val substitution = this mguWith belief) {
+
+private fun PrologBelief.matchBelief(belief: Fact): Substitution? = when (val substitution = this mguWith belief) {
     is Substitution.Fail -> null
     else -> substitution
 }
 
 @JaktaDSL
 context(scope: JaktaLogicProgrammingScope)
-fun PrologBelief.matching(block: JaktaLogicProgrammingScope.() -> Struct): Substitution? = matching(beliefQuery(block))
+fun PrologBelief.matching(block: JaktaLogicProgrammingScope.() -> Struct): Substitution? = matchBelief(beliefQuery(block))
 
 fun initialBelief(block: JaktaLogicProgrammingScope.() -> Struct): PrologGoal = Fact.of(
     JaktaLogicProgrammingScope().block().also {
@@ -41,7 +41,7 @@ fun belief(block: JaktaLogicProgrammingScope.() -> Struct): Fact = Fact.of(
 fun rule(block: JaktaLogicProgrammingScope.() -> Struct): Rule = Rule.of(JaktaLogicProgrammingScope().block())
 
 context(scope: JaktaLogicProgrammingScope)
-fun beliefQuery(block: JaktaLogicProgrammingScope.() -> Struct): Fact = Fact.of(
+private fun beliefQuery(block: JaktaLogicProgrammingScope.() -> Struct): Fact = Fact.of(
     scope.block().also {
         requirePredicate(it) { "Belief query must be a predicate, but got $it" }
     },

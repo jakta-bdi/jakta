@@ -9,6 +9,7 @@ import it.unibo.jakta.dsl.ifGoalMatch
 import it.unibo.jakta.dsl.node
 import it.unibo.jakta.dsl.plan.triggers
 import kotlin.test.Test
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 
 class TestHelloDelay {
@@ -16,7 +17,7 @@ class TestHelloDelay {
     @Test
     fun testHelloDelay() {
         Logger.setMinSeverity(Severity.Debug)
-        val timeToWait = 10000L
+        val timeToWait = 10.seconds
 
         executeInTestScope<Any, NodeTerminationSkill> {
             node {

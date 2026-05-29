@@ -41,7 +41,7 @@ class ExecutionTest {
                     goalPlans = listOf(
                         GoalAdditionPlan(
                             trigger = { it == "hello" },
-                            guard = { it },
+                            guard = { true },
                             body = {
                                 it.skills.prettyPrint("PLKUTO")
                                 it.skills.stop()

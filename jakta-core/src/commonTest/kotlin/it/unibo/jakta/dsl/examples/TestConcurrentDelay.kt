@@ -9,6 +9,7 @@ import it.unibo.jakta.dsl.node
 import it.unibo.jakta.dsl.plan.triggers
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 
 class TestConcurrentDelay {
@@ -27,16 +28,16 @@ class TestConcurrentDelay {
                         ifGoalMatch("goal")
                     } triggers {
                         agent.print("Hello...")
-                        delay(10000)
+                        delay(1.seconds)
                         agent.print("...World!")
                         skills.terminateNode()
                     }
                     adding.goal {
                         ifGoalMatch("anotherGoal")
                     } triggers {
-                        delay(1000)
+                        delay(1.seconds)
                         agent.print("Running while waiting...")
-                        delay(5000)
+                        delay(5.seconds)
                         agent.print("I'm still faster!")
                         skills.terminateNode()
                     }

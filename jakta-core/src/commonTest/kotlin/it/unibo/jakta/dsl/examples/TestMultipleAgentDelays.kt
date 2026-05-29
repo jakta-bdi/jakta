@@ -12,6 +12,7 @@ import it.unibo.jakta.dsl.node
 import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.node.Node
 import kotlin.test.Test
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 
 class SkillSet(val node: Node<*, *>) :
@@ -49,7 +50,7 @@ class TestMultipleAgentDelays {
                         ifGoalMatch("goal")
                     } triggers {
                         agent.print("I will be faster...")
-                        delay(5000)
+                        delay(5.seconds)
                         agent.print("...than you!")
                         with(skills) {
                             agent.terminate()

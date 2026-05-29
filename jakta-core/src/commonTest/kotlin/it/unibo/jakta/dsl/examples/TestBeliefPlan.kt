@@ -15,10 +15,16 @@ class TestBeliefPlan {
         agent("Hello world agent") {
             embodiedAs { object {} }
             withSkills { NodeTerminationSkillImpl(it) }
-            believes {
-                +"testBelief"
+            hasInitialGoals {
+                ! "start"
             }
             hasPlans {
+                adding.goal {
+                    this.takeIf{ it == "start" }
+                } triggers {
+                    agent.believe("testBelief")
+                }
+
                 adding.belief {
                     this.takeIf { it == "testBelief" }
                 } triggers {

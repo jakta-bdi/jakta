@@ -11,6 +11,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -27,20 +28,19 @@ class TestTryStep {
         agent("Hello world agent") {
             embodiedAs { object {} }
             withSkills { NodeTerminationSkillImpl(it) }
-            believes {
-                +"testBelief"
+            hasInitialGoals {
+                !"goal"
             }
             hasPlans {
-                adding.belief {
-                    this.takeIf { it == "testBelief" }
+                adding.goal {
+                    this.takeIf { it == "goal" }
                 } triggers {
-                    agent.print("Belief added: $context")
                     agent.print("First step")
                     firstStep = true
-                    delay(1000)
+                    delay(1.seconds)
                     agent.print("Second step")
                     secondStep = true
-                    delay(1000)
+                    delay(1.seconds)
                     agent.print("Third step, done!")
                     done = true
                     skills.terminateNode()

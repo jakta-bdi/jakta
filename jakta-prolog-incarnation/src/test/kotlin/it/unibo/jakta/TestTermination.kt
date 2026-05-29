@@ -7,14 +7,11 @@ import it.unibo.jakta.dsl.belief.initialBelief
 import it.unibo.jakta.dsl.belief.matching
 import it.unibo.jakta.dsl.mas.mas
 import it.unibo.jakta.dsl.node.LocalNodeBuilder
-import it.unibo.jakta.dsl.plan.condition
 import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.logic.JaktaLogicProgrammingScope.Companion.prologPlan
 import it.unibo.jakta.node.CoroutineNodeRunner
 import kotlin.test.BeforeTest
 import kotlin.test.Test
-import kotlin.time.Duration.Companion.milliseconds
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 

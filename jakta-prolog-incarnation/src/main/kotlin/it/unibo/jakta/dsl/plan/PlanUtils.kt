@@ -16,7 +16,7 @@ import kotlin.reflect.typeOf
 
 @JaktaDSL
 context(scope: JaktaLogicProgrammingScope)
-fun GuardScope<PrologBelief, Substitution>.condition(guard: JaktaLogicProgrammingScope.() -> Struct): Substitution? {
+fun GuardScope<PrologBelief, Substitution>.satisfies(guard: JaktaLogicProgrammingScope.() -> Struct): Substitution? {
     val guard = scope.guard()
     val substitutedGuard = guard.apply(this.context).castToStruct()
     return when (val solution = this.beliefs.unifiesWith(substitutedGuard)) {

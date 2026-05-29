@@ -3,29 +3,22 @@ package it.unibo.jakta
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import it.unibo.jakta.dsl.belief.belief
-import it.unibo.jakta.dsl.belief.beliefQuery
 import it.unibo.jakta.dsl.belief.initialBelief
 import it.unibo.jakta.dsl.belief.matching
+import it.unibo.jakta.dsl.belief.rule
 import it.unibo.jakta.dsl.goal.goal
-import it.unibo.jakta.dsl.goal.goalQuery
 import it.unibo.jakta.dsl.goal.initialGoal
 import it.unibo.jakta.dsl.goal.matching
 import it.unibo.jakta.dsl.mas.mas
 import it.unibo.jakta.dsl.node.LocalNodeBuilder
 import it.unibo.jakta.dsl.plan.achieve
-import it.unibo.jakta.dsl.plan.condition
+import it.unibo.jakta.dsl.plan.satisfies
 import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.logic.JaktaLogicProgrammingScope.Companion.prologPlan
 import it.unibo.jakta.node.CoroutineNodeRunner
-import it.unibo.tuprolog.core.Atom
-import it.unibo.tuprolog.core.Var
 import kotlin.test.BeforeTest
 import kotlin.test.Test
-import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 
 class TestPrologIncarnation {
@@ -60,7 +53,7 @@ class TestPrologIncarnation {
                                     adding.goal {
                                         matching { "start"(N, X) }
                                     } onlyWhen {
-                                        condition {
+                                        satisfies {
                                             (N lowerThan X) and (S `is` (N + 1))
                                         }
                                     } triggers {
@@ -90,10 +83,21 @@ class TestPrologIncarnation {
                         agent("Alice") {
                             embodiedAs { object {} }
                             withSkills { TerminationSkill(it) }
-                            believes {
-                                +initialBelief { "belief"(1) }
+                            hasInitialGoals {
+                                !initialGoal {"start"(1)}
                             }
                             hasPlans {
+
+                                prologPlan {
+                                    adding.goal {
+                                        matching { "start"(N) }
+                                    } triggers {
+                                        val n = N.valueFromContext(context)
+                                        agent.print("Starting with $n")
+                                        agent.believe(belief { "belief"(n) })
+                                    }
+                                }
+
                                 prologPlan {
                                     adding.belief {
                                         matching { "belief"(N) }
@@ -121,15 +125,26 @@ class TestPrologIncarnation {
                         agent("Alice") {
                             embodiedAs { object {} }
                             withSkills { TerminationSkill(it) }
-                            believes {
-                                +initialBelief { "belief"(1) }
+                            hasInitialGoals {
+                                !initialGoal {"start"(1)}
                             }
                             hasPlans {
+
+                                prologPlan {
+                                    adding.goal {
+                                        matching { "start"(N) }
+                                    } triggers {
+                                        val n = N.valueFromContext(context)
+                                        agent.print("Starting with $n")
+                                        agent.believe(belief { "belief"(n) })
+                                    }
+                                }
+
                                 prologPlan {
                                     adding.belief {
                                         matching { "belief"(N) }
                                     } onlyWhen {
-                                        condition { N greaterThan 5 }
+                                        satisfies { N greaterThan 5 }
                                     } triggers {
                                         skills.terminateNode()
                                     }
@@ -175,9 +190,53 @@ class TestPrologIncarnation {
                                     adding.goal {
                                         matching { "start"(`_`) }
                                     } onlyWhen {
-                                        condition { "belief"(N) }
+                                        satisfies { "belief"(N) }
                                     } triggers {
                                         agent.print("Belief is ${N.valueFromContext(context)}")
+                                        skills.terminateNode()
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }.run(CoroutineNodeRunner())
+            }
+            job.join()
+        }
+    }
+
+    @Test
+    fun `test rules`() {
+        runTest {
+            val job = launch {
+                mas(LocalNodeBuilder()) {
+                    node {
+                        agent("Alice") {
+                            embodiedAs { object {} }
+                            withSkills { TerminationSkill(it) }
+                            believes {
+                                + initialBelief{ "parent"("alice", "bob")}
+                                + initialBelief { "parent"("alice", "charlie") }
+
+                                + rule {
+                                    "sibling"(X, Y) impliedBy (
+                                        "parent"(Z, X)
+                                        and "parent"(Z, Y)
+                                        and (X neq Y)
+                                    )
+                                }
+                            }
+                            hasInitialGoals {
+                                !initialGoal { "start"("bob") }
+                            }
+                            hasPlans {
+                                prologPlan {
+                                    adding.goal {
+                                        matching { "start"(B) }
+                                    } onlyWhen {
+                                        satisfies { "sibling"(B, C) }
+                                    } triggers {
+                                        agent.print("${C.valueFromContext(context)} is a sibling of ${B.valueFromContext(context)}")
                                         skills.terminateNode()
                                     }
                                 }
