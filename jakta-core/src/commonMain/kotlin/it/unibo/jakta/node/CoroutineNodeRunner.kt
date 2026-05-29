@@ -16,6 +16,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
+import kotlinx.coroutines.yield
 
 /**
  * A [it.unibo.jakta.node.NodeRunner] implementation that uses Kotlin coroutines
@@ -57,6 +58,7 @@ class CoroutineNodeRunner<Body : Any, Skills : Any, N : Node<Body, Skills>> : No
         val newJob = launch {
             while (isActive) {
                 newAgent.step()
+                yield()
             }
         }
         agents += newAgent to newJob

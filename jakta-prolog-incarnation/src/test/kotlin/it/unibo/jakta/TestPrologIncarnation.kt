@@ -142,7 +142,6 @@ class TestPrologIncarnation {
                                         with(context) {
                                             val n = N.value.getAs<Int>()
                                             agent.print("Belief is $n")
-                                            delay(1.milliseconds) // TODO starvation issue if not present...
                                             agent.believe(belief { "belief"(n + 1) })
                                         }
                                     }
