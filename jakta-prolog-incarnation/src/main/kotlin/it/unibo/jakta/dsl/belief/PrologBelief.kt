@@ -13,7 +13,6 @@ import it.unibo.tuprolog.unify.Unificator.Companion.mguWith
 
 typealias PrologBelief = Rule
 
-
 private fun PrologBelief.matchBelief(belief: Fact): Substitution? = when (val substitution = this mguWith belief) {
     is Substitution.Fail -> null
     else -> substitution
@@ -21,7 +20,8 @@ private fun PrologBelief.matchBelief(belief: Fact): Substitution? = when (val su
 
 @JaktaDSL
 context(scope: JaktaLogicProgrammingScope)
-fun PrologBelief.matching(block: JaktaLogicProgrammingScope.() -> Struct): Substitution? = matchBelief(beliefQuery(block))
+fun PrologBelief.matching(block: JaktaLogicProgrammingScope.() -> Struct): Substitution? =
+    matchBelief(beliefQuery(block))
 
 fun initialBelief(block: JaktaLogicProgrammingScope.() -> Struct): PrologGoal = Fact.of(
     JaktaLogicProgrammingScope().block().also {
@@ -38,7 +38,7 @@ fun belief(block: JaktaLogicProgrammingScope.() -> Struct): Fact = Fact.of(
     },
 )
 
-fun rule(block: JaktaLogicProgrammingScope.() -> Struct): Rule = Rule.of(JaktaLogicProgrammingScope().block())
+fun rule(block: JaktaLogicProgrammingScope.() -> Rule): Rule = JaktaLogicProgrammingScope().block()
 
 context(scope: JaktaLogicProgrammingScope)
 private fun beliefQuery(block: JaktaLogicProgrammingScope.() -> Struct): Fact = Fact.of(

@@ -16,11 +16,11 @@ class TestBeliefPlan {
             embodiedAs { object {} }
             withSkills { NodeTerminationSkillImpl(it) }
             hasInitialGoals {
-                ! "start"
+                !"start"
             }
             hasPlans {
                 adding.goal {
-                    this.takeIf{ it == "start" }
+                    this.takeIf { it == "start" }
                 } triggers {
                     agent.believe("testBelief")
                 }

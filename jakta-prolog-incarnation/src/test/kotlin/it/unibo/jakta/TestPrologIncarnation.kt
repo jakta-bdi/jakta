@@ -84,10 +84,9 @@ class TestPrologIncarnation {
                             embodiedAs { object {} }
                             withSkills { TerminationSkill(it) }
                             hasInitialGoals {
-                                !initialGoal {"start"(1)}
+                                !initialGoal { "start"(1) }
                             }
                             hasPlans {
-
                                 prologPlan {
                                     adding.goal {
                                         matching { "start"(N) }
@@ -126,10 +125,9 @@ class TestPrologIncarnation {
                             embodiedAs { object {} }
                             withSkills { TerminationSkill(it) }
                             hasInitialGoals {
-                                !initialGoal {"start"(1)}
+                                !initialGoal { "start"(1) }
                             }
                             hasPlans {
-
                                 prologPlan {
                                     adding.goal {
                                         matching { "start"(N) }
@@ -215,15 +213,15 @@ class TestPrologIncarnation {
                             embodiedAs { object {} }
                             withSkills { TerminationSkill(it) }
                             believes {
-                                + initialBelief{ "parent"("alice", "bob")}
-                                + initialBelief { "parent"("alice", "charlie") }
+                                +initialBelief { "parent"("alice", "bob") }
+                                +initialBelief { "parent"("alice", "charlie") }
 
-                                + rule {
+                                +rule {
                                     "sibling"(X, Y) impliedBy (
                                         "parent"(Z, X)
-                                        and "parent"(Z, Y)
-                                        and (X neq Y)
-                                    )
+                                            and "parent"(Z, Y)
+                                            and (X neq Y)
+                                        )
                                 }
                             }
                             hasInitialGoals {
@@ -236,7 +234,10 @@ class TestPrologIncarnation {
                                     } onlyWhen {
                                         satisfies { "sibling"(B, C) }
                                     } triggers {
-                                        agent.print("${C.valueFromContext(context)} is a sibling of ${B.valueFromContext(context)}")
+                                        agent.print(
+                                            "${C.valueFromContext(context)}" +
+                                                " is a sibling of ${B.valueFromContext(context)}",
+                                        )
                                         skills.terminateNode()
                                     }
                                 }

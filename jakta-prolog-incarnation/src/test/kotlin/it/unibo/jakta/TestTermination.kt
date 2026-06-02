@@ -17,7 +17,6 @@ import kotlinx.coroutines.test.runTest
 
 class TestTermination {
 
-
     @BeforeTest
     fun setup() {
         Logger.setMinSeverity(Severity.Warn)
@@ -36,7 +35,6 @@ class TestTermination {
                                 +initialBelief { "belief"(1) }
                             }
                             hasPlans {
-
                                 prologPlan {
                                     adding.belief {
                                         matching { "belief"(N) }
