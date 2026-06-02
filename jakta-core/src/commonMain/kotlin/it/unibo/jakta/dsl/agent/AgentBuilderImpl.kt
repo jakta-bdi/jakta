@@ -27,14 +27,18 @@ class AgentBuilderImpl<Belief : Any, Goal : Any, Skills : Any, Body : Any>(priva
 
     private var skillsFactory: (Node<Body, Skills>) -> Skills by Delegates.notNull()
     private var bodyFactory: (AgentID) -> Body by Delegates.notNull()
-    private var messageHandler: (Message) -> Internal? = { null } // By default, all messages are discarded.
-    private var perceptionHandler: (Perception) -> Internal? = { null } // By default, percept do not generate events.
 
-    override fun handlesPerceptionEvents(handler: (Perception) -> Internal?) {
+    // By default, all messages are discarded.
+    private var messageHandler: (Message) -> List<Internal>? = { null }
+
+    // By default, percept do not generate events.
+    private var perceptionHandler: (Perception) -> List<Internal>? = { null }
+
+    override fun handlesPerceptionEvents(handler: (Perception) -> List<Internal>?) {
         this.perceptionHandler = handler
     }
 
-    override fun handlesMessageEvents(handler: (Message) -> Internal?) {
+    override fun handlesMessageEvents(handler: (Message) -> List<Internal>?) {
         this.messageHandler = handler
     }
 

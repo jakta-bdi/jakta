@@ -15,10 +15,7 @@ import kotlinx.coroutines.runBlocking
 fun main(): Unit = runBlocking {
     // val dispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
 
-    fun <Skills : Any> LocalNodeBuilder<
-        Skills,
-        Any,
-        >.simpleAgentBuilder(
+    fun <Skills : Any> LocalNodeBuilder<Any, Skills>.simpleAgentBuilder(
         name: String,
         skills: Skills,
         block: AgentBuilder<String, String, Skills, Any>.() -> Unit,

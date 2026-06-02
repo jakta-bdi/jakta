@@ -36,15 +36,15 @@ interface AgentState<Belief : Any, Goal : Any, Skills : Any> {
 
     /**
      * Mapping function which defines how to (optionally)
-     * convert a [AgentEvent.External.Perception] into a [AgentEvent.Internal].
+     * convert a [AgentEvent.External.Perception] into a list of [AgentEvent.Internal].
      */
-    val perceptionHandler: (AgentEvent.External.Perception) -> AgentEvent.Internal?
+    val perceptionHandler: (AgentEvent.External.Perception) -> List<AgentEvent.Internal>?
 
     /**
      * Mapping function which defines how to (optionally)
      * convert a [AgentEvent.External.Message] into a [AgentEvent.Internal].
      */
-    val messageHandler: (AgentEvent.External.Message) -> AgentEvent.Internal?
+    val messageHandler: (AgentEvent.External.Message) -> List<AgentEvent.Internal>?
 
     /**
      * The [Skills] the agent is allowed to use.

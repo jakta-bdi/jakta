@@ -51,21 +51,21 @@ internal class BaseMutableAgentState<Belief : Any, Goal : Any, Skills : Any>(
     override val goalPlans: List<Plan.Goal<Belief, Goal, Skills, *, *>>
         get() = _goalPlans.toList()
 
-    private var _perceptionHandler: (Perception) -> Internal? = initialAgentState.perceptionHandler
-    override val perceptionHandler: (Perception) -> Internal?
+    private var _perceptionHandler: (Perception) -> List<Internal>? = initialAgentState.perceptionHandler
+    override val perceptionHandler: (Perception) -> List<Internal>?
         get() = _perceptionHandler
 
-    private var _messageHandler: (Message) -> Internal? = initialAgentState.messageHandler
-    override val messageHandler: (Message) -> Internal?
+    private var _messageHandler: (Message) -> List<Internal>? = initialAgentState.messageHandler
+    override val messageHandler: (Message) -> List<Internal>?
         get() = _messageHandler
 
     override val skills: Skills = initialAgentState.skills
 
-    override fun setPerceptionHandler(handler: (Perception) -> Internal?) {
+    override fun setPerceptionHandler(handler: (Perception) -> List<Internal>?) {
         this._perceptionHandler = handler
     }
 
-    override fun setMessageHandler(handler: (Message) -> Internal?) {
+    override fun setMessageHandler(handler: (Message) -> List<Internal>?) {
         this._messageHandler = handler
     }
 

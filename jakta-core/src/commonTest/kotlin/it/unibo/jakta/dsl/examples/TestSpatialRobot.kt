@@ -4,8 +4,6 @@ import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import it.unibo.jakta.agent.Agent
 import it.unibo.jakta.agent.AgentID
-import it.unibo.jakta.dsl.NodeTerminationSkill
-import it.unibo.jakta.dsl.NodeTerminationSkillImpl
 import it.unibo.jakta.dsl.examples.Movement.Events.Factory.position
 import it.unibo.jakta.dsl.examples.Recharging.Events.Factory.chargeLevel
 import it.unibo.jakta.dsl.executeInTestScope
@@ -15,6 +13,8 @@ import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.event.AgentEvent
 import it.unibo.jakta.event.BeliefAddEvent
 import it.unibo.jakta.node.Node
+import it.unibo.jakta.skills.BaseNodeTerminationSkill
+import it.unibo.jakta.skills.NodeTerminationSkill
 import kotlin.test.Test
 import kotlinx.coroutines.delay
 
@@ -68,7 +68,7 @@ class GridMovement(val node: Node<BodyWithPosition, *>) : Movement<DoubleArray> 
 class CustomSkillSet(val node: Node<BodyWithPosition, *>) :
     Recharging by FixedTimeRecharging(node),
     Movement<DoubleArray> by GridMovement(node),
-    NodeTerminationSkill by NodeTerminationSkillImpl(node)
+    NodeTerminationSkill by BaseNodeTerminationSkill(node)
 
 class TestSpatialRobot {
 
@@ -83,10 +83,10 @@ class TestSpatialRobot {
             handlesPerceptionEvents {
                 when (it) {
                     is Movement.Events.Position<*> ->
-                        BeliefAddEvent("position(${it.agentId}, ${it.position})")
+                        listOf(BeliefAddEvent("position(${it.agentId}, ${it.position})"))
 
                     is Recharging.Events.ChargeLevel ->
-                        BeliefAddEvent("chargeLevel(${it.level})")
+                        listOf(BeliefAddEvent("chargeLevel(${it.level})"))
 
                     else -> null
                 }

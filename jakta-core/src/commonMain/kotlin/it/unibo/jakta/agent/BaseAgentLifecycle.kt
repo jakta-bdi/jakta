@@ -63,7 +63,7 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
         when (event) {
             is AgentEvent.External.Perception -> executableAgent.state.perceptionHandler(event)
             is AgentEvent.External.Message -> executableAgent.state.messageHandler(event)
-        }?.let { executableAgent.internalInbox.send(it) }
+        }?.let { events -> events.forEach { executableAgent.internalInbox.send(it) } }
     }
 
     /**

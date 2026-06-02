@@ -20,13 +20,13 @@ interface AgentBuilder<Belief : Any, Goal : Any, Skills : Any, Body : Any> {
      * Defines how and whether a [Perception] is mapped into a [Internal] Event.
      * By default, perceptions do not generate any event.
      */
-    fun handlesPerceptionEvents(handler: (Perception) -> Internal?)
+    fun handlesPerceptionEvents(handler: (Perception) -> List<Internal>?)
 
     /**
      * Defines how and whether a [Message] is mapped into a [Internal] Event.
      * By default, receiving messages do not generate any event.
      */
-    fun handlesMessageEvents(handler: (Message) -> Internal?)
+    fun handlesMessageEvents(handler: (Message) -> List<Internal>?)
 
     /**
      * Defines the initial beliefs of the agent using a builder block.

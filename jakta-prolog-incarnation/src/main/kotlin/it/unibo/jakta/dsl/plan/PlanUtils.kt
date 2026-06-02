@@ -25,23 +25,6 @@ fun GuardScope<PrologBelief, Substitution>.satisfies(guard: JaktaLogicProgrammin
     }
 }
 
-fun <Skills : Any> PlanLibraryBuilder<PrologBelief, PrologGoal, Skills>.prologPlan(
-    block: context(JaktaLogicProgrammingScope) PlanLibraryBuilder<PrologBelief, PrologGoal, Skills>.() -> Unit,
-): Unit = context(JaktaLogicProgrammingScope()) {
-    this.block()
-}
-
-context(scope: JaktaLogicProgrammingScope)
-fun <Skills : Any, PlanResult> withPrologContext(
-    block: suspend context(JaktaLogicProgrammingScope)
-    PlanScope<PrologBelief, PrologGoal, Skills, Substitution>.() -> PlanResult,
-): suspend PlanScope<PrologBelief, PrologGoal, Skills, Substitution>.() -> PlanResult = {
-    val planScope = this
-    with(scope) {
-        block()
-    }
-}
-
 /**
  * Public-facing extension function to achieve a goal with a specific return type, using reified type parameters.
  * @param goal The goal to be achieved.
