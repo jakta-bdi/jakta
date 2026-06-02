@@ -38,7 +38,9 @@ fun belief(block: JaktaLogicProgrammingScope.() -> Struct): Fact = Fact.of(
     },
 )
 
-fun rule(block: JaktaLogicProgrammingScope.() -> Rule): Rule = JaktaLogicProgrammingScope().block()
+fun inferenceRule(block: JaktaLogicProgrammingScope.() -> Rule): Rule = JaktaLogicProgrammingScope().block()
+
+fun JaktaLogicProgrammingScope.inferenceRule(block: JaktaLogicProgrammingScope.() -> Rule): Rule = this.block()
 
 context(scope: JaktaLogicProgrammingScope)
 private fun beliefQuery(block: JaktaLogicProgrammingScope.() -> Struct): Fact = Fact.of(

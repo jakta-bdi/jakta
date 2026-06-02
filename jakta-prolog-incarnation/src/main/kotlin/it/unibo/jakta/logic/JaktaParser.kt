@@ -9,6 +9,7 @@ import it.unibo.tuprolog.core.parsing.TermParser
 
 object JaktaParser {
 
+    // TODO are we sure we still need these?
     val operators = OperatorSet(
         Operator("&", Specifier.XFY, 1000),
         Operator("|", Specifier.XFY, 1100),

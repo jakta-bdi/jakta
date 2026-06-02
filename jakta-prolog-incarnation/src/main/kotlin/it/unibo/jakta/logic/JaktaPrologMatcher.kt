@@ -20,11 +20,12 @@ fun Collection<Rule>.unifiesWith(belief: Struct): Solution = Solver.prolog
     .build()
     .solveOnce(belief)
 
+// TODO do we need these?
 private val operatorExtension = Theory.of(
     JaktaParser.parseClause("&(A, B) :- A, B"),
     JaktaParser.parseClause("|(A, _) :- A"),
     JaktaParser.parseClause("|(_, B) :- B"),
-    JaktaParser.parseClause("~(X) :- not(X)"),
+    JaktaParser.parseClause("~(X) :- not(X)"), // TODO this does not seem equivalent.. check with Giovanni
 )
 
 val specialFunctors = listOf(".", "{}", ":-", "/", "[]", ",")

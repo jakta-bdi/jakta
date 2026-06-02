@@ -3,9 +3,9 @@ package it.unibo.jakta
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import it.unibo.jakta.dsl.belief.belief
+import it.unibo.jakta.dsl.belief.inferenceRule
 import it.unibo.jakta.dsl.belief.initialBelief
 import it.unibo.jakta.dsl.belief.matching
-import it.unibo.jakta.dsl.belief.rule
 import it.unibo.jakta.dsl.goal.goal
 import it.unibo.jakta.dsl.goal.initialGoal
 import it.unibo.jakta.dsl.goal.matching
@@ -16,6 +16,7 @@ import it.unibo.jakta.dsl.plan.satisfies
 import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.logic.JaktaLogicProgrammingScope.Companion.prologPlan
 import it.unibo.jakta.node.CoroutineNodeRunner
+import it.unibo.tuprolog.core.Rule
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlinx.coroutines.launch
@@ -204,7 +205,7 @@ class TestPrologIncarnation {
     }
 
     @Test
-    fun `test rules`() {
+    fun `test inference rule`() {
         runTest {
             val job = launch {
                 mas(LocalNodeBuilder()) {
@@ -216,7 +217,7 @@ class TestPrologIncarnation {
                                 +initialBelief { "parent"("alice", "bob") }
                                 +initialBelief { "parent"("alice", "charlie") }
 
-                                +rule {
+                                +inferenceRule {
                                     "sibling"(X, Y) impliedBy (
                                         "parent"(Z, X)
                                             and "parent"(Z, Y)
@@ -239,6 +240,65 @@ class TestPrologIncarnation {
                                                 " is a sibling of ${B.valueFromContext(context)}",
                                         )
                                         skills.terminateNode()
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }.run(CoroutineNodeRunner())
+            }
+            job.join()
+        }
+    }
+
+    @Test
+    fun `test dynamic inference rule`() {
+        runTest {
+            val rule = inferenceRule {
+                "sibling"(X, Y) impliedBy (
+                    "parent"(Z, X)
+                        and "parent"(Z, Y)
+                        and (X neq Y)
+                    )
+            }
+            val job = launch {
+                mas(LocalNodeBuilder()) {
+                    node {
+                        agent("Alice") {
+                            embodiedAs { object {} }
+                            withSkills { TerminationSkill(it) }
+                            believes {
+                                +initialBelief { "parent"("alice", "bob") }
+                                +initialBelief { "parent"("alice", "charlie") }
+                            }
+                            hasInitialGoals {
+                                !initialGoal { "start"("bob") }
+                            }
+                            hasPlans {
+                                prologPlan {
+                                    adding.goal {
+                                        matching { "start"(B) }
+                                    } onlyWhen {
+                                        satisfies { "sibling"(B, C) }
+                                    } triggers {
+                                        agent.print(
+                                            "${C.valueFromContext(context)}" +
+                                                " is a sibling of ${B.valueFromContext(context)}",
+                                        )
+                                        skills.terminateNode()
+                                    }
+                                }
+
+                                prologPlan {
+                                    failing.goal {
+                                        matching { "start"(B) }
+                                    } triggers {
+                                        with(context) {
+                                            agent.print("I didn't know how to infer siblings for ${B.value}")
+                                            agent.believe(rule)
+                                            agent.print("But now I do! I can try again...")
+                                            agent.alsoAchieve(goal { "start"(B.value) })
+                                        }
                                     }
                                 }
                             }

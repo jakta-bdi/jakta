@@ -1,7 +1,7 @@
 package it.unibo.jakta
 
+import it.unibo.jakta.dsl.belief.inferenceRule
 import it.unibo.jakta.dsl.belief.initialBelief
-import it.unibo.jakta.dsl.belief.rule
 import it.unibo.jakta.logic.unifiesWith
 import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.Fact
@@ -34,7 +34,7 @@ class TestPrologMatching {
             initialBelief {
                 "parent"("alice", "charlie")
             },
-            rule {
+            inferenceRule {
                 "sibling"(X, Y) impliedBy (
                     "parent"(Z, X)
                         and "parent"(Z, Y)

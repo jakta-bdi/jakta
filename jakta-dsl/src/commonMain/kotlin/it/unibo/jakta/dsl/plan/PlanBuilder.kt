@@ -227,6 +227,7 @@ inline infix fun <B, G, Skills, Context, reified PlanResult> PlanBuilder.Removal
  * @return the constructed goal failure interception plan
  */
 @Suppress("DEPRECATION_ERROR")
+@JaktaDSL
 inline infix fun <
     B,
     G,
