@@ -1,3 +1,10 @@
+## [0.15.159](https://github.com/jakta-bdi/jakta/compare/v0.15.158...v0.15.159) (2026-06-07)
+
+
+### Bug Fixes
+
+* **deps:** update codecov/codecov-action action to v7 ([#820](https://github.com/jakta-bdi/jakta/issues/820)) ([3e76c05](https://github.com/jakta-bdi/jakta/commit/3e76c050b6c209296981a2a34b5f0c1b6c937de7))
+
 ## [0.15.158](https://github.com/jakta-bdi/jakta/compare/v0.15.157...v0.15.158) (2026-06-04)
 
 
