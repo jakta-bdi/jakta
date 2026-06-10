@@ -1,21 +1,30 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     kotlin("jvm")
-    application
+    id("org.jetbrains.compose") version "1.6.10"
+    id("org.jetbrains.kotlin.plugin.compose") version "2.0.0"
 }
 
 repositories {
     mavenCentral()
+    google()
 }
 
 dependencies {
+    implementation(compose.desktop.currentOs)
+
     implementation(jakta("core"))
     implementation(jakta("prolog-incarnation"))
+
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kermit)
 }
 
-application {
-    mainClass.set("MainKt")
+compose.desktop {
+    application {
+        mainClass = "MainKt"
+    }
 }
 
 kotlinJvm {

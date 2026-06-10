@@ -36,7 +36,7 @@ allprojects {
     with(rootProject.libs.plugins) {
         apply(plugin = dokka.id)
         apply(plugin = gitSemVer.id)
-        apply(plugin = kotlin.qa.id)
+        //apply(plugin = kotlin.qa.id)
         apply(plugin = kover.id)
         apply(plugin = publishOnCentral.id)
         apply(plugin = taskTree.id)

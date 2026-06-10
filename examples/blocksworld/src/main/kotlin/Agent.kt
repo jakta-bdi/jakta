@@ -1,7 +1,6 @@
 import it.unibo.jakta.dsl.belief.PrologBelief
 import it.unibo.jakta.dsl.belief.inferenceRule
 import it.unibo.jakta.dsl.belief.initialBelief
-import it.unibo.jakta.dsl.belief.matching
 import it.unibo.jakta.dsl.goal.PrologGoal
 import it.unibo.jakta.dsl.goal.goal
 import it.unibo.jakta.dsl.goal.initialGoal
@@ -19,6 +18,7 @@ import it.unibo.jakta.skills.BaseNodeTerminationSkill
 import it.unibo.jakta.skills.NodeTerminationSkill
 import it.unibo.jakta.value
 import it.unibo.tuprolog.core.Atom
+import model.BlocksWorld
 
 class SkillSet(node: Node<Any, SkillSet>, world: BlocksWorld) :
     NodeTerminationSkill by BaseNodeTerminationSkill(node),
@@ -126,7 +126,7 @@ fun MasBuilder<LocalNode<Any, SkillSet>, LocalNodeBuilder<Any, SkillSet>>.blocks
                     satisfies { "on" (X, Y)}
                 } triggers {
                     with(context) {
-                        agent.print("Block ${X.value} is on ${Y.value}.")
+                        agent.print("model.Block ${X.value} is on ${Y.value}.")
                     }
                 }
             }
@@ -154,7 +154,7 @@ fun MasBuilder<LocalNode<Any, SkillSet>, LocalNodeBuilder<Any, SkillSet>>.blocks
                     satisfies { "clear" (X)}
                 } triggers {
                     with(context){
-                        agent.print("Block ${X.value} is clear.")
+                        agent.print("model.Block ${X.value} is clear.")
                     }
                 }
             }

@@ -1,7 +1,11 @@
+package model
+
 import kotlin.random.Random
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-
 
 data class Block(val id: String)
 
@@ -22,12 +26,12 @@ class BlocksWorld(seed: Long = 42, blockCount: Int = 6) {
 
     suspend fun move(block: Block, destination: Block?): List<List<Block>> = mutex.withLock {
         val fromStackIndex = findStackIndex(block)
-            ?: throw IllegalStateException("Block $block not found")
+            ?: throw IllegalStateException("model.Block $block not found")
 
         val fromStack = stacks[fromStackIndex]
 
         if (!isTop(fromStack, block)) {
-            throw IllegalStateException("Block $block is not clear")
+            throw IllegalStateException("model.Block $block is not clear")
         }
 
         val moving = fromStack.removeAt(fromStack.lastIndex)
@@ -47,6 +51,7 @@ class BlocksWorld(seed: Long = 42, blockCount: Int = 6) {
             throw IllegalStateException("Destination $destination is not clear")
         }
 
+        delay(1.seconds)
         destStack.add(moving)
         return getStateUnsafe()
     }

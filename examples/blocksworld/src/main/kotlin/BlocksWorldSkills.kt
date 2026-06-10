@@ -8,6 +8,8 @@ import it.unibo.tuprolog.core.Fact
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Term
 import it.unibo.tuprolog.unify.Unificator.Companion.matches
+import model.Block
+import model.BlocksWorld
 
 data class BlocksWorldPerception(val state: List<List<Block>>) : Perception
 
