@@ -9,10 +9,10 @@ package it.unibo.jakta.event
  */
 sealed interface AgentUpdate<T : Any> {
 
-    val additions: List<T>
-    val removals: List<T>
+    val additions: Set<T>
+    val removals: Set<T>
 
-    data class Belief<B : Any>(override val additions: List<B>, override val removals: List<B>) : AgentUpdate<B>
+    data class Belief<B : Any>(override val additions: Set<B>, override val removals: Set<B>) : AgentUpdate<B>
 
-    data class Goal<G : Any>(override val additions: List<G>, override val removals: List<G>) : AgentUpdate<G>
+    data class Goal<G : Any>(override val additions: Set<G>, override val removals: Set<G>) : AgentUpdate<G>
 }

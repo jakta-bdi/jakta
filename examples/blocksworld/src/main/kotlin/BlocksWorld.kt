@@ -2,12 +2,15 @@ import kotlin.random.Random
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
+
+data class Block(val id: String)
+
 class BlocksWorld(seed: Long = 42, blockCount: Int = 6) {
 
     private val random = Random(seed)
     private val mutex = Mutex()
 
-    private val stacks: MutableList<MutableList<Char>> = mutableListOf()
+    private val stacks: MutableList<MutableList<Block>> = mutableListOf()
 
     init {
         initialize(blockCount)
@@ -17,7 +20,7 @@ class BlocksWorld(seed: Long = 42, blockCount: Int = 6) {
     // Public API (coroutine-safe)
     // ----------------------------
 
-    suspend fun move(block: Char, destination: Char?): List<List<Char>> = mutex.withLock {
+    suspend fun move(block: Block, destination: Block?): List<List<Block>> = mutex.withLock {
         val fromStackIndex = findStackIndex(block)
             ?: throw IllegalStateException("Block $block not found")
 
@@ -48,7 +51,7 @@ class BlocksWorld(seed: Long = 42, blockCount: Int = 6) {
         return getStateUnsafe()
     }
 
-    suspend fun getState(): List<List<Char>> = mutex.withLock {
+    suspend fun getState(): List<List<Block>> = mutex.withLock {
         getStateUnsafe()
     }
 
@@ -63,7 +66,7 @@ class BlocksWorld(seed: Long = 42, blockCount: Int = 6) {
     // ----------------------------
 
     private fun initialize(blockCount: Int) {
-        val blocks = ('A' until ('A' + blockCount)).toList()
+        val blocks = ('A' until ('A' + blockCount)).map{Block(it.toString())}.toList()
 
         blocks.forEach { stacks.add(mutableListOf(it)) }
 
@@ -88,10 +91,10 @@ class BlocksWorld(seed: Long = 42, blockCount: Int = 6) {
     // Internal helpers (lock-protected by caller)
     // ----------------------------
 
-    fun getStateUnsafe(): List<List<Char>> = stacks.map { it.toList() }
+    private fun getStateUnsafe(): List<List<Block>> = stacks.map { it.toList() }
 
-    private fun findStackIndex(block: Char): Int? = stacks.indexOfFirst { it.contains(block) }
+    private fun findStackIndex(block: Block): Int? = stacks.indexOfFirst { it.contains(block) }
         .takeIf { it >= 0 }
 
-    private fun isTop(stack: List<Char>, block: Char): Boolean = stack.lastOrNull() == block
+    private fun isTop(stack: List<Block>, block: Block): Boolean = stack.lastOrNull() == block
 }

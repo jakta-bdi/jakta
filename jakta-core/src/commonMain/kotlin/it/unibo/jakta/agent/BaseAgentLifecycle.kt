@@ -216,8 +216,8 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
 
     private fun handleBeliefUpdateEvent(event: AgentUpdate.Belief<Belief>) {
         log.i { "Handling belief update event $event" }
-        val additionsOnly = event.additions - event.removals.toSet()
-        val removalsOnly = event.removals - event.additions.toSet()
+        val additionsOnly = event.additions - event.removals
+        val removalsOnly = event.removals - event.additions
         removalsOnly.forEach { executableAgent.state.forget(it) }
         additionsOnly.forEach { executableAgent.state.believe(it) }
     }
@@ -226,8 +226,8 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
     // for now I simply forward the goal addition and removal events
     private fun handleGoalUpdateEvent(event: AgentUpdate.Goal<Goal>) {
         log.i { "Handling goal update event $event" }
-        val additionsOnly = event.additions - event.removals.toSet()
-        val removalsOnly = event.removals - event.additions.toSet()
+        val additionsOnly = event.additions - event.removals
+        val removalsOnly = event.removals - event.additions
         removalsOnly.forEach { executableAgent.state.alsoAchieve(it) }
         additionsOnly.forEach { executableAgent.state.alsoAchieve(it) }
     }
