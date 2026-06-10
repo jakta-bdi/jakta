@@ -1,4 +1,3 @@
-import blocksWorldNode
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import it.unibo.jakta.dsl.mas.mas
@@ -9,7 +8,6 @@ import kotlinx.coroutines.runBlocking
 fun main() {
     Logger.setMinSeverity(Severity.Warn)
     val world = BlocksWorld(123)
-    println("Starting my Agent")
     runBlocking {
         mas(LocalNodeBuilder()) {
             // TODO I don't like this

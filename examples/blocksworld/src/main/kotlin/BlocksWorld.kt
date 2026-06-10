@@ -32,7 +32,7 @@ class BlocksWorld(seed: Long = 42, blockCount: Int = 6) {
 
         if (destination == null) {
             stacks.add(mutableListOf(moving))
-            return getState()
+            return getStateUnsafe()
         }
 
         val destStackIndex = findStackIndex(destination)
@@ -45,11 +45,11 @@ class BlocksWorld(seed: Long = 42, blockCount: Int = 6) {
         }
 
         destStack.add(moving)
-        return getState()
+        return getStateUnsafe()
     }
 
     suspend fun getState(): List<List<Char>> = mutex.withLock {
-        stacks.map { it.toList() }
+        getStateUnsafe()
     }
 
     suspend fun printState() = mutex.withLock {
@@ -87,6 +87,8 @@ class BlocksWorld(seed: Long = 42, blockCount: Int = 6) {
     // ----------------------------
     // Internal helpers (lock-protected by caller)
     // ----------------------------
+
+    fun getStateUnsafe(): List<List<Char>> = stacks.map { it.toList() }
 
     private fun findStackIndex(block: Char): Int? = stacks.indexOfFirst { it.contains(block) }
         .takeIf { it >= 0 }

@@ -42,9 +42,9 @@ data class GoalAddEvent<G : Any, PlanResult>(
  */
 data class GoalRemoveEvent<G : Any, PlanResult>(
     override val goal: G,
+    override val resultType: KType,
     override val completion: CompletableDeferred<PlanResult>? = null,
     override val intention: Intention? = null,
-    override val resultType: KType,
 ) : AgentEvent.Internal.Goal.Remove<G, PlanResult>
 
 /**
@@ -56,9 +56,9 @@ data class GoalRemoveEvent<G : Any, PlanResult>(
  */
 data class GoalFailedEvent<G : Any, PlanResult>(
     override val goal: G,
+    override val resultType: KType,
     override val completion: CompletableDeferred<PlanResult>? = null,
     override val intention: Intention? = null,
-    override val resultType: KType,
 ) : AgentEvent.Internal.Goal.Failed<G, PlanResult>
 
 /**

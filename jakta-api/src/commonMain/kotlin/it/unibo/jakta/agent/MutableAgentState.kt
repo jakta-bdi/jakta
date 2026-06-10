@@ -2,6 +2,7 @@ package it.unibo.jakta.agent
 
 import it.unibo.jakta.InternalJaktaAPI
 import it.unibo.jakta.event.AgentEvent
+import it.unibo.jakta.event.AgentUpdate
 import it.unibo.jakta.intention.MutableIntentionPool
 import it.unibo.jakta.plan.Plan
 import kotlin.reflect.KType
@@ -23,13 +24,15 @@ interface MutableAgentState<Belief : Any, Goal : Any, Skills : Any> :
      * Modifies the perception handler function that defines which external events are of interest of the agent.
      * @param handler the new function handler the agent will use starting from next iteration of its lifecycle.
      */
-    fun setPerceptionHandler(handler: (AgentEvent.External.Perception) -> List<AgentEvent.Internal>?)
+    fun setPerceptionHandler(
+        handler: AgentState<Belief, Goal, Skills>.(AgentEvent.External.Perception) -> AgentUpdate<*>?,
+    )
 
     /**
      * Modifies the message handler function that defines which Messages are interest of the agent.
      * @param handler the new function handler that the agent will use, starting from the next lifecycle iteration.
      */
-    fun setMessageHandler(handler: (AgentEvent.External.Message) -> List<AgentEvent.Internal>?)
+    fun setMessageHandler(handler: AgentState<Belief, Goal, Skills>.(AgentEvent.External.Message) -> AgentUpdate<*>?)
 
     /**
      * Adds a new [Plan.Goal] that agent can use for its reasoning process.

@@ -2,11 +2,12 @@ package it.unibo.jakta.dsl.agent
 
 import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.agent.AgentSpecification
+import it.unibo.jakta.agent.AgentState
 import it.unibo.jakta.dsl.JaktaDSL
 import it.unibo.jakta.dsl.plan.PlanLibraryBuilder
 import it.unibo.jakta.event.AgentEvent.External.Message
 import it.unibo.jakta.event.AgentEvent.External.Perception
-import it.unibo.jakta.event.AgentEvent.Internal
+import it.unibo.jakta.event.AgentUpdate
 import it.unibo.jakta.node.Node
 import it.unibo.jakta.plan.Plan
 
@@ -17,16 +18,16 @@ import it.unibo.jakta.plan.Plan
 interface AgentBuilder<Belief : Any, Goal : Any, Skills : Any, Body : Any> {
 
     /**
-     * Defines how and whether a [Perception] is mapped into a [Internal] Event.
-     * By default, perceptions do not generate any event.
+     * Defines how and whether a [Perception] is mapped into a [AgentUpdate].
+     * By default, perceptions do not generate any update.
      */
-    fun handlesPerceptionEvents(handler: (Perception) -> List<Internal>?)
+    fun handlesPerceptionEvents(handler: AgentState<Belief, Goal, Skills>.(Perception) -> AgentUpdate<*>?)
 
     /**
-     * Defines how and whether a [Message] is mapped into a [Internal] Event.
-     * By default, receiving messages do not generate any event.
+     * Defines how and whether a [Message] is mapped into a [AgentUpdate].
+     * By default, receiving messages do not generate any update.
      */
-    fun handlesMessageEvents(handler: (Message) -> List<Internal>?)
+    fun handlesMessageEvents(handler: AgentState<Belief, Goal, Skills>.(Message) -> AgentUpdate<*>?)
 
     /**
      * Defines the initial beliefs of the agent using a builder block.

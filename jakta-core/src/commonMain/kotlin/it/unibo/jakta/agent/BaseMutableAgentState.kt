@@ -7,6 +7,7 @@ import it.unibo.jakta.belief.BeliefBaseFactory
 import it.unibo.jakta.event.AgentEvent.External.Message
 import it.unibo.jakta.event.AgentEvent.External.Perception
 import it.unibo.jakta.event.AgentEvent.Internal
+import it.unibo.jakta.event.AgentUpdate
 import it.unibo.jakta.event.EventInbox
 import it.unibo.jakta.event.GoalAddEvent
 import it.unibo.jakta.intention.BaseIntentionPool
@@ -51,21 +52,21 @@ internal class BaseMutableAgentState<Belief : Any, Goal : Any, Skills : Any>(
     override val goalPlans: List<Plan.Goal<Belief, Goal, Skills, *, *>>
         get() = _goalPlans.toList()
 
-    private var _perceptionHandler: (Perception) -> List<Internal>? = initialAgentState.perceptionHandler
-    override val perceptionHandler: (Perception) -> List<Internal>?
+    private var _perceptionHandler: AgentState<Belief, Goal, Skills>.(Perception) -> AgentUpdate<*>? = initialAgentState.perceptionHandler
+    override val perceptionHandler: AgentState<Belief, Goal, Skills>.(Perception) -> AgentUpdate<*>?
         get() = _perceptionHandler
 
-    private var _messageHandler: (Message) -> List<Internal>? = initialAgentState.messageHandler
-    override val messageHandler: (Message) -> List<Internal>?
+    private var _messageHandler: AgentState<Belief, Goal, Skills>.(Message) -> AgentUpdate<*>? = initialAgentState.messageHandler
+    override val messageHandler: AgentState<Belief, Goal, Skills>.(Message) -> AgentUpdate<*>?
         get() = _messageHandler
 
     override val skills: Skills = initialAgentState.skills
 
-    override fun setPerceptionHandler(handler: (Perception) -> List<Internal>?) {
+    override fun setPerceptionHandler(handler: AgentState<Belief, Goal, Skills>.(Perception) -> AgentUpdate<*>?) {
         this._perceptionHandler = handler
     }
 
-    override fun setMessageHandler(handler: (Message) -> List<Internal>?) {
+    override fun setMessageHandler(handler: AgentState<Belief, Goal, Skills>.(Message) -> AgentUpdate<*>?) {
         this._messageHandler = handler
     }
 

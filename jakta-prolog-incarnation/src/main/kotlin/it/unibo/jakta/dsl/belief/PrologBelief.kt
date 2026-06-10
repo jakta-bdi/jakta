@@ -21,7 +21,7 @@ private fun PrologBelief.matchBelief(belief: Fact): Substitution? = when (val su
 @JaktaDSL
 context(scope: JaktaLogicProgrammingScope)
 fun PrologBelief.matching(block: JaktaLogicProgrammingScope.() -> Struct): Substitution? =
-    matchBelief(beliefQuery(block))
+    matchBelief(contextualBeliefQuery(block))
 
 fun initialBelief(block: JaktaLogicProgrammingScope.() -> Struct): PrologGoal = Fact.of(
     JaktaLogicProgrammingScope().block().also {
@@ -42,8 +42,14 @@ fun inferenceRule(block: JaktaLogicProgrammingScope.() -> Rule): Rule = JaktaLog
 
 fun JaktaLogicProgrammingScope.inferenceRule(block: JaktaLogicProgrammingScope.() -> Rule): Rule = this.block()
 
+fun beliefQuery(block: JaktaLogicProgrammingScope.() -> Struct): Fact = Fact.of(
+    JaktaLogicProgrammingScope().block().also {
+        requirePredicate(it) { "Belief query must be a predicate, but got $it" }
+    },
+)
+
 context(scope: JaktaLogicProgrammingScope)
-private fun beliefQuery(block: JaktaLogicProgrammingScope.() -> Struct): Fact = Fact.of(
+private fun contextualBeliefQuery(block: JaktaLogicProgrammingScope.() -> Struct): Fact = Fact.of(
     scope.block().also {
         requirePredicate(it) { "Belief query must be a predicate, but got $it" }
     },

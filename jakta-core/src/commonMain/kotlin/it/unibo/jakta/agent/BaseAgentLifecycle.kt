@@ -2,19 +2,12 @@ package it.unibo.jakta.agent
 
 import co.touchlab.kermit.Logger
 import it.unibo.jakta.event.AgentEvent
+import it.unibo.jakta.event.AgentUpdate
 import it.unibo.jakta.event.GoalFailedEvent
 import it.unibo.jakta.intention.IntentionDispatcher
 import it.unibo.jakta.plan.Plan
-import kotlin.collections.filter
 import kotlin.coroutines.ContinuationInterceptor
-import kotlin.coroutines.CoroutineContext
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
 /**
  * A base implementation of the [it.unibo.jakta.agent.AgentLifecycle] interface
@@ -57,13 +50,6 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
             is AgentEvent.Internal.Step -> handleStepEvent(event)
             is AgentEvent.External -> handleExternalEvent(event)
         }
-    }
-
-    private fun handleExternalEvent(event: AgentEvent.External) {
-        when (event) {
-            is AgentEvent.External.Perception -> executableAgent.state.perceptionHandler(event)
-            is AgentEvent.External.Message -> executableAgent.state.messageHandler(event)
-        }?.let { events -> events.forEach { executableAgent.internalInbox.send(it) } }
     }
 
     /**
@@ -185,9 +171,9 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
                 executableAgent.internalInbox.send(
                     GoalFailedEvent(
                         event.goal,
+                        event.resultType,
                         event.completion,
                         event.intention,
-                        event.resultType,
                     ),
                 )
             }
@@ -204,5 +190,45 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
     private fun handleStepEvent(event: AgentEvent.Internal.Step) {
         log.d { "Handling step event for intention ${event.intention.id.displayId}" }
         executableAgent.state.mutableIntentionPool.stepIntention(event)
+    }
+
+    // TODO unsafe cast, should be avoided, but I don't think it is possible
+    private fun handleExternalEvent(event: AgentEvent.External) {
+        val update = when (event) {
+            is AgentEvent.External.Perception -> executableAgent.state.run {
+                perceptionHandler(event)
+            }
+            is AgentEvent.External.Message -> executableAgent.state.run {
+                messageHandler(event)
+            }
+        } ?: run {
+            log.i { "The external event $event has been received but not mapped into an update" }
+            return
+        }
+
+        when (update) {
+            is AgentUpdate.Belief<*> ->
+                handleBeliefUpdateEvent(update as AgentUpdate.Belief<Belief>)
+            is AgentUpdate.Goal<*> ->
+                handleGoalUpdateEvent(update as AgentUpdate.Goal<Goal>)
+        }
+    }
+
+    private fun handleBeliefUpdateEvent(event: AgentUpdate.Belief<Belief>) {
+        log.i { "Handling belief update event $event" }
+        val additionsOnly = event.additions - event.removals.toSet()
+        val removalsOnly = event.removals - event.additions.toSet()
+        removalsOnly.forEach { executableAgent.state.forget(it) }
+        additionsOnly.forEach { executableAgent.state.believe(it) }
+    }
+
+    // TODO this should change to have a proper set of desires
+    // for now I simply forward the goal addition and removal events
+    private fun handleGoalUpdateEvent(event: AgentUpdate.Goal<Goal>) {
+        log.i { "Handling goal update event $event" }
+        val additionsOnly = event.additions - event.removals.toSet()
+        val removalsOnly = event.removals - event.additions.toSet()
+        removalsOnly.forEach { executableAgent.state.alsoAchieve(it) }
+        additionsOnly.forEach { executableAgent.state.alsoAchieve(it) }
     }
 }
