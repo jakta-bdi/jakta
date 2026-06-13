@@ -1,3 +1,10 @@
+## [0.15.160](https://github.com/jakta-bdi/jakta/compare/v0.15.159...v0.15.160) (2026-06-13)
+
+
+### Bug Fixes
+
+* **deps:** update anitvam/conventionalcommit-semantic-releasing action to v0.7.108 ([#822](https://github.com/jakta-bdi/jakta/issues/822)) ([87b4e7f](https://github.com/jakta-bdi/jakta/commit/87b4e7fbfb0c7f6c17f3a08f8c08e6522f0253a8))
+
 ## [0.15.159](https://github.com/jakta-bdi/jakta/compare/v0.15.158...v0.15.159) (2026-06-07)
 
 
