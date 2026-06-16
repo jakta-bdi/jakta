@@ -1,3 +1,10 @@
+## [0.15.162](https://github.com/jakta-bdi/jakta/compare/v0.15.161...v0.15.162) (2026-06-16)
+
+
+### Bug Fixes
+
+* **deps:** update kotest to v6.2.0 ([#824](https://github.com/jakta-bdi/jakta/issues/824)) ([185d1ec](https://github.com/jakta-bdi/jakta/commit/185d1ecb1faf0dcabc3e95310c288921d319d428))
+
 ## [0.15.161](https://github.com/jakta-bdi/jakta/compare/v0.15.160...v0.15.161) (2026-06-13)
 
 
