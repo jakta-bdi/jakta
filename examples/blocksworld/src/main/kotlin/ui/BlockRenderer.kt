@@ -10,12 +10,20 @@ import androidx.compose.ui.text.drawText
 import androidx.compose.ui.unit.sp
 
 val colorMap: Map<String, Color> = mapOf(
-    "A" to Color(0xFF3F6BAA),
-    "B" to Color(0xFF6BAA3F),
-    "C" to Color(0xFFAA3F6B),
-    "D" to Color(0xFF6B3FAA),
-    "E" to Color(0xFFAA6B3F),
-    "F" to Color(0xFF3FAA6B)
+    "A" to Color(0xFFAA3F3F),
+    "B" to Color(0xFF3F51AA),
+    "C" to Color(0xFF68AA3F),
+    "D" to Color(0xFFAA983F),
+    "E" to Color(0xFFAA643F),
+    "F" to Color(0xFF3FAA85),
+    "G" to Color(0xFFAA3FAA),
+    "H" to Color(0xFF5C3FAA),
+    "I" to Color(0xFF6BAA89),
+    "J" to Color(0xFF6B6BAA),
+    "K" to Color(0xFF9C6BAA),
+    "L" to Color(0xFFAA6B6B),
+    "M" to Color(0xFF3F6B6B),
+    "N" to Color(0xFF85AA3F),
 )
 
 fun DrawScope.drawBlock(
