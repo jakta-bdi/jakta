@@ -9,36 +9,39 @@ import it.unibo.jakta.node
 import it.unibo.jakta.plan.triggers
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
+import terminateNode
 
 class TestConcurrentDelay {
 
     val helloWorld =
         node {
-            agent {
-                embodiedAs { object {} }
-                withSkills { NodeTerminationSkillImpl(it) }
-                hasInitialGoals {
-                    !"goal"
-                    !"anotherGoal"
-                }
-                hasPlans {
-                    adding.goal {
-                        ifGoalMatch("goal")
-                    } triggers {
-                        agent.print("Hello...")
-                        delay(10000)
-                        agent.print("...World!")
-                        skills.terminateNode()
+            context(NodeTerminationSkillImpl(node)) {
+                agent {
+                    embodiedAs { Any() }
+                    hasInitialGoals {
+                        !"goal"
+                        !"anotherGoal"
                     }
-                    adding.goal {
-                        ifGoalMatch("anotherGoal")
-                    } triggers {
-                        delay(1000)
-                        agent.print("Running while waiting...")
-                        delay(5000)
-                        agent.print("I'm still faster!")
-                        skills.terminateNode()
+                    hasPlans {
+                        adding.goal {
+                            ifGoalMatch("goal")
+                        } triggers {
+                            agent.print("Hello...")
+                            delay(1.seconds)
+                            agent.print("...World!")
+                            terminateNode()
+                        }
+                        adding.goal {
+                            ifGoalMatch("anotherGoal")
+                        } triggers {
+                            delay(1.seconds)
+                            agent.print("Running while waiting...")
+                            delay(5.seconds)
+                            agent.print("I'm still faster!")
+                            terminateNode()
+                        }
                     }
                 }
             }

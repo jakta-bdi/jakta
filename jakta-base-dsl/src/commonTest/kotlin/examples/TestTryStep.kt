@@ -12,12 +12,14 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import terminateNode
 
 class TestTryStep {
 
@@ -25,27 +27,28 @@ class TestTryStep {
     var secondStep = false
     var done = false
 
-    val helloWorld: Node<Any, NodeTerminationSkillImpl> = node {
-        agent("Hello world agent") {
-            embodiedAs { object {} }
-            withSkills { NodeTerminationSkillImpl(it) }
-            believes {
-                +"testBelief"
-            }
-            hasPlans {
-                adding.belief {
-                    this.takeIf { it == "testBelief" }
-                } triggers {
-                    agent.print("Belief added: $context")
-                    agent.print("First step")
-                    firstStep = true
-                    delay(1000)
-                    agent.print("Second step")
-                    secondStep = true
-                    delay(1000)
-                    agent.print("Third step, done!")
-                    done = true
-                    skills.terminateNode()
+    val helloWorld: Node<Any> = node {
+        context(NodeTerminationSkillImpl(node)) {
+            agent("Hello world agent") {
+                embodiedAs { object {} }
+                believes {
+                    +"testBelief"
+                }
+                hasPlans {
+                    adding.belief {
+                        this.takeIf { it == "testBelief" }
+                    } triggers {
+                        agent.print("Belief added: $context")
+                        agent.print("First step")
+                        firstStep = true
+                        delay(1.seconds)
+                        agent.print("Second step")
+                        secondStep = true
+                        delay(1.seconds)
+                        agent.print("Third step, done!")
+                        done = true
+                        terminateNode()
+                    }
                 }
             }
         }
@@ -60,7 +63,7 @@ class TestTryStep {
     @Test
     fun testBeliefAddition() {
         runTest {
-            val runner = ManualStepNodeRunner<Any, NodeTerminationSkillImpl, Node<Any, NodeTerminationSkillImpl>>()
+            val runner = ManualStepNodeRunner<Any, Node<Any>>()
             runner.run(helloWorld)
 
             val dispatcher1 = StandardTestDispatcher(testScheduler)

@@ -36,12 +36,21 @@ class TestBeliefPlan {
         }
 
     val helloWorld = node {
-        context(NodeTerminationSkillImpl()) {
+        context(NodeTerminationSkillImpl(node)) {
             testAgent<String>()
         }
     }
 
-//
+    @BeforeTest
+    fun setup() {
+        Logger.setMinSeverity(Severity.Error)
+    }
+
+    @Test
+    fun testBeliefAddition() {
+        executeInTestScope { helloWorld }
+    }
+
 //        agent("Hello world agent") {
 //            embodiedAs { object {} }
 //            withSkills { NodeTerminationSkillImpl(it) }
@@ -57,15 +66,4 @@ class TestBeliefPlan {
 //                }
 //            }
 //        }
-    }
-
-    @BeforeTest
-    fun setup() {
-        Logger.setMinSeverity(Severity.Error)
-    }
-
-    @Test
-    fun testBeliefAddition() {
-        executeInTestScope { helloWorld }
-    }
 }

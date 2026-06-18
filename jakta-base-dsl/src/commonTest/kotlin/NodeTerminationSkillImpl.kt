@@ -1,5 +1,6 @@
 import it.unibo.jakta.agent.Agent
 import it.unibo.jakta.node.Node
+import it.unibo.jakta.plan.PlanScope
 
 interface NodeTerminationSkill {
     fun terminateNode()
@@ -19,4 +20,9 @@ class AgentTerminationSkillImpl(val node: Node<*>) : AgentTerminationSkill {
     override fun Agent.terminate() {
         node.removeAgent(id)
     }
+}
+
+context(skill: NodeTerminationSkill)
+fun <Belief: Any, Goal: Any, Context: Any> PlanScope<Belief,Goal, Context>.terminateNode() {
+    skill.terminateNode()
 }

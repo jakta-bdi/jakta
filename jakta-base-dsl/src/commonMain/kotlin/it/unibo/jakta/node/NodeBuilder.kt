@@ -5,6 +5,7 @@ import it.unibo.jakta.agent.AgentBuilder
 import it.unibo.jakta.agent.AgentBuilderImpl
 import it.unibo.jakta.node.LocalNode
 
+
 /**
  * Builder interface for defining a Multi-Agent System (MAS) with agents and an environment.
  */
@@ -40,7 +41,7 @@ interface NodeBuilder<Belief : Any, Goal : Any, Body : Any, N : Node<Body>> {
 open class LocalNodeBuilder<Belief : Any, Goal : Any, Body : Any> :
     NodeBuilder<Belief, Goal, Body, LocalNode<Body>> {
 
-    private val node = LocalNode<Body>()
+    val node = LocalNode<Body>()
 
     protected val agents = mutableListOf<AgentBuilder<Belief, Goal, Body>>()
 

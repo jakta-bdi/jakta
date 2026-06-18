@@ -14,9 +14,12 @@ import it.unibo.jakta.event.AgentEvent
 import it.unibo.jakta.event.BeliefAddEvent
 import it.unibo.jakta.node
 import it.unibo.jakta.node.Node
+import it.unibo.jakta.plan.PlanScope
 import it.unibo.jakta.plan.triggers
 import kotlin.test.Test
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
+import terminateNode
 
 class BodyWithPosition {
     var position2D: DoubleArray = doubleArrayOf(0.0, 0.0)
@@ -49,72 +52,82 @@ interface Movement<P> {
     }
 }
 
-class FixedTimeRecharging(val node: Node<BodyWithPosition, *>) : Recharging {
+class FixedTimeRecharging(val node: Node<BodyWithPosition>) : Recharging {
     override suspend fun Agent.recharge() {
         val agent = this
-        delay(3000)
+        delay(3.seconds)
         node.sendEvent(chargeLevel(100), { it == node.agents[agent.id] })
     }
 }
 
-class GridMovement(val node: Node<BodyWithPosition, *>) : Movement<DoubleArray> {
+class GridMovement(val node: Node<BodyWithPosition>) : Movement<DoubleArray> {
     override fun Agent.moveTo(newPos: DoubleArray) {
         node.agents[this.id]?.position2D = newPos
         node.sendEvent(position(this.id, newPos))
     }
 }
 
-class CustomSkillSet(val node: Node<BodyWithPosition, *>) :
-    Recharging by FixedTimeRecharging(node),
-    Movement<DoubleArray> by GridMovement(node),
-    NodeTerminationSkill by NodeTerminationSkillImpl(node)
+//class CustomSkillSet(val node: Node<BodyWithPosition>) :
+//    Recharging by FixedTimeRecharging(node),
+//    Movement<DoubleArray> by GridMovement(node),
+//    NodeTerminationSkill by NodeTerminationSkillImpl(node)
 
+context(skill: Recharging)
+val PlanScope<*, *, *>.rechargeSkill: Recharging
+    get() = skill
+
+context(skill: Movement<P>)
+fun <P> PlanScope<*, *, *>.movementSkill() : Movement<P> = skill
 
 class TestSpatialRobot {
 
     val mas = node {
+        context(
+            FixedTimeRecharging(node),
+            GridMovement(node),
+            NodeTerminationSkillImpl(node)
+        ) {
+            agent("Vacuum") {
+                embodiedAs { BodyWithPosition() }
 
-        agent("Vacuum") {
-            embodiedAs { BodyWithPosition() }
-            withSkills {
-                CustomSkillSet(it)
-            }
+                handlesPerceptionEvents {
+                    when (it) {
+                        is Movement.Events.Position<*> ->
+                            BeliefAddEvent("position(${it.agentId}, ${it.position})")
 
-            handlesPerceptionEvents {
-                when (it) {
-                    is Movement.Events.Position<*> ->
-                        BeliefAddEvent("position(${it.agentId}, ${it.position})")
+                        is Recharging.Events.ChargeLevel ->
+                            BeliefAddEvent("chargeLevel(${it.level})")
 
-                    is Recharging.Events.ChargeLevel ->
-                        BeliefAddEvent("chargeLevel(${it.level})")
-
-                    else -> null
-                }
-            }
-
-            believes {
-                +"temp(0)"
-            }
-
-            hasInitialGoals {
-                !"goal"
-            }
-            hasPlans {
-                adding.goal {
-                    ifGoalMatch("goal")
-                } triggers {
-                    with(skills) {
-                        agent.print("Hello World!")
-                        agent.recharge()
-                        agent.print("Recharged!")
-                        agent.moveTo(doubleArrayOf(0.0, 1.0))
-                        agent.print("Moved!")
-                        terminateNode()
+                        else -> null
                     }
                 }
 
-                adding.belief { this } triggers {
-                    agent.print("Now I believe ${this.context}")
+                believes {
+                    +"temp(0)"
+                }
+
+                hasInitialGoals {
+                    !"goal"
+                }
+                hasPlans {
+                    adding.goal {
+                        ifGoalMatch("goal")
+                    } triggers {
+                        with(rechargeSkill) {
+                            agent.print("Hello World!")
+                            agent.recharge()
+                            agent.print("Recharged!")
+                        }
+                        with(movementSkill()) {
+                            agent.moveTo(doubleArrayOf(0.0, 1.0))
+                            agent.print("Moved!")
+                        }
+                        terminateNode()
+                    }
+
+                    adding.belief { this } triggers {
+                        agent.print("Now I believe ${this.context}")
+                    }
                 }
             }
         }

@@ -8,22 +8,24 @@ import ifGoalMatch
 import it.unibo.jakta.node
 import it.unibo.jakta.plan.triggers
 import kotlin.test.Test
+import terminateNode
 
 class TestHelloWorld {
 
     val helloWorld = node {
-        agent("HelloAgent") {
-            embodiedAs { object {} }
-            withSkills { NodeTerminationSkillImpl(it) }
-            hasInitialGoals {
-                !"goal"
-            }
-            hasPlans {
-                adding.goal {
-                    ifGoalMatch("goal")
-                } triggers {
-                    agent.print("Hello World!")
-                    skills.terminateNode()
+        context(NodeTerminationSkillImpl(node)) {
+            agent("HelloAgent") {
+                embodiedAs { Any() }
+                hasInitialGoals {
+                    !"goal"
+                }
+                hasPlans {
+                    adding.goal {
+                        ifGoalMatch("goal")
+                    } triggers {
+                        agent.print("Hello World!")
+                        terminateNode()
+                    }
                 }
             }
         }

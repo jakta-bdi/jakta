@@ -1,20 +1,48 @@
 package examples
 
-import NodeTerminationSkillImpl
-import co.touchlab.kermit.Logger
-import co.touchlab.kermit.Severity
-import executeInTestScope
 import ifGoalMatch
+import it.unibo.jakta.JaktaDSL
 import it.unibo.jakta.node
+import it.unibo.jakta.node.LocalNode
+import it.unibo.jakta.node.Node
+import it.unibo.jakta.node.NodeBuilder
+import it.unibo.jakta.plan.PlanScope
 import it.unibo.jakta.plan.triggers
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import terminateNode
 
-class TestBeliefRemoval {
+
+interface Skill<Body: Any, out N : Node<Body>> {
+    val node: N
+}
+
+
+data class StopSkill(override val node: LocalNode<Any>) : Skill<Any, LocalNode<Any>> {
+
+    fun stopNode() {
+        node.terminateNode()
+    }
+}
+
+context(skill: StopSkill)
+val PlanScope<*, *, *>.stopSkill: StopSkill
+    get() = skill
+
+
+@JaktaDSL
+fun <T : Skill<*, *>, R> NodeBuilder<*, *, *, *>.withSkills(
+    skill: T,
+    block: context(T) () -> R
+): R {
+    return with(skill) {
+        block()
+    }
+}
+
+class TestWithSkillSyntax {
+
+
     val helloWorld =
         node {
-            context(NodeTerminationSkillImpl(node)) {
+            withSkills(StopSkill(node)) {
                 agent {
                     embodiedAs { Any() }
                     believes {
@@ -33,20 +61,13 @@ class TestBeliefRemoval {
                             this.takeIf { it == "testBelief" }
                         } triggers {
                             agent.print("Belief removed: $context")
-                            terminateNode()
+                            stopSkill.stopNode()
                         }
                     }
                 }
             }
         }
 
-    @BeforeTest
-    fun setup() {
-        Logger.setMinSeverity(Severity.Warn)
-    }
 
-    @Test
-    fun testBeliefRemoval() {
-        executeInTestScope { helloWorld }
-    }
+
 }

@@ -6,6 +6,7 @@ import it.unibo.jakta.agent.AgentBuilderImpl
 import it.unibo.jakta.agent.AgentSpecification
 import it.unibo.jakta.node.LocalNodeBuilder
 import it.unibo.jakta.node.Node
+import it.unibo.jakta.node.NodeBuilder
 import it.unibo.jakta.plan.Plan
 import it.unibo.jakta.plan.PlanBuilder
 import it.unibo.jakta.plan.TriggerAdditionImpl
