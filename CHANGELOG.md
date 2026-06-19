@@ -1,3 +1,10 @@
+## [0.15.165](https://github.com/jakta-bdi/jakta/compare/v0.15.164...v0.15.165) (2026-06-19)
+
+
+### Bug Fixes
+
+* **deps:** update danysk/action-checkout action to v0.2.30 ([#827](https://github.com/jakta-bdi/jakta/issues/827)) ([13d1d46](https://github.com/jakta-bdi/jakta/commit/13d1d4695e264c89467cb2ee0ca17f6acd537b30))
+
 ## [0.15.164](https://github.com/jakta-bdi/jakta/compare/v0.15.163...v0.15.164) (2026-06-19)
 
 
