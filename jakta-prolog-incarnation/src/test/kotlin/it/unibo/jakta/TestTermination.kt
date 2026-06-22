@@ -39,12 +39,10 @@ class TestTermination {
                                     adding.belief {
                                         matching { "belief"(N) }
                                     } triggers {
-                                        with(context) {
-                                            val n = N.value.toKotlin<Int>()
-                                            agent.print("Belief is $n")
-                                            agent.believe(belief { "belief"(n + 1) })
-                                            skills.terminateNode()
-                                        }
+                                        val n = N.toKotlin<Int>()
+                                        agent.print("Belief is $n")
+                                        agent.believe(belief { "belief"(n + 1) })
+                                        skills.terminateNode()
                                     }
                                 }
                             }

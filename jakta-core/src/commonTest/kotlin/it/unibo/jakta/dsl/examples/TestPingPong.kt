@@ -12,10 +12,12 @@ import it.unibo.jakta.dsl.ifGoalMatch
 import it.unibo.jakta.dsl.node
 import it.unibo.jakta.dsl.node.LocalNodeBuilder
 import it.unibo.jakta.dsl.plan.triggers
+import it.unibo.jakta.event.AgentUpdate
 import it.unibo.jakta.event.BeliefAddEvent
 import it.unibo.jakta.node.Node
 import it.unibo.jakta.skills.BaseNodeTerminationSkill
 import it.unibo.jakta.skills.NodeTerminationSkill
+import kotlin.collections.emptySet
 import kotlin.test.Test
 
 class TestPingPong {
@@ -33,7 +35,7 @@ class TestPingPong {
         agent(name) {
             embodiedAs { BodyWithName(name) }
             withSkills { CustomSkillSetImpl(it) }
-            handlesMessageEvents { listOf(BeliefAddEvent(it)) }
+            handlesMessageEvents { AgentUpdate.Belief(setOf(it), emptySet()) }
             block()
         }
     }

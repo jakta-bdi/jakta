@@ -10,6 +10,7 @@ import it.unibo.jakta.dsl.device
 import it.unibo.jakta.dsl.node.LocalNodeBuilder
 import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.event.AgentEvent
+import it.unibo.jakta.event.AgentUpdate
 import it.unibo.jakta.event.BeliefAddEvent
 import it.unibo.jakta.node.Node
 import kotlinx.coroutines.delay
@@ -33,7 +34,7 @@ private fun <Goal : Any> LocalNodeBuilder<BodyWithName, MessagingSkill>.messageE
     agent(name) {
         embodiedAs { BodyWithName(name) }
         withSkills { MessagingSkill(it) }
-        handlesMessageEvents { listOf(BeliefAddEvent(it)) }
+        handlesMessageEvents { AgentUpdate.Belief(setOf(it), emptySet()) }
         block()
     }
 }

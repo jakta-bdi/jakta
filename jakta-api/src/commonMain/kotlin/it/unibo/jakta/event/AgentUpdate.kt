@@ -12,7 +12,7 @@ sealed interface AgentUpdate<T : Any> {
     val additions: Set<T>
     val removals: Set<T>
 
-    data class Belief<B : Any>(override val additions: Set<B>, override val removals: Set<B>) : AgentUpdate<B>
+    data class Belief<B : Any>(override val additions: Set<B>, override val removals: Set<B> = emptySet()) : AgentUpdate<B>
 
-    data class Goal<G : Any>(override val additions: Set<G>, override val removals: Set<G>) : AgentUpdate<G>
+    data class Goal<G : Any>(override val additions: Set<G>, override val removals: Set<G> = emptySet()) : AgentUpdate<G>
 }

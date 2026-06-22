@@ -11,6 +11,7 @@ import it.unibo.jakta.dsl.ifGoalMatch
 import it.unibo.jakta.dsl.node
 import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.event.AgentEvent
+import it.unibo.jakta.event.AgentUpdate
 import it.unibo.jakta.event.BeliefAddEvent
 import it.unibo.jakta.node.Node
 import it.unibo.jakta.skills.BaseNodeTerminationSkill
@@ -80,18 +81,6 @@ class TestSpatialRobot {
                 CustomSkillSet(it)
             }
 
-            handlesPerceptionEvents {
-                when (it) {
-                    is Movement.Events.Position<*> ->
-                        listOf(BeliefAddEvent("position(${it.agentId}, ${it.position})"))
-
-                    is Recharging.Events.ChargeLevel ->
-                        listOf(BeliefAddEvent("chargeLevel(${it.level})"))
-
-                    else -> null
-                }
-            }
-
             believes {
                 +"temp(0)"
             }
@@ -99,6 +88,25 @@ class TestSpatialRobot {
             hasInitialGoals {
                 !"goal"
             }
+
+            handlesPerceptionEvents {
+                when (it) {
+                    is Movement.Events.Position<*> ->
+                        AgentUpdate.Belief(
+                            setOf(("position(${it.agentId}, ${it.position})")),
+                            beliefs.filter { it.startsWith("position(") }.toSet()
+                        )
+
+                    is Recharging.Events.ChargeLevel ->
+                        AgentUpdate.Belief(
+                            setOf("chargeLevel(${it.level})"),
+                            beliefs.filter { it.startsWith("chargeLevel(") }.toSet()
+                        )
+
+                    else -> null
+                }
+            }
+
             hasPlans {
                 adding.goal {
                     ifGoalMatch("goal")

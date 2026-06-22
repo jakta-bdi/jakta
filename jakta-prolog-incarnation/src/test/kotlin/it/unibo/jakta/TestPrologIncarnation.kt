@@ -89,7 +89,7 @@ class TestPrologIncarnation {
                                     adding.goal {
                                         matching { "start"(N) }
                                     } triggers {
-                                        val n = N.valueFromContext(context)
+                                        val n = N.value
                                         agent.print("Starting with $n")
                                         agent.believe(belief { "belief"(n) })
                                     }
@@ -99,7 +99,7 @@ class TestPrologIncarnation {
                                     adding.belief {
                                         matching { "belief"(N) }
                                     } triggers {
-                                        val n = N.valueFromContext(context)
+                                        val n = N.value
                                         agent.print("Belief is $n")
                                         skills.terminateNode()
                                     }
@@ -130,7 +130,7 @@ class TestPrologIncarnation {
                                     adding.goal {
                                         matching { "start"(N) }
                                     } triggers {
-                                        val n = N.valueFromContext(context)
+                                        val n = N.value
                                         agent.print("Starting with $n")
                                         agent.believe(belief { "belief"(n) })
                                     }
@@ -150,7 +150,7 @@ class TestPrologIncarnation {
                                     adding.belief {
                                         matching { "belief"(N) }
                                     } triggers {
-                                        val n = N.value.toKotlin<Int>()
+                                        val n = N.toKotlin<Int>()
                                         agent.print("Belief is $n")
                                         agent.believe(belief { "belief"(n + 1) })
                                     }
@@ -186,7 +186,7 @@ class TestPrologIncarnation {
                                     } onlyWhen {
                                         satisfies { "belief"(N) }
                                     } triggers {
-                                        agent.print("Belief is ${N.valueFromContext(context)}")
+                                        agent.print("Belief is ${N.value}")
                                         skills.terminateNode()
                                     }
                                 }
@@ -231,8 +231,8 @@ class TestPrologIncarnation {
                                         satisfies { "sibling"(B, C) }
                                     } triggers {
                                         agent.print(
-                                            "${C.valueFromContext(context)}" +
-                                                " is a sibling of ${B.valueFromContext(context)}",
+                                            "${C.value}" +
+                                                " is a sibling of ${B.value}",
                                         )
                                         skills.terminateNode()
                                     }
@@ -277,8 +277,8 @@ class TestPrologIncarnation {
                                         satisfies { "sibling"(B, C) }
                                     } triggers {
                                         agent.print(
-                                            "${C.valueFromContext(context)}" +
-                                                " is a sibling of ${B.valueFromContext(context)}",
+                                            "${C.value}" +
+                                                " is a sibling of ${B.value}",
                                         )
                                         skills.terminateNode()
                                     }
@@ -288,12 +288,10 @@ class TestPrologIncarnation {
                                     failing.goal {
                                         matching { "start"(B) }
                                     } triggers {
-                                        with(context) {
-                                            agent.print("I didn't know how to infer siblings for ${B.value}")
-                                            agent.believe(rule)
-                                            agent.print("But now I do! I can try again...")
-                                            agent.alsoAchieve(goal { "start"(B.value) })
-                                        }
+                                        agent.print("I didn't know how to infer siblings for ${B.value}")
+                                        agent.believe(rule)
+                                        agent.print("But now I do! I can try again...")
+                                        agent.alsoAchieve(goal { "start"(B.value) })
                                     }
                                 }
                             }
