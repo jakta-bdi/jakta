@@ -23,7 +23,7 @@ context(scope: JaktaLogicProgrammingScope)
 fun PrologBelief.matching(block: JaktaLogicProgrammingScope.() -> Struct): Substitution? =
     matchBelief(contextualBeliefQuery(block))
 
-fun initialBelief(block: JaktaLogicProgrammingScope.() -> Struct): PrologGoal = Fact.of(
+fun initialBelief(block: JaktaLogicProgrammingScope.() -> Struct): Fact = Fact.of(
     JaktaLogicProgrammingScope().block().also {
         requirePredicate(it) { "Belief must be a predicate, but got $it" }
         requireGround(it) { "Belief must be ground, but got $it" }

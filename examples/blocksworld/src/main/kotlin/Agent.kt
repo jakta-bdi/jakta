@@ -17,7 +17,9 @@ import it.unibo.jakta.node.Node
 import it.unibo.jakta.skills.BaseNodeTerminationSkill
 import it.unibo.jakta.skills.NodeTerminationSkill
 import it.unibo.jakta.value
-import it.unibo.tuprolog.core.Atom
+import it.unibo.tuprolog.core.List
+import it.unibo.tuprolog.core.Struct
+import it.unibo.tuprolog.core.toAtom
 import model.BlocksWorld
 
 class SkillSet(node: Node<Any, SkillSet>, world: BlocksWorld) :
@@ -29,6 +31,9 @@ fun MasBuilder<LocalNode<Any, SkillSet>, LocalNodeBuilder<Any, SkillSet>>.blocks
     desiredWorldState: PrologGoal
 ) = node {
     agent<PrologBelief, PrologGoal>("blocky") {
+
+        fun state(list: List) : Struct  = Struct.of("state", list)
+
         embodiedAs { object {} }
         withSkills { SkillSet(it, world) }
         believes {
@@ -45,7 +50,7 @@ fun MasBuilder<LocalNode<Any, SkillSet>, LocalNodeBuilder<Any, SkillSet>>.blocks
             }
         }
         hasInitialGoals {
-            !initialGoal { Atom.of("start") }
+            ! initialGoal { "start".toAtom() }
         }
         handlesPerceptionEvents {
             when (it) {
@@ -56,7 +61,7 @@ fun MasBuilder<LocalNode<Any, SkillSet>, LocalNodeBuilder<Any, SkillSet>>.blocks
         hasPlans {
             prologPlan {
                 adding.goal {
-                    matching { Atom.of("start") }
+                    matching { "start".toAtom() }
                 } triggers {
                     skills.join()
                     skills.displayWorld()
@@ -66,7 +71,7 @@ fun MasBuilder<LocalNode<Any, SkillSet>, LocalNodeBuilder<Any, SkillSet>>.blocks
 
             prologPlan {
                 adding.goal {
-                    matching { "state"(emptyLogicList) }
+                    matching { state(emptyLogicList) }
                 } triggers {
                     agent.print("Finished! Final state reached.")
                     skills.displayWorld()
@@ -75,12 +80,12 @@ fun MasBuilder<LocalNode<Any, SkillSet>, LocalNodeBuilder<Any, SkillSet>>.blocks
 
             prologPlan {
                 adding.goal {
-                    matching { "state"(logicList(H, tail=T)) }
+                    matching { state(logicList(H, tail=T)) }
                 } triggers {
                     with(context) {
                         agent.print("Building the tower ${H.value}")
-                        agent.achieve(goal { "tower"(H.value) })
-                        agent.achieve(goal { "state"(T.value) })
+                        agent.achieve(goal { "tower"(H) })
+                        agent.achieve(goal { "state"(T) })
                     }
                 }
             }
