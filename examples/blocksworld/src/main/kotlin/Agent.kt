@@ -10,15 +10,19 @@ import it.unibo.jakta.dsl.node.LocalNodeBuilder
 import it.unibo.jakta.dsl.plan.achieve
 import it.unibo.jakta.dsl.plan.satisfies
 import it.unibo.jakta.dsl.plan.triggers
-import it.unibo.jakta.getAs
+import it.unibo.jakta.toKotlin
 import it.unibo.jakta.logic.JaktaLogicProgrammingScope.Companion.prologPlan
 import it.unibo.jakta.node.LocalNode
 import it.unibo.jakta.node.Node
+import it.unibo.jakta.print
 import it.unibo.jakta.skills.BaseNodeTerminationSkill
 import it.unibo.jakta.skills.NodeTerminationSkill
 import it.unibo.jakta.value
+import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.List
 import it.unibo.tuprolog.core.Struct
+import it.unibo.tuprolog.core.Term
+import it.unibo.tuprolog.core.Var
 import it.unibo.tuprolog.core.toAtom
 import model.BlocksWorld
 
@@ -32,25 +36,33 @@ fun MasBuilder<LocalNode<Any, SkillSet>, LocalNodeBuilder<Any, SkillSet>>.blocks
 ) = node {
     agent<PrologBelief, PrologGoal>("blocky") {
 
+        val start = "start".toAtom()
+        val table = "table".toAtom()
         fun state(list: List) : Struct  = Struct.of("state", list)
+        fun state(list: Var) : Struct  = Struct.of("state", list)
+        fun tower(list: List) : Struct  = Struct.of("tower", list)
+        fun tower(list: Var) : Struct  = Struct.of("tower", list)
+        fun clear(block: Atom) : Struct  = Struct.of("clear", block)
+        fun clear(block: Var) : Struct  = Struct.of("clear", block)
+        fun on(block: Term, support: Term) : Struct  = Struct.of("on", block, support)
 
         embodiedAs { object {} }
         withSkills { SkillSet(it, world) }
         believes {
-            + initialBelief { "clear"(table) }
-            + inferenceRule { "clear"(X) impliedBy not("on"(`_`, X)) }
-            + inferenceRule { "tower"(logicListOf(X)) impliedBy (
-                    "on"(X, table)
+            + initialBelief { clear(table) }
+            + inferenceRule { clear(X) impliedBy not(on(`_`, X)) }
+            + inferenceRule { tower(logicListOf(X)) impliedBy (
+                    on(X, table)
                 )
             }
-            + inferenceRule { "tower"(logicList(X, Y, tail=T)) impliedBy (
-                    "on"(X, Y) and
-                    "tower"(logicList(Y, tail=T))
+            + inferenceRule { tower(logicList(X, Y, tail=T)) impliedBy (
+                    on(X, Y) and
+                    tower(logicList(Y, tail=T))
                 )
             }
         }
         hasInitialGoals {
-            ! initialGoal { "start".toAtom() }
+            ! initialGoal { start }
         }
         handlesPerceptionEvents {
             when (it) {
@@ -61,7 +73,7 @@ fun MasBuilder<LocalNode<Any, SkillSet>, LocalNodeBuilder<Any, SkillSet>>.blocks
         hasPlans {
             prologPlan {
                 adding.goal {
-                    matching { "start".toAtom() }
+                    matching { start }
                 } triggers {
                     skills.join()
                     skills.displayWorld()
@@ -82,103 +94,88 @@ fun MasBuilder<LocalNode<Any, SkillSet>, LocalNodeBuilder<Any, SkillSet>>.blocks
                 adding.goal {
                     matching { state(logicList(H, tail=T)) }
                 } triggers {
-                    with(context) {
-                        agent.print("Building the tower ${H.value}")
-                        agent.achieve(goal { "tower"(H) })
-                        agent.achieve(goal { "state"(T) })
-                    }
+                    agent.print("Building the tower ",H)
+                    agent.achieve(goal { tower(H) })
+                    agent.achieve(goal { state(T) })
                 }
             }
 
             prologPlan {
                 adding.goal {
-                    matching { "tower"(T) }
+                    matching { tower(T) }
                 } onlyWhen {
-                    satisfies { "tower"(T) }
+                    satisfies { tower(T) }
                 } triggers {
-                    with(context){
-                        agent.print("Tower ${T.value} is already built.")
-                    }
+                    agent.print("Tower ", T, " is already built.")
                 }
             }
 
             prologPlan {
                 adding.goal {
-                    matching { "tower"(listOf(X)) }
+                    matching { tower(logicListOf(X)) }
                 } triggers {
-                    with(context) {
-                        agent.achieve(goal {"on"(X.value, table)})
-                    }
+                    agent.achieve(goal { on(X, table)})
                 }
             }
 
 
             prologPlan {
                 adding.goal {
-                    matching { "tower"(logicList(X, Y, tail=T)) }
+                    matching { tower(logicList(X, Y, tail=T)) }
                 } triggers {
-                    with(context) {
-                        agent.achieve(goal {"tower"(logicList(Y.value, tail=T.value))})
-                        agent.achieve(goal {"on"(X.value, Y.value)})
-                    }
+                    agent.achieve(goal { tower(logicList(Y, tail=T))})
+                    agent.achieve(goal { on(X, Y)})
+
                 }
             }
 
             prologPlan {
                 adding.goal {
-                    matching { "on"(X, Y) }
+                    matching { on(X, Y) }
                 } onlyWhen {
-                    satisfies { "on" (X, Y)}
+                    satisfies { on(X, Y)}
                 } triggers {
-                    with(context) {
-                        agent.print("model.Block ${X.value} is on ${Y.value}.")
-                    }
+                    agent.print("Block ", X, " is on ", Y)
                 }
             }
 
 
             prologPlan {
                 adding.goal {
-                    matching { "on"(X, Y) }
+                    matching { on(X, Y) }
                 } triggers {
-                    with(context) {
-                        agent.print("Check if block ${X.value} is clear.")
-                        agent.achieve(goal { "clear"(X.value)})
-                        agent.print("Check if block ${Y.value} is clear.")
-                        agent.achieve(goal {"clear" (Y.value)})
-                        agent.print("Moving block ${X.value} on ${Y.value}.")
-                        skills.move(X.value.getAs(), Y.value.getAs())
-                    }
+                    agent.print("Check if block ", X, " is clear")
+                    agent.achieve(goal { clear(X)})
+                    agent.print("Check if block ", Y, " is clear")
+                    agent.achieve(goal { clear(Y)} )
+                    agent.print("Moving block ", X, " on ", Y)
+                    skills.move(X.toKotlin(), Y.toKotlin())
                 }
             }
 
             prologPlan {
                 adding.goal {
-                    matching { "clear"(X) }
+                    matching { clear(X) }
                 } onlyWhen {
-                    satisfies { "clear" (X)}
+                    satisfies { clear(X)}
                 } triggers {
-                    with(context){
-                        agent.print("model.Block ${X.value} is clear.")
-                    }
+                    agent.print("Block", X, "is clear.")
                 }
             }
 
             prologPlan {
                 adding.goal {
-                    matching { "clear"(X) }
+                    matching { clear(X) }
                 } onlyWhen {
-                    satisfies { "tower" (logicList(H, tail=T)) and member(X, T)}
+                    satisfies { tower(logicList(H, tail=T)) and member(X, T)}
                 } triggers {
-                    with(context){
-                        agent.print("${X.value} is not clear")
-                        agent.print("Check if I can move ${H.value} to clear ${X.value}.")
-                        agent.achieve(goal { "clear"(H.value) }) //TODO the Jason solution does not include this
-                        agent.print("Moving ${H.value} on the table.")
-                        skills.move(H.value.getAs(), table.getAs())
-                        agent.print("${X.value} should now be clear.")
-                        agent.achieve(goal { "clear"(X.value) })
-                    }
+                    agent.print("Block", X, "is not clear.")
+                    agent.print("Check if I can move ", H, " to clear ", X)
+                    agent.achieve(goal {clear(H) }) //TODO the Jason solution does not include this
+                    agent.print("Moving block ", X, " on ", table)
+                    skills.move(H.toKotlin(), table.value)
+                    agent.print(X, " should now be clear.")
+                    agent.achieve(goal { clear(X) })
                 }
             }
 

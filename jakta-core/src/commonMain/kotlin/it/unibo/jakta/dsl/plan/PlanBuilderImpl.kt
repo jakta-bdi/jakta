@@ -24,7 +24,7 @@ class BeliefAdditionPlanBuilderImpl<Belief : Any, Goal : Any, Skills : Any, Cont
 
     override fun <PlanResult> triggersImpl(
         resultType: KType,
-        body: suspend PlanScope<Belief, Goal, Skills, Context>.() -> PlanResult,
+        body: suspend context(Context) PlanScope<Belief, Goal, Skills, Context>.() -> PlanResult,
     ): Plan.Belief.Addition<Belief, Goal, Skills, Context, PlanResult> =
         buildAndRegisterPlan(resultType, trigger, guard, body, ::BeliefAdditionPlan, addBeliefPlan)
 }
@@ -43,7 +43,7 @@ class GoalAdditionPlanBuilderImpl<Belief : Any, Goal : Any, Skills : Any, Contex
 
     override fun <PlanResult> triggersImpl(
         resultType: KType,
-        body: suspend PlanScope<Belief, Goal, Skills, Context>.() -> PlanResult,
+        body: suspend context(Context) PlanScope<Belief, Goal, Skills, Context>.() -> PlanResult,
     ): Plan.Goal.Addition<Belief, Goal, Skills, Context, PlanResult> =
         buildAndRegisterPlan(resultType, trigger, guard, body, ::GoalAdditionPlan, addGoalPlan)
 }
@@ -62,7 +62,7 @@ class BeliefRemovalPlanBuilderImpl<Belief : Any, Goal : Any, Skills : Any, Conte
 
     override fun <PlanResult> triggersImpl(
         resultType: KType,
-        body: suspend PlanScope<Belief, Goal, Skills, Context>.() -> PlanResult,
+        body: suspend context(Context) PlanScope<Belief, Goal, Skills, Context>.() -> PlanResult,
     ): Plan.Belief.Removal<Belief, Goal, Skills, Context, PlanResult> =
         buildAndRegisterPlan(resultType, trigger, guard, body, ::BeliefRemovalPlan, removeBeliefPlan)
 }
@@ -81,7 +81,7 @@ class GoalRemovalPlanBuilderImpl<Belief : Any, Goal : Any, Skills : Any, Context
 
     override fun <PlanResult> triggersImpl(
         resultType: KType,
-        body: suspend PlanScope<Belief, Goal, Skills, Context>.() -> PlanResult,
+        body: suspend context(Context) PlanScope<Belief, Goal, Skills, Context>.() -> PlanResult,
     ): Plan.Goal.Removal<Belief, Goal, Skills, Context, PlanResult> =
         buildAndRegisterPlan(resultType, trigger, guard, body, ::GoalRemovalPlan, removeGoalPlan)
 }
@@ -100,7 +100,7 @@ class GoalFailurePlanBuilderImpl<Belief : Any, Goal : Any, Skills : Any, Context
 
     override fun <PlanResult> triggersImpl(
         resultType: KType,
-        body: suspend PlanScope<Belief, Goal, Skills, Context>.() -> PlanResult,
+        body: suspend context(Context) PlanScope<Belief, Goal, Skills, Context>.() -> PlanResult,
     ): Plan.Goal.Failure<Belief, Goal, Skills, Context, PlanResult> =
         buildAndRegisterPlan(resultType, trigger, guard, body, ::GoalFailurePlan, failingGoalPlan)
 }
@@ -109,11 +109,11 @@ private fun <B, G, S, TE, C, PR, P> buildAndRegisterPlan(
     resultType: KType,
     trigger: TE.() -> C?,
     guard: GuardScope<B, C>.() -> C?,
-    body: suspend PlanScope<B, G, S, C>.() -> PR,
+    body: suspend context(C) PlanScope<B, G, S, C>.() -> PR,
     builder: (
         (TE) -> C?,
         GuardScope<B, C>.() -> C?,
-        suspend PlanScope<B, G, S, C>.() -> PR,
+        suspend context(C) PlanScope<B, G, S, C>.() -> PR,
         KType,
     ) -> P,
     register: (P) -> Unit,

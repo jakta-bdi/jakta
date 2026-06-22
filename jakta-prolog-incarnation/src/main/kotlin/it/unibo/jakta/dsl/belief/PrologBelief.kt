@@ -30,17 +30,15 @@ fun initialBelief(block: JaktaLogicProgrammingScope.() -> Struct): Fact = Fact.o
     },
 )
 
-context(scope: JaktaLogicProgrammingScope)
+context(scope: JaktaLogicProgrammingScope, substitution: Substitution)
 fun belief(block: JaktaLogicProgrammingScope.() -> Struct): Fact = Fact.of(
-    scope.block().also {
+    (scope.block().apply(substitution) as Struct).also {
         requirePredicate(it) { "Belief must be a predicate, but got $it" }
         requireGround(it) { "Belief must be ground, but got $it" }
     },
 )
 
 fun inferenceRule(block: JaktaLogicProgrammingScope.() -> Rule): Rule = JaktaLogicProgrammingScope().block()
-
-fun JaktaLogicProgrammingScope.inferenceRule(block: JaktaLogicProgrammingScope.() -> Rule): Rule = this.block()
 
 fun beliefQuery(block: JaktaLogicProgrammingScope.() -> Struct): Fact = Fact.of(
     JaktaLogicProgrammingScope().block().also {

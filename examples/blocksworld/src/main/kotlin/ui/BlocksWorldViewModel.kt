@@ -3,15 +3,6 @@ package ui
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import blockA
-import blockB
-import blockC
-import blockD
-import blockE
-import blockF
-import blockG
-import blockH
-import blockI
 import blocksWorldNode
 import it.unibo.jakta.dsl.goal.PrologGoal
 import it.unibo.jakta.dsl.goal.initialGoal

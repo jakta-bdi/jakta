@@ -16,7 +16,6 @@ import it.unibo.jakta.dsl.plan.satisfies
 import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.logic.JaktaLogicProgrammingScope.Companion.prologPlan
 import it.unibo.jakta.node.CoroutineNodeRunner
-import it.unibo.tuprolog.core.Rule
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlinx.coroutines.launch
@@ -46,7 +45,7 @@ class TestPrologIncarnation {
                                     adding.goal {
                                         matching { "start"(N, N) }
                                     } triggers {
-                                        val n = N.valueFromContext(context)
+                                        val n = N.value
                                         agent.print("Counting...$n done!")
                                     }
                                 }
@@ -58,12 +57,10 @@ class TestPrologIncarnation {
                                             (N lowerThan X) and (S `is` (N + 1))
                                         }
                                     } triggers {
-                                        with(this.context) {
-                                            agent.print("Counting..." + N.value)
-                                            agent.achieve(goal { "start"(S.value, X.value) })
-                                            assert(true)
-                                            skills.terminateNode()
-                                        }
+                                        agent.print("Counting..." + N.value)
+                                        agent.achieve(goal { "start"(S, X) })
+                                        assert(true)
+                                        skills.terminateNode()
                                     }
                                 }
                             }
@@ -153,11 +150,9 @@ class TestPrologIncarnation {
                                     adding.belief {
                                         matching { "belief"(N) }
                                     } triggers {
-                                        with(context) {
-                                            val n = N.value.getAs<Int>()
-                                            agent.print("Belief is $n")
-                                            agent.believe(belief { "belief"(n + 1) })
-                                        }
+                                        val n = N.value.toKotlin<Int>()
+                                        agent.print("Belief is $n")
+                                        agent.believe(belief { "belief"(n + 1) })
                                     }
                                 }
                             }
