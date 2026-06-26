@@ -47,4 +47,9 @@ kotlinJvm {
             exceptionFormat = TestExceptionFormat.FULL
         }
     }
+
+
+    compilerOptions {
+        freeCompilerArgs.add("-Xcontext-parameters")
+    }
 }

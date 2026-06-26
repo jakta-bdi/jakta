@@ -17,7 +17,7 @@ import it.unibo.jakta.alchemist.AlchemistDispatcher
  */
 class JaktaForAlchemistAgent<P : Position<P>>(
     alchemistNode: AlchemistNode<Any?>,
-    private val agent: ExecutableAgent<*, *, *>,
+    private val agent: ExecutableAgent<*, *>,
     private val alchemistEnvironment: Environment<Any?, P>,
     private val dispatcher: AlchemistDispatcher<P> = AlchemistDispatcher(alchemistEnvironment),
 ) : AbstractAction<Any?>(alchemistNode) {

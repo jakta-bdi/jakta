@@ -12,11 +12,11 @@ sealed interface SystemEvent {
     /**
      * Generated when a new agent is added to the system.
      */
-    interface AgentAddition<Belief : Any, Goal : Any, Skills : Any> : SystemEvent {
+    interface AgentAddition<Belief : Any, Goal : Any> : SystemEvent {
         /**
          * The [ExecutableAgent] that has been added to the system.
          */
-        val executableAgent: ExecutableAgent<Belief, Goal, Skills>
+        val executableAgent: ExecutableAgent<Belief, Goal>
     }
 
     /**

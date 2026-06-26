@@ -38,7 +38,7 @@ fun <T : Any> Var.toKotlin(): T = this.value.accept(TermObjectifier.default) as?
  * @param parts The parts to be printed, which can include variables and other objects.
  */
 context(substitution: Substitution)
-fun MutableAgentState<PrologBelief, PrologGoal, *>.print(vararg parts: Any?) {
+fun MutableAgentState<PrologBelief, PrologGoal>.print(vararg parts: Any?) {
     val text = buildString {
         for (part in parts) {
             append(

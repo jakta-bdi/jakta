@@ -11,8 +11,8 @@ import kotlin.reflect.typeOf
 /**
  * Mutable state of an agent, allowing modifications to its beliefs, plans, and event handlers.
  */
-interface MutableAgentState<Belief : Any, Goal : Any, Skills : Any> :
-    AgentState<Belief, Goal, Skills>,
+interface MutableAgentState<Belief : Any, Goal : Any> :
+    AgentState<Belief, Goal>,
     Agent {
 
     /**
@@ -25,26 +25,26 @@ interface MutableAgentState<Belief : Any, Goal : Any, Skills : Any> :
      * @param handler the new function handler the agent will use starting from next iteration of its lifecycle.
      */
     fun setPerceptionHandler(
-        handler: AgentState<Belief, Goal, Skills>.(AgentEvent.External.Perception) -> AgentUpdate<*>?,
+        handler: AgentState<Belief, Goal>.(AgentEvent.External.Perception) -> AgentUpdate<*>?,
     )
 
     /**
      * Modifies the message handler function that defines which Messages are interest of the agent.
      * @param handler the new function handler that the agent will use, starting from the next lifecycle iteration.
      */
-    fun setMessageHandler(handler: AgentState<Belief, Goal, Skills>.(AgentEvent.External.Message) -> AgentUpdate<*>?)
+    fun setMessageHandler(handler: AgentState<Belief, Goal>.(AgentEvent.External.Message) -> AgentUpdate<*>?)
 
     /**
      * Adds a new [Plan.Goal] that agent can use for its reasoning process.
      * @param plan the new [Plan.Goal].
      */
-    fun addPlan(plan: Plan.Goal<Belief, Goal, Skills, *, *>)
+    fun addPlan(plan: Plan.Goal<Belief, Goal, *, *>)
 
     /**
      * Adds a new [Plan.Belief] that agent can use for its reasoning process.
      * @param plan the new [Plan.Belief].
      */
-    fun addPlan(plan: Plan.Belief<Belief, Goal, Skills, *, *>)
+    fun addPlan(plan: Plan.Belief<Belief, Goal, *, *>)
 
     /**
      * Adds an event to the agent's queue to achieve a goal and suspends until the goal is achieved.
@@ -87,5 +87,5 @@ interface MutableAgentState<Belief : Any, Goal : Any, Skills : Any> :
  * @return The result of the plan execution of type [PlanResult].
  */
 @OptIn(InternalJaktaAPI::class)
-suspend inline fun <Goal : Any, reified PlanResult> MutableAgentState<*, Goal, *>.achieve(goal: Goal): PlanResult =
+suspend inline fun <Goal : Any, reified PlanResult> MutableAgentState<*, Goal>.achieve(goal: Goal): PlanResult =
     internalAchieve(goal, typeOf<PlanResult>())

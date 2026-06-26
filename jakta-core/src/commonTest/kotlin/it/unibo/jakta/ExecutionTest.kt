@@ -17,7 +17,7 @@ import kotlinx.coroutines.test.runTest
 
 class ExecutionTest {
 
-    class MyPrint(val node: Node<*, *>) {
+    class MyPrint(val node: Node<*>) {
         suspend fun prettyPrint(value: String) = println("${currentCoroutineContext()} - $value")
         fun stop() {
             node.terminateNode()
@@ -26,16 +26,16 @@ class ExecutionTest {
 
     @Test
     fun testAgentExecution() {
-        val node = LocalNode<Any, MyPrint>()
-        val node2 = LocalNode<Any, MyPrint>()
+        val node = LocalNode<Any>()
+        val node2 = LocalNode<Any>()
 
         fun agentSpecGenerator(
             agentname: String,
-            node: LocalNode<*, MyPrint>,
-        ): Set<AgentSpecification<String, String, MyPrint, Any>> = setOf(
-            object : AgentSpecification<String, String, MyPrint, Any> {
-                override val body = object {}
-                override val initialState: AgentState<String, String, MyPrint> = BaseAgentState(
+            node: LocalNode<*>,
+        ): Set<AgentSpecification<String, String, Any>> = setOf(
+            object : AgentSpecification<String, String, Any> {
+                override val body = Any()
+                override val initialState: AgentState<String, String> = BaseAgentState(
                     beliefs = listOf(),
                     intentions = setOf(),
                     beliefPlans = listOf(),
@@ -44,22 +44,23 @@ class ExecutionTest {
                             trigger = { it == "hello" },
                             guard = { true },
                             body = {
-                                it.skills.prettyPrint("PLKUTO")
-                                it.skills.stop()
+                                with(MyPrint(node)) {
+                                    prettyPrint("PLKUTO")
+                                    stop()
+                                }
                             },
                             resultType = typeOf<Unit>(),
                         ),
                     ),
                     perceptionHandler = { null },
                     messageHandler = { null },
-                    skills = MyPrint(node),
                 )
                 override val initialGoals: List<String> = listOf("hello")
                 override val id: AgentID = BaseAgentID(agentname)
             },
         )
 
-        val runner = CoroutineNodeRunner<Any, MyPrint, LocalNode<Any, MyPrint>>()
+        val runner = CoroutineNodeRunner<Any, LocalNode<Any>>()
 
         runTest {
             agentSpecGenerator("Agent1", node).forEach { node.addAgent(it) }

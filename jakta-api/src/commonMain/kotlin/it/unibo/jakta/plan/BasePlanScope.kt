@@ -5,8 +5,7 @@ import it.unibo.jakta.agent.MutableAgentState
 /**
  * Implementation of PlanScope.
  */
-data class BasePlanScope<Belief : Any, Goal : Any, Skills : Any, Context : Any>(
-    override val agent: MutableAgentState<Belief, Goal, Skills>,
-    override val skills: Skills,
+data class BasePlanScope<Belief : Any, Goal : Any, Context : Any>(
+    override val agent: MutableAgentState<Belief, Goal>,
     override val context: Context,
-) : PlanScope<Belief, Goal, Skills, Context>
+) : PlanScope<Belief, Goal, Context>

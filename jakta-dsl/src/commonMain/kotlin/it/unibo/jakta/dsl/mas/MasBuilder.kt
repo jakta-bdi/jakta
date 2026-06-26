@@ -7,7 +7,7 @@ import it.unibo.jakta.node.NodeRunner
 /**
  * A builder for a Multi-Agent System (MAS). It allows defining nodes and running them with a given runner.
  */
-interface MasBuilder<N : Node<*, *>, NB : NodeBuilder<*, *, N>> {
+interface MasBuilder<N : Node<*>, NB : NodeBuilder<*, N>> {
 
     /**
      * Opens a scope for adding a node to the MAS.

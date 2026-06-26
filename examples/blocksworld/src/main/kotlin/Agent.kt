@@ -25,7 +25,7 @@ import model.BlocksWorld
 /**
  * Creates a node of the blocksworld MAS with one agent.
  */
-fun MasBuilder<LocalNode<Any, SkillSet>, LocalNodeBuilder<Any, SkillSet>>.blocksWorldNode(
+fun MasBuilder<LocalNode<Any>, LocalNodeBuilder<Any>>.blocksWorldNode(
     world: BlocksWorld,
     desiredWorldState: PrologGoal,
 ) = node {
@@ -40,7 +40,7 @@ fun MasBuilder<LocalNode<Any, SkillSet>, LocalNodeBuilder<Any, SkillSet>>.blocks
         fun clear(block: Var): Struct = Struct.of("clear", block)
         fun on(block: Term, support: Term): Struct = Struct.of("on", block, support)
 
-        embodiedAs { object {} }
+        embodiedAs { Any() }
         withSkills { SkillSet(it, world) }
         believes {
             +initialBelief { clear(table) }

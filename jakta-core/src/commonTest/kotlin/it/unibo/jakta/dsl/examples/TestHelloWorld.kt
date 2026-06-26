@@ -7,23 +7,25 @@ import it.unibo.jakta.dsl.ifGoalMatch
 import it.unibo.jakta.dsl.node
 import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.skills.BaseNodeTerminationSkill
+import it.unibo.jakta.skills.terminateNode
 import kotlin.test.Test
 
 class TestHelloWorld {
 
     val helloWorld = node {
-        agent("HelloAgent") {
-            embodiedAs { object {} }
-            withSkills { BaseNodeTerminationSkill(it) }
-            hasInitialGoals {
-                !"goal"
-            }
-            hasPlans {
-                adding.goal {
-                    ifGoalMatch("goal")
-                } triggers {
-                    agent.print("Hello World!")
-                    skills.terminateNode()
+        context(BaseNodeTerminationSkill(node)) {
+            agent("HelloAgent") {
+                embodiedAs { Any() }
+                hasInitialGoals {
+                    !"goal"
+                }
+                hasPlans {
+                    adding.goal {
+                        ifGoalMatch("goal")
+                    } triggers {
+                        agent.print("Hello World!")
+                        terminateNode()
+                    }
                 }
             }
         }

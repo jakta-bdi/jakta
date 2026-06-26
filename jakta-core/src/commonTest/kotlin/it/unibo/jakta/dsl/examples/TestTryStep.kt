@@ -8,6 +8,7 @@ import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.node.Node
 import it.unibo.jakta.skills.BaseNodeTerminationSkill
 import it.unibo.jakta.skills.NodeTerminationSkill
+import it.unibo.jakta.skills.terminateNode
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertFalse
@@ -25,26 +26,27 @@ class TestTryStep {
     var secondStep = false
     var done = false
 
-    val helloWorld: Node<Any, NodeTerminationSkill> = node {
-        agent("Hello world agent") {
-            embodiedAs { object {} }
-            withSkills { BaseNodeTerminationSkill(it) }
-            hasInitialGoals {
-                !"goal"
-            }
-            hasPlans {
-                adding.goal {
-                    this.takeIf { it == "goal" }
-                } triggers {
-                    agent.print("First step")
-                    firstStep = true
-                    delay(1.seconds)
-                    agent.print("Second step")
-                    secondStep = true
-                    delay(1.seconds)
-                    agent.print("Third step, done!")
-                    done = true
-                    skills.terminateNode()
+    val helloWorld: Node<Any> = node {
+        context(BaseNodeTerminationSkill(node)) {
+            agent("Hello world agent") {
+                embodiedAs { Any() }
+                hasInitialGoals {
+                    !"goal"
+                }
+                hasPlans {
+                    adding.goal {
+                        this.takeIf { it == "goal" }
+                    } triggers {
+                        agent.print("First step")
+                        firstStep = true
+                        delay(1.seconds)
+                        agent.print("Second step")
+                        secondStep = true
+                        delay(1.seconds)
+                        agent.print("Third step, done!")
+                        done = true
+                        terminateNode()
+                    }
                 }
             }
         }
@@ -59,7 +61,7 @@ class TestTryStep {
     @Test
     fun testBeliefAddition() {
         runTest {
-            val runner = ManualStepNodeRunner<Any, NodeTerminationSkill, Node<Any, NodeTerminationSkill>>()
+            val runner = ManualStepNodeRunner<Any, Node<Any>>()
             runner.run(helloWorld)
 
             val dispatcher1 = StandardTestDispatcher(testScheduler)

@@ -8,26 +8,29 @@ import it.unibo.jakta.node.LocalNode
 /**
  * Implementation of the MasBuilder interface.
  */
-open class LocalNodeBuilder<Body : Any, Skills : Any> : NodeBuilder<Skills, Body, LocalNode<Body, Skills>> {
+open class LocalNodeBuilder<Body : Any> : NodeBuilder<Body, LocalNode<Body>> {
 
-    private val node = LocalNode<Body, Skills>()
+    /**
+     * The node instance being built.
+     */
+    val node = LocalNode<Body>()
 
-    protected val agents = mutableListOf<AgentBuilder<*, *, Skills, Body>>()
+    protected val agents = mutableListOf<AgentBuilder<*, *, Body>>()
 
-    override fun <Belief : Any, Goal : Any> agent(block: AgentBuilder<Belief, Goal, Skills, Body>.() -> Unit) =
+    override fun <Belief : Any, Goal : Any> agent(block: AgentBuilder<Belief, Goal, Body>.() -> Unit) =
         buildAgent(null, block)
 
     override fun <Belief : Any, Goal : Any> agent(
         name: String,
-        block: AgentBuilder<Belief, Goal, Skills, Body>.() -> Unit,
+        block: AgentBuilder<Belief, Goal, Body>.() -> Unit,
     ) = buildAgent(name, block)
 
     private fun <Belief : Any, Goal : Any> buildAgent(
         name: String?,
-        block: AgentBuilder<Belief, Goal, Skills, Body>.() -> Unit,
+        block: AgentBuilder<Belief, Goal, Body>.() -> Unit,
     ) {
-        val agentBuilder = AgentBuilderImpl<Belief, Goal, Skills, Body>(name)
-        val agent: AgentBuilder<Belief, Goal, Skills, Body> = agentBuilder.apply(block)
+        val agentBuilder = AgentBuilderImpl<Belief, Goal, Body>(name)
+        val agent: AgentBuilder<Belief, Goal, Body> = agentBuilder.apply(block)
         agents += agent
     }
 
@@ -39,7 +42,7 @@ open class LocalNodeBuilder<Body : Any, Skills : Any> : NodeBuilder<Skills, Body
 //        environment = block()
 //    }
 
-    override fun build(): LocalNode<Body, Skills> {
+    override fun build(): LocalNode<Body> {
         // val env = environment ?: error { "Must provide an Environment for the MAS" }
         agents.forEach { node.addAgent(it.build(node)) }
         return node

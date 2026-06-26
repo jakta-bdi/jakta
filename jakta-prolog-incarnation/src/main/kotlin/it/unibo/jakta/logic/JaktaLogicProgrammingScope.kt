@@ -85,7 +85,7 @@ open class JaktaLogicProgrammingScope(
          * @return The result of the scope block.
          */
         @JaktaDSL
-        inline fun PlanLibraryBuilder<PrologBelief, PrologGoal, *>.prologPlan(
+        inline fun PlanLibraryBuilder<PrologBelief, PrologGoal>.prologPlan(
             block: JaktaLogicProgrammingScope.() -> Unit,
         ): Unit = with(JaktaLogicProgrammingScope(), block)
     }

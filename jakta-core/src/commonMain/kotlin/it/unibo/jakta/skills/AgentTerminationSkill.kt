@@ -21,7 +21,7 @@ interface AgentTerminationSkill {
  * Basic implementation of [AgentTerminationSkill] that simply removes the agent from the node.
  * Takes the [node] the agent is on as input.
  */
-class BaseAgentTerminationSkill(val node: Node<*, *>) : AgentTerminationSkill {
+class BaseAgentTerminationSkill(val node: Node<*>) : AgentTerminationSkill {
     override fun Agent.terminate() {
         node.removeAgent(id)
     }

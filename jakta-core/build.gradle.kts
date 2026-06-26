@@ -28,4 +28,8 @@ kotlinMultiplatform {
         exclude("**PlanImpl**")
         exclude("**PlanBuilderImpl**")
     }
+
+    compilerOptions {
+        freeCompilerArgs.add("-Xcontext-parameters")
+    }
 }

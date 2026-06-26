@@ -20,10 +20,10 @@ class JaktaForAlchemistRuntime<P : Position<P>>(
     override val node: AlchemistNode<Any?>,
 ) : NodeProperty<Any?> {
 
-    private lateinit var jaktaNodes: RuntimeNodes<JaktaNode<*, *>>
-    private val agentActions: MutableMap<JaktaForAlchemistAgent<P>, JaktaNode<*, *>> = mutableMapOf()
+    private lateinit var jaktaNodes: RuntimeNodes<JaktaNode<*>>
+    private val agentActions: MutableMap<JaktaForAlchemistAgent<P>, JaktaNode<*>> = mutableMapOf()
 
-    private fun addAgentAction(node: JaktaNode<*, *>, agent: ExecutableAgent<*, *, *>) {
+    private fun addAgentAction(node: JaktaNode<*>, agent: ExecutableAgent<*, *>) {
         val newAgentAction = JaktaForAlchemistAgent<P>(
             this.node,
             agent,
@@ -37,7 +37,7 @@ class JaktaForAlchemistRuntime<P : Position<P>>(
      * The initial configuration of nodes can happen only one time at simulation creation time, not later.
      * @param nodes the Jakta [RuntimeNodes].
      */
-    fun setInitialJaktaNodes(nodes: RuntimeNodes<JaktaNode<*, *>>) {
+    fun setInitialJaktaNodes(nodes: RuntimeNodes<JaktaNode<*>>) {
         if (!::jaktaNodes.isInitialized) {
             jaktaNodes = nodes
 
@@ -46,7 +46,7 @@ class JaktaForAlchemistRuntime<P : Position<P>>(
                 var event: SystemEvent? = node.systemEvents.tryNext()
                 while (event != null) {
                     when (event) {
-                        is SystemEvent.AgentAddition<*, *, *> -> addAgentAction(node, event.executableAgent)
+                        is SystemEvent.AgentAddition<*, *> -> addAgentAction(node, event.executableAgent)
                         is SystemEvent.AgentRemoval -> TODO("Not supported for now")
                         is SystemEvent.ShutDownNode -> TODO("Not supported for now")
                     }

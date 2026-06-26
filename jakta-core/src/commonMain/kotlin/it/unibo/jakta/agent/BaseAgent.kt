@@ -9,10 +9,10 @@ import it.unibo.jakta.event.UnlimitedChannelBus
 /**
  * Default implementation of an [it.unibo.jakta.agent.Agent].
  */
-class BaseAgent<Belief : Any, Goal : Any, Skills : Any, Body : Any>(
-    agentSpecification: AgentSpecification<Belief, Goal, Skills, Body>,
+class BaseAgent<Belief : Any, Goal : Any, Body : Any>(
+    agentSpecification: AgentSpecification<Belief, Goal, Body>,
 ) : Agent,
-    ExecutableAgent<Belief, Goal, Skills>,
+    ExecutableAgent<Belief, Goal>,
     RuntimeAgent<Body> {
 
     override val id: AgentID = agentSpecification.id
@@ -30,7 +30,7 @@ class BaseAgent<Belief : Any, Goal : Any, Skills : Any, Body : Any>(
 
     override val body: Body = agentSpecification.body
 
-    override val state: MutableAgentState<Belief, Goal, Skills> = BaseMutableAgentState(
+    override val state: MutableAgentState<Belief, Goal> = BaseMutableAgentState(
         agentSpecification.initialState,
         internalInbox,
         id,

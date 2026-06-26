@@ -9,6 +9,6 @@ import model.BlocksWorld
  * @param node The node to which this skill set belongs.
  * @param world The BlocksWorld instance to interact with.
  */
-class SkillSet(node: Node<Any, SkillSet>, world: BlocksWorld) :
+class SkillSet(node: Node<Anyet>, world: BlocksWorld) :
     NodeTerminationSkill by BaseNodeTerminationSkill(node),
     BlocksWorldSkills by BlocksWorldSkillsImpl(world, node)

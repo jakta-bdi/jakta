@@ -6,12 +6,12 @@ import it.unibo.jakta.dsl.JaktaDSL
  * Builder interface for defining triggers based on belief and goal events.
  */
 @JaktaDSL
-interface TriggerBuilder<Belief : Any, Goal : Any, Skills : Any> {
+interface TriggerBuilder<Belief : Any, Goal : Any> {
 
     /**
      * Builder interface for defining triggers based on belief additions and goal additions.
      */
-    interface Addition<Belief : Any, Goal : Any, Skills : Any> : TriggerBuilder<Belief, Goal, Skills> {
+    interface Addition<Belief : Any, Goal : Any> : TriggerBuilder<Belief, Goal> {
 
         /**
          * Given a @param[beliefQuery] as a function that matches a belief
@@ -20,7 +20,7 @@ interface TriggerBuilder<Belief : Any, Goal : Any, Skills : Any> {
          */
         fun <Context : Any> belief(
             beliefQuery: Belief.() -> Context?,
-        ): PlanBuilder.Addition.Belief<Belief, Goal, Skills, Context>
+        ): PlanBuilder.Addition.Belief<Belief, Goal, Context>
 
         /**
          * Given a @param[goalQuery] as a function that matches a goal
@@ -29,13 +29,13 @@ interface TriggerBuilder<Belief : Any, Goal : Any, Skills : Any> {
          */
         fun <Context : Any> goal(
             goalQuery: Goal.() -> Context?,
-        ): PlanBuilder.Addition.Goal<Belief, Goal, Skills, Context>
+        ): PlanBuilder.Addition.Goal<Belief, Goal, Context>
     }
 
     /**
      * Builder interface for defining triggers based on belief removals and goal removals.
      */
-    interface Removal<Belief : Any, Goal : Any, Skills : Any> : TriggerBuilder<Belief, Goal, Skills> {
+    interface Removal<Belief : Any, Goal : Any> : TriggerBuilder<Belief, Goal> {
 
         /**
          * Given a @param[beliefQuery] as a function that matches a belief
@@ -44,7 +44,7 @@ interface TriggerBuilder<Belief : Any, Goal : Any, Skills : Any> {
          */
         fun <Context : Any> belief(
             beliefQuery: Belief.() -> Context?,
-        ): PlanBuilder.Removal.Belief<Belief, Goal, Skills, Context>
+        ): PlanBuilder.Removal.Belief<Belief, Goal, Context>
 
         /**
          * Given a @param[goalQuery] as a function that matches a goal
@@ -53,14 +53,14 @@ interface TriggerBuilder<Belief : Any, Goal : Any, Skills : Any> {
          */
         fun <Context : Any> goal(
             goalQuery: Goal.() -> Context?,
-        ): PlanBuilder.Removal.Goal<Belief, Goal, Skills, Context>
+        ): PlanBuilder.Removal.Goal<Belief, Goal, Context>
     }
 
     /**
      * Builder interface for defining triggers based on goal failure interceptions.
      */
-    interface FailureInterception<Belief : Any, Goal : Any, Skills : Any> :
-        TriggerBuilder<Belief, Goal, Skills> {
+    interface FailureInterception<Belief : Any, Goal : Any> :
+        TriggerBuilder<Belief, Goal> {
 
         /**
          * Given a @param[goalQuery] as a function that matches a goal
@@ -69,6 +69,6 @@ interface TriggerBuilder<Belief : Any, Goal : Any, Skills : Any> {
          */
         fun <Context : Any> goal(
             goalQuery: Goal.() -> Context?,
-        ): PlanBuilder.FailureInterception.Goal<Belief, Goal, Skills, Context>
+        ): PlanBuilder.FailureInterception.Goal<Belief, Goal, Context>
     }
 }

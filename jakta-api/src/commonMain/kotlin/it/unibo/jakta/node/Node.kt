@@ -12,7 +12,7 @@ import it.unibo.jakta.event.SystemEvent
  * Represents the shared node in which the agents operate.
  * @param Body The type of body used by agents in this node.
  */
-interface Node<Body : Any, Skills : Any> {
+interface Node<Body : Any> {
 
     /**
      * A map of agents currently present in the node,
@@ -31,13 +31,13 @@ interface Node<Body : Any, Skills : Any> {
      * @param filterFunction A function that determines the conditions under which an agent should receive the event.
      */
 
-    fun sendEvent(event: AgentEvent.External, filterFunction: Node<Body, Skills>.(Body) -> Boolean = { true })
+    fun sendEvent(event: AgentEvent.External, filterFunction: Node<Body>.(Body) -> Boolean = { true })
 
     /**
      * Adds a new agent to the node based on the provided [agentSpecification].
      * @param agentSpecification The specification of the agent to be added.
      */
-    fun addAgent(agentSpecification: AgentSpecification<*, *, Skills, Body>)
+    fun addAgent(agentSpecification: AgentSpecification<*, *, Body>)
 
     /**
      * Removes an agent from the node based on its [id].

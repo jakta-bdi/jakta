@@ -22,9 +22,9 @@ import kotlinx.coroutines.yield
  * A [it.unibo.jakta.node.NodeRunner] implementation that uses Kotlin coroutines
  * to manage the execution of agents within a node.
  */
-class CoroutineNodeRunner<Body : Any, Skills : Any, N : Node<Body, Skills>> : NodeRunner<N> {
+class CoroutineNodeRunner<Body : Any, N : Node<Body>> : NodeRunner<N> {
 
-    private val agents: MutableMap<AgentLifecycle<*, *, *>, Job> = mutableMapOf()
+    private val agents: MutableMap<AgentLifecycle<*, *>, Job> = mutableMapOf()
 
     private val _nodes: MutableSet<N> = mutableSetOf()
 
@@ -43,7 +43,7 @@ class CoroutineNodeRunner<Body : Any, Skills : Any, N : Node<Body, Skills>> : No
             launch {
                 while (isActive) {
                     when (val event = node.systemEvents.next()) {
-                        is SystemEvent.AgentAddition<*, *, *> -> appScope.addAgent(node, event.executableAgent)
+                        is SystemEvent.AgentAddition<*, *> -> appScope.addAgent(node, event.executableAgent)
                         is SystemEvent.AgentRemoval -> removeAgent(event.id)
                         is SystemEvent.ShutDownNode -> appScope.stopNode(node)
                     }
@@ -53,7 +53,7 @@ class CoroutineNodeRunner<Body : Any, Skills : Any, N : Node<Body, Skills>> : No
         logger.i("Node $node START")
     }
 
-    private fun CoroutineScope.addAgent(node: N, agent: ExecutableAgent<*, *, *>) {
+    private fun CoroutineScope.addAgent(node: N, agent: ExecutableAgent<*, *>) {
         val newAgent = BaseAgentLifecycle(agent)
         val newJob = launch {
             while (isActive) {

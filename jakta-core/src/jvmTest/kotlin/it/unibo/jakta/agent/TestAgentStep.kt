@@ -24,7 +24,7 @@ class TestAgentStep {
     private val firstLineOfPlanBody = CompletableDeferred<Unit>()
     private val secondLineOfPlanBody = CompletableDeferred<Unit>()
     private val planCompleted = CompletableDeferred<Unit>()
-    private val slowPlan = GoalAdditionPlan<String, String, Unit, String, Unit>(
+    private val slowPlan = GoalAdditionPlan<String, String, String, Unit>(
         trigger = { goal -> goal.takeIf { it == "slow" } },
         guard = { "slow" },
         body = {
@@ -95,21 +95,20 @@ class TestAgentStep {
     }
 
     private fun createLifecycle(
-        goalPlans: List<Plan.Goal<String, String, Unit, *, *>> = emptyList(),
-    ): BaseAgentLifecycle<String, String, Unit> {
+        goalPlans: List<Plan.Goal<String, String, *, *>> = emptyList(),
+    ): BaseAgentLifecycle<String, String> {
         val specification =
-            object : AgentSpecification<String, String, Unit, Unit> {
+            object : AgentSpecification<String, String, Unit> {
                 override val body: Unit = Unit
                 override val id: AgentID = BaseAgentID("test-agent")
                 override val initialGoals: List<String> = emptyList()
-                override val initialState: AgentState<String, String, Unit> = BaseAgentState(
+                override val initialState: AgentState<String, String> = BaseAgentState(
                     beliefs = emptyList(),
                     intentions = emptySet(),
                     beliefPlans = emptyList(),
                     goalPlans = goalPlans,
                     perceptionHandler = { null },
                     messageHandler = { null },
-                    skills = Unit,
                 )
             }
 
