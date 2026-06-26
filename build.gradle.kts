@@ -1,10 +1,11 @@
-import io.gitlab.arturbosch.detekt.Detekt
-import io.gitlab.arturbosch.detekt.DetektPlugin
-import io.gitlab.arturbosch.detekt.report.ReportMergeTask
+import de.aaschmid.gradle.plugins.cpd.Cpd
+import dev.detekt.gradle.Detekt
+import dev.detekt.gradle.report.ReportMergeTask
+import dev.detekt.gradle.plugin.DetektPlugin
 import org.danilopianini.gradle.gitsemver.UpdateType
 import org.jlleitschuh.gradle.ktlint.tasks.GenerateReportsTask
-import org.jlleitschuh.gradle.ktlint.tasks.KtLintCheckTask
 import org.jlleitschuh.gradle.ktlint.tasks.KtLintFormatTask
+import org.jlleitschuh.gradle.ktlint.tasks.KtLintCheckTask
 
 plugins {
     alias(libs.plugins.dokka)
@@ -36,8 +37,8 @@ allprojects {
     with(rootProject.libs.plugins) {
         apply(plugin = dokka.id)
         apply(plugin = gitSemVer.id)
-        //apply(plugin = kotlin.qa.id)
         apply(plugin = kover.id)
+        apply(plugin = kotlin.qa.id)
         apply(plugin = publishOnCentral.id)
         apply(plugin = taskTree.id)
     }
@@ -128,10 +129,16 @@ allprojects {
 
     tasks.withType<GenerateReportsTask>().configureEach { finalizedBy(reportMerge) }
     reportMerge {
-        input.from(tasks.withType<Detekt>().map { it.sarifReportFile })
+        input.from(tasks.withType<Detekt>().map { it.reports.checkstyle.outputLocation })
         input.from(tasks.withType<GenerateReportsTask>().flatMap { it.reportsOutputDirectory.asFileTree.files })
     }
 
+    tasks.withType<Cpd> {
+        reports {
+            text.required.set(true)
+            xml.required.set(true)
+        }
+    }
 
 
 }
@@ -140,12 +147,11 @@ dependencies {
     listOf(
         "jakta-api",
         "jakta-dsl",
-        "jakta-core"
+        "jakta-core",
     ).forEach{
         kover(project(it))
     }
 }
-
 
 tasks {
     // Prevent publishing the root project (since is empty)

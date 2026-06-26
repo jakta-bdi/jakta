@@ -9,8 +9,14 @@ import it.unibo.jakta.event.GoalRemoveEvent
 import it.unibo.jakta.intention.IntentionDispatcher
 import it.unibo.jakta.plan.Plan
 import kotlin.coroutines.ContinuationInterceptor
-import kotlin.reflect.typeOf
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.job
+import kotlinx.coroutines.launch
 
 /**
  * A base implementation of the [it.unibo.jakta.agent.AgentLifecycle] interface
@@ -44,13 +50,18 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
     private fun handleEvent(event: AgentEvent, scope: CoroutineScope) {
         when (event) {
             // TODO per rimuovere questo cast dovrei tipare Event.Internal
             //  con Belief e Goal (si può fare ma è subottimo?)
+
             is AgentEvent.Internal.Belief<*> -> scope.handleBeliefEvent(event as AgentEvent.Internal.Belief<Belief>)
+
             is AgentEvent.Internal.Goal<*, *> -> scope.handleGoalEvent(event as AgentEvent.Internal.Goal<Goal, Any?>)
+
             is AgentEvent.Internal.Step -> handleStepEvent(event)
+
             is AgentEvent.External -> handleExternalEvent(event)
         }
     }
@@ -117,7 +128,10 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
         plan: Plan<Belief, Goal, Skills, TriggerEntity, *, *>,
         completion: CompletableDeferred<Any?>? = null, // TODO Check if this Any? can be improved
     ) {
-        val intention = executableAgent.state.mutableIntentionPool.nextIntention(event, this.coroutineContext.job)
+        val intention = executableAgent.state.mutableIntentionPool.nextIntention(
+            event,
+            this.coroutineContext.job,
+        )
         log.d { "Launching plan $plan for event $event on intention $intention" }
         val interceptor =
             this.coroutineContext[ContinuationInterceptor] ?: error { "No ContinuationInterceptor in context" }
@@ -128,6 +142,8 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
                 log.d { "Running plan $plan for event $event" }
                 val result = plan.run(executableAgent.state, entity)
                 completion?.complete(result)
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 log.e("Goal failed for exception: ${e.message} ${e.stackTraceToString()}")
                 handleFailure(event, e)
@@ -156,6 +172,7 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
             log.w { "No applicable plans for $entityMessage: $entity" }
         }
 
+        @Suppress("UNCHECKED_CAST")
         return applicable.firstOrNull()?.let {
             log.d { "Selected plan $it for $entityMessage: $entity" }
             it as Plan<Belief, Goal, Skills, TriggerEntity, *, *>
@@ -180,10 +197,12 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
                     ),
                 )
             }
+
             is AgentEvent.Internal.Goal.Failed<*, *> -> {
                 log.d { "An error occurred when attempting to handle the failure of goal: $event.goal" }
                 event.completion?.completeExceptionally(e)
             }
+
             else -> {
                 log.w { "Handling of event $event failed with exception:${e.message}" }
             }
@@ -201,6 +220,7 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
             is AgentEvent.External.Perception -> executableAgent.state.run {
                 perceptionHandler(event)
             }
+
             is AgentEvent.External.Message -> executableAgent.state.run {
                 messageHandler(event)
             }
@@ -209,9 +229,11 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
             return
         }
 
+        @Suppress("UNCHECKED_CAST")
         when (update) {
             is AgentUpdate.Belief<*> ->
                 handleBeliefUpdateEvent(update as AgentUpdate.Belief<Belief>)
+
             is AgentUpdate.Goal<*> ->
                 handleGoalUpdateEvent(update as AgentUpdate.Goal<Goal>)
         }
@@ -231,11 +253,15 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
         log.i { "Handling goal update event $event" }
         val additionsOnly = event.additions - event.removals
         val removalsOnly = event.removals - event.additions
-        removalsOnly.forEach { executableAgent.internalInbox.send(
-            GoalRemoveEvent.withNoResult(it)
-        ) }
-        additionsOnly.forEach { executableAgent.internalInbox.send(
-            GoalAddEvent.withNoResult(it)
-        ) }
+        removalsOnly.forEach {
+            executableAgent.internalInbox.send(
+                GoalRemoveEvent.withNoResult(it),
+            )
+        }
+        additionsOnly.forEach {
+            executableAgent.internalInbox.send(
+                GoalAddEvent.withNoResult(it),
+            )
+        }
     }
 }

@@ -19,9 +19,6 @@ kotlinMultiplatform {
         jvmMain.dependencies {
             implementation(libs.kotlin.reflect)
         }
-        all {
-            languageSettings.enableLanguageFeature("ContextParameters")
-        }
     }
 
     tasks.withType(Cpd::class).configureEach {

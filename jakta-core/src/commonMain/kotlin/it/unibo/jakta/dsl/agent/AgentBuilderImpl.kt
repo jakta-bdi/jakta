@@ -1,6 +1,10 @@
 package it.unibo.jakta.dsl.agent
 
-import it.unibo.jakta.agent.*
+import it.unibo.jakta.agent.AgentID
+import it.unibo.jakta.agent.AgentSpecification
+import it.unibo.jakta.agent.AgentState
+import it.unibo.jakta.agent.BaseAgentID
+import it.unibo.jakta.agent.BaseAgentState
 import it.unibo.jakta.dsl.plan.PlanLibraryBuilder
 import it.unibo.jakta.dsl.plan.PlanLibraryBuilderImpl
 import it.unibo.jakta.event.AgentEvent.External.Message

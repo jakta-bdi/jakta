@@ -15,18 +15,6 @@ class TestPrologMatching {
 
     @Test
     fun `test matching with rules`() {
-        val originalPrologRule = Rule.of(
-            Struct.of("sibling", Var.of("X"), Var.of("Y")),
-            Struct.of("parent", Var.of("Z"), Var.of("X")),
-            Struct.of("parent", Var.of("Z"), Var.of("Y")),
-            Struct.of("\\=", Var.of("X"), Var.of("Y")),
-        )
-
-        val prologFacts = listOf(
-            Fact.of(Struct.of("parent", Atom.of("alice"), Atom.of("bob"))),
-            Fact.of(Struct.of("parent", Atom.of("alice"), Atom.of("charlie"))),
-        )
-
         val theory = listOf(
             initialBelief {
                 "parent"("alice", "bob")
@@ -43,8 +31,6 @@ class TestPrologMatching {
             },
         )
 
-        val basicQuery = Struct.of("parent", Atom.of("alice"), Atom.of("charlie"))
-        val queryNoRule = Struct.of("parent", Var.of("X"), Var.of("Y"))
         val queryRule = Struct.of("sibling", Var.of("X"), Var.of("Y"))
         val solution = theory.unifiesWith(queryRule)
 

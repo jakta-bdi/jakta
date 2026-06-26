@@ -41,7 +41,8 @@ sealed interface Plan<Belief : Any, Goal : Any, Skills : Any, TriggerEntity : An
      * when the plan is executed. It operates within a [PlanScope] that provides access
      * to the agent's actions, the environment, and the context of the triggering event.
      */
-    val body: suspend context(Context) (PlanScope<Belief, Goal, Skills, Context>) -> PlanResult
+    val body: suspend context(Context)
+    (PlanScope<Belief, Goal, Skills, Context>) -> PlanResult
 
     /**
      * The type of result produced by the plan upon execution.
@@ -84,7 +85,7 @@ sealed interface Plan<Belief : Any, Goal : Any, Skills : Any, TriggerEntity : An
      */
     suspend fun run(agent: MutableAgentState<Belief, Goal, Skills>, entity: TriggerEntity): PlanResult {
         val context = getPlanContext(agent.beliefs, entity)
-        return context(context){ body(BasePlanScope(agent, agent.skills, context))}
+        return context(context) { body(BasePlanScope(agent, agent.skills, context)) }
     }
 
     /**

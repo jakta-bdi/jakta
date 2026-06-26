@@ -5,21 +5,23 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.geometry.*
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.rememberTextMeasurer
 import model.Block
 
+/**
+ * Renders the Blocks World environment as a 2D plane using Jetpack Compose's Canvas.
+ */
+@Suppress("MagicNumber")
 @Composable
 fun BlocksWorldPlane(state: List<List<Block>>) {
-
     val textMeasurer = rememberTextMeasurer()
 
     Canvas(
         modifier = Modifier
             .background(Color(0xFFE9E2D0))
-            .fillMaxSize()
+            .fillMaxSize(),
     ) {
         val stackCount = state.size.coerceAtLeast(1)
 
@@ -29,9 +31,9 @@ fun BlocksWorldPlane(state: List<List<Block>>) {
 
         drawLine(
             Color.DarkGray,
-            Offset(0f, size.height-50f),
-            Offset(size.width, size.height-50f),
-            100f
+            Offset(0f, size.height - 50f),
+            Offset(size.width, size.height - 50f),
+            100f,
         )
 
         state.forEachIndexed { i, stack ->
@@ -47,7 +49,7 @@ fun BlocksWorldPlane(state: List<List<Block>>) {
                     y = y,
                     width = blockW,
                     height = blockH,
-                    textMeasurer = textMeasurer
+                    textMeasurer = textMeasurer,
                 )
             }
         }

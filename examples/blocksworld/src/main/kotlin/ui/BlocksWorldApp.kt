@@ -17,30 +17,33 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+
+/**
+ * The main Composable function for the Blocks World application.
+ *
+ * @param app The state of the Blocks World application.
+ */
 @Composable
 fun BlocksWorldApp(app: BlocksWorldAppState) {
-
     val scope = rememberCoroutineScope()
 
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize(),
     ) {
-
         // =========================
         // CONTROL PANEL (fixed)
         // =========================
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp)
+                .padding(12.dp),
         ) {
-
             Row {
                 OutlinedTextField(
                     value = app.seed,
                     onValueChange = { app.seed = it },
                     label = { Text("Seed") },
-                    modifier = Modifier.width(160.dp)
+                    modifier = Modifier.width(160.dp),
                 )
 
                 Spacer(Modifier.width(8.dp))
@@ -49,7 +52,7 @@ fun BlocksWorldApp(app: BlocksWorldAppState) {
                     value = app.blockCount,
                     onValueChange = { app.blockCount = it },
                     label = { Text("Blocks") },
-                    modifier = Modifier.width(160.dp)
+                    modifier = Modifier.width(160.dp),
                 )
 
                 Spacer(Modifier.width(8.dp))
@@ -58,14 +61,13 @@ fun BlocksWorldApp(app: BlocksWorldAppState) {
                     value = app.goalText,
                     onValueChange = { app.setGoal(it) },
                     label = { Text("Goal (raw)") },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 )
             }
 
             Spacer(Modifier.height(8.dp))
 
             Row {
-
                 Button(onClick = { app.play(scope) }) {
                     Text("Play")
                 }
@@ -92,7 +94,7 @@ fun BlocksWorldApp(app: BlocksWorldAppState) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(8.dp)
+                .padding(8.dp),
         ) {
             BlocksWorldScreen(app.vm)
         }

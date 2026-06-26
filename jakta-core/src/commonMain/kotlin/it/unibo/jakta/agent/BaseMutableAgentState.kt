@@ -52,11 +52,15 @@ internal class BaseMutableAgentState<Belief : Any, Goal : Any, Skills : Any>(
     override val goalPlans: List<Plan.Goal<Belief, Goal, Skills, *, *>>
         get() = _goalPlans.toList()
 
-    private var _perceptionHandler: AgentState<Belief, Goal, Skills>.(Perception) -> AgentUpdate<*>? = initialAgentState.perceptionHandler
+    private var _perceptionHandler: AgentState<Belief, Goal, Skills>.(Perception) -> AgentUpdate<*>? =
+        initialAgentState.perceptionHandler
+
     override val perceptionHandler: AgentState<Belief, Goal, Skills>.(Perception) -> AgentUpdate<*>?
         get() = _perceptionHandler
 
-    private var _messageHandler: AgentState<Belief, Goal, Skills>.(Message) -> AgentUpdate<*>? = initialAgentState.messageHandler
+    private var _messageHandler: AgentState<Belief, Goal, Skills>.(Message) -> AgentUpdate<*>? =
+        initialAgentState.messageHandler
+
     override val messageHandler: AgentState<Belief, Goal, Skills>.(Message) -> AgentUpdate<*>?
         get() = _messageHandler
 
@@ -83,7 +87,7 @@ internal class BaseMutableAgentState<Belief : Any, Goal : Any, Skills : Any>(
         val completion = CompletableDeferred<PlanResult>()
         val intention = currentCoroutineContext()[Intention]
 
-        check(intention != null) { "Cannot happen that an achieve invocation comes from a null intention." }
+        checkNotNull(intention) { "Cannot happen that an achieve invocation comes from a null intention." }
 
         logger.d { "Achieving $goal. Previous intention $intention" }
         internalInbox.send(GoalAddEvent(goal, resultType, completion, intention))

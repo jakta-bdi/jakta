@@ -1,9 +1,7 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     kotlin("jvm")
-    id("org.jetbrains.compose") version "1.6.10"
-    id("org.jetbrains.kotlin.plugin.compose") version "2.0.0"
+    id("org.jetbrains.compose") version "1.11.1"
+    id("org.jetbrains.kotlin.plugin.compose") version "2.4.0"
 }
 
 repositories {
@@ -24,11 +22,5 @@ dependencies {
 compose.desktop {
     application {
         mainClass = "MainKt"
-    }
-}
-
-kotlinJvm {
-    compilerOptions {
-        freeCompilerArgs.add("-Xcontext-parameters")
     }
 }

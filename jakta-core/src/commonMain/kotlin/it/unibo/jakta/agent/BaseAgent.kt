@@ -36,9 +36,6 @@ class BaseAgent<Belief : Any, Goal : Any, Skills : Any, Body : Any>(
         id,
     )
 
-    /**
-     * Initialize the agent by triggering the achievement of the initial goals.
-     */
     init {
         agentSpecification.initialGoals.forEach { state.alsoAchieve(it) }
     }

@@ -40,9 +40,6 @@ fun <Belief : Any, Goal : Any, Skills : Any, Body : Any> agent(
 
 // TODO maybe actually make the triggerBuilder implement these interfaces?
 
-/**
- * Entry point for belief addition only plans.
- */
 // interface BeliefOnlyAdditionTrigger<Belief : Any, Goal : Any, Skills : Any> {
 //    /**
 //     * Given a @param[beliefQuery] as a function that matches a belief

@@ -50,7 +50,7 @@ class TestAgentStep {
     }
 
     @Test
-    @OptIn(ExperimentalCoroutinesApi::class)
+    @OptIn(ExperimentalCoroutinesApi::class, ExperimentalStdlibApi::class)
     fun tryStepDoesNotWaitForPlanCompletion() {
         val lifecycle = createLifecycle(goalPlans = listOf(slowPlan))
         lifecycle.executableAgent.internalInbox.send(GoalAddEvent.withNoResult("slow"))

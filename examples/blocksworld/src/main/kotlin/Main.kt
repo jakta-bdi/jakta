@@ -26,7 +26,7 @@ import ui.BlocksWorldAppState
 import ui.BlocksWorldScreen
 import ui.BlocksWorldViewModel
 
-//fun main() {
+// fun main() {
 //    Logger.setMinSeverity(Severity.Assert)
 //    val world = BlocksWorld(0)
 //    val desiredWorldState = initialGoal {
@@ -40,22 +40,23 @@ import ui.BlocksWorldViewModel
 //            blocksWorldNode(world, desiredWorldState)
 //        }.run(CoroutineNodeRunner())
 //    }
-//}
+// }
 
+/**
+ * Entry point of the Blocks World application.
+ */
 fun main() = application {
-
     Logger.setMinSeverity(Severity.Assert)
 
-    val appState = remember { BlocksWorldAppState()}
-
+    val appState = remember { BlocksWorldAppState() }
 
     Window(
         onCloseRequest = ::exitApplication,
         title = "Blocks World",
         state = rememberWindowState(
             width = 1200.dp,
-            height = 800.dp
-        )
+            height = 800.dp,
+        ),
     ) {
         MaterialTheme {
             BlocksWorldApp(appState)

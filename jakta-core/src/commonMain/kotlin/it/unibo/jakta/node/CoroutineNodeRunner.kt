@@ -66,7 +66,9 @@ class CoroutineNodeRunner<Body : Any, Skills : Any, N : Node<Body, Skills>> : No
         // remove the agent from the environment if the agent stops for unexpected reasons
         newJob.invokeOnCompletion {
             when (it) {
-                is CancellationException -> {} // intentional removal
+                is CancellationException -> {}
+
+                // intentional removal
 //                is IllegalArgumentException -> {
 //                    this.stopNode(node)
 //                    throw it

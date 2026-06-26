@@ -1,7 +1,7 @@
+import de.aaschmid.gradle.plugins.cpd.Cpd
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     `java-library`
@@ -45,7 +45,6 @@ kotlinJvm {
     }
     compilerOptions {
         jvmTarget.set(targetJvm)
-        freeCompilerArgs.add("-Xcontext-parameters")
     }
     tasks.withType<Test> {
         useJUnitPlatform()
@@ -60,8 +59,7 @@ dependencies {
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
 }
 
-tasks.withType<KotlinCompile>().configureEach {
-    compilerOptions {
-        allWarningsAsErrors.set(false)
-    }
+tasks.withType<Cpd> {
+    // TODO should I not exclude CPD for tests?
+    exclude("Test**")
 }

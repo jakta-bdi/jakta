@@ -2,9 +2,9 @@ package it.unibo.jakta.dsl.examples
 
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
+import it.unibo.jakta.dsl.ManualStepNodeRunner
 import it.unibo.jakta.dsl.node
 import it.unibo.jakta.dsl.plan.triggers
-import it.unibo.jakta.node.ManualStepNodeRunner
 import it.unibo.jakta.node.Node
 import it.unibo.jakta.skills.BaseNodeTerminationSkill
 import it.unibo.jakta.skills.NodeTerminationSkill

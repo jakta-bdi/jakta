@@ -5,11 +5,15 @@ import co.touchlab.kermit.Severity
 import it.unibo.jakta.dsl.belief.belief
 import it.unibo.jakta.dsl.belief.initialBelief
 import it.unibo.jakta.dsl.belief.matching
+import it.unibo.jakta.dsl.goal.goal
+import it.unibo.jakta.dsl.goal.initialGoal
+import it.unibo.jakta.dsl.goal.matching
 import it.unibo.jakta.dsl.mas.mas
 import it.unibo.jakta.dsl.node.LocalNodeBuilder
 import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.logic.JaktaLogicProgrammingScope.Companion.prologPlan
 import it.unibo.jakta.node.CoroutineNodeRunner
+import it.unibo.tuprolog.core.toAtom
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlinx.coroutines.launch
@@ -23,7 +27,7 @@ class TestTermination {
     }
 
     @Test
-    fun `test termination with recurring non-blocking plans`() {
+    fun `test termination`() {
         runTest {
             val job = launch {
                 mas(LocalNodeBuilder()) {
@@ -31,17 +35,14 @@ class TestTermination {
                         agent("Alice") {
                             embodiedAs { object {} }
                             withSkills { TerminationSkill(it) }
-                            believes {
-                                +initialBelief { "belief"(1) }
+                            hasInitialGoals {
+                                !initialGoal { "start".toAtom() }
                             }
                             hasPlans {
                                 prologPlan {
-                                    adding.belief {
-                                        matching { "belief"(N) }
+                                    adding.goal {
+                                        matching { "start".toAtom() }
                                     } triggers {
-                                        val n = N.toKotlin<Int>()
-                                        agent.print("Belief is $n")
-                                        agent.believe(belief { "belief"(n + 1) })
                                         skills.terminateNode()
                                     }
                                 }

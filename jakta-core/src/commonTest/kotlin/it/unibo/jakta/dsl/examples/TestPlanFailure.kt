@@ -26,14 +26,14 @@ class TestPlanFailure {
                         adding.goal {
                             ifGoalMatch("goalChain")
                         } triggers {
-                            val x: Unit = agent.achieve("failingPlan")
+                            agent.achieve<String, Unit>("failingPlan")
                             agent.print("The plan has failed but recovered")
                             skills.terminateNode()
                         }
                         adding.goal {
                             ifGoalMatch("failingPlan")
                         } triggers {
-                            throw Exception("This plan is meant to fail")
+                            check(false) { "This plan is meant to fail" }
                             42
                         }
                         failing.goal {

@@ -37,7 +37,6 @@ kotlinJvm {
         }
     }
     compilerOptions {
-        freeCompilerArgs.add("-Xcontext-parameters")
         jvmTarget.set(targetJvm)
     }
     tasks.withType<Test> {

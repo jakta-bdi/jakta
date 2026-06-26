@@ -47,6 +47,9 @@ data class GoalRemoveEvent<G : Any, PlanResult>(
     override val intention: Intention? = null,
 
 ) : AgentEvent.Internal.Goal.Remove<G, PlanResult> {
+    /**
+     * Factory methods for GoalRemoveEvent.
+     */
     companion object {
         /**
          * Creates a GoalAddEvent with no expected result i.e. PlanResult = Unit.

@@ -9,6 +9,9 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.unit.sp
 
+/**
+ * A map of block labels to their corresponding colors.
+ */
 val colorMap: Map<String, Color> = mapOf(
     "A" to Color(0xFFAA3F3F),
     "B" to Color(0xFF3F51AA),
@@ -26,14 +29,10 @@ val colorMap: Map<String, Color> = mapOf(
     "N" to Color(0xFF85AA3F),
 )
 
-fun DrawScope.drawBlock(
-    label: String,
-    x: Float,
-    y: Float,
-    width: Float,
-    height: Float,
-    textMeasurer: TextMeasurer
-) {
+/**
+ * Draws a block with the given label at the specified position and size.
+ */
+fun DrawScope.drawBlock(label: String, x: Float, y: Float, width: Float, height: Float, textMeasurer: TextMeasurer) {
     // block shape
     drawRect(
         color = colorMap[label] ?: Color.Gray,
@@ -46,8 +45,8 @@ fun DrawScope.drawBlock(
         text = label,
         style = TextStyle(
             color = Color.White,
-            fontSize = 20.sp
-        )
+            fontSize = 20.sp,
+        ),
     )
 
     // centered text
@@ -55,7 +54,7 @@ fun DrawScope.drawBlock(
         textLayoutResult = textLayout,
         topLeft = Offset(
             x + width / 2 - textLayout.size.width / 2,
-            y + height / 2 - textLayout.size.height / 2
-        )
+            y + height / 2 - textLayout.size.height / 2,
+        ),
     )
 }

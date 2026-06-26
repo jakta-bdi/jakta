@@ -22,6 +22,7 @@ class BeliefAdditionPlanBuilderImpl<Belief : Any, Goal : Any, Skills : Any, Cont
         guard: GuardScope<Belief, Context>.() -> Context?,
     ): PlanBuilder.Addition.Belief<Belief, Goal, Skills, Context> = this.also { this.guard = guard }
 
+    @Deprecated("Use triggers instead", replaceWith = ReplaceWith("triggers(body)"), level = DeprecationLevel.ERROR)
     override fun <PlanResult> triggersImpl(
         resultType: KType,
         body: suspend context(Context) PlanScope<Belief, Goal, Skills, Context>.() -> PlanResult,
@@ -41,6 +42,7 @@ class GoalAdditionPlanBuilderImpl<Belief : Any, Goal : Any, Skills : Any, Contex
         guard: GuardScope<Belief, Context>.() -> Context?,
     ): PlanBuilder.Addition.Goal<Belief, Goal, Skills, Context> = this.also { this.guard = guard }
 
+    @Deprecated("Use triggers instead", replaceWith = ReplaceWith("triggers(body)"), level = DeprecationLevel.ERROR)
     override fun <PlanResult> triggersImpl(
         resultType: KType,
         body: suspend context(Context) PlanScope<Belief, Goal, Skills, Context>.() -> PlanResult,
@@ -60,6 +62,7 @@ class BeliefRemovalPlanBuilderImpl<Belief : Any, Goal : Any, Skills : Any, Conte
         guard: GuardScope<Belief, Context>.() -> Context?,
     ): PlanBuilder.Removal.Belief<Belief, Goal, Skills, Context> = this.also { this.guard = guard }
 
+    @Deprecated("Use triggers instead", replaceWith = ReplaceWith("triggers(body)"), level = DeprecationLevel.ERROR)
     override fun <PlanResult> triggersImpl(
         resultType: KType,
         body: suspend context(Context) PlanScope<Belief, Goal, Skills, Context>.() -> PlanResult,
@@ -79,6 +82,7 @@ class GoalRemovalPlanBuilderImpl<Belief : Any, Goal : Any, Skills : Any, Context
         guard: GuardScope<Belief, Context>.() -> Context?,
     ): PlanBuilder.Removal.Goal<Belief, Goal, Skills, Context> = this.also { this.guard = guard }
 
+    @Deprecated("Use triggers instead", replaceWith = ReplaceWith("triggers(body)"), level = DeprecationLevel.ERROR)
     override fun <PlanResult> triggersImpl(
         resultType: KType,
         body: suspend context(Context) PlanScope<Belief, Goal, Skills, Context>.() -> PlanResult,
@@ -98,6 +102,7 @@ class GoalFailurePlanBuilderImpl<Belief : Any, Goal : Any, Skills : Any, Context
         guard: GuardScope<Belief, Context>.() -> Context?,
     ): PlanBuilder.FailureInterception.Goal<Belief, Goal, Skills, Context> = this.also { this.guard = guard }
 
+    @Deprecated("Use triggers instead", replaceWith = ReplaceWith("triggers(body)"), level = DeprecationLevel.ERROR)
     override fun <PlanResult> triggersImpl(
         resultType: KType,
         body: suspend context(Context) PlanScope<Belief, Goal, Skills, Context>.() -> PlanResult,
@@ -113,7 +118,8 @@ private fun <B, G, S, TE, C, PR, P> buildAndRegisterPlan(
     builder: (
         (TE) -> C?,
         GuardScope<B, C>.() -> C?,
-        suspend context(C) PlanScope<B, G, S, C>.() -> PR,
+        suspend context(C)
+        PlanScope<B, G, S, C>.() -> PR,
         KType,
     ) -> P,
     register: (P) -> Unit,
