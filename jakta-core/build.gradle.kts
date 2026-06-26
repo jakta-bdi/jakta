@@ -21,16 +21,11 @@ kotlinMultiplatform {
         jvmMain.dependencies {
             implementation(libs.kotlin.reflect)
         }
-        all {
-            languageSettings.enableLanguageFeature("ContextParameters")
-        }
     }
 
-    tasks.withType(Cpd::class).configureEach {
+    tasks.withType<Cpd> {
         // TODO find a way to avoid repeated code for the data classes?
         exclude("**PlanImpl**")
-        reports {
-            text.required.set(true)
-        }
+        exclude("**PlanBuilderImpl**")
     }
 }

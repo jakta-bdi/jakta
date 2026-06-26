@@ -40,7 +40,7 @@ interface PlanBuilder<B : Any, G : Any, Skills : Any, Context : Any> {
             @Deprecated("Use triggers instead", ReplaceWith("triggers(body)"), DeprecationLevel.ERROR)
             fun <PlanResult> triggersImpl(
                 resultType: KType,
-                body: suspend PlanScope<B, G, Skills, Context>.() -> PlanResult,
+                body: suspend context(Context) PlanScope<B, G, Skills, Context>.() -> PlanResult,
             ): Plan.Belief.Addition<B, G, Skills, Context, PlanResult>
         }
 
@@ -70,7 +70,7 @@ interface PlanBuilder<B : Any, G : Any, Skills : Any, Context : Any> {
             )
             fun <PlanResult> triggersImpl(
                 resultType: KType,
-                body: suspend PlanScope<B, G, Skills, Context>.() -> PlanResult,
+                body: suspend context(Context) PlanScope<B, G, Skills, Context>.() -> PlanResult,
             ): Plan.Goal.Addition<B, G, Skills, Context, PlanResult>
         }
     }
@@ -104,7 +104,7 @@ interface PlanBuilder<B : Any, G : Any, Skills : Any, Context : Any> {
             )
             fun <PlanResult> triggersImpl(
                 resultType: KType,
-                body: suspend PlanScope<B, G, Skills, Context>.() -> PlanResult,
+                body: suspend context(Context) PlanScope<B, G, Skills, Context>.() -> PlanResult,
             ): Plan.Belief.Removal<B, G, Skills, Context, PlanResult>
         }
 
@@ -132,7 +132,7 @@ interface PlanBuilder<B : Any, G : Any, Skills : Any, Context : Any> {
             )
             fun <PlanResult> triggersImpl(
                 resultType: KType,
-                body: suspend PlanScope<B, G, Skills, Context>.() -> PlanResult,
+                body: suspend context(Context) PlanScope<B, G, Skills, Context>.() -> PlanResult,
             ): Plan.Goal.Removal<B, G, Skills, Context, PlanResult>
         }
     }
@@ -167,7 +167,7 @@ interface PlanBuilder<B : Any, G : Any, Skills : Any, Context : Any> {
             )
             fun <PlanResult> triggersImpl(
                 resultType: KType,
-                body: suspend PlanScope<B, G, Skills, Context>.() -> PlanResult,
+                body: suspend context(Context) PlanScope<B, G, Skills, Context>.() -> PlanResult,
             ): Plan.Goal.Failure<B, G, Skills, Context, PlanResult>
         }
     }
@@ -181,7 +181,7 @@ interface PlanBuilder<B : Any, G : Any, Skills : Any, Context : Any> {
 @Suppress("DEPRECATION_ERROR")
 @JaktaDSL
 inline infix fun <B, G, Skills, Ctx, reified PlanResult> PlanBuilder.Addition.Belief<B, G, Skills, Ctx>.triggers(
-    noinline body: suspend PlanScope<B, G, Skills, Ctx>.() -> PlanResult,
+    noinline body: suspend context(Ctx) PlanScope<B, G, Skills, Ctx>.() -> PlanResult,
 ): Plan.Belief.Addition<B, G, Skills, Ctx, PlanResult> where B : Any, G : Any, Skills : Any, Ctx : Any =
     this.triggersImpl(typeOf<PlanResult>(), body)
 
@@ -192,9 +192,9 @@ inline infix fun <B, G, Skills, Ctx, reified PlanResult> PlanBuilder.Addition.Be
  */
 @Suppress("DEPRECATION_ERROR")
 @JaktaDSL
-inline infix fun <B, G, Skills, Context, reified PlanResult> PlanBuilder.Addition.Goal<B, G, Skills, Context>.triggers(
-    noinline body: suspend PlanScope<B, G, Skills, Context>.() -> PlanResult,
-): Plan.Goal.Addition<B, G, Skills, Context, PlanResult> where B : Any, G : Any, Skills : Any, Context : Any =
+inline infix fun <B, G, Skills, Ctx, reified PlanResult> PlanBuilder.Addition.Goal<B, G, Skills, Ctx>.triggers(
+    noinline body: suspend context(Ctx) PlanScope<B, G, Skills, Ctx>.() -> PlanResult,
+): Plan.Goal.Addition<B, G, Skills, Ctx, PlanResult> where B : Any, G : Any, Skills : Any, Ctx : Any =
     this.triggersImpl(typeOf<PlanResult>(), body)
 
 /**
@@ -204,9 +204,9 @@ inline infix fun <B, G, Skills, Context, reified PlanResult> PlanBuilder.Additio
  */
 @Suppress("DEPRECATION_ERROR")
 @JaktaDSL
-inline infix fun <B, G, Skills, Context, reified PlanResult> PlanBuilder.Removal.Belief<B, G, Skills, Context>.triggers(
-    noinline body: suspend PlanScope<B, G, Skills, Context>.() -> PlanResult,
-): Plan.Belief.Removal<B, G, Skills, Context, PlanResult> where B : Any, G : Any, Skills : Any, Context : Any =
+inline infix fun <B, G, Skills, Ctx, reified PlanResult> PlanBuilder.Removal.Belief<B, G, Skills, Ctx>.triggers(
+    noinline body: suspend context(Ctx) PlanScope<B, G, Skills, Ctx>.() -> PlanResult,
+): Plan.Belief.Removal<B, G, Skills, Ctx, PlanResult> where B : Any, G : Any, Skills : Any, Ctx : Any =
     this.triggersImpl(typeOf<PlanResult>(), body)
 
 /**
@@ -216,9 +216,9 @@ inline infix fun <B, G, Skills, Context, reified PlanResult> PlanBuilder.Removal
  */
 @Suppress("DEPRECATION_ERROR")
 @JaktaDSL
-inline infix fun <B, G, Skills, Context, reified PlanResult> PlanBuilder.Removal.Goal<B, G, Skills, Context>.triggers(
-    noinline body: suspend PlanScope<B, G, Skills, Context>.() -> PlanResult,
-): Plan.Goal.Removal<B, G, Skills, Context, PlanResult> where B : Any, G : Any, Skills : Any, Context : Any =
+inline infix fun <B, G, Skills, Ctx, reified PlanResult> PlanBuilder.Removal.Goal<B, G, Skills, Ctx>.triggers(
+    noinline body: suspend context(Ctx) PlanScope<B, G, Skills, Ctx>.() -> PlanResult,
+): Plan.Goal.Removal<B, G, Skills, Ctx, PlanResult> where B : Any, G : Any, Skills : Any, Ctx : Any =
     this.triggersImpl(typeOf<PlanResult>(), body)
 
 /**
@@ -240,7 +240,7 @@ inline infix fun <
     Skills,
     Context,
     >.triggers(
-    noinline body: suspend PlanScope<B, G, Skills, Context>.() -> PlanResult,
+    noinline body: suspend context(Context) PlanScope<B, G, Skills, Context>.() -> PlanResult,
 ): Plan.Goal.Failure<B, G, Skills, Context, PlanResult>
     where B : Any, G : Any, Skills : Any, Context : Any =
     this.triggersImpl(typeOf<PlanResult>(), body)

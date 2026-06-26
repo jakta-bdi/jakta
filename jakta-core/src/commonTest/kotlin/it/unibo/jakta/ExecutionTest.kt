@@ -11,6 +11,7 @@ import it.unibo.jakta.node.Node
 import it.unibo.jakta.plan.GoalAdditionPlan
 import kotlin.reflect.typeOf
 import kotlin.test.Test
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.test.runTest
 
@@ -64,12 +65,16 @@ class ExecutionTest {
             agentSpecGenerator("Agent1", node).forEach { node.addAgent(it) }
             try {
                 runner.run(node)
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 println("Node execution terminated with exception: ${e.message}")
             }
             agentSpecGenerator("Agent2", node2).forEach { node2.addAgent(it) }
             try {
                 runner.run(node2)
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 println("Node execution terminated with exception: ${e.message}")
             }

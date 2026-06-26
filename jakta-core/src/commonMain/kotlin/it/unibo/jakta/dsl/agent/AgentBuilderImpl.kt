@@ -9,10 +9,9 @@ import it.unibo.jakta.dsl.plan.PlanLibraryBuilder
 import it.unibo.jakta.dsl.plan.PlanLibraryBuilderImpl
 import it.unibo.jakta.event.AgentEvent.External.Message
 import it.unibo.jakta.event.AgentEvent.External.Perception
-import it.unibo.jakta.event.AgentEvent.Internal
+import it.unibo.jakta.event.AgentUpdate
 import it.unibo.jakta.node.Node
 import it.unibo.jakta.plan.Plan
-import kotlin.collections.plus
 import kotlin.properties.Delegates
 
 /**
@@ -27,14 +26,18 @@ class AgentBuilderImpl<Belief : Any, Goal : Any, Skills : Any, Body : Any>(priva
 
     private var skillsFactory: (Node<Body, Skills>) -> Skills by Delegates.notNull()
     private var bodyFactory: (AgentID) -> Body by Delegates.notNull()
-    private var messageHandler: (Message) -> Internal? = { null } // By default, all messages are discarded.
-    private var perceptionHandler: (Perception) -> Internal? = { null } // By default, percept do not generate events.
 
-    override fun handlesPerceptionEvents(handler: (Perception) -> Internal?) {
+    // By default, all messages are discarded.
+    private var messageHandler: AgentState<Belief, Goal, Skills>.(Message) -> AgentUpdate<*>? = { null }
+
+    // By default, percept do not generate events.
+    private var perceptionHandler: AgentState<Belief, Goal, Skills>.(Perception) -> AgentUpdate<*>? = { null }
+
+    override fun handlesPerceptionEvents(handler: AgentState<Belief, Goal, Skills>.(Perception) -> AgentUpdate<*>?) {
         this.perceptionHandler = handler
     }
 
-    override fun handlesMessageEvents(handler: (Message) -> Internal?) {
+    override fun handlesMessageEvents(handler: AgentState<Belief, Goal, Skills>.(Message) -> AgentUpdate<*>?) {
         this.messageHandler = handler
     }
 

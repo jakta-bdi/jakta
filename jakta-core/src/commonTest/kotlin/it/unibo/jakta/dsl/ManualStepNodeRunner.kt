@@ -1,10 +1,12 @@
-package it.unibo.jakta.node
+package it.unibo.jakta.dsl
 
 import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.agent.AgentLifecycle
 import it.unibo.jakta.agent.BaseAgentLifecycle
 import it.unibo.jakta.agent.ExecutableAgent
 import it.unibo.jakta.event.SystemEvent
+import it.unibo.jakta.node.Node
+import it.unibo.jakta.node.NodeRunner
 import kotlinx.coroutines.CoroutineDispatcher
 
 /**

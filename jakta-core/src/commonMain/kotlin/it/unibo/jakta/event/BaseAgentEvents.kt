@@ -29,7 +29,7 @@ data class GoalAddEvent<G : Any, PlanResult>(
          * @param[goal] the goal that has been added.
          * @return the created GoalAddEvent.
          */
-        fun <G : Any> withNoResult(goal: G) = GoalAddEvent<G, Unit>(goal, typeOf<Any>())
+        fun <G : Any> withNoResult(goal: G) = GoalAddEvent<G, Any?>(goal, typeOf<Any?>())
     }
 }
 
@@ -42,10 +42,25 @@ data class GoalAddEvent<G : Any, PlanResult>(
  */
 data class GoalRemoveEvent<G : Any, PlanResult>(
     override val goal: G,
+    override val resultType: KType,
     override val completion: CompletableDeferred<PlanResult>? = null,
     override val intention: Intention? = null,
-    override val resultType: KType,
-) : AgentEvent.Internal.Goal.Remove<G, PlanResult>
+
+) : AgentEvent.Internal.Goal.Remove<G, PlanResult> {
+    /**
+     * Factory methods for GoalRemoveEvent.
+     */
+    companion object {
+        /**
+         * Creates a GoalAddEvent with no expected result i.e. PlanResult = Unit.
+         * The created event will have resultType = Any, as it should match any plan result type as the result
+         * will be ignored.
+         * @param[goal] the goal that has been added.
+         * @return the created GoalAddEvent.
+         */
+        fun <G : Any> withNoResult(goal: G) = GoalRemoveEvent<G, Any?>(goal, typeOf<Any?>())
+    }
+}
 
 /**
  * Implements a Goal Failed event.
@@ -56,9 +71,9 @@ data class GoalRemoveEvent<G : Any, PlanResult>(
  */
 data class GoalFailedEvent<G : Any, PlanResult>(
     override val goal: G,
+    override val resultType: KType,
     override val completion: CompletableDeferred<PlanResult>? = null,
     override val intention: Intention? = null,
-    override val resultType: KType,
 ) : AgentEvent.Internal.Goal.Failed<G, PlanResult>
 
 /**

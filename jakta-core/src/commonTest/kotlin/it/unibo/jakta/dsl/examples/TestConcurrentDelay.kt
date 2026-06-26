@@ -2,11 +2,11 @@ package it.unibo.jakta.dsl.examples
 
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
-import it.unibo.jakta.dsl.NodeTerminationSkillImpl
 import it.unibo.jakta.dsl.executeInTestScope
 import it.unibo.jakta.dsl.ifGoalMatch
 import it.unibo.jakta.dsl.node
 import it.unibo.jakta.dsl.plan.triggers
+import it.unibo.jakta.skills.BaseNodeTerminationSkill
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.seconds
@@ -18,7 +18,7 @@ class TestConcurrentDelay {
         node {
             agent {
                 embodiedAs { object {} }
-                withSkills { NodeTerminationSkillImpl(it) }
+                withSkills { BaseNodeTerminationSkill(it) }
                 hasInitialGoals {
                     !"goal"
                     !"anotherGoal"

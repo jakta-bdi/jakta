@@ -66,7 +66,9 @@ class CoroutineNodeRunner<Body : Any, Skills : Any, N : Node<Body, Skills>> : No
         // remove the agent from the environment if the agent stops for unexpected reasons
         newJob.invokeOnCompletion {
             when (it) {
-                is CancellationException -> {} // intentional removal
+                is CancellationException -> {}
+
+                // intentional removal
 //                is IllegalArgumentException -> {
 //                    this.stopNode(node)
 //                    throw it
@@ -87,10 +89,8 @@ class CoroutineNodeRunner<Body : Any, Skills : Any, N : Node<Body, Skills>> : No
     }
 
     private fun CoroutineScope.stopNode(node: N) {
-        this.coroutineContext.cancel(CancellationException("Termination requested"))
-        // TODO we are brutally killing the agents
-        // agents.forEach { removeAgent(it.key.executableAgent.id) }
-        // return@launch
+        // this kills all the agents + the node loop itself
+        this.coroutineContext.job.children.forEach { it.cancel(CancellationException("Termination requested")) }
         _nodes -= node
         logger.i("Node $node has been stopped")
     }

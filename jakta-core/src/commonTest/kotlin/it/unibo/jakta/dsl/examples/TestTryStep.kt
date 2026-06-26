@@ -2,11 +2,12 @@ package it.unibo.jakta.dsl.examples
 
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
-import it.unibo.jakta.dsl.NodeTerminationSkillImpl
+import it.unibo.jakta.dsl.ManualStepNodeRunner
 import it.unibo.jakta.dsl.node
 import it.unibo.jakta.dsl.plan.triggers
-import it.unibo.jakta.node.ManualStepNodeRunner
 import it.unibo.jakta.node.Node
+import it.unibo.jakta.skills.BaseNodeTerminationSkill
+import it.unibo.jakta.skills.NodeTerminationSkill
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertFalse
@@ -24,10 +25,10 @@ class TestTryStep {
     var secondStep = false
     var done = false
 
-    val helloWorld: Node<Any, NodeTerminationSkillImpl> = node {
+    val helloWorld: Node<Any, NodeTerminationSkill> = node {
         agent("Hello world agent") {
             embodiedAs { object {} }
-            withSkills { NodeTerminationSkillImpl(it) }
+            withSkills { BaseNodeTerminationSkill(it) }
             hasInitialGoals {
                 !"goal"
             }
@@ -58,7 +59,7 @@ class TestTryStep {
     @Test
     fun testBeliefAddition() {
         runTest {
-            val runner = ManualStepNodeRunner<Any, NodeTerminationSkillImpl, Node<Any, NodeTerminationSkillImpl>>()
+            val runner = ManualStepNodeRunner<Any, NodeTerminationSkill, Node<Any, NodeTerminationSkill>>()
             runner.run(helloWorld)
 
             val dispatcher1 = StandardTestDispatcher(testScheduler)

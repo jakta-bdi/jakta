@@ -14,8 +14,8 @@ import it.unibo.jakta.plan.Plan
  * Entry point for creating a multi-agent system using the Jakta DSL and a localnode.
  * @return an instantiated MAS.
  */
-fun <Skills : Any, Body : Any> node(block: LocalNodeBuilder<Skills, Body>.() -> Unit): Node<Body, Skills> {
-    val nodeBuilder = LocalNodeBuilder<Skills, Body>()
+fun <Skills : Any, Body : Any> node(block: LocalNodeBuilder<Body, Skills>.() -> Unit): Node<Body, Skills> {
+    val nodeBuilder = LocalNodeBuilder<Body, Skills>()
     nodeBuilder.apply(block)
     return nodeBuilder.build()
 }
@@ -40,9 +40,6 @@ fun <Belief : Any, Goal : Any, Skills : Any, Body : Any> agent(
 
 // TODO maybe actually make the triggerBuilder implement these interfaces?
 
-/**
- * Entry point for belief addition only plans.
- */
 // interface BeliefOnlyAdditionTrigger<Belief : Any, Goal : Any, Skills : Any> {
 //    /**
 //     * Given a @param[beliefQuery] as a function that matches a belief

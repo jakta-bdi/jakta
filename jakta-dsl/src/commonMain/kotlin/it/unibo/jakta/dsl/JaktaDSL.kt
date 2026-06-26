@@ -3,5 +3,5 @@ package it.unibo.jakta.dsl
 /**
  * DSL marker for Jakta DSL builders.
  */
-@DslMarker
+@Target(AnnotationTarget.FUNCTION, AnnotationTarget.CLASS)
 annotation class JaktaDSL

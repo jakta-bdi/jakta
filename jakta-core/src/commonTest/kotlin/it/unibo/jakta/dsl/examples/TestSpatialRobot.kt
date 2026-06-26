@@ -4,8 +4,6 @@ import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import it.unibo.jakta.agent.Agent
 import it.unibo.jakta.agent.AgentID
-import it.unibo.jakta.dsl.NodeTerminationSkill
-import it.unibo.jakta.dsl.NodeTerminationSkillImpl
 import it.unibo.jakta.dsl.examples.Movement.Events.Factory.position
 import it.unibo.jakta.dsl.examples.Recharging.Events.Factory.chargeLevel
 import it.unibo.jakta.dsl.executeInTestScope
@@ -13,8 +11,11 @@ import it.unibo.jakta.dsl.ifGoalMatch
 import it.unibo.jakta.dsl.node
 import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.event.AgentEvent
+import it.unibo.jakta.event.AgentUpdate
 import it.unibo.jakta.event.BeliefAddEvent
 import it.unibo.jakta.node.Node
+import it.unibo.jakta.skills.BaseNodeTerminationSkill
+import it.unibo.jakta.skills.NodeTerminationSkill
 import kotlin.test.Test
 import kotlinx.coroutines.delay
 
@@ -68,7 +69,7 @@ class GridMovement(val node: Node<BodyWithPosition, *>) : Movement<DoubleArray> 
 class CustomSkillSet(val node: Node<BodyWithPosition, *>) :
     Recharging by FixedTimeRecharging(node),
     Movement<DoubleArray> by GridMovement(node),
-    NodeTerminationSkill by NodeTerminationSkillImpl(node)
+    NodeTerminationSkill by BaseNodeTerminationSkill(node)
 
 class TestSpatialRobot {
 
@@ -80,18 +81,6 @@ class TestSpatialRobot {
                 CustomSkillSet(it)
             }
 
-            handlesPerceptionEvents {
-                when (it) {
-                    is Movement.Events.Position<*> ->
-                        BeliefAddEvent("position(${it.agentId}, ${it.position})")
-
-                    is Recharging.Events.ChargeLevel ->
-                        BeliefAddEvent("chargeLevel(${it.level})")
-
-                    else -> null
-                }
-            }
-
             believes {
                 +"temp(0)"
             }
@@ -99,6 +88,25 @@ class TestSpatialRobot {
             hasInitialGoals {
                 !"goal"
             }
+
+            handlesPerceptionEvents { event ->
+                when (event) {
+                    is Movement.Events.Position<*> ->
+                        AgentUpdate.Belief(
+                            setOf(("position(${event.agentId}, ${event.position})")),
+                            beliefs.filter { it.startsWith("position(") }.toSet(),
+                        )
+
+                    is Recharging.Events.ChargeLevel ->
+                        AgentUpdate.Belief(
+                            setOf("chargeLevel(${event.level})"),
+                            beliefs.filter { it.startsWith("chargeLevel(") }.toSet(),
+                        )
+
+                    else -> null
+                }
+            }
+
             hasPlans {
                 adding.goal {
                     ifGoalMatch("goal")

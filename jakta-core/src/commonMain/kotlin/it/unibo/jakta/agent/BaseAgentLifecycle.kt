@@ -2,12 +2,14 @@ package it.unibo.jakta.agent
 
 import co.touchlab.kermit.Logger
 import it.unibo.jakta.event.AgentEvent
+import it.unibo.jakta.event.AgentUpdate
+import it.unibo.jakta.event.GoalAddEvent
 import it.unibo.jakta.event.GoalFailedEvent
+import it.unibo.jakta.event.GoalRemoveEvent
 import it.unibo.jakta.intention.IntentionDispatcher
 import it.unibo.jakta.plan.Plan
-import kotlin.collections.filter
 import kotlin.coroutines.ContinuationInterceptor
-import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -48,22 +50,20 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
     private fun handleEvent(event: AgentEvent, scope: CoroutineScope) {
         when (event) {
             // TODO per rimuovere questo cast dovrei tipare Event.Internal
             //  con Belief e Goal (si può fare ma è subottimo?)
+
             is AgentEvent.Internal.Belief<*> -> scope.handleBeliefEvent(event as AgentEvent.Internal.Belief<Belief>)
+
             is AgentEvent.Internal.Goal<*, *> -> scope.handleGoalEvent(event as AgentEvent.Internal.Goal<Goal, Any?>)
+
             is AgentEvent.Internal.Step -> handleStepEvent(event)
+
             is AgentEvent.External -> handleExternalEvent(event)
         }
-    }
-
-    private fun handleExternalEvent(event: AgentEvent.External) {
-        when (event) {
-            is AgentEvent.External.Perception -> executableAgent.state.perceptionHandler(event)
-            is AgentEvent.External.Message -> executableAgent.state.messageHandler(event)
-        }?.let { executableAgent.internalInbox.send(it) }
     }
 
     /**
@@ -128,7 +128,10 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
         plan: Plan<Belief, Goal, Skills, TriggerEntity, *, *>,
         completion: CompletableDeferred<Any?>? = null, // TODO Check if this Any? can be improved
     ) {
-        val intention = executableAgent.state.mutableIntentionPool.nextIntention(event, this.coroutineContext.job)
+        val intention = executableAgent.state.mutableIntentionPool.nextIntention(
+            event,
+            this.coroutineContext.job,
+        )
         log.d { "Launching plan $plan for event $event on intention $intention" }
         val interceptor =
             this.coroutineContext[ContinuationInterceptor] ?: error { "No ContinuationInterceptor in context" }
@@ -139,6 +142,8 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
                 log.d { "Running plan $plan for event $event" }
                 val result = plan.run(executableAgent.state, entity)
                 completion?.complete(result)
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 log.e("Goal failed for exception: ${e.message} ${e.stackTraceToString()}")
                 handleFailure(event, e)
@@ -167,6 +172,7 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
             log.w { "No applicable plans for $entityMessage: $entity" }
         }
 
+        @Suppress("UNCHECKED_CAST")
         return applicable.firstOrNull()?.let {
             log.d { "Selected plan $it for $entityMessage: $entity" }
             it as Plan<Belief, Goal, Skills, TriggerEntity, *, *>
@@ -185,16 +191,18 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
                 executableAgent.internalInbox.send(
                     GoalFailedEvent(
                         event.goal,
+                        event.resultType,
                         event.completion,
                         event.intention,
-                        event.resultType,
                     ),
                 )
             }
+
             is AgentEvent.Internal.Goal.Failed<*, *> -> {
                 log.d { "An error occurred when attempting to handle the failure of goal: $event.goal" }
                 event.completion?.completeExceptionally(e)
             }
+
             else -> {
                 log.w { "Handling of event $event failed with exception:${e.message}" }
             }
@@ -204,5 +212,56 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
     private fun handleStepEvent(event: AgentEvent.Internal.Step) {
         log.d { "Handling step event for intention ${event.intention.id.displayId}" }
         executableAgent.state.mutableIntentionPool.stepIntention(event)
+    }
+
+    // TODO unsafe cast, should be avoided, but I don't think it is possible
+    private fun handleExternalEvent(event: AgentEvent.External) {
+        val update = when (event) {
+            is AgentEvent.External.Perception -> executableAgent.state.run {
+                perceptionHandler(event)
+            }
+
+            is AgentEvent.External.Message -> executableAgent.state.run {
+                messageHandler(event)
+            }
+        } ?: run {
+            log.i { "The external event $event has been received but not mapped into an update" }
+            return
+        }
+
+        @Suppress("UNCHECKED_CAST")
+        when (update) {
+            is AgentUpdate.Belief<*> ->
+                handleBeliefUpdateEvent(update as AgentUpdate.Belief<Belief>)
+
+            is AgentUpdate.Goal<*> ->
+                handleGoalUpdateEvent(update as AgentUpdate.Goal<Goal>)
+        }
+    }
+
+    private fun handleBeliefUpdateEvent(event: AgentUpdate.Belief<Belief>) {
+        log.i { "Handling belief update event $event" }
+        val additionsOnly = event.additions - event.removals
+        val removalsOnly = event.removals - event.additions
+        removalsOnly.forEach { executableAgent.state.forget(it) }
+        additionsOnly.forEach { executableAgent.state.believe(it) }
+    }
+
+    // TODO this should change to have a proper set of desires
+    // for now I simply forward the goal addition and removal events
+    private fun handleGoalUpdateEvent(event: AgentUpdate.Goal<Goal>) {
+        log.i { "Handling goal update event $event" }
+        val additionsOnly = event.additions - event.removals
+        val removalsOnly = event.removals - event.additions
+        removalsOnly.forEach {
+            executableAgent.internalInbox.send(
+                GoalRemoveEvent.withNoResult(it),
+            )
+        }
+        additionsOnly.forEach {
+            executableAgent.internalInbox.send(
+                GoalAddEvent.withNoResult(it),
+            )
+        }
     }
 }

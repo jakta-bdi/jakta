@@ -83,10 +83,13 @@ class TestStringIncarnationFunctions {
     @Test
     fun `test that string Belief triggers a plan and matches a Belief Query`() {
         runMas {
-            adding.belief {
+            adding.goal {
                 ifGoalMatches("goal")
-            } onlyWhen {
-                containsBeliefMatching("goal")
+            } triggers {
+                agent.believe("belief")
+            }
+            adding.belief {
+                ifGoalMatches("belief")
             } triggers {
                 agent.print("Hello World!")
                 skills.terminateNode()

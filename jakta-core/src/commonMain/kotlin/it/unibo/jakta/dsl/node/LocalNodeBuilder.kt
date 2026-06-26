@@ -1,5 +1,6 @@
 package it.unibo.jakta.dsl.node
 
+import it.unibo.jakta.dsl.JaktaDSL
 import it.unibo.jakta.dsl.agent.AgentBuilder
 import it.unibo.jakta.dsl.agent.AgentBuilderImpl
 import it.unibo.jakta.node.LocalNode
@@ -7,7 +8,7 @@ import it.unibo.jakta.node.LocalNode
 /**
  * Implementation of the MasBuilder interface.
  */
-open class LocalNodeBuilder<Skills : Any, Body : Any> : NodeBuilder<Skills, Body, LocalNode<Body, Skills>> {
+open class LocalNodeBuilder<Body : Any, Skills : Any> : NodeBuilder<Skills, Body, LocalNode<Body, Skills>> {
 
     private val node = LocalNode<Body, Skills>()
 

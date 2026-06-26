@@ -1,8 +1,8 @@
 package it.unibo.jakta.agent
 
 import it.unibo.jakta.event.AgentEvent
+import it.unibo.jakta.event.AgentUpdate
 import it.unibo.jakta.intention.Intention
-import it.unibo.jakta.plan.GuardScope
 import it.unibo.jakta.plan.Plan
 
 /**
@@ -36,15 +36,15 @@ interface AgentState<Belief : Any, Goal : Any, Skills : Any> {
 
     /**
      * Mapping function which defines how to (optionally)
-     * convert a [AgentEvent.External.Perception] into a [AgentEvent.Internal].
+     * convert a [AgentEvent.External.Perception] into an [AgentUpdate].
      */
-    val perceptionHandler: (AgentEvent.External.Perception) -> AgentEvent.Internal?
+    val perceptionHandler: AgentState<Belief, Goal, Skills>.(AgentEvent.External.Perception) -> AgentUpdate<*>?
 
     /**
      * Mapping function which defines how to (optionally)
-     * convert a [AgentEvent.External.Message] into a [AgentEvent.Internal].
+     * convert a [AgentEvent.External.Message] into an [AgentUpdate] .
      */
-    val messageHandler: (AgentEvent.External.Message) -> AgentEvent.Internal?
+    val messageHandler: AgentState<Belief, Goal, Skills>.(AgentEvent.External.Message) -> AgentUpdate<*>?
 
     /**
      * The [Skills] the agent is allowed to use.
