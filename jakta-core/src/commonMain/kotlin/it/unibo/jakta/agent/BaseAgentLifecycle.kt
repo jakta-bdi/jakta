@@ -3,10 +3,13 @@ package it.unibo.jakta.agent
 import co.touchlab.kermit.Logger
 import it.unibo.jakta.event.AgentEvent
 import it.unibo.jakta.event.AgentUpdate
+import it.unibo.jakta.event.GoalAddEvent
 import it.unibo.jakta.event.GoalFailedEvent
+import it.unibo.jakta.event.GoalRemoveEvent
 import it.unibo.jakta.intention.IntentionDispatcher
 import it.unibo.jakta.plan.Plan
 import kotlin.coroutines.ContinuationInterceptor
+import kotlin.reflect.typeOf
 import kotlinx.coroutines.*
 
 /**
@@ -228,7 +231,11 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
         log.i { "Handling goal update event $event" }
         val additionsOnly = event.additions - event.removals
         val removalsOnly = event.removals - event.additions
-        removalsOnly.forEach { executableAgent.state.alsoAchieve(it) }
-        additionsOnly.forEach { executableAgent.state.alsoAchieve(it) }
+        removalsOnly.forEach { executableAgent.internalInbox.send(
+            GoalRemoveEvent.withNoResult(it)
+        ) }
+        additionsOnly.forEach { executableAgent.internalInbox.send(
+            GoalAddEvent.withNoResult(it)
+        ) }
     }
 }
