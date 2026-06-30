@@ -9,9 +9,8 @@ import it.unibo.jakta.event.UnlimitedChannelBus
 /**
  * Default implementation of an [it.unibo.jakta.agent.Agent].
  */
-class BaseAgent<Belief : Any, Goal : Any, Body : Any>(
-    agentSpecification: AgentSpecification<Belief, Goal, Body>,
-) : Agent,
+class BaseAgent<Belief : Any, Goal : Any, Body : Any>(agentSpecification: AgentSpecification<Belief, Goal, Body>) :
+    Agent,
     ExecutableAgent<Belief, Goal>,
     RuntimeAgent<Body> {
 

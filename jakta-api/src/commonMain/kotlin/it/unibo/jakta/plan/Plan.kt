@@ -93,43 +93,36 @@ sealed interface Plan<Belief : Any, Goal : Any, TriggerEntity : Any, Context : A
      */
     // TODO It does not make sense for Belief Plans to have a PlanResult as it will never be awaited on... right?
     // What are the implication on the overall design? Remove it or bind it as Unit?
-    sealed interface Belief<B : Any, G : Any, Context : Any, PlanResult> :
-        Plan<B, G, B, Context, PlanResult> {
+    sealed interface Belief<B : Any, G : Any, Context : Any, PlanResult> : Plan<B, G, B, Context, PlanResult> {
         /**
          * Plans that are triggered by the addition of a belief.
          */
-        interface Addition<B : Any, G : Any, Context : Any, PlanResult> :
-            Belief<B, G, Context, PlanResult>
+        interface Addition<B : Any, G : Any, Context : Any, PlanResult> : Belief<B, G, Context, PlanResult>
 
         /**
          * Plans that are triggered by the removal of a belief.
          */
-        interface Removal<B : Any, G : Any, Context : Any, PlanResult> :
-            Belief<B, G, Context, PlanResult>
+        interface Removal<B : Any, G : Any, Context : Any, PlanResult> : Belief<B, G, Context, PlanResult>
     }
 
     /**
      * Plans that are triggered by changes in goals.
      */
-    sealed interface Goal<B : Any, G : Any, Context : Any, PlanResult> :
-        Plan<B, G, G, Context, PlanResult> {
+    sealed interface Goal<B : Any, G : Any, Context : Any, PlanResult> : Plan<B, G, G, Context, PlanResult> {
 
         /**
          * Plans that are triggered by the addition of a goal.
          */
-        interface Addition<B : Any, G : Any, Context : Any, PlanResult> :
-            Goal<B, G, Context, PlanResult>
+        interface Addition<B : Any, G : Any, Context : Any, PlanResult> : Goal<B, G, Context, PlanResult>
 
         /**
          * Plans that are triggered by the removal of a goal.
          */
-        interface Removal<B : Any, G : Any, Context : Any, PlanResult> :
-            Goal<B, G, Context, PlanResult>
+        interface Removal<B : Any, G : Any, Context : Any, PlanResult> : Goal<B, G, Context, PlanResult>
 
         /**
          * Plans that are triggered by the failure of a goal.
          */
-        interface Failure<B : Any, G : Any, Context : Any, PlanResult> :
-            Goal<B, G, Context, PlanResult>
+        interface Failure<B : Any, G : Any, Context : Any, PlanResult> : Goal<B, G, Context, PlanResult>
     }
 }

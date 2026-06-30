@@ -4,26 +4,25 @@ import it.unibo.jakta.dsl.JaktaDSL
 import it.unibo.jakta.dsl.agent.AgentBuilder
 import it.unibo.jakta.dsl.agent.AgentBuilderImpl
 import it.unibo.jakta.node.LocalNode
+import it.unibo.jakta.node.Node
 
 /**
  * Implementation of the MasBuilder interface.
  */
 open class LocalNodeBuilder<Body : Any> : NodeBuilder<Body, LocalNode<Body>> {
 
-    /**
-     * The node instance being built.
-     */
-    val node = LocalNode<Body>()
+    override val node: Node<Body>
+        get() = _node
+
+    private val _node = LocalNode<Body>()
 
     protected val agents = mutableListOf<AgentBuilder<*, *, Body>>()
 
     override fun <Belief : Any, Goal : Any> agent(block: AgentBuilder<Belief, Goal, Body>.() -> Unit) =
         buildAgent(null, block)
 
-    override fun <Belief : Any, Goal : Any> agent(
-        name: String,
-        block: AgentBuilder<Belief, Goal, Body>.() -> Unit,
-    ) = buildAgent(name, block)
+    override fun <Belief : Any, Goal : Any> agent(name: String, block: AgentBuilder<Belief, Goal, Body>.() -> Unit) =
+        buildAgent(name, block)
 
     private fun <Belief : Any, Goal : Any> buildAgent(
         name: String?,
@@ -45,6 +44,6 @@ open class LocalNodeBuilder<Body : Any> : NodeBuilder<Body, LocalNode<Body>> {
     override fun build(): LocalNode<Body> {
         // val env = environment ?: error { "Must provide an Environment for the MAS" }
         agents.forEach { node.addAgent(it.build(node)) }
-        return node
+        return _node
     }
 }

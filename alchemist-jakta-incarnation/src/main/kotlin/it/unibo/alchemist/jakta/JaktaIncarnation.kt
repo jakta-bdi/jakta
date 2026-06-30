@@ -1,19 +1,30 @@
 package it.unibo.alchemist.jakta
 
 import it.unibo.alchemist.jakta.properties.JaktaForAlchemistRuntime
-import it.unibo.alchemist.model.*
+import it.unibo.alchemist.model.Action
+import it.unibo.alchemist.model.Actionable
+import it.unibo.alchemist.model.Condition
+import it.unibo.alchemist.model.Context
+import it.unibo.alchemist.model.Environment
+import it.unibo.alchemist.model.Incarnation
+import it.unibo.alchemist.model.Molecule
+import it.unibo.alchemist.model.Node
+import it.unibo.alchemist.model.Position
+import it.unibo.alchemist.model.Reaction
+import it.unibo.alchemist.model.TimeDistribution
 import it.unibo.alchemist.model.conditions.AbstractCondition
 import it.unibo.alchemist.model.molecules.SimpleMolecule
 import it.unibo.alchemist.model.nodes.GenericNode
 import it.unibo.alchemist.model.reactions.Event
 import it.unibo.alchemist.model.timedistributions.DiracComb
 import it.unibo.jakta.dsl.RuntimeNodes
-import it.unibo.jakta.node.Node as JaktaNode
 import kotlin.reflect.KCallable
 import kotlin.reflect.full.isSubtypeOf
 import kotlin.reflect.full.starProjectedType
 import kotlin.reflect.jvm.kotlinFunction
 import org.apache.commons.math3.random.RandomGenerator
+
+typealias JaktaNode<B> = it.unibo.jakta.node.ExecutableNode<B>
 
 /**
  * Jakta incarnation for executing on Alchemist.

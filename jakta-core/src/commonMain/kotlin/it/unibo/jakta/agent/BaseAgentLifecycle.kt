@@ -22,9 +22,8 @@ import kotlinx.coroutines.launch
  * A base implementation of the [it.unibo.jakta.agent.AgentLifecycle] interface
  * that defines the core logic for handling agent events and executing plans.
  */
-class BaseAgentLifecycle<Belief : Any, Goal : Any>(
-    override val executableAgent: ExecutableAgent<Belief, Goal>,
-) : AgentLifecycle<Belief, Goal> {
+class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent: ExecutableAgent<Belief, Goal>) :
+    AgentLifecycle<Belief, Goal> {
     private val log =
         Logger(
             Logger.config,
@@ -172,12 +171,9 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(
             log.w { "No applicable plans for $entityMessage: $entity" }
         }
 
-        @Suppress("UNCHECKED_CAST")
         return applicable.firstOrNull()?.let {
             log.d { "Selected plan $it for $entityMessage: $entity" }
-            it as Plan<Belief, Goal, TriggerEntity, *, *>
-            // TODO: This is not entirely safe, check from DSL that
-            // the type of the agent skill must implement the plan skill type.
+            it
         } ?: run {
             log.w { "No plan selected for $entityMessage: $entity" }
             null

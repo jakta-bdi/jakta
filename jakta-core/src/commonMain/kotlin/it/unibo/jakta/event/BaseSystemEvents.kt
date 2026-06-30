@@ -6,9 +6,8 @@ import it.unibo.jakta.agent.ExecutableAgent
 /**
  * Base implementation of [SystemEvent.AgentAddition].
  */
-data class AgentAdditionEvent<Belief : Any, Goal : Any>(
-    override val executableAgent: ExecutableAgent<Belief, Goal>,
-) : SystemEvent.AgentAddition<Belief, Goal>
+data class AgentAdditionEvent<Belief : Any, Goal : Any>(override val executableAgent: ExecutableAgent<Belief, Goal>) :
+    SystemEvent.AgentAddition<Belief, Goal>
 
 /**
  * Base implementation of [SystemEvent.AgentRemoval].

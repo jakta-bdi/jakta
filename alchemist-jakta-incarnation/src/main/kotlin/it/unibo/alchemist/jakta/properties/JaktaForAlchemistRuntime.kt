@@ -1,5 +1,6 @@
 package it.unibo.alchemist.jakta.properties
 
+import it.unibo.alchemist.jakta.JaktaNode
 import it.unibo.alchemist.jakta.actions.JaktaForAlchemistAgent
 import it.unibo.alchemist.model.Environment
 import it.unibo.alchemist.model.Node as AlchemistNode
@@ -8,7 +9,6 @@ import it.unibo.alchemist.model.Position
 import it.unibo.jakta.agent.ExecutableAgent
 import it.unibo.jakta.dsl.RuntimeNodes
 import it.unibo.jakta.event.SystemEvent
-import it.unibo.jakta.node.Node as JaktaNode
 
 /** One Alchemist Node may contain more than one Jakta Node.
  * This Alchemist property connects JaKtA meta-model to alchemist representation.

@@ -23,16 +23,15 @@ class TestBeliefPlan {
     }
 
     context(terminator: NodeTerminationSkill)
-    fun <Goal : Any> LocalNodeBuilder<Any>.testAgent() =
-        agent<String, Goal>("Hello world agent") {
-            embodiedAs { Any() }
-            believes {
-                + "testBelief"
-            }
-            hasPlans {
-                terminateOn("testBelief")
-            }
+    fun <Goal : Any> LocalNodeBuilder<Any>.testAgent() = agent<String, Goal>("Hello world agent") {
+        embodiedAs { Any() }
+        believes {
+            +"testBelief"
         }
+        hasPlans {
+            terminateOn("testBelief")
+        }
+    }
 
     val helloWorld = node {
         context(BaseNodeTerminationSkill(node)) {

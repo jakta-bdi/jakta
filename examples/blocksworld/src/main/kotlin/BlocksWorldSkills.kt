@@ -3,6 +3,7 @@ import it.unibo.jakta.dsl.belief.beliefQuery
 import it.unibo.jakta.event.AgentEvent.External.Perception
 import it.unibo.jakta.event.AgentUpdate
 import it.unibo.jakta.node.Node
+import it.unibo.jakta.plan.PlanScope
 import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.Fact
 import it.unibo.tuprolog.core.Struct
@@ -47,7 +48,7 @@ interface BlocksWorldSkills {
  * @property world The BlocksWorld instance representing the current state of the world.
  * @property node The Node instance used to send perception events.
  */
-class BlocksWorldSkillsImpl(private val world: BlocksWorld, private val node: Node<*, *>) : BlocksWorldSkills {
+class BlocksWorldSkillsImpl(private val world: BlocksWorld, private val node: Node<*>) : BlocksWorldSkills {
 
     override suspend fun move(block: String, destination: String) {
         val destinationBlock = if (destination == "table") null else Block(destination)
@@ -101,3 +102,10 @@ fun List<List<Block>>.toPrologFacts(): Set<PrologBelief> = flatMap { stack ->
         )
     }
 }.toSet()
+
+/**
+ * Extension property to access BlocksWorldSkills from the PlanScope.
+ */
+context(skills: BlocksWorldSkills)
+val PlanScope<*, *, *>.blocksWorld
+    get() = skills

@@ -24,9 +24,7 @@ interface MutableAgentState<Belief : Any, Goal : Any> :
      * Modifies the perception handler function that defines which external events are of interest of the agent.
      * @param handler the new function handler the agent will use starting from next iteration of its lifecycle.
      */
-    fun setPerceptionHandler(
-        handler: AgentState<Belief, Goal>.(AgentEvent.External.Perception) -> AgentUpdate<*>?,
-    )
+    fun setPerceptionHandler(handler: AgentState<Belief, Goal>.(AgentEvent.External.Perception) -> AgentUpdate<*>?)
 
     /**
      * Modifies the message handler function that defines which Messages are interest of the agent.

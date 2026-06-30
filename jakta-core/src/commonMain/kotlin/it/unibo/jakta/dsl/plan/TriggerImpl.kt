@@ -13,8 +13,7 @@ class TriggerAdditionImpl<Belief : Any, Goal : Any>(
 
     override fun <Context : Any> belief(
         beliefQuery: Belief.() -> Context?,
-    ): PlanBuilder.Addition.Belief<Belief, Goal, Context> =
-        BeliefAdditionPlanBuilderImpl(addBeliefPlan, beliefQuery)
+    ): PlanBuilder.Addition.Belief<Belief, Goal, Context> = BeliefAdditionPlanBuilderImpl(addBeliefPlan, beliefQuery)
 
     override fun <Context : Any> goal(
         goalQuery: Goal.() -> Context?,
@@ -31,8 +30,7 @@ class TriggerRemovalImpl<Belief : Any, Goal : Any>(
 
     override fun <Context : Any> belief(
         beliefQuery: Belief.() -> Context?,
-    ): PlanBuilder.Removal.Belief<Belief, Goal, Context> =
-        BeliefRemovalPlanBuilderImpl(addBeliefPlan, beliefQuery)
+    ): PlanBuilder.Removal.Belief<Belief, Goal, Context> = BeliefRemovalPlanBuilderImpl(addBeliefPlan, beliefQuery)
 
     override fun <Context : Any> goal(
         goalQuery: Goal.() -> Context?,
@@ -48,6 +46,5 @@ class TriggerFailureInterceptionImpl<Belief : Any, Goal : Any>(
 
     override fun <Context : Any> goal(
         goalQuery: Goal.() -> Context?,
-    ): PlanBuilder.FailureInterception.Goal<Belief, Goal, Context> =
-        GoalFailurePlanBuilderImpl(addGoalPlan, goalQuery)
+    ): PlanBuilder.FailureInterception.Goal<Belief, Goal, Context> = GoalFailurePlanBuilderImpl(addGoalPlan, goalQuery)
 }

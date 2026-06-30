@@ -77,7 +77,6 @@ class TestPingPong {
                 }
             }
         }
-
     }
 
     @Test

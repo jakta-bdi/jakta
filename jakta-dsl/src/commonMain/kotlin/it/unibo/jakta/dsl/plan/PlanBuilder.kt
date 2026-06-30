@@ -140,13 +140,11 @@ interface PlanBuilder<B : Any, G : Any, Context : Any> {
     /**
      * Builder interface for defining plans triggered by failure interceptions.
      */
-    interface FailureInterception<B : Any, G : Any, Context : Any> :
-        PlanBuilder<B, G, Context> {
+    interface FailureInterception<B : Any, G : Any, Context : Any> : PlanBuilder<B, G, Context> {
         /**
          * Builder interface for defining plans triggered by goal failure interceptions.
          */
-        interface Goal<B : Any, G : Any, Context : Any> :
-            FailureInterception<B, G, Context> {
+        interface Goal<B : Any, G : Any, Context : Any> : FailureInterception<B, G, Context> {
             /**
              * Adds a guard condition to the plan that must be satisfied for the plan to trigger.
              * @param guard a function that takes the context and returns a modified context or null to block the plan

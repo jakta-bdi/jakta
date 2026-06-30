@@ -22,7 +22,7 @@ import kotlinx.coroutines.yield
  * A [it.unibo.jakta.node.NodeRunner] implementation that uses Kotlin coroutines
  * to manage the execution of agents within a node.
  */
-class CoroutineNodeRunner<Body : Any, N : Node<Body>> : NodeRunner<N> {
+class CoroutineNodeRunner<Body : Any, N : ExecutableNode<Body>> : NodeRunner<N> {
 
     private val agents: MutableMap<AgentLifecycle<*, *>, Job> = mutableMapOf()
 

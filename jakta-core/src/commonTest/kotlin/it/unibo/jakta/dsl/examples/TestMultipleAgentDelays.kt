@@ -25,7 +25,7 @@ class TestMultipleAgentDelays {
         node {
             context(
                 BaseNodeTerminationSkill(node),
-                BaseAgentTerminationSkill(node)
+                BaseAgentTerminationSkill(node),
             ) {
                 agent {
                     embodiedAs { Any() }

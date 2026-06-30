@@ -5,6 +5,7 @@ import co.touchlab.kermit.Severity
 import it.unibo.jakta.dsl.ManualStepNodeRunner
 import it.unibo.jakta.dsl.node
 import it.unibo.jakta.dsl.plan.triggers
+import it.unibo.jakta.node.ExecutableNode
 import it.unibo.jakta.node.Node
 import it.unibo.jakta.skills.BaseNodeTerminationSkill
 import it.unibo.jakta.skills.NodeTerminationSkill
@@ -26,7 +27,7 @@ class TestTryStep {
     var secondStep = false
     var done = false
 
-    val helloWorld: Node<Any> = node {
+    val helloWorld: ExecutableNode<Any> = node {
         context(BaseNodeTerminationSkill(node)) {
             agent("Hello world agent") {
                 embodiedAs { Any() }
@@ -61,7 +62,7 @@ class TestTryStep {
     @Test
     fun testBeliefAddition() {
         runTest {
-            val runner = ManualStepNodeRunner<Any, Node<Any>>()
+            val runner = ManualStepNodeRunner<Any, ExecutableNode<Any>>()
             runner.run(helloWorld)
 
             val dispatcher1 = StandardTestDispatcher(testScheduler)

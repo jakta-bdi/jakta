@@ -30,6 +30,6 @@ class BaseNodeTerminationSkill(val node: Node<*>) : NodeTerminationSkill {
  * This function can be called from within a plan's triggers block.
  */
 context(skill: NodeTerminationSkill)
-fun  PlanScope<*, *, *>.terminateNode() {
+fun PlanScope<*, *, *>.terminateNode() {
     skill.terminateNode()
 }

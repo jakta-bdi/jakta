@@ -16,7 +16,7 @@ import it.unibo.jakta.event.UnlimitedChannelBus
  * A local implementation of the [it.unibo.jakta.node.Node] interface
  * that manages agents and system events within a single node.
  */
-class LocalNode<Body : Any> : Node<Body> {
+class LocalNode<Body : Any> : ExecutableNode<Body> {
 
     private val _agents: MutableSet<BaseAgent<*, *, Body>> = mutableSetOf()
 

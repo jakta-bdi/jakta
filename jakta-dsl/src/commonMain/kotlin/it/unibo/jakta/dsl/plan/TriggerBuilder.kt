@@ -27,9 +27,7 @@ interface TriggerBuilder<Belief : Any, Goal : Any> {
          * and extracts a context from it if the goal matches.
          * @return a plan builder for goal addition triggers.
          */
-        fun <Context : Any> goal(
-            goalQuery: Goal.() -> Context?,
-        ): PlanBuilder.Addition.Goal<Belief, Goal, Context>
+        fun <Context : Any> goal(goalQuery: Goal.() -> Context?): PlanBuilder.Addition.Goal<Belief, Goal, Context>
     }
 
     /**
@@ -51,16 +49,13 @@ interface TriggerBuilder<Belief : Any, Goal : Any> {
          * and extracts a context from it if the goal matches.
          * @return a plan builder for goal removal triggers.
          */
-        fun <Context : Any> goal(
-            goalQuery: Goal.() -> Context?,
-        ): PlanBuilder.Removal.Goal<Belief, Goal, Context>
+        fun <Context : Any> goal(goalQuery: Goal.() -> Context?): PlanBuilder.Removal.Goal<Belief, Goal, Context>
     }
 
     /**
      * Builder interface for defining triggers based on goal failure interceptions.
      */
-    interface FailureInterception<Belief : Any, Goal : Any> :
-        TriggerBuilder<Belief, Goal> {
+    interface FailureInterception<Belief : Any, Goal : Any> : TriggerBuilder<Belief, Goal> {
 
         /**
          * Given a @param[goalQuery] as a function that matches a goal

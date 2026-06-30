@@ -1,9 +1,7 @@
 package it.unibo.jakta.node
 
-import it.unibo.jakta.agent.Agent
 import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.agent.AgentSpecification
-import it.unibo.jakta.agent.RuntimeAgent
 import it.unibo.jakta.event.AgentEvent
 import it.unibo.jakta.event.EventStream
 import it.unibo.jakta.event.SystemEvent
@@ -19,11 +17,6 @@ interface Node<Body : Any> {
      * where the key is the unique identifier of the agent and the value is the body of the agent.
      */
     val agents: Map<AgentID, Body>
-
-    /**
-     * An event stream that emits system events related to the node.
-     */
-    val systemEvents: EventStream<SystemEvent>
 
     /**
      * Sends an external [event] to all agents in the node that satisfy the [filterFunction].
@@ -55,4 +48,15 @@ interface Node<Body : Any> {
      * @param body The body of the agent for which to retrieve the identifier.
      */
     fun getAgentIDfromBody(body: Body): AgentID? = agents.entries.find { it.value == body }?.key
+}
+
+/**
+ * Represents a node that can be executed and managed, providing an event stream for system events.
+ * @param Body The type of body used by agents in this node.
+ */
+interface ExecutableNode<Body : Any> : Node<Body> {
+    /**
+     * An event stream that emits system events related to the node.
+     */
+    val systemEvents: EventStream<SystemEvent>
 }

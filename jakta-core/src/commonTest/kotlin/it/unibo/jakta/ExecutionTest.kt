@@ -29,36 +29,34 @@ class ExecutionTest {
         val node = LocalNode<Any>()
         val node2 = LocalNode<Any>()
 
-        fun agentSpecGenerator(
-            agentname: String,
-            node: LocalNode<*>,
-        ): Set<AgentSpecification<String, String, Any>> = setOf(
-            object : AgentSpecification<String, String, Any> {
-                override val body = Any()
-                override val initialState: AgentState<String, String> = BaseAgentState(
-                    beliefs = listOf(),
-                    intentions = setOf(),
-                    beliefPlans = listOf(),
-                    goalPlans = listOf(
-                        GoalAdditionPlan(
-                            trigger = { it == "hello" },
-                            guard = { true },
-                            body = {
-                                with(MyPrint(node)) {
-                                    prettyPrint("PLKUTO")
-                                    stop()
-                                }
-                            },
-                            resultType = typeOf<Unit>(),
+        fun agentSpecGenerator(agentname: String, node: LocalNode<*>): Set<AgentSpecification<String, String, Any>> =
+            setOf(
+                object : AgentSpecification<String, String, Any> {
+                    override val body = Any()
+                    override val initialState: AgentState<String, String> = BaseAgentState(
+                        beliefs = listOf(),
+                        intentions = setOf(),
+                        beliefPlans = listOf(),
+                        goalPlans = listOf(
+                            GoalAdditionPlan(
+                                trigger = { it == "hello" },
+                                guard = { true },
+                                body = {
+                                    with(MyPrint(node)) {
+                                        prettyPrint("PLKUTO")
+                                        stop()
+                                    }
+                                },
+                                resultType = typeOf<Unit>(),
+                            ),
                         ),
-                    ),
-                    perceptionHandler = { null },
-                    messageHandler = { null },
-                )
-                override val initialGoals: List<String> = listOf("hello")
-                override val id: AgentID = BaseAgentID(agentname)
-            },
-        )
+                        perceptionHandler = { null },
+                        messageHandler = { null },
+                    )
+                    override val initialGoals: List<String> = listOf("hello")
+                    override val id: AgentID = BaseAgentID(agentname)
+                },
+            )
 
         val runner = CoroutineNodeRunner<Any, LocalNode<Any>>()
 

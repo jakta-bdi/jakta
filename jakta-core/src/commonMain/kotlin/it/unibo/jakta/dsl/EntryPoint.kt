@@ -7,6 +7,7 @@ import it.unibo.jakta.dsl.node.LocalNodeBuilder
 import it.unibo.jakta.dsl.plan.PlanBuilder
 import it.unibo.jakta.dsl.plan.TriggerAdditionImpl
 import it.unibo.jakta.dsl.plan.TriggerRemovalImpl
+import it.unibo.jakta.node.ExecutableNode
 import it.unibo.jakta.node.Node
 import it.unibo.jakta.plan.Plan
 
@@ -14,7 +15,7 @@ import it.unibo.jakta.plan.Plan
  * Entry point for creating a multi-agent system using the Jakta DSL and a localnode.
  * @return an instantiated MAS.
  */
-fun <Body : Any> node(block: LocalNodeBuilder<Body>.() -> Unit): Node<Body> {
+fun <Body : Any> node(block: LocalNodeBuilder<Body>.() -> Unit): ExecutableNode<Body> {
     val nodeBuilder = LocalNodeBuilder<Body>()
     nodeBuilder.apply(block)
     return nodeBuilder.build()

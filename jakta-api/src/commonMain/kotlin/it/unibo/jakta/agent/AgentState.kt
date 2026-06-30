@@ -45,5 +45,4 @@ interface AgentState<Belief : Any, Goal : Any> {
      * convert a [AgentEvent.External.Message] into an [AgentUpdate] .
      */
     val messageHandler: AgentState<Belief, Goal>.(AgentEvent.External.Message) -> AgentUpdate<*>?
-
 }
