@@ -13,115 +13,115 @@ import kotlin.reflect.KType
 /**
  * Implementation of PlanBuilder for belief additions.
  */
-class BeliefAdditionPlanBuilderImpl<Belief : Any, Goal : Any, Skills : Any, Context : Any>(
-    private val addBeliefPlan: (plan: Plan.Belief<Belief, Goal, Skills, *, *>) -> Unit,
+class BeliefAdditionPlanBuilderImpl<Belief : Any, Goal : Any, Context : Any>(
+    private val addBeliefPlan: (plan: Plan.Belief<Belief, Goal, *, *>) -> Unit,
     private val trigger: Belief.() -> Context?,
     private var guard: GuardScope<Belief, Context>.() -> Context? = { this.context },
-) : PlanBuilder.Addition.Belief<Belief, Goal, Skills, Context> {
+) : PlanBuilder.Addition.Belief<Belief, Goal, Context> {
     override fun onlyWhen(
         guard: GuardScope<Belief, Context>.() -> Context?,
-    ): PlanBuilder.Addition.Belief<Belief, Goal, Skills, Context> = this.also { this.guard = guard }
+    ): PlanBuilder.Addition.Belief<Belief, Goal, Context> = this.also { this.guard = guard }
 
     @Deprecated("Use triggers instead", replaceWith = ReplaceWith("triggers(body)"), level = DeprecationLevel.ERROR)
     override fun <PlanResult> triggersImpl(
         resultType: KType,
-        body: suspend context(Context) PlanScope<Belief, Goal, Skills, Context>.() -> PlanResult,
-    ): Plan.Belief.Addition<Belief, Goal, Skills, Context, PlanResult> =
+        body: suspend context(Context) PlanScope<Belief, Goal, Context>.() -> PlanResult,
+    ): Plan.Belief.Addition<Belief, Goal, Context, PlanResult> =
         buildAndRegisterPlan(resultType, trigger, guard, body, ::BeliefAdditionPlan, addBeliefPlan)
 }
 
 /**
  * Implementation of PlanBuilder for goal additions.
  */
-class GoalAdditionPlanBuilderImpl<Belief : Any, Goal : Any, Skills : Any, Context : Any>(
-    private val addGoalPlan: (plan: Plan.Goal<Belief, Goal, Skills, *, *>) -> Unit,
+class GoalAdditionPlanBuilderImpl<Belief : Any, Goal : Any, Context : Any>(
+    private val addGoalPlan: (plan: Plan.Goal<Belief, Goal, *, *>) -> Unit,
     private val trigger: Goal.() -> Context?,
     private var guard: GuardScope<Belief, Context>.() -> Context? = { this.context },
-) : PlanBuilder.Addition.Goal<Belief, Goal, Skills, Context> {
+) : PlanBuilder.Addition.Goal<Belief, Goal, Context> {
     override fun onlyWhen(
         guard: GuardScope<Belief, Context>.() -> Context?,
-    ): PlanBuilder.Addition.Goal<Belief, Goal, Skills, Context> = this.also { this.guard = guard }
+    ): PlanBuilder.Addition.Goal<Belief, Goal, Context> = this.also { this.guard = guard }
 
     @Deprecated("Use triggers instead", replaceWith = ReplaceWith("triggers(body)"), level = DeprecationLevel.ERROR)
     override fun <PlanResult> triggersImpl(
         resultType: KType,
-        body: suspend context(Context) PlanScope<Belief, Goal, Skills, Context>.() -> PlanResult,
-    ): Plan.Goal.Addition<Belief, Goal, Skills, Context, PlanResult> =
+        body: suspend context(Context) PlanScope<Belief, Goal, Context>.() -> PlanResult,
+    ): Plan.Goal.Addition<Belief, Goal, Context, PlanResult> =
         buildAndRegisterPlan(resultType, trigger, guard, body, ::GoalAdditionPlan, addGoalPlan)
 }
 
 /**
  * Implementation of PlanBuilder for belief removals.
  */
-class BeliefRemovalPlanBuilderImpl<Belief : Any, Goal : Any, Skills : Any, Context : Any>(
-    private val removeBeliefPlan: (plan: Plan.Belief<Belief, Goal, Skills, *, *>) -> Unit,
+class BeliefRemovalPlanBuilderImpl<Belief : Any, Goal : Any, Context : Any>(
+    private val removeBeliefPlan: (plan: Plan.Belief<Belief, Goal, *, *>) -> Unit,
     private val trigger: Belief.() -> Context?,
     private var guard: GuardScope<Belief, Context>.() -> Context? = { this.context },
-) : PlanBuilder.Removal.Belief<Belief, Goal, Skills, Context> {
+) : PlanBuilder.Removal.Belief<Belief, Goal, Context> {
     override fun onlyWhen(
         guard: GuardScope<Belief, Context>.() -> Context?,
-    ): PlanBuilder.Removal.Belief<Belief, Goal, Skills, Context> = this.also { this.guard = guard }
+    ): PlanBuilder.Removal.Belief<Belief, Goal, Context> = this.also { this.guard = guard }
 
     @Deprecated("Use triggers instead", replaceWith = ReplaceWith("triggers(body)"), level = DeprecationLevel.ERROR)
     override fun <PlanResult> triggersImpl(
         resultType: KType,
-        body: suspend context(Context) PlanScope<Belief, Goal, Skills, Context>.() -> PlanResult,
-    ): Plan.Belief.Removal<Belief, Goal, Skills, Context, PlanResult> =
+        body: suspend context(Context) PlanScope<Belief, Goal, Context>.() -> PlanResult,
+    ): Plan.Belief.Removal<Belief, Goal, Context, PlanResult> =
         buildAndRegisterPlan(resultType, trigger, guard, body, ::BeliefRemovalPlan, removeBeliefPlan)
 }
 
 /**
  * Implementation of PlanBuilder for goal removals.
  */
-class GoalRemovalPlanBuilderImpl<Belief : Any, Goal : Any, Skills : Any, Context : Any>(
-    private val removeGoalPlan: (plan: Plan.Goal<Belief, Goal, Skills, *, *>) -> Unit,
+class GoalRemovalPlanBuilderImpl<Belief : Any, Goal : Any, Context : Any>(
+    private val removeGoalPlan: (plan: Plan.Goal<Belief, Goal, *, *>) -> Unit,
     private val trigger: Goal.() -> Context?,
     private var guard: GuardScope<Belief, Context>.() -> Context? = { this.context },
-) : PlanBuilder.Removal.Goal<Belief, Goal, Skills, Context> {
+) : PlanBuilder.Removal.Goal<Belief, Goal, Context> {
     override fun onlyWhen(
         guard: GuardScope<Belief, Context>.() -> Context?,
-    ): PlanBuilder.Removal.Goal<Belief, Goal, Skills, Context> = this.also { this.guard = guard }
+    ): PlanBuilder.Removal.Goal<Belief, Goal, Context> = this.also { this.guard = guard }
 
     @Deprecated("Use triggers instead", replaceWith = ReplaceWith("triggers(body)"), level = DeprecationLevel.ERROR)
     override fun <PlanResult> triggersImpl(
         resultType: KType,
-        body: suspend context(Context) PlanScope<Belief, Goal, Skills, Context>.() -> PlanResult,
-    ): Plan.Goal.Removal<Belief, Goal, Skills, Context, PlanResult> =
+        body: suspend context(Context) PlanScope<Belief, Goal, Context>.() -> PlanResult,
+    ): Plan.Goal.Removal<Belief, Goal, Context, PlanResult> =
         buildAndRegisterPlan(resultType, trigger, guard, body, ::GoalRemovalPlan, removeGoalPlan)
 }
 
 /**
  * Implementation of PlanBuilder for goal failures.
  */
-class GoalFailurePlanBuilderImpl<Belief : Any, Goal : Any, Skills : Any, Context : Any>(
-    private val failingGoalPlan: (plan: Plan.Goal<Belief, Goal, Skills, *, *>) -> Unit,
+class GoalFailurePlanBuilderImpl<Belief : Any, Goal : Any, Context : Any>(
+    private val failingGoalPlan: (plan: Plan.Goal<Belief, Goal, *, *>) -> Unit,
     private val trigger: Goal.() -> Context?,
     private var guard: GuardScope<Belief, Context>.() -> Context? = { this.context },
-) : PlanBuilder.FailureInterception.Goal<Belief, Goal, Skills, Context> {
+) : PlanBuilder.FailureInterception.Goal<Belief, Goal, Context> {
     override fun onlyWhen(
         guard: GuardScope<Belief, Context>.() -> Context?,
-    ): PlanBuilder.FailureInterception.Goal<Belief, Goal, Skills, Context> = this.also { this.guard = guard }
+    ): PlanBuilder.FailureInterception.Goal<Belief, Goal, Context> = this.also { this.guard = guard }
 
     @Deprecated("Use triggers instead", replaceWith = ReplaceWith("triggers(body)"), level = DeprecationLevel.ERROR)
     override fun <PlanResult> triggersImpl(
         resultType: KType,
-        body: suspend context(Context) PlanScope<Belief, Goal, Skills, Context>.() -> PlanResult,
-    ): Plan.Goal.Failure<Belief, Goal, Skills, Context, PlanResult> =
+        body: suspend context(Context) PlanScope<Belief, Goal, Context>.() -> PlanResult,
+    ): Plan.Goal.Failure<Belief, Goal, Context, PlanResult> =
         buildAndRegisterPlan(resultType, trigger, guard, body, ::GoalFailurePlan, failingGoalPlan)
 }
 
-private fun <B, G, S, TE, C, PR, P> buildAndRegisterPlan(
+private fun <B, G, TE, C, PR, P> buildAndRegisterPlan(
     resultType: KType,
     trigger: TE.() -> C?,
     guard: GuardScope<B, C>.() -> C?,
-    body: suspend context(C) PlanScope<B, G, S, C>.() -> PR,
+    body: suspend context(C) PlanScope<B, G, C>.() -> PR,
     builder: (
         (TE) -> C?,
         GuardScope<B, C>.() -> C?,
         suspend context(C)
-        PlanScope<B, G, S, C>.() -> PR,
+        PlanScope<B, G, C>.() -> PR,
         KType,
     ) -> P,
     register: (P) -> Unit,
-): P where B : Any, G : Any, S : Any, TE : Any, C : Any, P : Plan<B, G, S, TE, C, PR> =
+): P where B : Any, G : Any, TE : Any, C : Any, P : Plan<B, G, TE, C, PR> =
     builder(trigger, guard, body, resultType).also { register(it) }

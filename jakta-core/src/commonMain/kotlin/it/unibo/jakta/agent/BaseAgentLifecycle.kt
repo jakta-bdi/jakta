@@ -22,9 +22,8 @@ import kotlinx.coroutines.launch
  * A base implementation of the [it.unibo.jakta.agent.AgentLifecycle] interface
  * that defines the core logic for handling agent events and executing plans.
  */
-class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
-    override val executableAgent: ExecutableAgent<Belief, Goal, Skills>,
-) : AgentLifecycle<Belief, Goal, Skills> {
+class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent: ExecutableAgent<Belief, Goal>) :
+    AgentLifecycle<Belief, Goal> {
     private val log =
         Logger(
             Logger.config,
@@ -80,8 +79,8 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
             planList = executableAgent.state.beliefPlans,
             relevantFilter = {
                 when (event) {
-                    is AgentEvent.Internal.Belief.Add<Belief> -> it is Plan.Belief.Addition
-                    is AgentEvent.Internal.Belief.Remove<Belief> -> it is Plan.Belief.Removal
+                    is AgentEvent.Internal.Belief.Add<Belief> -> it is Plan.Belief.Addition<Belief, Goal, *, *>
+                    is AgentEvent.Internal.Belief.Remove<Belief> -> it is Plan.Belief.Removal<Belief, Goal, *, *>
                 } && it.isRelevant(event.belief)
             },
             applicableFilter = {
@@ -107,9 +106,9 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
             planList = executableAgent.state.goalPlans,
             relevantFilter = {
                 when (event) {
-                    is AgentEvent.Internal.Goal.Add<Goal, *> -> it is Plan.Goal.Addition
-                    is AgentEvent.Internal.Goal.Remove<Goal, *> -> it is Plan.Goal.Removal
-                    is AgentEvent.Internal.Goal.Failed<Goal, *> -> it is Plan.Goal.Failure
+                    is AgentEvent.Internal.Goal.Add<Goal, *> -> it is Plan.Goal.Addition<Belief, Goal, *, *>
+                    is AgentEvent.Internal.Goal.Remove<Goal, *> -> it is Plan.Goal.Removal<Belief, Goal, *, *>
+                    is AgentEvent.Internal.Goal.Failed<Goal, *> -> it is Plan.Goal.Failure<Belief, Goal, *, *>
                 } && it.isRelevant(event.goal)
             },
             applicableFilter = {
@@ -125,7 +124,7 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
     private fun <TriggerEntity : Any> CoroutineScope.launchPlan(
         event: AgentEvent.Internal,
         entity: TriggerEntity,
-        plan: Plan<Belief, Goal, Skills, TriggerEntity, *, *>,
+        plan: Plan<Belief, Goal, TriggerEntity, *, *>,
         completion: CompletableDeferred<Any?>? = null, // TODO Check if this Any? can be improved
     ) {
         val intention = executableAgent.state.mutableIntentionPool.nextIntention(
@@ -156,10 +155,10 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
     private fun <TriggerEntity : Any> selectPlan(
         entity: TriggerEntity,
         entityMessage: String,
-        planList: List<Plan<Belief, Goal, *, TriggerEntity, *, *>>,
-        relevantFilter: (Plan<Belief, Goal, *, TriggerEntity, *, *>) -> Boolean,
-        applicableFilter: (Plan<Belief, Goal, *, TriggerEntity, *, *>) -> Boolean,
-    ): Plan<Belief, Goal, Skills, TriggerEntity, *, *>? {
+        planList: List<Plan<Belief, Goal, TriggerEntity, *, *>>,
+        relevantFilter: (Plan<Belief, Goal, TriggerEntity, *, *>) -> Boolean,
+        applicableFilter: (Plan<Belief, Goal, TriggerEntity, *, *>) -> Boolean,
+    ): Plan<Belief, Goal, TriggerEntity, *, *>? {
         val relevant = planList.filter(relevantFilter)
 
         if (relevant.isEmpty()) {
@@ -172,12 +171,9 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any, Skills : Any>(
             log.w { "No applicable plans for $entityMessage: $entity" }
         }
 
-        @Suppress("UNCHECKED_CAST")
         return applicable.firstOrNull()?.let {
             log.d { "Selected plan $it for $entityMessage: $entity" }
-            it as Plan<Belief, Goal, Skills, TriggerEntity, *, *>
-            // TODO: This is not entirely safe, check from DSL that
-            // the type of the agent skill must implement the plan skill type.
+            it
         } ?: run {
             log.w { "No plan selected for $entityMessage: $entity" }
             null

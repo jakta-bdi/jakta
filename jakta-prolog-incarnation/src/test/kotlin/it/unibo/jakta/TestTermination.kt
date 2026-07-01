@@ -13,6 +13,8 @@ import it.unibo.jakta.dsl.node.LocalNodeBuilder
 import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.logic.JaktaLogicProgrammingScope.Companion.prologPlan
 import it.unibo.jakta.node.CoroutineNodeRunner
+import it.unibo.jakta.skills.BaseNodeTerminationSkill
+import it.unibo.jakta.skills.terminateNode
 import it.unibo.tuprolog.core.toAtom
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -32,18 +34,19 @@ class TestTermination {
             val job = launch {
                 mas(LocalNodeBuilder()) {
                     node {
-                        agent("Alice") {
-                            embodiedAs { object {} }
-                            withSkills { TerminationSkill(it) }
-                            hasInitialGoals {
-                                !initialGoal { "start".toAtom() }
-                            }
-                            hasPlans {
-                                prologPlan {
-                                    adding.goal {
-                                        matching { "start".toAtom() }
-                                    } triggers {
-                                        skills.terminateNode()
+                        context(BaseNodeTerminationSkill(node)) {
+                            agent("Alice") {
+                                embodiedAs { Any() }
+                                hasInitialGoals {
+                                    !initialGoal { "start".toAtom() }
+                                }
+                                hasPlans {
+                                    prologPlan {
+                                        adding.goal {
+                                            matching { "start".toAtom() }
+                                        } triggers {
+                                            terminateNode()
+                                        }
                                     }
                                 }
                             }

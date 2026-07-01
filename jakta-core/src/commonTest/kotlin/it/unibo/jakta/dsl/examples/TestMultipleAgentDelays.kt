@@ -11,48 +11,51 @@ import it.unibo.jakta.skills.AgentTerminationSkill
 import it.unibo.jakta.skills.BaseAgentTerminationSkill
 import it.unibo.jakta.skills.BaseNodeTerminationSkill
 import it.unibo.jakta.skills.NodeTerminationSkill
+import it.unibo.jakta.skills.terminate
+import it.unibo.jakta.skills.terminateNode
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 
-class SkillSet(val node: Node<*, *>) :
+class SkillSet(val node: Node<*>) :
     NodeTerminationSkill by BaseNodeTerminationSkill(node),
     AgentTerminationSkill by BaseAgentTerminationSkill(node)
 
 class TestMultipleAgentDelays {
     val helloWorld =
         node {
-            agent {
-                embodiedAs { object {} }
-                withSkills { SkillSet(it) }
-                hasInitialGoals {
-                    !"goal"
-                }
-                hasPlans {
-                    adding.goal {
-                        ifGoalMatch("goal")
-                    } triggers {
-                        agent.print("Hello...")
-                        delay(10000)
-                        agent.print("...World!")
-                        skills.terminateNode()
+            context(
+                BaseNodeTerminationSkill(node),
+                BaseAgentTerminationSkill(node),
+            ) {
+                agent {
+                    embodiedAs { Any() }
+                    hasInitialGoals {
+                        !"goal"
+                    }
+                    hasPlans {
+                        adding.goal {
+                            ifGoalMatch("goal")
+                        } triggers {
+                            agent.print("Hello...")
+                            delay(10.seconds)
+                            agent.print("...World!")
+                            terminateNode()
+                        }
                     }
                 }
-            }
-            agent {
-                embodiedAs { object {} }
-                withSkills { SkillSet(it) }
-                hasInitialGoals {
-                    !"goal"
-                }
-                hasPlans {
-                    adding.goal {
-                        ifGoalMatch("goal")
-                    } triggers {
-                        agent.print("I will be faster...")
-                        delay(5.seconds)
-                        agent.print("...than you!")
-                        with(skills) {
+                agent {
+                    embodiedAs { Any() }
+                    hasInitialGoals {
+                        !"goal"
+                    }
+                    hasPlans {
+                        adding.goal {
+                            ifGoalMatch("goal")
+                        } triggers {
+                            agent.print("I will be faster...")
+                            delay(5.seconds)
+                            agent.print("...than you!")
                             agent.terminate()
                         }
                     }

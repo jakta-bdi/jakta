@@ -3,7 +3,7 @@ package it.unibo.jakta.node
 /**
  * Represents a Node of a Multi-Agent System hosting a set of agents operating.
  */
-interface NodeRunner<N : Node<*, *>> {
+interface NodeRunner<N : ExecutableNode<*>> {
 
     /**
      * The set of nodes that this runner is responsible for managing and executing.

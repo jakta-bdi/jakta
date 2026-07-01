@@ -17,61 +17,63 @@ import it.unibo.jakta.event.BeliefAddEvent
 import it.unibo.jakta.node.Node
 import it.unibo.jakta.skills.BaseNodeTerminationSkill
 import it.unibo.jakta.skills.NodeTerminationSkill
+import it.unibo.jakta.skills.terminateNode
 import kotlin.collections.emptySet
 import kotlin.test.Test
 
 class TestPingPong {
 
     interface CustomSkillSet : NodeTerminationSkill, MessagingSkill
-    class CustomSkillSetImpl(node: Node<BodyWithName, CustomSkillSet>) :
+    class CustomSkillSetImpl(node: Node<BodyWithName>) :
         CustomSkillSet,
         NodeTerminationSkill by BaseNodeTerminationSkill(node),
         MessagingSkill by MessagingSkillImpl(node)
 
-    private fun <Goal : Any> LocalNodeBuilder<BodyWithName, CustomSkillSet>.messageEnabledAgent(
+    private fun <Goal : Any> LocalNodeBuilder<BodyWithName>.messageEnabledAgent(
         name: String,
-        block: AgentBuilder<SimpleMessage, Goal, CustomSkillSet, BodyWithName>.() -> Unit,
+        block: AgentBuilder<SimpleMessage, Goal, BodyWithName>.() -> Unit,
     ) {
         agent(name) {
             embodiedAs { BodyWithName(name) }
-            withSkills { CustomSkillSetImpl(it) }
             handlesMessageEvents { AgentUpdate.Belief(setOf(it), emptySet()) }
             block()
         }
     }
 
     val node = node {
-        messageEnabledAgent("Bob") {
-            hasPlans {
-                adding.belief {
-                    this.takeIf { it == SimpleMessage("Message", "Alice") }
-                } triggers {
-                    agent.print(context.toString())
-                    with(skills) {
-                        agent.sendMessage("Hello Back!", context.sender)
+        context(CustomSkillSetImpl(node)) {
+            messageEnabledAgent("Bob") {
+                hasPlans {
+                    adding.belief {
+                        this.takeIf { it == SimpleMessage("Message", "Alice") }
+                    } triggers {
+                        agent.print(context.toString())
+                        with(contextOf<MessagingSkill>()) {
+                            agent.sendMessage("Hello Back!", context.sender)
+                        }
                     }
                 }
             }
-        }
 
-        messageEnabledAgent("Alice") {
-            hasInitialGoals {
-                !"sendMessage"
-            }
-            hasPlans {
-                adding.goal {
-                    ifGoalMatch("sendMessage")
-                } triggers {
-                    agent.print("Hello World!")
-                    with(skills) {
-                        agent.sendMessage("Message", "Bob")
-                    }
+            messageEnabledAgent("Alice") {
+                hasInitialGoals {
+                    !"sendMessage"
                 }
-                adding.belief {
-                    this.takeIf { it == SimpleMessage("Hello Back!", "Bob") }
-                } triggers {
-                    agent.print("Terminating!")
-                    skills.terminateNode()
+                hasPlans {
+                    adding.goal {
+                        ifGoalMatch("sendMessage")
+                    } triggers {
+                        agent.print("Hello World!")
+                        with(contextOf<MessagingSkill>()) {
+                            agent.sendMessage("Message", "Bob")
+                        }
+                    }
+                    adding.belief {
+                        this.takeIf { it == SimpleMessage("Hello Back!", "Bob") }
+                    } triggers {
+                        agent.print("Terminating!")
+                        terminateNode()
+                    }
                 }
             }
         }
