@@ -26,3 +26,14 @@ class BaseAgentTerminationSkill(val node: Node<*>) : AgentTerminationSkill {
         node.removeAgent(id)
     }
 }
+
+/**
+ * Extension function to terminate an agent using the provided [AgentTerminationSkill].
+ * This allows for a more concise syntax when terminating an agent.
+ */
+context(skill: AgentTerminationSkill)
+fun Agent.terminate() {
+    with(skill){
+        terminate()
+    }
+}

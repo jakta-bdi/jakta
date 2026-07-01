@@ -11,6 +11,7 @@ import it.unibo.jakta.skills.AgentTerminationSkill
 import it.unibo.jakta.skills.BaseAgentTerminationSkill
 import it.unibo.jakta.skills.BaseNodeTerminationSkill
 import it.unibo.jakta.skills.NodeTerminationSkill
+import it.unibo.jakta.skills.terminate
 import it.unibo.jakta.skills.terminateNode
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.seconds
@@ -37,7 +38,7 @@ class TestMultipleAgentDelays {
                             ifGoalMatch("goal")
                         } triggers {
                             agent.print("Hello...")
-                            delay(10000)
+                            delay(10.seconds)
                             agent.print("...World!")
                             terminateNode()
                         }
@@ -55,9 +56,7 @@ class TestMultipleAgentDelays {
                             agent.print("I will be faster...")
                             delay(5.seconds)
                             agent.print("...than you!")
-                            with(contextOf<AgentTerminationSkill>()) {
-                                agent.terminate()
-                            }
+                            agent.terminate()
                         }
                     }
                 }
