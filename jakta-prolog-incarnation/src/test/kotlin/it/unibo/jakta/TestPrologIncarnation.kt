@@ -34,9 +34,8 @@ class TestPrologIncarnation {
             val job = launch {
                 mas(LocalNodeBuilder()) {
                     node {
-                        agent("Alice") {
-                            embodiedAs { object {} }
-                            withSkills { TerminationSkill(it) }
+                        agent {
+                            embodiedAs { Any() }
                             hasInitialGoals {
                                 !initialGoal { "start"(0, 10) }
                             }
@@ -60,7 +59,7 @@ class TestPrologIncarnation {
                                         agent.print("Counting..." + N.value)
                                         agent.achieve(goal { "start"(S, X) })
                                         assert(true)
-                                        skills.terminateNode()
+                                        node.terminateNode()
                                     }
                                 }
                             }
@@ -78,9 +77,8 @@ class TestPrologIncarnation {
             val job = launch {
                 mas(LocalNodeBuilder()) {
                     node {
-                        agent("Alice") {
-                            embodiedAs { object {} }
-                            withSkills { TerminationSkill(it) }
+                        agent {
+                            embodiedAs { Any() }
                             hasInitialGoals {
                                 !initialGoal { "start"(1) }
                             }
@@ -101,7 +99,7 @@ class TestPrologIncarnation {
                                     } triggers {
                                         val n = N.value
                                         agent.print("Belief is $n")
-                                        skills.terminateNode()
+                                        node.terminateNode()
                                     }
                                 }
                             }
@@ -119,9 +117,8 @@ class TestPrologIncarnation {
             val job = launch {
                 mas(LocalNodeBuilder()) {
                     node {
-                        agent("Alice") {
-                            embodiedAs { object {} }
-                            withSkills { TerminationSkill(it) }
+                        agent {
+                            embodiedAs { Any() }
                             hasInitialGoals {
                                 !initialGoal { "start"(1) }
                             }
@@ -142,7 +139,7 @@ class TestPrologIncarnation {
                                     } onlyWhen {
                                         satisfies { N greaterThan 5 }
                                     } triggers {
-                                        skills.terminateNode()
+                                        node.terminateNode()
                                     }
                                 }
 
@@ -170,9 +167,8 @@ class TestPrologIncarnation {
             val job = launch {
                 mas(LocalNodeBuilder()) {
                     node {
-                        agent("Alice") {
-                            embodiedAs { object {} }
-                            withSkills { TerminationSkill(it) }
+                        agent {
+                            embodiedAs { Any() }
                             believes {
                                 +initialBelief { "belief"(1) }
                             }
@@ -187,7 +183,7 @@ class TestPrologIncarnation {
                                         satisfies { "belief"(N) }
                                     } triggers {
                                         agent.print("Belief is ${N.value}")
-                                        skills.terminateNode()
+                                        node.terminateNode()
                                     }
                                 }
                             }
@@ -205,9 +201,8 @@ class TestPrologIncarnation {
             val job = launch {
                 mas(LocalNodeBuilder()) {
                     node {
-                        agent("Alice") {
-                            embodiedAs { object {} }
-                            withSkills { TerminationSkill(it) }
+                        agent {
+                            embodiedAs { Any() }
                             believes {
                                 +initialBelief { "parent"("alice", "bob") }
                                 +initialBelief { "parent"("alice", "charlie") }
@@ -234,7 +229,7 @@ class TestPrologIncarnation {
                                             "${C.value}" +
                                                 " is a sibling of ${B.value}",
                                         )
-                                        skills.terminateNode()
+                                        node.terminateNode()
                                     }
                                 }
                             }
@@ -259,9 +254,8 @@ class TestPrologIncarnation {
             val job = launch {
                 mas(LocalNodeBuilder()) {
                     node {
-                        agent("Alice") {
-                            embodiedAs { object {} }
-                            withSkills { TerminationSkill(it) }
+                        agent {
+                            embodiedAs { Any() }
                             believes {
                                 +initialBelief { "parent"("alice", "bob") }
                                 +initialBelief { "parent"("alice", "charlie") }
@@ -280,7 +274,7 @@ class TestPrologIncarnation {
                                             "${C.value}" +
                                                 " is a sibling of ${B.value}",
                                         )
-                                        skills.terminateNode()
+                                        node.terminateNode()
                                     }
                                 }
 

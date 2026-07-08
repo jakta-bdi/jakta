@@ -1,8 +1,7 @@
 package it.unibo.jakta.belief
 
 /**
- * Checks if the belief base contains a belief that matches the given [belief].
- * If it does, returns the [Context] of the [GuardScope], otherwise returns null.
+ * Checks if the receiver goal matches the provided [goal]. If it does return it otherwise returns null.
  */
 fun String.ifGoalMatches(goal: String): Unit? = Unit.takeIf { this == goal }
 

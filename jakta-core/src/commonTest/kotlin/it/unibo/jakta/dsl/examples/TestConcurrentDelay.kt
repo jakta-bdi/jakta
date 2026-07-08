@@ -6,7 +6,6 @@ import it.unibo.jakta.dsl.executeInTestScope
 import it.unibo.jakta.dsl.ifGoalMatch
 import it.unibo.jakta.dsl.node
 import it.unibo.jakta.dsl.plan.triggers
-import it.unibo.jakta.skills.BaseNodeTerminationSkill
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.seconds
@@ -17,8 +16,7 @@ class TestConcurrentDelay {
     val helloWorld =
         node {
             agent {
-                embodiedAs { object {} }
-                withSkills { BaseNodeTerminationSkill(it) }
+                embodiedAs { Any() }
                 hasInitialGoals {
                     !"goal"
                     !"anotherGoal"
@@ -30,7 +28,7 @@ class TestConcurrentDelay {
                         agent.print("Hello...")
                         delay(1.seconds)
                         agent.print("...World!")
-                        skills.terminateNode()
+                        node.terminateNode()
                     }
                     adding.goal {
                         ifGoalMatch("anotherGoal")
@@ -39,7 +37,7 @@ class TestConcurrentDelay {
                         agent.print("Running while waiting...")
                         delay(5.seconds)
                         agent.print("I'm still faster!")
-                        skills.terminateNode()
+                        node.terminateNode()
                     }
                 }
             }

@@ -140,7 +140,6 @@ allprojects {
         }
     }
 
-
 }
 
 dependencies {

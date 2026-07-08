@@ -7,8 +7,6 @@ import it.unibo.jakta.dsl.executeInTestScope
 import it.unibo.jakta.dsl.ifGoalMatch
 import it.unibo.jakta.dsl.node
 import it.unibo.jakta.dsl.plan.triggers
-import it.unibo.jakta.skills.BaseNodeTerminationSkill
-import it.unibo.jakta.skills.NodeTerminationSkill
 import kotlin.test.Test
 
 class TestPlanFailure {
@@ -16,11 +14,10 @@ class TestPlanFailure {
     @Test
     fun testPlanFailureHandling() {
         Logger.setMinSeverity(Severity.Warn)
-        executeInTestScope<Any, NodeTerminationSkill> {
+        executeInTestScope {
             node {
                 agent {
-                    embodiedAs { object {} }
-                    withSkills { BaseNodeTerminationSkill(it) }
+                    embodiedAs { Any() }
                     hasInitialGoals { !"goalChain" }
                     hasPlans {
                         adding.goal {
@@ -28,7 +25,7 @@ class TestPlanFailure {
                         } triggers {
                             agent.achieve<String, Unit>("failingPlan")
                             agent.print("The plan has failed but recovered")
-                            skills.terminateNode()
+                            node.terminateNode()
                         }
                         adding.goal {
                             ifGoalMatch("failingPlan")
@@ -40,7 +37,7 @@ class TestPlanFailure {
                             ifGoalMatch("goalChain")
                         } triggers {
                             agent.print("Goal chain failed as expected.")
-                            skills.terminateNode()
+                            node.terminateNode()
                         }
 //                            failing.goal {
 //                                it.unibo.jakta.dsl.ifGoalMatch("failingPlan")

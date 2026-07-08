@@ -38,15 +38,14 @@ fun GuardScope<PrologBelief, Substitution>.satisfies(block: JaktaLogicProgrammin
  */
 @OptIn(InternalJaktaAPI::class)
 @JvmName("achieveTyped")
-suspend inline fun <reified PlanResult> MutableAgentState<*, PrologGoal, *>.achieve(goal: PrologGoal): PlanResult =
+suspend inline fun <reified PlanResult> MutableAgentState<*, PrologGoal>.achieve(goal: PrologGoal): PlanResult =
     internalAchieve(goal, typeOf<PlanResult>())
 
 /**
- * Public-facing extension function to achieve a goal with a specific return type, using reified type parameters.
+ * Public-facing extension function to achieve a goal without a specific return type, using reified type parameters.
  * @param goal The goal to be achieved.
- * @return The result of the plan execution of type [PlanResult].
  */
 @OptIn(InternalJaktaAPI::class)
 @JvmName("achieveUnit")
-suspend inline fun MutableAgentState<*, PrologGoal, *>.achieve(goal: PrologGoal): Unit =
+suspend inline fun MutableAgentState<*, PrologGoal>.achieve(goal: PrologGoal): Unit =
     internalAchieve(goal, typeOf<Unit>())

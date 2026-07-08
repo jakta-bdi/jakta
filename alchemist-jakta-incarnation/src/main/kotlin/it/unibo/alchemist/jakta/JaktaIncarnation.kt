@@ -1,6 +1,5 @@
 package it.unibo.alchemist.jakta
 
-import it.unibo.alchemist.jakta.actions.JaktaForAlchemistAgent
 import it.unibo.alchemist.jakta.properties.JaktaForAlchemistRuntime
 import it.unibo.alchemist.model.Action
 import it.unibo.alchemist.model.Actionable
@@ -19,13 +18,13 @@ import it.unibo.alchemist.model.nodes.GenericNode
 import it.unibo.alchemist.model.reactions.Event
 import it.unibo.alchemist.model.timedistributions.DiracComb
 import it.unibo.jakta.dsl.RuntimeNodes
-import it.unibo.jakta.node.Node as JaktaNode
-import kotlin.collections.get
 import kotlin.reflect.KCallable
 import kotlin.reflect.full.isSubtypeOf
 import kotlin.reflect.full.starProjectedType
 import kotlin.reflect.jvm.kotlinFunction
 import org.apache.commons.math3.random.RandomGenerator
+
+typealias JaktaNode<B> = it.unibo.jakta.node.ExecutableNode<B>
 
 /**
  * Jakta incarnation for executing on Alchemist.
@@ -120,7 +119,7 @@ class JaktaIncarnation<P : Position<P>> : Incarnation<Any?, P> {
          * @param node the alchemist Node on which the jakta entrypoint should be executed.
          * @return an instance of [RuntimeNodes] which contains the jakta nodes to be executed on the alchemist node.
          */
-        fun loadEntrypointFromClasspath(entrypoint: Any?, node: Node<Any?>): RuntimeNodes<JaktaNode<*, *>> {
+        fun loadEntrypointFromClasspath(entrypoint: Any?, node: Node<Any?>): RuntimeNodes<JaktaNode<*>> {
             require(entrypoint is String) {
                 "JaKtA expects the program to be the classpath String pointing to program entrypoint."
             }
@@ -137,7 +136,7 @@ class JaktaIncarnation<P : Position<P>> : Incarnation<Any?, P> {
                 .asSequence()
                 .mapNotNull { it.kotlinFunction }
                 .filter { it.returnType.isSubtypeOf(RuntimeNodes::class.starProjectedType) }
-                .filterIsInstance<KCallable<RuntimeNodes<JaktaNode<*, *>>>>()
+                .filterIsInstance<KCallable<RuntimeNodes<JaktaNode<*>>>>()
                 .first { it.name == method }
 
             val jaktaRuntime = node.properties

@@ -6,8 +6,6 @@ import it.unibo.jakta.dsl.executeInTestScope
 import it.unibo.jakta.dsl.ifGoalMatch
 import it.unibo.jakta.dsl.node
 import it.unibo.jakta.dsl.plan.triggers
-import it.unibo.jakta.skills.BaseNodeTerminationSkill
-import it.unibo.jakta.skills.NodeTerminationSkill
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
@@ -19,11 +17,10 @@ class TestHelloDelay {
         Logger.setMinSeverity(Severity.Debug)
         val timeToWait = 10.seconds
 
-        executeInTestScope<Any, NodeTerminationSkill> {
+        executeInTestScope<Any> {
             node {
                 agent {
-                    embodiedAs { object {} }
-                    withSkills { BaseNodeTerminationSkill(it) }
+                    embodiedAs { Any() }
                     hasInitialGoals {
                         !"goal"
                     }
@@ -33,10 +30,8 @@ class TestHelloDelay {
                         } triggers {
                             agent.print("Hello...")
                             delay(timeToWait)
-                            // agent.print("Time perceived by the agent: ${environment.currentTime()}")
-                            // assertEquals(environment.currentTime(), timeToWait)
                             agent.print("...World!")
-                            skills.terminateNode()
+                            node.terminateNode()
                         }
                     }
                 }

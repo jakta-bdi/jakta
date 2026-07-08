@@ -7,12 +7,12 @@ import kotlinx.coroutines.CoroutineScope
 /**
  * Specifies how a [ExecutableAgent] can run.
  */
-interface AgentLifecycle<Belief : Any, Goal : Any, Skills : Any> {
+interface AgentLifecycle<Belief : Any, Goal : Any> {
 
     /**
      * The [ExecutableAgent] that is currently executing.
      */
-    val executableAgent: ExecutableAgent<Belief, Goal, Skills>
+    val executableAgent: ExecutableAgent<Belief, Goal>
 
     /**
      * Runs a reasoning cycle step.

@@ -4,6 +4,7 @@ import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import it.unibo.jakta.agent.Agent
 import it.unibo.jakta.agent.AgentID
+import it.unibo.jakta.agent.BaseAgentID
 import it.unibo.jakta.dsl.examples.Movement.Events.Factory.position
 import it.unibo.jakta.dsl.examples.Recharging.Events.Factory.chargeLevel
 import it.unibo.jakta.dsl.executeInTestScope
@@ -12,11 +13,9 @@ import it.unibo.jakta.dsl.node
 import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.event.AgentEvent
 import it.unibo.jakta.event.AgentUpdate
-import it.unibo.jakta.event.BeliefAddEvent
 import it.unibo.jakta.node.Node
-import it.unibo.jakta.skills.BaseNodeTerminationSkill
-import it.unibo.jakta.skills.NodeTerminationSkill
 import kotlin.test.Test
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 
 class BodyWithPosition {
@@ -50,15 +49,15 @@ interface Movement<P> {
     }
 }
 
-class FixedTimeRecharging(val node: Node<BodyWithPosition, *>) : Recharging {
+class FixedTimeRecharging(val node: Node<BodyWithPosition>) : Recharging {
     override suspend fun Agent.recharge() {
         val agent = this
-        delay(3000)
+        delay(3.seconds)
         node.sendEvent(chargeLevel(100), { it == node.agents[agent.id] })
     }
 }
 
-class GridMovement(val node: Node<BodyWithPosition, *>) : Movement<DoubleArray> {
+class GridMovement(val node: Node<BodyWithPosition>) : Movement<DoubleArray> {
     context(s1: Recharging)
     override fun Agent.moveTo(newPos: DoubleArray) {
         node.agents[this.id]?.position2D = newPos
@@ -66,63 +65,61 @@ class GridMovement(val node: Node<BodyWithPosition, *>) : Movement<DoubleArray> 
     }
 }
 
-class CustomSkillSet(val node: Node<BodyWithPosition, *>) :
-    Recharging by FixedTimeRecharging(node),
-    Movement<DoubleArray> by GridMovement(node),
-    NodeTerminationSkill by BaseNodeTerminationSkill(node)
-
 class TestSpatialRobot {
 
     val mas = node {
+        context(
+            FixedTimeRecharging(node),
+            GridMovement(node),
+        ) {
+            agent(BaseAgentID("robot")) {
+                embodiedAs { BodyWithPosition() }
 
-        agent("Vacuum") {
-            embodiedAs { BodyWithPosition() }
-            withSkills {
-                CustomSkillSet(it)
-            }
-
-            believes {
-                +"temp(0)"
-            }
-
-            hasInitialGoals {
-                !"goal"
-            }
-
-            handlesPerceptionEvents { event ->
-                when (event) {
-                    is Movement.Events.Position<*> ->
-                        AgentUpdate.Belief(
-                            setOf(("position(${event.agentId}, ${event.position})")),
-                            beliefs.filter { it.startsWith("position(") }.toSet(),
-                        )
-
-                    is Recharging.Events.ChargeLevel ->
-                        AgentUpdate.Belief(
-                            setOf("chargeLevel(${event.level})"),
-                            beliefs.filter { it.startsWith("chargeLevel(") }.toSet(),
-                        )
-
-                    else -> null
+                believes {
+                    +"temp(0)"
                 }
-            }
 
-            hasPlans {
-                adding.goal {
-                    ifGoalMatch("goal")
-                } triggers {
-                    with(skills) {
-                        agent.print("Hello World!")
-                        agent.recharge()
-                        agent.print("Recharged!")
-                        agent.moveTo(doubleArrayOf(0.0, 1.0))
-                        agent.print("Moved!")
-                        terminateNode()
+                hasInitialGoals {
+                    !"goal"
+                }
+
+                handlesPerceptionEvents { event ->
+                    when (event) {
+                        is Movement.Events.Position<*> ->
+                            AgentUpdate.Belief(
+                                setOf(("position(${event.agentId}, ${event.position})")),
+                                beliefs.filter { it.startsWith("position(") }.toSet(),
+                            )
+
+                        is Recharging.Events.ChargeLevel ->
+                            AgentUpdate.Belief(
+                                setOf("chargeLevel(${event.level})"),
+                                beliefs.filter { it.startsWith("chargeLevel(") }.toSet(),
+                            )
+
+                        else -> null
                     }
                 }
 
-                adding.belief { this } triggers {
-                    agent.print("Now I believe ${this.context}")
+                hasPlans {
+                    adding.goal {
+                        ifGoalMatch("goal")
+                    } triggers {
+                        with(contextOf<Recharging>()) {
+                            agent.print("Hello World!")
+                            agent.recharge()
+                            agent.print("Recharged!")
+                        }
+                        with(contextOf<Movement<DoubleArray>>()) {
+                            agent.moveTo(doubleArrayOf(0.0, 1.0))
+                            agent.print("Moved!")
+                        }
+                        node.terminateNode()
+                    }
+
+                    adding.belief { this } triggers {
+                        agent.print("Now I believe ${this.context}")
+                    }
                 }
             }
         }

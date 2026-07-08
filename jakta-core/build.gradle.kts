@@ -28,4 +28,13 @@ kotlinMultiplatform {
         exclude("**PlanImpl**")
         exclude("**PlanBuilderImpl**")
     }
+
+    compilerOptions {
+        freeCompilerArgs.add("-Xcontext-parameters")
+    }
+}
+
+tasks.withType<Cpd> {
+    // TODO should I not exclude CPD for tests?
+    exclude("Test**")
 }

@@ -6,25 +6,16 @@ import it.unibo.jakta.dsl.executeInTestScope
 import it.unibo.jakta.dsl.ifGoalMatch
 import it.unibo.jakta.dsl.node
 import it.unibo.jakta.dsl.plan.triggers
-import it.unibo.jakta.node.Node
-import it.unibo.jakta.skills.AgentTerminationSkill
-import it.unibo.jakta.skills.BaseAgentTerminationSkill
-import it.unibo.jakta.skills.BaseNodeTerminationSkill
-import it.unibo.jakta.skills.NodeTerminationSkill
+import it.unibo.jakta.skills.terminate
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
-
-class SkillSet(val node: Node<*, *>) :
-    NodeTerminationSkill by BaseNodeTerminationSkill(node),
-    AgentTerminationSkill by BaseAgentTerminationSkill(node)
 
 class TestMultipleAgentDelays {
     val helloWorld =
         node {
             agent {
-                embodiedAs { object {} }
-                withSkills { SkillSet(it) }
+                embodiedAs { Any() }
                 hasInitialGoals {
                     !"goal"
                 }
@@ -33,15 +24,14 @@ class TestMultipleAgentDelays {
                         ifGoalMatch("goal")
                     } triggers {
                         agent.print("Hello...")
-                        delay(10000)
+                        delay(10.seconds)
                         agent.print("...World!")
-                        skills.terminateNode()
+                        node.terminateNode()
                     }
                 }
             }
             agent {
-                embodiedAs { object {} }
-                withSkills { SkillSet(it) }
+                embodiedAs { Any() }
                 hasInitialGoals {
                     !"goal"
                 }
@@ -52,7 +42,7 @@ class TestMultipleAgentDelays {
                         agent.print("I will be faster...")
                         delay(5.seconds)
                         agent.print("...than you!")
-                        with(skills) {
+                        context(node) {
                             agent.terminate()
                         }
                     }

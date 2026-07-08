@@ -2,36 +2,46 @@ package it.unibo.jakta.dsl.examples
 
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
+import it.unibo.jakta.agent.BaseAgentID
 import it.unibo.jakta.dsl.executeInTestScope
 import it.unibo.jakta.dsl.node
+import it.unibo.jakta.dsl.node.LocalNodeBuilder
+import it.unibo.jakta.dsl.plan.PlanLibraryBuilder
 import it.unibo.jakta.dsl.plan.triggers
-import it.unibo.jakta.skills.BaseNodeTerminationSkill
+import it.unibo.jakta.skills.NodeTerminationSkill
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 class TestBeliefPlan {
 
-    val helloWorld = node {
-        agent("Hello world agent") {
-            embodiedAs { object {} }
-            withSkills { BaseNodeTerminationSkill(it) }
-            hasInitialGoals {
-                !"start"
-            }
-            hasPlans {
-                adding.goal {
-                    this.takeIf { it == "start" }
-                } triggers {
-                    agent.believe("testBelief")
-                }
+    context(terminator: NodeTerminationSkill)
+    fun PlanLibraryBuilder<String, *>.terminateOn(test: String) = adding.belief {
+        this.takeIf { it == test }
+    } triggers {
+        agent.print("Belief added: $context")
+        terminator.terminateNode()
+    }
 
-                adding.belief {
-                    this.takeIf { it == "testBelief" }
-                } triggers {
-                    agent.print("Belief added: $context")
-                    skills.terminateNode()
-                }
+    context(terminator: NodeTerminationSkill)
+    fun LocalNodeBuilder<Any>.testAgent() = agent(BaseAgentID("TestAgent")) {
+        embodiedAs { Any() }
+        hasInitialGoals {
+            !"testGoal"
+        }
+        hasPlans {
+            adding.goal {
+                this.takeIf { it == "testGoal" }
+            } triggers {
+                agent.print("Adding belief: testBelief")
+                agent.believe("testBelief")
             }
+            terminateOn("testBelief")
+        }
+    }
+
+    val helloWorld = node {
+        context(NodeTerminationSkill(node)) {
+            testAgent()
         }
     }
 

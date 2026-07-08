@@ -6,7 +6,6 @@ import it.unibo.jakta.dsl.executeInTestScope
 import it.unibo.jakta.dsl.ifGoalMatch
 import it.unibo.jakta.dsl.node
 import it.unibo.jakta.dsl.plan.triggers
-import it.unibo.jakta.skills.BaseNodeTerminationSkill
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
@@ -14,8 +13,7 @@ class TestBeliefRemoval {
     val helloWorld =
         node {
             agent {
-                embodiedAs { object {} }
-                withSkills { BaseNodeTerminationSkill(it) }
+                embodiedAs { Any() }
                 believes {
                     +"testBelief"
                 }
@@ -32,7 +30,7 @@ class TestBeliefRemoval {
                         this.takeIf { it == "testBelief" }
                     } triggers {
                         agent.print("Belief removed: $context")
-                        skills.terminateNode()
+                        node.terminateNode()
                     }
                 }
             }

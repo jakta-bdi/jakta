@@ -10,6 +10,8 @@ import it.unibo.jakta.dsl.node.LocalNodeBuilder
 import it.unibo.jakta.dsl.plan.PlanLibraryBuilder
 import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.node.CoroutineNodeRunner
+import it.unibo.jakta.skills.NodeTerminationSkill
+import it.unibo.jakta.skills.terminateNode
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlinx.coroutines.launch
@@ -24,21 +26,24 @@ class TestStringIncarnationFunctions {
 
     private fun fail(message: String = ""): Unit = kotlin.test.fail(message)
 
-    private fun runMas(block: PlanLibraryBuilder<String, String, TerminationSkill>.() -> Unit) {
+    private fun runMas(block: context(NodeTerminationSkill) PlanLibraryBuilder<String, String>.() -> Unit) {
         runTest {
             val job = launch {
                 mas(LocalNodeBuilder()) {
                     node {
-                        agent("HelloAgent") {
-                            embodiedAs { object {} }
-                            withSkills { TerminationSkill(it) }
-                            believes {
-                                +"goal"
+                        context(NodeTerminationSkill(node)) {
+                            agent {
+                                embodiedAs { Any() }
+                                believes {
+                                    +"goal"
+                                }
+                                hasInitialGoals {
+                                    !"goal"
+                                }
+                                hasPlans {
+                                    block()
+                                }
                             }
-                            hasInitialGoals {
-                                !"goal"
-                            }
-                            hasPlans(block)
                         }
                     }
                 }.run(CoroutineNodeRunner())
@@ -56,7 +61,7 @@ class TestStringIncarnationFunctions {
                 containsBeliefMatching("goal")
             } triggers {
                 agent.print("Hello World!")
-                skills.terminateNode()
+                terminateNode()
             }
         }
     }
@@ -75,7 +80,7 @@ class TestStringIncarnationFunctions {
                 ifGoalMatches("goal")
             } triggers {
                 agent.print("Hello World!")
-                skills.terminateNode()
+                terminateNode()
             }
         }
     }
@@ -92,7 +97,7 @@ class TestStringIncarnationFunctions {
                 ifGoalMatches("belief")
             } triggers {
                 agent.print("Hello World!")
-                skills.terminateNode()
+                terminateNode()
             }
         }
     }
@@ -106,7 +111,7 @@ class TestStringIncarnationFunctions {
                 containsBeliefMatching("goal")
             } triggers {
                 agent.print("Hello World!")
-                skills.terminateNode()
+                terminateNode()
             }
         }
     }

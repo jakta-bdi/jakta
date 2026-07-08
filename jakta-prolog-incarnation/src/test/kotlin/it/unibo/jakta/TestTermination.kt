@@ -2,10 +2,6 @@ package it.unibo.jakta
 
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
-import it.unibo.jakta.dsl.belief.belief
-import it.unibo.jakta.dsl.belief.initialBelief
-import it.unibo.jakta.dsl.belief.matching
-import it.unibo.jakta.dsl.goal.goal
 import it.unibo.jakta.dsl.goal.initialGoal
 import it.unibo.jakta.dsl.goal.matching
 import it.unibo.jakta.dsl.mas.mas
@@ -32,9 +28,8 @@ class TestTermination {
             val job = launch {
                 mas(LocalNodeBuilder()) {
                     node {
-                        agent("Alice") {
-                            embodiedAs { object {} }
-                            withSkills { TerminationSkill(it) }
+                        agent {
+                            embodiedAs { Any() }
                             hasInitialGoals {
                                 !initialGoal { "start".toAtom() }
                             }
@@ -43,7 +38,7 @@ class TestTermination {
                                     adding.goal {
                                         matching { "start".toAtom() }
                                     } triggers {
-                                        skills.terminateNode()
+                                        node.terminateNode()
                                     }
                                 }
                             }

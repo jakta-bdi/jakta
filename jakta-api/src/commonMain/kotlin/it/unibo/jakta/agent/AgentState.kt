@@ -10,9 +10,8 @@ import it.unibo.jakta.plan.Plan
  *
  * @param Belief The type representing the agent's *beliefs*.
  * @param Goal The type representing the agent's *goals*.
- * @param Skills The type representing the agent's *skills*.
  */
-interface AgentState<Belief : Any, Goal : Any, Skills : Any> {
+interface AgentState<Belief : Any, Goal : Any> {
 
     /**
      * The *beliefs* held by the agent.
@@ -27,27 +26,22 @@ interface AgentState<Belief : Any, Goal : Any, Skills : Any> {
     /**
      * The list of [Plan.Belief] available to handle [AgentEvent.Internal.Belief] events.
      */
-    val beliefPlans: List<Plan.Belief<Belief, Goal, Skills, *, *>>
+    val beliefPlans: List<Plan.Belief<Belief, Goal, *, *>>
 
     /**
      * The list of [Plan.Goal] available to handle [AgentEvent.Internal.Goal] events.
      */
-    val goalPlans: List<Plan.Goal<Belief, Goal, Skills, *, *>>
+    val goalPlans: List<Plan.Goal<Belief, Goal, *, *>>
 
     /**
      * Mapping function which defines how to (optionally)
      * convert a [AgentEvent.External.Perception] into an [AgentUpdate].
      */
-    val perceptionHandler: AgentState<Belief, Goal, Skills>.(AgentEvent.External.Perception) -> AgentUpdate<*>?
+    val perceptionHandler: AgentState<Belief, Goal>.(AgentEvent.External.Perception) -> AgentUpdate<*>?
 
     /**
      * Mapping function which defines how to (optionally)
      * convert a [AgentEvent.External.Message] into an [AgentUpdate] .
      */
-    val messageHandler: AgentState<Belief, Goal, Skills>.(AgentEvent.External.Message) -> AgentUpdate<*>?
-
-    /**
-     * The [Skills] the agent is allowed to use.
-     */
-    val skills: Skills
+    val messageHandler: AgentState<Belief, Goal>.(AgentEvent.External.Message<*>) -> AgentUpdate<*>?
 }

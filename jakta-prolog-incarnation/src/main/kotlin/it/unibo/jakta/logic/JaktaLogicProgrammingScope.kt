@@ -6,6 +6,9 @@ import it.unibo.jakta.dsl.belief.PrologBelief
 import it.unibo.jakta.dsl.goal.PrologGoal
 import it.unibo.jakta.dsl.plan.PlanLibraryBuilder
 import it.unibo.tuprolog.core.Scope
+import it.unibo.tuprolog.core.Struct
+import it.unibo.tuprolog.core.Substitution
+import it.unibo.tuprolog.core.Term
 import it.unibo.tuprolog.core.VariablesProvider
 import it.unibo.tuprolog.dsl.LogicProgrammingScopeWithOperators
 import it.unibo.tuprolog.dsl.LogicProgrammingScopeWithPrologStandardLibrary
@@ -17,7 +20,11 @@ import it.unibo.tuprolog.dsl.theory.LogicProgrammingScopeWithTheories
 import it.unibo.tuprolog.dsl.unify.LogicProgrammingScopeWithUnification
 import it.unibo.tuprolog.theory.IndexedTheoryFactory
 import it.unibo.tuprolog.theory.TheoryFactory
+import it.unibo.tuprolog.unify.AbstractUnificator
 import it.unibo.tuprolog.unify.Unificator
+import kotlin.collections.contains
+import kotlin.collections.orEmpty
+import kotlin.collections.toMutableList
 
 /**
  * A logic programming scope for Jakta, providing a context for defining and manipulating Prolog beliefs and goals
@@ -85,7 +92,7 @@ open class JaktaLogicProgrammingScope(
          * @return The result of the scope block.
          */
         @JaktaDSL
-        inline fun PlanLibraryBuilder<PrologBelief, PrologGoal, *>.prologPlan(
+        inline fun PlanLibraryBuilder<PrologBelief, PrologGoal>.prologPlan(
             block: JaktaLogicProgrammingScope.() -> Unit,
         ): Unit = with(JaktaLogicProgrammingScope(), block)
     }

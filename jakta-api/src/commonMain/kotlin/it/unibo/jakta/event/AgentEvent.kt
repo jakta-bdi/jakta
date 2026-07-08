@@ -1,4 +1,5 @@
 package it.unibo.jakta.event
+import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.intention.Intention
 import kotlin.reflect.KType
 import kotlinx.coroutines.CompletableDeferred
@@ -85,8 +86,11 @@ sealed interface AgentEvent {
     sealed interface External : AgentEvent {
         /**
          * Messages are events sent to communicate with agents.
+         * @param P The type of the message payload.
+         * @property payload The content of the message.
+         * @property sender The ID of the agent that sent the message.
          */
-        interface Message : External
+        data class Message<P : Any>(val payload: P, val sender: AgentID) : External
 
         /**
          * Perceptions are events representing information that can be perceived from the environment.
