@@ -23,7 +23,6 @@ interface Node<Body : Any> {
      * @param event The external event to be sent.
      * @param filterFunction A function that determines the conditions under which an agent should receive the event.
      */
-
     fun sendEvent(event: AgentEvent.External, filterFunction: Node<Body>.(Body) -> Boolean = { true })
 
     /**

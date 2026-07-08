@@ -2,12 +2,12 @@ package it.unibo.jakta.dsl.examples
 
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
+import it.unibo.jakta.agent.BaseAgentID
 import it.unibo.jakta.dsl.executeInTestScope
 import it.unibo.jakta.dsl.node
 import it.unibo.jakta.dsl.node.LocalNodeBuilder
 import it.unibo.jakta.dsl.plan.PlanLibraryBuilder
 import it.unibo.jakta.dsl.plan.triggers
-import it.unibo.jakta.skills.BaseNodeTerminationSkill
 import it.unibo.jakta.skills.NodeTerminationSkill
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -23,19 +23,25 @@ class TestBeliefPlan {
     }
 
     context(terminator: NodeTerminationSkill)
-    fun <Goal : Any> LocalNodeBuilder<Any>.testAgent() = agent<String, Goal>("Hello world agent") {
+    fun LocalNodeBuilder<Any>.testAgent() = agent(BaseAgentID("TestAgent")) {
         embodiedAs { Any() }
-        believes {
-            +"testBelief"
+        hasInitialGoals {
+            !"testGoal"
         }
         hasPlans {
+            adding.goal {
+                this.takeIf { it == "testGoal" }
+            } triggers {
+                agent.print("Adding belief: testBelief")
+                agent.believe("testBelief")
+            }
             terminateOn("testBelief")
         }
     }
 
     val helloWorld = node {
-        context(BaseNodeTerminationSkill(node)) {
-            testAgent<String>()
+        context(NodeTerminationSkill(node)) {
+            testAgent()
         }
     }
 

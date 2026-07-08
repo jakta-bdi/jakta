@@ -8,21 +8,11 @@ import it.unibo.jakta.node.Node
  * This can be used to implement a "self-destruct" behavior for the agent,
  * or to allow agents to clean up themselves when they are no longer needed.
  */
-interface AgentTerminationSkill {
+class AgentTerminationSkill(node: Node<Any>) : Skill<Any>(node) {
     /**
-     * Terminates the agent.
-     * After this method is called, the agent will be removed from the node
-     * and will no longer be active in the system.
+     * Terminates the agent by removing it from the node.
      */
-    fun Agent.terminate()
-}
-
-/**
- * Basic implementation of [AgentTerminationSkill] that simply removes the agent from the node.
- * Takes the [node] the agent is on as input.
- */
-class BaseAgentTerminationSkill(val node: Node<*>) : AgentTerminationSkill {
-    override fun Agent.terminate() {
+    fun Agent.terminate() {
         node.removeAgent(id)
     }
 }
@@ -33,7 +23,18 @@ class BaseAgentTerminationSkill(val node: Node<*>) : AgentTerminationSkill {
  */
 context(skill: AgentTerminationSkill)
 fun Agent.terminate() {
-    with(skill){
+    with(skill) {
+        terminate()
+    }
+}
+
+/**
+ * Helper function to create an [AgentTerminationSkill] and terminate an agent.
+ * This allows for a more concise syntax when terminating an agent without explicitly creating a skill instance.
+ */
+context(node: Node<Any>)
+fun Agent.terminate() {
+    with(AgentTerminationSkill(node)) {
         terminate()
     }
 }

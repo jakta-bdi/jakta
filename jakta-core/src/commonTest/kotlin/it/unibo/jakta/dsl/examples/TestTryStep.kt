@@ -6,10 +6,6 @@ import it.unibo.jakta.dsl.ManualStepNodeRunner
 import it.unibo.jakta.dsl.node
 import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.node.ExecutableNode
-import it.unibo.jakta.node.Node
-import it.unibo.jakta.skills.BaseNodeTerminationSkill
-import it.unibo.jakta.skills.NodeTerminationSkill
-import it.unibo.jakta.skills.terminateNode
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertFalse
@@ -28,26 +24,24 @@ class TestTryStep {
     var done = false
 
     val helloWorld: ExecutableNode<Any> = node {
-        context(BaseNodeTerminationSkill(node)) {
-            agent("Hello world agent") {
-                embodiedAs { Any() }
-                hasInitialGoals {
-                    !"goal"
-                }
-                hasPlans {
-                    adding.goal {
-                        this.takeIf { it == "goal" }
-                    } triggers {
-                        agent.print("First step")
-                        firstStep = true
-                        delay(1.seconds)
-                        agent.print("Second step")
-                        secondStep = true
-                        delay(1.seconds)
-                        agent.print("Third step, done!")
-                        done = true
-                        terminateNode()
-                    }
+        agent {
+            embodiedAs { Any() }
+            hasInitialGoals {
+                !"goal"
+            }
+            hasPlans {
+                adding.goal {
+                    this.takeIf { it == "goal" }
+                } triggers {
+                    agent.print("First step")
+                    firstStep = true
+                    delay(1.seconds)
+                    agent.print("Second step")
+                    secondStep = true
+                    delay(1.seconds)
+                    agent.print("Third step, done!")
+                    done = true
+                    node.terminateNode()
                 }
             }
         }

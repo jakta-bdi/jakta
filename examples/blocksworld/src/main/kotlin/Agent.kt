@@ -1,3 +1,4 @@
+import it.unibo.jakta.agent.BaseAgentID
 import it.unibo.jakta.dsl.belief.PrologBelief
 import it.unibo.jakta.dsl.belief.inferenceRule
 import it.unibo.jakta.dsl.belief.initialBelief
@@ -30,7 +31,7 @@ fun MasBuilder<LocalNode<Any>, LocalNodeBuilder<Any>>.blocksWorldNode(
     desiredWorldState: PrologGoal,
 ) = node {
     context(BlocksWorldSkillsImpl(world, node)) {
-        agent<PrologBelief, PrologGoal>("blocky") {
+        agent<PrologBelief, PrologGoal>(BaseAgentID("BlocksWorldAgent")) {
             val start = "start".toAtom()
             val table = "table".toAtom()
             fun state(list: List): Struct = Struct.of("state", list)

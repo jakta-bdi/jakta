@@ -1,5 +1,6 @@
 package it.unibo.jakta.dsl.node
 
+import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.dsl.JaktaDSL
 import it.unibo.jakta.dsl.agent.AgentBuilder
 import it.unibo.jakta.dsl.agent.AgentBuilderImpl
@@ -21,14 +22,14 @@ open class LocalNodeBuilder<Body : Any> : NodeBuilder<Body, LocalNode<Body>> {
     override fun <Belief : Any, Goal : Any> agent(block: AgentBuilder<Belief, Goal, Body>.() -> Unit) =
         buildAgent(null, block)
 
-    override fun <Belief : Any, Goal : Any> agent(name: String, block: AgentBuilder<Belief, Goal, Body>.() -> Unit) =
-        buildAgent(name, block)
+    override fun <Belief : Any, Goal : Any> agent(id: AgentID, block: AgentBuilder<Belief, Goal, Body>.() -> Unit) =
+        buildAgent(id, block)
 
     private fun <Belief : Any, Goal : Any> buildAgent(
-        name: String?,
+        id: AgentID?,
         block: AgentBuilder<Belief, Goal, Body>.() -> Unit,
     ) {
-        val agentBuilder = AgentBuilderImpl<Belief, Goal, Body>(name)
+        val agentBuilder = AgentBuilderImpl<Belief, Goal, Body>(id)
         val agent: AgentBuilder<Belief, Goal, Body> = agentBuilder.apply(block)
         agents += agent
     }

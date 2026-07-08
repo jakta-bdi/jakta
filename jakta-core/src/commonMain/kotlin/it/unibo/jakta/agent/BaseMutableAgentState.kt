@@ -58,17 +58,17 @@ internal class BaseMutableAgentState<Belief : Any, Goal : Any>(
     override val perceptionHandler: AgentState<Belief, Goal>.(Perception) -> AgentUpdate<*>?
         get() = _perceptionHandler
 
-    private var _messageHandler: AgentState<Belief, Goal>.(Message) -> AgentUpdate<*>? =
+    private var _messageHandler: AgentState<Belief, Goal>.(Message<*>) -> AgentUpdate<*>? =
         initialAgentState.messageHandler
 
-    override val messageHandler: AgentState<Belief, Goal>.(Message) -> AgentUpdate<*>?
+    override val messageHandler: AgentState<Belief, Goal>.(Message<*>) -> AgentUpdate<*>?
         get() = _messageHandler
 
     override fun setPerceptionHandler(handler: AgentState<Belief, Goal>.(Perception) -> AgentUpdate<*>?) {
         this._perceptionHandler = handler
     }
 
-    override fun setMessageHandler(handler: AgentState<Belief, Goal>.(Message) -> AgentUpdate<*>?) {
+    override fun setMessageHandler(handler: AgentState<Belief, Goal>.(Message<*>) -> AgentUpdate<*>?) {
         this._messageHandler = handler
     }
 

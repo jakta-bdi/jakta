@@ -15,5 +15,5 @@ class BaseAgentState<Belief : Any, Goal : Any>(
     override val beliefPlans: List<Plan.Belief<Belief, Goal, *, *>>,
     override val goalPlans: List<Plan.Goal<Belief, Goal, *, *>>,
     override val perceptionHandler: AgentState<Belief, Goal>.(Perception) -> AgentUpdate<*>?,
-    override val messageHandler: AgentState<Belief, Goal>.(Message) -> AgentUpdate<*>?,
+    override val messageHandler: AgentState<Belief, Goal>.(Message<*>) -> AgentUpdate<*>?,
 ) : AgentState<Belief, Goal>

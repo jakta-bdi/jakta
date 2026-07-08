@@ -1,9 +1,10 @@
+package it.unibo.jakta
+
 import it.unibo.jakta.logic.JaktaLogicProgrammingScope
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.core.Term
 import it.unibo.tuprolog.unify.AbstractUnificator
-import it.unibo.tuprolog.unify.Unificator
 import it.unibo.tuprolog.utils.setTag
 
 /**

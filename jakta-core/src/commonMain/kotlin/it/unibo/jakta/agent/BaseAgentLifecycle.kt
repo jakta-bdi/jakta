@@ -217,7 +217,7 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
                 perceptionHandler(event)
             }
 
-            is AgentEvent.External.Message -> executableAgent.state.run {
+            is AgentEvent.External.Message<*> -> executableAgent.state.run {
                 messageHandler(event)
             }
         } ?: run {

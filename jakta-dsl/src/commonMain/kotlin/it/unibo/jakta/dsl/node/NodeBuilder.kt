@@ -1,5 +1,6 @@
 package it.unibo.jakta.dsl.node
 
+import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.dsl.JaktaDSL
 import it.unibo.jakta.dsl.agent.AgentBuilder
 import it.unibo.jakta.node.ExecutableNode
@@ -26,7 +27,7 @@ interface NodeBuilder<Body : Any, N : ExecutableNode<Body>> {
      * Defines an agent with a specific name using the provided builder block.
      * @return the constructed agent.
      */
-    fun <Belief : Any, Goal : Any> agent(name: String, block: AgentBuilder<Belief, Goal, Body>.() -> Unit)
+    fun <Belief : Any, Goal : Any> agent(id: AgentID, block: AgentBuilder<Belief, Goal, Body>.() -> Unit)
 
 //    /**
 //     * Adds multiple agents to the MAS.

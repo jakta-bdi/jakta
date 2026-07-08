@@ -30,7 +30,7 @@ interface MutableAgentState<Belief : Any, Goal : Any> :
      * Modifies the message handler function that defines which Messages are interest of the agent.
      * @param handler the new function handler that the agent will use, starting from the next lifecycle iteration.
      */
-    fun setMessageHandler(handler: AgentState<Belief, Goal>.(AgentEvent.External.Message) -> AgentUpdate<*>?)
+    fun setMessageHandler(handler: AgentState<Belief, Goal>.(AgentEvent.External.Message<*>) -> AgentUpdate<*>?)
 
     /**
      * Adds a new [Plan.Goal] that agent can use for its reasoning process.

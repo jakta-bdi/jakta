@@ -17,7 +17,7 @@ import kotlin.properties.Delegates
 /**
  * Implementation of the AgentBuilder interface.
  */
-class AgentBuilderImpl<Belief : Any, Goal : Any, Body : Any>(private val name: String? = null) :
+class AgentBuilderImpl<Belief : Any, Goal : Any, Body : Any>(private val id: AgentID? = null) :
     AgentBuilder<Belief, Goal, Body> {
     private var initialBeliefs = listOf<Belief>()
     private var initialGoals = listOf<Goal>()
@@ -27,7 +27,7 @@ class AgentBuilderImpl<Belief : Any, Goal : Any, Body : Any>(private val name: S
     private var bodyFactory: (AgentID) -> Body by Delegates.notNull()
 
     // By default, all messages are discarded.
-    private var messageHandler: AgentState<Belief, Goal>.(Message) -> AgentUpdate<*>? = { null }
+    private var messageHandler: AgentState<Belief, Goal>.(Message<*>) -> AgentUpdate<*>? = { null }
 
     // By default, percept do not generate events.
     private var perceptionHandler: AgentState<Belief, Goal>.(Perception) -> AgentUpdate<*>? = { null }
@@ -36,7 +36,7 @@ class AgentBuilderImpl<Belief : Any, Goal : Any, Body : Any>(private val name: S
         this.perceptionHandler = handler
     }
 
-    override fun handlesMessageEvents(handler: AgentState<Belief, Goal>.(Message) -> AgentUpdate<*>?) {
+    override fun handlesMessageEvents(handler: AgentState<Belief, Goal>.(Message<*>) -> AgentUpdate<*>?) {
         this.messageHandler = handler
     }
 
@@ -85,7 +85,7 @@ class AgentBuilderImpl<Belief : Any, Goal : Any, Body : Any>(private val name: S
 
     override fun build(node: Node<Body>): AgentSpecification<Belief, Goal, Body> =
         object : AgentSpecification<Belief, Goal, Body> {
-            override val id: AgentID = this@AgentBuilderImpl.name?.let { BaseAgentID(it) } ?: BaseAgentID()
+            override val id: AgentID = this@AgentBuilderImpl.id ?: BaseAgentID()
             override val body: Body = this@AgentBuilderImpl.bodyFactory(id)
             override val initialGoals: List<Goal> = this@AgentBuilderImpl.initialGoals
             override val initialState: AgentState<Belief, Goal> = BaseAgentState(

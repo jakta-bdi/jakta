@@ -4,6 +4,7 @@ import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import it.unibo.jakta.agent.Agent
 import it.unibo.jakta.agent.AgentID
+import it.unibo.jakta.agent.BaseAgentID
 import it.unibo.jakta.dsl.examples.Movement.Events.Factory.position
 import it.unibo.jakta.dsl.examples.Recharging.Events.Factory.chargeLevel
 import it.unibo.jakta.dsl.executeInTestScope
@@ -12,12 +13,9 @@ import it.unibo.jakta.dsl.node
 import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.event.AgentEvent
 import it.unibo.jakta.event.AgentUpdate
-import it.unibo.jakta.event.BeliefAddEvent
 import it.unibo.jakta.node.Node
-import it.unibo.jakta.skills.BaseNodeTerminationSkill
-import it.unibo.jakta.skills.NodeTerminationSkill
-import it.unibo.jakta.skills.terminateNode
 import kotlin.test.Test
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 
 class BodyWithPosition {
@@ -54,7 +52,7 @@ interface Movement<P> {
 class FixedTimeRecharging(val node: Node<BodyWithPosition>) : Recharging {
     override suspend fun Agent.recharge() {
         val agent = this
-        delay(3000)
+        delay(3.seconds)
         node.sendEvent(chargeLevel(100), { it == node.agents[agent.id] })
     }
 }
@@ -67,16 +65,14 @@ class GridMovement(val node: Node<BodyWithPosition>) : Movement<DoubleArray> {
     }
 }
 
-class CustomSkillSet(val node: Node<BodyWithPosition>) :
-    Recharging by FixedTimeRecharging(node),
-    Movement<DoubleArray> by GridMovement(node),
-    NodeTerminationSkill by BaseNodeTerminationSkill(node)
-
 class TestSpatialRobot {
 
     val mas = node {
-        context(CustomSkillSet(node)) {
-            agent("Vacuum") {
+        context(
+            FixedTimeRecharging(node),
+            GridMovement(node),
+        ) {
+            agent(BaseAgentID("robot")) {
                 embodiedAs { BodyWithPosition() }
 
                 believes {
@@ -118,7 +114,7 @@ class TestSpatialRobot {
                             agent.moveTo(doubleArrayOf(0.0, 1.0))
                             agent.print("Moved!")
                         }
-                        terminateNode()
+                        node.terminateNode()
                     }
 
                     adding.belief { this } triggers {

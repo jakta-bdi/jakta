@@ -10,7 +10,6 @@ import it.unibo.jakta.plan.Plan
  *
  * @param Belief The type representing the agent's *beliefs*.
  * @param Goal The type representing the agent's *goals*.
- * @param Skills The type representing the agent's *skills*.
  */
 interface AgentState<Belief : Any, Goal : Any> {
 
@@ -44,5 +43,5 @@ interface AgentState<Belief : Any, Goal : Any> {
      * Mapping function which defines how to (optionally)
      * convert a [AgentEvent.External.Message] into an [AgentUpdate] .
      */
-    val messageHandler: AgentState<Belief, Goal>.(AgentEvent.External.Message) -> AgentUpdate<*>?
+    val messageHandler: AgentState<Belief, Goal>.(AgentEvent.External.Message<*>) -> AgentUpdate<*>?
 }

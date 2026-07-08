@@ -27,7 +27,7 @@ interface AgentBuilder<Belief : Any, Goal : Any, Body : Any> {
      * Defines how and whether a [Message] is mapped into a [AgentUpdate].
      * By default, receiving messages do not generate any update.
      */
-    fun handlesMessageEvents(handler: AgentState<Belief, Goal>.(Message) -> AgentUpdate<*>?)
+    fun handlesMessageEvents(handler: AgentState<Belief, Goal>.(Message<*>) -> AgentUpdate<*>?)
 
     /**
      * Defines the initial beliefs of the agent using a builder block.

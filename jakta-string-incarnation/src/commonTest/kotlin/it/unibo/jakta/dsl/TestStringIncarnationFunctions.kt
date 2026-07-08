@@ -10,7 +10,6 @@ import it.unibo.jakta.dsl.node.LocalNodeBuilder
 import it.unibo.jakta.dsl.plan.PlanLibraryBuilder
 import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.node.CoroutineNodeRunner
-import it.unibo.jakta.skills.BaseNodeTerminationSkill
 import it.unibo.jakta.skills.NodeTerminationSkill
 import it.unibo.jakta.skills.terminateNode
 import kotlin.test.BeforeTest
@@ -32,8 +31,8 @@ class TestStringIncarnationFunctions {
             val job = launch {
                 mas(LocalNodeBuilder()) {
                     node {
-                        context(BaseNodeTerminationSkill(node)) {
-                            agent("HelloAgent") {
+                        context(NodeTerminationSkill(node)) {
+                            agent {
                                 embodiedAs { Any() }
                                 believes {
                                     +"goal"
