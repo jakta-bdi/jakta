@@ -5,10 +5,27 @@ import it.unibo.jakta.agent.MutableAgentState
 import it.unibo.jakta.dsl.belief.PrologBelief
 import it.unibo.jakta.dsl.goal.PrologGoal
 import it.unibo.jakta.logic.JaktaLogicProgrammingScope
+import it.unibo.tuprolog.core.Atom
+import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.core.Term
 import it.unibo.tuprolog.core.Var
 import it.unibo.tuprolog.serialize.TermObjectifier
+import it.unibo.tuprolog.utils.setTag
+
+/**
+ * Extension function to annotate a Prolog struct with one or more annotations
+ * using the operator syntax struct(...)[ann, ann2, ...].
+ */
+operator fun Struct.get(annotation: Struct, vararg otherAnnotations: Struct): Struct =
+    setTag("jakta.annotations", setOf(annotation, *otherAnnotations))
+
+/**
+ * Extension function to annotate a Prolog struct with one or more annotations
+ * using the operator syntax term[ann, ann2, ...].
+ */
+operator fun Term.get(annotation: Struct, vararg otherAnnotations: Struct): Term =
+    setTag("jakta.annotations", setOf(annotation, *otherAnnotations))
 
 /**
  * Extension property to retrieve the value of a variable from a substitution.
