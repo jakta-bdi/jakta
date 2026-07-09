@@ -58,3 +58,8 @@ context(scope: JaktaLogicProgrammingScope)
 private fun goalQuery(block: JaktaLogicProgrammingScope.() -> Struct): PrologGoal = scope.block().also { struct ->
     requirePredicate(struct) { "Goal query must be a predicate, but got $it" }
 }
+
+
+// TODO can we make an utility for test goals?
+//  sometimes it would still be nice to have a way to say
+//  "test this condition otherwise achieve this goal"
