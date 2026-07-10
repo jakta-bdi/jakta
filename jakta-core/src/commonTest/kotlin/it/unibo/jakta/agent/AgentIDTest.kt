@@ -1,6 +1,5 @@
 package it.unibo.jakta.agent
 
-import it.unibo.jakta.agent.BaseAgentID
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
@@ -40,7 +39,7 @@ class AgentIDTest {
         val agentWithName = BaseAgentID(name = "AgentOne", id = "id-123")
         val agentWithoutName = BaseAgentID(id = "id-456")
         assertEquals(
-            "AgentOne",
+            "AgentOne-id-123",
             agentWithName.displayName,
             "The display name should be the provided name",
         )

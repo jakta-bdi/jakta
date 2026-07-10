@@ -19,7 +19,7 @@ interface Node<Body : Any> {
     val agents: Map<AgentID, Body>
 
     /**
-     * Sends an external [event] to all agents in the node that satisfy the [filterFunction].
+     * Sends an external [event] to all agents reachable by that node that satisfy the [filterFunction].
      * @param event The external event to be sent.
      * @param filterFunction A function that determines the conditions under which an agent should receive the event.
      */
@@ -43,7 +43,7 @@ interface Node<Body : Any> {
     fun terminateNode()
 
     /**
-     * Retrieves the unique identifier of an agent based on its body.
+     * Retrieves the unique identifier of an agent in this node based on its body.
      * @param body The body of the agent for which to retrieve the identifier.
      */
     fun getAgentIDfromBody(body: Body): AgentID? = agents.entries.find { it.value == body }?.key

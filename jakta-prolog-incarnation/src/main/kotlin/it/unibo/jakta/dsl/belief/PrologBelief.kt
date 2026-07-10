@@ -67,7 +67,7 @@ fun inferenceRule(block: JaktaLogicProgrammingScope.() -> Rule): Rule = JaktaLog
  * @param block A lambda function that defines the belief query to be created.
  * @return The created [Fact] as a query if it is a valid predicate.
  */
-//TODO check if this is correct, maybe it should be a Struct instead of a Fact
+// TODO check if this is correct, maybe it should be a Struct instead of a Fact
 fun beliefQuery(block: JaktaLogicProgrammingScope.() -> Struct): Fact = Fact.of(
     JaktaLogicProgrammingScope().block().also { struct ->
         requirePredicate(struct) { "Belief query must be a predicate, but got $it" }
