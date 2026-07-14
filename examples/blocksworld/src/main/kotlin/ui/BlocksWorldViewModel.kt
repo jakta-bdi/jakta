@@ -7,8 +7,10 @@ import blocksWorldNode
 import it.unibo.jakta.dsl.goal.PrologGoal
 import it.unibo.jakta.dsl.goal.initialGoal
 import it.unibo.jakta.dsl.mas.mas
-import it.unibo.jakta.dsl.node.LocalNodeBuilder
+import it.unibo.jakta.dsl.node.BaseNodeBuilder
+import it.unibo.jakta.dsl.node.NodeBuilders
 import it.unibo.jakta.node.CoroutineNodeRunner
+import it.unibo.jakta.node.LocalNodeConnection
 import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.List
 import kotlinx.coroutines.CoroutineScope
@@ -129,9 +131,9 @@ class BlocksWorldAppState {
         val currentGoal = goal
 
         agentJob = scope.launch {
-            mas(LocalNodeBuilder()) {
+            mas(NodeBuilders.baseNode()) {
                 blocksWorldNode(world, currentGoal)
-            }.run(CoroutineNodeRunner())
+            }.run(CoroutineNodeRunner(LocalNodeConnection()))
         }
     }
 

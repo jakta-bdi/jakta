@@ -3,26 +3,24 @@ package it.unibo.jakta.dsl
 import it.unibo.jakta.agent.AgentSpecification
 import it.unibo.jakta.dsl.agent.AgentBuilder
 import it.unibo.jakta.dsl.agent.AgentBuilderImpl
-import it.unibo.jakta.dsl.node.LocalNodeBuilder
-import it.unibo.jakta.dsl.plan.PlanBuilder
-import it.unibo.jakta.dsl.plan.TriggerAdditionImpl
-import it.unibo.jakta.dsl.plan.TriggerRemovalImpl
+import it.unibo.jakta.dsl.node.NodeBuilder
 import it.unibo.jakta.node.ExecutableNode
 import it.unibo.jakta.node.Node
-import it.unibo.jakta.plan.Plan
 
 /**
- * Entry point for creating a multi-agent system using the Jakta DSL and a localnode.
+ * Entry point for creating a node using the JaKtA DSL.
  * @return an instantiated MAS.
  */
-fun <Body : Any> node(block: LocalNodeBuilder<Body>.() -> Unit): ExecutableNode<Body> {
-    val nodeBuilder = LocalNodeBuilder<Body>()
-    nodeBuilder.apply(block)
-    return nodeBuilder.build()
+fun <Body : Any, N : ExecutableNode<Body>, NB : NodeBuilder<Body, N>> node(
+    builder: NB,
+    block: NB.() -> Unit,
+): ExecutableNode<Body> {
+    builder.apply(block)
+    return builder.build()
 }
 
 /**
- * Entry point for creating an agent using the Jakta DSL.
+ * Entry point for creating an agent using the JaKtA DSL.
  * @return an instantiated Agent.
  */
 @JaktaDSL

@@ -5,8 +5,9 @@ import it.unibo.jakta.agent.AgentSpecification
 import it.unibo.jakta.agent.AgentState
 import it.unibo.jakta.agent.BaseAgentID
 import it.unibo.jakta.agent.BaseAgentState
+import it.unibo.jakta.node.BaseNode
 import it.unibo.jakta.node.CoroutineNodeRunner
-import it.unibo.jakta.node.LocalNode
+import it.unibo.jakta.node.LocalNodeConnection
 import it.unibo.jakta.node.Node
 import it.unibo.jakta.plan.GoalAdditionPlan
 import kotlin.reflect.typeOf
@@ -26,10 +27,10 @@ class ExecutionTest {
 
     @Test
     fun testAgentExecution() {
-        val node = LocalNode<Any>()
-        val node2 = LocalNode<Any>()
+        val node = BaseNode<Any>()
+        val node2 = BaseNode<Any>()
 
-        fun agentSpecGenerator(agentname: String, node: LocalNode<*>): Set<AgentSpecification<String, String, Any>> =
+        fun agentSpecGenerator(agentname: String, node: BaseNode<*>): Set<AgentSpecification<String, String, Any>> =
             setOf(
                 object : AgentSpecification<String, String, Any> {
                     override val body = Any()
@@ -58,7 +59,7 @@ class ExecutionTest {
                 },
             )
 
-        val runner = CoroutineNodeRunner<Any, LocalNode<Any>>()
+        val runner = CoroutineNodeRunner<Any, BaseNode<Any>>(LocalNodeConnection())
 
         runTest {
             agentSpecGenerator("Agent1", node).forEach { node.addAgent(it) }

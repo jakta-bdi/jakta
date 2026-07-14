@@ -5,10 +5,11 @@ import co.touchlab.kermit.Severity
 import it.unibo.jakta.dsl.goal.initialGoal
 import it.unibo.jakta.dsl.goal.matching
 import it.unibo.jakta.dsl.mas.mas
-import it.unibo.jakta.dsl.node.LocalNodeBuilder
+import it.unibo.jakta.dsl.node.NodeBuilders
 import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.logic.JaktaLogicProgrammingScope.Companion.prologPlan
 import it.unibo.jakta.node.CoroutineNodeRunner
+import it.unibo.jakta.node.LocalNodeConnection
 import it.unibo.tuprolog.core.toAtom
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -26,7 +27,7 @@ class TestTermination {
     fun `test termination`() {
         runTest {
             val job = launch {
-                mas(LocalNodeBuilder()) {
+                mas(NodeBuilders.baseNode()) {
                     node {
                         agent {
                             embodiedAs { Any() }
@@ -44,7 +45,7 @@ class TestTermination {
                             }
                         }
                     }
-                }.run(CoroutineNodeRunner())
+                }.run(CoroutineNodeRunner(LocalNodeConnection()))
             }
             job.join()
         }

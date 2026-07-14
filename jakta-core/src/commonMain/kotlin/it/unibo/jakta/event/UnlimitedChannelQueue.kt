@@ -3,9 +3,9 @@ package it.unibo.jakta.event
 import kotlinx.coroutines.channels.Channel
 
 /**
- * An implementation of [it.unibo.jakta.event.EventBus] that uses an unbounded channel to handle events of type [E].
+ * An implementation of [EventQueue] that uses an unbounded channel to handle events of type [E].
  */
-class UnlimitedChannelBus<E> : EventBus<E> {
+class UnlimitedChannelQueue<E> : EventQueue<E> {
 
     private val channel: Channel<E> = Channel(Channel.Factory.UNLIMITED)
 

@@ -10,7 +10,7 @@ import it.unibo.jakta.node.Node
  * Builder interface for defining a Multi-Agent System (MAS) with agents and an environment.
  */
 @JaktaDSL
-interface NodeBuilder<Body : Any, N : ExecutableNode<Body>> {
+interface NodeBuilder<Body : Any, out N : ExecutableNode<Body>> {
 
     /**
      * The node instance being built.
@@ -28,11 +28,6 @@ interface NodeBuilder<Body : Any, N : ExecutableNode<Body>> {
      * @return the constructed agent.
      */
     fun <Belief : Any, Goal : Any> agent(id: AgentID, block: AgentBuilder<Belief, Goal, Body>.() -> Unit)
-
-//    /**
-//     * Adds multiple agents to the MAS.
-//     */
-//    fun withAgents(vararg agents: Agent<Belief, Goal>)
 
     /**
      * Builds and returns the Node instance.

@@ -31,7 +31,7 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
         )
 
     // TODO consider making this public or add a method to cancel it e.g. stop()
-    // so far it does not seem to be necessary
+    //  so far it does not seem to be necessary
     private val agentJob = SupervisorJob()
 
     override suspend fun step() {
@@ -52,8 +52,8 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
     @Suppress("UNCHECKED_CAST")
     private fun handleEvent(event: AgentEvent, scope: CoroutineScope) {
         when (event) {
-            // TODO per rimuovere questo cast dovrei tipare Event.Internal
-            //  con Belief e Goal (si può fare ma è subottimo?)
+            // TODO to remove this cast i should type the top level Event.Internal
+            //  with Belief and Goal. Doable but maybe unnecessary?
 
             is AgentEvent.Internal.Belief<*> -> scope.handleBeliefEvent(event as AgentEvent.Internal.Belief<Belief>)
 
@@ -244,7 +244,7 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
     }
 
     // TODO this should change to have a proper set of desires
-    // for now I simply forward the goal addition and removal events
+    //  for now I simply forward the goal addition and removal events
     private fun handleGoalUpdateEvent(event: AgentUpdate.Goal<Goal>) {
         log.i { "Handling goal update event $event" }
         val additionsOnly = event.additions - event.removals

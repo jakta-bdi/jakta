@@ -8,8 +8,11 @@ import it.unibo.alchemist.model.NodeProperty
 import it.unibo.alchemist.model.Position
 import it.unibo.jakta.agent.ExecutableAgent
 import it.unibo.jakta.dsl.RuntimeNodes
+import it.unibo.jakta.event.EventStream
 import it.unibo.jakta.event.SystemEvent
 
+// TODO this is probably broken now with the latest changes to node runners and management of system events.
+//  We need to rework this class to properly handle it.
 /** One Alchemist Node may contain more than one Jakta Node.
  * This Alchemist property connects JaKtA meta-model to alchemist representation.
  * @param alchemistEnvironment the Alchemist Environment instance.
@@ -43,14 +46,16 @@ class JaktaForAlchemistRuntime<P : Position<P>>(
 
             // Jakta Nodes System Events management (
             jaktaNodes.nodes.forEach { node ->
-                var event: SystemEvent? = node.systemEvents.tryNext()
+                val systemEvents: EventStream<SystemEvent> = node.systemEvents
+                var event: SystemEvent? = systemEvents.tryNext()
                 while (event != null) {
                     when (event) {
                         is SystemEvent.AgentAddition<*, *> -> addAgentAction(node, event.executableAgent)
                         is SystemEvent.AgentRemoval -> TODO("Not supported for now")
                         is SystemEvent.ShutDownNode -> TODO("Not supported for now")
+                        is SystemEvent.AgentMessage<*, *> -> TODO("Not supported for now")
                     }
-                    event = node.systemEvents.tryNext()
+                    event = systemEvents.tryNext()
                 }
             }
         }

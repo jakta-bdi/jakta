@@ -5,13 +5,12 @@ import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.agent.AgentLifecycle
 import it.unibo.jakta.agent.BaseAgentLifecycle
 import it.unibo.jakta.agent.ExecutableAgent
+import it.unibo.jakta.event.EventQueue
 import it.unibo.jakta.event.SystemEvent
+import it.unibo.jakta.event.UnlimitedChannelQueue
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
@@ -19,10 +18,13 @@ import kotlinx.coroutines.supervisorScope
 import kotlinx.coroutines.yield
 
 /**
- * A [it.unibo.jakta.node.NodeRunner] implementation that uses Kotlin coroutines
+ * A [NodeRunner] implementation that uses Kotlin coroutines
  * to manage the execution of agents within a node.
+ * @param [connection] The [NodeConnection] used for communication and event handling.
+ * @param [Body] The type of the agent's body.
+ * @param [N] The type of the executable node that this runner will manage.
  */
-class CoroutineNodeRunner<Body : Any, N : ExecutableNode<Body>> : NodeRunner<N> {
+class CoroutineNodeRunner<Body : Any, N : ExecutableNode<Body>>(val connection: NodeConnection) : NodeRunner<N> {
 
     private val agents: MutableMap<AgentLifecycle<*, *>, Job> = mutableMapOf()
 
@@ -37,20 +39,36 @@ class CoroutineNodeRunner<Body : Any, N : ExecutableNode<Body>> : NodeRunner<N> 
     )
 
     override suspend fun run(node: N) {
+        logger.i("Node $node started")
         supervisorScope {
             val appScope = this
             _nodes += node
+            val subscription = connection.subscribe()
+
+            // propagate local events on the remote connection
             launch {
                 while (isActive) {
-                    when (val event = node.systemEvents.next()) {
+                    connection.send(node.systemEvents.next())
+                }
+            }
+
+            // handle incoming events from the remote connection
+            launch {
+                while (isActive) {
+                    when (val event = subscription.queue.next()) {
                         is SystemEvent.AgentAddition<*, *> -> appScope.addAgent(node, event.executableAgent)
+
                         is SystemEvent.AgentRemoval -> removeAgent(event.id)
-                        is SystemEvent.ShutDownNode -> appScope.stopNode(node)
+
+                        is SystemEvent.ShutDownNode -> if (event.nodeID == node.id) {
+                            stopNode(node, subscription, appScope.coroutineContext.job)
+                        }
+
+                        is SystemEvent.AgentMessage<*, *> -> node.handleExternalMessage(event)
                     }
                 }
             }
         }
-        logger.i("Node $node START")
     }
 
     private fun CoroutineScope.addAgent(node: N, agent: ExecutableAgent<*, *>) {
@@ -88,10 +106,10 @@ class CoroutineNodeRunner<Body : Any, N : ExecutableNode<Body>> : NodeRunner<N> 
         agents.remove(agent)
     }
 
-    private fun CoroutineScope.stopNode(node: N) {
-        // this kills all the agents + the node loop itself
-        this.coroutineContext.job.children.forEach { it.cancel(CancellationException("Termination requested")) }
+    private suspend fun stopNode(node: N, subscription: NodeSubscription, parentJob: Job) {
+        subscription.close()
         _nodes -= node
         logger.i("Node $node has been stopped")
+        parentJob.children.forEach({ it.cancel(CancellationException("Termination requested")) })
     }
 }

@@ -1,6 +1,5 @@
 package it.unibo.jakta.agent
 
-import it.unibo.jakta.agent.BaseAgentID
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals

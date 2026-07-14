@@ -6,10 +6,11 @@ import it.unibo.jakta.belief.containsBeliefMatching
 import it.unibo.jakta.belief.ifGoalMatches
 import it.unibo.jakta.belief.matchesRegex
 import it.unibo.jakta.dsl.mas.mas
-import it.unibo.jakta.dsl.node.LocalNodeBuilder
+import it.unibo.jakta.dsl.node.NodeBuilders
 import it.unibo.jakta.dsl.plan.PlanLibraryBuilder
 import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.node.CoroutineNodeRunner
+import it.unibo.jakta.node.LocalNodeConnection
 import it.unibo.jakta.skills.NodeTerminationSkill
 import it.unibo.jakta.skills.terminateNode
 import kotlin.test.BeforeTest
@@ -29,7 +30,7 @@ class TestStringIncarnationFunctions {
     private fun runMas(block: context(NodeTerminationSkill) PlanLibraryBuilder<String, String>.() -> Unit) {
         runTest {
             val job = launch {
-                mas(LocalNodeBuilder()) {
+                mas(NodeBuilders.baseNode()) {
                     node {
                         context(NodeTerminationSkill(node)) {
                             agent {
@@ -46,7 +47,7 @@ class TestStringIncarnationFunctions {
                             }
                         }
                     }
-                }.run(CoroutineNodeRunner())
+                }.run(CoroutineNodeRunner(LocalNodeConnection()))
             }
             job.join()
         }

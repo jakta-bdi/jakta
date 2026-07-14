@@ -5,9 +5,11 @@ import co.touchlab.kermit.Severity
 import it.unibo.jakta.agent.BaseAgentID
 import it.unibo.jakta.dsl.executeInTestScope
 import it.unibo.jakta.dsl.node
-import it.unibo.jakta.dsl.node.LocalNodeBuilder
+import it.unibo.jakta.dsl.node.BaseNodeBuilder
+import it.unibo.jakta.dsl.node.NodeBuilders
 import it.unibo.jakta.dsl.plan.PlanLibraryBuilder
 import it.unibo.jakta.dsl.plan.triggers
+import it.unibo.jakta.node.BaseNode
 import it.unibo.jakta.skills.NodeTerminationSkill
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -23,7 +25,7 @@ class TestBeliefPlan {
     }
 
     context(terminator: NodeTerminationSkill)
-    fun LocalNodeBuilder<Any>.testAgent() = agent(BaseAgentID("TestAgent")) {
+    fun BaseNodeBuilder<Any, BaseNode<Any>>.testAgent() = agent(BaseAgentID("TestAgent")) {
         embodiedAs { Any() }
         hasInitialGoals {
             !"testGoal"
@@ -39,7 +41,7 @@ class TestBeliefPlan {
         }
     }
 
-    val helloWorld = node {
+    val helloWorld = node(NodeBuilders.baseNode()) {
         context(NodeTerminationSkill(node)) {
             testAgent()
         }

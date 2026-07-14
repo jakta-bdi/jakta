@@ -10,6 +10,8 @@ import it.unibo.jakta.dsl.examples.Recharging.Events.Factory.chargeLevel
 import it.unibo.jakta.dsl.executeInTestScope
 import it.unibo.jakta.dsl.ifGoalMatch
 import it.unibo.jakta.dsl.node
+import it.unibo.jakta.dsl.node.BaseNodeBuilder
+import it.unibo.jakta.dsl.node.NodeBuilders
 import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.event.AgentEvent
 import it.unibo.jakta.event.AgentUpdate
@@ -53,7 +55,7 @@ class FixedTimeRecharging(val node: Node<BodyWithPosition>) : Recharging {
     override suspend fun Agent.recharge() {
         val agent = this
         delay(3.seconds)
-        node.sendEvent(chargeLevel(100), { it == node.agents[agent.id] })
+        node.publishEvent(chargeLevel(100), { it == node.agents[agent.id] })
     }
 }
 
@@ -61,13 +63,13 @@ class GridMovement(val node: Node<BodyWithPosition>) : Movement<DoubleArray> {
     context(s1: Recharging)
     override fun Agent.moveTo(newPos: DoubleArray) {
         node.agents[this.id]?.position2D = newPos
-        node.sendEvent(position(this.id, newPos))
+        node.publishEvent(position(this.id, newPos))
     }
 }
 
 class TestSpatialRobot {
 
-    val mas = node {
+    val mas = node(NodeBuilders.baseNode<BodyWithPosition>()) {
         context(
             FixedTimeRecharging(node),
             GridMovement(node),

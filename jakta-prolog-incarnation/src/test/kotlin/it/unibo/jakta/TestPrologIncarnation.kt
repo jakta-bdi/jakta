@@ -10,12 +10,13 @@ import it.unibo.jakta.dsl.goal.goal
 import it.unibo.jakta.dsl.goal.initialGoal
 import it.unibo.jakta.dsl.goal.matching
 import it.unibo.jakta.dsl.mas.mas
-import it.unibo.jakta.dsl.node.LocalNodeBuilder
+import it.unibo.jakta.dsl.node.NodeBuilders
 import it.unibo.jakta.dsl.plan.achieve
 import it.unibo.jakta.dsl.plan.satisfies
 import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.logic.JaktaLogicProgrammingScope.Companion.prologPlan
 import it.unibo.jakta.node.CoroutineNodeRunner
+import it.unibo.jakta.node.LocalNodeConnection
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlinx.coroutines.launch
@@ -32,7 +33,7 @@ class TestPrologIncarnation {
     fun `test prolog recursion`() {
         runTest {
             val job = launch {
-                mas(LocalNodeBuilder()) {
+                mas(NodeBuilders.baseNode()) {
                     node {
                         agent {
                             embodiedAs { Any() }
@@ -65,7 +66,7 @@ class TestPrologIncarnation {
                             }
                         }
                     }
-                }.run(CoroutineNodeRunner())
+                }.run(CoroutineNodeRunner(LocalNodeConnection()))
             }
             job.join()
         }
@@ -75,7 +76,7 @@ class TestPrologIncarnation {
     fun `test prolog belief plan`() {
         runTest {
             val job = launch {
-                mas(LocalNodeBuilder()) {
+                mas(NodeBuilders.baseNode()) {
                     node {
                         agent {
                             embodiedAs { Any() }
@@ -105,7 +106,7 @@ class TestPrologIncarnation {
                             }
                         }
                     }
-                }.run(CoroutineNodeRunner())
+                }.run(CoroutineNodeRunner(LocalNodeConnection()))
             }
             job.join()
         }
@@ -115,7 +116,7 @@ class TestPrologIncarnation {
     fun `test prolog belief update`() {
         runTest {
             val job = launch {
-                mas(LocalNodeBuilder()) {
+                mas(NodeBuilders.baseNode()) {
                     node {
                         agent {
                             embodiedAs { Any() }
@@ -155,7 +156,7 @@ class TestPrologIncarnation {
                             }
                         }
                     }
-                }.run(CoroutineNodeRunner())
+                }.run(CoroutineNodeRunner(LocalNodeConnection()))
             }
             job.join()
         }
@@ -165,7 +166,7 @@ class TestPrologIncarnation {
     fun `test belief matching in guards`() {
         runTest {
             val job = launch {
-                mas(LocalNodeBuilder()) {
+                mas(NodeBuilders.baseNode()) {
                     node {
                         agent {
                             embodiedAs { Any() }
@@ -189,7 +190,7 @@ class TestPrologIncarnation {
                             }
                         }
                     }
-                }.run(CoroutineNodeRunner())
+                }.run(CoroutineNodeRunner(LocalNodeConnection()))
             }
             job.join()
         }
@@ -199,7 +200,7 @@ class TestPrologIncarnation {
     fun `test inference rule`() {
         runTest {
             val job = launch {
-                mas(LocalNodeBuilder()) {
+                mas(NodeBuilders.baseNode()) {
                     node {
                         agent {
                             embodiedAs { Any() }
@@ -235,7 +236,7 @@ class TestPrologIncarnation {
                             }
                         }
                     }
-                }.run(CoroutineNodeRunner())
+                }.run(CoroutineNodeRunner(LocalNodeConnection()))
             }
             job.join()
         }
@@ -252,7 +253,7 @@ class TestPrologIncarnation {
                     )
             }
             val job = launch {
-                mas(LocalNodeBuilder()) {
+                mas(NodeBuilders.baseNode()) {
                     node {
                         agent {
                             embodiedAs { Any() }
@@ -291,7 +292,7 @@ class TestPrologIncarnation {
                             }
                         }
                     }
-                }.run(CoroutineNodeRunner())
+                }.run(CoroutineNodeRunner(LocalNodeConnection()))
             }
             job.join()
         }

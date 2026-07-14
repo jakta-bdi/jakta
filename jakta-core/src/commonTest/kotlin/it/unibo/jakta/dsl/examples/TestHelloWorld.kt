@@ -5,12 +5,14 @@ import co.touchlab.kermit.Severity
 import it.unibo.jakta.dsl.executeInTestScope
 import it.unibo.jakta.dsl.ifGoalMatch
 import it.unibo.jakta.dsl.node
+import it.unibo.jakta.dsl.node.BaseNodeBuilder
+import it.unibo.jakta.dsl.node.NodeBuilders
 import it.unibo.jakta.dsl.plan.triggers
 import kotlin.test.Test
 
 class TestHelloWorld {
 
-    val helloWorld = node {
+    val helloWorld = node(NodeBuilders.baseNode()) {
         agent {
             embodiedAs { Any() }
             hasInitialGoals {

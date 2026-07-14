@@ -1,9 +1,9 @@
 package it.unibo.jakta.intention
 
 import co.touchlab.kermit.Logger
-import it.unibo.jakta.event.EventBus
 import it.unibo.jakta.event.EventInbox
-import it.unibo.jakta.event.UnlimitedChannelBus
+import it.unibo.jakta.event.EventQueue
+import it.unibo.jakta.event.UnlimitedChannelQueue
 import kotlin.coroutines.CoroutineContext.Key
 import kotlinx.coroutines.Job
 
@@ -17,7 +17,7 @@ data class BaseIntention(override val job: Job, override val id: IntentionID = B
             "Intention[${id.displayId}]",
         )
 
-    private val _continuations: EventBus<() -> Unit> = UnlimitedChannelBus()
+    private val _continuations: EventQueue<() -> Unit> = UnlimitedChannelQueue()
 
     override val continuations: EventInbox<() -> Unit>
         get() = _continuations

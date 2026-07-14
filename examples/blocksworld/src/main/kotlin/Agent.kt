@@ -7,12 +7,12 @@ import it.unibo.jakta.dsl.goal.goal
 import it.unibo.jakta.dsl.goal.initialGoal
 import it.unibo.jakta.dsl.goal.matching
 import it.unibo.jakta.dsl.mas.MasBuilder
-import it.unibo.jakta.dsl.node.LocalNodeBuilder
+import it.unibo.jakta.dsl.node.BaseNodeBuilder
 import it.unibo.jakta.dsl.plan.achieve
 import it.unibo.jakta.dsl.plan.satisfies
 import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.logic.JaktaLogicProgrammingScope.Companion.prologPlan
-import it.unibo.jakta.node.LocalNode
+import it.unibo.jakta.node.BaseNode
 import it.unibo.jakta.print
 import it.unibo.jakta.toKotlin
 import it.unibo.tuprolog.core.Atom
@@ -26,7 +26,7 @@ import model.BlocksWorld
 /**
  * Creates a node of the blocksworld MAS with one agent.
  */
-fun MasBuilder<LocalNode<Any>, LocalNodeBuilder<Any>>.blocksWorldNode(
+fun MasBuilder<BaseNode<Any>, BaseNodeBuilder<Any, BaseNode<Any>>>.blocksWorldNode(
     world: BlocksWorld,
     desiredWorldState: PrologGoal,
 ) = node {

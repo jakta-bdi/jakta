@@ -4,9 +4,9 @@ import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.agent.AgentLifecycle
 import it.unibo.jakta.agent.BaseAgentLifecycle
 import it.unibo.jakta.agent.ExecutableAgent
+import it.unibo.jakta.event.EventStream
 import it.unibo.jakta.event.SystemEvent
 import it.unibo.jakta.node.ExecutableNode
-import it.unibo.jakta.node.Node
 import it.unibo.jakta.node.NodeRunner
 import kotlinx.coroutines.CoroutineDispatcher
 
@@ -20,11 +20,14 @@ class ManualStepNodeRunner<Body : Any, N : ExecutableNode<Body>> : NodeRunner<N>
     private val _nodes: MutableSet<N> = mutableSetOf()
     override val nodes: Set<N> get() = _nodes.toSet()
 
+    private val systemEvents: MutableMap<N, EventStream<SystemEvent>> = mutableMapOf()
+
     /**
      * Adds a node to the runner. Processes immediate system events once.
      */
     override suspend fun run(node: N) {
         _nodes += node
+        systemEvents[node] = node.systemEvents
         processSystemEvents(node)
     }
 
@@ -56,15 +59,7 @@ class ManualStepNodeRunner<Body : Any, N : ExecutableNode<Body>> : NodeRunner<N>
             }
             // Check system events for each node
             _nodes.forEach { node ->
-                while (true) {
-                    val event = node.systemEvents.tryNext() ?: break
-                    hasEvents = true
-                    when (event) {
-                        is SystemEvent.AgentAddition<*, *> -> addAgent(event.executableAgent)
-                        is SystemEvent.AgentRemoval -> removeAgent(event.id)
-                        is SystemEvent.ShutDownNode -> _nodes -= node
-                    }
-                }
+                processSystemEvents(node)
             }
         } while (hasEvents)
     }
@@ -90,11 +85,12 @@ class ManualStepNodeRunner<Body : Any, N : ExecutableNode<Body>> : NodeRunner<N>
      */
     private fun processSystemEvents(node: N) {
         while (true) {
-            val event = node.systemEvents.tryNext() ?: break
+            val event = systemEvents[node]?.tryNext() ?: break
             when (event) {
                 is SystemEvent.AgentAddition<*, *> -> addAgent(event.executableAgent)
                 is SystemEvent.AgentRemoval -> removeAgent(event.id)
                 is SystemEvent.ShutDownNode -> _nodes -= node
+                is SystemEvent.AgentMessage<*, *> -> node.handleExternalMessage(event)
             }
         }
     }
