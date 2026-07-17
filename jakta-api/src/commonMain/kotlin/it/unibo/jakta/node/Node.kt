@@ -38,13 +38,14 @@ interface Node<Body : Any> {
     fun addAgent(agentSpecification: AgentSpecification<*, *, Body>)
 
     /**
-     * Removes an agent from the node based on its [id].
+     * Removes an agent from the mas based on its [id].
      * @param id The unique identifier of the agent to be removed.
      */
     fun removeAgent(id: AgentID)
 
     /**
-     * Terminates the node, effectively shutting down all agents and stopping any ongoing processes within the node.
+     * Terminates a node, effectively shutting down all agents and stopping any ongoing processes within the node.
+     * @param nodeID The unique identifier of the node to be terminated. If not provided, the current node's ID is used.
      */
     fun terminateNode(nodeID: NodeID = this.id)
 
