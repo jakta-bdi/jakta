@@ -5,9 +5,7 @@ import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.agent.AgentLifecycle
 import it.unibo.jakta.agent.BaseAgentLifecycle
 import it.unibo.jakta.agent.ExecutableAgent
-import it.unibo.jakta.event.EventQueue
 import it.unibo.jakta.event.SystemEvent
-import it.unibo.jakta.event.UnlimitedChannelQueue
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -55,23 +53,25 @@ class CoroutineNodeRunner<Body : Any, N : ExecutableNode<Body>>(val connection: 
             // handle incoming events from the remote connection
             launch {
                 while (isActive) {
-                    when (val event = subscription.queue.next()) {
-                        is SystemEvent.AgentAddition<*, *> -> appScope.addAgent(node, event.executableAgent)
+                    val event = subscription.queue.next()
+                    node.handleExternalEvent(event)
+                    when (event) {
+                        is SystemEvent.AgentAddition<*, *> -> appScope.startAgent(node, event.executableAgent)
 
-                        is SystemEvent.AgentRemoval -> removeAgent(event.id)
+                        is SystemEvent.AgentRemoval -> stopAgent(event.id)
 
                         is SystemEvent.ShutDownNode -> if (event.nodeID == node.id) {
                             stopNode(node, subscription, appScope.coroutineContext.job)
                         }
 
-                        is SystemEvent.AgentMessage<*, *> -> node.handleExternalMessage(event)
+                        else -> Unit
                     }
                 }
             }
         }
     }
 
-    private fun CoroutineScope.addAgent(node: N, agent: ExecutableAgent<*, *>) {
+    private fun CoroutineScope.startAgent(node: N, agent: ExecutableAgent<*, *>) {
         val newAgent = BaseAgentLifecycle(agent)
         val newJob = launch {
             while (isActive) {
@@ -99,7 +99,7 @@ class CoroutineNodeRunner<Body : Any, N : ExecutableNode<Body>>(val connection: 
         }
     }
 
-    private fun removeAgent(id: AgentID) {
+    private fun stopAgent(id: AgentID) {
         val (agent, job) = agents.entries.find { (agent, _) -> agent.executableAgent.id == id } ?: return
         // TODO is it ok to cancel if it has been already stopped with exception?
         job.cancel(CancellationException("The agent has been removed from the MAS"))

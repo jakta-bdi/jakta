@@ -7,6 +7,8 @@ import it.unibo.jakta.intention.MutableIntentionPool
 import it.unibo.jakta.plan.Plan
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
+import kotlin.time.Duration
+import kotlinx.coroutines.CompletableDeferred
 
 /**
  * Mutable state of an agent, allowing modifications to its beliefs, plans, and event handlers.
@@ -19,6 +21,11 @@ interface MutableAgentState<Belief : Any, Goal : Any> :
      * The mutable pool of intentions that the agent is currently pursuing.
      */
     val mutableIntentionPool: MutableIntentionPool
+
+    /**
+     * A map of event filters that will keep intentions suspended on the associated deferred
+     */
+    val waitEventFilters: MutableMap<(AgentEvent) -> Any?, CompletableDeferred<*>>
 
     /**
      * Modifies the perception handler function that defines which external events are of interest of the agent.
@@ -77,6 +84,8 @@ interface MutableAgentState<Belief : Any, Goal : Any> :
      * @param[message] The message to be printed.
      */
     fun print(message: String)
+
+    suspend fun <T: Any> wait(eventFilter: (AgentEvent) -> T?, timeout: Duration? = null) : T?
 }
 
 /**

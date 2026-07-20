@@ -19,6 +19,7 @@ import it.unibo.jakta.skills.MessagingSkill
 import it.unibo.jakta.skills.sendTo
 import kotlin.collections.emptySet
 import kotlin.test.Test
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest

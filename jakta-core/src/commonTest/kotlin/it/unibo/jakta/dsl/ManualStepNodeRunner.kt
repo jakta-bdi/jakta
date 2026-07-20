@@ -90,7 +90,7 @@ class ManualStepNodeRunner<Body : Any, N : ExecutableNode<Body>> : NodeRunner<N>
                 is SystemEvent.AgentAddition<*, *> -> addAgent(event.executableAgent)
                 is SystemEvent.AgentRemoval -> removeAgent(event.id)
                 is SystemEvent.ShutDownNode -> _nodes -= node
-                is SystemEvent.AgentMessage<*, *> -> node.handleExternalMessage(event)
+                is SystemEvent.AgentMessage<*, *> -> node.handleExternalEvent(event)
             }
         }
     }

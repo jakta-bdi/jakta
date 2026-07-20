@@ -51,17 +51,41 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
 
     @Suppress("UNCHECKED_CAST")
     private fun handleEvent(event: AgentEvent, scope: CoroutineScope) {
+        completeWaitingEventFilters(event)
         when (event) {
-            // TODO to remove this cast i should type the top level Event.Internal
-            //  with Belief and Goal. Doable but maybe unnecessary?
+            is AgentEvent.Internal ->  {
+                // TODO to remove this cast i should type the top level Event.Internal
+                //  with Belief and Goal. Doable but maybe unnecessary?
+                when (event) {
+                    is AgentEvent.Internal.Belief<*> ->
+                        scope.handleBeliefEvent(event as AgentEvent.Internal.Belief<Belief>)
 
-            is AgentEvent.Internal.Belief<*> -> scope.handleBeliefEvent(event as AgentEvent.Internal.Belief<Belief>)
+                    is AgentEvent.Internal.Goal<*, *> ->
+                        scope.handleGoalEvent(event as AgentEvent.Internal.Goal<Goal, Any?>)
 
-            is AgentEvent.Internal.Goal<*, *> -> scope.handleGoalEvent(event as AgentEvent.Internal.Goal<Goal, Any?>)
-
-            is AgentEvent.Internal.Step -> handleStepEvent(event)
+                    is AgentEvent.Internal.Step ->
+                        handleStepEvent(event)
+                }
+            }
 
             is AgentEvent.External -> handleExternalEvent(event)
+        }
+    }
+
+    /**
+     * Iterates over the map of waiting event filters.
+     * If the filter matches complete the associated deferred and remove the filter from the map.
+     */
+    @Suppress("UNCHECKED_CAST") //TODO Check
+    private fun completeWaitingEventFilters(event: AgentEvent) {
+        val iterator = executableAgent.state.waitEventFilters.iterator()
+        while (iterator.hasNext()) {
+            val (filter, deferred) = iterator.next()
+            val result = filter(event)
+            if (result != null) {
+                (deferred as CompletableDeferred<Any>).complete(result)
+                iterator.remove()
+            }
         }
     }
 

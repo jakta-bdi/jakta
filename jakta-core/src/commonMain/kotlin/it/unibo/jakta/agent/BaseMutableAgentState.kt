@@ -4,6 +4,7 @@ import co.touchlab.kermit.Logger
 import it.unibo.jakta.InternalJaktaAPI
 import it.unibo.jakta.belief.BeliefBase
 import it.unibo.jakta.belief.BeliefBaseFactory
+import it.unibo.jakta.event.AgentEvent
 import it.unibo.jakta.event.AgentEvent.External.Message
 import it.unibo.jakta.event.AgentEvent.External.Perception
 import it.unibo.jakta.event.AgentEvent.Internal
@@ -15,8 +16,10 @@ import it.unibo.jakta.intention.Intention
 import it.unibo.jakta.intention.MutableIntentionPool
 import it.unibo.jakta.plan.Plan
 import kotlin.reflect.KType
+import kotlin.time.Duration
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.withTimeoutOrNull
 
 /**
  * Default implementation of a [it.unibo.jakta.agent.MutableAgentState].
@@ -51,6 +54,9 @@ internal class BaseMutableAgentState<Belief : Any, Goal : Any>(
 
     override val goalPlans: List<Plan.Goal<Belief, Goal, *, *>>
         get() = _goalPlans.toList()
+
+    override val waitEventFilters: MutableMap<(AgentEvent) -> Any?, CompletableDeferred<*>> =
+        mutableMapOf()
 
     private var _perceptionHandler: AgentState<Belief, Goal>.(Perception) -> AgentUpdate<*>? =
         initialAgentState.perceptionHandler
@@ -106,5 +112,18 @@ internal class BaseMutableAgentState<Belief : Any, Goal : Any>(
 
     override fun print(message: String) {
         logger.a { message }
+    }
+
+    //TODO check this function I am not sure..
+    override suspend fun <T : Any> wait(eventFilter: (AgentEvent) -> T?, timeout: Duration?) : T? {
+        val deferred = CompletableDeferred<T>()
+        this.waitEventFilters[eventFilter] = deferred
+        return timeout?.let {
+            withTimeoutOrNull(it) {
+                deferred.await()
+            }
+        }?.run {
+            deferred.await()
+        }
     }
 }

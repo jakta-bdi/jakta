@@ -33,15 +33,11 @@ open class BaseNode<Body : Any> : ExecutableNode<Body> {
 
     override fun addAgent(agentSpecification: AgentSpecification<*, *, Body>) {
         val agent = BaseAgent(agentSpecification)
-        _agents += agent
         _systemEvents.send(AgentAdditionEvent(agent, this.id))
     }
 
     override fun removeAgent(id: AgentID) {
-        _agents.firstOrNull { it.id == id }?.let {
-            _agents.remove(it)
-            _systemEvents.send(AgentRemovalEvent(id))
-        }
+        _systemEvents.send(AgentRemovalEvent(id))
     }
 
     override fun terminateNode(nodeID: NodeID) {
@@ -55,8 +51,22 @@ open class BaseNode<Body : Any> : ExecutableNode<Body> {
 
     // TODO check this cast, can I remove it somehow?
     @Suppress("UNCHECKED_CAST")
-    override fun handleExternalMessage(event: SystemEvent.AgentMessage<*, *>) {
-        deliverEvent(event.message, event.filterFunction as Node<Body>.(Body) -> Boolean)
+    override fun handleExternalEvent(event: SystemEvent) {
+        when (event) {
+            is AgentMessageEvent<*, *> -> {
+                deliverEvent(event.message, event.filterFunction as Node<Body>.(Body) -> Boolean)
+            }
+            is AgentRemovalEvent -> {
+                _agents.firstOrNull { it.id == id }?.let {
+                    _agents.remove(it)
+                }
+            }
+            is SystemEvent.AgentAddition<*, *> -> {
+                val agent = event.executableAgent as BaseAgent<*, *, Body>
+                _agents.add(agent)
+            }
+            else -> Unit
+        }
     }
 
     private fun deliverEvent(event: AgentEvent.External, filterFunction: Node<Body>.(Body) -> Boolean) {

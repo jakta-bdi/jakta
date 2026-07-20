@@ -15,8 +15,7 @@ interface ExecutableNode<Body : Any> : Node<Body> {
     val systemEvents: EventStream<SystemEvent>
 
     /**
-     * Handles an external message received by the node,
-     * allowing for processing and appropriate action based on the message content.
+     * Handles an external event received by the node.
      */
-    fun handleExternalMessage(event: SystemEvent.AgentMessage<*, *>)
+    fun handleExternalEvent(event: SystemEvent)
 }
