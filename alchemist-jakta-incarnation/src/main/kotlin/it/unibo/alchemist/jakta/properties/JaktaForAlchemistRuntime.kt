@@ -10,6 +10,10 @@ import it.unibo.jakta.agent.ExecutableAgent
 import it.unibo.jakta.dsl.RuntimeNodes
 import it.unibo.jakta.event.EventStream
 import it.unibo.jakta.event.SystemEvent
+import it.unibo.jakta.node.AlchemistNodeConnection
+import it.unibo.jakta.node.LocalNodeConnection
+import it.unibo.jakta.node.NodeConnection
+import it.unibo.jakta.node.NodeSubscription
 
 // TODO this is probably broken now with the latest changes to node runners and management of system events.
 //  We need to rework this class to properly handle it.
@@ -21,6 +25,7 @@ import it.unibo.jakta.event.SystemEvent
 class JaktaForAlchemistRuntime<P : Position<P>>(
     val alchemistEnvironment: Environment<Any?, P>,
     override val node: AlchemistNode<Any?>,
+    private val subscription: NodeSubscription,
 ) : NodeProperty<Any?> {
 
     private lateinit var jaktaNodes: RuntimeNodes<JaktaNode<*>>
@@ -43,19 +48,27 @@ class JaktaForAlchemistRuntime<P : Position<P>>(
     fun setInitialJaktaNodes(nodes: RuntimeNodes<JaktaNode<*>>) {
         if (!::jaktaNodes.isInitialized) {
             jaktaNodes = nodes
-
-            // Jakta Nodes System Events management (
+            println("NODES: ${jaktaNodes.nodes.size}")
+            // Jakta Nodes System Events management
             jaktaNodes.nodes.forEach { node ->
+                println("AGENTS in NODE ${node.agents.map { it.key.displayName }}")
                 val systemEvents: EventStream<SystemEvent> = node.systemEvents
-                var event: SystemEvent? = systemEvents.tryNext()
-                while (event != null) {
-                    when (event) {
+                var systemEvent: SystemEvent? = systemEvents.tryNext()
+                if (systemEvent != null) {
+                    AlchemistNodeConnection.send(systemEvent)
+                } // Come viene gestita questa cosa nel CoroutineNodeRunner?
+                println("EVENT: $systemEvent")
+                while (systemEvent != null) {
+                    when (val event = subscription.queue.tryNext()) {
                         is SystemEvent.AgentAddition<*, *> -> addAgentAction(node, event.executableAgent)
                         is SystemEvent.AgentRemoval -> TODO("Not supported for now")
                         is SystemEvent.ShutDownNode -> TODO("Not supported for now")
                         is SystemEvent.AgentMessage<*, *> -> TODO("Not supported for now")
+                        else -> Unit
                     }
-                    event = systemEvents.tryNext()
+                    systemEvent = systemEvents.tryNext()
+                    println("NEXT EVENT: $systemEvent")
+
                 }
             }
         }
@@ -68,5 +81,5 @@ class JaktaForAlchemistRuntime<P : Position<P>>(
     fun getAgentActions() = agentActions.toList()
 
     override fun cloneOnNewNode(node: AlchemistNode<Any?>): JaktaForAlchemistRuntime<P> =
-        JaktaForAlchemistRuntime(alchemistEnvironment, node)
+        JaktaForAlchemistRuntime(alchemistEnvironment, node, subscription)
 }

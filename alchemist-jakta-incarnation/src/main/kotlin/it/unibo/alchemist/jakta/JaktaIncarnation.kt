@@ -18,6 +18,7 @@ import it.unibo.alchemist.model.nodes.GenericNode
 import it.unibo.alchemist.model.reactions.Event
 import it.unibo.alchemist.model.timedistributions.DiracComb
 import it.unibo.jakta.dsl.RuntimeNodes
+import it.unibo.jakta.node.AlchemistNodeConnection
 import kotlin.reflect.KCallable
 import kotlin.reflect.full.isSubtypeOf
 import kotlin.reflect.full.starProjectedType
@@ -48,7 +49,11 @@ class JaktaIncarnation<P : Position<P>> : Incarnation<Any?, P> {
         environment: Environment<Any?, P>,
         parameter: Any?,
     ): Node<Any?> = GenericNode(environment).also {
-        it.addProperty(JaktaForAlchemistRuntime(environment, it))
+        it.addProperty(JaktaForAlchemistRuntime(
+            environment,
+            it,
+            AlchemistNodeConnection.subscribe(it),
+        ))
         // TODO("Is there a way to inject nodes in Jakta Runtime?")
     }
 
