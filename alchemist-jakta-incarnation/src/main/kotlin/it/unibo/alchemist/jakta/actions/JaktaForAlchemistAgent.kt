@@ -1,6 +1,7 @@
 package it.unibo.alchemist.jakta.actions
 
 import co.touchlab.kermit.Logger
+import it.unibo.alchemist.jakta.properties.JaktaForAlchemistRuntime
 import it.unibo.alchemist.model.Action
 import it.unibo.alchemist.model.Context
 import it.unibo.alchemist.model.Environment
@@ -16,7 +17,7 @@ import it.unibo.jakta.alchemist.AlchemistDispatcher
  * Alchemist Action executing the JaKtA agent lifecycle.
  */
 class JaktaForAlchemistAgent<P : Position<P>>(
-    alchemistNode: AlchemistNode<Any?>,
+    private val alchemistNode: AlchemistNode<Any?>,
     private val agent: ExecutableAgent<*, *>,
     private val alchemistEnvironment: Environment<Any?, P>,
     private val dispatcher: AlchemistDispatcher<P> = AlchemistDispatcher(alchemistEnvironment),
@@ -37,5 +38,10 @@ class JaktaForAlchemistAgent<P : Position<P>>(
     override fun execute() {
         dispatcher.runDueTasks()
         agentLifecycle.tryStep(dispatcher)
+
+        alchemistNode.properties
+            .filterIsInstance<JaktaForAlchemistRuntime<P>>()
+            .firstOrNull()
+            ?.stepSystemEvents()
     }
 }
