@@ -44,7 +44,7 @@ class ExecutionTest {
                                 guard = { true },
                                 body = {
                                     with(MyPrint(node)) {
-                                        prettyPrint("PLKUTO")
+                                        prettyPrint("PLUTO")
                                         stop()
                                     }
                                 },
