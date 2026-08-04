@@ -12,9 +12,10 @@ import it.unibo.jakta.node.Node
  * @return an instantiated MAS.
  */
 fun <Body : Any, N : ExecutableNode<Body>, NB : NodeBuilder<Body, N>> node(
-    builder: NB,
+    builderFactory: () -> NB,
     block: NB.() -> Unit,
 ): ExecutableNode<Body> {
+    val builder = builderFactory()
     builder.apply(block)
     return builder.build()
 }

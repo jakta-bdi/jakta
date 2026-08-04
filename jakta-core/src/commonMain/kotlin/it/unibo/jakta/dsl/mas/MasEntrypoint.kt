@@ -3,7 +3,6 @@ package it.unibo.jakta.dsl.mas
 import it.unibo.jakta.dsl.JaktaDSL
 import it.unibo.jakta.dsl.node.NodeBuilder
 import it.unibo.jakta.node.ExecutableNode
-import it.unibo.jakta.node.Node
 import it.unibo.jakta.node.NodeRunner
 
 /**
@@ -12,14 +11,14 @@ import it.unibo.jakta.node.NodeRunner
  */
 @JaktaDSL
 fun <N : ExecutableNode<*>, NB : NodeBuilder<*, N>> mas(
-    builder: NB,
+    builderFactory: () -> NB,
     block: MasBuilder<N, NB>.() -> Unit,
 ): MasBuilder<N, NB> = object : MasBuilder<N, NB> {
 
     val nodes = mutableListOf<N>()
 
     override fun node(block: NB.() -> Unit) {
-        nodes += builder.apply(block).build()
+        nodes += builderFactory().apply(block).build()
     }
 
     override suspend fun run(runner: NodeRunner<N>) {
