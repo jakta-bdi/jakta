@@ -92,5 +92,4 @@ class TestAgentAdditionAndRemoval {
             mas.run(CoroutineNodeRunner(LocalNodeConnection()))
         }
     }
-
 }

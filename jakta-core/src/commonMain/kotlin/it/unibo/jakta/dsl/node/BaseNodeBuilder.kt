@@ -28,7 +28,7 @@ open class BaseNodeBuilder<Body : Any, out N : ExecutableNode<Body>>(private val
     override fun <Belief : Any, Goal : Any> withAgents(
         vararg agentFactories: (Node<Body>) -> AgentSpecification<Belief, Goal, Body>,
     ) = agentFactories.forEach { factory ->
-        node.addAgent(factory(node))
+        node.addAgent(factory)
     }
 
     private fun <Belief : Any, Goal : Any> buildAgent(
@@ -41,7 +41,7 @@ open class BaseNodeBuilder<Body : Any, out N : ExecutableNode<Body>>(private val
     }
 
     override fun build(): N {
-        agents.forEach { node.addAgent(it.build()) }
+        agents.forEach { factory -> node.addAgent({ factory.build() }) }
         return initialNode
     }
 }

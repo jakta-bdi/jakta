@@ -31,36 +31,36 @@ class ExecutionTest {
         val node2 = BaseNode<Any>()
 
         fun agentSpecGenerator(agentname: String, node: Node<*>): AgentSpecification<String, String, Any> =
-                object : AgentSpecification<String, String, Any> {
-                    override val body = Any()
-                    override val initialState: AgentState<String, String> = BaseAgentState(
-                        beliefs = listOf(),
-                        intentions = setOf(),
-                        beliefPlans = listOf(),
-                        goalPlans = listOf(
-                            GoalAdditionPlan(
-                                trigger = { it == "hello" },
-                                guard = { true },
-                                body = {
-                                    with(MyPrint(node)) {
-                                        prettyPrint("PLUTO")
-                                        stop()
-                                    }
-                                },
-                                resultType = typeOf<Unit>(),
-                            ),
+            object : AgentSpecification<String, String, Any> {
+                override val body = Any()
+                override val initialState: AgentState<String, String> = BaseAgentState(
+                    beliefs = listOf(),
+                    intentions = setOf(),
+                    beliefPlans = listOf(),
+                    goalPlans = listOf(
+                        GoalAdditionPlan(
+                            trigger = { it == "hello" },
+                            guard = { true },
+                            body = {
+                                with(MyPrint(node)) {
+                                    prettyPrint("PLUTO")
+                                    stop()
+                                }
+                            },
+                            resultType = typeOf<Unit>(),
                         ),
-                        perceptionHandler = { null },
-                        messageHandler = { null },
-                    )
-                    override val initialGoals: List<String> = listOf("hello")
-                    override val id: AgentID = BaseAgentID(agentname)
-                }
+                    ),
+                    perceptionHandler = { null },
+                    messageHandler = { null },
+                )
+                override val initialGoals: List<String> = listOf("hello")
+                override val id: AgentID = BaseAgentID(agentname)
+            }
 
         val runner = CoroutineNodeRunner<Any, BaseNode<Any>>(LocalNodeConnection())
 
         runTest {
-            node.addAgent({agentSpecGenerator("Agent1", it)})
+            node.addAgent({ agentSpecGenerator("Agent1", it) })
             try {
                 runner.run(node)
             } catch (e: CancellationException) {
@@ -68,7 +68,7 @@ class ExecutionTest {
             } catch (e: Exception) {
                 println("Node execution terminated with exception: ${e.message}")
             }
-            node2.addAgent({agentSpecGenerator("Agent2", node2)})
+            node2.addAgent({ agentSpecGenerator("Agent2", node2) })
             try {
                 runner.run(node2)
             } catch (e: CancellationException) {
