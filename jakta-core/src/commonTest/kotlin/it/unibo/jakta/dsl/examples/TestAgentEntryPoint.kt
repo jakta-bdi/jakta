@@ -6,7 +6,7 @@ import it.unibo.jakta.agent.AgentSpecification
 import it.unibo.jakta.agent.BaseAgentID
 import it.unibo.jakta.dsl.agent
 import it.unibo.jakta.dsl.ifGoalMatch
-import it.unibo.jakta.dsl.mas.mas
+import it.unibo.jakta.dsl.mas
 import it.unibo.jakta.dsl.node.NodeBuilders
 import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.event.AgentUpdate
@@ -19,9 +19,10 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
 
-class TestAgentCreation {
+class TestAgentEntryPoint {
 
     val aliceID = BaseAgentID("Alice")
+    val bobID = BaseAgentID("Bob")
 
     val alice = agent<String, String, Any>(aliceID) {
         embodiedAs { Any() }
@@ -43,7 +44,7 @@ class TestAgentCreation {
 
     context(messaging: MessagingSkill)
     val bob: (Node<Any>) -> AgentSpecification<Any, String, Any>
-        get() = agent(BaseAgentID("Bob")) {
+        get() = agent(bobID) {
             embodiedAs { Any() }
             hasInitialGoals { !"greet" }
             hasPlans {
