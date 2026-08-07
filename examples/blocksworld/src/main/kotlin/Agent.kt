@@ -67,7 +67,7 @@ fun MasBuilder<BaseNode<Any>, BaseNodeBuilder<Any, BaseNode<Any>>>.blocksWorldNo
                     else -> null
                 }
             }
-            hasPlans {
+            hasPlanLibrary {
                 prologPlan {
                     adding.goal {
                         matching { start }

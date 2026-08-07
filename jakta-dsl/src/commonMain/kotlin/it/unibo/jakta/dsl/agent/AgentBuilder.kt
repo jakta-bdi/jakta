@@ -47,7 +47,12 @@ interface AgentBuilder<Belief : Any, Goal : Any, Body : Any> {
     /**
      * Defines the plans of the agent using a plan library builder block.
      */
-    fun hasPlans(block: PlanLibraryBuilder<Belief, Goal>.() -> Unit)
+    fun hasPlanLibrary(block: PlanLibraryBuilder<Belief, Goal>.() -> Unit)
+
+    /**
+     * Defines the plans of the agent using a list of pre-defined plans.
+     */
+    fun withPredefinedPlans(vararg plans: (Node<Body>) -> List<Plan<Belief, Goal, *, *, *>>)
 
     /**
      * Adds a belief to the agent's initial beliefs.

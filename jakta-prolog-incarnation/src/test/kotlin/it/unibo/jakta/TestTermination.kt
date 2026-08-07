@@ -34,7 +34,7 @@ class TestTermination {
                             hasInitialGoals {
                                 !initialGoal { "start".toAtom() }
                             }
-                            hasPlans {
+                            hasPlanLibrary {
                                 prologPlan {
                                     adding.goal {
                                         matching { "start".toAtom() }

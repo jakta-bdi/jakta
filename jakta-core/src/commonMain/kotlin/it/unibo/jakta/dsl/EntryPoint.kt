@@ -7,8 +7,16 @@ import it.unibo.jakta.dsl.agent.AgentBuilderImpl
 import it.unibo.jakta.dsl.mas.BaseMasBuilder
 import it.unibo.jakta.dsl.mas.MasBuilder
 import it.unibo.jakta.dsl.node.NodeBuilder
+import it.unibo.jakta.dsl.plan.BeliefAdditionPlanBuilderImpl
+import it.unibo.jakta.dsl.plan.PlanBuilder
+import it.unibo.jakta.dsl.plan.PlanLibraryBuilder
+import it.unibo.jakta.dsl.plan.PlanLibraryBuilderImpl
+import it.unibo.jakta.dsl.plan.TriggerAdditionImpl
+import it.unibo.jakta.dsl.plan.TriggerRemovalImpl
+import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.node.ExecutableNode
 import it.unibo.jakta.node.Node
+import it.unibo.jakta.plan.Plan
 
 /**
  * DSL entrypoint for creating a Multi-Agent System (MAS).
@@ -67,6 +75,26 @@ fun <Belief : Any, Goal : Any, Body : Any> agent(
 
 // TODO maybe actually make the triggerBuilder implement these interfaces?
 
+
+/**
+ * Entrypoint to define a list of plans for an agent.
+ */
+@JaktaDSL
+fun <Belief : Any, Goal : Any, Body: Any> plans (
+    block: PlanLibraryBuilder<Belief, Goal>.(Node<Body>) -> Unit
+) : (Node<Body>) -> List<Plan<Belief, Goal, *, *, *>> {
+    val plans = mutableListOf<Plan<Belief, Goal, *, *, *>>()
+    val libraryBuilder = PlanLibraryBuilderImpl(
+        addBeliefPlan = { plans.add(it) },
+        addGoalPlan = { plans.add(it) }
+    )
+    return { node ->
+        libraryBuilder.apply { block(node) }
+        plans
+    }
+}
+
+
 // interface BeliefOnlyAdditionTrigger<Belief : Any, Goal : Any> {
 //    /**
 //     * Given a @param[beliefQuery] as a function that matches a belief
@@ -77,7 +105,7 @@ fun <Belief : Any, Goal : Any, Body : Any> agent(
 //        beliefQuery: Belief.() -> Context?,
 //    ): PlanBuilder.Addition.Belief<Belief, Goal, Context>
 // }
-//
+
 // /**
 // * Entry point for belief removal only plans.
 // */

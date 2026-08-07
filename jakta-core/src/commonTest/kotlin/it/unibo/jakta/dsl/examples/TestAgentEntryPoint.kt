@@ -9,6 +9,7 @@ import it.unibo.jakta.dsl.ifGoalMatch
 import it.unibo.jakta.dsl.mas
 import it.unibo.jakta.dsl.node.NodeBuilders
 import it.unibo.jakta.dsl.plan.triggers
+import it.unibo.jakta.dsl.plans
 import it.unibo.jakta.event.AgentUpdate
 import it.unibo.jakta.node.CoroutineNodeRunner
 import it.unibo.jakta.node.LocalNodeConnection
@@ -32,7 +33,7 @@ class TestAgentEntryPoint {
                 else -> null
             }
         }
-        hasPlans {
+        hasPlanLibrary {
             adding.goal {
                 ifGoalMatch("greet")
             } triggers {
@@ -47,7 +48,7 @@ class TestAgentEntryPoint {
         get() = agent(bobID) {
             embodiedAs { Any() }
             hasInitialGoals { !"greet" }
-            hasPlans {
+            hasPlanLibrary {
                 adding.goal {
                     ifGoalMatch("greet")
                 } triggers {
@@ -74,6 +75,45 @@ class TestAgentEntryPoint {
                     context(MessagingSkill(node)) {
                         withAgents(bob)
                     }
+                }
+            }.run(CoroutineNodeRunner(LocalNodeConnection()))
+        }
+    }
+
+    @Test
+    fun testPlansEntryPoint() {
+
+        val myCustomPlans = plans<String, String, Any> { node ->
+            adding.goal {
+                ifGoalMatch("hello")
+            } triggers {
+                agent.print("Hello!")
+                node.terminateNode()
+            }
+        }
+
+        val myOtherPlans = plans<String, String, Any> { node ->
+            adding.goal {
+                ifGoalMatch("ciao")
+            } triggers {
+                agent.print("Ciao!")
+                node.terminateNode()
+            }
+        }
+
+        val myAgent = agent {
+            embodiedAs { Any() }
+            hasInitialGoals {
+                !"ciao"
+                !"hello"
+            }
+            withPredefinedPlans(myCustomPlans, myOtherPlans)
+        }
+
+        runTest {
+            mas(NodeBuilders.baseNode()) {
+                node {
+                    withAgents(myAgent)
                 }
             }.run(CoroutineNodeRunner(LocalNodeConnection()))
         }

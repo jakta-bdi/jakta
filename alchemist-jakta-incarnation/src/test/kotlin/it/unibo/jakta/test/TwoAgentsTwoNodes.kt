@@ -11,8 +11,6 @@ import it.unibo.jakta.dsl.node.NodeBuilders
 import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.skills.MessagingSkill
 import it.unibo.jakta.skills.sendTo
-import kotlin.time.Duration.Companion.milliseconds
-import kotlinx.coroutines.delay
 
 val bob = BaseAgentID("Bob")
 val alice = BaseAgentID("Alice")
@@ -23,7 +21,7 @@ fun <P : Position<P>> JaktaForAlchemistRuntime<P>.entrypointNodeOne() = device(
     node {
         context(MessagingSkill(node)) {
             messageEnabledAgent(bob) {
-                hasPlans {
+                hasPlanLibrary {
                     adding.belief {
                         this.takeIf { it == Pair("Ping!", alice) }
                     } triggers {
@@ -47,7 +45,7 @@ fun <P : Position<P>> JaktaForAlchemistRuntime<P>.entrypointNodeTwo() = device(
                 hasInitialGoals {
                     !"sendMessage"
                 }
-                hasPlans {
+                hasPlanLibrary {
                     adding.goal {
                         ifGoalMatch("sendMessage")
                     } triggers {

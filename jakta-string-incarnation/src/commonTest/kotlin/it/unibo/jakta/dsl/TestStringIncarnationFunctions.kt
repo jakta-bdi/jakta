@@ -40,7 +40,7 @@ class TestStringIncarnationFunctions {
                                 hasInitialGoals {
                                     !"goal"
                                 }
-                                hasPlans {
+                                hasPlanLibrary {
                                     block()
                                 }
                             }

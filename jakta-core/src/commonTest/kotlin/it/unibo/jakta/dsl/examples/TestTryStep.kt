@@ -4,7 +4,6 @@ import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import it.unibo.jakta.dsl.ManualStepNodeRunner
 import it.unibo.jakta.dsl.node
-import it.unibo.jakta.dsl.node.BaseNodeBuilder
 import it.unibo.jakta.dsl.node.NodeBuilders
 import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.node.ExecutableNode
@@ -31,7 +30,7 @@ class TestTryStep {
             hasInitialGoals {
                 !"goal"
             }
-            hasPlans {
+            hasPlanLibrary {
                 adding.goal {
                     this.takeIf { it == "goal" }
                 } triggers {

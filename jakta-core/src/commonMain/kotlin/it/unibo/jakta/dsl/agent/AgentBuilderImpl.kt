@@ -56,9 +56,19 @@ class AgentBuilderImpl<Belief : Any, Goal : Any, Body : Any>(
         this.bodyFactory = bodyFactory
     }
 
-    override fun hasPlans(block: PlanLibraryBuilder<Belief, Goal>.() -> Unit) {
-        val builder = PlanLibraryBuilderImpl<Belief, Goal>(::addBeliefPlan, ::addGoalPlan)
+    override fun hasPlanLibrary(block: PlanLibraryBuilder<Belief, Goal>.() -> Unit) {
+        val builder = PlanLibraryBuilderImpl(::addBeliefPlan, ::addGoalPlan)
         builder.apply(block)
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    override fun withPredefinedPlans(vararg plans: (Node<Body>) -> List<Plan<Belief, Goal, *, *, *>>) {
+        plans.flatMap { factory -> factory(node) }.forEach { plan ->
+            when(plan) {
+                is Plan.Belief<*, *, *, *> -> addBeliefPlan(plan as Plan.Belief<Belief, Goal, *, *>)
+                is Plan.Goal<*, *, *, *> -> addGoalPlan(plan as Plan.Goal<Belief, Goal, *, *>)
+            }
+        }
     }
 
     override fun addBelief(belief: Belief) {

@@ -5,7 +5,6 @@ import co.touchlab.kermit.Severity
 import it.unibo.jakta.dsl.executeInTestScope
 import it.unibo.jakta.dsl.ifGoalMatch
 import it.unibo.jakta.dsl.node
-import it.unibo.jakta.dsl.node.BaseNodeBuilder
 import it.unibo.jakta.dsl.node.NodeBuilders
 import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.skills.terminate
@@ -21,7 +20,7 @@ class TestMultipleAgentDelays {
                 hasInitialGoals {
                     !"goal"
                 }
-                hasPlans {
+                hasPlanLibrary {
                     adding.goal {
                         ifGoalMatch("goal")
                     } triggers {
@@ -37,7 +36,7 @@ class TestMultipleAgentDelays {
                 hasInitialGoals {
                     !"goal"
                 }
-                hasPlans {
+                hasPlanLibrary {
                     adding.goal {
                         ifGoalMatch("goal")
                     } triggers {

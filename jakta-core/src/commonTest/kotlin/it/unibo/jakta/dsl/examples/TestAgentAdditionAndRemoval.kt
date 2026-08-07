@@ -23,7 +23,7 @@ class TestAgentAdditionAndRemoval {
     val alice = agent<String, String, Any>(aliceID) {
         embodiedAs { Any() }
         hasInitialGoals { !"greet" }
-        hasPlans {
+        hasPlanLibrary {
             adding.goal {
                 ifGoalMatch("greet")
             } triggers {
@@ -45,7 +45,7 @@ class TestAgentAdditionAndRemoval {
                     agent(BaseAgentID("Creator")) {
                         embodiedAs { Any() }
                         hasInitialGoals { !"create" }
-                        hasPlans {
+                        hasPlanLibrary {
                             adding.goal {
                                 ifGoalMatch("create")
                             } triggers {
@@ -74,7 +74,7 @@ class TestAgentAdditionAndRemoval {
                     agent(BaseAgentID("Destroyer")) {
                         embodiedAs { Any() }
                         hasInitialGoals { !"destroy" }
-                        hasPlans {
+                        hasPlanLibrary {
                             adding.goal {
                                 ifGoalMatch("destroy")
                             } triggers {

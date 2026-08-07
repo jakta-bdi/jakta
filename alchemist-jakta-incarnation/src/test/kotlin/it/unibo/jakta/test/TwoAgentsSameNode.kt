@@ -44,7 +44,7 @@ fun <P : Position<P>> JaktaForAlchemistRuntime<P>.entrypoint() = device(NodeBuil
 
         context(MessagingSkill(node)) {
             messageEnabledAgent(bob) {
-                hasPlans {
+                hasPlanLibrary {
                     adding.belief {
                         this.takeIf { it == Pair("Ping!", alice) }
                     } triggers {
@@ -59,7 +59,7 @@ fun <P : Position<P>> JaktaForAlchemistRuntime<P>.entrypoint() = device(NodeBuil
                 hasInitialGoals {
                     !"sendMessage"
                 }
-                hasPlans {
+                hasPlanLibrary {
                     adding.goal {
                         ifGoalMatch("sendMessage")
                     } triggers {

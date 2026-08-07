@@ -20,7 +20,7 @@ class MultiNodeExecutionTest {
             agent(BaseAgentID("Alice")) {
                 embodiedAs { Any() }
                 hasInitialGoals { !"greet" }
-                hasPlans {
+                hasPlanLibrary {
                     adding.goal {
                         ifGoalMatch("greet")
                     } triggers {
@@ -35,7 +35,7 @@ class MultiNodeExecutionTest {
             agent(BaseAgentID("Bob")) {
                 embodiedAs { Any() }
                 hasInitialGoals { !"greet" }
-                hasPlans {
+                hasPlanLibrary {
                     adding.goal {
                         ifGoalMatch("greet")
                     } triggers {

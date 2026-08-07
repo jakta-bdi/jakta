@@ -19,7 +19,6 @@ import it.unibo.jakta.skills.MessagingSkill
 import it.unibo.jakta.skills.sendTo
 import kotlin.collections.emptySet
 import kotlin.test.Test
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
@@ -53,7 +52,7 @@ class TestPingPong {
 
         context(MessagingSkill(node)) {
             messageEnabledAgent(bob) {
-                hasPlans {
+                hasPlanLibrary {
                     adding.belief {
                         this.takeIf { it == Pair("Ping!", alice) }
                     } triggers {
@@ -69,7 +68,7 @@ class TestPingPong {
                 hasInitialGoals {
                     !"sendMessage"
                 }
-                hasPlans {
+                hasPlanLibrary {
                     adding.goal {
                         ifGoalMatch("sendMessage")
                     } triggers {
@@ -99,7 +98,7 @@ class TestPingPong {
 
         context(MessagingSkill(node)) {
             messageEnabledAgent(bob) {
-                hasPlans {
+                hasPlanLibrary {
                     adding.belief {
                         this.takeIf { it == Pair("Ping!", alice) }
                     } triggers {
@@ -120,7 +119,7 @@ class TestPingPong {
                 hasInitialGoals {
                     !"sendMessage"
                 }
-                hasPlans {
+                hasPlanLibrary {
                     adding.goal {
                         ifGoalMatch("sendMessage")
                     } triggers {

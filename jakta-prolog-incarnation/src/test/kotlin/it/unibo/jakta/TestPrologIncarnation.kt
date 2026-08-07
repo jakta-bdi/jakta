@@ -40,7 +40,7 @@ class TestPrologIncarnation {
                             hasInitialGoals {
                                 !initialGoal { "start"(0, 10) }
                             }
-                            hasPlans {
+                            hasPlanLibrary {
                                 prologPlan {
                                     adding.goal {
                                         matching { "start"(N, N) }
@@ -83,7 +83,7 @@ class TestPrologIncarnation {
                             hasInitialGoals {
                                 !initialGoal { "start"(1) }
                             }
-                            hasPlans {
+                            hasPlanLibrary {
                                 prologPlan {
                                     adding.goal {
                                         matching { "start"(N) }
@@ -123,7 +123,7 @@ class TestPrologIncarnation {
                             hasInitialGoals {
                                 !initialGoal { "start"(1) }
                             }
-                            hasPlans {
+                            hasPlanLibrary {
                                 prologPlan {
                                     adding.goal {
                                         matching { "start"(N) }
@@ -176,7 +176,7 @@ class TestPrologIncarnation {
                             hasInitialGoals {
                                 !initialGoal { "start"(1) }
                             }
-                            hasPlans {
+                            hasPlanLibrary {
                                 prologPlan {
                                     adding.goal {
                                         matching { "start"(`_`) }
@@ -219,7 +219,7 @@ class TestPrologIncarnation {
                             hasInitialGoals {
                                 !initialGoal { "start"("bob") }
                             }
-                            hasPlans {
+                            hasPlanLibrary {
                                 prologPlan {
                                     adding.goal {
                                         matching { "start"(B) }
@@ -264,7 +264,7 @@ class TestPrologIncarnation {
                             hasInitialGoals {
                                 !initialGoal { "start"("bob") }
                             }
-                            hasPlans {
+                            hasPlanLibrary {
                                 prologPlan {
                                     adding.goal {
                                         matching { "start"(B) }

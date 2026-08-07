@@ -30,7 +30,7 @@ class TestBeliefPlan {
         hasInitialGoals {
             !"testGoal"
         }
-        hasPlans {
+        hasPlanLibrary {
             adding.goal {
                 this.takeIf { it == "testGoal" }
             } triggers {
