@@ -44,7 +44,6 @@ allprojects {
     }
 
     gitSemVer {
-        versionPrefix.set("v")
         excludeLightweightTags()
         commitNameBasedUpdateStrategy {
             UpdateType.NONE
@@ -59,45 +58,44 @@ allprojects {
         }
     }
 
-    //TODO enable at some point?
+    publishOnCentral {
+        repoOwner = "JaKtA"
+        projectLongName = "jakta"
+        projectDescription = "BDI agents in Kotlin"
+        licenseName = "Apache License 2.0"
+        licenseUrl = "https://opensource.org/license/Apache-2.0/"
+        publishing {
+            publications {
+                withType<MavenPublication>().configureEach {
+                    pom {
+                        developers {
+                            developer {
+                                name = "Martina Baiardi"
+                                email = "m.baiardi@unibo.it"
+                                url = "https://github.com/anitvam"
+                            }
+                            developer {
+                                name = "Samuele Burattini"
+                                email = "samuele.burattini@unibo.it"
+                                url = "https://github.com/samubura"
+                            }
+                            developer {
+                                name = "Danilo Pianini"
+                                email = "danilo.pianini@unibo.it"
+                                url = "https://danilopianini.org"
+                            }
+                            developer {
+                                name = "Giovanni Ciatto"
+                                email = "giovanni.ciatto@unibo.it"
+                                url = "https://github.com/gciatto"
+                            }
 
-//    publishOnCentral {
-//        repoOwner = "JaKtA"
-//        projectLongName = "jakta"
-//        projectDescription = "BDI agents in Kotlin"
-//        licenseName = "Apache License 2.0"
-//        licenseUrl = "https://opensource.org/license/Apache-2.0/"
-//        publishing {
-//            publications {
-//                withType<MavenPublication>().configureEach {
-//                    pom {
-//                        developers {
-//                            developer {
-//                                name = "Martina Baiardi"
-//                                email = "m.baiardi@unibo.it"
-//                                url = "https://github.com/anitvam"
-//                            }
-//                            developer {
-//                                name = "Samuele Burattini"
-//                                email = "samuele.burattini@unibo.it"
-//                                url = "https://github.com/samubura"
-//                            }
-//                            developer {
-//                                name = "Giovanni Ciatto"
-//                                email = "giovanni.ciatto@unibo.it"
-//                                url = "https://github.com/gciatto"
-//                            }
-//                            developer {
-//                                name = "Danilo Pianini"
-//                                email = "danilo.pianini@unibo.it"
-//                                url = "https://danilopianini.org"
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
 
     plugins.withType<DetektPlugin> {
@@ -168,24 +166,4 @@ tasks {
 }
 
 
-// OLD CONFIGURATION FOR RELEASE ON MAVEN CENTRAL PLUGIN
-//publishOnCentral {
-//    repoOwner.set("jakta-bdi")
-//    projectLongName.set("JaKtA")
-//    projectDescription.set("A Kotlin internal DSL for the definition of BDI agents")
-//    scmConnection.set("scm:git:https://github.com/$repoOwner/${rootProject.name}")
-//    projectUrl.set("https://github.com/$repoOwner/${rootProject.name}")
-//}
-//
-//publishing.publications.withType<MavenPublication>().configureEach {
-//    pom {
-//        developers {
-//            developer {
-//                id.set("anitvam")
-//                name.set("Martina Baiardi")
-//                email.set("m.baiardi@unibo.it")
-//            }
-//        }
-//    }
-//}
 
