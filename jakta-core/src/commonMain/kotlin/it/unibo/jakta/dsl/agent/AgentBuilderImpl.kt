@@ -20,8 +20,7 @@ import kotlin.properties.Delegates
 class AgentBuilderImpl<Belief : Any, Goal : Any, Body : Any>(
     override val node: Node<Body>,
     private val id: AgentID? = null,
-) :
-    AgentBuilder<Belief, Goal, Body> {
+) : AgentBuilder<Belief, Goal, Body> {
     private var initialBeliefs = listOf<Belief>()
     private var initialGoals = listOf<Goal>()
     private var beliefPlans = listOf<Plan.Belief<Belief, Goal, *, *>>()
@@ -86,18 +85,17 @@ class AgentBuilderImpl<Belief : Any, Goal : Any, Body : Any>(
         goalPlans += plans
     }
 
-    override fun build(): AgentSpecification<Belief, Goal, Body> =
-        object : AgentSpecification<Belief, Goal, Body> {
-            override val id: AgentID = this@AgentBuilderImpl.id ?: BaseAgentID()
-            override val body: Body = this@AgentBuilderImpl.bodyFactory(id)
-            override val initialGoals: List<Goal> = this@AgentBuilderImpl.initialGoals
-            override val initialState: AgentState<Belief, Goal> = BaseAgentState(
-                beliefs = initialBeliefs,
-                intentions = setOf(),
-                beliefPlans = this@AgentBuilderImpl.beliefPlans,
-                goalPlans = this@AgentBuilderImpl.goalPlans,
-                perceptionHandler = perceptionHandler,
-                messageHandler = messageHandler,
-            )
-        }
+    override fun build(): AgentSpecification<Belief, Goal, Body> = object : AgentSpecification<Belief, Goal, Body> {
+        override val id: AgentID = this@AgentBuilderImpl.id ?: BaseAgentID()
+        override val body: Body = this@AgentBuilderImpl.bodyFactory(id)
+        override val initialGoals: List<Goal> = this@AgentBuilderImpl.initialGoals
+        override val initialState: AgentState<Belief, Goal> = BaseAgentState(
+            beliefs = initialBeliefs,
+            intentions = setOf(),
+            beliefPlans = this@AgentBuilderImpl.beliefPlans,
+            goalPlans = this@AgentBuilderImpl.goalPlans,
+            perceptionHandler = perceptionHandler,
+            messageHandler = messageHandler,
+        )
+    }
 }

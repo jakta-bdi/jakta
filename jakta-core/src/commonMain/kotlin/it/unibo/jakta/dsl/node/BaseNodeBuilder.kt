@@ -4,18 +4,18 @@ import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.agent.AgentSpecification
 import it.unibo.jakta.dsl.agent.AgentBuilder
 import it.unibo.jakta.dsl.agent.AgentBuilderImpl
-import it.unibo.jakta.node.BaseNode
 import it.unibo.jakta.node.ExecutableNode
 import it.unibo.jakta.node.Node
 
 /**
  * Implementation of the [NodeBuilder] interface.
- * @param nodeFactory a factory for creating the instance of this node.
+ * @param initialNode the initial [ExecutableNode].
  */
-open class BaseNodeBuilder<Body : Any, out N : ExecutableNode<Body>>(private val _node: N) : NodeBuilder<Body, N> {
+open class BaseNodeBuilder<Body : Any, out N : ExecutableNode<Body>>(private val initialNode: N) :
+    NodeBuilder<Body, N> {
 
     override val node: Node<Body>
-        get() = _node
+        get() = initialNode
 
     protected val agents = mutableListOf<AgentBuilder<*, *, Body>>()
 
@@ -26,10 +26,10 @@ open class BaseNodeBuilder<Body : Any, out N : ExecutableNode<Body>>(private val
         buildAgent(id, block)
 
     override fun <Belief : Any, Goal : Any> withAgents(
-        vararg agentFactories: (Node<Body>) -> AgentSpecification<Belief, Goal, Body>
+        vararg agentFactories: (Node<Body>) -> AgentSpecification<Belief, Goal, Body>,
     ) = agentFactories.forEach { factory ->
-            node.addAgent(factory(node))
-        }
+        node.addAgent(factory(node))
+    }
 
     private fun <Belief : Any, Goal : Any> buildAgent(
         id: AgentID?,
@@ -42,6 +42,6 @@ open class BaseNodeBuilder<Body : Any, out N : ExecutableNode<Body>>(private val
 
     override fun build(): N {
         agents.forEach { node.addAgent(it.build()) }
-        return _node
+        return initialNode
     }
 }

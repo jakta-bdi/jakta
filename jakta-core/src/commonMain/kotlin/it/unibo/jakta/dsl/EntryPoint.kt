@@ -34,7 +34,6 @@ fun <Belief : Any, Goal : Any, Body : Any> agent(
     ab.build()
 }
 
-
 /**
  * Entry point for creating an agent using the JaKtA DSL.
  * @param id the id for the Agent.

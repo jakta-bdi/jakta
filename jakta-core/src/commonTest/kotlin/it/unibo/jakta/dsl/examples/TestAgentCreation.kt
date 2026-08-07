@@ -26,7 +26,7 @@ class TestAgentCreation {
     val alice = agent<String, String, Any>(aliceID) {
         embodiedAs { Any() }
         handlesMessageEvents {
-            when(it.payload) {
+            when (it.payload) {
                 is String -> AgentUpdate.Goal(setOf("greet"))
                 else -> null
             }
@@ -41,10 +41,9 @@ class TestAgentCreation {
         }
     }
 
-
     context(messaging: MessagingSkill)
     val bob: (Node<Any>) -> AgentSpecification<Any, String, Any>
-        get () = agent(BaseAgentID("Bob")) {
+        get() = agent(BaseAgentID("Bob")) {
             embodiedAs { Any() }
             hasInitialGoals { !"greet" }
             hasPlans {
@@ -75,9 +74,7 @@ class TestAgentCreation {
                         withAgents(bob)
                     }
                 }
-
             }.run(CoroutineNodeRunner(LocalNodeConnection()))
         }
     }
 }
-

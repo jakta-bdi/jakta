@@ -35,8 +35,8 @@ interface NodeBuilder<Body : Any, out N : ExecutableNode<Body>> {
      * Each factory is a function that takes a Node<Body> and returns an AgentSpecification.
      * @param agentFactories vararg of functions that create AgentSpecifications for the node.
      */
-    fun <Belief: Any, Goal: Any> withAgents(
-        vararg agentFactories: (Node<Body>) -> AgentSpecification<Belief, Goal, Body>
+    fun <Belief : Any, Goal : Any> withAgents(
+        vararg agentFactories: (Node<Body>) -> AgentSpecification<Belief, Goal, Body>,
     )
 
     /**

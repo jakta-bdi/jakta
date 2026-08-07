@@ -11,7 +11,7 @@ import it.unibo.jakta.node.RuntimeNodes
  * @return a factory for a [BaseNodeBuilder] which creates a [JaktaForAlchemistNode].
  */
 fun <Body : Any> NodeBuilders.alchemistNode(): () -> BaseNodeBuilder<Body, JaktaForAlchemistNode<Body>> = {
-    BaseNodeBuilder<Body, JaktaForAlchemistNode<Body>> { JaktaForAlchemistNode() }
+    BaseNodeBuilder<Body, JaktaForAlchemistNode<Body>>(JaktaForAlchemistNode())
 }
 
 /**
