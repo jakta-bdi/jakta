@@ -1,26 +1,24 @@
 package it.unibo.jakta.dsl
 
+import it.unibo.jakta.dsl.node.BaseNodeBuilder
 import it.unibo.jakta.dsl.node.NodeBuilder
+import it.unibo.jakta.dsl.node.NodeBuilders
+import it.unibo.jakta.node.BaseNode
 import it.unibo.jakta.node.ExecutableNode
-import it.unibo.jakta.node.Node
+import it.unibo.jakta.node.JaktaForAlchemistNode
+import it.unibo.jakta.node.RuntimeNodes
 
-/**
- * Custom Runtime for Alchemist.
- * It serves only as a JaKtA node container.
- */
-class RuntimeNodes<N : ExecutableNode<*>>(
-    /**
-     * The JaKtA nodes that are being executed in the node.
-     */
-    val nodes: Set<N>,
-)
+
+fun <Body: Any> NodeBuilders.AlchemistNode(): () -> BaseNodeBuilder<Body, JaktaForAlchemistNode<Body>> = {
+    BaseNodeBuilder<Body, JaktaForAlchemistNode<Body>> { JaktaForAlchemistNode() }
+}
 
 /**
  * Builder of a device inside the simulation.
  * A device corresponds to a simulated node, which inside can host one or more JaKtA nodes.
  * @param builder the NodeBuilder instance.
  */
-class DeviceBuilder<N : ExecutableNode<*>, NB : NodeBuilder<*, N>>(val builder: NB) {
+class DeviceBuilder<N : JaktaForAlchemistNode<*>, NB : NodeBuilder<*, N>>(val builder: NB) {
 
     /**
      * JaKtA nodes executing inside of this alchemist node.
@@ -39,7 +37,7 @@ class DeviceBuilder<N : ExecutableNode<*>, NB : NodeBuilder<*, N>>(val builder: 
  * Device entrypoint for the simulation custom DSL.
  */
 @JaktaDSL
-fun <N : ExecutableNode<*>, NB : NodeBuilder<*, N>> device(
-    builder: NB,
+fun <N : JaktaForAlchemistNode<*>, NB : NodeBuilder<*, N>> device(
+    builderFactory: () -> NB,
     block: DeviceBuilder<N, NB>.() -> Unit,
-): RuntimeNodes<N> = RuntimeNodes(DeviceBuilder(builder).apply(block).nodes)
+): RuntimeNodes<N> = RuntimeNodes(DeviceBuilder(builderFactory()).apply(block).nodes)

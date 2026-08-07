@@ -1,19 +1,16 @@
 package it.unibo.alchemist.jakta.properties
 
-import it.unibo.alchemist.jakta.JaktaNode
-import it.unibo.alchemist.jakta.actions.JaktaForAlchemistAgent
+import it.unibo.alchemist.jakta.actions.JaktaAgentAction
 import it.unibo.alchemist.model.Environment
 import it.unibo.alchemist.model.Node as AlchemistNode
 import it.unibo.alchemist.model.NodeProperty
 import it.unibo.alchemist.model.Position
 import it.unibo.jakta.agent.ExecutableAgent
-import it.unibo.jakta.dsl.RuntimeNodes
-import it.unibo.jakta.event.EventStream
 import it.unibo.jakta.event.SystemEvent
-import it.unibo.jakta.node.AlchemistNodeConnection
-import it.unibo.jakta.node.LocalNodeConnection
-import it.unibo.jakta.node.NodeConnection
+import it.unibo.jakta.node.JaktaForAlchemistNode
+import it.unibo.jakta.node.NodeNetwork
 import it.unibo.jakta.node.NodeSubscription
+import it.unibo.jakta.node.RuntimeNodes
 import kotlinx.coroutines.runBlocking
 
 // TODO this is probably broken now with the latest changes to node runners and management of system events.
@@ -26,32 +23,31 @@ import kotlinx.coroutines.runBlocking
 class JaktaForAlchemistRuntime<P : Position<P>>(
     val alchemistEnvironment: Environment<Any?, P>,
     override val node: AlchemistNode<Any?>,
-    private val subscription: NodeSubscription,
 ) : NodeProperty<Any?> {
 
-    private lateinit var jaktaNodes: RuntimeNodes<JaktaNode<*>>
-    private val agentActions: MutableMap<JaktaForAlchemistAgent<P>, JaktaNode<*>> = mutableMapOf()
+    private lateinit var jaktaNodes: RuntimeNodes<JaktaForAlchemistNode<*>>
+    private val agentActions: MutableMap<JaktaAgentAction<P>, JaktaForAlchemistNode<*>> = mutableMapOf()
 
     /**
      * Configures the runtime to manage the specified Jakta nodes.
      * The initial configuration of nodes can happen only one time at simulation creation time, not later.
      * @param nodes the Jakta [RuntimeNodes].
      */
-    fun setInitialJaktaNodes(nodes: RuntimeNodes<JaktaNode<*>>) {
+    fun setInitialJaktaNodes(nodes: RuntimeNodes<JaktaForAlchemistNode<*>>) {
         if (!::jaktaNodes.isInitialized) {
             jaktaNodes = nodes
             jaktaNodes.nodes.forEach { node ->
                 var systemEvent: SystemEvent? = node.systemEvents.tryNext()
                 while (systemEvent != null) {
-                    AlchemistNodeConnection.send(systemEvent)
+                    NodeNetwork.send(systemEvent)
                     systemEvent = node.systemEvents.tryNext()
                 }
 
-                var event = subscription.queue.tryNext()
+                var event = node.subscription.queue.tryNext()
                 while (event != null) {
                     node.handleExternalEvent(event)
                     manageSystemEvent(node, event)
-                    event = subscription.queue.tryNext()
+                    event = node.subscription.queue.tryNext()
                 }
             }
         }
@@ -62,10 +58,10 @@ class JaktaForAlchemistRuntime<P : Position<P>>(
             // 1. Forwarding node system events to the shared Node Connection
             val nodeSystemEvent =  node.systemEvents.tryNext()
             if (nodeSystemEvent != null) {
-                AlchemistNodeConnection.send(nodeSystemEvent)
+                NodeNetwork.send(nodeSystemEvent)
             }
             // 2. Take next systemEvent to handle from shared Node Connection
-            val eventToManage = subscription.queue.tryNext()
+            val eventToManage = node.subscription.queue.tryNext()
             if (eventToManage != null) {
                 node.handleExternalEvent(eventToManage)
                 manageSystemEvent(node, eventToManage)
@@ -74,21 +70,21 @@ class JaktaForAlchemistRuntime<P : Position<P>>(
     }
 
     /**
-     * @return a list of [Pair] containing the [JaktaForAlchemistAgent] and
+     * @return a list of [Pair] containing the [JaktaAgentAction] and
      * the associated alchemist Node on which it is being executed.
      */
     fun getAgentActions() = agentActions.toList()
 
     override fun cloneOnNewNode(node: AlchemistNode<Any?>): JaktaForAlchemistRuntime<P> =
-        JaktaForAlchemistRuntime(alchemistEnvironment, node, subscription)
+        JaktaForAlchemistRuntime(alchemistEnvironment, node)
 
     /**
      * Stores the newly added agent action that is scheduled for execution in the node.
      * @param node the node that will host the agent.
      * @param agent the agent scheduled for the execution in the node.
      */
-    private fun addAgentAction(node: JaktaNode<*>, agent: ExecutableAgent<*, *>) {
-        val newAgentAction = JaktaForAlchemistAgent<P>(this.node, agent, alchemistEnvironment)
+    private fun addAgentAction(node: JaktaForAlchemistNode<*>, agent: ExecutableAgent<*, *>) {
+        val newAgentAction = JaktaAgentAction<P>(this.node, agent, alchemistEnvironment)
         agentActions += newAgentAction to node
     }
 
@@ -97,7 +93,7 @@ class JaktaForAlchemistRuntime<P : Position<P>>(
      * @param node the node on which the event effect is applied.
      * @param systemEvent the event that is being managed.
      */
-    private fun manageSystemEvent(node: JaktaNode<*>, systemEvent: SystemEvent): Unit {
+    private fun manageSystemEvent(node: JaktaForAlchemistNode<*>, systemEvent: SystemEvent): Unit {
         when (systemEvent) {
             is SystemEvent.AgentAddition<*, *> -> if (systemEvent.nodeID == node.id) {
                 addAgentAction(node, systemEvent.executableAgent)
@@ -105,7 +101,7 @@ class JaktaForAlchemistRuntime<P : Position<P>>(
             is SystemEvent.AgentRemoval -> TODO("Agent Removal not supported for now")
             is SystemEvent.ShutDownNode -> if (systemEvent.nodeID == node.id) {
                 runBlocking {
-                    subscription.close()
+                    node.subscription.close()
                 }
             }
             else -> Unit
