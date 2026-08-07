@@ -53,22 +53,6 @@ class JaktaForAlchemistRuntime<P : Position<P>>(
         }
     }
 
-    fun stepSystemEvents() {
-        jaktaNodes.nodes.forEach { node ->
-            // 1. Forwarding node system events to the shared Node Connection
-            val nodeSystemEvent =  node.systemEvents.tryNext()
-            if (nodeSystemEvent != null) {
-                NodeNetwork.send(nodeSystemEvent)
-            }
-            // 2. Take next systemEvent to handle from shared Node Connection
-            val eventToManage = node.subscription.queue.tryNext()
-            if (eventToManage != null) {
-                node.handleExternalEvent(eventToManage)
-                manageSystemEvent(node, eventToManage)
-            }
-        }
-    }
-
     /**
      * @return a list of [Pair] containing the [JaktaAgentAction] and
      * the associated alchemist Node on which it is being executed.
@@ -93,7 +77,7 @@ class JaktaForAlchemistRuntime<P : Position<P>>(
      * @param node the node on which the event effect is applied.
      * @param systemEvent the event that is being managed.
      */
-    private fun manageSystemEvent(node: JaktaForAlchemistNode<*>, systemEvent: SystemEvent): Unit {
+    fun manageSystemEvent(node: JaktaForAlchemistNode<*>, systemEvent: SystemEvent): Unit {
         when (systemEvent) {
             is SystemEvent.AgentAddition<*, *> -> if (systemEvent.nodeID == node.id) {
                 addAgentAction(node, systemEvent.executableAgent)

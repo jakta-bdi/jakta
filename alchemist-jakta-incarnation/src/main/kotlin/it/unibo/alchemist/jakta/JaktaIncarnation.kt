@@ -1,5 +1,6 @@
 package it.unibo.alchemist.jakta
 
+import it.unibo.alchemist.jakta.actions.NodeEventsAction
 import it.unibo.alchemist.jakta.properties.JaktaForAlchemistRuntime
 import it.unibo.alchemist.model.Action
 import it.unibo.alchemist.model.Actionable
@@ -96,7 +97,10 @@ class JaktaIncarnation<P : Position<P>> : Incarnation<Any?, P> {
 
         val event = Event(node, timeDistribution)
         val actions = runtime.getAgentActions().map { it.first }
-        event.actions = actions
+        val nodesActions = jaktaNodes.nodes.map {
+            NodeEventsAction(node, environment, it)
+        }
+        event.actions = actions + nodesActions
         return event
     }
 

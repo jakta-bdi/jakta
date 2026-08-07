@@ -37,10 +37,5 @@ class JaktaAgentAction<P : Position<P>>(
     override fun execute() {
         dispatcher.runDueTasks()
         agentLifecycle.tryStep(dispatcher)
-
-        alchemistNode.properties
-            .filterIsInstance<JaktaForAlchemistRuntime<P>>()
-            .firstOrNull()
-            ?.stepSystemEvents() // TODO(Questa cosa potrebbe essere gestita da un'azioneche fa solamente la step system events)
     }
 }
