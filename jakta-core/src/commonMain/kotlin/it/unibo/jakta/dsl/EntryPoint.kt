@@ -4,9 +4,21 @@ import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.agent.AgentSpecification
 import it.unibo.jakta.dsl.agent.AgentBuilder
 import it.unibo.jakta.dsl.agent.AgentBuilderImpl
+import it.unibo.jakta.dsl.mas.BaseMasBuilder
+import it.unibo.jakta.dsl.mas.MasBuilder
 import it.unibo.jakta.dsl.node.NodeBuilder
 import it.unibo.jakta.node.ExecutableNode
 import it.unibo.jakta.node.Node
+
+/**
+ * DSL entrypoint for creating a Multi-Agent System (MAS).
+ * It takes a [NodeBuilder] and a block of code that defines the MAS structure.
+ */
+@JaktaDSL
+fun <N : ExecutableNode<*>, NB : NodeBuilder<*, N>> mas(
+    builderFactory: () -> NB,
+    block: MasBuilder<N, NB>.() -> Unit,
+): MasBuilder<N, NB> = BaseMasBuilder(builderFactory).apply(block)
 
 /**
  * Entry point for creating a node using the JaKtA DSL.

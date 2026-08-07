@@ -6,11 +6,13 @@ import it.unibo.jakta.node.NodeRunner
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 
-class BaseMasBuilder<N : ExecutableNode<*>, NB : NodeBuilder<*, N>>(
-    val builderFactory: () -> NB
-) : MasBuilder<N, NB> {
+/**
+ * Base implementation of a MasBuilder, with a strategy to build nodes and run them concurrently.
+ * @param builderFactory the strategy factory to create new node builders.
+ */
+class BaseMasBuilder<N : ExecutableNode<*>, NB : NodeBuilder<*, N>>(val builderFactory: () -> NB) : MasBuilder<N, NB> {
 
-    val nodes = mutableListOf<N>()
+    private val nodes = mutableListOf<N>()
 
     override fun node(block: NB.() -> Unit) {
         nodes += builderFactory().apply(block).build()

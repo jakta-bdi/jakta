@@ -31,9 +31,10 @@ open class BaseNode<Body : Any> : ExecutableNode<Body> {
     override val systemEvents: EventStream<SystemEvent>
         get() = _systemEvents
 
-    override fun addAgent(agentSpecification: AgentSpecification<*, *, Body>) {
+    override fun addAgent(agentFactory: (Node<Body>) -> AgentSpecification<*, *, Body>, nodeID: NodeID) {
+        val agentSpecification = agentFactory(this)
         val agent = BaseAgent(agentSpecification)
-        _systemEvents.send(AgentAdditionEvent(agent, this.id))
+        _systemEvents.send(AgentAdditionEvent(agent, nodeID))
     }
 
     override fun removeAgent(id: AgentID) {
@@ -58,7 +59,7 @@ open class BaseNode<Body : Any> : ExecutableNode<Body> {
             }
 
             is AgentRemovalEvent -> {
-                _agents.firstOrNull { it.id == id }?.let {
+                _agents.firstOrNull { it.id == event.id }?.let {
                     _agents.remove(it)
                 }
             }

@@ -6,8 +6,7 @@ import androidx.compose.runtime.setValue
 import blocksWorldNode
 import it.unibo.jakta.dsl.goal.PrologGoal
 import it.unibo.jakta.dsl.goal.initialGoal
-import it.unibo.jakta.dsl.mas.mas
-import it.unibo.jakta.dsl.node.BaseNodeBuilder
+import it.unibo.jakta.dsl.mas
 import it.unibo.jakta.dsl.node.NodeBuilders
 import it.unibo.jakta.node.CoroutineNodeRunner
 import it.unibo.jakta.node.LocalNodeConnection

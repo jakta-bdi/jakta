@@ -30,8 +30,7 @@ class ExecutionTest {
         val node = BaseNode<Any>()
         val node2 = BaseNode<Any>()
 
-        fun agentSpecGenerator(agentname: String, node: BaseNode<*>): Set<AgentSpecification<String, String, Any>> =
-            setOf(
+        fun agentSpecGenerator(agentname: String, node: Node<*>): AgentSpecification<String, String, Any> =
                 object : AgentSpecification<String, String, Any> {
                     override val body = Any()
                     override val initialState: AgentState<String, String> = BaseAgentState(
@@ -56,13 +55,12 @@ class ExecutionTest {
                     )
                     override val initialGoals: List<String> = listOf("hello")
                     override val id: AgentID = BaseAgentID(agentname)
-                },
-            )
+                }
 
         val runner = CoroutineNodeRunner<Any, BaseNode<Any>>(LocalNodeConnection())
 
         runTest {
-            agentSpecGenerator("Agent1", node).forEach { node.addAgent(it) }
+            node.addAgent({agentSpecGenerator("Agent1", it)})
             try {
                 runner.run(node)
             } catch (e: CancellationException) {
@@ -70,7 +68,7 @@ class ExecutionTest {
             } catch (e: Exception) {
                 println("Node execution terminated with exception: ${e.message}")
             }
-            agentSpecGenerator("Agent2", node2).forEach { node2.addAgent(it) }
+            node2.addAgent({agentSpecGenerator("Agent2", node2)})
             try {
                 runner.run(node2)
             } catch (e: CancellationException) {

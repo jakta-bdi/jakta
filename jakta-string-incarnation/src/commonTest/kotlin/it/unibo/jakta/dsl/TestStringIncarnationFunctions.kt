@@ -5,7 +5,6 @@ import co.touchlab.kermit.Severity
 import it.unibo.jakta.belief.containsBeliefMatching
 import it.unibo.jakta.belief.ifGoalMatches
 import it.unibo.jakta.belief.matchesRegex
-import it.unibo.jakta.dsl.mas.mas
 import it.unibo.jakta.dsl.node.NodeBuilders
 import it.unibo.jakta.dsl.plan.PlanLibraryBuilder
 import it.unibo.jakta.dsl.plan.triggers

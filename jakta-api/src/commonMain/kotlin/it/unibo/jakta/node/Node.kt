@@ -32,10 +32,10 @@ interface Node<Body : Any> {
     fun publishEvent(event: AgentEvent.External, filterFunction: Node<Body>.(Body) -> Boolean = { true })
 
     /**
-     * Adds a new agent to the node based on the provided [agentSpecification].
-     * @param agentSpecification The specification of the agent to be added.
+     * Adds a new agent to the node based on the provided [agentFactory].
+     * @param agentFactory A function that creates an agent specification based on the node.
      */
-    fun addAgent(agentSpecification: AgentSpecification<*, *, Body>)
+    fun addAgent(agentFactory: (Node<Body>) -> AgentSpecification<*, *, Body>, nodeID: NodeID = this.id)
 
     /**
      * Removes an agent from the mas based on its [id].

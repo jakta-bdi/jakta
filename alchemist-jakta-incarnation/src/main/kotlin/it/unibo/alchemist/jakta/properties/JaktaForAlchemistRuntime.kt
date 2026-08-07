@@ -16,7 +16,7 @@ import kotlinx.coroutines.runBlocking
 // TODO this is probably broken now with the latest changes to node runners and management of system events.
 //  We need to rework this class to properly handle it.
 /** One Alchemist Node may contain more than one Jakta Node.
- * This Alchemist property connects JaKtA meta-model to alchemist representation.
+ * This Alchemist property connects JaKtA metamodel to alchemist representation.
  * @param alchemistEnvironment the Alchemist Environment instance.
  * @param node the Alchemist Node instance.
  */

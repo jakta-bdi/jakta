@@ -86,9 +86,9 @@ interface MutableAgentState<Belief : Any, Goal : Any> :
     fun print(message: String)
 
     /**
-     * Allows the agent to continue the execution upon receiving an event that matches the event filter,
-     * otherwise waits for a maximum amount of timeout duration.
-     * @param eventFilter the event the agent is waiting for continuing its execution.
+     * Suspends the agent until it receives an event that matches the event filter,
+     * or the timeout is passed.
+     * @param eventFilter the event filter to match what agent is waiting for continuing its execution.
      * @param timeout the maximum [Duration] the agent waits if no event matches the filter.
      * @return the value returned by the eventFilter.
      */
