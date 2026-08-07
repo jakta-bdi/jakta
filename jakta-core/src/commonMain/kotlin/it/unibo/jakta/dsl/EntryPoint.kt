@@ -75,25 +75,23 @@ fun <Belief : Any, Goal : Any, Body : Any> agent(
 
 // TODO maybe actually make the triggerBuilder implement these interfaces?
 
-
 /**
  * Entrypoint to define a list of plans for an agent.
  */
 @JaktaDSL
-fun <Belief : Any, Goal : Any, Body: Any> plans (
-    block: PlanLibraryBuilder<Belief, Goal>.(Node<Body>) -> Unit
-) : (Node<Body>) -> List<Plan<Belief, Goal, *, *, *>> {
+fun <Belief : Any, Goal : Any, Body : Any> plans(
+    block: PlanLibraryBuilder<Belief, Goal>.(Node<Body>) -> Unit,
+): (Node<Body>) -> List<Plan<Belief, Goal, *, *, *>> {
     val plans = mutableListOf<Plan<Belief, Goal, *, *, *>>()
     val libraryBuilder = PlanLibraryBuilderImpl(
         addBeliefPlan = { plans.add(it) },
-        addGoalPlan = { plans.add(it) }
+        addGoalPlan = { plans.add(it) },
     )
     return { node ->
         libraryBuilder.apply { block(node) }
         plans
     }
 }
-
 
 // interface BeliefOnlyAdditionTrigger<Belief : Any, Goal : Any> {
 //    /**

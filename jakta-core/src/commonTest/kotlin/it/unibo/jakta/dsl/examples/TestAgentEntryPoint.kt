@@ -82,7 +82,6 @@ class TestAgentEntryPoint {
 
     @Test
     fun testPlansEntryPoint() {
-
         val myCustomPlans = plans<String, String, Any> { node ->
             adding.goal {
                 ifGoalMatch("hello")
