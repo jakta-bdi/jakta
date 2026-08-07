@@ -9,6 +9,7 @@ object NodeBuilders {
     /**
      * Creates a [BaseNodeBuilder] for an [it.unibo.jakta.node.BaseNode] with the specified [Body] type.
      */
-    fun <Body : Any> baseNode(): () -> BaseNodeBuilder<Body, BaseNode<Body>> =
-        { BaseNodeBuilder<Body, BaseNode<Body>>(nodeFactory = { BaseNode() })}
+    fun <Body : Any> baseNode(): () -> BaseNodeBuilder<Body, BaseNode<Body>> = {
+        BaseNodeBuilder<Body, BaseNode<Body>>(nodeFactory = { BaseNode() })
+    }
 }

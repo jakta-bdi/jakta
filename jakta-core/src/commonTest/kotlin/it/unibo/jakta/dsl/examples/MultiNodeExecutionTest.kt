@@ -5,7 +5,6 @@ import co.touchlab.kermit.Severity
 import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.agent.BaseAgentID
 import it.unibo.jakta.dsl.ifGoalMatch
-import it.unibo.jakta.dsl.node
 import it.unibo.jakta.dsl.mas.mas
 import it.unibo.jakta.dsl.node.NodeBuilders
 import it.unibo.jakta.dsl.plan.triggers

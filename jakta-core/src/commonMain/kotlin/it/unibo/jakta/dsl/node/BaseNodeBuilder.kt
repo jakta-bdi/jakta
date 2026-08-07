@@ -10,12 +10,12 @@ import it.unibo.jakta.node.Node
 /**
  * Implementation of the [NodeBuilder] interface.
  */
-open class BaseNodeBuilder<Body : Any, out N : ExecutableNode<Body>>(nodeFactory: () -> N) : NodeBuilder<Body, N> {
+open class BaseNodeBuilder<Body : Any, out N : ExecutableNode<Body>>(val nodeFactory: () -> N) : NodeBuilder<Body, N> {
 
     override val node: Node<Body>
         get() = _node
 
-    private val _node = nodeFactory()
+    private var _node = nodeFactory()
 
     protected val agents = mutableListOf<AgentBuilder<*, *, Body>>()
 

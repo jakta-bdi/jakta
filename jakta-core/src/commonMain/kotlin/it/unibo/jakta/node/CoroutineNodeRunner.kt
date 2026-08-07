@@ -56,7 +56,9 @@ class CoroutineNodeRunner<Body : Any, N : ExecutableNode<Body>>(val connection: 
                     val event = subscription.queue.next()
                     node.handleExternalEvent(event)
                     when (event) {
-                        is SystemEvent.AgentAddition<*, *> -> appScope.startAgent(node, event.executableAgent)
+                        is SystemEvent.AgentAddition<*, *> -> if (event.nodeID == node.id) {
+                            appScope.startAgent(node, event.executableAgent)
+                        }
 
                         is SystemEvent.AgentRemoval -> stopAgent(event.id)
 

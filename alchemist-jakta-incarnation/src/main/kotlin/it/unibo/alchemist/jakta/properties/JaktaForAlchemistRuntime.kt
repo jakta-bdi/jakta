@@ -99,10 +99,14 @@ class JaktaForAlchemistRuntime<P : Position<P>>(
      */
     private fun manageSystemEvent(node: JaktaNode<*>, systemEvent: SystemEvent): Unit {
         when (systemEvent) {
-            is SystemEvent.AgentAddition<*, *> -> addAgentAction(node, systemEvent.executableAgent)
+            is SystemEvent.AgentAddition<*, *> -> if (systemEvent.nodeID == node.id) {
+                addAgentAction(node, systemEvent.executableAgent)
+            }
             is SystemEvent.AgentRemoval -> TODO("Agent Removal not supported for now")
-            is SystemEvent.ShutDownNode -> runBlocking {
-                subscription.close()
+            is SystemEvent.ShutDownNode -> if (systemEvent.nodeID == node.id) {
+                runBlocking {
+                    subscription.close()
+                }
             }
             else -> Unit
         }
