@@ -20,18 +20,38 @@ class LocalNodeConnection : NodeConnection {
         val queue = UnlimitedChannelQueue<SystemEvent>().also {
             subscribers.add(it)
         }
-        return object : NodeSubscription {
-            override val queue: EventQueue<SystemEvent> = queue
+        return createNodeSubscription(queue)
+    }
 
-            override suspend fun close() {
-                mutex.withLock {
-                    subscribers.remove(queue)
-                }
+    override fun trySubscribe(): NodeSubscription? {
+        val lock = mutex.tryLock()
+        if (!lock) return null
+        val queue = UnlimitedChannelQueue<SystemEvent>().also {
+            subscribers.add(it)
+        }
+        mutex.unlock()
+        return createNodeSubscription(queue)
+    }
+
+    private fun createNodeSubscription(queue: EventQueue<SystemEvent>): NodeSubscription = object : NodeSubscription {
+        override val queue: EventQueue<SystemEvent> = queue
+        override suspend fun close() {
+            mutex.withLock {
+                subscribers.remove(queue)
             }
         }
     }
 
     override suspend fun send(event: SystemEvent) = mutex.withLock {
         subscribers.forEach { it.send(event) }
+    }
+
+    override fun trySend(event: SystemEvent): Boolean {
+        val lock = mutex.tryLock()
+        if (lock) {
+            subscribers.forEach { it.send(event) }
+            mutex.unlock()
+        }
+        return lock
     }
 }

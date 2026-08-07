@@ -39,7 +39,7 @@ class NodeEventsAction<P : Position<P>>(
         // 1. Forwarding node system events to the shared Node Connection
         val nodeSystemEvent = jaktaNode.systemEvents.tryNext()
         if (nodeSystemEvent != null) {
-            NodeNetwork.send(nodeSystemEvent)
+            NodeNetwork.trySend(nodeSystemEvent)
         }
         // 2. Take next systemEvent to handle from shared Node Connection
         val eventToManage = jaktaNode.subscription.queue.tryNext()

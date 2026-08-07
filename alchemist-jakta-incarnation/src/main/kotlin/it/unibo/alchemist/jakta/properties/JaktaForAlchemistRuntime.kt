@@ -39,7 +39,7 @@ class JaktaForAlchemistRuntime<P : Position<P>>(
             jaktaNodes.nodes.forEach { node ->
                 var systemEvent: SystemEvent? = node.systemEvents.tryNext()
                 while (systemEvent != null) {
-                    NodeNetwork.send(systemEvent)
+                    NodeNetwork.trySend(systemEvent)
                     systemEvent = node.systemEvents.tryNext()
                 }
 

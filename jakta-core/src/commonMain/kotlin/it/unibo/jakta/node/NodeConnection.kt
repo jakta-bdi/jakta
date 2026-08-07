@@ -14,7 +14,20 @@ interface NodeConnection {
     suspend fun subscribe(): NodeSubscription
 
     /**
+     * Starts the connection without suspending and returns a [NodeSubscription]
+     * that allows for receiving [SystemEvent]s from the connection, if possible.
+     * If it is not possible to subscribe, the function returns null.
+     */
+    fun trySubscribe(): NodeSubscription?
+
+    /**
      * Sends a [SystemEvent] through the connection, allowing for communication and event propagation across nodes.
      */
     suspend fun send(event: SystemEvent)
+
+    /**
+     * Attempts to send an event to the shared connection, without suspending.
+     * If it fails, returns false.
+     */
+    fun trySend(event: SystemEvent): Boolean
 }
