@@ -1,5 +1,6 @@
 package it.unibo.jakta.dsl
 
+import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.agent.AgentSpecification
 import it.unibo.jakta.dsl.agent.AgentBuilder
 import it.unibo.jakta.dsl.agent.AgentBuilderImpl
@@ -22,16 +23,31 @@ fun <Body : Any, N : ExecutableNode<Body>, NB : NodeBuilder<Body, N>> node(
 
 /**
  * Entry point for creating an agent using the JaKtA DSL.
- * @return an instantiated Agent.
+ * @return a factory to create an agent, given the node the agent will run on.
  */
 @JaktaDSL
 fun <Belief : Any, Goal : Any, Body : Any> agent(
-    node: Node<Body>,
     block: AgentBuilder<Belief, Goal, Body>.() -> Unit,
-): AgentSpecification<Belief, Goal, Body> {
-    val ab = AgentBuilderImpl<Belief, Goal, Body>()
+): (Node<Body>) -> AgentSpecification<Belief, Goal, Body> = { node ->
+    val ab = AgentBuilderImpl<Belief, Goal, Body>(node)
     ab.apply(block)
-    return ab.build(node)
+    ab.build()
+}
+
+
+/**
+ * Entry point for creating an agent using the JaKtA DSL.
+ * @param id the id for the Agent.
+ * @return a factory to create an agent, given the node the agent will run on.
+ */
+@JaktaDSL
+fun <Belief : Any, Goal : Any, Body : Any> agent(
+    id: AgentID,
+    block: AgentBuilder<Belief, Goal, Body>.() -> Unit,
+): (Node<Body>) -> AgentSpecification<Belief, Goal, Body> = { node ->
+    val ab = AgentBuilderImpl<Belief, Goal, Body>(node, id)
+    ab.apply(block)
+    ab.build()
 }
 
 // TODO entrypoint for plans???

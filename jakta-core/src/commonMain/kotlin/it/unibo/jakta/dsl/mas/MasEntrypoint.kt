@@ -4,6 +4,8 @@ import it.unibo.jakta.dsl.JaktaDSL
 import it.unibo.jakta.dsl.node.NodeBuilder
 import it.unibo.jakta.node.ExecutableNode
 import it.unibo.jakta.node.NodeRunner
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.supervisorScope
 
 /**
  * DSL entrypoint for creating a Multi-Agent System (MAS).
@@ -22,6 +24,12 @@ fun <N : ExecutableNode<*>, NB : NodeBuilder<*, N>> mas(
     }
 
     override suspend fun run(runner: NodeRunner<N>) {
-        nodes.forEach { runner.run(it) }
+        supervisorScope {
+            nodes.forEach {
+                launch {
+                    runner.run(it)
+                }
+            }
+        }
     }
 }.apply(block)

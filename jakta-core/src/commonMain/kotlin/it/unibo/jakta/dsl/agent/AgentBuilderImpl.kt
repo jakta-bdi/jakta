@@ -17,7 +17,10 @@ import kotlin.properties.Delegates
 /**
  * Implementation of the AgentBuilder interface.
  */
-class AgentBuilderImpl<Belief : Any, Goal : Any, Body : Any>(private val id: AgentID? = null) :
+class AgentBuilderImpl<Belief : Any, Goal : Any, Body : Any>(
+    override val node: Node<Body>,
+    private val id: AgentID? = null,
+) :
     AgentBuilder<Belief, Goal, Body> {
     private var initialBeliefs = listOf<Belief>()
     private var initialGoals = listOf<Goal>()
@@ -83,7 +86,7 @@ class AgentBuilderImpl<Belief : Any, Goal : Any, Body : Any>(private val id: Age
         goalPlans += plans
     }
 
-    override fun build(node: Node<Body>): AgentSpecification<Belief, Goal, Body> =
+    override fun build(): AgentSpecification<Belief, Goal, Body> =
         object : AgentSpecification<Belief, Goal, Body> {
             override val id: AgentID = this@AgentBuilderImpl.id ?: BaseAgentID()
             override val body: Body = this@AgentBuilderImpl.bodyFactory(id)

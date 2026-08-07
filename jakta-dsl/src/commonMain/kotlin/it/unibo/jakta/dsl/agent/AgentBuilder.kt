@@ -18,6 +18,11 @@ import it.unibo.jakta.plan.Plan
 interface AgentBuilder<Belief : Any, Goal : Any, Body : Any> {
 
     /**
+     * The node this agent is hosted on. This is used to send messages and perceptions to the agent.
+     */
+    val node: Node<Body>
+
+    /**
      * Defines how and whether a [Perception] is mapped into a [AgentUpdate].
      * By default, perceptions do not generate any update.
      */
@@ -82,5 +87,5 @@ interface AgentBuilder<Belief : Any, Goal : Any, Body : Any> {
     /**
      * Builds and returns the agent instance.
      */
-    fun build(node: Node<Body>): AgentSpecification<Belief, Goal, Body>
+    fun build(): AgentSpecification<Belief, Goal, Body>
 }
