@@ -9,7 +9,7 @@ import it.unibo.jakta.dsl.node.NodeBuilders
 import it.unibo.jakta.dsl.plan.PlanLibraryBuilder
 import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.node.CoroutineNodeRunner
-import it.unibo.jakta.node.LocalNodeConnection
+import it.unibo.jakta.node.SharedMemoryNetwork
 import it.unibo.jakta.skills.NodeTerminationSkill
 import it.unibo.jakta.skills.terminateNode
 import kotlin.test.BeforeTest
@@ -46,7 +46,7 @@ class TestStringIncarnationFunctions {
                             }
                         }
                     }
-                }.run(CoroutineNodeRunner(LocalNodeConnection()))
+                }.run(CoroutineNodeRunner(SharedMemoryNetwork()))
             }
             job.join()
         }

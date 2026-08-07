@@ -7,8 +7,8 @@ import it.unibo.jakta.agent.BaseAgentID
 import it.unibo.jakta.agent.BaseAgentState
 import it.unibo.jakta.node.BaseNode
 import it.unibo.jakta.node.CoroutineNodeRunner
-import it.unibo.jakta.node.LocalNodeConnection
 import it.unibo.jakta.node.Node
+import it.unibo.jakta.node.SharedMemoryNetwork
 import it.unibo.jakta.plan.GoalAdditionPlan
 import kotlin.reflect.typeOf
 import kotlin.test.Test
@@ -57,7 +57,7 @@ class ExecutionTest {
                 override val id: AgentID = BaseAgentID(agentname)
             }
 
-        val runner = CoroutineNodeRunner<Any, BaseNode<Any>>(LocalNodeConnection())
+        val runner = CoroutineNodeRunner<Any, BaseNode<Any>>(SharedMemoryNetwork())
 
         runTest {
             node.addAgent({ agentSpecGenerator("Agent1", it) })

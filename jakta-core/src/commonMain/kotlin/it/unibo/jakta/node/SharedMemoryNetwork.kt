@@ -7,10 +7,10 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 /**
- * Represents a local node connection that allows for communication and event handling across nodes on the same JVM.
+ * Represents a local node network that allows for communication and event handling across nodes on the same JVM.
  * This implementation uses an [UnlimitedChannelQueue] to manage system events.
  */
-class LocalNodeConnection : NodeConnection {
+class SharedMemoryNetwork : NodeNetwork {
 
     private val mutex = Mutex()
 

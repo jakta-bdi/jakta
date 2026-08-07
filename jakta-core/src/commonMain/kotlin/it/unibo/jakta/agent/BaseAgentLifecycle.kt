@@ -78,13 +78,10 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
      */
     @Suppress("UNCHECKED_CAST") // TODO Check
     private fun completeWaitingEventFilters(event: AgentEvent) {
-        val iterator = executableAgent.state.waitEventFilters.iterator()
-        while (iterator.hasNext()) {
-            val (filter, deferred) = iterator.next()
+        for ((filter, deferred) in executableAgent.state.waitEventFilters) {
             val result = filter(event)
             if (result != null) {
                 (deferred as CompletableDeferred<Any>).complete(result)
-                iterator.remove()
             }
         }
     }

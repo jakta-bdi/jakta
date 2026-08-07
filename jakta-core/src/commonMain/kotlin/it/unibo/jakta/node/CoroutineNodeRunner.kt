@@ -18,11 +18,11 @@ import kotlinx.coroutines.yield
 /**
  * A [NodeRunner] implementation that uses Kotlin coroutines
  * to manage the execution of agents within a node.
- * @param [connection] The [NodeConnection] used for communication and event handling.
+ * @param [connection] The [NodeNetwork] used for communication and event handling.
  * @param [Body] The type of the agent's body.
  * @param [N] The type of the executable node that this runner will manage.
  */
-class CoroutineNodeRunner<Body : Any, N : ExecutableNode<Body>>(val connection: NodeConnection) : NodeRunner<N> {
+class CoroutineNodeRunner<Body : Any, N : ExecutableNode<Body>>(val connection: NodeNetwork) : NodeRunner<N> {
 
     private val agents: MutableMap<AgentLifecycle<*, *>, Job> = mutableMapOf()
 

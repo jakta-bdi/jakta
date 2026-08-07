@@ -14,7 +14,7 @@ import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.event.AgentUpdate
 import it.unibo.jakta.node.CoroutineNodeRunner
 import it.unibo.jakta.node.ExecutableNode
-import it.unibo.jakta.node.LocalNodeConnection
+import it.unibo.jakta.node.SharedMemoryNetwork
 import it.unibo.jakta.skills.MessagingSkill
 import it.unibo.jakta.skills.sendTo
 import kotlin.collections.emptySet
@@ -143,7 +143,7 @@ class TestPingPong {
     fun testDistributedPingPong() {
         Logger.setMinSeverity(Severity.Info)
         runTest {
-            val runner = CoroutineNodeRunner<Any, ExecutableNode<Any>>(LocalNodeConnection())
+            val runner = CoroutineNodeRunner<Any, ExecutableNode<Any>>(SharedMemoryNetwork())
             val job = launch {
                 runner.run(nodeBob)
             }

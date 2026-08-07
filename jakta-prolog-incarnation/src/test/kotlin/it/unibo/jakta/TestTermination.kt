@@ -9,7 +9,7 @@ import it.unibo.jakta.dsl.node.NodeBuilders
 import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.logic.JaktaLogicProgrammingScope.Companion.prologPlan
 import it.unibo.jakta.node.CoroutineNodeRunner
-import it.unibo.jakta.node.LocalNodeConnection
+import it.unibo.jakta.node.SharedMemoryNetwork
 import it.unibo.tuprolog.core.toAtom
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -45,7 +45,7 @@ class TestTermination {
                             }
                         }
                     }
-                }.run(CoroutineNodeRunner(LocalNodeConnection()))
+                }.run(CoroutineNodeRunner(SharedMemoryNetwork()))
             }
             job.join()
         }

@@ -8,7 +8,7 @@ import it.unibo.jakta.dsl.mas
 import it.unibo.jakta.dsl.node.NodeBuilders
 import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.node.CoroutineNodeRunner
-import it.unibo.jakta.node.LocalNodeConnection
+import it.unibo.jakta.node.SharedMemoryNetwork
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
@@ -55,7 +55,7 @@ class MultiNodeExecutionTest {
     @Test
     fun testMultiNodeExecution() {
         runTest {
-            mas.run(CoroutineNodeRunner(LocalNodeConnection()))
+            mas.run(CoroutineNodeRunner(SharedMemoryNetwork()))
         }
     }
 }

@@ -12,8 +12,8 @@ import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.dsl.plans
 import it.unibo.jakta.event.AgentUpdate
 import it.unibo.jakta.node.CoroutineNodeRunner
-import it.unibo.jakta.node.LocalNodeConnection
 import it.unibo.jakta.node.Node
+import it.unibo.jakta.node.SharedMemoryNetwork
 import it.unibo.jakta.skills.MessagingSkill
 import it.unibo.jakta.skills.sendTo
 import kotlin.test.BeforeTest
@@ -76,7 +76,7 @@ class TestAgentEntryPoint {
                         withAgents(bob)
                     }
                 }
-            }.run(CoroutineNodeRunner(LocalNodeConnection()))
+            }.run(CoroutineNodeRunner(SharedMemoryNetwork()))
         }
     }
 
@@ -114,7 +114,7 @@ class TestAgentEntryPoint {
                 node {
                     withAgents(myAgent)
                 }
-            }.run(CoroutineNodeRunner(LocalNodeConnection()))
+            }.run(CoroutineNodeRunner(SharedMemoryNetwork()))
         }
     }
 }

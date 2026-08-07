@@ -16,7 +16,7 @@ import it.unibo.jakta.dsl.plan.satisfies
 import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.logic.JaktaLogicProgrammingScope.Companion.prologPlan
 import it.unibo.jakta.node.CoroutineNodeRunner
-import it.unibo.jakta.node.LocalNodeConnection
+import it.unibo.jakta.node.SharedMemoryNetwork
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlinx.coroutines.launch
@@ -66,7 +66,7 @@ class TestPrologIncarnation {
                             }
                         }
                     }
-                }.run(CoroutineNodeRunner(LocalNodeConnection()))
+                }.run(CoroutineNodeRunner(SharedMemoryNetwork()))
             }
             job.join()
         }
@@ -106,7 +106,7 @@ class TestPrologIncarnation {
                             }
                         }
                     }
-                }.run(CoroutineNodeRunner(LocalNodeConnection()))
+                }.run(CoroutineNodeRunner(SharedMemoryNetwork()))
             }
             job.join()
         }
@@ -156,7 +156,7 @@ class TestPrologIncarnation {
                             }
                         }
                     }
-                }.run(CoroutineNodeRunner(LocalNodeConnection()))
+                }.run(CoroutineNodeRunner(SharedMemoryNetwork()))
             }
             job.join()
         }
@@ -190,7 +190,7 @@ class TestPrologIncarnation {
                             }
                         }
                     }
-                }.run(CoroutineNodeRunner(LocalNodeConnection()))
+                }.run(CoroutineNodeRunner(SharedMemoryNetwork()))
             }
             job.join()
         }
@@ -236,7 +236,7 @@ class TestPrologIncarnation {
                             }
                         }
                     }
-                }.run(CoroutineNodeRunner(LocalNodeConnection()))
+                }.run(CoroutineNodeRunner(SharedMemoryNetwork()))
             }
             job.join()
         }
@@ -292,7 +292,7 @@ class TestPrologIncarnation {
                             }
                         }
                     }
-                }.run(CoroutineNodeRunner(LocalNodeConnection()))
+                }.run(CoroutineNodeRunner(SharedMemoryNetwork()))
             }
             job.join()
         }
