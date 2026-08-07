@@ -5,7 +5,7 @@ package it.unibo.jakta.test
 import it.unibo.alchemist.jakta.properties.JaktaForAlchemistRuntime
 import it.unibo.alchemist.model.Position
 import it.unibo.jakta.agent.BaseAgentID
-import it.unibo.jakta.dsl.AlchemistNode
+import it.unibo.jakta.dsl.alchemistNode
 import it.unibo.jakta.dsl.device
 import it.unibo.jakta.dsl.node.NodeBuilders
 import it.unibo.jakta.dsl.plan.triggers
@@ -18,7 +18,7 @@ val bob = BaseAgentID("Bob")
 val alice = BaseAgentID("Alice")
 
 fun <P : Position<P>> JaktaForAlchemistRuntime<P>.entrypointNodeOne() = device(
-    NodeBuilders.AlchemistNode()
+    NodeBuilders.alchemistNode(),
 ) {
     node {
         context(MessagingSkill(node)) {
@@ -28,8 +28,8 @@ fun <P : Position<P>> JaktaForAlchemistRuntime<P>.entrypointNodeOne() = device(
                         this.takeIf { it == Pair("Ping!", alice) }
                     } triggers {
                         val (message, sender) = context
-                        agent.print("Received: \"$message\" from $sender")
-                        agent.print("Sending pong to Alice")
+                        agent.print("I'm Bob from ${node.id}. I Received: \"$message\" from $sender")
+                        agent.print("Sending pong back to Alice...")
                         agent.sendTo(sender, "Pong!")
                     }
                 }
@@ -39,7 +39,7 @@ fun <P : Position<P>> JaktaForAlchemistRuntime<P>.entrypointNodeOne() = device(
 }
 
 fun <P : Position<P>> JaktaForAlchemistRuntime<P>.entrypointNodeTwo() = device(
-    NodeBuilders.AlchemistNode()
+    NodeBuilders.alchemistNode(),
 ) {
     node {
         context(MessagingSkill(node)) {
@@ -51,12 +51,8 @@ fun <P : Position<P>> JaktaForAlchemistRuntime<P>.entrypointNodeTwo() = device(
                     adding.goal {
                         ifGoalMatch("sendMessage")
                     } triggers {
-                        agent.print("Hello World!")
-                        agent.print("Time: ${alchemistEnvironment.simulation.time}")
-                        delay(5000.milliseconds)
-                        agent.print("Sending ping to Bob")
+                        agent.print("I'm Alice from node ${node.id}. Sending ping to Bob...")
                         agent.sendTo(bob, "Ping!")
-                        agent.print("Time after delay of 5000: ${alchemistEnvironment.simulation.time}")
                     }
                     adding.belief {
                         this.takeIf { it == Pair("Pong!", bob) }
@@ -71,4 +67,3 @@ fun <P : Position<P>> JaktaForAlchemistRuntime<P>.entrypointNodeTwo() = device(
         }
     }
 }
-

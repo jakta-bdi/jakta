@@ -26,13 +26,12 @@ class JaktaAgentAction<P : Position<P>>(
 
     private val agentLifecycle = BaseAgentLifecycle(agent)
 
-    override fun cloneAction(node: AlchemistNode<Any?>, reaction: Reaction<Any?>): Action<Any?> =
-        JaktaAgentAction(
-            node,
-            agent,
-            alchemistEnvironment,
-            dispatcher,
-        )
+    override fun cloneAction(node: AlchemistNode<Any?>, reaction: Reaction<Any?>): Action<Any?> = JaktaAgentAction(
+        node,
+        agent,
+        alchemistEnvironment,
+        dispatcher,
+    )
 
     override fun execute() {
         dispatcher.runDueTasks()

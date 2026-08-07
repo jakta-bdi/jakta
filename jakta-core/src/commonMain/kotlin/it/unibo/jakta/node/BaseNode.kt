@@ -56,15 +56,18 @@ open class BaseNode<Body : Any> : ExecutableNode<Body> {
             is AgentMessageEvent<*, *> -> {
                 deliverEvent(event.message, event.filterFunction as Node<Body>.(Body) -> Boolean)
             }
+
             is AgentRemovalEvent -> {
                 _agents.firstOrNull { it.id == id }?.let {
                     _agents.remove(it)
                 }
             }
+
             is SystemEvent.AgentAddition<*, *> -> {
                 val agent = event.executableAgent as BaseAgent<*, *, Body>
                 _agents.add(agent)
             }
+
             else -> Unit
         }
     }

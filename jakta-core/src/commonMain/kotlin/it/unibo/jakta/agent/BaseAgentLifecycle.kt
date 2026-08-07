@@ -53,7 +53,7 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
     private fun handleEvent(event: AgentEvent, scope: CoroutineScope) {
         completeWaitingEventFilters(event)
         when (event) {
-            is AgentEvent.Internal ->  {
+            is AgentEvent.Internal -> {
                 // TODO to remove this cast i should type the top level Event.Internal
                 //  with Belief and Goal. Doable but maybe unnecessary?
                 when (event) {
@@ -76,7 +76,7 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
      * Iterates over the map of waiting event filters.
      * If the filter matches complete the associated deferred and remove the filter from the map.
      */
-    @Suppress("UNCHECKED_CAST") //TODO Check
+    @Suppress("UNCHECKED_CAST") // TODO Check
     private fun completeWaitingEventFilters(event: AgentEvent) {
         val iterator = executableAgent.state.waitEventFilters.iterator()
         while (iterator.hasNext()) {

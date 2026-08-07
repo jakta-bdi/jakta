@@ -18,7 +18,7 @@ class TestLoadingWithAlchemist {
     }
 
     @Test
-    fun testCommunicationBetweenNodes(){
+    fun testCommunicationBetweenNodes() {
         loadAndRunYaml("two-agents-two-nodes")
     }
 

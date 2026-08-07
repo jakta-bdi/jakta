@@ -3,13 +3,14 @@ package it.unibo.jakta.dsl
 import it.unibo.jakta.dsl.node.BaseNodeBuilder
 import it.unibo.jakta.dsl.node.NodeBuilder
 import it.unibo.jakta.dsl.node.NodeBuilders
-import it.unibo.jakta.node.BaseNode
-import it.unibo.jakta.node.ExecutableNode
 import it.unibo.jakta.node.JaktaForAlchemistNode
 import it.unibo.jakta.node.RuntimeNodes
 
-
-fun <Body: Any> NodeBuilders.AlchemistNode(): () -> BaseNodeBuilder<Body, JaktaForAlchemistNode<Body>> = {
+/**
+ * Factory method for building a [JaktaForAlchemistNode].
+ * @return a factory for a [BaseNodeBuilder] which creates a [JaktaForAlchemistNode].
+ */
+fun <Body : Any> NodeBuilders.alchemistNode(): () -> BaseNodeBuilder<Body, JaktaForAlchemistNode<Body>> = {
     BaseNodeBuilder<Body, JaktaForAlchemistNode<Body>> { JaktaForAlchemistNode() }
 }
 

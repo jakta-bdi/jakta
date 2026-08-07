@@ -114,8 +114,8 @@ internal class BaseMutableAgentState<Belief : Any, Goal : Any>(
         logger.a { message }
     }
 
-    //TODO check this function I am not sure..
-    override suspend fun <T : Any> wait(eventFilter: (AgentEvent) -> T?, timeout: Duration?) : T? {
+    // TODO check this function I am not sure..
+    override suspend fun <T : Any> wait(eventFilter: (AgentEvent) -> T?, timeout: Duration?): T? {
         val deferred = CompletableDeferred<T>()
         this.waitEventFilters[eventFilter] = deferred
         return timeout?.let {

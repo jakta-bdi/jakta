@@ -8,14 +8,20 @@ import it.unibo.alchemist.model.Node as AlchemistNode
 import it.unibo.alchemist.model.Position
 import it.unibo.alchemist.model.Reaction
 import it.unibo.alchemist.model.actions.AbstractAction
-import it.unibo.jakta.agent.ExecutableAgent
-import it.unibo.jakta.alchemist.AlchemistDispatcher
-import it.unibo.jakta.event.SystemEvent
 import it.unibo.jakta.node.JaktaForAlchemistNode
 import it.unibo.jakta.node.NodeNetwork
-import kotlin.collections.plusAssign
 
-class NodeEventsAction <P : Position<P>>(
+/**
+ * Alchemist action that manages system events of a [JaktaForAlchemistNode].
+ * Every time the action is executed by the simulation,
+ * it submits one system event from the local queue to the shared [NodeNetwork]
+ * and gathers the next event to parse from the queue.
+ * If no event is available in the local system events or in the shared one, then no action is performed.
+ * @param alchemistNode the alchemist [Node] (a.k.a. device) running the [JaktaForAlchemistNode].
+ * @param alchemistEnvironment the shared simulation environment.
+ * @param jaktaNode the [JaktaForAlchemistNode] that is managed by this instance of [NodeEventsAction].
+ */
+class NodeEventsAction<P : Position<P>>(
     private val alchemistNode: AlchemistNode<Any?>,
     private val alchemistEnvironment: Environment<Any?, P>,
     private val jaktaNode: JaktaForAlchemistNode<*>,
@@ -26,12 +32,12 @@ class NodeEventsAction <P : Position<P>>(
     override fun cloneAction(node: AlchemistNode<Any?>, reaction: Reaction<Any?>): Action<Any?> = NodeEventsAction(
         alchemistNode,
         alchemistEnvironment,
-        jaktaNode
+        jaktaNode,
     )
 
     override fun execute() {
         // 1. Forwarding node system events to the shared Node Connection
-        val nodeSystemEvent =  jaktaNode.systemEvents.tryNext()
+        val nodeSystemEvent = jaktaNode.systemEvents.tryNext()
         if (nodeSystemEvent != null) {
             NodeNetwork.send(nodeSystemEvent)
         }
@@ -41,9 +47,9 @@ class NodeEventsAction <P : Position<P>>(
             jaktaNode.handleExternalEvent(eventToManage)
 
             alchemistNode.properties
-            .filterIsInstance<JaktaForAlchemistRuntime<P>>()
-            .firstOrNull()
-            ?.manageSystemEvent(jaktaNode, eventToManage)
+                .filterIsInstance<JaktaForAlchemistRuntime<P>>()
+                .firstOrNull()
+                ?.manageSystemEvent(jaktaNode, eventToManage)
         }
     }
 }

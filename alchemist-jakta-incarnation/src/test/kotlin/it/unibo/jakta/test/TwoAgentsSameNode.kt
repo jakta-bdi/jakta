@@ -6,8 +6,8 @@ import it.unibo.alchemist.jakta.properties.JaktaForAlchemistRuntime
 import it.unibo.alchemist.model.Position
 import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.agent.BaseAgentID
-import it.unibo.jakta.dsl.AlchemistNode
 import it.unibo.jakta.dsl.agent.AgentBuilder
+import it.unibo.jakta.dsl.alchemistNode
 import it.unibo.jakta.dsl.device
 import it.unibo.jakta.dsl.node.BaseNodeBuilder
 import it.unibo.jakta.dsl.node.NodeBuilders
@@ -37,7 +37,7 @@ fun <Goal : Any> BaseNodeBuilder<Any, JaktaForAlchemistNode<Any>>.messageEnabled
     }
 }
 
-fun <P : Position<P>> JaktaForAlchemistRuntime<P>.entrypoint() = device(NodeBuilders.AlchemistNode()) {
+fun <P : Position<P>> JaktaForAlchemistRuntime<P>.entrypoint() = device(NodeBuilders.alchemistNode()) {
     node {
         val bob = BaseAgentID("Bob")
         val alice = BaseAgentID("Alice")

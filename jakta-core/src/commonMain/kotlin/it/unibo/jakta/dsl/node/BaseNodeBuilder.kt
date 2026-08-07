@@ -10,6 +10,7 @@ import it.unibo.jakta.node.Node
 
 /**
  * Implementation of the [NodeBuilder] interface.
+ * @param nodeFactory a factory for creating the instance of this node.
  */
 open class BaseNodeBuilder<Body : Any, out N : ExecutableNode<Body>>(private val _node: N) : NodeBuilder<Body, N> {
 

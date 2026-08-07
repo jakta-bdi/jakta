@@ -16,7 +16,7 @@ import kotlinx.coroutines.test.runTest
 
 class MultiNodeExecutionTest {
 
-    val mas = mas(NodeBuilders.baseNode()){
+    val mas = mas(NodeBuilders.baseNode()) {
         node {
             agent(BaseAgentID("Alice")) {
                 embodiedAs { Any() }

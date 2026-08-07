@@ -26,7 +26,6 @@ import kotlin.reflect.full.starProjectedType
 import kotlin.reflect.jvm.kotlinFunction
 import org.apache.commons.math3.random.RandomGenerator
 
-
 /**
  * Jakta incarnation for executing on Alchemist.
  */
@@ -49,10 +48,12 @@ class JaktaIncarnation<P : Position<P>> : Incarnation<Any?, P> {
         environment: Environment<Any?, P>,
         parameter: Any?,
     ): Node<Any?> = GenericNode(environment).also {
-        it.addProperty(JaktaForAlchemistRuntime(
-            environment,
-            it,
-        ))
+        it.addProperty(
+            JaktaForAlchemistRuntime(
+                environment,
+                it,
+            ),
+        )
         // TODO("Is there a way to inject nodes in Jakta Runtime?")
     }
 

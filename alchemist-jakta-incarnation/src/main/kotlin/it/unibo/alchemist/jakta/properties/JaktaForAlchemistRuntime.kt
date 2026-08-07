@@ -77,17 +77,20 @@ class JaktaForAlchemistRuntime<P : Position<P>>(
      * @param node the node on which the event effect is applied.
      * @param systemEvent the event that is being managed.
      */
-    fun manageSystemEvent(node: JaktaForAlchemistNode<*>, systemEvent: SystemEvent): Unit {
+    fun manageSystemEvent(node: JaktaForAlchemistNode<*>, systemEvent: SystemEvent) {
         when (systemEvent) {
             is SystemEvent.AgentAddition<*, *> -> if (systemEvent.nodeID == node.id) {
                 addAgentAction(node, systemEvent.executableAgent)
             }
+
             is SystemEvent.AgentRemoval -> TODO("Agent Removal not supported for now")
+
             is SystemEvent.ShutDownNode -> if (systemEvent.nodeID == node.id) {
                 runBlocking {
                     node.subscription.close()
                 }
             }
+
             else -> Unit
         }
     }

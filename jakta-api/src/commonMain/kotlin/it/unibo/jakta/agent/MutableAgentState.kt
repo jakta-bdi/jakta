@@ -23,7 +23,7 @@ interface MutableAgentState<Belief : Any, Goal : Any> :
     val mutableIntentionPool: MutableIntentionPool
 
     /**
-     * A map of event filters that will keep intentions suspended on the associated deferred
+     * A map of event filters that will keep intentions suspended on the associated deferred.
      */
     val waitEventFilters: MutableMap<(AgentEvent) -> Any?, CompletableDeferred<*>>
 
@@ -85,7 +85,14 @@ interface MutableAgentState<Belief : Any, Goal : Any> :
      */
     fun print(message: String)
 
-    suspend fun <T: Any> wait(eventFilter: (AgentEvent) -> T?, timeout: Duration? = null) : T?
+    /**
+     * Allows the agent to continue the execution upon receiving an event that matches the event filter,
+     * otherwise waits for a maximum amount of timeout duration.
+     * @param eventFilter the event the agent is waiting for continuing its execution.
+     * @param timeout the maximum [Duration] the agent waits if no event matches the filter.
+     * @return the value returned by the eventFilter.
+     */
+    suspend fun <T : Any> wait(eventFilter: (AgentEvent) -> T?, timeout: Duration? = null): T?
 }
 
 /**
