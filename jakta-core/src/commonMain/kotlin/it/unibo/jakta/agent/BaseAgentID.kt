@@ -20,7 +20,7 @@ data class BaseAgentID(private val name: String? = null, private val id: String 
     /**
      * The display name of the agent, which is either its name or its id if no name is set.
      */
-    override val displayName: String get() = name ?: "Agent-$id"
+    override val displayName: String get() = "${(name ?: "Agent")}-$id"
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
