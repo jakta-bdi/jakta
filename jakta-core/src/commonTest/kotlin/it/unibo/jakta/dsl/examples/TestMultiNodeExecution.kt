@@ -13,7 +13,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
 
-class MultiNodeExecutionTest {
+class TestMultiNodeExecution {
 
     val mas = mas(NodeBuilders.baseNode()) {
         node {
