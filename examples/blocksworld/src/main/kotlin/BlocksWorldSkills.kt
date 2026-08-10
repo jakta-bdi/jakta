@@ -53,12 +53,12 @@ class BlocksWorldSkillsImpl(private val world: BlocksWorld, private val node: No
     override suspend fun move(block: String, destination: String) {
         val destinationBlock = if (destination == "table") null else Block(destination)
         val state = world.move(Block(block), destinationBlock)
-        node.sendEvent(BlocksWorldPerception(state))
+        node.publishEvent(BlocksWorldPerception(state))
     }
 
     override suspend fun join() {
         val state = world.getState()
-        node.sendEvent(BlocksWorldPerception(state))
+        node.publishEvent(BlocksWorldPerception(state))
     }
 
     override suspend fun displayWorld() {

@@ -17,8 +17,10 @@ import kotlin.properties.Delegates
 /**
  * Implementation of the AgentBuilder interface.
  */
-class AgentBuilderImpl<Belief : Any, Goal : Any, Body : Any>(private val id: AgentID? = null) :
-    AgentBuilder<Belief, Goal, Body> {
+class AgentBuilderImpl<Belief : Any, Goal : Any, Body : Any>(
+    override val node: Node<Body>,
+    private val id: AgentID? = null,
+) : AgentBuilder<Belief, Goal, Body> {
     private var initialBeliefs = listOf<Belief>()
     private var initialGoals = listOf<Goal>()
     private var beliefPlans = listOf<Plan.Belief<Belief, Goal, *, *>>()
@@ -54,9 +56,19 @@ class AgentBuilderImpl<Belief : Any, Goal : Any, Body : Any>(private val id: Age
         this.bodyFactory = bodyFactory
     }
 
-    override fun hasPlans(block: PlanLibraryBuilder<Belief, Goal>.() -> Unit) {
-        val builder = PlanLibraryBuilderImpl<Belief, Goal>(::addBeliefPlan, ::addGoalPlan)
+    override fun hasPlanLibrary(block: PlanLibraryBuilder<Belief, Goal>.() -> Unit) {
+        val builder = PlanLibraryBuilderImpl(::addBeliefPlan, ::addGoalPlan)
         builder.apply(block)
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    override fun withPredefinedPlans(vararg plans: (Node<Body>) -> List<Plan<Belief, Goal, *, *, *>>) {
+        plans.flatMap { factory -> factory(node) }.forEach { plan ->
+            when (plan) {
+                is Plan.Belief<*, *, *, *> -> addBeliefPlan(plan as Plan.Belief<Belief, Goal, *, *>)
+                is Plan.Goal<*, *, *, *> -> addGoalPlan(plan as Plan.Goal<Belief, Goal, *, *>)
+            }
+        }
     }
 
     override fun addBelief(belief: Belief) {
@@ -83,18 +95,17 @@ class AgentBuilderImpl<Belief : Any, Goal : Any, Body : Any>(private val id: Age
         goalPlans += plans
     }
 
-    override fun build(node: Node<Body>): AgentSpecification<Belief, Goal, Body> =
-        object : AgentSpecification<Belief, Goal, Body> {
-            override val id: AgentID = this@AgentBuilderImpl.id ?: BaseAgentID()
-            override val body: Body = this@AgentBuilderImpl.bodyFactory(id)
-            override val initialGoals: List<Goal> = this@AgentBuilderImpl.initialGoals
-            override val initialState: AgentState<Belief, Goal> = BaseAgentState(
-                beliefs = initialBeliefs,
-                intentions = setOf(),
-                beliefPlans = this@AgentBuilderImpl.beliefPlans,
-                goalPlans = this@AgentBuilderImpl.goalPlans,
-                perceptionHandler = perceptionHandler,
-                messageHandler = messageHandler,
-            )
-        }
+    override fun build(): AgentSpecification<Belief, Goal, Body> = object : AgentSpecification<Belief, Goal, Body> {
+        override val id: AgentID = this@AgentBuilderImpl.id ?: BaseAgentID()
+        override val body: Body = this@AgentBuilderImpl.bodyFactory(id)
+        override val initialGoals: List<Goal> = this@AgentBuilderImpl.initialGoals
+        override val initialState: AgentState<Belief, Goal> = BaseAgentState(
+            beliefs = initialBeliefs,
+            intentions = setOf(),
+            beliefPlans = this@AgentBuilderImpl.beliefPlans,
+            goalPlans = this@AgentBuilderImpl.goalPlans,
+            perceptionHandler = perceptionHandler,
+            messageHandler = messageHandler,
+        )
+    }
 }

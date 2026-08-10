@@ -12,5 +12,9 @@ deployments:
   - type: Point
     parameters: [ 2, 2 ]
     programs:
-      - program: it.unibo.jakta.test.TwoAgentsSameNode.entrypoint
-        time-distribution: 1
+      - program: it.unibo.jakta.test.TwoAgentsTwoNodes.entrypointNodeOne
+
+  - type: Point
+    parameters: [ 6, 7 ]
+    programs:
+      - program: it.unibo.jakta.test.TwoAgentsTwoNodes.entrypointNodeTwo

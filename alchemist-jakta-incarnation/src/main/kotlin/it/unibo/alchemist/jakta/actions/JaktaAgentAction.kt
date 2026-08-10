@@ -1,6 +1,6 @@
 package it.unibo.alchemist.jakta.actions
 
-import co.touchlab.kermit.Logger
+import it.unibo.alchemist.jakta.properties.JaktaForAlchemistRuntime
 import it.unibo.alchemist.model.Action
 import it.unibo.alchemist.model.Context
 import it.unibo.alchemist.model.Environment
@@ -15,8 +15,8 @@ import it.unibo.jakta.alchemist.AlchemistDispatcher
 /**
  * Alchemist Action executing the JaKtA agent lifecycle.
  */
-class JaktaForAlchemistAgent<P : Position<P>>(
-    alchemistNode: AlchemistNode<Any?>,
+class JaktaAgentAction<P : Position<P>>(
+    private val alchemistNode: AlchemistNode<Any?>,
     private val agent: ExecutableAgent<*, *>,
     private val alchemistEnvironment: Environment<Any?, P>,
     private val dispatcher: AlchemistDispatcher<P> = AlchemistDispatcher(alchemistEnvironment),
@@ -26,13 +26,12 @@ class JaktaForAlchemistAgent<P : Position<P>>(
 
     private val agentLifecycle = BaseAgentLifecycle(agent)
 
-    override fun cloneAction(node: AlchemistNode<Any?>, reaction: Reaction<Any?>): Action<Any?> =
-        JaktaForAlchemistAgent(
-            node,
-            agent,
-            alchemistEnvironment,
-            dispatcher,
-        )
+    override fun cloneAction(node: AlchemistNode<Any?>, reaction: Reaction<Any?>): Action<Any?> = JaktaAgentAction(
+        node,
+        agent,
+        alchemistEnvironment,
+        dispatcher,
+    )
 
     override fun execute() {
         dispatcher.runDueTasks()

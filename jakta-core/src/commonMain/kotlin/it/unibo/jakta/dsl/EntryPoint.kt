@@ -1,38 +1,72 @@
 package it.unibo.jakta.dsl
 
+import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.agent.AgentSpecification
 import it.unibo.jakta.dsl.agent.AgentBuilder
 import it.unibo.jakta.dsl.agent.AgentBuilderImpl
-import it.unibo.jakta.dsl.node.LocalNodeBuilder
+import it.unibo.jakta.dsl.mas.BaseMasBuilder
+import it.unibo.jakta.dsl.mas.MasBuilder
+import it.unibo.jakta.dsl.node.NodeBuilder
+import it.unibo.jakta.dsl.plan.BeliefAdditionPlanBuilderImpl
 import it.unibo.jakta.dsl.plan.PlanBuilder
+import it.unibo.jakta.dsl.plan.PlanLibraryBuilder
+import it.unibo.jakta.dsl.plan.PlanLibraryBuilderImpl
 import it.unibo.jakta.dsl.plan.TriggerAdditionImpl
 import it.unibo.jakta.dsl.plan.TriggerRemovalImpl
+import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.node.ExecutableNode
 import it.unibo.jakta.node.Node
 import it.unibo.jakta.plan.Plan
 
 /**
- * Entry point for creating a multi-agent system using the Jakta DSL and a localnode.
+ * DSL entrypoint for creating a Multi-Agent System (MAS).
+ * It takes a [NodeBuilder] and a block of code that defines the MAS structure.
+ */
+@JaktaDSL
+fun <N : ExecutableNode<*>, NB : NodeBuilder<*, N>> mas(
+    builderFactory: () -> NB,
+    block: MasBuilder<N, NB>.() -> Unit,
+): MasBuilder<N, NB> = BaseMasBuilder(builderFactory).apply(block)
+
+/**
+ * Entry point for creating a node using the JaKtA DSL.
  * @return an instantiated MAS.
  */
-fun <Body : Any> node(block: LocalNodeBuilder<Body>.() -> Unit): ExecutableNode<Body> {
-    val nodeBuilder = LocalNodeBuilder<Body>()
-    nodeBuilder.apply(block)
-    return nodeBuilder.build()
+fun <Body : Any, N : ExecutableNode<Body>, NB : NodeBuilder<Body, N>> node(
+    builderFactory: () -> NB,
+    block: NB.() -> Unit,
+): ExecutableNode<Body> {
+    val builder = builderFactory()
+    builder.apply(block)
+    return builder.build()
 }
 
 /**
- * Entry point for creating an agent using the Jakta DSL.
- * @return an instantiated Agent.
+ * Entry point for creating an agent using the JaKtA DSL.
+ * @return a factory to create an agent, given the node the agent will run on.
  */
 @JaktaDSL
 fun <Belief : Any, Goal : Any, Body : Any> agent(
-    node: Node<Body>,
     block: AgentBuilder<Belief, Goal, Body>.() -> Unit,
-): AgentSpecification<Belief, Goal, Body> {
-    val ab = AgentBuilderImpl<Belief, Goal, Body>()
+): (Node<Body>) -> AgentSpecification<Belief, Goal, Body> = { node ->
+    val ab = AgentBuilderImpl<Belief, Goal, Body>(node)
     ab.apply(block)
-    return ab.build(node)
+    ab.build()
+}
+
+/**
+ * Entry point for creating an agent using the JaKtA DSL.
+ * @param id the id for the Agent.
+ * @return a factory to create an agent, given the node the agent will run on.
+ */
+@JaktaDSL
+fun <Belief : Any, Goal : Any, Body : Any> agent(
+    id: AgentID,
+    block: AgentBuilder<Belief, Goal, Body>.() -> Unit,
+): (Node<Body>) -> AgentSpecification<Belief, Goal, Body> = { node ->
+    val ab = AgentBuilderImpl<Belief, Goal, Body>(node, id)
+    ab.apply(block)
+    ab.build()
 }
 
 // TODO entrypoint for plans???
@@ -40,6 +74,24 @@ fun <Belief : Any, Goal : Any, Body : Any> agent(
 // create an entrypoint for a single standalone plan is hard...
 
 // TODO maybe actually make the triggerBuilder implement these interfaces?
+
+/**
+ * Entrypoint to define a list of plans for an agent.
+ */
+@JaktaDSL
+fun <Belief : Any, Goal : Any, Body : Any> plans(
+    block: PlanLibraryBuilder<Belief, Goal>.(Node<Body>) -> Unit,
+): (Node<Body>) -> List<Plan<Belief, Goal, *, *, *>> {
+    val plans = mutableListOf<Plan<Belief, Goal, *, *, *>>()
+    val libraryBuilder = PlanLibraryBuilderImpl(
+        addBeliefPlan = { plans.add(it) },
+        addGoalPlan = { plans.add(it) },
+    )
+    return { node ->
+        libraryBuilder.apply { block(node) }
+        plans
+    }
+}
 
 // interface BeliefOnlyAdditionTrigger<Belief : Any, Goal : Any> {
 //    /**
@@ -51,7 +103,7 @@ fun <Belief : Any, Goal : Any, Body : Any> agent(
 //        beliefQuery: Belief.() -> Context?,
 //    ): PlanBuilder.Addition.Belief<Belief, Goal, Context>
 // }
-//
+
 // /**
 // * Entry point for belief removal only plans.
 // */

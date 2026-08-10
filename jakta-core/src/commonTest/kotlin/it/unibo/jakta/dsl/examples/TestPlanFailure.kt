@@ -6,6 +6,7 @@ import it.unibo.jakta.agent.achieve
 import it.unibo.jakta.dsl.executeInTestScope
 import it.unibo.jakta.dsl.ifGoalMatch
 import it.unibo.jakta.dsl.node
+import it.unibo.jakta.dsl.node.NodeBuilders
 import it.unibo.jakta.dsl.plan.triggers
 import kotlin.test.Test
 
@@ -15,11 +16,11 @@ class TestPlanFailure {
     fun testPlanFailureHandling() {
         Logger.setMinSeverity(Severity.Warn)
         executeInTestScope {
-            node {
+            node(NodeBuilders.baseNode()) {
                 agent {
                     embodiedAs { Any() }
                     hasInitialGoals { !"goalChain" }
-                    hasPlans {
+                    hasPlanLibrary {
                         adding.goal {
                             ifGoalMatch("goalChain")
                         } triggers {

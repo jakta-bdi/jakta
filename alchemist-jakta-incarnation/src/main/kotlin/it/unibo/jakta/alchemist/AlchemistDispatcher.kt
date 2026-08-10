@@ -34,7 +34,7 @@ class AlchemistDispatcher<P : Position<P>>(private val alchemistEnvironment: Env
         queue.add(
             ScheduledTask(targetTime) {
                 continuation.resume(Unit)
-            }.also { println(it) },
+            },
         )
     }
 
@@ -43,7 +43,7 @@ class AlchemistDispatcher<P : Position<P>>(private val alchemistEnvironment: Env
      */
     fun runDueTasks() {
         val now = alchemistEnvironment.simulation.time.toDouble()
-        println("Manage tasks until: $now")
+        // println("Manage tasks until: $now")
         while (queue.isNotEmpty() && queue.peek().time <= now) {
             queue.poll().action.run()
         }

@@ -15,7 +15,7 @@ sealed interface AgentEvent {
         /**
          * The intention from which the event has been generated, if any.
          */
-        val intention: Intention? // TODO needed?
+        val intention: Intention?
 
         /**
          * Represents a goal-related event.

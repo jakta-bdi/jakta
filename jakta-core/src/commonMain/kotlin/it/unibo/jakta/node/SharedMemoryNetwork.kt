@@ -1,0 +1,57 @@
+package it.unibo.jakta.node
+
+import it.unibo.jakta.event.EventQueue
+import it.unibo.jakta.event.SystemEvent
+import it.unibo.jakta.event.UnlimitedChannelQueue
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+
+/**
+ * Represents a local node network that allows for communication and event handling across nodes on the same JVM.
+ * This implementation uses an [UnlimitedChannelQueue] to manage system events.
+ */
+class SharedMemoryNetwork : NodeNetwork {
+
+    private val mutex = Mutex()
+
+    private val subscribers: MutableSet<EventQueue<SystemEvent>> = mutableSetOf()
+
+    override suspend fun subscribe(): NodeSubscription = mutex.withLock {
+        val queue = UnlimitedChannelQueue<SystemEvent>().also {
+            subscribers.add(it)
+        }
+        return createNodeSubscription(queue)
+    }
+
+    override fun trySubscribe(): NodeSubscription? {
+        val lock = mutex.tryLock()
+        if (!lock) return null
+        val queue = UnlimitedChannelQueue<SystemEvent>().also {
+            subscribers.add(it)
+        }
+        mutex.unlock()
+        return createNodeSubscription(queue)
+    }
+
+    private fun createNodeSubscription(queue: EventQueue<SystemEvent>): NodeSubscription = object : NodeSubscription {
+        override val queue: EventQueue<SystemEvent> = queue
+        override suspend fun close() {
+            mutex.withLock {
+                subscribers.remove(queue)
+            }
+        }
+    }
+
+    override suspend fun send(event: SystemEvent) = mutex.withLock {
+        subscribers.forEach { it.send(event) }
+    }
+
+    override fun trySend(event: SystemEvent): Boolean {
+        val lock = mutex.tryLock()
+        if (lock) {
+            subscribers.forEach { it.send(event) }
+            mutex.unlock()
+        }
+        return lock
+    }
+}

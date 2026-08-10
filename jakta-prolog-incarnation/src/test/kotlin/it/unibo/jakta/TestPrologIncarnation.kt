@@ -9,13 +9,14 @@ import it.unibo.jakta.dsl.belief.matching
 import it.unibo.jakta.dsl.goal.goal
 import it.unibo.jakta.dsl.goal.initialGoal
 import it.unibo.jakta.dsl.goal.matching
-import it.unibo.jakta.dsl.mas.mas
-import it.unibo.jakta.dsl.node.LocalNodeBuilder
+import it.unibo.jakta.dsl.mas
+import it.unibo.jakta.dsl.node.NodeBuilders
 import it.unibo.jakta.dsl.plan.achieve
 import it.unibo.jakta.dsl.plan.satisfies
 import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.logic.JaktaLogicProgrammingScope.Companion.prologPlan
 import it.unibo.jakta.node.CoroutineNodeRunner
+import it.unibo.jakta.node.SharedMemoryNetwork
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlinx.coroutines.launch
@@ -32,14 +33,14 @@ class TestPrologIncarnation {
     fun `test prolog recursion`() {
         runTest {
             val job = launch {
-                mas(LocalNodeBuilder()) {
+                mas(NodeBuilders.baseNode()) {
                     node {
                         agent {
                             embodiedAs { Any() }
                             hasInitialGoals {
                                 !initialGoal { "start"(0, 10) }
                             }
-                            hasPlans {
+                            hasPlanLibrary {
                                 prologPlan {
                                     adding.goal {
                                         matching { "start"(N, N) }
@@ -65,7 +66,7 @@ class TestPrologIncarnation {
                             }
                         }
                     }
-                }.run(CoroutineNodeRunner())
+                }.run(CoroutineNodeRunner(SharedMemoryNetwork()))
             }
             job.join()
         }
@@ -75,14 +76,14 @@ class TestPrologIncarnation {
     fun `test prolog belief plan`() {
         runTest {
             val job = launch {
-                mas(LocalNodeBuilder()) {
+                mas(NodeBuilders.baseNode()) {
                     node {
                         agent {
                             embodiedAs { Any() }
                             hasInitialGoals {
                                 !initialGoal { "start"(1) }
                             }
-                            hasPlans {
+                            hasPlanLibrary {
                                 prologPlan {
                                     adding.goal {
                                         matching { "start"(N) }
@@ -105,7 +106,7 @@ class TestPrologIncarnation {
                             }
                         }
                     }
-                }.run(CoroutineNodeRunner())
+                }.run(CoroutineNodeRunner(SharedMemoryNetwork()))
             }
             job.join()
         }
@@ -115,14 +116,14 @@ class TestPrologIncarnation {
     fun `test prolog belief update`() {
         runTest {
             val job = launch {
-                mas(LocalNodeBuilder()) {
+                mas(NodeBuilders.baseNode()) {
                     node {
                         agent {
                             embodiedAs { Any() }
                             hasInitialGoals {
                                 !initialGoal { "start"(1) }
                             }
-                            hasPlans {
+                            hasPlanLibrary {
                                 prologPlan {
                                     adding.goal {
                                         matching { "start"(N) }
@@ -155,7 +156,7 @@ class TestPrologIncarnation {
                             }
                         }
                     }
-                }.run(CoroutineNodeRunner())
+                }.run(CoroutineNodeRunner(SharedMemoryNetwork()))
             }
             job.join()
         }
@@ -165,7 +166,7 @@ class TestPrologIncarnation {
     fun `test belief matching in guards`() {
         runTest {
             val job = launch {
-                mas(LocalNodeBuilder()) {
+                mas(NodeBuilders.baseNode()) {
                     node {
                         agent {
                             embodiedAs { Any() }
@@ -175,7 +176,7 @@ class TestPrologIncarnation {
                             hasInitialGoals {
                                 !initialGoal { "start"(1) }
                             }
-                            hasPlans {
+                            hasPlanLibrary {
                                 prologPlan {
                                     adding.goal {
                                         matching { "start"(`_`) }
@@ -189,7 +190,7 @@ class TestPrologIncarnation {
                             }
                         }
                     }
-                }.run(CoroutineNodeRunner())
+                }.run(CoroutineNodeRunner(SharedMemoryNetwork()))
             }
             job.join()
         }
@@ -199,7 +200,7 @@ class TestPrologIncarnation {
     fun `test inference rule`() {
         runTest {
             val job = launch {
-                mas(LocalNodeBuilder()) {
+                mas(NodeBuilders.baseNode()) {
                     node {
                         agent {
                             embodiedAs { Any() }
@@ -218,7 +219,7 @@ class TestPrologIncarnation {
                             hasInitialGoals {
                                 !initialGoal { "start"("bob") }
                             }
-                            hasPlans {
+                            hasPlanLibrary {
                                 prologPlan {
                                     adding.goal {
                                         matching { "start"(B) }
@@ -235,7 +236,7 @@ class TestPrologIncarnation {
                             }
                         }
                     }
-                }.run(CoroutineNodeRunner())
+                }.run(CoroutineNodeRunner(SharedMemoryNetwork()))
             }
             job.join()
         }
@@ -252,7 +253,7 @@ class TestPrologIncarnation {
                     )
             }
             val job = launch {
-                mas(LocalNodeBuilder()) {
+                mas(NodeBuilders.baseNode()) {
                     node {
                         agent {
                             embodiedAs { Any() }
@@ -263,7 +264,7 @@ class TestPrologIncarnation {
                             hasInitialGoals {
                                 !initialGoal { "start"("bob") }
                             }
-                            hasPlans {
+                            hasPlanLibrary {
                                 prologPlan {
                                     adding.goal {
                                         matching { "start"(B) }
@@ -291,7 +292,7 @@ class TestPrologIncarnation {
                             }
                         }
                     }
-                }.run(CoroutineNodeRunner())
+                }.run(CoroutineNodeRunner(SharedMemoryNetwork()))
             }
             job.join()
         }

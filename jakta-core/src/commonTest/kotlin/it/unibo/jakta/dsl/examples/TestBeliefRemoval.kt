@@ -5,13 +5,14 @@ import co.touchlab.kermit.Severity
 import it.unibo.jakta.dsl.executeInTestScope
 import it.unibo.jakta.dsl.ifGoalMatch
 import it.unibo.jakta.dsl.node
+import it.unibo.jakta.dsl.node.NodeBuilders
 import it.unibo.jakta.dsl.plan.triggers
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 class TestBeliefRemoval {
     val helloWorld =
-        node {
+        node(NodeBuilders.baseNode()) {
             agent {
                 embodiedAs { Any() }
                 believes {
@@ -20,7 +21,7 @@ class TestBeliefRemoval {
                 hasInitialGoals {
                     !"removeBelief"
                 }
-                hasPlans {
+                hasPlanLibrary {
                     adding.goal {
                         ifGoalMatch("removeBelief")
                     } triggers {

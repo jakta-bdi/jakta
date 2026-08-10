@@ -38,6 +38,7 @@ class TestPrologMatching {
         }
         val solution = theory.unifiesWith(queryRule)
 
+        // TODO implement an actual test
         when (solution) {
             is Solution.Yes -> println("The solution is: $solution")
             is Solution.No -> assert(false) { "No solution found" }
@@ -60,6 +61,7 @@ class TestPrologMatching {
         }
         val solution = theory.unifiesWith(queryRule)
 
+        // TODO implement an actual test for annotations
         when (solution) {
             is Solution.Yes -> println("The solution is: $solution")
             is Solution.No -> assert(false) { "No solution found" }
