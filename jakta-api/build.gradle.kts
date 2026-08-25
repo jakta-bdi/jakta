@@ -26,8 +26,4 @@ kotlinMultiplatform {
             text.required.set(true)
         }
     }
-
-    compilerOptions {
-        freeCompilerArgs.add("-Xcontext-parameters")
-    }
 }

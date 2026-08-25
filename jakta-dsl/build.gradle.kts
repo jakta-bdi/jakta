@@ -16,10 +16,6 @@ kotlinMultiplatform {
             implementation(libs.kotlinx.coroutines.test)
         }
     }
-
-    compilerOptions {
-        freeCompilerArgs.add("-Xcontext-parameters")
-    }
 }
 
 tasks.withType(Cpd::class).configureEach {

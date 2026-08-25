@@ -35,6 +35,6 @@ include(
     "alchemist-jakta-incarnation",
     "jakta-string-incarnation",
     "jakta-prolog-incarnation",
-    "examples:blocksworld"
+    "examples:blocksworld",
+    "examples:hello-world",
 )
-
