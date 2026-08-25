@@ -6,8 +6,11 @@ import it.unibo.jakta.dsl.JaktaDSL
 import it.unibo.jakta.dsl.belief.PrologBelief
 import it.unibo.jakta.dsl.goal.PrologGoal
 import it.unibo.jakta.logic.JaktaLogicProgrammingScope
+import it.unibo.jakta.logic.MutableSubstitutionPlanContext
 import it.unibo.jakta.logic.unifiesWith
 import it.unibo.jakta.plan.GuardScope
+import it.unibo.jakta.plan.PlanScope
+import it.unibo.tuprolog.core.Fact
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.solve.Solution
@@ -22,12 +25,39 @@ import kotlin.reflect.typeOf
  */
 @JaktaDSL
 context(scope: JaktaLogicProgrammingScope)
-fun GuardScope<PrologBelief, Substitution>.satisfies(block: JaktaLogicProgrammingScope.() -> Struct): Substitution? {
+fun GuardScope<PrologBelief, MutableSubstitutionPlanContext>.satisfies(
+    block: JaktaLogicProgrammingScope.() -> Struct,
+): MutableSubstitutionPlanContext? {
     val guard = scope.block()
-    val substitutedGuard = guard.apply(this.context).castToStruct()
+    val substitutedGuard = guard.apply(this.context.substitution).castToStruct()
     return when (val solution = this.beliefs.unifiesWith(substitutedGuard)) {
-        is Solution.Yes -> solution.substitution + this.context
+        is Solution.Yes -> {
+            this.context += solution.substitution
+            this.context
+        }
+
         else -> null
+    }
+}
+
+/**
+ * Tests a prolog query on the agent's current beliefs and if it succeeds the result of the substitution is merged
+ * with the current plan context.
+ * @param block A lambda function that defines the belief query to be created.
+ * @return The created [Fact] as a query if it is a valid predicate.
+ */
+// TODO test this
+context(logicScope: JaktaLogicProgrammingScope)
+fun PlanScope<PrologBelief, PrologGoal, MutableSubstitutionPlanContext>.testQuery(
+    block: JaktaLogicProgrammingScope.() -> Struct,
+) {
+    val query = logicScope.block().apply(this.context.substitution).castToStruct()
+    when (val solution = this.agent.beliefs.unifiesWith(query)) {
+        is Solution.Yes -> {
+            this.context += solution.substitution
+        }
+
+        else -> error("The query $query is not satisfied")
     }
 }
 

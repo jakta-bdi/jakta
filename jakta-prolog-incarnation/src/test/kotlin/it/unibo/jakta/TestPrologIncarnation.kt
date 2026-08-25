@@ -57,7 +57,7 @@ class TestPrologIncarnation {
                                             (N lowerThan X) and (S `is` (N + 1))
                                         }
                                     } triggers {
-                                        agent.print("Counting..." + N.value)
+                                        agent.print("Counting...", N)
                                         agent.achieve(goal { "start"(S, X) })
                                         assert(true)
                                         node.terminateNode()

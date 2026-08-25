@@ -3,6 +3,7 @@ package it.unibo.jakta.dsl.belief
 import it.unibo.jakta.dsl.JaktaDSL
 import it.unibo.jakta.dsl.goal.PrologGoal
 import it.unibo.jakta.logic.JaktaLogicProgrammingScope
+import it.unibo.jakta.logic.MutableSubstitutionPlanContext
 import it.unibo.jakta.logic.requireGround
 import it.unibo.jakta.logic.requirePredicate
 import it.unibo.tuprolog.core.Fact
@@ -13,19 +14,22 @@ import it.unibo.tuprolog.unify.Unificator.Companion.mguWith
 
 typealias PrologBelief = Rule
 
-private fun PrologBelief.matchBelief(belief: Fact): Substitution? = when (val substitution = this mguWith belief) {
+private fun PrologBelief.matchBelief(belief: Fact): MutableSubstitutionPlanContext? = when (
+    val substitution =
+        this mguWith belief
+) {
     is Substitution.Fail -> null
-    else -> substitution
+    else -> MutableSubstitutionPlanContext(substitution)
 }
 
 /**
  * Extension function to match a Prolog belief against a belief query defined in the provided block.
  * @param block A lambda function that defines the belief query to be matched against the current belief
- * * @return The matched [Substitution] if the belief matches the query, or null if it does not match.
+ * @return The matched [MutableSubstitutionPlanContext] if the belief matches the query, or null if it does not match.
  */
 @JaktaDSL
 context(scope: JaktaLogicProgrammingScope)
-fun PrologBelief.matching(block: JaktaLogicProgrammingScope.() -> Struct): Substitution? =
+fun PrologBelief.matching(block: JaktaLogicProgrammingScope.() -> Struct): MutableSubstitutionPlanContext? =
     matchBelief(contextualBeliefQuery(block))
 
 /**
@@ -44,12 +48,12 @@ fun initialBelief(block: JaktaLogicProgrammingScope.() -> Struct): Fact = Fact.o
  * Creates a Prolog belief from the provided block, applying the given substitution
  * and ensuring that it is a predicate and ground.
  * @param block A lambda function that defines the belief to be created.
- * @param substitution The substitution to be applied to the belief.
+ * @param planContext the current context of the plan, containing the substitution of variables in scope.
  * @return The created [Fact] if it is a valid predicate and ground.
  */
-context(scope: JaktaLogicProgrammingScope, substitution: Substitution)
+context(scope: JaktaLogicProgrammingScope, planContext: MutableSubstitutionPlanContext)
 fun belief(block: JaktaLogicProgrammingScope.() -> Struct): Fact = Fact.of(
-    (scope.block().apply(substitution) as Struct).also { struct ->
+    (scope.block().apply(planContext.substitution) as Struct).also { struct ->
         requirePredicate(struct) { "Belief must be a predicate, but got $it" }
         requireGround(struct) { "Belief must be ground, but got $it" }
     },

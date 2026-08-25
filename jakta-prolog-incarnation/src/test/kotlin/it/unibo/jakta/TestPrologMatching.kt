@@ -36,10 +36,8 @@ class TestPrologMatching {
         val queryRule = with(JaktaLogicProgrammingScope()) {
             "sibling"(X, Y)
         }
-        val solution = theory.unifiesWith(queryRule)
-
         // TODO implement an actual test
-        when (solution) {
+        when (val solution = theory.unifiesWith(queryRule)) {
             is Solution.Yes -> println("The solution is: $solution")
             is Solution.No -> assert(false) { "No solution found" }
             is Solution.Halt -> assert(false) { "The solving process was halted: ${solution.exception}" }
@@ -59,10 +57,8 @@ class TestPrologMatching {
         val queryRule = with(JaktaLogicProgrammingScope()) {
             "parent"(X, Y)["source"("bob")]
         }
-        val solution = theory.unifiesWith(queryRule)
-
         // TODO implement an actual test for annotations
-        when (solution) {
+        when (val solution = theory.unifiesWith(queryRule)) {
             is Solution.Yes -> println("The solution is: $solution")
             is Solution.No -> assert(false) { "No solution found" }
             is Solution.Halt -> assert(false) { "The solving process was halted: ${solution.exception}" }

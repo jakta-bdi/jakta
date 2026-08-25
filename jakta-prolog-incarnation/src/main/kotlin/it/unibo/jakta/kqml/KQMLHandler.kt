@@ -6,6 +6,8 @@ import it.unibo.jakta.dsl.belief.PrologBelief
 import it.unibo.jakta.dsl.goal.PrologGoal
 import it.unibo.jakta.event.AgentEvent
 import it.unibo.jakta.event.AgentUpdate
+import it.unibo.jakta.event.AgentUpdate.Belief
+import it.unibo.jakta.event.AgentUpdate.Goal
 import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.utils.setTag
@@ -24,21 +26,25 @@ fun AgentState<PrologBelief, PrologGoal>.handleKQMLPayload(
                 JAKTA_ANNOTATIONS_TAG,
                 setOf(Struct.of("source", Atom.of(message.sender.displayName))),
             )
-        AgentUpdate.Belief(setOf(belief))
+        Belief(setOf(belief))
     }
 
     is Untell -> {
         val belief = (message.payload as Untell).belief
-        AgentUpdate.Belief(emptySet(), setOf(belief))
+        Belief(emptySet(), setOf(belief))
     }
 
     is Achieve -> {
         val goal = (message.payload as Achieve).goal
-        AgentUpdate.Goal(setOf(goal))
+        Goal(setOf(goal))
     }
 
     is Unachieve -> {
         val goal = (message.payload as Unachieve).goal
-        AgentUpdate.Goal(emptySet(), setOf(goal))
+        Goal(emptySet(), setOf(goal))
     }
+
+    is AskAll -> TODO()
+
+    is AskOne -> TODO()
 }

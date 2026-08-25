@@ -5,6 +5,7 @@ import it.unibo.jakta.agent.MutableAgentState
 import it.unibo.jakta.dsl.belief.PrologBelief
 import it.unibo.jakta.dsl.goal.PrologGoal
 import it.unibo.jakta.logic.JaktaLogicProgrammingScope
+import it.unibo.jakta.logic.MutableSubstitutionPlanContext
 import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
@@ -38,10 +39,10 @@ operator fun Term.get(annotation: Struct, vararg otherAnnotations: Struct): Term
  * @return The value of the variable as a [Term].
  * @throws IllegalArgumentException if the variable is not ground in the substitution.
  */
-context(substitution: Substitution)
+context(context: MutableSubstitutionPlanContext)
 val Var.value: Term
-    get() = substitution[this]
-        ?: error { "Variable $this is not ground in the substitution $substitution" }
+    get() = context.substitution[this]
+        ?: error { "Variable $this is not ground in the substitution $context.substitution" }
 
 /**
  * Extension function to convert a variable to a Kotlin type using the provided substitution.
@@ -50,7 +51,7 @@ val Var.value: Term
  * @throws IllegalArgumentException if the variable cannot be cast to the expected type.
  */
 @Suppress("UNCHECKED_CAST")
-context(substitution: Substitution)
+context(context: MutableSubstitutionPlanContext)
 fun <T : Any> Var.toKotlin(): T = this.value.accept(TermObjectifier.default) as? T
     ?: error { "Term $this cannot be cast to the expected type" }
 
@@ -59,7 +60,7 @@ fun <T : Any> Var.toKotlin(): T = this.value.accept(TermObjectifier.default) as?
  * @receiver The mutable agent state containing the current substitution.
  * @param parts The parts to be printed, which can include variables and other objects.
  */
-context(substitution: Substitution)
+context(context: MutableSubstitutionPlanContext)
 fun MutableAgentState<PrologBelief, PrologGoal>.print(vararg parts: Any?) {
     val text = buildString {
         for (part in parts) {
