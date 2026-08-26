@@ -1,5 +1,5 @@
 plugins {
-    id("org.danilopianini.gradle-pre-commit-git-hooks") version "2.1.22"
+    id("org.danilopianini.gradle-pre-commit-git-hooks") version "2.1.23"
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
