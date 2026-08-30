@@ -2,7 +2,7 @@
 kotest = "6.2.4"
 kotlin = "2.4.10"
 mockito = "5.23.0"
-tuprolog = "1.1.5"
+tuprolog = "1.2.1"
 alchemist = "43.1.5"
 
 [libraries]
