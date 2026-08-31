@@ -1,16 +1,16 @@
 package it.unibo.jakta.kqml
 
-import it.unibo.jakta.JAKTA_ANNOTATIONS_TAG
 import it.unibo.jakta.agent.AgentState
 import it.unibo.jakta.dsl.belief.PrologBelief
 import it.unibo.jakta.dsl.goal.PrologGoal
+import it.unibo.jakta.dsl.goal.replyAllTo
+import it.unibo.jakta.dsl.goal.replyOneTo
 import it.unibo.jakta.event.AgentEvent
 import it.unibo.jakta.event.AgentUpdate
 import it.unibo.jakta.event.AgentUpdate.Belief
 import it.unibo.jakta.event.AgentUpdate.Goal
-import it.unibo.tuprolog.core.Atom
-import it.unibo.tuprolog.core.Struct
-import it.unibo.tuprolog.utils.setTag
+import it.unibo.jakta.source
+import it.unibo.jakta.tag
 
 /**
  * Handles a KQML payload message and returns the corresponding agent update.
@@ -19,32 +19,40 @@ import it.unibo.tuprolog.utils.setTag
  */
 fun AgentState<PrologBelief, PrologGoal>.handleKQMLPayload(
     message: AgentEvent.External.Message<KQMLPayload>,
-): AgentUpdate<*> = when (message.payload) {
+): AgentUpdate<*> = when (val payload = message.payload) {
     is Tell -> {
-        val belief = (message.payload as Tell).belief
-            .setTag(
-                JAKTA_ANNOTATIONS_TAG,
-                setOf(Struct.of("source", Atom.of(message.sender.displayName))),
-            )
-        Belief(setOf(belief))
+        val beliefs = payload.beliefs.map {
+            it.tag(source(message.sender)) // TODO should I use something else for the source?
+        }.toSet()
+        Belief(beliefs)
     }
 
     is Untell -> {
-        val belief = (message.payload as Untell).belief
+        val belief = payload.belief.tag(source(message.sender))
         Belief(emptySet(), setOf(belief))
     }
 
     is Achieve -> {
-        val goal = (message.payload as Achieve).goal
+        val goal = payload.goal.tag(source(message.sender))
         Goal(setOf(goal))
     }
 
     is Unachieve -> {
-        val goal = (message.payload as Unachieve).goal
+        val goal = payload.goal.tag(source(message.sender))
         Goal(emptySet(), setOf(goal))
     }
 
-    is AskAll -> TODO()
+    is AskAll -> {
+        val query = payload.query
+        val id = message.payload.id
+        val goal = replyAllTo(id) { query }.tag(source(message.sender))
+        Goal(setOf(goal))
+    }
 
-    is AskOne -> TODO()
+    is AskOne -> {
+        val query = (message.payload as AskOne).query
+        val id = message.payload.id
+        val goal = replyOneTo(id) { query }.tag(source(message.sender))
+        Goal(setOf(goal))
+    }
 }

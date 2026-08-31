@@ -1,5 +1,8 @@
 package it.unibo.jakta.logic
 
+import it.unibo.jakta.self
+import it.unibo.jakta.source
+import it.unibo.tuprolog.core.Clause
 import it.unibo.tuprolog.core.Rule
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
@@ -7,6 +10,7 @@ import it.unibo.tuprolog.core.Term
 import it.unibo.tuprolog.solve.Solution
 import it.unibo.tuprolog.solve.Solver
 import it.unibo.tuprolog.solve.flags.TrackVariables
+import it.unibo.tuprolog.solve.flags.TrackVariables.ON
 import it.unibo.tuprolog.solve.flags.Unknown
 import it.unibo.tuprolog.unify.AbstractUnificator
 
@@ -29,16 +33,21 @@ val annotationUnificator = object : AbstractUnificator() {
 
     @Suppress("UNCHECKED_CAST")
     private fun unifyTags(
-        query: Term,
         fact: Term,
+        query: Term,
         initialResult: Substitution,
         occurCheckEnabled: Boolean,
     ): Substitution {
-        val queryAnnotations =
-            (query.tags["jakta.annotations"] as? Set<Struct>).orEmpty().toMutableList()
-
         val factAnnotations =
             (fact.tags["jakta.annotations"] as? Set<Struct>).orEmpty().toMutableList()
+
+        // every unannotated struct is considered annotated with source(self)
+        if (factAnnotations.isEmpty()) {
+            factAnnotations.add(source(self))
+        }
+
+        val queryAnnotations =
+            (query.tags["jakta.annotations"] as? Set<Struct>).orEmpty().toMutableList()
 
         val result = when {
             queryAnnotations.isEmpty() -> initialResult
@@ -90,18 +99,34 @@ val annotationUnificator = object : AbstractUnificator() {
 }
 
 /**
+ * An object representing a way to access a [Solver] configured with JaKtA specific options.
+ */
+object JaktaSolver {
+    /**
+     * Factory method to create a new solver instance with a loaded theory.
+     */
+    fun get(theory: Iterable<Clause>): Solver = Solver.prolog
+        .newBuilder()
+        .unificator(annotationUnificator)
+        .staticKb(theory)
+        .flag(Unknown, Unknown.FAIL)
+        .flag(TrackVariables) { ON }
+        .build()
+}
+
+/**
  * Extension function to check if a collection of Prolog rules unifies with a given query [Struct].
  * @param query The [Struct] to be unified with the collection of rules.
  * @return The [Solution] of the unification process, which can be a success or failure.
  */
-fun Collection<Rule>.unifiesWith(query: Struct): Solution = Solver.prolog
-    .newBuilder()
-    .unificator(annotationUnificator)
-    .flag(Unknown, Unknown.FAIL)
-    .staticKb(this)
-    .flag(TrackVariables) { ON }
-    .build()
-    .solveOnce(query)
+fun Collection<Rule>.unifiesWith(query: Struct): Solution = JaktaSolver.get(this).solveOnce(query)
+
+/**
+ * Extension function to check if a collection of Prolog rules unifies with a given query [Struct].
+ * @param query The [Struct] to be unified with the collection of rules.
+ * @return The [Solution] of the unification process, which can be a success or failure.
+ */
+fun Collection<Rule>.allSolutionsOf(query: Struct): List<Solution> = JaktaSolver.get(this).solveList(query)
 
 /**
  * List of special functors in Prolog that are not considered predicates.

@@ -166,7 +166,7 @@ fun MasBuilder<BaseNode<Any>, BaseNodeBuilder<Any, BaseNode<Any>>>.blocksWorldNo
                         agent.print("Block", X, "is not clear.")
                         agent.print("Check if I can move ", H, " to clear ", X)
                         agent.achieve(goal { clear(H) }) // TODO the Jason solution does not include this
-                        agent.print("Moving block ", X, " on ", table)
+                        agent.print("Moving block ", H, " on ", table)
                         blocksWorld.move(H.toKotlin(), table.value)
                         agent.print(X, " should now be clear.")
                         agent.achieve(goal { clear(X) })

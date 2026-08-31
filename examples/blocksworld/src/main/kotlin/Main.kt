@@ -13,7 +13,7 @@ import ui.BlocksWorldAppState
  * Entry point of the Blocks World application.
  */
 fun main() = application {
-    Logger.setMinSeverity(Severity.Assert)
+    Logger.setMinSeverity(Severity.Error)
 
     val appState = remember { BlocksWorldAppState() }
 

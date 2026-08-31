@@ -1,16 +1,12 @@
 package it.unibo.jakta
 
-import it.unibo.jakta.dsl.belief.beliefQuery
+import it.unibo.jakta.dsl.belief.contextualBeliefQuery
 import it.unibo.jakta.dsl.belief.inferenceRule
 import it.unibo.jakta.dsl.belief.initialBelief
 import it.unibo.jakta.logic.JaktaLogicProgrammingScope
 import it.unibo.jakta.logic.unifiesWith
-import it.unibo.tuprolog.core.Atom
-import it.unibo.tuprolog.core.Fact
-import it.unibo.tuprolog.core.Rule
-import it.unibo.tuprolog.core.Struct
-import it.unibo.tuprolog.core.Var
 import it.unibo.tuprolog.solve.Solution
+import kotlin.test.assertEquals
 import org.junit.jupiter.api.Test
 
 class TestPrologMatching {
@@ -33,35 +29,78 @@ class TestPrologMatching {
             },
         )
 
-        val queryRule = with(JaktaLogicProgrammingScope()) {
-            "sibling"(X, Y)
-        }
-        // TODO implement an actual test
-        when (val solution = theory.unifiesWith(queryRule)) {
-            is Solution.Yes -> println("The solution is: $solution")
-            is Solution.No -> assert(false) { "No solution found" }
-            is Solution.Halt -> assert(false) { "The solving process was halted: ${solution.exception}" }
+        with(JaktaLogicProgrammingScope()) {
+            val queryRule = contextualBeliefQuery { "sibling"(X, Y) }
+            when (val solution = theory.unifiesWith(queryRule)) {
+                is Solution.Yes -> {
+                    assertEquals("bob", solution.substitution[X].toString())
+                    assertEquals("charlie", solution.substitution[Y].toString())
+                }
+
+                is Solution.No -> assert(false) { "No solution found" }
+
+                is Solution.Halt -> assert(false) { "The solving process was halted: ${solution.exception}" }
+            }
         }
     }
 
     @Test
-    fun `test matching with annotations`() {
+    fun `annotated fact should match the source`() {
         val theory = listOf(
             initialBelief {
-                "parent"("alice", "bob")["source"("self")]
+                "parent"("alice", "bob")
             },
             initialBelief {
-                "parent"("alice", "charlie")["source"("bob")]
+                "parent"("alice", "charlie")[source("bob")]
             },
         )
-        val queryRule = with(JaktaLogicProgrammingScope()) {
-            "parent"(X, Y)["source"("bob")]
+        with(JaktaLogicProgrammingScope()) {
+            val queryRule = contextualBeliefQuery { "parent"(X, Y)[source("bob")] }
+            when (val solution = theory.unifiesWith(queryRule)) {
+                is Solution.Yes -> assertEquals("charlie", solution.substitution[Y].toString())
+                is Solution.No -> assert(false) { "No solution found" }
+                is Solution.Halt -> assert(false) { "The solving process was halted: ${solution.exception}" }
+            }
         }
-        // TODO implement an actual test for annotations
-        when (val solution = theory.unifiesWith(queryRule)) {
-            is Solution.Yes -> println("The solution is: $solution")
-            is Solution.No -> assert(false) { "No solution found" }
-            is Solution.Halt -> assert(false) { "The solving process was halted: ${solution.exception}" }
+    }
+
+    @Test
+    fun `not annotated query matches the first belief regardless of source`() {
+        val theory = listOf(
+            initialBelief {
+                "parent"("alice", "charlie")[source("bob")]
+            },
+            initialBelief {
+                "parent"("alice", "bob")
+            },
+        )
+        with(JaktaLogicProgrammingScope()) {
+            val queryRule = contextualBeliefQuery { "parent"(X, Y) }
+            when (val solution = theory.unifiesWith(queryRule)) {
+                is Solution.Yes -> assertEquals("charlie", solution.substitution[Y].toString())
+                is Solution.No -> assert(false) { "No solution found" }
+                is Solution.Halt -> assert(false) { "The solving process was halted: ${solution.exception}" }
+            }
+        }
+    }
+
+    @Test
+    fun `not annotated fact is implicitly matching source(self)`() {
+        val theory = listOf(
+            initialBelief {
+                "parent"("alice", "charlie")[source("bob")]
+            },
+            initialBelief {
+                "parent"("alice", "bob")
+            },
+        )
+        with(JaktaLogicProgrammingScope()) {
+            val queryRule = contextualBeliefQuery { "parent"(X, Y)[source(self)] }
+            when (val solution = theory.unifiesWith(queryRule)) {
+                is Solution.Yes -> assertEquals("bob", solution.substitution[Y].toString())
+                is Solution.No -> assert(false) { "No solution found" }
+                is Solution.Halt -> assert(false) { "The solving process was halted: ${solution.exception}" }
+            }
         }
     }
 }

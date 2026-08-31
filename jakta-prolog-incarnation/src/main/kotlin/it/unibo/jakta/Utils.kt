@@ -1,18 +1,17 @@
 package it.unibo.jakta
 
-import it.unibo.jakta.agent.Agent
+import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.agent.MutableAgentState
 import it.unibo.jakta.dsl.belief.PrologBelief
 import it.unibo.jakta.dsl.goal.PrologGoal
-import it.unibo.jakta.logic.JaktaLogicProgrammingScope
 import it.unibo.jakta.logic.MutableSubstitutionPlanContext
 import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.Struct
-import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.core.Term
 import it.unibo.tuprolog.core.Var
 import it.unibo.tuprolog.serialize.TermObjectifier
 import it.unibo.tuprolog.utils.setTag
+import jdk.internal.joptsimple.internal.Messages.message
 
 /**
  * Tag used to store annotations on Prolog terms.
@@ -20,18 +19,43 @@ import it.unibo.tuprolog.utils.setTag
 const val JAKTA_ANNOTATIONS_TAG = "jakta.annotations"
 
 /**
- * Extension function to annotate a Prolog struct with one or more annotations
- * using the operator syntax struct(...)[ann, ann2, ...].
+ * Creates a [Struct] for the source annotation using the passed [AgentID.displayName] as the source.
  */
-operator fun Struct.get(annotation: Struct, vararg otherAnnotations: Struct): Struct =
-    setTag(JAKTA_ANNOTATIONS_TAG, setOf(annotation, *otherAnnotations))
+fun source(id: AgentID): Struct = source(id.toString())
+
+/**
+ * Creates a [Struct] for the source annotation using the passed string as the source.
+ */
+fun source(source: String): Struct = source(Atom.of(source))
+
+/**
+ * Creates a [Struct] for the source annotation using the passed [Atom] as the source.
+ */
+fun source(source: Atom): Struct = Struct.of("source", source)
+
+/**
+ * An [Atom] representing the "self" annotation.
+ */
+val self = Atom.of("self")
+
+/**
+ * Extension method to tag terms with JaKtA annotations.
+ */
+fun <T : Term> T.tag(vararg annotation: Struct): T {
+    val previousAnnotations = this.getTag<Set<Struct>>(JAKTA_ANNOTATIONS_TAG)
+    val struct = this.setTag(
+        JAKTA_ANNOTATIONS_TAG,
+        setOf(*annotation) + (previousAnnotations.orEmpty()),
+    )
+    return struct
+}
 
 /**
  * Extension function to annotate a Prolog struct with one or more annotations
- * using the operator syntax term[ann, ann2, ...].
+ * using the operator syntax struct(...)[ann, ann2, ...].
  */
-operator fun Term.get(annotation: Struct, vararg otherAnnotations: Struct): Term =
-    setTag(JAKTA_ANNOTATIONS_TAG, setOf(annotation, *otherAnnotations))
+operator fun <T : Term> T.get(annotation: Struct, vararg otherAnnotations: Struct): T =
+    tag(annotation, *otherAnnotations)
 
 /**
  * Extension property to retrieve the value of a variable from a substitution.

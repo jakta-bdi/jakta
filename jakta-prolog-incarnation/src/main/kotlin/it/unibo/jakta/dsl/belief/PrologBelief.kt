@@ -1,22 +1,20 @@
 package it.unibo.jakta.dsl.belief
 
 import it.unibo.jakta.dsl.JaktaDSL
-import it.unibo.jakta.dsl.goal.PrologGoal
 import it.unibo.jakta.logic.JaktaLogicProgrammingScope
 import it.unibo.jakta.logic.MutableSubstitutionPlanContext
+import it.unibo.jakta.logic.annotationUnificator
 import it.unibo.jakta.logic.requireGround
 import it.unibo.jakta.logic.requirePredicate
 import it.unibo.tuprolog.core.Fact
 import it.unibo.tuprolog.core.Rule
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
-import it.unibo.tuprolog.unify.Unificator.Companion.mguWith
 
 typealias PrologBelief = Rule
 
-private fun PrologBelief.matchBelief(belief: Fact): MutableSubstitutionPlanContext? = when (
-    val substitution =
-        this mguWith belief
+private fun PrologBelief.matchBelief(beliefQuery: Struct): MutableSubstitutionPlanContext? = when (
+    val substitution = annotationUnificator.mgu(this, beliefQuery)
 ) {
     is Substitution.Fail -> null
     else -> MutableSubstitutionPlanContext(substitution)
@@ -71,15 +69,16 @@ fun inferenceRule(block: JaktaLogicProgrammingScope.() -> Rule): Rule = JaktaLog
  * @param block A lambda function that defines the belief query to be created.
  * @return The created [Fact] as a query if it is a valid predicate.
  */
-// TODO check if this is correct, maybe it should be a Struct instead of a Fact
-fun beliefQuery(block: JaktaLogicProgrammingScope.() -> Struct): Fact = Fact.of(
-    JaktaLogicProgrammingScope().block().also { struct ->
-        requirePredicate(struct) { "Belief query must be a predicate, but got $it" }
-    },
-)
+fun beliefQuery(block: JaktaLogicProgrammingScope.() -> Struct): Fact =
+    context(JaktaLogicProgrammingScope()) { contextualBeliefQuery(block) }
 
+/**
+ * Creates a Prolog belief query from the provided block, using the contextual [scope].
+ * @param block A lambda function that defines the belief query to be created.
+ * @return The created [Fact] as a query if it is a valid predicate.
+ */
 context(scope: JaktaLogicProgrammingScope)
-private fun contextualBeliefQuery(block: JaktaLogicProgrammingScope.() -> Struct): Fact = Fact.of(
+fun contextualBeliefQuery(block: JaktaLogicProgrammingScope.() -> Struct): Fact = Fact.of(
     scope.block().also { struct ->
         requirePredicate(struct) { "Belief query must be a predicate, but got $it" }
     },
