@@ -266,6 +266,7 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
 
     // TODO this should change to have a proper set of desires
     //  for now I simply forward the goal addition and removal events
+    // TODO this has problems because goal removal is not actually stopping goals already in pursue.
     private fun handleGoalUpdateEvent(event: AgentUpdate.Goal<Goal>) {
         log.i { "Handling goal update event $event" }
         val additionsOnly = event.additions - event.removals

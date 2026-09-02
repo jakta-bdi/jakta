@@ -3,19 +3,18 @@ package it.unibo.jakta.dsl.goal
 import it.unibo.jakta.dsl.JaktaDSL
 import it.unibo.jakta.logic.JaktaLogicProgrammingScope
 import it.unibo.jakta.logic.MutableSubstitutionPlanContext
-import it.unibo.jakta.logic.annotationUnificator
+import it.unibo.jakta.logic.annotatedMguWith
 import it.unibo.jakta.logic.requireGround
 import it.unibo.jakta.logic.requirePredicate
-import it.unibo.tuprolog.core.Fact
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
+import it.unibo.tuprolog.core.Term
 import it.unibo.tuprolog.core.Var
-import kotlin.uuid.Uuid
 
 typealias PrologGoal = Struct
 
 private fun PrologGoal.matchGoal(goalQuery: Struct): MutableSubstitutionPlanContext? = when (
-    val substitution = annotationUnificator.mgu(this, goalQuery)
+    val substitution = this.annotatedMguWith(goalQuery)
 ) {
     is Substitution.Fail -> null
     else -> MutableSubstitutionPlanContext(substitution)
@@ -28,7 +27,7 @@ private fun PrologGoal.matchGoal(goalQuery: Struct): MutableSubstitutionPlanCont
  */
 @JaktaDSL
 context(scope: JaktaLogicProgrammingScope)
-fun PrologGoal.matching(block: JaktaLogicProgrammingScope.() -> Struct): MutableSubstitutionPlanContext? =
+fun PrologGoal.matchingGoal(block: JaktaLogicProgrammingScope.() -> Struct): MutableSubstitutionPlanContext? =
     matchGoal(goalQuery(block))
 
 /**
@@ -62,7 +61,7 @@ fun goal(block: JaktaLogicProgrammingScope.() -> Struct): PrologGoal =
  * @return The created [PrologGoal] if it is a valid predicate,
  */
 context(scope: JaktaLogicProgrammingScope)
-private fun goalQuery(block: JaktaLogicProgrammingScope.() -> Struct): Struct = scope.block().also { struct ->
+fun goalQuery(block: JaktaLogicProgrammingScope.() -> Struct): Struct = scope.block().also { struct ->
     requirePredicate(struct) { "Goal query must be a predicate, but got $it" }
 }
 
@@ -72,10 +71,9 @@ private fun goalQuery(block: JaktaLogicProgrammingScope.() -> Struct): Struct = 
  * @param block A lambda function that defines the query to match in this reply.
  * @return the created [PrologGoal].
  */
-fun replyOneTo(messageId: Uuid? = null, block: JaktaLogicProgrammingScope.() -> Fact): PrologGoal =
-    with(JaktaLogicProgrammingScope()) {
-        val query = block()
-        return "replyOneTo"(query, messageId?.toString() ?: Var.anonymous())
+fun JaktaLogicProgrammingScope.replyOneTo(query: Term, messageId: Term = Var.anonymous()): PrologGoal =
+    with(this) {
+        return "replyOneTo"(query, messageId)
     }
 
 /**
@@ -84,10 +82,9 @@ fun replyOneTo(messageId: Uuid? = null, block: JaktaLogicProgrammingScope.() -> 
  * @param block A lambda function that defines the query to match in this reply.
  * @return the created [PrologGoal].
  */
-fun replyAllTo(messageId: Uuid? = null, block: JaktaLogicProgrammingScope.() -> Fact): PrologGoal =
-    with(JaktaLogicProgrammingScope()) {
-        val query = block()
-        return "replyAllTo"(query, messageId?.toString() ?: Var.anonymous())
+fun JaktaLogicProgrammingScope.replyAllTo(query: Term, messageId: Term = Var.anonymous()): PrologGoal =
+    with(this) {
+        return "replyAllTo"(query, messageId)
     }
 
 // TODO can we make an utility for test goals?

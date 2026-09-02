@@ -19,23 +19,26 @@ sealed class KQMLPayload {
 }
 
 /**
- * KQML payload for telling a belief to an agent.
+ * KQML payload for telling a beliefQuery to an agent.
  * The [beliefs] must be ground. [replyingTo] is an optional id of the message this tell message is replying to.
  */
-data class Tell(val beliefs: List<PrologBelief>, val replyingTo: Uuid? = null) : KQMLPayload() {
+data class Tell(val beliefs: Set<PrologBelief>, val replyingTo: Uuid? = null) : KQMLPayload() {
     init {
         beliefs.all { it is Fact } || error { "All beliefs to tell must be facts, but got $beliefs" }
-        beliefs.forEach { b -> requireGround(b) { "All beliefs to tell must be ground, but got $it" } }
+        beliefs.forEach { b ->
+            requirePredicate(b.head) { "All beliefs to tell must be a predicate, but got $b" }
+            requireGround(b) { "All beliefs to tell must be ground, but got $it" }
+        }
     }
 }
 
 /**
- * KQML payload for untelling a belief to an agent.
- * The [belief] must be a predicate.
+ * KQML payload for untelling a beliefQuery to an agent.
+ * The [beliefQuery] must be a predicate.
  */
-data class Untell(val belief: PrologBelief) : KQMLPayload() {
+data class Untell(val beliefQuery: Struct) : KQMLPayload() {
     init {
-        requirePredicate(belief) { "The belief to untell must be a predicate, but got $belief" }
+        requirePredicate(beliefQuery) { "The beliefQuery to untell must be a predicate, but got $beliefQuery" }
     }
 }
 
@@ -45,25 +48,28 @@ data class Untell(val belief: PrologBelief) : KQMLPayload() {
  */
 data class Achieve(val goal: PrologGoal) : KQMLPayload() {
     init {
+        requirePredicate(goal) { "The goal to achieve must be a predicate, but got $goal" }
         requireGround(goal) { "The goal to achieve must be ground, but got $goal" }
     }
 }
 
+
+//TODO rename in Drop or DropGoal?
 /**
  * KQML payload for telling an agent to stop pursuing a (delegated) goal.
- * The [goal] must be a predicate.
+ * The [goalQuery] must be a predicate.
  */
-data class Unachieve(val goal: PrologGoal) : KQMLPayload() {
+data class Unachieve(val goalQuery: Struct) : KQMLPayload() {
     init {
-        requirePredicate(goal) { "The goal to unachieve must be a predicate, but got $goal" }
+        requirePredicate(goalQuery) { "The goal to unachieve must be a predicate, but got $goalQuery" }
     }
 }
 
 /**
- * KQML payload for asking an agent to reply with the first belief that satisfies the given query.
+ * KQML payload for asking an agent to reply with the first beliefQuery that satisfies the given query.
  * @param query the query to satisfy.
  */
-data class AskOne(val query: Fact) : KQMLPayload() {
+data class AskOne(val query: Struct) : KQMLPayload() {
     init {
         requirePredicate(query) { "The query to askOne must be a predicate, but got $query" }
     }
@@ -73,7 +79,7 @@ data class AskOne(val query: Fact) : KQMLPayload() {
  * KQML payload for asking an agent to reply with all the beliefs that satisfy the given query.
  * @param query the query to satisfy.
  */
-data class AskAll(val query: Fact) : KQMLPayload() {
+data class AskAll(val query: Struct) : KQMLPayload() {
     init {
         requirePredicate(query) { "The query to askAll must be a predicate, but got $query" }
     }

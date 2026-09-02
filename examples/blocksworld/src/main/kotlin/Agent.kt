@@ -5,7 +5,7 @@ import it.unibo.jakta.dsl.belief.initialBelief
 import it.unibo.jakta.dsl.goal.PrologGoal
 import it.unibo.jakta.dsl.goal.goal
 import it.unibo.jakta.dsl.goal.initialGoal
-import it.unibo.jakta.dsl.goal.matching
+import it.unibo.jakta.dsl.goal.matchingGoal
 import it.unibo.jakta.dsl.mas.MasBuilder
 import it.unibo.jakta.dsl.node.BaseNodeBuilder
 import it.unibo.jakta.dsl.plan.achieve
@@ -14,7 +14,7 @@ import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.logic.JaktaLogicProgrammingScope.Companion.prologPlan
 import it.unibo.jakta.node.BaseNode
 import it.unibo.jakta.print
-import it.unibo.jakta.toKotlin
+import it.unibo.jakta.value
 import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.List
 import it.unibo.tuprolog.core.Struct
@@ -70,7 +70,7 @@ fun MasBuilder<BaseNode<Any>, BaseNodeBuilder<Any, BaseNode<Any>>>.blocksWorldNo
             hasPlanLibrary {
                 prologPlan {
                     adding.goal {
-                        matching { start }
+                        matchingGoal { start }
                     } triggers {
                         blocksWorld.join()
                         blocksWorld.displayWorld()
@@ -80,7 +80,7 @@ fun MasBuilder<BaseNode<Any>, BaseNodeBuilder<Any, BaseNode<Any>>>.blocksWorldNo
 
                 prologPlan {
                     adding.goal {
-                        matching { state(emptyLogicList) }
+                        matchingGoal { state(emptyLogicList) }
                     } triggers {
                         agent.print("Finished! Final state reached.")
                         blocksWorld.displayWorld()
@@ -89,7 +89,7 @@ fun MasBuilder<BaseNode<Any>, BaseNodeBuilder<Any, BaseNode<Any>>>.blocksWorldNo
 
                 prologPlan {
                     adding.goal {
-                        matching { state(logicList(H, tail = T)) }
+                        matchingGoal { state(logicList(H, tail = T)) }
                     } triggers {
                         agent.print("Building the tower ", H)
                         agent.achieve(goal { tower(H) })
@@ -99,7 +99,7 @@ fun MasBuilder<BaseNode<Any>, BaseNodeBuilder<Any, BaseNode<Any>>>.blocksWorldNo
 
                 prologPlan {
                     adding.goal {
-                        matching { tower(T) }
+                        matchingGoal { tower(T) }
                     } onlyWhen {
                         satisfies { tower(T) }
                     } triggers {
@@ -109,7 +109,7 @@ fun MasBuilder<BaseNode<Any>, BaseNodeBuilder<Any, BaseNode<Any>>>.blocksWorldNo
 
                 prologPlan {
                     adding.goal {
-                        matching { tower(logicListOf(X)) }
+                        matchingGoal { tower(logicListOf(X)) }
                     } triggers {
                         agent.achieve(goal { on(X, table) })
                     }
@@ -117,7 +117,7 @@ fun MasBuilder<BaseNode<Any>, BaseNodeBuilder<Any, BaseNode<Any>>>.blocksWorldNo
 
                 prologPlan {
                     adding.goal {
-                        matching { tower(logicList(X, Y, tail = T)) }
+                        matchingGoal { tower(logicList(X, Y, tail = T)) }
                     } triggers {
                         agent.achieve(goal { tower(logicList(Y, tail = T)) })
                         agent.achieve(goal { on(X, Y) })
@@ -126,7 +126,7 @@ fun MasBuilder<BaseNode<Any>, BaseNodeBuilder<Any, BaseNode<Any>>>.blocksWorldNo
 
                 prologPlan {
                     adding.goal {
-                        matching { on(X, Y) }
+                        matchingGoal { on(X, Y) }
                     } onlyWhen {
                         satisfies { on(X, Y) }
                     } triggers {
@@ -136,20 +136,20 @@ fun MasBuilder<BaseNode<Any>, BaseNodeBuilder<Any, BaseNode<Any>>>.blocksWorldNo
 
                 prologPlan {
                     adding.goal {
-                        matching { on(X, Y) }
+                        matchingGoal { on(X, Y) }
                     } triggers {
                         agent.print("Check if block ", X, " is clear")
                         agent.achieve(goal { clear(X) })
                         agent.print("Check if block ", Y, " is clear")
                         agent.achieve(goal { clear(Y) })
                         agent.print("Moving block ", X, " on ", Y)
-                        blocksWorld.move(X.toKotlin(), Y.toKotlin())
+                        blocksWorld.move(X.value(), Y.value())
                     }
                 }
 
                 prologPlan {
                     adding.goal {
-                        matching { clear(X) }
+                        matchingGoal { clear(X) }
                     } onlyWhen {
                         satisfies { clear(X) }
                     } triggers {
@@ -159,7 +159,7 @@ fun MasBuilder<BaseNode<Any>, BaseNodeBuilder<Any, BaseNode<Any>>>.blocksWorldNo
 
                 prologPlan {
                     adding.goal {
-                        matching { clear(X) }
+                        matchingGoal { clear(X) }
                     } onlyWhen {
                         satisfies { tower(logicList(H, tail = T)) and member(X, T) }
                     } triggers {
@@ -167,7 +167,7 @@ fun MasBuilder<BaseNode<Any>, BaseNodeBuilder<Any, BaseNode<Any>>>.blocksWorldNo
                         agent.print("Check if I can move ", H, " to clear ", X)
                         agent.achieve(goal { clear(H) }) // TODO the Jason solution does not include this
                         agent.print("Moving block ", H, " on ", table)
-                        blocksWorld.move(H.toKotlin(), table.value)
+                        blocksWorld.move(H.value(), table.value)
                         agent.print(X, " should now be clear.")
                         agent.achieve(goal { clear(X) })
                     }
@@ -175,21 +175,21 @@ fun MasBuilder<BaseNode<Any>, BaseNodeBuilder<Any, BaseNode<Any>>>.blocksWorldNo
             }
 
 //            prologPlan {
-//                adding.belief {
+//                adding.beliefQuery {
 //                    matching { "on"(X, Y) }
 //                } triggers {
 //                    with(context) {
-//                        agent.print("Belief added: on(${X.value}, ${Y.value})")
+//                        agent.print("Belief added: on(${X.substitutedTerm}, ${Y.substitutedTerm})")
 //                    }
 //                }
 //            }
 //
 //            prologPlan {
-//                removing.belief {
+//                removing.beliefQuery {
 //                    matching { "on"(X, Y) }
 //                } triggers {
 //                    with(context) {
-//                        agent.print("Belief removed: on(${X.value}, ${Y.value})")
+//                        agent.print("Belief removed: on(${X.substitutedTerm}, ${Y.substitutedTerm})")
 //                    }
 //                }
 //            }

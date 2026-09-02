@@ -4,7 +4,7 @@ import it.unibo.jakta.dsl.agent
 import it.unibo.jakta.dsl.belief.PrologBelief
 import it.unibo.jakta.dsl.goal.PrologGoal
 import it.unibo.jakta.dsl.goal.initialGoal
-import it.unibo.jakta.dsl.goal.matching
+import it.unibo.jakta.dsl.goal.matchingGoal
 import it.unibo.jakta.dsl.mas
 import it.unibo.jakta.dsl.node.NodeBuilders
 import it.unibo.jakta.dsl.plan.triggers
@@ -30,7 +30,7 @@ val helloWorldAgent = agent<PrologBelief, PrologGoal, Any> {
     hasPlanLibrary {
         prologPlan {
             adding.goal {
-                matching { helloGoal }
+                matchingGoal { helloGoal }
             } triggers {
                 agent.print("Hello, world!")
                 node.terminateNode()

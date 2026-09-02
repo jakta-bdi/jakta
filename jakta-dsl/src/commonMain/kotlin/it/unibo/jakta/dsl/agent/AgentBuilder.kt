@@ -75,16 +75,6 @@ interface AgentBuilder<Belief : Any, Goal : Any, Body : Any> {
     fun addGoalPlan(plan: Plan.Goal<Belief, Goal, *, *>)
 
     /**
-     * Adds multiple belief plans to the agent's plan library.
-     */
-    fun withBeliefPlans(vararg plans: Plan.Belief<Belief, Goal, *, *>)
-
-    /**
-     * Adds multiple goal plans to the agent's plan library.
-     */
-    fun withGoalPlans(vararg plans: Plan.Goal<Belief, Goal, *, *>)
-
-    /**
      * Define how an agent can be embodied in the node.
      */
     fun embodiedAs(bodyFactory: (AgentID) -> Body)

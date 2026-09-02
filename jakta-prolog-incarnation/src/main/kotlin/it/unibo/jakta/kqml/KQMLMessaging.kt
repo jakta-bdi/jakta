@@ -8,13 +8,10 @@ import it.unibo.jakta.dsl.goal.PrologGoal
 import it.unibo.jakta.event.AgentEvent
 import it.unibo.jakta.logic.MutableSubstitutionPlanContext
 import it.unibo.jakta.logic.allSolutionsOf
-import it.unibo.jakta.logic.annotationUnificator
+import it.unibo.jakta.logic.annotatedMguWith
 import it.unibo.jakta.skills.MessagingSkill
-import it.unibo.tuprolog.core.Fact
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
-import it.unibo.tuprolog.solve.Solution
-import it.unibo.tuprolog.unify.Unificator.Companion.mguWith
 import kotlin.time.Duration
 import kotlin.uuid.Uuid
 
@@ -43,32 +40,32 @@ private fun <P : KQMLPayload> Agent.kqmlBroadcast(payload: P) {
  * Extension function to send a message using the [Tell] performative.
  */
 context(skill: MessagingSkill)
-fun Agent.tellTo(receiver: AgentID, vararg belief: PrologBelief) = kqmlSend(receiver, Tell(belief.toList()))
+fun Agent.tellTo(receiver: AgentID, vararg belief: PrologBelief) = kqmlSend(receiver, Tell(belief.toSet()))
 
 /**
  * Extension function to send a message using the [Tell] performative.
  */
 context(skill: MessagingSkill)
 fun Agent.tellTo(receiver: AgentID, replyingTo: String, vararg belief: PrologBelief) =
-    kqmlSend(receiver, Tell(belief.toList(), Uuid.parse(replyingTo)))
+    kqmlSend(receiver, Tell(belief.toSet(), Uuid.parse(replyingTo)))
 
 /**
  * Extension function to broadcast a message using the [Tell] performative.
  */
 context(skill: MessagingSkill)
-fun Agent.broadcastTell(vararg belief: PrologBelief) = kqmlBroadcast(Tell(belief.toList()))
+fun Agent.broadcastTell(vararg belief: PrologBelief) = kqmlBroadcast(Tell(belief.toSet()))
 
 /**
  * Extension function to send a message using [Untell] performative.
  */
 context(skill: MessagingSkill)
-fun Agent.untellTo(receiver: AgentID, belief: PrologBelief) = kqmlSend(receiver, Untell(belief))
+fun Agent.untellTo(receiver: AgentID, query: Struct) = kqmlSend(receiver, Untell(query))
 
 /**
  * Extension function to use the [Untell] performative to broadcast a message.
  */
 context(skill: MessagingSkill)
-fun Agent.broadcastUntell(belief: PrologBelief) = kqmlBroadcast(Untell(belief))
+fun Agent.broadcastUntell(query: Struct) = kqmlBroadcast(Untell(query))
 
 /**
  * Extension function to send a message using the [Achieve] performative.
@@ -86,13 +83,13 @@ fun Agent.broadcastAchieve(goal: PrologGoal) = kqmlBroadcast(Achieve(goal))
  * Extension function to send a message using the [Unachieve] performative.
  */
 context(skill: MessagingSkill)
-fun Agent.sendUnachieveTo(receiver: AgentID, goal: PrologGoal) = kqmlSend(receiver, Unachieve(goal))
+fun Agent.sendUnachieveTo(receiver: AgentID, query: Struct) = kqmlSend(receiver, Unachieve(query))
 
 /**
  * Extension function to broadcast a message using the [Unachieve] performative.
  */
 context(skill: MessagingSkill)
-fun Agent.broadcastUnachieve(goal: PrologGoal) = kqmlBroadcast(Unachieve(goal))
+fun Agent.broadcastUnachieve(query: Struct) = kqmlBroadcast(Unachieve(query))
 
 /**
  * Extension function to send a message using the [AskOne] performative and wait for a reply.
@@ -104,7 +101,7 @@ fun Agent.broadcastUnachieve(goal: PrologGoal) = kqmlBroadcast(Unachieve(goal))
 context(skill: MessagingSkill, planContext: MutableSubstitutionPlanContext)
 suspend fun MutableAgentState<PrologBelief, PrologGoal>.askOneTo(
     receiver: AgentID,
-    query: Fact,
+    query: Struct,
     timeout: Duration? = null,
 ): Substitution? {
     val message = AskOne(query)
@@ -116,7 +113,7 @@ suspend fun MutableAgentState<PrologBelief, PrologGoal>.askOneTo(
                     if (event.sender != receiver || payload.replyingTo != message.id || payload.beliefs.isEmpty()) {
                         null
                     } else {
-                        val substitution = annotationUnificator.mgu(payload.beliefs.first(), query)
+                        val substitution = payload.beliefs.first().annotatedMguWith(query)
                         if (substitution.isSuccess) {
                             planContext += substitution
                         }
@@ -143,7 +140,7 @@ suspend fun MutableAgentState<PrologBelief, PrologGoal>.askOneTo(
 context(skill: MessagingSkill)
 suspend fun MutableAgentState<PrologBelief, PrologGoal>.askAllTo(
     receiver: AgentID,
-    query: Fact,
+    query: Struct,
     timeout: Duration? = null,
 ): List<Substitution>? {
     val message = AskOne(query)

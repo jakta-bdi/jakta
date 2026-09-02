@@ -5,7 +5,7 @@ package it.unibo.jakta.agent
  */
 interface AgentID {
     /**
-     * The id serialized as a [String].
+     * A print-friendly id for the agent.
      */
     val displayName: String
 }

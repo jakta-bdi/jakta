@@ -3,7 +3,7 @@ package it.unibo.jakta
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import it.unibo.jakta.dsl.goal.initialGoal
-import it.unibo.jakta.dsl.goal.matching
+import it.unibo.jakta.dsl.goal.matchingGoal
 import it.unibo.jakta.dsl.mas
 import it.unibo.jakta.dsl.node.NodeBuilders
 import it.unibo.jakta.dsl.plan.triggers
@@ -37,7 +37,7 @@ class TestTermination {
                             hasPlanLibrary {
                                 prologPlan {
                                     adding.goal {
-                                        matching { "start".toAtom() }
+                                        matchingGoal { "start".toAtom() }
                                     } triggers {
                                         node.terminateNode()
                                     }

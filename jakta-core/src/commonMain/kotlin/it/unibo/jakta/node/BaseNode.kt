@@ -41,8 +41,8 @@ open class BaseNode<Body : Any> : ExecutableNode<Body> {
         _systemEvents.send(AgentRemovalEvent(id))
     }
 
-    override fun terminateNode(nodeID: NodeID) {
-        _systemEvents.send(ShutDownNodeEvent(nodeID))
+    override fun terminateNode(error: Throwable?, nodeID: NodeID) {
+        _systemEvents.send(ShutDownNodeEvent(nodeID, error))
     }
 
     override fun publishEvent(event: AgentEvent.External, filterFunction: Node<Body>.(Body) -> Boolean) = when (event) {
@@ -53,7 +53,7 @@ open class BaseNode<Body : Any> : ExecutableNode<Body> {
     // TODO check this cast, can I remove it somehow?
     @Suppress("UNCHECKED_CAST")
     override fun handleExternalEvent(event: SystemEvent) {
-        when (event) {
+        when (val event = event) {
             is AgentMessageEvent<*, *> -> {
                 deliverEvent(event.message, event.filterFunction as Node<Body>.(Body) -> Boolean)
             }
@@ -65,8 +65,10 @@ open class BaseNode<Body : Any> : ExecutableNode<Body> {
             }
 
             is SystemEvent.AgentAddition<*, *> -> {
-                val agent = event.executableAgent as BaseAgent<*, *, Body>
-                _agents.add(agent)
+                if(event.nodeID == id) {
+                    val agent = event.executableAgent as BaseAgent<*, *, Body>
+                    _agents.add(agent)
+                }
             }
 
             else -> Unit

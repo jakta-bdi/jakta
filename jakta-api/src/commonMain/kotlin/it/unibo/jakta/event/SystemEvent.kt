@@ -44,6 +44,11 @@ sealed interface SystemEvent {
          * The [NodeID] of the node that is being shut down.
          */
         val nodeID: NodeID
+
+        /**
+         * An optional error that caused the node to shut down.
+         */
+        val error: Throwable?
     }
 
     /**

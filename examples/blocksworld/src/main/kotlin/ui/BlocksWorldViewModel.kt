@@ -48,7 +48,7 @@ class BlocksWorldViewModel(private val world: BlocksWorld) {
 class BlocksWorldAppState {
 
     /**
-     * The seed value used for initializing the Blocks World random generator.
+     * The seed substitutedTerm used for initializing the Blocks World random generator.
      */
     var seed by mutableStateOf("42")
 

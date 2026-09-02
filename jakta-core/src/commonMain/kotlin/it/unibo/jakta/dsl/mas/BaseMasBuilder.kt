@@ -18,6 +18,10 @@ class BaseMasBuilder<N : ExecutableNode<*>, NB : NodeBuilder<*, N>>(val builderF
         nodes += builderFactory().apply(block).build()
     }
 
+    override fun withNodes(vararg node: N) {
+        nodes += node
+    }
+
     override suspend fun run(runner: NodeRunner<N>) {
         supervisorScope {
             nodes.forEach {

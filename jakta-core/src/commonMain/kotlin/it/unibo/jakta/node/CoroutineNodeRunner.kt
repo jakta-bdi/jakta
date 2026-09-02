@@ -46,7 +46,8 @@ class CoroutineNodeRunner<Body : Any, N : ExecutableNode<Body>>(val connection: 
             // propagate local events on the remote connection
             launch {
                 while (isActive) {
-                    connection.send(node.systemEvents.next())
+                    val event = node.systemEvents.next()
+                    connection.send(event)
                 }
             }
 
@@ -63,7 +64,7 @@ class CoroutineNodeRunner<Body : Any, N : ExecutableNode<Body>>(val connection: 
                         is SystemEvent.AgentRemoval -> stopAgent(event.id)
 
                         is SystemEvent.ShutDownNode -> if (event.nodeID == node.id) {
-                            stopNode(node, subscription, appScope.coroutineContext.job)
+                            stopNode(node, subscription, appScope.coroutineContext.job, event.error)
                         }
 
                         else -> Unit
@@ -94,7 +95,8 @@ class CoroutineNodeRunner<Body : Any, N : ExecutableNode<Body>>(val connection: 
 //                    throw it
 //                }
                 else -> {
-                    logger.e { "Agent ${agent.id} has stopped unexpectedly with cause: $it" }
+                    logger.e { "Agent ${agent.id} has stopped unexpectedly with cause: $it" +
+                    "\n${it?.stackTraceToString()}"}
                     node.removeAgent(agent.id)
                 }
             }
@@ -108,10 +110,11 @@ class CoroutineNodeRunner<Body : Any, N : ExecutableNode<Body>>(val connection: 
         agents.remove(agent)
     }
 
-    private suspend fun stopNode(node: N, subscription: NodeSubscription, parentJob: Job) {
+    private suspend fun stopNode(node: N, subscription: NodeSubscription, parentJob: Job, error: Throwable?) {
         subscription.close()
         _nodes -= node
         logger.i("Node $node has been stopped")
-        parentJob.children.forEach({ it.cancel(CancellationException("Termination requested")) })
+        parentJob.children.forEach { it.cancel(CancellationException("Termination requested"))}
+        error?.let {throw it}
     }
 }

@@ -3,8 +3,6 @@ package it.unibo.jakta.node
 import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.agent.AgentSpecification
 import it.unibo.jakta.event.AgentEvent
-import it.unibo.jakta.event.EventStream
-import it.unibo.jakta.event.SystemEvent
 
 /**
  * Represents the shared node in which the agents operate.
@@ -45,9 +43,10 @@ interface Node<Body : Any> {
 
     /**
      * Terminates a node, effectively shutting down all agents and stopping any ongoing processes within the node.
+     * @param error An optional exception that caused the node to terminate.
      * @param nodeID The unique identifier of the node to be terminated. If not provided, the current node's ID is used.
      */
-    fun terminateNode(nodeID: NodeID = this.id)
+    fun terminateNode(error: Throwable? = null, nodeID: NodeID = this.id)
 
     /**
      * Retrieves the unique identifier of an agent in this node based on its body.

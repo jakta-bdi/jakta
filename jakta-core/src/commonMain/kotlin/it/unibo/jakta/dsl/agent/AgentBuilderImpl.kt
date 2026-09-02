@@ -87,13 +87,7 @@ class AgentBuilderImpl<Belief : Any, Goal : Any, Body : Any>(
         goalPlans += plan
     }
 
-    override fun withBeliefPlans(vararg plans: Plan.Belief<Belief, Goal, *, *>) {
-        beliefPlans += plans
-    }
 
-    override fun withGoalPlans(vararg plans: Plan.Goal<Belief, Goal, *, *>) {
-        goalPlans += plans
-    }
 
     override fun build(): AgentSpecification<Belief, Goal, Body> = object : AgentSpecification<Belief, Goal, Body> {
         override val id: AgentID = this@AgentBuilderImpl.id ?: BaseAgentID()

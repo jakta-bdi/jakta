@@ -1,13 +1,14 @@
 package it.unibo.jakta
 
-import it.unibo.jakta.dsl.belief.contextualBeliefQuery
 import it.unibo.jakta.dsl.belief.inferenceRule
 import it.unibo.jakta.dsl.belief.initialBelief
+import it.unibo.jakta.dsl.belief.noSubstitutionBeliefQuery
 import it.unibo.jakta.logic.JaktaLogicProgrammingScope
+import it.unibo.jakta.logic.annotatedMguWith
 import it.unibo.jakta.logic.unifiesWith
 import it.unibo.tuprolog.solve.Solution
+import kotlin.test.Test
 import kotlin.test.assertEquals
-import org.junit.jupiter.api.Test
 
 class TestPrologMatching {
 
@@ -30,8 +31,8 @@ class TestPrologMatching {
         )
 
         with(JaktaLogicProgrammingScope()) {
-            val queryRule = contextualBeliefQuery { "sibling"(X, Y) }
-            when (val solution = theory.unifiesWith(queryRule)) {
+            val query = noSubstitutionBeliefQuery { "sibling"(X, Y) }
+            when (val solution = theory.unifiesWith(query)) {
                 is Solution.Yes -> {
                     assertEquals("bob", solution.substitution[X].toString())
                     assertEquals("charlie", solution.substitution[Y].toString())
@@ -45,7 +46,59 @@ class TestPrologMatching {
     }
 
     @Test
-    fun `annotated fact should match the source`() {
+    fun `annotated belief mgu with annotated query`() {
+        val belief = initialBelief {
+                "parent"("alice", "charlie")[source("bob")]
+            }
+        with(JaktaLogicProgrammingScope()) {
+            val query = noSubstitutionBeliefQuery { "parent"(X, Y)[source("bob")] }
+            val sub = belief.annotatedMguWith(query)
+            if(sub.isFailed) {
+                assert(false) { "Failed to find a match" }
+            }
+            assertEquals("alice", sub[X].toString())
+            assertEquals("charlie", sub[Y].toString())
+        }
+    }
+
+
+    @Test
+    fun `annotated belief mgu with not annotated query`() {
+        val belief = initialBelief {
+            "parent"("alice", "charlie")[source("bob")]
+        }
+        with(JaktaLogicProgrammingScope()) {
+            val query = noSubstitutionBeliefQuery { "parent"(X, Y) }
+            val sub = belief.annotatedMguWith(query)
+            if(sub.isFailed) {
+                assert(false) { "Failed to find a match" }
+            }
+            assertEquals("alice", sub[X].toString())
+            assertEquals("charlie", sub[Y].toString())
+        }
+    }
+
+
+
+    @Test
+    fun `not annotated belief is implicitly annotated with source(self)`() {
+        val belief = initialBelief {
+            "parent"("alice", "charlie")
+        }
+        with(JaktaLogicProgrammingScope()) {
+            val query = noSubstitutionBeliefQuery { "parent"(X, Y)[source(Z)] }
+            val sub = belief.annotatedMguWith(query)
+            if(sub.isFailed) {
+                assert(false) { "Failed to find a match" }
+            }
+            assertEquals("alice", sub[X].toString())
+            assertEquals("charlie", sub[Y].toString())
+            assertEquals(self.toString(), sub[Z].toString())
+        }
+    }
+
+    @Test
+    fun `annotated belief solves annotated query`() {
         val theory = listOf(
             initialBelief {
                 "parent"("alice", "bob")
@@ -55,8 +108,8 @@ class TestPrologMatching {
             },
         )
         with(JaktaLogicProgrammingScope()) {
-            val queryRule = contextualBeliefQuery { "parent"(X, Y)[source("bob")] }
-            when (val solution = theory.unifiesWith(queryRule)) {
+            val query = noSubstitutionBeliefQuery { "parent"(X, Y)[source("bob")] }
+            when (val solution = theory.unifiesWith(query)) {
                 is Solution.Yes -> assertEquals("charlie", solution.substitution[Y].toString())
                 is Solution.No -> assert(false) { "No solution found" }
                 is Solution.Halt -> assert(false) { "The solving process was halted: ${solution.exception}" }
@@ -65,18 +118,15 @@ class TestPrologMatching {
     }
 
     @Test
-    fun `not annotated query matches the first belief regardless of source`() {
+    fun `not annotated query is solved by the first matching belief regardless of source`() {
         val theory = listOf(
             initialBelief {
-                "parent"("alice", "charlie")[source("bob")]
-            },
-            initialBelief {
-                "parent"("alice", "bob")
-            },
+                "parent"("alice", "charlie")[source("a")]
+            }
         )
         with(JaktaLogicProgrammingScope()) {
-            val queryRule = contextualBeliefQuery { "parent"(X, Y) }
-            when (val solution = theory.unifiesWith(queryRule)) {
+            val query = noSubstitutionBeliefQuery { "parent"(X, Y) }
+            when (val solution = theory.unifiesWith(query)) {
                 is Solution.Yes -> assertEquals("charlie", solution.substitution[Y].toString())
                 is Solution.No -> assert(false) { "No solution found" }
                 is Solution.Halt -> assert(false) { "The solving process was halted: ${solution.exception}" }
@@ -84,23 +134,4 @@ class TestPrologMatching {
         }
     }
 
-    @Test
-    fun `not annotated fact is implicitly matching source(self)`() {
-        val theory = listOf(
-            initialBelief {
-                "parent"("alice", "charlie")[source("bob")]
-            },
-            initialBelief {
-                "parent"("alice", "bob")
-            },
-        )
-        with(JaktaLogicProgrammingScope()) {
-            val queryRule = contextualBeliefQuery { "parent"(X, Y)[source(self)] }
-            when (val solution = theory.unifiesWith(queryRule)) {
-                is Solution.Yes -> assertEquals("bob", solution.substitution[Y].toString())
-                is Solution.No -> assert(false) { "No solution found" }
-                is Solution.Halt -> assert(false) { "The solving process was halted: ${solution.exception}" }
-            }
-        }
-    }
 }

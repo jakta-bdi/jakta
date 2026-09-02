@@ -11,7 +11,6 @@ import it.unibo.tuprolog.core.Term
 import it.unibo.tuprolog.core.Var
 import it.unibo.tuprolog.serialize.TermObjectifier
 import it.unibo.tuprolog.utils.setTag
-import jdk.internal.joptsimple.internal.Messages.message
 
 /**
  * Tag used to store annotations on Prolog terms.
@@ -31,7 +30,7 @@ fun source(source: String): Struct = source(Atom.of(source))
 /**
  * Creates a [Struct] for the source annotation using the passed [Atom] as the source.
  */
-fun source(source: Atom): Struct = Struct.of("source", source)
+fun source(source: Term): Struct = Struct.of("source", source)
 
 /**
  * An [Atom] representing the "self" annotation.
@@ -58,26 +57,22 @@ operator fun <T : Term> T.get(annotation: Struct, vararg otherAnnotations: Struc
     tag(annotation, *otherAnnotations)
 
 /**
- * Extension property to retrieve the value of a variable from a substitution.
- * @receiver The variable whose value is to be retrieved.
- * @return The value of the variable as a [Term].
- * @throws IllegalArgumentException if the variable is not ground in the substitution.
- */
-context(context: MutableSubstitutionPlanContext)
-val Var.value: Term
-    get() = context.substitution[this]
-        ?: error { "Variable $this is not ground in the substitution $context.substitution" }
-
-/**
  * Extension function to convert a variable to a Kotlin type using the provided substitution.
- * @receiver The variable to be converted.
+ * @receiver The [Var] to be converted.
  * @return The value of the variable as the specified Kotlin type [T].
  * @throws IllegalArgumentException if the variable cannot be cast to the expected type.
  */
 @Suppress("UNCHECKED_CAST")
 context(context: MutableSubstitutionPlanContext)
-fun <T : Any> Var.toKotlin(): T = this.value.accept(TermObjectifier.default) as? T
-    ?: error { "Term $this cannot be cast to the expected type" }
+inline fun <reified T : Any> Var.value(): T {
+    val term = context.substitution[this]
+        ?: error { "Variable $this is not ground in the substitution $context.substitution" }
+
+    val result = term as? T
+        ?: term.accept(TermObjectifier.default) as? T
+        ?: error { "Term $this cannot be cast to the expected type" }
+    return result
+}
 
 /**
  * Extension function to print 2p-kt logic variables substituted with their values from the current substitution.
@@ -90,7 +85,7 @@ fun MutableAgentState<PrologBelief, PrologGoal>.print(vararg parts: Any?) {
         for (part in parts) {
             append(
                 when (part) {
-                    is Var -> part.value
+                    is Var -> part.value()
                     else -> part
                 },
             )
