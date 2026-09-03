@@ -18,13 +18,14 @@ plugins {
     alias(libs.plugins.taskTree)
 }
 
-val reportMerge by tasks.registering(ReportMergeTask::class) {
+val reportMerge = tasks.register("reportMerge", ReportMergeTask::class.java) {
+    description = "Merges all Detekt reports into a single report"
     output = project.layout.buildDirectory.file("reports/merge.sarif")
 }
 
-subprojects {
-    project.version = rootProject.version
-}
+fun Project.isExampleModule(): Boolean =
+    path == ":examples" || path.startsWith(":examples:")
+
 
 allprojects {
 
@@ -35,12 +36,12 @@ allprojects {
     }
 
     with(rootProject.libs.plugins) {
-        apply(plugin = dokka.id)
-        apply(plugin = gitSemVer.id)
-        apply(plugin = kover.id)
-        apply(plugin = kotlin.qa.id)
-        apply(plugin = publishOnCentral.id)
-        apply(plugin = taskTree.id)
+        pluginManager.apply(dokka.id)
+        pluginManager.apply(gitSemVer.id)
+        pluginManager.apply(kover.id)
+        pluginManager.apply(kotlin.qa.id)
+        pluginManager.apply(taskTree.id)
+        pluginManager.apply(publishOnCentral.id)
     }
 
     gitSemVer {
@@ -52,8 +53,8 @@ allprojects {
 
     signing {
         if (System.getenv("CI") == "true") {
-            val signingKey: String? by project
-            val signingPassword: String? by project
+            val signingKey: String? = project.property("signingKey")?.toString()
+            val signingPassword: String? = project.property("signingPassword")?.toString()
             useInMemoryPgpKeys(signingKey, signingPassword)
         }
     }
@@ -101,15 +102,16 @@ allprojects {
     plugins.withType<DetektPlugin> {
         val detektTasks = tasks.withType<Detekt>()
             .matching { task ->
-                task.name.let { it.endsWith("Main") || it.endsWith("Test") } &&
+                task.name.let { it.endsWith("Main") || it.endsWith("Test") || it.startsWith("Test") } &&
                     !task.name.contains("Baseline")
             }
-        val check by tasks.getting
-        val detektAll by tasks.registering {
+        val check = tasks.getByName("check")
+        val detektAll = tasks.register("detektAll", Detekt::class.java) {
+            description = "Runs all detekt tasks"
             group = "verification"
-            check.dependsOn(this)
             dependsOn(detektTasks)
         }
+        check.dependsOn(detektAll)
     }
 
     // Enforce the use of the Kotlin version in all subprojects
@@ -138,6 +140,20 @@ allprojects {
         }
     }
 
+}
+
+
+subprojects {
+    project.version = rootProject.version
+
+    // Exclude example projects from publishing
+    if (isExampleModule()) {
+        tasks.matching {
+            it.name.startsWith("publish") || it.name.startsWith("upload")
+        }.configureEach {
+            enabled = false
+        }
+    }
 }
 
 dependencies {
