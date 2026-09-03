@@ -53,8 +53,8 @@ allprojects {
 
     signing {
         if (System.getenv("CI") == "true") {
-            val signingKey: String? = project.property("signingKey")?.toString()
-            val signingPassword: String? = project.property("signingPassword")?.toString()
+            val signingKey: String? = project.findProperty("signingKey")?.toString()
+            val signingPassword: String? = project.findProperty("signingPassword")?.toString()
             useInMemoryPgpKeys(signingKey, signingPassword)
         }
     }
