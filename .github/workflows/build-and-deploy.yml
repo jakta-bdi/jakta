@@ -52,7 +52,7 @@ jobs:
       - name: Install Node
         uses: actions/setup-node@v7.0.0
         with:
-          node-version-file: package.json
+          node-version: lts/*
       - uses: DanySK/build-check-deploy-gradle-action@4.0.43
         env:
           STAGING_REPO_ID: ${{ needs.staging-repo.outputs.staging-repo-id }}
@@ -62,7 +62,6 @@ jobs:
           build-command: true
           check-command: true
           deploy-command: |
-            npm install
             npx semantic-release
           should-run-codecov: false
           should-deploy: true
