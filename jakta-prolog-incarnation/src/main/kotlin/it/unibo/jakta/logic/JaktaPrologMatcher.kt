@@ -2,7 +2,11 @@ package it.unibo.jakta.logic
 
 import it.unibo.jakta.self
 import it.unibo.jakta.source
-import it.unibo.tuprolog.core.*
+import it.unibo.tuprolog.core.Clause
+import it.unibo.tuprolog.core.Rule
+import it.unibo.tuprolog.core.Struct
+import it.unibo.tuprolog.core.Substitution
+import it.unibo.tuprolog.core.Term
 import it.unibo.tuprolog.solve.Solution
 import it.unibo.tuprolog.solve.Solver
 import it.unibo.tuprolog.solve.flags.TrackVariables
@@ -20,8 +24,8 @@ private val annotationUnificator = object : AbstractUnificator() {
         var fact = annotatedTerm(term1)
         var query = annotatedTerm(term2)
 
-        //TODO this is a workaround that might cause problems in the future
-        if(!term1.isFact) {
+        // TODO this is a workaround that might cause problems in the future
+        if (!term1.isFact) {
             fact = annotatedTerm(term2)
             query = annotatedTerm(term1)
         }
@@ -38,7 +42,7 @@ private val annotationUnificator = object : AbstractUnificator() {
     /**
      * Extract the term for which to check annotations.
      */
-    private fun annotatedTerm(term: Term): Term = when(term) {
+    private fun annotatedTerm(term: Term): Term = when (term) {
         is Rule -> term.head
         else -> term
     }
@@ -54,6 +58,7 @@ private val annotationUnificator = object : AbstractUnificator() {
             (fact.tags["jakta.annotations"] as? Set<Struct>).orEmpty().toMutableList()
 
         // every unannotated struct is considered annotated with source(self)
+        // TODO what happens if I want to have [source(self), source(bob)]???
         if (factAnnotations.isEmpty()) {
             factAnnotations.add(source(self))
         }
@@ -132,7 +137,6 @@ object JaktaSolver {
  * @return The [Solution] of the unification process, which can be a success or failure.
  */
 fun Collection<Rule>.unifiesWith(query: Struct): Solution = JaktaSolver.get(this).solveOnce(query)
-
 
 /**
 * Extension function to compute the most general unifier (MGU) between a [Struct] and a query [Struct]

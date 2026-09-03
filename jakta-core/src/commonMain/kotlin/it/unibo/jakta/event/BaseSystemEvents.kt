@@ -21,7 +21,8 @@ data class AgentRemovalEvent(override val id: AgentID) : SystemEvent.AgentRemova
 /**
  * Base implementation of [SystemEvent.ShutDownNode].
  */
-data class ShutDownNodeEvent(override val nodeID: NodeID, override val error: Throwable?=null) : SystemEvent.ShutDownNode
+data class ShutDownNodeEvent(override val nodeID: NodeID, override val error: Throwable? = null) :
+    SystemEvent.ShutDownNode
 
 /**
  * Base implementation of [SystemEvent.AgentMessage].

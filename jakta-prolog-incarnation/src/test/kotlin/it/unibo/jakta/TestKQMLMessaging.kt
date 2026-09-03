@@ -8,13 +8,13 @@ import it.unibo.jakta.dsl.belief.PrologBelief
 import it.unibo.jakta.dsl.belief.belief
 import it.unibo.jakta.dsl.belief.beliefQuery
 import it.unibo.jakta.dsl.belief.initialBelief
-import it.unibo.jakta.dsl.goal.PrologGoal
-import it.unibo.jakta.dsl.goal.initialGoal
-import it.unibo.jakta.dsl.goal.matchingGoal
 import it.unibo.jakta.dsl.belief.matchingBelief
+import it.unibo.jakta.dsl.goal.PrologGoal
 import it.unibo.jakta.dsl.goal.goal
 import it.unibo.jakta.dsl.goal.goalQuery
-import it.unibo.jakta.dsl.goal.replyOneTo
+import it.unibo.jakta.dsl.goal.initialGoal
+import it.unibo.jakta.dsl.goal.matchingGoal
+import it.unibo.jakta.dsl.goal.replyOne
 import it.unibo.jakta.dsl.mas
 import it.unibo.jakta.dsl.node
 import it.unibo.jakta.dsl.node.NodeBuilders
@@ -36,7 +36,6 @@ import it.unibo.jakta.node.Node
 import it.unibo.jakta.node.SharedMemoryNetwork
 import it.unibo.jakta.plan.Plan
 import it.unibo.jakta.skills.MessagingSkill
-import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.toAtom
 import it.unibo.tuprolog.solve.Solution
 import kotlin.test.BeforeTest
@@ -47,7 +46,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 
-
 class TestKQMLMessaging {
 
     @BeforeTest
@@ -55,31 +53,32 @@ class TestKQMLMessaging {
         Logger.setMinSeverity(Severity.Warn)
     }
 
-
     val bob = BaseAgentID("bob")
     val alice = BaseAgentID("alice")
 
     val startGoal = "start".toAtom()
     val delegatedGoal = "delegatedGoal".toAtom()
 
-    fun masNode(id: AgentID, vararg beliefs: PrologBelief, block: () -> ((Node<Any>) -> List<Plan<PrologBelief, PrologGoal, *, *, *>>)) =
-        node(NodeBuilders.baseNode()){
-            agent(id) {
-                embodiedAs {Any()}
-                handlesMessageEvents {
-                    when(val payload = it.payload) {
-                        is KQMLPayload -> handleKQMLPayload(payload, it.sender)
-                        else -> null
-                    }
+    fun masNode(
+        id: AgentID,
+        vararg beliefs: PrologBelief,
+        block: () -> ((Node<Any>) -> List<Plan<PrologBelief, PrologGoal, *, *, *>>),
+    ) = node(NodeBuilders.baseNode()) {
+        agent(id) {
+            embodiedAs { Any() }
+            handlesMessageEvents {
+                when (val payload = it.payload) {
+                    is KQMLPayload -> handleKQMLPayload(payload, it.sender)
+                    else -> null
                 }
-                beliefs.forEach { addBelief(it) }
-                hasInitialGoals {
-                    ! initialGoal {startGoal}
-                }
-                withPredefinedPlans(block())
             }
+            beliefs.forEach { addBelief(it) }
+            hasInitialGoals {
+                !initialGoal { startGoal }
+            }
+            withPredefinedPlans(block())
         }
-
+    }
 
     suspend fun run(vararg nodes: ExecutableNode<Any>) = coroutineScope {
         val job = launch {
@@ -106,7 +105,6 @@ class TestKQMLMessaging {
                     }
                 }
             }
-
         }
 
         val bobNode = masNode(bob) {
@@ -125,8 +123,6 @@ class TestKQMLMessaging {
         run(aliceNode, bobNode)
     }
 
-
-
     @Test
     fun `test untell`() = runTest {
         val aliceNode = masNode(alice) {
@@ -143,10 +139,9 @@ class TestKQMLMessaging {
                     }
                 }
             }
-
         }
 
-        val bobNode = masNode(bob, initialBelief {"ping"(1)[source(alice)]}) {
+        val bobNode = masNode(bob, initialBelief { "ping"(1)[source(alice)] }) {
             plans { node ->
                 prologPlan {
                     removing.belief {
@@ -178,7 +173,6 @@ class TestKQMLMessaging {
                     }
                 }
             }
-
         }
 
         val bobNode = masNode(bob) {
@@ -197,8 +191,7 @@ class TestKQMLMessaging {
         run(aliceNode, bobNode)
     }
 
-
-    //TODO is currently failing as the dropping of goals is not correctly implemented
+    // TODO is currently failing as the dropping of goals is not correctly implemented
     @Test
     fun `test unachieve`() = runTest {
         val aliceNode = masNode(alice) {
@@ -216,7 +209,6 @@ class TestKQMLMessaging {
                     }
                 }
             }
-
         }
 
         val bobNode = masNode(bob) {
@@ -226,7 +218,7 @@ class TestKQMLMessaging {
                         matchingGoal { startGoal }
                     } triggers {
                         agent.print("Hello! I will start achieving the goal")
-                        agent.achieve(goal{delegatedGoal})
+                        agent.achieve(goal { delegatedGoal })
                         node.terminateNode()
                     }
                 }
@@ -265,27 +257,28 @@ class TestKQMLMessaging {
                             agent.print("Hello!")
                             delay(3.seconds)
                             val reply = agent.askOneTo(bob, beliefQuery { "b"(X) })
-                            if(reply != null) {
+                            if (reply != null) {
                                 agent.print("Received reply: ", X)
+                            } else {
+                                agent.print("No reply, I will stop.")
                             }
                             node.terminateNode()
                         }
                     }
                 }
             }
-
         }
 
-        val bobNode = masNode(bob, initialBelief{"b"(1)}, initialBelief{"b"(2)}) {
+        val bobNode = masNode(bob, initialBelief { "b"(1) }, initialBelief { "b"(2) }) {
             plans { node ->
                 context(MessagingSkill(node)) {
                     prologPlan {
                         adding.goal {
-                            matchingGoal { replyOneTo(Q, M)[source(S)] }
+                            matchingGoal { replyOne(Q, M)[source(S)] }
                         } triggers {
                             agent.print("Reply to ", S)
                             agent.print("Id: ", M)
-                            when(val solution = agent.beliefs.unifiesWith(Q.value())){
+                            when (val solution = agent.beliefs.unifiesWith(Q.value())) {
                                 is Solution.Yes -> {
                                     agent.print("Found a solution: ", solution.solvedQuery)
                                     this.context += solution.substitution
@@ -293,6 +286,7 @@ class TestKQMLMessaging {
                                     val questionId = M.value<String>()
                                     agent.tellTo(sender, questionId, belief { solution.solvedQuery })
                                 }
+
                                 else -> agent.print("No matches.")
                             }
                             node.terminateNode()

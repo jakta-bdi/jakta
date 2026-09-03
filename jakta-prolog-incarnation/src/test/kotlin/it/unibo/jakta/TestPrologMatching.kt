@@ -48,19 +48,18 @@ class TestPrologMatching {
     @Test
     fun `annotated belief mgu with annotated query`() {
         val belief = initialBelief {
-                "parent"("alice", "charlie")[source("bob")]
-            }
+            "parent"("alice", "charlie")[source("bob")]
+        }
         with(JaktaLogicProgrammingScope()) {
             val query = noSubstitutionBeliefQuery { "parent"(X, Y)[source("bob")] }
             val sub = belief.annotatedMguWith(query)
-            if(sub.isFailed) {
+            if (sub.isFailed) {
                 assert(false) { "Failed to find a match" }
             }
             assertEquals("alice", sub[X].toString())
             assertEquals("charlie", sub[Y].toString())
         }
     }
-
 
     @Test
     fun `annotated belief mgu with not annotated query`() {
@@ -70,15 +69,13 @@ class TestPrologMatching {
         with(JaktaLogicProgrammingScope()) {
             val query = noSubstitutionBeliefQuery { "parent"(X, Y) }
             val sub = belief.annotatedMguWith(query)
-            if(sub.isFailed) {
+            if (sub.isFailed) {
                 assert(false) { "Failed to find a match" }
             }
             assertEquals("alice", sub[X].toString())
             assertEquals("charlie", sub[Y].toString())
         }
     }
-
-
 
     @Test
     fun `not annotated belief is implicitly annotated with source(self)`() {
@@ -88,7 +85,7 @@ class TestPrologMatching {
         with(JaktaLogicProgrammingScope()) {
             val query = noSubstitutionBeliefQuery { "parent"(X, Y)[source(Z)] }
             val sub = belief.annotatedMguWith(query)
-            if(sub.isFailed) {
+            if (sub.isFailed) {
                 assert(false) { "Failed to find a match" }
             }
             assertEquals("alice", sub[X].toString())
@@ -122,7 +119,7 @@ class TestPrologMatching {
         val theory = listOf(
             initialBelief {
                 "parent"("alice", "charlie")[source("a")]
-            }
+            },
         )
         with(JaktaLogicProgrammingScope()) {
             val query = noSubstitutionBeliefQuery { "parent"(X, Y) }
@@ -133,5 +130,4 @@ class TestPrologMatching {
             }
         }
     }
-
 }

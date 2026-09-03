@@ -71,10 +71,9 @@ fun goalQuery(block: JaktaLogicProgrammingScope.() -> Struct): Struct = scope.bl
  * @param block A lambda function that defines the query to match in this reply.
  * @return the created [PrologGoal].
  */
-fun JaktaLogicProgrammingScope.replyOneTo(query: Term, messageId: Term = Var.anonymous()): PrologGoal =
-    with(this) {
-        return "replyOneTo"(query, messageId)
-    }
+fun JaktaLogicProgrammingScope.replyOne(query: Term, messageId: Term = Var.anonymous()): PrologGoal = with(this) {
+    return "replyOne"(query, messageId)
+}
 
 /**
  * Creates a special goal that can be used to write plans that reply to askAll messages received by the agent.
@@ -82,10 +81,9 @@ fun JaktaLogicProgrammingScope.replyOneTo(query: Term, messageId: Term = Var.ano
  * @param block A lambda function that defines the query to match in this reply.
  * @return the created [PrologGoal].
  */
-fun JaktaLogicProgrammingScope.replyAllTo(query: Term, messageId: Term = Var.anonymous()): PrologGoal =
-    with(this) {
-        return "replyAllTo"(query, messageId)
-    }
+fun JaktaLogicProgrammingScope.replyAllTo(query: Term, messageId: Term = Var.anonymous()): PrologGoal = with(this) {
+    return "replyAllTo"(query, messageId)
+}
 
 // TODO can we make an utility for test goals?
 //  sometimes it would still be nice to have a way to say

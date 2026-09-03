@@ -12,8 +12,7 @@ class BaseAgentID(private val name: String? = null, private val id: String = Uui
      */
     override val displayName: String get() = (name ?: "Agent-$id")
 
-    override fun equals(other: Any?): Boolean =
-        this === other || other is BaseAgentID && id == other.id
+    override fun equals(other: Any?): Boolean = (this === other) || (other is BaseAgentID && id == other.id)
 
     override fun hashCode(): Int = id.hashCode()
 

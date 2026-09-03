@@ -87,8 +87,6 @@ class AgentBuilderImpl<Belief : Any, Goal : Any, Body : Any>(
         goalPlans += plan
     }
 
-
-
     override fun build(): AgentSpecification<Belief, Goal, Body> = object : AgentSpecification<Belief, Goal, Body> {
         override val id: AgentID = this@AgentBuilderImpl.id ?: BaseAgentID()
         override val body: Body = this@AgentBuilderImpl.bodyFactory(id)

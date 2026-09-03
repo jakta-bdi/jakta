@@ -13,6 +13,9 @@ import it.unibo.tuprolog.core.Substitution
 
 typealias PrologBelief = Rule
 
+/**
+ * Matches a belief using the mgu that considers annotations.
+ */
 fun PrologBelief.matchBelief(beliefQuery: Struct): MutableSubstitutionPlanContext? = when (
     val substitution = this.annotatedMguWith(beliefQuery)
 ) {
@@ -23,13 +26,13 @@ fun PrologBelief.matchBelief(beliefQuery: Struct): MutableSubstitutionPlanContex
 /**
  * Extension function to match a Prolog beliefQuery against a beliefQuery query defined in the provided block.
  * @param block A lambda function that defines the beliefQuery query to be matched against the current beliefQuery
- * @return The matched [MutableSubstitutionPlanContext] if the beliefQuery matches the query, or null if it does not match.
+ * @return The matched [MutableSubstitutionPlanContext] if the beliefQuery matches the query,
+ * or null if it does not match.
  */
 @JaktaDSL
 context(scope: JaktaLogicProgrammingScope)
 fun PrologBelief.matchingBelief(block: JaktaLogicProgrammingScope.() -> Struct): MutableSubstitutionPlanContext? =
     matchBelief(noSubstitutionBeliefQuery(block))
-
 
 /**
  * Creates an initial Prolog beliefQuery from the provided block, ensuring that it is a predicate and ground.
@@ -82,10 +85,9 @@ fun beliefQuery(block: JaktaLogicProgrammingScope.() -> Struct): Struct =
  * @return The created [Fact] as a query if it is a valid predicate.
  */
 context(scope: JaktaLogicProgrammingScope)
-fun noSubstitutionBeliefQuery(block: JaktaLogicProgrammingScope.() -> Struct): Struct =
-    scope.block().also { struct ->
-        requirePredicate(struct) { "Belief query must be a predicate, but got $it" }
-    }
+fun noSubstitutionBeliefQuery(block: JaktaLogicProgrammingScope.() -> Struct): Struct = scope.block().also { struct ->
+    requirePredicate(struct) { "Belief query must be a predicate, but got $it" }
+}
 
 /**
  * Creates a Prolog beliefQuery query using a brand-new scope.

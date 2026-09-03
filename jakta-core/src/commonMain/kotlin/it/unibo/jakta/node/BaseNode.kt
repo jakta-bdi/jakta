@@ -53,7 +53,7 @@ open class BaseNode<Body : Any> : ExecutableNode<Body> {
     // TODO check this cast, can I remove it somehow?
     @Suppress("UNCHECKED_CAST")
     override fun handleExternalEvent(event: SystemEvent) {
-        when (val event = event) {
+        when (event) {
             is AgentMessageEvent<*, *> -> {
                 deliverEvent(event.message, event.filterFunction as Node<Body>.(Body) -> Boolean)
             }
@@ -65,7 +65,7 @@ open class BaseNode<Body : Any> : ExecutableNode<Body> {
             }
 
             is SystemEvent.AgentAddition<*, *> -> {
-                if(event.nodeID == id) {
+                if (event.nodeID == id) {
                     val agent = event.executableAgent as BaseAgent<*, *, Body>
                     _agents.add(agent)
                 }

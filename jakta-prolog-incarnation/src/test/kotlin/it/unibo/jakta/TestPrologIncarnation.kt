@@ -222,7 +222,7 @@ class TestPrologIncarnation {
                                     } onlyWhen {
                                         satisfies { "sibling"(B, C) }
                                     } triggers {
-                                        agent.print(C, " is a sibling of ",B)
+                                        agent.print(C, " is a sibling of ", B)
                                         node.terminateNode()
                                     }
                                 }
@@ -264,7 +264,7 @@ class TestPrologIncarnation {
                                     } onlyWhen {
                                         satisfies { "sibling"(B, C) }
                                     } triggers {
-                                        agent.print(C, " is a sibling of ",B)
+                                        agent.print(C, " is a sibling of ", B)
                                         node.terminateNode()
                                     }
                                 }

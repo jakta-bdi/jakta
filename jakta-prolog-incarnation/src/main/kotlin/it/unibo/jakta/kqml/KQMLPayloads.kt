@@ -53,8 +53,8 @@ data class Achieve(val goal: PrologGoal) : KQMLPayload() {
     }
 }
 
+// TODO rename in Drop or DropGoal?
 
-//TODO rename in Drop or DropGoal?
 /**
  * KQML payload for telling an agent to stop pursuing a (delegated) goal.
  * The [goalQuery] must be a predicate.

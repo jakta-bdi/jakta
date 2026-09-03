@@ -95,8 +95,10 @@ class CoroutineNodeRunner<Body : Any, N : ExecutableNode<Body>>(val connection: 
 //                    throw it
 //                }
                 else -> {
-                    logger.e { "Agent ${agent.id} has stopped unexpectedly with cause: $it" +
-                    "\n${it?.stackTraceToString()}"}
+                    logger.e {
+                        "Agent ${agent.id} has stopped unexpectedly with cause: $it" +
+                            "\n${it?.stackTraceToString()}"
+                    }
                     node.removeAgent(agent.id)
                 }
             }
@@ -114,7 +116,7 @@ class CoroutineNodeRunner<Body : Any, N : ExecutableNode<Body>>(val connection: 
         subscription.close()
         _nodes -= node
         logger.i("Node $node has been stopped")
-        parentJob.children.forEach { it.cancel(CancellationException("Termination requested"))}
-        error?.let {throw it}
+        parentJob.children.forEach { it.cancel(CancellationException("Termination requested")) }
+        error?.let { throw it }
     }
 }
