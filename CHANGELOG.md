@@ -1,3 +1,263 @@
+## [0.15.187](https://github.com/jakta-bdi/jakta/compare/v0.15.186...v0.15.187) (2026-07-25)
+
+
+### Bug Fixes
+
+* **deps:** update anitvam/conventionalcommit-semantic-releasing action to v0.7.122 ([#856](https://github.com/jakta-bdi/jakta/issues/856)) ([97649e2](https://github.com/jakta-bdi/jakta/commit/97649e2149c49213542c6cbf92b34041adc92745))
+
+## [0.15.186](https://github.com/jakta-bdi/jakta/compare/v0.15.185...v0.15.186) (2026-07-25)
+
+
+### Bug Fixes
+
+* **deps:** update anitvam/conventionalcommit-semantic-releasing action to v0.7.121 ([#855](https://github.com/jakta-bdi/jakta/issues/855)) ([1c7e73a](https://github.com/jakta-bdi/jakta/commit/1c7e73ae0a4b8a6638320984b4482ccd2be9408c))
+
+## [0.15.185](https://github.com/jakta-bdi/jakta/compare/v0.15.184...v0.15.185) (2026-07-22)
+
+
+### Bug Fixes
+
+* **deps:** update kotest to v6.2.3 ([#853](https://github.com/jakta-bdi/jakta/issues/853)) ([d49eea4](https://github.com/jakta-bdi/jakta/commit/d49eea49b3a82d215e89cc6078dfbebaf5c0fbb6))
+
+## [0.15.184](https://github.com/jakta-bdi/jakta/compare/v0.15.183...v0.15.184) (2026-07-22)
+
+
+### Bug Fixes
+
+* **deps:** update danysk/action-checkout action to v0.2.31 ([#851](https://github.com/jakta-bdi/jakta/issues/851)) ([75c6c50](https://github.com/jakta-bdi/jakta/commit/75c6c5024b433e9db005403f74419b132a62c537))
+
+## [0.15.183](https://github.com/jakta-bdi/jakta/compare/v0.15.182...v0.15.183) (2026-07-21)
+
+
+### Bug Fixes
+
+* **deps:** update anitvam/conventionalcommit-semantic-releasing action to v0.7.120 ([#854](https://github.com/jakta-bdi/jakta/issues/854)) ([04c3a94](https://github.com/jakta-bdi/jakta/commit/04c3a940400b626c7b86af01b8d7dfefe03d56c6))
+
+## [0.15.182](https://github.com/jakta-bdi/jakta/compare/v0.15.181...v0.15.182) (2026-07-21)
+
+
+### Bug Fixes
+
+* **deps:** update anitvam/conventionalcommit-semantic-releasing action to v0.7.119 ([#852](https://github.com/jakta-bdi/jakta/issues/852)) ([39c66c9](https://github.com/jakta-bdi/jakta/commit/39c66c9a95b4b54385923dab69b0c17dd5467d5d))
+
+## [0.15.181](https://github.com/jakta-bdi/jakta/compare/v0.15.180...v0.15.181) (2026-07-21)
+
+
+### Bug Fixes
+
+* **deps:** update actions/checkout action to v7.0.1 ([#850](https://github.com/jakta-bdi/jakta/issues/850)) ([c07ed29](https://github.com/jakta-bdi/jakta/commit/c07ed29e00604644875d85670a9e7a96d287ef11))
+
+## [0.15.180](https://github.com/jakta-bdi/jakta/compare/v0.15.179...v0.15.180) (2026-07-16)
+
+
+### Bug Fixes
+
+* **deps:** update anitvam/conventionalcommit-semantic-releasing action to v0.7.118 ([#848](https://github.com/jakta-bdi/jakta/issues/848)) ([5eb1aac](https://github.com/jakta-bdi/jakta/commit/5eb1aac83e5ee645ca64d115f2cce2fd1e2310d2))
+
+## [0.15.179](https://github.com/jakta-bdi/jakta/compare/v0.15.178...v0.15.179) (2026-07-15)
+
+
+### Bug Fixes
+
+* **deps:** update anitvam/conventionalcommit-semantic-releasing action to v0.7.117 ([#846](https://github.com/jakta-bdi/jakta/issues/846)) ([3e74dc2](https://github.com/jakta-bdi/jakta/commit/3e74dc2025771a8d5244d186ec2e8710e53e9e8a))
+
+## [0.15.178](https://github.com/jakta-bdi/jakta/compare/v0.15.177...v0.15.178) (2026-07-15)
+
+
+### Bug Fixes
+
+* **deps:** update plugin gitsemver to v7.0.23 ([#847](https://github.com/jakta-bdi/jakta/issues/847)) ([5239ee2](https://github.com/jakta-bdi/jakta/commit/5239ee2e0a5a207ece39f23e31c34383dc496864))
+
+## [0.15.177](https://github.com/jakta-bdi/jakta/compare/v0.15.176...v0.15.177) (2026-07-14)
+
+
+### Bug Fixes
+
+* **deps:** update plugin org.danilopianini.gradle-pre-commit-git-hooks to v2.1.21 ([#845](https://github.com/jakta-bdi/jakta/issues/845)) ([a644ad9](https://github.com/jakta-bdi/jakta/commit/a644ad96c8fce2adc9fbb7e617b751e0b8b44d2e))
+
+## [0.15.176](https://github.com/jakta-bdi/jakta/compare/v0.15.175...v0.15.176) (2026-07-14)
+
+
+### Bug Fixes
+
+* **deps:** update anitvam/conventionalcommit-semantic-releasing action to v0.7.115 ([#843](https://github.com/jakta-bdi/jakta/issues/843)) ([388cc7c](https://github.com/jakta-bdi/jakta/commit/388cc7c1f1a81fb01845010daa52ebf18386523a))
+
+## [0.15.175](https://github.com/jakta-bdi/jakta/compare/v0.15.174...v0.15.175) (2026-07-08)
+
+
+### Bug Fixes
+
+* **deps:** update kotest to v6.2.2 ([#842](https://github.com/jakta-bdi/jakta/issues/842)) ([bb13956](https://github.com/jakta-bdi/jakta/commit/bb139562765287632a69ca904a9bef5f3a77f53f))
+
+## [0.15.174](https://github.com/jakta-bdi/jakta/compare/v0.15.173...v0.15.174) (2026-07-08)
+
+
+### Bug Fixes
+
+* **deps:** update anitvam/conventionalcommit-semantic-releasing action to v0.7.114 ([#841](https://github.com/jakta-bdi/jakta/issues/841)) ([31398b8](https://github.com/jakta-bdi/jakta/commit/31398b81976178933634de2a6d1da339c30e131d))
+
+## [0.15.173](https://github.com/jakta-bdi/jakta/compare/v0.15.172...v0.15.173) (2026-07-05)
+
+
+### Bug Fixes
+
+* **deps:** update anitvam/conventionalcommit-semantic-releasing action to v0.7.113 ([#840](https://github.com/jakta-bdi/jakta/issues/840)) ([23e9c59](https://github.com/jakta-bdi/jakta/commit/23e9c59e50b4b79b205a9c2091558a093a562357))
+
+## [0.15.172](https://github.com/jakta-bdi/jakta/compare/v0.15.171...v0.15.172) (2026-07-04)
+
+
+### Bug Fixes
+
+* **deps:** update anitvam/conventionalcommit-semantic-releasing action to v0.7.112 ([#837](https://github.com/jakta-bdi/jakta/issues/837)) ([86809f3](https://github.com/jakta-bdi/jakta/commit/86809f3e022c16d5b90cf12d84140aea32b4f2be))
+
+## [0.15.171](https://github.com/jakta-bdi/jakta/compare/v0.15.170...v0.15.171) (2026-06-30)
+
+
+### Bug Fixes
+
+* **deps:** update anitvam/conventionalcommit-semantic-releasing action to v0.7.110 ([#836](https://github.com/jakta-bdi/jakta/issues/836)) ([764153b](https://github.com/jakta-bdi/jakta/commit/764153b85cd95ded820f59e9afad172cb5fe8777))
+
+## [0.15.170](https://github.com/jakta-bdi/jakta/compare/v0.15.169...v0.15.170) (2026-06-30)
+
+
+### Bug Fixes
+
+* **deps:** update plugin org.danilopianini.gradle-pre-commit-git-hooks to v2.1.20 ([#834](https://github.com/jakta-bdi/jakta/issues/834)) ([4e6f5ee](https://github.com/jakta-bdi/jakta/commit/4e6f5ee114f1df8df96f2156f73b7b28d91effbd))
+
+## [0.15.169](https://github.com/jakta-bdi/jakta/compare/v0.15.168...v0.15.169) (2026-06-26)
+
+
+### Bug Fixes
+
+* **deps:** update gradle to v9.6.1 ([#833](https://github.com/jakta-bdi/jakta/issues/833)) ([6dbd3f5](https://github.com/jakta-bdi/jakta/commit/6dbd3f507f98e661655e7bedd12537fa5898a73c))
+
+## [0.15.168](https://github.com/jakta-bdi/jakta/compare/v0.15.167...v0.15.168) (2026-06-20)
+
+
+### Bug Fixes
+
+* **deps:** update gradle to v9.6.0 ([#830](https://github.com/jakta-bdi/jakta/issues/830)) ([a870a7e](https://github.com/jakta-bdi/jakta/commit/a870a7e4d194c6576f4ecdfb7c7e3296b6ac8606))
+
+## [0.15.167](https://github.com/jakta-bdi/jakta/compare/v0.15.166...v0.15.167) (2026-06-20)
+
+
+### Bug Fixes
+
+* **deps:** update plugin org.danilopianini.gradle-pre-commit-git-hooks to v2.1.19 ([#829](https://github.com/jakta-bdi/jakta/issues/829)) ([e5a67da](https://github.com/jakta-bdi/jakta/commit/e5a67da0152a9c0d66b066271b48f69fee4cd44f))
+
+## [0.15.166](https://github.com/jakta-bdi/jakta/compare/v0.15.165...v0.15.166) (2026-06-20)
+
+
+### Bug Fixes
+
+* **deps:** update kotest to v6.2.1 ([#828](https://github.com/jakta-bdi/jakta/issues/828)) ([557ff7a](https://github.com/jakta-bdi/jakta/commit/557ff7a92f0c9f627efd08cd2ade63a7b0378f72))
+
+## [0.15.165](https://github.com/jakta-bdi/jakta/compare/v0.15.164...v0.15.165) (2026-06-19)
+
+
+### Bug Fixes
+
+* **deps:** update danysk/action-checkout action to v0.2.30 ([#827](https://github.com/jakta-bdi/jakta/issues/827)) ([13d1d46](https://github.com/jakta-bdi/jakta/commit/13d1d4695e264c89467cb2ee0ca17f6acd537b30))
+
+## [0.15.164](https://github.com/jakta-bdi/jakta/compare/v0.15.163...v0.15.164) (2026-06-19)
+
+
+### Bug Fixes
+
+* **deps:** update anitvam/conventionalcommit-semantic-releasing action to v0.7.109 ([#831](https://github.com/jakta-bdi/jakta/issues/831)) ([dcb0077](https://github.com/jakta-bdi/jakta/commit/dcb0077f96099be2b96fc57cc37c85e8b7a5281f))
+
+## [0.15.163](https://github.com/jakta-bdi/jakta/compare/v0.15.162...v0.15.163) (2026-06-19)
+
+
+### Bug Fixes
+
+* **deps:** update actions/checkout action to v7 ([#826](https://github.com/jakta-bdi/jakta/issues/826)) ([0b2e11f](https://github.com/jakta-bdi/jakta/commit/0b2e11f89e19a6d6116fdf67db275996cf45e2f6))
+
+## [0.15.162](https://github.com/jakta-bdi/jakta/compare/v0.15.161...v0.15.162) (2026-06-16)
+
+
+### Bug Fixes
+
+* **deps:** update kotest to v6.2.0 ([#824](https://github.com/jakta-bdi/jakta/issues/824)) ([185d1ec](https://github.com/jakta-bdi/jakta/commit/185d1ecb1faf0dcabc3e95310c288921d319d428))
+
+## [0.15.161](https://github.com/jakta-bdi/jakta/compare/v0.15.160...v0.15.161) (2026-06-13)
+
+
+### Bug Fixes
+
+* **deps:** update plugin gitsemver to v7.0.22 ([#823](https://github.com/jakta-bdi/jakta/issues/823)) ([9eb9ff2](https://github.com/jakta-bdi/jakta/commit/9eb9ff2b12ab117b08b6a4bf4e04d70edb6e8af7))
+
+## [0.15.160](https://github.com/jakta-bdi/jakta/compare/v0.15.159...v0.15.160) (2026-06-13)
+
+
+### Bug Fixes
+
+* **deps:** update anitvam/conventionalcommit-semantic-releasing action to v0.7.108 ([#822](https://github.com/jakta-bdi/jakta/issues/822)) ([87b4e7f](https://github.com/jakta-bdi/jakta/commit/87b4e7fbfb0c7f6c17f3a08f8c08e6522f0253a8))
+
+## [0.15.159](https://github.com/jakta-bdi/jakta/compare/v0.15.158...v0.15.159) (2026-06-07)
+
+
+### Bug Fixes
+
+* **deps:** update codecov/codecov-action action to v7 ([#820](https://github.com/jakta-bdi/jakta/issues/820)) ([3e76c05](https://github.com/jakta-bdi/jakta/commit/3e76c050b6c209296981a2a34b5f0c1b6c937de7))
+
+## [0.15.158](https://github.com/jakta-bdi/jakta/compare/v0.15.157...v0.15.158) (2026-06-04)
+
+
+### Bug Fixes
+
+* **deps:** update danysk/action-checkout action to v0.2.29 ([#817](https://github.com/jakta-bdi/jakta/issues/817)) ([26ae57c](https://github.com/jakta-bdi/jakta/commit/26ae57c1d72afecbc9d9f3f9c3cd77b12a5f749c))
+
+## [0.15.157](https://github.com/jakta-bdi/jakta/compare/v0.15.156...v0.15.157) (2026-06-03)
+
+
+### Bug Fixes
+
+* **deps:** update plugin org.danilopianini.gradle-pre-commit-git-hooks to v2.1.18 ([#819](https://github.com/jakta-bdi/jakta/issues/819)) ([32a67d1](https://github.com/jakta-bdi/jakta/commit/32a67d1ff436398a5b9fc66b07278c98d750c0c1))
+
+## [0.15.156](https://github.com/jakta-bdi/jakta/compare/v0.15.155...v0.15.156) (2026-06-03)
+
+
+### Bug Fixes
+
+* **deps:** update anitvam/conventionalcommit-semantic-releasing action to v0.7.107 ([#816](https://github.com/jakta-bdi/jakta/issues/816)) ([2646cbf](https://github.com/jakta-bdi/jakta/commit/2646cbf7de3b1d4bffc8e87444d5798be8cc74a0))
+
+## [0.15.155](https://github.com/jakta-bdi/jakta/compare/v0.15.154...v0.15.155) (2026-06-02)
+
+
+### Bug Fixes
+
+* **deps:** update actions/checkout action to v6.0.3 ([#815](https://github.com/jakta-bdi/jakta/issues/815)) ([904646e](https://github.com/jakta-bdi/jakta/commit/904646e9c388f8e1a056eed7dbffe29b7d028bcf))
+
+## [0.15.154](https://github.com/jakta-bdi/jakta/compare/v0.15.153...v0.15.154) (2026-05-20)
+
+
+### Bug Fixes
+
+* **deps:** update plugin gitsemver to v7.0.20 ([#810](https://github.com/jakta-bdi/jakta/issues/810)) ([ebc1866](https://github.com/jakta-bdi/jakta/commit/ebc186626a06d9bff2b3a1ae328db1a8e9f483d7))
+
+## [0.15.153](https://github.com/jakta-bdi/jakta/compare/v0.15.152...v0.15.153) (2026-05-14)
+
+
+### Bug Fixes
+
+* **deps:** update plugin org.danilopianini.gradle-pre-commit-git-hooks to v2.1.17 ([#809](https://github.com/jakta-bdi/jakta/issues/809)) ([1d09d3b](https://github.com/jakta-bdi/jakta/commit/1d09d3bf86abfea10e79537ccc989a243c968b47))
+
+## [0.15.152](https://github.com/jakta-bdi/jakta/compare/v0.15.151...v0.15.152) (2026-05-13)
+
+
+### Bug Fixes
+
+* **deps:** update plugin gitsemver to v7.0.19 ([#808](https://github.com/jakta-bdi/jakta/issues/808)) ([802dd15](https://github.com/jakta-bdi/jakta/commit/802dd154b8a4f268339a75fdbc4d1b93313293a1))
+
+## [0.15.151](https://github.com/jakta-bdi/jakta/compare/v0.15.150...v0.15.151) (2026-05-12)
+
+
+### Bug Fixes
+
+* **deps:** update anitvam/conventionalcommit-semantic-releasing action to v0.7.106 ([#806](https://github.com/jakta-bdi/jakta/issues/806)) ([34d8432](https://github.com/jakta-bdi/jakta/commit/34d84324ef14c8ad509ae63e25086e4bf0d32240))
+* **deps:** update gradle to v9.5.1 ([#807](https://github.com/jakta-bdi/jakta/issues/807)) ([93e9e00](https://github.com/jakta-bdi/jakta/commit/93e9e0077cb9e8275ca67eac9f360a7ec7447547))
+
 ## [0.15.150](https://github.com/jakta-bdi/jakta/compare/v0.15.149...v0.15.150) (2026-05-02)
 
 
