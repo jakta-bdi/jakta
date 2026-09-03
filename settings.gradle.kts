@@ -1,19 +1,40 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+    }
+}
+
 plugins {
+    id("com.gradle.develocity") version "4.4.3"
     id("org.danilopianini.gradle-pre-commit-git-hooks") version "2.1.23"
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
-gitHooks {
-    preCommit {
-        tasks("ktlintCheck")
+develocity {
+    buildScan {
+        termsOfUseUrl = "https://gradle.com/terms-of-service"
+        termsOfUseAgree = "yes"
+        uploadInBackground = !System.getenv("CI").toBoolean()
+        publishing.onlyIf { it.buildResult.failures.isNotEmpty() }
     }
+}
+
+gitHooks {
     commitMsg { conventionalCommits() }
     createHooks()
 }
 
 rootProject.name = "jakta"
-include(":jakta-state-machine")
-include(":jakta-bdi")
-include(":jakta-dsl")
-include("alchemist-jakta-incarnation")
-include("jakta-full")
+
+include(
+    "jakta-api",
+    "jakta-dsl",
+    "jakta-core",
+    "alchemist-jakta-incarnation",
+    "jakta-string-incarnation",
+    "jakta-prolog-incarnation",
+    "examples:blocksworld",
+    "examples:hello-world",
+)

@@ -1,5 +1,10 @@
 .gradle/
-build/
 .idea/
 .vscode
-bin
+.kotlin/
+bin/
+build/
+node_modules/
+kotlin-js-store
+*.hprof
+local.properties
