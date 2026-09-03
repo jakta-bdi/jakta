@@ -17,8 +17,8 @@ open class MessagingSkill(node: Node<Any>) : Skill<Any>(node) {
      * Sends a message with the given [payload] to the specified [receiver] agent.
      */
     fun <P : Any> Agent.sendTo(receiver: AgentID, payload: P) {
-        node.sendEvent(Message(payload, id)) { body ->
-            node.getAgentIDfromBody(body) == receiver
+        node.publishEvent(Message(payload, id)) { body ->
+            this.getAgentIDfromBody(body) == receiver
         }
     }
 
@@ -26,8 +26,8 @@ open class MessagingSkill(node: Node<Any>) : Skill<Any>(node) {
      * Broadcasts a message with the given [payload] to all other agents in the node except the sender itself.
      */
     fun <P : Any> Agent.broadcast(payload: P) {
-        node.sendEvent(Message(payload, id)) { body ->
-            node.getAgentIDfromBody(body) != id
+        node.publishEvent(Message(payload, id)) { body ->
+            this.getAgentIDfromBody(body) != id
         }
     }
 }

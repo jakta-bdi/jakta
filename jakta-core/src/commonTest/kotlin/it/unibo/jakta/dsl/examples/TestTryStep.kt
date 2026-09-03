@@ -4,6 +4,7 @@ import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import it.unibo.jakta.dsl.ManualStepNodeRunner
 import it.unibo.jakta.dsl.node
+import it.unibo.jakta.dsl.node.NodeBuilders
 import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.node.ExecutableNode
 import kotlin.test.BeforeTest
@@ -23,13 +24,13 @@ class TestTryStep {
     var secondStep = false
     var done = false
 
-    val helloWorld: ExecutableNode<Any> = node {
+    val helloWorld: ExecutableNode<Any> = node(NodeBuilders.baseNode()) {
         agent {
             embodiedAs { Any() }
             hasInitialGoals {
                 !"goal"
             }
-            hasPlans {
+            hasPlanLibrary {
                 adding.goal {
                     this.takeIf { it == "goal" }
                 } triggers {

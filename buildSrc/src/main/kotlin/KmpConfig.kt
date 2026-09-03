@@ -25,6 +25,7 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinDependencyHandler
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import kotlin.time.Duration.Companion.minutes
 import org.gradle.kotlin.dsl.withType
+import org.jetbrains.kotlin.gradle.targets.js.dsl.KotlinJsTargetDsl
 import org.jetbrains.kotlin.gradle.tasks.KotlinTest
 
 val Provider<PluginDependency>.id: String get() = get().pluginId
@@ -63,7 +64,7 @@ fun Project.configureKotlinMultiplatform() {
             }
         }
         val mochaTimeout = 60.minutes.inWholeMilliseconds.toString()
-        js(IR) {
+        js {
             browser {
                 testTask {
                     useMocha {
@@ -92,17 +93,15 @@ fun Project.configureKotlinMultiplatform() {
 
         mingwX64(nativeSetup)
 
-        macosX64(nativeSetup)
         macosArm64(nativeSetup)
         iosArm64(nativeSetup)
         iosX64(nativeSetup)
-        iosSimulatorArm64(nativeSetup)
-        watchosArm64(nativeSetup)
-        watchosX64(nativeSetup)
-        watchosSimulatorArm64(nativeSetup)
-        tvosArm64(nativeSetup)
-        tvosX64(nativeSetup)
-        tvosSimulatorArm64(nativeSetup)
+
+//        iosSimulatorArm64(nativeSetup)
+//        watchosArm64(nativeSetup)
+//        watchosSimulatorArm64(nativeSetup)
+//        tvosArm64(nativeSetup)
+//        tvosSimulatorArm64(nativeSetup)
 
         targets.all {
             compilations.all {

@@ -5,6 +5,7 @@ import co.touchlab.kermit.Severity
 import it.unibo.jakta.dsl.executeInTestScope
 import it.unibo.jakta.dsl.ifGoalMatch
 import it.unibo.jakta.dsl.node
+import it.unibo.jakta.dsl.node.NodeBuilders
 import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.skills.terminate
 import kotlin.test.Test
@@ -13,13 +14,13 @@ import kotlinx.coroutines.delay
 
 class TestMultipleAgentDelays {
     val helloWorld =
-        node {
+        node(NodeBuilders.baseNode()) {
             agent {
                 embodiedAs { Any() }
                 hasInitialGoals {
                     !"goal"
                 }
-                hasPlans {
+                hasPlanLibrary {
                     adding.goal {
                         ifGoalMatch("goal")
                     } triggers {
@@ -35,7 +36,7 @@ class TestMultipleAgentDelays {
                 hasInitialGoals {
                     !"goal"
                 }
-                hasPlans {
+                hasPlanLibrary {
                     adding.goal {
                         ifGoalMatch("goal")
                     } triggers {

@@ -16,8 +16,4 @@ kotlinMultiplatform {
             implementation(libs.kotlinx.coroutines.test)
         }
     }
-
-    compilerOptions {
-        freeCompilerArgs.add("-Xcontext-parameters")
-    }
 }

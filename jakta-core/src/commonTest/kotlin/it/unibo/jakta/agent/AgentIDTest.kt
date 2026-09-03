@@ -39,7 +39,7 @@ class AgentIDTest {
         val agentWithName = BaseAgentID(name = "AgentOne", id = "id-123")
         val agentWithoutName = BaseAgentID(id = "id-456")
         assertEquals(
-            "AgentOne-id-123",
+            "AgentOne",
             agentWithName.displayName,
             "The display name should be the provided name",
         )

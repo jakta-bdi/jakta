@@ -1,21 +1,21 @@
 package it.unibo.jakta.dsl.node
 
 import it.unibo.jakta.agent.AgentID
-import it.unibo.jakta.dsl.JaktaDSL
+import it.unibo.jakta.agent.AgentSpecification
 import it.unibo.jakta.dsl.agent.AgentBuilder
 import it.unibo.jakta.dsl.agent.AgentBuilderImpl
-import it.unibo.jakta.node.LocalNode
+import it.unibo.jakta.node.ExecutableNode
 import it.unibo.jakta.node.Node
 
 /**
- * Implementation of the MasBuilder interface.
+ * Implementation of the [NodeBuilder] interface.
+ * @param initialNode the initial [ExecutableNode].
  */
-open class LocalNodeBuilder<Body : Any> : NodeBuilder<Body, LocalNode<Body>> {
+open class BaseNodeBuilder<Body : Any, out N : ExecutableNode<Body>>(private val initialNode: N) :
+    NodeBuilder<Body, N> {
 
     override val node: Node<Body>
-        get() = _node
-
-    private val _node = LocalNode<Body>()
+        get() = initialNode
 
     protected val agents = mutableListOf<AgentBuilder<*, *, Body>>()
 
@@ -25,26 +25,23 @@ open class LocalNodeBuilder<Body : Any> : NodeBuilder<Body, LocalNode<Body>> {
     override fun <Belief : Any, Goal : Any> agent(id: AgentID, block: AgentBuilder<Belief, Goal, Body>.() -> Unit) =
         buildAgent(id, block)
 
+    override fun <Belief : Any, Goal : Any> withAgents(
+        vararg agentFactories: (Node<Body>) -> AgentSpecification<Belief, Goal, Body>,
+    ) = agentFactories.forEach { factory ->
+        node.addAgent(factory)
+    }
+
     private fun <Belief : Any, Goal : Any> buildAgent(
         id: AgentID?,
         block: AgentBuilder<Belief, Goal, Body>.() -> Unit,
     ) {
-        val agentBuilder = AgentBuilderImpl<Belief, Goal, Body>(id)
+        val agentBuilder = AgentBuilderImpl<Belief, Goal, Body>(node, id)
         val agent: AgentBuilder<Belief, Goal, Body> = agentBuilder.apply(block)
         agents += agent
     }
 
-//    override fun withAgents(vararg agents: Agent<Belief, Goal>) {
-//        this.agents += agents
-//    }
-
-//    override fun environment(block: () -> Env) {
-//        environment = block()
-//    }
-
-    override fun build(): LocalNode<Body> {
-        // val env = environment ?: error { "Must provide an Environment for the MAS" }
-        agents.forEach { node.addAgent(it.build(node)) }
-        return _node
+    override fun build(): N {
+        agents.forEach { factory -> node.addAgent({ factory.build() }) }
+        return initialNode
     }
 }

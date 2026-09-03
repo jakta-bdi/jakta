@@ -6,9 +6,10 @@ import androidx.compose.runtime.setValue
 import blocksWorldNode
 import it.unibo.jakta.dsl.goal.PrologGoal
 import it.unibo.jakta.dsl.goal.initialGoal
-import it.unibo.jakta.dsl.mas.mas
-import it.unibo.jakta.dsl.node.LocalNodeBuilder
+import it.unibo.jakta.dsl.mas
+import it.unibo.jakta.dsl.node.NodeBuilders
 import it.unibo.jakta.node.CoroutineNodeRunner
+import it.unibo.jakta.node.SharedMemoryNetwork
 import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.List
 import kotlinx.coroutines.CoroutineScope
@@ -47,7 +48,7 @@ class BlocksWorldViewModel(private val world: BlocksWorld) {
 class BlocksWorldAppState {
 
     /**
-     * The seed value used for initializing the Blocks World random generator.
+     * The seed substitutedTerm used for initializing the Blocks World random generator.
      */
     var seed by mutableStateOf("42")
 
@@ -129,9 +130,9 @@ class BlocksWorldAppState {
         val currentGoal = goal
 
         agentJob = scope.launch {
-            mas(LocalNodeBuilder()) {
+            mas(NodeBuilders.baseNode()) {
                 blocksWorldNode(world, currentGoal)
-            }.run(CoroutineNodeRunner())
+            }.run(CoroutineNodeRunner(SharedMemoryNetwork()))
         }
     }
 

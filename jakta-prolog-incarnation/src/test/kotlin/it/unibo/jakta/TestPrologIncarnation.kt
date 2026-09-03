@@ -5,17 +5,18 @@ import co.touchlab.kermit.Severity
 import it.unibo.jakta.dsl.belief.belief
 import it.unibo.jakta.dsl.belief.inferenceRule
 import it.unibo.jakta.dsl.belief.initialBelief
-import it.unibo.jakta.dsl.belief.matching
+import it.unibo.jakta.dsl.belief.matchingBelief
 import it.unibo.jakta.dsl.goal.goal
 import it.unibo.jakta.dsl.goal.initialGoal
-import it.unibo.jakta.dsl.goal.matching
-import it.unibo.jakta.dsl.mas.mas
-import it.unibo.jakta.dsl.node.LocalNodeBuilder
+import it.unibo.jakta.dsl.goal.matchingGoal
+import it.unibo.jakta.dsl.mas
+import it.unibo.jakta.dsl.node.NodeBuilders
 import it.unibo.jakta.dsl.plan.achieve
 import it.unibo.jakta.dsl.plan.satisfies
 import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.logic.JaktaLogicProgrammingScope.Companion.prologPlan
 import it.unibo.jakta.node.CoroutineNodeRunner
+import it.unibo.jakta.node.SharedMemoryNetwork
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlinx.coroutines.launch
@@ -32,31 +33,30 @@ class TestPrologIncarnation {
     fun `test prolog recursion`() {
         runTest {
             val job = launch {
-                mas(LocalNodeBuilder()) {
+                mas(NodeBuilders.baseNode()) {
                     node {
                         agent {
                             embodiedAs { Any() }
                             hasInitialGoals {
                                 !initialGoal { "start"(0, 10) }
                             }
-                            hasPlans {
+                            hasPlanLibrary {
                                 prologPlan {
                                     adding.goal {
-                                        matching { "start"(N, N) }
+                                        matchingGoal { "start"(N, N) }
                                     } triggers {
-                                        val n = N.value
-                                        agent.print("Counting...$n done!")
+                                        agent.print("Counting...", N, " done!")
                                     }
                                 }
                                 prologPlan {
                                     adding.goal {
-                                        matching { "start"(N, X) }
+                                        matchingGoal { "start"(N, X) }
                                     } onlyWhen {
                                         satisfies {
                                             (N lowerThan X) and (S `is` (N + 1))
                                         }
                                     } triggers {
-                                        agent.print("Counting..." + N.value)
+                                        agent.print("Counting...", N)
                                         agent.achieve(goal { "start"(S, X) })
                                         assert(true)
                                         node.terminateNode()
@@ -65,7 +65,7 @@ class TestPrologIncarnation {
                             }
                         }
                     }
-                }.run(CoroutineNodeRunner())
+                }.run(CoroutineNodeRunner(SharedMemoryNetwork()))
             }
             job.join()
         }
@@ -75,37 +75,35 @@ class TestPrologIncarnation {
     fun `test prolog belief plan`() {
         runTest {
             val job = launch {
-                mas(LocalNodeBuilder()) {
+                mas(NodeBuilders.baseNode()) {
                     node {
                         agent {
                             embodiedAs { Any() }
                             hasInitialGoals {
                                 !initialGoal { "start"(1) }
                             }
-                            hasPlans {
+                            hasPlanLibrary {
                                 prologPlan {
                                     adding.goal {
-                                        matching { "start"(N) }
+                                        matchingGoal { "start"(N) }
                                     } triggers {
-                                        val n = N.value
-                                        agent.print("Starting with $n")
-                                        agent.believe(belief { "belief"(n) })
+                                        agent.print("Starting with ", N)
+                                        agent.believe(belief { "belief"(N) })
                                     }
                                 }
 
                                 prologPlan {
                                     adding.belief {
-                                        matching { "belief"(N) }
+                                        matchingBelief { "belief"(N) }
                                     } triggers {
-                                        val n = N.value
-                                        agent.print("Belief is $n")
+                                        agent.print("Belief is ", N)
                                         node.terminateNode()
                                     }
                                 }
                             }
                         }
                     }
-                }.run(CoroutineNodeRunner())
+                }.run(CoroutineNodeRunner(SharedMemoryNetwork()))
             }
             job.join()
         }
@@ -115,27 +113,26 @@ class TestPrologIncarnation {
     fun `test prolog belief update`() {
         runTest {
             val job = launch {
-                mas(LocalNodeBuilder()) {
+                mas(NodeBuilders.baseNode()) {
                     node {
                         agent {
                             embodiedAs { Any() }
                             hasInitialGoals {
                                 !initialGoal { "start"(1) }
                             }
-                            hasPlans {
+                            hasPlanLibrary {
                                 prologPlan {
                                     adding.goal {
-                                        matching { "start"(N) }
+                                        matchingGoal { "start"(N) }
                                     } triggers {
-                                        val n = N.value
-                                        agent.print("Starting with $n")
-                                        agent.believe(belief { "belief"(n) })
+                                        agent.print("Starting with ", N)
+                                        agent.believe(belief { "belief"(N) })
                                     }
                                 }
 
                                 prologPlan {
                                     adding.belief {
-                                        matching { "belief"(N) }
+                                        matchingBelief { "belief"(N) }
                                     } onlyWhen {
                                         satisfies { N greaterThan 5 }
                                     } triggers {
@@ -145,9 +142,9 @@ class TestPrologIncarnation {
 
                                 prologPlan {
                                     adding.belief {
-                                        matching { "belief"(N) }
+                                        matchingBelief { "belief"(N) }
                                     } triggers {
-                                        val n = N.toKotlin<Int>()
+                                        val n = N.value<Int>()
                                         agent.print("Belief is $n")
                                         agent.believe(belief { "belief"(n + 1) })
                                     }
@@ -155,7 +152,7 @@ class TestPrologIncarnation {
                             }
                         }
                     }
-                }.run(CoroutineNodeRunner())
+                }.run(CoroutineNodeRunner(SharedMemoryNetwork()))
             }
             job.join()
         }
@@ -165,7 +162,7 @@ class TestPrologIncarnation {
     fun `test belief matching in guards`() {
         runTest {
             val job = launch {
-                mas(LocalNodeBuilder()) {
+                mas(NodeBuilders.baseNode()) {
                     node {
                         agent {
                             embodiedAs { Any() }
@@ -175,21 +172,21 @@ class TestPrologIncarnation {
                             hasInitialGoals {
                                 !initialGoal { "start"(1) }
                             }
-                            hasPlans {
+                            hasPlanLibrary {
                                 prologPlan {
                                     adding.goal {
-                                        matching { "start"(`_`) }
+                                        matchingGoal { "start"(`_`) }
                                     } onlyWhen {
                                         satisfies { "belief"(N) }
                                     } triggers {
-                                        agent.print("Belief is ${N.value}")
+                                        agent.print("Belief is ", N)
                                         node.terminateNode()
                                     }
                                 }
                             }
                         }
                     }
-                }.run(CoroutineNodeRunner())
+                }.run(CoroutineNodeRunner(SharedMemoryNetwork()))
             }
             job.join()
         }
@@ -199,7 +196,7 @@ class TestPrologIncarnation {
     fun `test inference rule`() {
         runTest {
             val job = launch {
-                mas(LocalNodeBuilder()) {
+                mas(NodeBuilders.baseNode()) {
                     node {
                         agent {
                             embodiedAs { Any() }
@@ -218,24 +215,21 @@ class TestPrologIncarnation {
                             hasInitialGoals {
                                 !initialGoal { "start"("bob") }
                             }
-                            hasPlans {
+                            hasPlanLibrary {
                                 prologPlan {
                                     adding.goal {
-                                        matching { "start"(B) }
+                                        matchingGoal { "start"(B) }
                                     } onlyWhen {
                                         satisfies { "sibling"(B, C) }
                                     } triggers {
-                                        agent.print(
-                                            "${C.value}" +
-                                                " is a sibling of ${B.value}",
-                                        )
+                                        agent.print(C, " is a sibling of ", B)
                                         node.terminateNode()
                                     }
                                 }
                             }
                         }
                     }
-                }.run(CoroutineNodeRunner())
+                }.run(CoroutineNodeRunner(SharedMemoryNetwork()))
             }
             job.join()
         }
@@ -252,7 +246,7 @@ class TestPrologIncarnation {
                     )
             }
             val job = launch {
-                mas(LocalNodeBuilder()) {
+                mas(NodeBuilders.baseNode()) {
                     node {
                         agent {
                             embodiedAs { Any() }
@@ -263,35 +257,32 @@ class TestPrologIncarnation {
                             hasInitialGoals {
                                 !initialGoal { "start"("bob") }
                             }
-                            hasPlans {
+                            hasPlanLibrary {
                                 prologPlan {
                                     adding.goal {
-                                        matching { "start"(B) }
+                                        matchingGoal { "start"(B) }
                                     } onlyWhen {
                                         satisfies { "sibling"(B, C) }
                                     } triggers {
-                                        agent.print(
-                                            "${C.value}" +
-                                                " is a sibling of ${B.value}",
-                                        )
+                                        agent.print(C, " is a sibling of ", B)
                                         node.terminateNode()
                                     }
                                 }
 
                                 prologPlan {
                                     failing.goal {
-                                        matching { "start"(B) }
+                                        matchingGoal { "start"(B) }
                                     } triggers {
-                                        agent.print("I didn't know how to infer siblings for ${B.value}")
+                                        agent.print("I didn't know how to infer siblings for ", B)
                                         agent.believe(rule)
                                         agent.print("But now I do! I can try again...")
-                                        agent.alsoAchieve(goal { "start"(B.value) })
+                                        agent.alsoAchieve(goal { "start"(B) })
                                     }
                                 }
                             }
                         }
                     }
-                }.run(CoroutineNodeRunner())
+                }.run(CoroutineNodeRunner(SharedMemoryNetwork()))
             }
             job.join()
         }

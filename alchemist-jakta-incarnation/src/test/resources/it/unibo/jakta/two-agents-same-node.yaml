@@ -13,3 +13,4 @@ deployments:
     parameters: [ 2, 2 ]
     programs:
       - program: it.unibo.jakta.test.TwoAgentsSameNode.entrypoint
+        time-distribution: 1

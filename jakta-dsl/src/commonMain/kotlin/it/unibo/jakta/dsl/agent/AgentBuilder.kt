@@ -18,6 +18,11 @@ import it.unibo.jakta.plan.Plan
 interface AgentBuilder<Belief : Any, Goal : Any, Body : Any> {
 
     /**
+     * The node this agent is hosted on. This is used to send messages and perceptions to the agent.
+     */
+    val node: Node<Body>
+
+    /**
      * Defines how and whether a [Perception] is mapped into a [AgentUpdate].
      * By default, perceptions do not generate any update.
      */
@@ -42,7 +47,12 @@ interface AgentBuilder<Belief : Any, Goal : Any, Body : Any> {
     /**
      * Defines the plans of the agent using a plan library builder block.
      */
-    fun hasPlans(block: PlanLibraryBuilder<Belief, Goal>.() -> Unit)
+    fun hasPlanLibrary(block: PlanLibraryBuilder<Belief, Goal>.() -> Unit)
+
+    /**
+     * Defines the plans of the agent using a list of pre-defined plans.
+     */
+    fun withPredefinedPlans(vararg plans: (Node<Body>) -> List<Plan<Belief, Goal, *, *, *>>)
 
     /**
      * Adds a belief to the agent's initial beliefs.
@@ -65,16 +75,6 @@ interface AgentBuilder<Belief : Any, Goal : Any, Body : Any> {
     fun addGoalPlan(plan: Plan.Goal<Belief, Goal, *, *>)
 
     /**
-     * Adds multiple belief plans to the agent's plan library.
-     */
-    fun withBeliefPlans(vararg plans: Plan.Belief<Belief, Goal, *, *>)
-
-    /**
-     * Adds multiple goal plans to the agent's plan library.
-     */
-    fun withGoalPlans(vararg plans: Plan.Goal<Belief, Goal, *, *>)
-
-    /**
      * Define how an agent can be embodied in the node.
      */
     fun embodiedAs(bodyFactory: (AgentID) -> Body)
@@ -82,5 +82,5 @@ interface AgentBuilder<Belief : Any, Goal : Any, Body : Any> {
     /**
      * Builds and returns the agent instance.
      */
-    fun build(node: Node<Body>): AgentSpecification<Belief, Goal, Body>
+    fun build(): AgentSpecification<Belief, Goal, Body>
 }

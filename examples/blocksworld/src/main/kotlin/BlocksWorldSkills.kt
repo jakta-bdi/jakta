@@ -1,5 +1,5 @@
 import it.unibo.jakta.dsl.belief.PrologBelief
-import it.unibo.jakta.dsl.belief.beliefQuery
+import it.unibo.jakta.dsl.belief.newContextBeliefQuery
 import it.unibo.jakta.event.AgentEvent.External.Perception
 import it.unibo.jakta.event.AgentUpdate
 import it.unibo.jakta.node.Node
@@ -53,18 +53,23 @@ class BlocksWorldSkillsImpl(private val world: BlocksWorld, private val node: No
     override suspend fun move(block: String, destination: String) {
         val destinationBlock = if (destination == "table") null else Block(destination)
         val state = world.move(Block(block), destinationBlock)
-        node.sendEvent(BlocksWorldPerception(state))
+        node.publishEvent(BlocksWorldPerception(state))
     }
 
     override suspend fun join() {
         val state = world.getState()
-        node.sendEvent(BlocksWorldPerception(state))
+        node.publishEvent(BlocksWorldPerception(state))
     }
 
     override suspend fun displayWorld() {
         world.printState()
     }
 }
+
+/**
+ * A query to filter beliefs that represent the state of blocks in the world.
+ */
+val filterQuery = newContextBeliefQuery { "on"(X, Y) }
 
 /**
  * Handles the perception of the Blocks World state and updates the agent's beliefs accordingly.
@@ -75,7 +80,7 @@ fun handleBlocksWorldPerceptions(
 ): AgentUpdate<*> = AgentUpdate.Belief(
     event.state.toPrologFacts(),
     previousBeliefs.filter {
-        it matches beliefQuery { "on"(X, Y) }
+        it matches filterQuery
     }.toSet(),
 )
 

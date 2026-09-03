@@ -9,16 +9,26 @@ import it.unibo.alchemist.util.ClassPathScanner
 import java.net.URL
 import kotlin.test.Test
 import kotlin.test.assertNotNull
+import kotlin.test.fail
 
 class TestLoadingWithAlchemist {
+    @Test
+    fun testCommunicationInSameNode() {
+        loadAndRunYaml("two-agents-same-node")
+    }
 
     @Test
-    fun testLoading() {
-        ClassPathScanner.resourcesMatching(".*\\.ya?ml", "it.unibo.jakta").forEach { simulationFile ->
+    fun testCommunicationBetweenNodes() {
+        loadAndRunYaml("two-agents-two-nodes")
+    }
+
+    private fun loadAndRunYaml(name: String) = ClassPathScanner
+        .resourcesMatching(".*$name.ya?ml", "it.unibo.jakta")
+        .ifEmpty { fail("No yaml file matching name { $name } found.") }
+        .forEach { simulationFile ->
             val (fileName) = checkNotNull(Regex(".*/([^/]+?)$").matchEntire(simulationFile.path)).destructured
             testRunning(fileName, simulationFile)
         }
-    }
 
     private fun testRunning(fileName: String, fileUrl: URL) {
         Logger.setMinSeverity(Severity.Info)

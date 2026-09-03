@@ -31,7 +31,7 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
         )
 
     // TODO consider making this public or add a method to cancel it e.g. stop()
-    // so far it does not seem to be necessary
+    //  so far it does not seem to be necessary
     private val agentJob = SupervisorJob()
 
     override suspend fun step() {
@@ -51,17 +51,38 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
 
     @Suppress("UNCHECKED_CAST")
     private fun handleEvent(event: AgentEvent, scope: CoroutineScope) {
+        completeWaitingEventFilters(event)
         when (event) {
-            // TODO per rimuovere questo cast dovrei tipare Event.Internal
-            //  con Belief e Goal (si può fare ma è subottimo?)
+            is AgentEvent.Internal -> {
+                // TODO to remove this cast i should type the top level Event.Internal
+                //  with Belief and Goal. Doable but maybe unnecessary?
+                when (event) {
+                    is AgentEvent.Internal.Belief<*> ->
+                        scope.handleBeliefEvent(event as AgentEvent.Internal.Belief<Belief>)
 
-            is AgentEvent.Internal.Belief<*> -> scope.handleBeliefEvent(event as AgentEvent.Internal.Belief<Belief>)
+                    is AgentEvent.Internal.Goal<*, *> ->
+                        scope.handleGoalEvent(event as AgentEvent.Internal.Goal<Goal, Any?>)
 
-            is AgentEvent.Internal.Goal<*, *> -> scope.handleGoalEvent(event as AgentEvent.Internal.Goal<Goal, Any?>)
-
-            is AgentEvent.Internal.Step -> handleStepEvent(event)
+                    is AgentEvent.Internal.Step ->
+                        handleStepEvent(event)
+                }
+            }
 
             is AgentEvent.External -> handleExternalEvent(event)
+        }
+    }
+
+    /**
+     * Iterates over the map of waiting event filters.
+     * If the filter matches complete the associated deferred and remove the filter from the map.
+     */
+    @Suppress("UNCHECKED_CAST") // TODO Check
+    private fun completeWaitingEventFilters(event: AgentEvent) {
+        for ((filter, deferred) in executableAgent.state.waitEventFilters) {
+            val result = filter(event)
+            if (result != null) {
+                (deferred as CompletableDeferred<Any>).complete(result)
+            }
         }
     }
 
@@ -244,7 +265,8 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
     }
 
     // TODO this should change to have a proper set of desires
-    // for now I simply forward the goal addition and removal events
+    //  for now I simply forward the goal addition and removal events
+    // TODO this has problems because goal removal is not actually stopping goals already in pursue.
     private fun handleGoalUpdateEvent(event: AgentUpdate.Goal<Goal>) {
         log.i { "Handling goal update event $event" }
         val additionsOnly = event.additions - event.removals

@@ -43,7 +43,7 @@ class BlocksWorld(seed: Long = 42, blockCount: Int = 6) {
 
         val fromStack = stacks[fromStackIndex]
 
-        check(!isTop(fromStack, block)) {
+        check(isTop(fromStack, block)) {
             "model.Block $block is not clear"
         }
 
@@ -61,7 +61,7 @@ class BlocksWorld(seed: Long = 42, blockCount: Int = 6) {
 
         val destStack = stacks[destStackIndex]
 
-        check(!isTop(destStack, destination)) {
+        check(isTop(destStack, destination)) {
             "Destination $destination is not clear"
         }
 

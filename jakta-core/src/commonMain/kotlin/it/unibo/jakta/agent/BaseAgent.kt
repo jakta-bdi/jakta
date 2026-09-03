@@ -1,10 +1,10 @@
 package it.unibo.jakta.agent
 
 import it.unibo.jakta.event.AgentEvent
-import it.unibo.jakta.event.EventBus
 import it.unibo.jakta.event.EventInbox
+import it.unibo.jakta.event.EventQueue
 import it.unibo.jakta.event.EventStream
-import it.unibo.jakta.event.UnlimitedChannelBus
+import it.unibo.jakta.event.UnlimitedChannelQueue
 
 /**
  * Default implementation of an [it.unibo.jakta.agent.Agent].
@@ -16,16 +16,16 @@ class BaseAgent<Belief : Any, Goal : Any, Body : Any>(agentSpecification: AgentS
 
     override val id: AgentID = agentSpecification.id
 
-    private val eventBus: EventBus<AgentEvent> = UnlimitedChannelBus()
+    private val eventQueue: EventQueue<AgentEvent> = UnlimitedChannelQueue()
 
     override val events: EventStream<AgentEvent>
-        get() = eventBus
+        get() = eventQueue
 
     override val internalInbox: EventInbox<AgentEvent.Internal>
-        get() = eventBus
+        get() = eventQueue
 
     override val externalInbox: EventInbox<AgentEvent.External>
-        get() = eventBus
+        get() = eventQueue
 
     override val body: Body = agentSpecification.body
 

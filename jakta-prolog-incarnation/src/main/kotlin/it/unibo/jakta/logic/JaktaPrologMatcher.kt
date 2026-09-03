@@ -1,5 +1,8 @@
 package it.unibo.jakta.logic
 
+import it.unibo.jakta.self
+import it.unibo.jakta.source
+import it.unibo.tuprolog.core.Clause
 import it.unibo.tuprolog.core.Rule
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
@@ -14,31 +17,54 @@ import it.unibo.tuprolog.unify.AbstractUnificator
  * Custom unificator that handles annotations in Prolog terms.
  * It extends the AbstractUnificator and overrides the mgu method to consider annotations during unification.
  */
-val annotationUnificator = object : AbstractUnificator() {
+private val annotationUnificator = object : AbstractUnificator() {
     override fun checkTermsEquality(first: Term, second: Term): Boolean = first == second
 
     override fun mgu(term1: Term, term2: Term, occurCheckEnabled: Boolean): Substitution {
-        var result = super.mgu(term1, term2, occurCheckEnabled)
+        var fact = annotatedTerm(term1)
+        var query = annotatedTerm(term2)
+
+        // TODO this is a workaround that might cause problems in the future
+        if (!term1.isFact) {
+            fact = annotatedTerm(term2)
+            query = annotatedTerm(term1)
+        }
+
+        var result = super.mgu(fact, query, occurCheckEnabled)
 
         if (result !is Substitution.Fail) {
-            result = unifyTags(term1, term2, result, occurCheckEnabled)
+            result = unifyTags(fact, query, result, occurCheckEnabled)
         }
 
         return result
     }
 
+    /**
+     * Extract the term for which to check annotations.
+     */
+    private fun annotatedTerm(term: Term): Term = when (term) {
+        is Rule -> term.head
+        else -> term
+    }
+
     @Suppress("UNCHECKED_CAST")
     private fun unifyTags(
-        query: Term,
         fact: Term,
+        query: Term,
         initialResult: Substitution,
         occurCheckEnabled: Boolean,
     ): Substitution {
-        val queryAnnotations =
-            (query.tags["jakta.annotations"] as? Set<Struct>).orEmpty().toMutableList()
-
         val factAnnotations =
             (fact.tags["jakta.annotations"] as? Set<Struct>).orEmpty().toMutableList()
+
+        // every unannotated struct is considered annotated with source(self)
+        // TODO what happens if I want to have [source(self), source(bob)]???
+        if (factAnnotations.isEmpty()) {
+            factAnnotations.add(source(self))
+        }
+
+        val queryAnnotations =
+            (query.tags["jakta.annotations"] as? Set<Struct>).orEmpty().toMutableList()
 
         val result = when {
             queryAnnotations.isEmpty() -> initialResult
@@ -46,8 +72,8 @@ val annotationUnificator = object : AbstractUnificator() {
             queryAnnotations.size > factAnnotations.size -> Substitution.failed()
 
             else -> matchAnnotations(
-                queryAnnotations,
                 factAnnotations,
+                queryAnnotations,
                 initialResult,
                 occurCheckEnabled,
             )
@@ -57,24 +83,24 @@ val annotationUnificator = object : AbstractUnificator() {
     }
 
     private fun matchAnnotations(
-        queryAnnotations: MutableList<Struct>,
         factAnnotations: MutableList<Struct>,
+        queryAnnotations: MutableList<Struct>,
         initialResult: Substitution,
         occurCheckEnabled: Boolean,
     ): Substitution {
         var result = initialResult
 
-        for (annotation in factAnnotations) {
-            val queryIterator = queryAnnotations.listIterator()
+        for (annotation in queryAnnotations) {
+            val factIterator = factAnnotations.listIterator()
             var matched = false
 
-            while (queryIterator.hasNext()) {
-                val candidate = queryIterator.next()
-                val annotationResult = super.mgu(candidate, annotation, occurCheckEnabled)
+            while (factIterator.hasNext()) {
+                val candidate = factIterator.next()
+                val annotationResult = super.mgu(annotation, candidate, occurCheckEnabled)
 
                 if (annotationResult !is Substitution.Fail) {
                     result += annotationResult
-                    queryIterator.remove()
+                    factIterator.remove()
                     matched = true
                     break
                 }
@@ -90,18 +116,40 @@ val annotationUnificator = object : AbstractUnificator() {
 }
 
 /**
+ * An object representing a way to access a [Solver] configured with JaKtA specific options.
+ */
+object JaktaSolver {
+    /**
+     * Factory method to create a new solver instance with a loaded theory.
+     */
+    fun get(theory: Iterable<Clause>): Solver = Solver.prolog
+        .newBuilder()
+        .unificator(annotationUnificator)
+        .staticKb(theory)
+        .flag(Unknown, Unknown.FAIL)
+        .flag(TrackVariables) { ON }
+        .build()
+}
+
+/**
  * Extension function to check if a collection of Prolog rules unifies with a given query [Struct].
  * @param query The [Struct] to be unified with the collection of rules.
  * @return The [Solution] of the unification process, which can be a success or failure.
  */
-fun Collection<Rule>.unifiesWith(query: Struct): Solution = Solver.prolog
-    .newBuilder()
-    .unificator(annotationUnificator)
-    .flag(Unknown, Unknown.FAIL)
-    .staticKb(this)
-    .flag(TrackVariables) { ON }
-    .build()
-    .solveOnce(query)
+fun Collection<Rule>.unifiesWith(query: Struct): Solution = JaktaSolver.get(this).solveOnce(query)
+
+/**
+* Extension function to compute the most general unifier (MGU) between a [Struct] and a query [Struct]
+ * using annotation semantics.
+ */
+fun Struct.annotatedMguWith(query: Struct): Substitution = annotationUnificator.mgu(this, query)
+
+/**
+ * Extension function to check if a collection of Prolog rules unifies with a given query [Struct].
+ * @param query The [Struct] to be unified with the collection of rules.
+ * @return The [Solution] of the unification process, which can be a success or failure.
+ */
+fun Collection<Rule>.allSolutionsOf(query: Struct): List<Solution> = JaktaSolver.get(this).solveList(query)
 
 /**
  * List of special functors in Prolog that are not considered predicates.

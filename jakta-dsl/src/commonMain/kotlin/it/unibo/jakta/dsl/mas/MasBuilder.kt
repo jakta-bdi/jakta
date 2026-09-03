@@ -16,6 +16,11 @@ interface MasBuilder<N : ExecutableNode<*>, NB : NodeBuilder<*, N>> {
     fun node(block: NB.() -> Unit)
 
     /**
+     * Adds nodes to the mas.
+     */
+    fun withNodes(vararg node: N)
+
+    /**
      * Runs the MAS using the provided [NodeRunner]. This will execute all the nodes defined in the MAS.
      *
      * @param runner The [NodeRunner] to use for running the nodes.
