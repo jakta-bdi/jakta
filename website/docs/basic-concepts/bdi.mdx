@@ -1,0 +1,41 @@
+---
+sidebar_position: 1
+---
+
+# BDI
+
+The philosopher Michael Bratman described humans’ practical reasoning via the “beliefs, desires, intentions” framework, 
+as a way to explain future-directed decisionmaking. 
+Successively, the framework was formalised by means of modal logics, and then turned into an abstract semantic for computational agents:
+[AgentSpeak(L)](https://link.springer.com/chapter/10.1007/BFb0031845).
+
+Computational agents are autonomous entities situated into an **environment** they can perceive and affect; 
+they interact either directly or through the environment by means of stigmergy. 
+The classical implementation of BDI agents, based on the Procedural Reasoning System (PRS), 
+is characterized by four main abstractions, namely:
+- **Beliefs**: a set of facts and rules representing an agent’s epistemic memory, possibly describing its knowledge about the world, itself, and other agents;
+- **Desires**: a set of goals, representing (possibly partial) descriptions of desirable states of the world the agent is willing to achieve, test, or maintain;
+- **Intentions**: a set of tasks the agent is currently committed to, in order to satisfy some of its desires;
+- **Plans**: a set of recipes representing the agent’s procedural memory, hence encoding the know-how about achieving a given intention under certain conditions.
+
+Any instance of the aforementioned abstractions in a BDI agent may vary during its lifetime. 
+For instance, novel beliefs appear in the agents’ minds whenever they receive novel perceptions from their sensors, while stale beliefs simultaneously disappear.
+
+While carrying on an intention, agents may select one or more **plans** among those supporting the corresponding intention’s accomplishment. 
+Plans may involve the execution of one or more **actions** – possibly affecting the environment via actuators – or the accomplishment of further sub-goals, which may, in turn, require the execution of further plans as part of the same intention. 
+Finally, agents could even learn entirely new plans, either through reasoning or through information sharing with other agents.
+
+<details>
+    <summary>
+        Concerning **intentions**
+    </summary>
+
+    Even though **Intentions** are first-citizen elements in BDI concepts, 
+    those are not explicitly represented in agents programs.
+    The purpose of "hiding" this structure is to exacerbate the agent's commitment on acting for reaching its goals.
+
+</details>
+
+---
+
+Source reference: [Blending BDI Agents with Object-Oriented and Functional Programming with JaKtA](https://link.springer.com/article/10.1007/s42979-024-03244-y)    

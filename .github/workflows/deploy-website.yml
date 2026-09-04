@@ -1,0 +1,80 @@
+name: Deploy website
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "website/**"
+      - ".github/workflows/deploy-website.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout main repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: website/package-lock.json
+
+      - name: Install dependencies
+        working-directory: website
+        run: npm ci
+
+      - name: Build website
+        working-directory: website
+        run: npm run build
+
+      - name: Configure SSH
+        env:
+          DEPLOY_KEY: ${{ secrets.WEBSITE_DEPLOY_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+
+          echo "$DEPLOY_KEY" > ~/.ssh/jakta-website-deployment
+          chmod 600 ~/.ssh/jakta-website-deployment
+
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+
+      - name: Deploy to GitHub Pages repository
+        env:
+          GIT_SSH_COMMAND: "ssh -i ~/.ssh/jakta-website-deployment -o IdentitiesOnly=yes"
+        run: |
+          rm -rf /tmp/website-deploy
+
+          git clone \
+            --branch main \
+            git@github.com:jakta-bdi/jakta-bdi.github.io.git \
+            /tmp/website-deploy
+
+          # Remove the existing generated website.
+          find /tmp/website-deploy -mindepth 1 -maxdepth 1 \
+            ! -name ".git" \
+            -exec rm -rf {} +
+
+          # Copy the new Docusaurus build.
+          cp -a website/build/. /tmp/website-deploy/
+
+          cd /tmp/website-deploy
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add --all
+
+          if git diff --cached --quiet; then
+            echo "No website changes to deploy."
+            exit 0
+          fi
+
+          git commit -m "Deploy website"
+          git push origin main
