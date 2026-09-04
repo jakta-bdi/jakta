@@ -1,3 +1,75 @@
+## [1.0.0](https://github.com/jakta-bdi/jakta/compare/v0.15.187...1.0.0) (2026-09-04)
+
+### ⚠ BREAKING CHANGES
+
+* release new jakta version
+* jakta engine with coroutine implementation and kotlin mpp support (#708)
+
+### Features
+
+* alchemist incarnation for jakta coroutine engine implementation ([053e37c](https://github.com/jakta-bdi/jakta/commit/053e37ccd55faad42ae4d911a5bfcfcdfec8d6b5))
+* **alchemist-incarnation:** each agent now has its own dispatcher; dispatcher now manages correctly time unit ([4c41abd](https://github.com/jakta-bdi/jakta/commit/4c41abd56f42520bad0e1c3086a5cb1d527f45e0))
+* external event management + context parameters in plan body +  examples subproject + improvements on the prolog integration and DSL ([d46d468](https://github.com/jakta-bdi/jakta/commit/d46d468902f0bf37c0ba0a1905a0e2a2d3ef9a30))
+* jakta engine with coroutine implementation and kotlin mpp support ([#708](https://github.com/jakta-bdi/jakta/issues/708)) ([90a87a8](https://github.com/jakta-bdi/jakta/commit/90a87a8dd59ef94eb929af3bbe07954ef0503465)), closes [#786](https://github.com/jakta-bdi/jakta/issues/786)
+* node communication and kqml ([#844](https://github.com/jakta-bdi/jakta/issues/844)) ([90c40c2](https://github.com/jakta-bdi/jakta/commit/90c40c2867bf17846114c3c90f51aea4c0bb3607))
+* partial KQML implementation is complete ([35d4eb1](https://github.com/jakta-bdi/jakta/commit/35d4eb1e4bbd9f82f965e7f4fbeadb9a0a38ad19))
+* prolog and string-based incarnations ([#814](https://github.com/jakta-bdi/jakta/issues/814)) ([2b1dc6b](https://github.com/jakta-bdi/jakta/commit/2b1dc6bd75b81bed38b70dfc8e8a0cee08f73399))
+* release new jakta version ([fa529a4](https://github.com/jakta-bdi/jakta/commit/fa529a4ca4b493139c2af04c1b59ecf1c322a355))
+* remove skill generic from the API and improve the prolog incarnation ([0dc3530](https://github.com/jakta-bdi/jakta/commit/0dc353069f9ae9bf28a90a4570a90cda059e670d))
+* separate jakta-dsl api and implementation, fix dokka v2 dependencies, address cpd and ktlint issues ([10484f2](https://github.com/jakta-bdi/jakta/commit/10484f2117cce63ea4697edd4e105e3376aff31a))
+* starting KQML implementation ([5dc3bc7](https://github.com/jakta-bdi/jakta/commit/5dc3bc72a745d1f4f1375c1b9c643f7af4744b69))
+
+### Bug Fixes
+
+* **core-deps:** update kotlin monorepo to v2.3.21 ([#774](https://github.com/jakta-bdi/jakta/issues/774)) ([754feda](https://github.com/jakta-bdi/jakta/commit/754feda21d0c7f6cb88f4c25ce6d7b0ab56505b5))
+* **core-deps:** update kotlin monorepo to v2.4.10 ([#818](https://github.com/jakta-bdi/jakta/issues/818)) ([e80aba7](https://github.com/jakta-bdi/jakta/commit/e80aba727e12010391037971bdda1d18ab2f6d7e))
+* **core-deps:** update plugin kover to v0.9.9 ([#877](https://github.com/jakta-bdi/jakta/issues/877)) ([acb4232](https://github.com/jakta-bdi/jakta/commit/acb42324457561b12e74e40b4f9a7e138f4f0933))
+* **deps:** update actions/setup-java action to v6 ([#872](https://github.com/jakta-bdi/jakta/issues/872)) ([e777c89](https://github.com/jakta-bdi/jakta/commit/e777c89a35308d23bebc343c094555fdf48c3f1f))
+* **deps:** update alchemist to v43 ([#757](https://github.com/jakta-bdi/jakta/issues/757)) ([545c59c](https://github.com/jakta-bdi/jakta/commit/545c59c6b5a2879202b82fdebca941c82eaf414a))
+* **deps:** update anitvam/conventionalcommit-semantic-releasing action to v0.7.123 ([#857](https://github.com/jakta-bdi/jakta/issues/857)) ([2e9b2d9](https://github.com/jakta-bdi/jakta/commit/2e9b2d97f2def45c85ab7bdf5ffe3e4638bb6f0b))
+* **deps:** update anitvam/conventionalcommit-semantic-releasing action to v0.7.124 ([#862](https://github.com/jakta-bdi/jakta/issues/862)) ([fbb1f0e](https://github.com/jakta-bdi/jakta/commit/fbb1f0e1f461b5f575a3669736c24bf34e94c97e))
+* **deps:** update anitvam/conventionalcommit-semantic-releasing action to v0.7.125 ([#864](https://github.com/jakta-bdi/jakta/issues/864)) ([492e188](https://github.com/jakta-bdi/jakta/commit/492e188b7fd18e3962450895d77ef8b678cb0dab))
+* **deps:** update anitvam/conventionalcommit-semantic-releasing action to v0.7.126 ([#866](https://github.com/jakta-bdi/jakta/issues/866)) ([6049078](https://github.com/jakta-bdi/jakta/commit/6049078817fa58b196ef17d62c48e2ee964d156d))
+* **deps:** update danysk/build-check-deploy-gradle-action action to v4.0.44 ([#878](https://github.com/jakta-bdi/jakta/issues/878)) ([243b0d3](https://github.com/jakta-bdi/jakta/commit/243b0d30537ce4f44a894e2395e7a33d77b9e576))
+* **deps:** update gradle to v9.7.0 ([#858](https://github.com/jakta-bdi/jakta/issues/858)) ([91c1435](https://github.com/jakta-bdi/jakta/commit/91c1435a6956d5325ff690eee205d1b88c692066))
+* **deps:** update gradle to v9.7.1 ([#867](https://github.com/jakta-bdi/jakta/issues/867)) ([35617b9](https://github.com/jakta-bdi/jakta/commit/35617b971be542135552dac3bd8f58cb0f9168a0))
+* **deps:** update kotest to v6.2.4 ([#865](https://github.com/jakta-bdi/jakta/issues/865)) ([ec5a550](https://github.com/jakta-bdi/jakta/commit/ec5a5500d76f1acf8280c2fe44be90a3dd8b33fe))
+* **deps:** update plugin dokka to v2.2.0 ([#783](https://github.com/jakta-bdi/jakta/issues/783)) ([5061178](https://github.com/jakta-bdi/jakta/commit/50611786c3908476a3ae392c001dbe13b742d875))
+* **deps:** update plugin kotlin-qa to v1 ([#753](https://github.com/jakta-bdi/jakta/issues/753)) ([d9870f9](https://github.com/jakta-bdi/jakta/commit/d9870f92308539cf8c24e9275c1533744a6d43d1))
+* **deps:** update plugin kotlin-qa to v1.9.0 ([#873](https://github.com/jakta-bdi/jakta/issues/873)) ([6059d8d](https://github.com/jakta-bdi/jakta/commit/6059d8de050069baaf6f5d4cf08030cc3ec1082a))
+* **deps:** update plugin multijvmtesting to v4.3.6 ([#800](https://github.com/jakta-bdi/jakta/issues/800)) ([4e90bf4](https://github.com/jakta-bdi/jakta/commit/4e90bf42a08df22df96a3879326e66bea23b2dfd))
+* **deps:** update plugin multijvmtesting to v4.4.0 ([#811](https://github.com/jakta-bdi/jakta/issues/811)) ([fb626b4](https://github.com/jakta-bdi/jakta/commit/fb626b418d3b360041cec468384a1407430633b9))
+* **deps:** update plugin multijvmtesting to v4.5.4 ([#812](https://github.com/jakta-bdi/jakta/issues/812)) ([37d6a2a](https://github.com/jakta-bdi/jakta/commit/37d6a2a5bafbb34bff2da26788df8e05bd551c5e))
+* **deps:** update plugin multijvmtesting to v4.5.5 ([#859](https://github.com/jakta-bdi/jakta/issues/859)) ([2449dd0](https://github.com/jakta-bdi/jakta/commit/2449dd0da35f6f31c636616a32ed9440f893efd4))
+* **deps:** update plugin multijvmtesting to v4.5.6 ([#868](https://github.com/jakta-bdi/jakta/issues/868)) ([756676b](https://github.com/jakta-bdi/jakta/commit/756676bf9223b78ed2c749fa97e399ccc36117b3))
+* **deps:** update plugin org.danilopianini.gradle-pre-commit-git-hooks to v2.1.22 ([#860](https://github.com/jakta-bdi/jakta/issues/860)) ([646eda5](https://github.com/jakta-bdi/jakta/commit/646eda59cce2cbee5bcb3b3864fb25587c970b2b))
+* **deps:** update plugin org.danilopianini.gradle-pre-commit-git-hooks to v2.1.23 ([#869](https://github.com/jakta-bdi/jakta/issues/869)) ([6c6edc0](https://github.com/jakta-bdi/jakta/commit/6c6edc0aabde6b226e5b34b1b9c19395a619f8bc))
+* **deps:** update plugin publishoncentral to v9.1.15 ([#776](https://github.com/jakta-bdi/jakta/issues/776)) ([f6028fc](https://github.com/jakta-bdi/jakta/commit/f6028fcb355ac6dffbd77f312a0280a76550ceb5))
+* **deps:** update plugin publishoncentral to v9.2.10 ([#870](https://github.com/jakta-bdi/jakta/issues/870)) ([f71e6c9](https://github.com/jakta-bdi/jakta/commit/f71e6c94e780cc49fc3d9eec6708fed2026dc0af))
+* **deps:** update plugin publishoncentral to v9.2.8 ([#793](https://github.com/jakta-bdi/jakta/issues/793)) ([ab7f552](https://github.com/jakta-bdi/jakta/commit/ab7f552ece497876dda9a3b1949260b84bf564a7))
+* **deps:** update plugin publishoncentral to v9.2.9 ([#861](https://github.com/jakta-bdi/jakta/issues/861)) ([6530b7c](https://github.com/jakta-bdi/jakta/commit/6530b7cbdce126bf236d8cf90d8c99fd416e7095))
+* **deps:** update plugin tasktree to v4.0.2 ([#863](https://github.com/jakta-bdi/jakta/issues/863)) ([8fba98b](https://github.com/jakta-bdi/jakta/commit/8fba98bb882ee749c67ea447c9968a99f1ade056))
+* **deps:** update tuprolog to v1.2.1 ([#871](https://github.com/jakta-bdi/jakta/issues/871)) ([4f132ff](https://github.com/jakta-bdi/jakta/commit/4f132ffd664655bb6d3064291ca986566760a66a))
+* **deps:** update tuprolog to v1.3.0 ([#874](https://github.com/jakta-bdi/jakta/issues/874)) ([245a97d](https://github.com/jakta-bdi/jakta/commit/245a97d44174f8fdb1048a462ea121aa3a792c07))
+* rule DSL helper is now ok ([2fd9588](https://github.com/jakta-bdi/jakta/commit/2fd9588d395da0d365f49fbe37331037c656101d))
+* termination bug ([7ceb998](https://github.com/jakta-bdi/jakta/commit/7ceb99840d9866cc2ac94c1b2e3c38738e259898))
+* tests and objectifier ([f779cd6](https://github.com/jakta-bdi/jakta/commit/f779cd69932c1d136442343664561cbd15032575))
+
+### General maintenance
+
+* CI properties ([93c6e9b](https://github.com/jakta-bdi/jakta/commit/93c6e9b56dbbcd8d9df0fcaab3f9501379918697))
+* dokka tasks and release confg tweaks ([071a28f](https://github.com/jakta-bdi/jakta/commit/071a28f52dd1742b499c4d013aa2aeb1c67463c7))
+* dynamic rule testing ([40e2c4b](https://github.com/jakta-bdi/jakta/commit/40e2c4b793383dafe3921d37b2a2eb8f1d3f7d9e))
+* increase gradle JVM memory limits to avoid CI failure ([b3881db](https://github.com/jakta-bdi/jakta/commit/b3881dbd8a14ed432852ce9ffff0c17015cadbec))
+* managing todos ([24413da](https://github.com/jakta-bdi/jakta/commit/24413daa0ab814f691316fa42ee8c63a7f661e6e))
+* managing todos ([234ecec](https://github.com/jakta-bdi/jakta/commit/234ecec38002ce08ba20dbe74ec591640439768b))
+* minor changes and rule test ([c9612bf](https://github.com/jakta-bdi/jakta/commit/c9612bf49e2c28ceb1243a7c7dcb237a62733a99))
+* package.json for version ([1a6678f](https://github.com/jakta-bdi/jakta/commit/1a6678f1bb207c151be112b5037d5d63110bacc8))
+* passing checks ([4786c5f](https://github.com/jakta-bdi/jakta/commit/4786c5fb6947365a84a5a1f411e566d259cbd58b))
+* release.config.js ([ec282d3](https://github.com/jakta-bdi/jakta/commit/ec282d3003a2d389a6167e44a26a7827a811dc34))
+* remove outdated design folder and text files ([64cfbcb](https://github.com/jakta-bdi/jakta/commit/64cfbcb24a0901542826be953acc41480b782c7b))
+* removing node behaviors api ([2294095](https://github.com/jakta-bdi/jakta/commit/22940958c2f1af6302adc3a1dff9705eceeaaf71))
+
 ## [0.15.187](https://github.com/jakta-bdi/jakta/compare/v0.15.186...v0.15.187) (2026-07-25)
 
 
