@@ -1,3 +1,9 @@
+## [1.0.3](https://github.com/jakta-bdi/jakta/compare/1.0.2...1.0.3) (2026-09-04)
+
+### Bug Fixes
+
+* downgrade publish on central plugin ([c04f68b](https://github.com/jakta-bdi/jakta/commit/c04f68b2d41eca37f9ff5be000f7339e15931ff3))
+
 ## [1.0.2](https://github.com/jakta-bdi/jakta/compare/1.0.1...1.0.2) (2026-09-04)
 
 ### Bug Fixes
