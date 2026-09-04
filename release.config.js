@@ -1,10 +1,8 @@
 var publishCmd = `
 ./gradlew publishAllPublicationsToProjectLocalRepository zipMavenCentralPortalPublication releaseMavenCentralPortalPublication || exit 3
-./gradlew publishJsPackageToNpmjsRegistry || true
 `
 var prepareCmd = `
 ./gradlew dokkaGenerateHtml || true
-./gradlew allShadowJars || exit 4
 `
 
 var config = require('semantic-release-preconfigured-conventional-commits');

@@ -18,7 +18,6 @@ interface AgentLifecycle<Belief : Any, Goal : Any> {
      * Runs a reasoning cycle step.
      * Suspends until the next [it.unibo.jakta.event.AgentEvent] is available and process it.
      * Potentially launches plans as a response to the event.
-     * @param scope must be a SupervisorScope
      */
     suspend fun step()
 

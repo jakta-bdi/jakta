@@ -9,7 +9,6 @@ import it.unibo.jakta.agent.ExecutableAgent
 import it.unibo.jakta.event.SystemEvent
 import it.unibo.jakta.node.JaktaForAlchemistNode
 import it.unibo.jakta.node.NodeNetwork
-import it.unibo.jakta.node.NodeSubscription
 import it.unibo.jakta.node.RuntimeNodes
 import kotlinx.coroutines.runBlocking
 
@@ -73,7 +72,7 @@ class JaktaForAlchemistRuntime<P : Position<P>>(
     }
 
     /**
-     * Actions the Runtime will perform on the [JaktaNode] upon receiving the specified [SystemEvent].
+     * Actions the Runtime will perform on the [it.unibo.jakta.node.Node] upon receiving the specified [SystemEvent].
      * @param node the node on which the event effect is applied.
      * @param systemEvent the event that is being managed.
      */
