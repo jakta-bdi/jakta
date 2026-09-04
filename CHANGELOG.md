@@ -1,3 +1,9 @@
+## [1.0.1](https://github.com/jakta-bdi/jakta/compare/1.0.0...1.0.1) (2026-09-04)
+
+### Bug Fixes
+
+* coroutine dependencies ([59efafc](https://github.com/jakta-bdi/jakta/commit/59efafc16746d5b71952cee1c8543c8dc94cb434))
+
 ## [1.0.0](https://github.com/jakta-bdi/jakta/compare/v0.15.187...1.0.0) (2026-09-04)
 
 ### ⚠ BREAKING CHANGES
