@@ -1,3 +1,10 @@
+## [1.0.6](https://github.com/jakta-bdi/jakta/compare/1.0.5...1.0.6) (2026-09-05)
+
+### Bug Fixes
+
+* **core-deps:** update dependency org.jetbrains.kotlinx:kotlinx-coroutines-core to v1.11.0 ([#883](https://github.com/jakta-bdi/jakta/issues/883)) ([2890cc3](https://github.com/jakta-bdi/jakta/commit/2890cc3523dac3994c29eb496c7640429f63307d))
+* **deps:** update tuprolog to v1.3.1 ([#882](https://github.com/jakta-bdi/jakta/issues/882)) ([843e966](https://github.com/jakta-bdi/jakta/commit/843e966935cbc31a741acd1a3bd0250d8885c508))
+
 ## [1.0.5](https://github.com/jakta-bdi/jakta/compare/1.0.4...1.0.5) (2026-09-05)
 
 ### Bug Fixes
