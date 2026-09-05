@@ -1,3 +1,9 @@
+## [1.0.5](https://github.com/jakta-bdi/jakta/compare/1.0.4...1.0.5) (2026-09-05)
+
+### Bug Fixes
+
+* **deps:** update plugin npm-publish to v4.1.11 ([#881](https://github.com/jakta-bdi/jakta/issues/881)) ([2feeebf](https://github.com/jakta-bdi/jakta/commit/2feeebfd338e927dae44bdf4b097429a8e391106))
+
 ## [1.0.4](https://github.com/jakta-bdi/jakta/compare/1.0.3...1.0.4) (2026-09-05)
 
 ### Bug Fixes
