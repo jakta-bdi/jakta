@@ -1,3 +1,9 @@
+## [1.0.4](https://github.com/jakta-bdi/jakta/compare/1.0.3...1.0.4) (2026-09-05)
+
+### Bug Fixes
+
+* **deps:** update dependency com.github.ben-manes.caffeine:caffeine to v3.2.4 ([#880](https://github.com/jakta-bdi/jakta/issues/880)) ([06bbeb3](https://github.com/jakta-bdi/jakta/commit/06bbeb3fc21032076b70e418b8e1b05c3af09953))
+
 ## [1.0.3](https://github.com/jakta-bdi/jakta/compare/1.0.2...1.0.3) (2026-09-04)
 
 ### Bug Fixes
