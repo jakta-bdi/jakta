@@ -1,3 +1,9 @@
+## [1.0.7](https://github.com/jakta-bdi/jakta/compare/1.0.6...1.0.7) (2026-09-06)
+
+### Bug Fixes
+
+* **deps:** update node.js to 24.20 ([#889](https://github.com/jakta-bdi/jakta/issues/889)) ([e5fc313](https://github.com/jakta-bdi/jakta/commit/e5fc313fefec0c2a3c34fb6f560ea84b32d7b969))
+
 ## [1.0.6](https://github.com/jakta-bdi/jakta/compare/1.0.5...1.0.6) (2026-09-05)
 
 ### Bug Fixes
