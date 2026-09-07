@@ -18,16 +18,6 @@ plugins {
     alias(libs.plugins.taskTree)
 }
 
-plugins.withId("org.danilopianini.publish-on-central") {
-    val pluginClass = Class.forName(
-        "org.danilopianini.gradle.mavencentral.portal.PublishPortalDeployment"
-    )
-    val loader = pluginClass.classLoader
-    val jobClass = Class.forName("kotlinx.coroutines.Job", false, loader)
-
-    println("PUBLISH-ON-CENTRAL LOADER: $loader")
-    println("JOB CLASS: ${jobClass.protectionDomain.codeSource.location}")
-}
 
 val reportMerge = tasks.register("reportMerge", ReportMergeTask::class.java) {
     description = "Merges all Detekt reports into a single report"
