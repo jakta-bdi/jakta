@@ -78,8 +78,8 @@ sealed interface Plan<Belief : Any, Goal : Any, TriggerEntity : Any, Context : A
     } ?: error { "Execution not possible without a plan context" }
 
     /**
-     * Executes the plan within the provided [agent], [guardScope], [environment], and for the given [entity].
-     * It constructs a [PlanScope] using the agent, environment, and the context obtained
+     * Executes the plan within the provided [agent], and for the given trigger [entity].
+     * It constructs a [PlanScope] using the agent, and the context obtained
      * by applying the trigger and guard functions to the entity.
      * The plan's body is then executed within this scope, and the result is returned.
      */

@@ -17,7 +17,7 @@ import it.unibo.jakta.node.NodeNetwork
  * it submits one system event from the local queue to the shared [NodeNetwork]
  * and gathers the next event to parse from the queue.
  * If no event is available in the local system events or in the shared one, then no action is performed.
- * @param alchemistNode the alchemist [Node] (a.k.a. device) running the [JaktaForAlchemistNode].
+ * @param alchemistNode the alchemist [it.unibo.jakta.node.Node] (a.k.a. device) running the [JaktaForAlchemistNode].
  * @param alchemistEnvironment the shared simulation environment.
  * @param jaktaNode the [JaktaForAlchemistNode] that is managed by this instance of [NodeEventsAction].
  */
