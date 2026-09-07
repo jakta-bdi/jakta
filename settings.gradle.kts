@@ -22,8 +22,13 @@ develocity {
 }
 
 gitHooks {
-    commitMsg { conventionalCommits() }
-    createHooks()
+    commitMsg {
+        conventionalCommits {
+            defaultTypes()
+            types(setOf("wip"))
+        }
+    }
+    createHooks(true)
 }
 
 rootProject.name = "jakta"
