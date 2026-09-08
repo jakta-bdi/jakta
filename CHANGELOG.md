@@ -1,3 +1,9 @@
+## [1.0.3](https://github.com/jakta-bdi/jakta/compare/1.0.2...1.0.3) (2026-09-08)
+
+### Bug Fixes
+
+* **deps:** update plugin org.danilopianini.gradle-pre-commit-git-hooks to v2.1.24 ([#906](https://github.com/jakta-bdi/jakta/issues/906)) ([838dec6](https://github.com/jakta-bdi/jakta/commit/838dec6ec1cd4a4b483785f6e2a5f5db44a379aa))
+
 ## [1.0.2](https://github.com/jakta-bdi/jakta/compare/1.0.1...1.0.2) (2026-09-08)
 
 ### Bug Fixes
