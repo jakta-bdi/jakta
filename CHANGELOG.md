@@ -1,3 +1,9 @@
+## [1.0.4](https://github.com/jakta-bdi/jakta/compare/1.0.3...1.0.4) (2026-09-09)
+
+### Bug Fixes
+
+* **deps:** update dependency co.touchlab:kermit to v2.2.0 ([#907](https://github.com/jakta-bdi/jakta/issues/907)) ([2cf94ac](https://github.com/jakta-bdi/jakta/commit/2cf94ac1797f5ddd9373f39316ed72d31104f14d))
+
 ## [1.0.3](https://github.com/jakta-bdi/jakta/compare/1.0.2...1.0.3) (2026-09-08)
 
 ### Bug Fixes
