@@ -3,6 +3,7 @@ var publishCmd = `
 `
 var prepareCmd = `
 node scripts/generate-release-blog-post.mjs
+(cd website && node scripts/generate-publication-blog-posts.mjs) || true
 `
 
 var config = require('semantic-release-preconfigured-conventional-commits');
