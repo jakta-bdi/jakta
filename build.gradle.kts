@@ -46,11 +46,10 @@ allprojects {
     }
 
     gitSemVer {
-        excludeLightweightTags()
         commitNameBasedUpdateStrategy {
             UpdateType.NONE
         }
-        versionPrefix = "v"
+        versionPrefix = ""
     }
 
     signing {
