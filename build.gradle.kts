@@ -46,7 +46,6 @@ allprojects {
     }
 
     gitSemVer {
-        excludeLightweightTags()
         commitNameBasedUpdateStrategy {
             UpdateType.NONE
         }
