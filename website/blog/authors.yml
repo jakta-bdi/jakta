@@ -1,0 +1,35 @@
+anitvam:
+  name: Martina Baiardi
+  title: Maintainer
+  url: https://github.com/anitvam
+  image_url: https://github.com/anitvam.png
+  page: true
+  socials:
+    github: anitvam
+
+samubura:
+  name: Samuele Burattini
+  title: Contributor
+  url: https://github.com/samubura
+  image_url: https://github.com/samubura.png
+  page: true
+  socials:
+    github: samubura
+
+danysk:
+  name: Danilo Pianini
+  title: Contributor
+  url: https://github.com/danysk
+  image_url: https://github.com/danysk.png
+  page: true
+  socials:
+    github: danysk
+
+gciatto:
+  name: Giovanni Ciatto
+  title: Contributor
+  url: https://github.com/gciatto
+  image_url: https://github.com/gciatto.png
+  page: true
+  socials:
+    github: gciatto
