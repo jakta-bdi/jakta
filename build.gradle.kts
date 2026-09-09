@@ -18,6 +18,7 @@ plugins {
     alias(libs.plugins.taskTree)
 }
 
+
 val reportMerge = tasks.register("reportMerge", ReportMergeTask::class.java) {
     description = "Merges all Detekt reports into a single report"
     output = project.layout.buildDirectory.file("reports/merge.sarif")
@@ -49,6 +50,7 @@ allprojects {
         commitNameBasedUpdateStrategy {
             UpdateType.NONE
         }
+        versionPrefix = "v"
     }
 
     signing {

@@ -8,7 +8,7 @@ pluginManagement {
 
 plugins {
     id("com.gradle.develocity") version "4.4.3"
-    id("org.danilopianini.gradle-pre-commit-git-hooks") version "2.1.23"
+    id("org.danilopianini.gradle-pre-commit-git-hooks") version "2.1.24"
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
@@ -22,8 +22,13 @@ develocity {
 }
 
 gitHooks {
-    commitMsg { conventionalCommits() }
-    createHooks()
+    commitMsg {
+        conventionalCommits {
+            defaultTypes()
+            types(setOf("wip"))
+        }
+    }
+    createHooks(true)
 }
 
 rootProject.name = "jakta"

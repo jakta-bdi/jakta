@@ -1,5 +1,5 @@
 var publishCmd = `
-./gradlew publishAllPublicationsToProjectLocalRepository zipMavenCentralPortalPublication releaseMavenCentralPortalPublication || exit 3
+./gradlew publishAllPublicationsToProjectLocalRepository zipMavenCentralPortalPublication releaseMavenCentralPortalPublication --stacktrace || exit 3
 `
 var prepareCmd = `
 ./gradlew dokkaGenerateHtml || true
