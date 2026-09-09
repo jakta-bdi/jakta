@@ -7,6 +7,11 @@ on:
     paths:
       - "website/**"
       - ".github/workflows/deploy-website.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-website
+  cancel-in-progress: false
 
 permissions:
   contents: read
@@ -14,13 +19,14 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout main repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7.0.1
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7.0.0
         with:
           node-version: 24
           cache: npm
@@ -39,11 +45,17 @@ jobs:
           DEPLOY_KEY: ${{ secrets.WEBSITE_DEPLOY_KEY }}
         run: |
           mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
 
           echo "$DEPLOY_KEY" > ~/.ssh/jakta-website-deployment
           chmod 600 ~/.ssh/jakta-website-deployment
 
-          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          # Pin GitHub's own SSH host keys, fetched over TLS-verified HTTPS,
+          # instead of trusting whatever ssh-keyscan sees on the wire.
+          curl -fsSL https://api.github.com/meta \
+            | jq -r '.ssh_keys[]' \
+            | sed 's/^/github.com /' >> ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
 
       - name: Deploy to GitHub Pages repository
         env:
