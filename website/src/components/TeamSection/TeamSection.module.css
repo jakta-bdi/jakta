@@ -1,0 +1,36 @@
+.teamSection {
+  padding: 4rem 0;
+  background: var(--custom-section-color);
+  text-align: center;
+  scroll-margin-top: calc(var(--ifm-navbar-height) + 2rem);
+}
+
+.teamGrid {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.teamMember {
+  background: var(--ifm-background-color);
+  border-radius: 12px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.32);
+  padding: 1.5rem 1rem;
+  width: 40%;
+  max-width: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.avatar {
+  width: 50%;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 1rem;
+}
+
+.text-lg {
+  font-size: 40px;
+}

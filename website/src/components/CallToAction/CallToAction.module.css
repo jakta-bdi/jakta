@@ -1,0 +1,50 @@
+
+.callToActionSection {
+  text-align: center;
+  padding: 4.5rem 1rem;
+  background: var(--custom-section-color);
+  box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+}
+
+
+.callToActionSection h2 {
+  margin-bottom: 0.5rem;
+  font-size: 2rem;
+  color: var(--ifm-heading-color);
+}
+
+.callToActionSection p {
+  margin-bottom: 1.5rem;
+  font-size: 1.15rem;
+}
+
+
+.ctaButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #fff;
+  background: var(--ifm-color-primary);
+  border: none;
+  border-radius: 0.5rem;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+
+.ctaButton:hover {
+  background: var(--ifm-color-primary-dark);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  text-decoration: none;
+  color: #fff;
+}
+
+.githubLogo {
+  display: flex;
+  align-items: center;
+}

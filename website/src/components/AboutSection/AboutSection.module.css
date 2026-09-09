@@ -1,0 +1,54 @@
+
+.aboutSection {
+  padding: 4rem 0;
+  background: var(--ifm--background-color);
+  scroll-margin-top: calc(var(--ifm-navbar-height) + 2rem);
+}
+
+.aboutSection h2 {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.aboutContent {
+	display: flex;
+	flex-wrap: wrap;
+	flex-direction: row;
+	justify-content: center;
+	align-items: flex-start;
+	gap: 2rem;
+}
+
+.citeCard {
+	width: 90%;
+	max-width: 1000px;
+	background: var(--ifm-card-background-color);
+	color: var(--ifm-font-color-base);
+	border-radius: 1.5rem;
+	box-shadow: 0 2px 16px rgba(0,0,0,0.32);
+	padding: 1rem 2rem;
+	z-index: 10;
+}
+
+.citeHeader {
+	text-align: center;
+	margin-bottom: 1rem;
+}
+
+.aboutGrid {
+	width: 100%;
+	max-width: 400px;
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem;
+}
+
+.aboutCard {
+	min-width: 300px;
+	background: var(--ifm-card-background-color);
+	color: var(--ifm-font-color-base);
+	border-radius: 1.5rem;
+	box-shadow: 0 2px 16px rgba(0,0,0,0.32);
+	padding: 1rem 2rem;
+	z-index: 10;
+}
