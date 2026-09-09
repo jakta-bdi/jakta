@@ -2,7 +2,7 @@ var publishCmd = `
 ./gradlew publishAllPublicationsToProjectLocalRepository zipMavenCentralPortalPublication releaseMavenCentralPortalPublication --stacktrace || exit 3
 `
 var prepareCmd = `
-./gradlew dokkaGenerateHtml || true
+node scripts/generate-release-blog-post.mjs
 `
 
 var config = require('semantic-release-preconfigured-conventional-commits');
@@ -22,8 +22,17 @@ config.plugins.push(
             ]
         }
     ],
-    "@semantic-release/git",
+    [
+        "@semantic-release/git",
+        {
+            "assets": [
+                "CHANGELOG.md",
+                "package.json",
+                "package-lock.json",
+                "website/blog/*.md",
+            ]
+        }
+    ],
 )
-config.tagFormat = "v${version}"
 
 module.exports = config

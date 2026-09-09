@@ -131,6 +131,19 @@ const config: Config = {
           label: 'Documentation',
         },
         {
+          type: 'dropdown',
+          label: 'API Docs',
+          position: 'left',
+          items: [
+            { label: 'jakta-api', href: 'https://javadoc.io/doc/it.unibo.jakta/jakta-api/latest' },
+            { label: 'jakta-dsl', href: 'https://javadoc.io/doc/it.unibo.jakta/jakta-dsl/latest' },
+            { label: 'jakta-core', href: 'https://javadoc.io/doc/it.unibo.jakta/jakta-core/latest' },
+            { label: 'alchemist-jakta-incarnation', href: 'https://javadoc.io/doc/it.unibo.jakta/alchemist-jakta-incarnation/latest' },
+            { label: 'jakta-string-incarnation', href: 'https://javadoc.io/doc/it.unibo.jakta/jakta-string-incarnation/latest' },
+            { label: 'jakta-prolog-incarnation', href: 'https://javadoc.io/doc/it.unibo.jakta/jakta-prolog-incarnation/latest' },
+          ],
+        },
+        {
           to: '/publications',
           label: 'Publications', 
           position: 'left'

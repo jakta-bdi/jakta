@@ -49,7 +49,7 @@ allprojects {
         commitNameBasedUpdateStrategy {
             UpdateType.NONE
         }
-        versionPrefix = "v"
+        versionPrefix = ""
     }
 
     signing {
