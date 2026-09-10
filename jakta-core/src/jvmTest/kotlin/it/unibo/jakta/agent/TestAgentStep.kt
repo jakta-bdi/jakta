@@ -3,6 +3,7 @@ package it.unibo.jakta.agent
 import it.unibo.jakta.event.GoalAddEvent
 import it.unibo.jakta.plan.GoalAdditionPlan
 import it.unibo.jakta.plan.Plan
+import kotlin.coroutines.ContinuationInterceptor
 import kotlin.reflect.typeOf
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -57,7 +58,7 @@ class TestAgentStep {
 
         // First iteration of the agent lifecycle
         runTest {
-            val dispatcher = this.coroutineContext[CoroutineDispatcher]!!
+            val dispatcher = this.coroutineContext[ContinuationInterceptor]!! as CoroutineDispatcher
             try {
                 withTimeout(250.milliseconds) {
                     lifecycle.tryStep(dispatcher)

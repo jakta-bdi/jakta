@@ -24,7 +24,7 @@ class TestPlanFailure {
                         adding.goal {
                             ifGoalMatch("goalChain")
                         } triggers {
-                            agent.achieve<String, Unit>("failingPlan")
+                            agent.achieve("failingPlan")
                             agent.print("The plan has failed but recovered")
                             node.terminateNode()
                         }

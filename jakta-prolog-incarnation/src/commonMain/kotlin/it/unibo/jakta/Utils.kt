@@ -18,11 +18,11 @@ import it.unibo.tuprolog.core.Tuple
 import it.unibo.tuprolog.core.Var
 import it.unibo.tuprolog.serialize.TermObjectifier
 import it.unibo.tuprolog.utils.setTag
-import java.math.BigDecimal
-import java.math.BigInteger
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
+import org.gciatto.kt.math.BigDecimal
+import org.gciatto.kt.math.BigInteger
 
 /**
  * Tag used to store annotations on Prolog terms.
@@ -89,7 +89,7 @@ inline fun <reified T : Any> Var.value(): T {
 
     return converted as? T
         ?: throw ClassCastException(
-            "Term $this ($converted) cannot be converted to expected type ${T::class.qualifiedName}",
+            "Term $this ($converted) cannot be converted to expected type ${T::class.simpleName}",
         )
 }
 
@@ -111,25 +111,25 @@ fun coerceValue(value: Any?, targetType: KType): Any? {
     val result = when (value) {
         // --- 1. Primitive / Scalar Conversions ---
         is BigInteger -> when (targetClass) {
-            Int::class -> value.intValueExact()
-            Long::class -> value.longValueExact()
+            Int::class -> value.toIntExact()
+            Long::class -> value.toLongExact()
             Double::class -> value.toDouble()
             Float::class -> value.toFloat()
-            BigDecimal::class -> value.toBigDecimal()
-            Short::class -> value.shortValueExact()
-            Byte::class -> value.byteValueExact()
+            BigDecimal::class -> BigDecimal.of(value)
+            Short::class -> value.toShortExact()
+            Byte::class -> value.toByteExact()
             String::class -> value.toString()
             else -> value
         }
 
         is BigDecimal -> when (targetClass) {
-            Int::class -> value.intValueExact()
-            Long::class -> value.longValueExact()
+            Int::class -> value.toIntExact()
+            Long::class -> value.toLongExact()
             Double::class -> value.toDouble()
             Float::class -> value.toFloat()
             BigInteger::class -> value.toBigIntegerExact()
-            Short::class -> value.shortValueExact()
-            Byte::class -> value.byteValueExact()
+            Short::class -> value.toShortExact()
+            Byte::class -> value.toByteExact()
             String::class -> value.toString()
             else -> value
         }
@@ -177,14 +177,6 @@ fun coerceValue(value: Any?, targetType: KType): Any? {
 
         else -> value
     }
-    if (!Collection::class.java.isAssignableFrom(targetClass.java) &&
-        targetClass != Pair::class &&
-        !targetClass.isInstance(result)
-    ) {
-        throw ClassCastException(
-            "Element '$value' (${value::class.simpleName}) could not be converted to $targetClass",
-        )
-    }
     return result
 }
 
@@ -222,9 +214,9 @@ object JaktaTermObjectifier : TermObjectifier by TermObjectifier.default {
         else -> error("Unexpected Truth value: $term")
     }
 
-    override fun visitInteger(term: Integer): BigInteger = term.value.toString().toBigInteger()
+    override fun visitInteger(term: Integer): BigInteger = term.value
 
-    override fun visitReal(term: Real): BigDecimal = term.value.toString().toBigDecimal()
+    override fun visitReal(term: Real): BigDecimal = term.value
 
     override fun visitEmptyList(term: EmptyList): List<Any> = emptyList()
 

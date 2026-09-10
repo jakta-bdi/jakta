@@ -45,11 +45,11 @@ fun KotlinDependencyHandler.jakta(project: String): ProjectDependency = project(
 fun DependencyHandler.jakta(project: String) = project(":jakta-$project")
 
 @OptIn(ExperimentalKotlinGradlePluginApi::class)
-fun Project.configureKotlinMultiplatform() {
+fun Project.configureKotlinMultiplatform(includeNative: Boolean = true, targetJvm: JvmTarget = JvmTarget.JVM_1_8) {
     with(extensions.getByType<KotlinMultiplatformExtension>()) {
         jvm {
             compilerOptions {
-                jvmTarget = JvmTarget.JVM_1_8
+                jvmTarget = targetJvm
             }
             testRuns.getByName("test").executionTask.configure {
                 useJUnitPlatform()
@@ -84,27 +84,29 @@ fun Project.configureKotlinMultiplatform() {
             }
             binaries.library()
         }
-        val nativeSetup: KotlinNativeTarget.() -> Unit = {
-            binaries {
-                sharedLib()
-                staticLib()
-            }
-        }
         applyDefaultHierarchyTemplate()
-        linuxX64(nativeSetup)
-        linuxArm64(nativeSetup)
+        if (includeNative) {
+            val nativeSetup: KotlinNativeTarget.() -> Unit = {
+                binaries {
+                    sharedLib()
+                    staticLib()
+                }
+            }
+            linuxX64(nativeSetup)
+            linuxArm64(nativeSetup)
 
-        mingwX64(nativeSetup)
+            mingwX64(nativeSetup)
 
-        macosArm64(nativeSetup)
-        iosArm64(nativeSetup)
-        iosX64(nativeSetup)
+            macosArm64(nativeSetup)
+            iosArm64(nativeSetup)
+            iosX64(nativeSetup)
 
 //        iosSimulatorArm64(nativeSetup)
 //        watchosArm64(nativeSetup)
 //        watchosSimulatorArm64(nativeSetup)
 //        tvosArm64(nativeSetup)
 //        tvosSimulatorArm64(nativeSetup)
+        }
 
         targets.all {
             compilations.all {
