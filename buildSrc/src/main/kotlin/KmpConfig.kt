@@ -128,11 +128,18 @@ private fun Project.configureNpmPublishing() {
     pluginManager.apply(libs.findPlugin("npm-publish").get().id)
     extensions.configure<NpmPublishExtension> {
         organization.set("jakta")
+        readme.set(rootProject.layout.projectDirectory.file("README.md"))
         // No authToken: npm is deprecating direct-publish tokens, so CI authenticates via
         // Trusted Publishing (GitHub Actions OIDC) instead, which the npm CLI picks up automatically
         // when the workflow requests an id-token and a Trusted Publisher is configured on npmjs.com.
         registries {
             npmjs { }
+        }
+        packages.all {
+            files.from(rootProject.layout.projectDirectory.file("LICENSE"))
+            packageJson {
+                license.set("Apache-2.0")
+            }
         }
     }
 }

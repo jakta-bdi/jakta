@@ -1,5 +1,5 @@
 var publishCmd = `
-./gradlew publishAllPublicationsToProjectLocalRepository zipMavenCentralPortalPublication releaseMavenCentralPortalPublication --stacktrace || exit 3
+./gradlew publishAllPublicationsToProjectLocalRepository zipMavenCentralPortalPublication releaseMavenCentralPortalPublication publish --stacktrace || exit 3
 `
 var prepareCmd = `
 node scripts/generate-release-blog-post.mjs
