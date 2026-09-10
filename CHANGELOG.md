@@ -1,3 +1,9 @@
+## [1.1.0](https://github.com/jakta-bdi/jakta/compare/1.0.7...1.1.0) (2026-09-10)
+
+### Features
+
+* prolog-incarnation multiplatform and npm publishing fixes ([#930](https://github.com/jakta-bdi/jakta/issues/930)) ([5648708](https://github.com/jakta-bdi/jakta/commit/5648708bad32e2bb9da44ffd8f558751ba5e570e))
+
 ## [1.0.7](https://github.com/jakta-bdi/jakta/compare/1.0.6...1.0.7) (2026-09-10)
 
 ### Bug Fixes
