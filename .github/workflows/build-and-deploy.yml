@@ -9,6 +9,9 @@ jobs:
       matrix:
         os: [windows, macos, ubuntu]
     runs-on: ${{ matrix.os }}-latest
+    permissions:
+      contents: read
+      id-token: write # Required for npm Trusted Publishing (OIDC) on the deploy step below
     concurrency:
       group: build-${{ github.workflow }}-${{ matrix.os }}-${{ github.event.number || github.ref }}
       cancel-in-progress: true
@@ -23,6 +26,7 @@ jobs:
           should-deploy: ${{ runner.os == 'macOS' && steps.detect-secrets.outputs.has-secrets == 'true' }} # Deploy from macOS since it supports all the platforms
           deploy-command: |
             ./gradlew publishAllPublicationsToProjectLocalRepository zipMavenCentralPortalPublication releaseMavenCentralPortalPublication
+            ./gradlew publish
           should-run-codecov: ${{ runner.os == 'Linux' }}
           codecov-directory: build/reports/kover
           codecov-token: ${{ secrets.CODECOV_TOKEN }}
