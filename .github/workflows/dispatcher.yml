@@ -10,7 +10,16 @@ on:
       - 'LICENSE'
       - 'README.md'
       - 'renovate.json'
+      - 'website/**'
   pull_request:
+    paths-ignore:
+      - '.gitignore'
+      - '.mergify.yml'
+      - 'CHANGELOG.md'
+      - 'LICENSE'
+      - 'README.md'
+      - 'renovate.json'
+      - 'website/**'
   workflow_dispatch:
 
 jobs:

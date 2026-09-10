@@ -1,3 +1,21 @@
+## [1.0.6](https://github.com/jakta-bdi/jakta/compare/1.0.5...1.0.6) (2026-09-10)
+
+### Bug Fixes
+
+* **deps:** update danysk/build-check-deploy-gradle-action action to v4.0.45 ([#894](https://github.com/jakta-bdi/jakta/issues/894)) ([b6ff332](https://github.com/jakta-bdi/jakta/commit/b6ff332c8256ce60a46a88c460c1655cbfcaa60a))
+
+## [1.0.5](https://github.com/jakta-bdi/jakta/compare/1.0.4...1.0.5) (2026-09-09)
+
+### Bug Fixes
+
+* **deps:** update dependency @citation-js/plugin-csl to v0.7.22 ([#910](https://github.com/jakta-bdi/jakta/issues/910)) ([dabb33a](https://github.com/jakta-bdi/jakta/commit/dabb33ae1267ec424566ce13d4992767dd1cdf2e))
+* **deps:** update dependency @iconify/react to v5.2.1 ([#911](https://github.com/jakta-bdi/jakta/issues/911)) ([c4ebd15](https://github.com/jakta-bdi/jakta/commit/c4ebd15f98abe31d9b5b58b3694fd08954ce405c))
+
+### General maintenance
+
+* CI Upgrades and fixes ([#927](https://github.com/jakta-bdi/jakta/issues/927)) ([49afcb2](https://github.com/jakta-bdi/jakta/commit/49afcb23f0af6a8c25215d4629e6120e08b3afa5))
+* migrating the website to the main repo ([#909](https://github.com/jakta-bdi/jakta/issues/909)) ([4c16ac7](https://github.com/jakta-bdi/jakta/commit/4c16ac7e95835e5cd556d8c0b60aa38e74cfd238))
+
 ## [1.0.4](https://github.com/jakta-bdi/jakta/compare/1.0.3...1.0.4) (2026-09-09)
 
 ### Bug Fixes

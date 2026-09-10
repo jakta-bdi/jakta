@@ -8,11 +8,13 @@
 
 import org.gradle.api.Project
 import org.gradle.api.artifacts.ProjectDependency
+import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.gradle.kotlin.dsl.assign
+import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.project
 import org.gradle.plugin.use.PluginDependency
@@ -27,6 +29,7 @@ import kotlin.time.Duration.Companion.minutes
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.targets.js.dsl.KotlinJsTargetDsl
 import org.jetbrains.kotlin.gradle.tasks.KotlinTest
+import dev.petuska.npm.publish.extension.NpmPublishExtension
 
 val Provider<PluginDependency>.id: String get() = get().pluginId
 
@@ -114,5 +117,20 @@ fun Project.configureKotlinMultiplatform() {
             }
         }
 
+    }
+    configureNpmPublishing()
+}
+
+private fun Project.configureNpmPublishing() {
+    val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
+    pluginManager.apply(libs.findPlugin("npm-publish").get().id)
+    extensions.configure<NpmPublishExtension> {
+        organization.set("jakta")
+        // No authToken: npm is deprecating direct-publish tokens, so CI authenticates via
+        // Trusted Publishing (GitHub Actions OIDC) instead, which the npm CLI picks up automatically
+        // when the workflow requests an id-token and a Trusted Publisher is configured on npmjs.com.
+        registries {
+            npmjs { }
+        }
     }
 }

@@ -12,7 +12,6 @@ plugins {
     alias(libs.plugins.gitSemVer)
     alias(libs.plugins.kover)
     alias(libs.plugins.kotlin.qa)
-    alias(libs.plugins.npm.publish)
     alias(libs.plugins.multiJvmTesting)
     alias(libs.plugins.publishOnCentral)
     alias(libs.plugins.taskTree)
@@ -46,11 +45,10 @@ allprojects {
     }
 
     gitSemVer {
-        excludeLightweightTags()
         commitNameBasedUpdateStrategy {
             UpdateType.NONE
         }
-        versionPrefix = "v"
+        versionPrefix = ""
     }
 
     signing {
