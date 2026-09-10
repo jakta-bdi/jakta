@@ -1,16 +1,9 @@
 package it.unibo.jakta.reflection
 
-import kotlin.reflect.KClass
 import kotlin.reflect.KType
 
-// TODO check if a better subtype check is possible
 /**
  * Implements the Native behavior of checking if a KType is a subtype of another KType.
+ * @see isSubtypeOfWithoutFullReflection
  */
-actual fun KType.isSubtypeOfMultiPlatform(other: KType): Boolean {
-    if (this == other) {
-        return true
-    }
-    val otherClass = other.classifier as? KClass<*>
-    return otherClass == Any::class
-}
+actual fun KType.isSubtypeOfMultiPlatform(other: KType): Boolean = isSubtypeOfWithoutFullReflection(other)

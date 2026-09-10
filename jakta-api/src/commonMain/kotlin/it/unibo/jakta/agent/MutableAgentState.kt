@@ -101,5 +101,14 @@ interface MutableAgentState<Belief : Any, Goal : Any> :
  * @return The result of the plan execution of type [PlanResult].
  */
 @OptIn(InternalJaktaAPI::class)
-suspend inline fun <Goal : Any, reified PlanResult> MutableAgentState<*, Goal>.achieve(goal: Goal): PlanResult =
-    internalAchieve(goal, typeOf<PlanResult>())
+suspend inline fun <Goal : Any, reified PlanResult> MutableAgentState<*, Goal>.achieveWithResult(
+    goal: Goal,
+): PlanResult = internalAchieve(goal, typeOf<PlanResult>())
+
+/**
+ * Public-facing extension function to achieve a goal and wait for its completion, discarding its result.
+ * @param goal The goal to be achieved.
+ */
+@OptIn(InternalJaktaAPI::class)
+suspend inline fun <Goal : Any> MutableAgentState<*, Goal>.achieve(goal: Goal): Unit =
+    internalAchieve(goal, typeOf<Unit>())
