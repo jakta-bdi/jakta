@@ -41,6 +41,9 @@ jobs:
     needs:
       - build
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write # Required for npm Trusted Publishing (OIDC) on the deploy step below
     if: >-
       !github.event.repository.fork
       && github.ref == 'refs/heads/main'

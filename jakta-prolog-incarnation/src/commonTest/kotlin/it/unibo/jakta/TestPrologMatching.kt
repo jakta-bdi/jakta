@@ -9,6 +9,7 @@ import it.unibo.jakta.logic.unifiesWith
 import it.unibo.tuprolog.solve.Solution
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.fail
 
 class TestPrologMatching {
 
@@ -38,9 +39,9 @@ class TestPrologMatching {
                     assertEquals("charlie", solution.substitution[Y].toString())
                 }
 
-                is Solution.No -> assert(false) { "No solution found" }
+                is Solution.No -> fail("No solution found")
 
-                is Solution.Halt -> assert(false) { "The solving process was halted: ${solution.exception}" }
+                is Solution.Halt -> fail("The solving process was halted: ${solution.exception}")
             }
         }
     }
@@ -54,7 +55,7 @@ class TestPrologMatching {
             val query = noSubstitutionBeliefQuery { "parent"(X, Y)[source("bob")] }
             val sub = belief.annotatedMguWith(query)
             if (sub.isFailed) {
-                assert(false) { "Failed to find a match" }
+                fail("Failed to find a match")
             }
             assertEquals("alice", sub[X].toString())
             assertEquals("charlie", sub[Y].toString())
@@ -70,7 +71,7 @@ class TestPrologMatching {
             val query = noSubstitutionBeliefQuery { "parent"(X, Y) }
             val sub = belief.annotatedMguWith(query)
             if (sub.isFailed) {
-                assert(false) { "Failed to find a match" }
+                fail("Failed to find a match")
             }
             assertEquals("alice", sub[X].toString())
             assertEquals("charlie", sub[Y].toString())
@@ -86,7 +87,7 @@ class TestPrologMatching {
             val query = noSubstitutionBeliefQuery { "parent"(X, Y)[source(Z)] }
             val sub = belief.annotatedMguWith(query)
             if (sub.isFailed) {
-                assert(false) { "Failed to find a match" }
+                fail("Failed to find a match")
             }
             assertEquals("alice", sub[X].toString())
             assertEquals("charlie", sub[Y].toString())
@@ -108,8 +109,8 @@ class TestPrologMatching {
             val query = noSubstitutionBeliefQuery { "parent"(X, Y)[source("bob")] }
             when (val solution = theory.unifiesWith(query)) {
                 is Solution.Yes -> assertEquals("charlie", solution.substitution[Y].toString())
-                is Solution.No -> assert(false) { "No solution found" }
-                is Solution.Halt -> assert(false) { "The solving process was halted: ${solution.exception}" }
+                is Solution.No -> fail("No solution found")
+                is Solution.Halt -> fail("The solving process was halted: ${solution.exception}")
             }
         }
     }
@@ -125,8 +126,8 @@ class TestPrologMatching {
             val query = noSubstitutionBeliefQuery { "parent"(X, Y) }
             when (val solution = theory.unifiesWith(query)) {
                 is Solution.Yes -> assertEquals("charlie", solution.substitution[Y].toString())
-                is Solution.No -> assert(false) { "No solution found" }
-                is Solution.Halt -> assert(false) { "The solving process was halted: ${solution.exception}" }
+                is Solution.No -> fail("No solution found")
+                is Solution.Halt -> fail("The solving process was halted: ${solution.exception}")
             }
         }
     }

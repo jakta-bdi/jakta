@@ -4,6 +4,7 @@ import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.agent.BaseAgentID
+import it.unibo.jakta.agent.achieve
 import it.unibo.jakta.dsl.belief.PrologBelief
 import it.unibo.jakta.dsl.belief.belief
 import it.unibo.jakta.dsl.belief.beliefQuery
@@ -18,7 +19,6 @@ import it.unibo.jakta.dsl.goal.replyOne
 import it.unibo.jakta.dsl.mas
 import it.unibo.jakta.dsl.node
 import it.unibo.jakta.dsl.node.NodeBuilders
-import it.unibo.jakta.dsl.plan.achieve
 import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.dsl.plans
 import it.unibo.jakta.kqml.KQMLPayload
@@ -192,7 +192,8 @@ class TestKQMLMessaging {
         run(aliceNode, bobNode)
     }
 
-    @Ignore("This is currently failing as the dropping of goals is not correctly implemented") // TODO
+    // TODO this is currently failing as the dropping of goals is not correctly implemented
+    @Ignore
     @Test
     fun `test unachieve`() = runTest {
         val aliceNode = masNode(alice) {

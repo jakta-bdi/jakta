@@ -2,6 +2,8 @@ package it.unibo.jakta
 
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
+import it.unibo.jakta.agent.achieve
+import it.unibo.jakta.agent.achieveWithResult
 import it.unibo.jakta.dsl.belief.belief
 import it.unibo.jakta.dsl.belief.inferenceRule
 import it.unibo.jakta.dsl.belief.initialBelief
@@ -11,7 +13,6 @@ import it.unibo.jakta.dsl.goal.initialGoal
 import it.unibo.jakta.dsl.goal.matchingGoal
 import it.unibo.jakta.dsl.mas
 import it.unibo.jakta.dsl.node.NodeBuilders
-import it.unibo.jakta.dsl.plan.achieve
 import it.unibo.jakta.dsl.plan.satisfies
 import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.logic.JaktaLogicProgrammingScope.Companion.prologPlan
