@@ -2,7 +2,7 @@ var publishCmd = `
 ./gradlew publishAllPublicationsToProjectLocalRepository zipMavenCentralPortalPublication releaseMavenCentralPortalPublication publish --stacktrace || exit 3
 `
 var prepareCmd = `
-node scripts/generate-release-blog-post.mjs
+NEXT_RELEASE_VERSION=\${nextRelease.version} node scripts/generate-release-blog-post.mjs
 (cd website && node scripts/generate-publication-blog-posts.mjs) || true
 `
 
