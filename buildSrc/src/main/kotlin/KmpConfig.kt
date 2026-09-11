@@ -129,9 +129,12 @@ private fun Project.configureNpmPublishing() {
     extensions.configure<NpmPublishExtension> {
         organization.set("jakta")
         readme.set(rootProject.layout.projectDirectory.file("README.md"))
-        // No authToken: npm is deprecating direct-publish tokens, so CI authenticates via
-        // Trusted Publishing (GitHub Actions OIDC) instead, which the npm CLI picks up automatically
-        // when the workflow requests an id-token and a Trusted Publisher is configured on npmjs.com.
+        // No authToken: publishing relies on Trusted Publishing (GitHub Actions OIDC).
+        // IMPORTANT: this workflow only runs as a workflow_call from dispatcher.yml, and
+        // GitHub's OIDC token identifies the *caller* workflow -- so each package's Trusted
+        // Publisher on npmjs.com must be configured with workflow filename
+        // ".github/workflows/dispatcher.yml", NOT "build-and-deploy.yml", or the OIDC identity
+        // check silently fails and npm falls back to demanding a token (ENEEDAUTH).
         registries {
             npmjs { }
         }
