@@ -1,3 +1,15 @@
+## [1.1.2](https://github.com/jakta-bdi/jakta/compare/1.1.1...1.1.2) (2026-09-11)
+
+### Bug Fixes
+
+* **deps:** update dependency typescript to ~5.8.0 ([#916](https://github.com/jakta-bdi/jakta/issues/916)) ([d3960ca](https://github.com/jakta-bdi/jakta/commit/d3960ca333e9d0a3544d5cee3286aab1ea143e5a))
+
+### General maintenance
+
+* **ci:** fix the previous commit that got lost ([#935](https://github.com/jakta-bdi/jakta/issues/935)) ([bd349a6](https://github.com/jakta-bdi/jakta/commit/bd349a6a3c0ecd13d691fb4ac9f49ce5428e75f9))
+* **ci:** fixing small merging error ([#934](https://github.com/jakta-bdi/jakta/issues/934)) ([6d6c78d](https://github.com/jakta-bdi/jakta/commit/6d6c78d7b62f994d60d254904ff5750fdc58ad2d))
+* fixing npm release ([#933](https://github.com/jakta-bdi/jakta/issues/933)) ([82122e7](https://github.com/jakta-bdi/jakta/commit/82122e73ec03904a551c05bb9b5e1f99ec8be766))
+
 ## [1.1.1](https://github.com/jakta-bdi/jakta/compare/1.1.0...1.1.1) (2026-09-11)
 
 ### Bug Fixes
