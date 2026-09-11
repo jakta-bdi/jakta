@@ -1,3 +1,19 @@
+## [1.1.0](https://github.com/jakta-bdi/jakta/compare/1.0.7...1.1.0) (2026-09-10)
+
+### Features
+
+* prolog-incarnation multiplatform and npm publishing fixes ([#930](https://github.com/jakta-bdi/jakta/issues/930)) ([5648708](https://github.com/jakta-bdi/jakta/commit/5648708bad32e2bb9da44ffd8f558751ba5e570e))
+
+## [1.0.7](https://github.com/jakta-bdi/jakta/compare/1.0.6...1.0.7) (2026-09-10)
+
+### Bug Fixes
+
+* **deps:** update dependency @mdx-js/react to v3.1.1 ([#912](https://github.com/jakta-bdi/jakta/issues/912)) ([8da88f9](https://github.com/jakta-bdi/jakta/commit/8da88f99641c10b7ac4c7a6d99f8e0d2ccb94258))
+
+### General maintenance
+
+* npm publishing setup ([#929](https://github.com/jakta-bdi/jakta/issues/929)) ([3224cd3](https://github.com/jakta-bdi/jakta/commit/3224cd33169a430da5d0eb6d1d3e51b34038ce75))
+
 ## [1.0.6](https://github.com/jakta-bdi/jakta/compare/1.0.5...1.0.6) (2026-09-10)
 
 ### Bug Fixes
