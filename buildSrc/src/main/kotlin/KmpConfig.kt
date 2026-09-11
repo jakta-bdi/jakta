@@ -100,6 +100,9 @@ fun Project.configureKotlinMultiplatform(includeNative: Boolean = true, targetJv
             macosArm64(nativeSetup)
             iosArm64(nativeSetup)
             iosX64(nativeSetup)
+            macosArm64(nativeSetup)
+            iosArm64(nativeSetup)
+            iosX64(nativeSetup)
 
 //        iosSimulatorArm64(nativeSetup)
 //        watchosArm64(nativeSetup)
