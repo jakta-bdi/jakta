@@ -1,3 +1,12 @@
+## [1.1.4](https://github.com/jakta-bdi/jakta/compare/1.1.3...1.1.4) (2026-09-12)
+
+### Bug Fixes
+
+* **deps:** update dependency typescript to ~5.9.0 ([#917](https://github.com/jakta-bdi/jakta/issues/917)) ([071e2d9](https://github.com/jakta-bdi/jakta/commit/071e2d9430e6d1a3d41b54519969d955205a29c2))
+* **deps:** update dependency yaml-loader to ^0.9.0 ([#918](https://github.com/jakta-bdi/jakta/issues/918)) ([a5224b4](https://github.com/jakta-bdi/jakta/commit/a5224b445731e746a26752e3609439418298328d))
+* **deps:** update docusaurus monorepo to v3.10.2 ([#921](https://github.com/jakta-bdi/jakta/issues/921)) ([f3b5d43](https://github.com/jakta-bdi/jakta/commit/f3b5d435600f4c65f955521a194fea6e3067364b))
+* **deps:** update node.js to 24.21 ([#928](https://github.com/jakta-bdi/jakta/issues/928)) ([b5bb92c](https://github.com/jakta-bdi/jakta/commit/b5bb92cc9dbb72ca9b59f672eb0306eb83cf5def))
+
 ## [1.1.3](https://github.com/jakta-bdi/jakta/compare/1.1.2...1.1.3) (2026-09-12)
 
 ### Bug Fixes
