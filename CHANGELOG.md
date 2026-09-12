@@ -1,3 +1,9 @@
+## [1.1.3](https://github.com/jakta-bdi/jakta/compare/1.1.2...1.1.3) (2026-09-12)
+
+### Bug Fixes
+
+* **deps:** update plugin kotlin-qa to v1.9.1 ([#936](https://github.com/jakta-bdi/jakta/issues/936)) ([ed9b02c](https://github.com/jakta-bdi/jakta/commit/ed9b02cb3cf8681927ee75d2b6cd5f7c38e4417a))
+
 ## [1.1.2](https://github.com/jakta-bdi/jakta/compare/1.1.1...1.1.2) (2026-09-11)
 
 ### Bug Fixes
