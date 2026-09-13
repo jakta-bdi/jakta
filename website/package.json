@@ -15,9 +15,9 @@
     "typecheck": "tsc"
   },
   "dependencies": {
-    "@citation-js/core": "^0.7.21",
-    "@citation-js/plugin-bibtex": "^0.7.21",
-    "@citation-js/plugin-csl": "^0.7.21",
+    "@citation-js/core": "^0.8.0",
+    "@citation-js/plugin-bibtex": "^0.8.0",
+    "@citation-js/plugin-csl": "^0.8.0",
     "@docusaurus/core": "3.10.2",
     "@docusaurus/preset-classic": "3.10.2",
     "@docusaurus/theme-search-algolia": "^3.7.0",
