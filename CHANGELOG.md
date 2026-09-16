@@ -1,3 +1,12 @@
+## [1.1.11](https://github.com/jakta-bdi/jakta/compare/1.1.10...1.1.11) (2026-09-16)
+
+### Bug Fixes
+
+* **deps:** update dependency @iconify/react to v6 ([#924](https://github.com/jakta-bdi/jakta/issues/924)) ([f919d25](https://github.com/jakta-bdi/jakta/commit/f919d25598e358e11b917d029354d0261dbc0c3a))
+* **deps:** update dependency typescript to v6 ([#925](https://github.com/jakta-bdi/jakta/issues/925)) ([f96030e](https://github.com/jakta-bdi/jakta/commit/f96030ea7b8b7add63a02006d67dd6e7ab0619bb))
+* **deps:** update dependency typescript to v7 ([#926](https://github.com/jakta-bdi/jakta/issues/926)) ([c780372](https://github.com/jakta-bdi/jakta/commit/c780372fda464e8fad443e1388dfb0e8ece4453c))
+* **deps:** update tuprolog to v2 ([#940](https://github.com/jakta-bdi/jakta/issues/940)) ([dabdfa3](https://github.com/jakta-bdi/jakta/commit/dabdfa38464bcae7f0c142342293c9f3f01854f2))
+
 ## [1.1.10](https://github.com/jakta-bdi/jakta/compare/1.1.9...1.1.10) (2026-09-15)
 
 ### Bug Fixes
