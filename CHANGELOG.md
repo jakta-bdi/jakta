@@ -1,3 +1,9 @@
+## [1.1.12](https://github.com/jakta-bdi/jakta/compare/1.1.11...1.1.12) (2026-09-17)
+
+### Bug Fixes
+
+* **deps:** update tuprolog to v2.0.5 ([#897](https://github.com/jakta-bdi/jakta/issues/897)) ([1bcf1f3](https://github.com/jakta-bdi/jakta/commit/1bcf1f34108e646b27a160480b69305f7a7e6573))
+
 ## [1.1.11](https://github.com/jakta-bdi/jakta/compare/1.1.10...1.1.11) (2026-09-16)
 
 ### Bug Fixes
