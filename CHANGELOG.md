@@ -1,3 +1,10 @@
+## [1.1.14](https://github.com/jakta-bdi/jakta/compare/1.1.13...1.1.14) (2026-09-22)
+
+### Bug Fixes
+
+* **deps:** update citation-js monorepo to ^0.9.0 ([#944](https://github.com/jakta-bdi/jakta/issues/944)) ([b58a499](https://github.com/jakta-bdi/jakta/commit/b58a4990e6a5042843904fed0bea5e25d7310610))
+* **deps:** update dependency com.github.ben-manes.caffeine:caffeine to v3.3.0 ([#945](https://github.com/jakta-bdi/jakta/issues/945)) ([7f7e899](https://github.com/jakta-bdi/jakta/commit/7f7e899cc9ade6d370ff2092a8e677784b55d334))
+
 ## [1.1.13](https://github.com/jakta-bdi/jakta/compare/1.1.12...1.1.13) (2026-09-19)
 
 ### Bug Fixes
