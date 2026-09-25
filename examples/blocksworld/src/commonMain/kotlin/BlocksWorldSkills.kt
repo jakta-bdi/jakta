@@ -1,4 +1,5 @@
 import it.unibo.jakta.dsl.belief.PrologBelief
+import it.unibo.jakta.dsl.belief.matchBelief
 import it.unibo.jakta.dsl.belief.newContextBeliefQuery
 import it.unibo.jakta.event.AgentEvent.External.Perception
 import it.unibo.jakta.event.AgentUpdate
@@ -8,7 +9,6 @@ import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.Fact
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Term
-import it.unibo.tuprolog.unify.Unificator.Companion.matches
 import model.Block
 import model.BlocksWorld
 
@@ -35,11 +35,6 @@ interface BlocksWorldSkills {
      * Joins the Blocks World and sends the current state as a perception event.
      */
     suspend fun join()
-
-    /**
-     * Displays the current state of the Blocks World.
-     */
-    suspend fun displayWorld()
 }
 
 /**
@@ -57,12 +52,7 @@ class BlocksWorldSkillsImpl(private val world: BlocksWorld, private val node: No
     }
 
     override suspend fun join() {
-        val state = world.getState()
-        node.publishEvent(BlocksWorldPerception(state))
-    }
-
-    override suspend fun displayWorld() {
-        world.printState()
+        node.publishEvent(BlocksWorldPerception(world.state.value))
     }
 }
 
@@ -79,9 +69,7 @@ fun handleBlocksWorldPerceptions(
     previousBeliefs: Collection<PrologBelief>,
 ): AgentUpdate<*> = AgentUpdate.Belief(
     event.state.toPrologFacts(),
-    previousBeliefs.filter {
-        it matches filterQuery
-    }.toSet(),
+    previousBeliefs.filter { it.matchBelief(filterQuery) != null }.toSet(),
 )
 
 /**

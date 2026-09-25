@@ -73,7 +73,6 @@ fun MasBuilder<BaseNode<Any>, BaseNodeBuilder<Any, BaseNode<Any>>>.blocksWorldNo
                         matchingGoal { start }
                     } triggers {
                         blocksWorld.join()
-                        blocksWorld.displayWorld()
                         agent.achieve(desiredWorldState)
                     }
                 }
@@ -83,7 +82,7 @@ fun MasBuilder<BaseNode<Any>, BaseNodeBuilder<Any, BaseNode<Any>>>.blocksWorldNo
                         matchingGoal { state(emptyLogicList) }
                     } triggers {
                         agent.print("Finished! Final state reached.")
-                        blocksWorld.displayWorld()
+                        node.terminateNode()
                     }
                 }
 
@@ -153,7 +152,7 @@ fun MasBuilder<BaseNode<Any>, BaseNodeBuilder<Any, BaseNode<Any>>>.blocksWorldNo
                     } onlyWhen {
                         satisfies { clear(X) }
                     } triggers {
-                        agent.print("Block", X, "is clear.")
+                        agent.print("Block ", X, " is clear.")
                     }
                 }
 
@@ -163,7 +162,7 @@ fun MasBuilder<BaseNode<Any>, BaseNodeBuilder<Any, BaseNode<Any>>>.blocksWorldNo
                     } onlyWhen {
                         satisfies { tower(logicList(H, tail = T)) and member(X, T) }
                     } triggers {
-                        agent.print("Block", X, "is not clear.")
+                        agent.print("Block ", X, " is not clear.")
                         agent.print("Check if I can move ", H, " to clear ", X)
                         agent.achieve(goal { clear(H) }) // TODO the Jason solution does not include this
                         agent.print("Moving block ", H, " on ", table)
@@ -173,26 +172,6 @@ fun MasBuilder<BaseNode<Any>, BaseNodeBuilder<Any, BaseNode<Any>>>.blocksWorldNo
                     }
                 }
             }
-
-//            prologPlan {
-//                adding.beliefQuery {
-//                    matching { "on"(X, Y) }
-//                } triggers {
-//                    with(context) {
-//                        agent.print("Belief added: on(${X.substitutedTerm}, ${Y.substitutedTerm})")
-//                    }
-//                }
-//            }
-//
-//            prologPlan {
-//                removing.beliefQuery {
-//                    matching { "on"(X, Y) }
-//                } triggers {
-//                    with(context) {
-//                        agent.print("Belief removed: on(${X.substitutedTerm}, ${Y.substitutedTerm})")
-//                    }
-//                }
-//            }
         }
     }
 }
