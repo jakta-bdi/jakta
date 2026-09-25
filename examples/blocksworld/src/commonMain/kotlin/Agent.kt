@@ -78,6 +78,15 @@ fun MasBuilder<BaseNode<Any>, BaseNodeBuilder<Any, BaseNode<Any>>>.blocksWorldNo
                 }
 
                 prologPlan {
+                    failing.goal {
+                        matchingGoal { start }
+                    } triggers {
+                        agent.print("I could not reach the goal, giving up.")
+                        node.terminateNode()
+                    }
+                }
+
+                prologPlan {
                     adding.goal {
                         matchingGoal { state(emptyLogicList) }
                     } triggers {
