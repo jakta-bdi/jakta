@@ -58,12 +58,6 @@ internal class BaseMutableAgentState<Belief : Any, Goal : Any>(
     override val waitEventFilters: MutableMap<(AgentEvent) -> Any?, CompletableDeferred<*>> =
         mutableMapOf()
 
-    /**
-     * Work the lifecycle completes before handling the next event, so that it still belongs to the current step
-     * (e.g., JS code resumed during the step, which the JS engine runs later in its own queue).
-     */
-    val beforeNextEvent: MutableList<suspend () -> Unit> = mutableListOf()
-
     private var _perceptionHandler: AgentState<Belief, Goal>.(Perception) -> AgentUpdate<*>? =
         initialAgentState.perceptionHandler
 
