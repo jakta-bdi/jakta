@@ -2,7 +2,6 @@ package ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -16,7 +15,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Button
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Slider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -34,6 +33,8 @@ import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
 
 private const val MAX_MOVE_DELAY_MS = 2000f
+private const val WORLD_WEIGHT = 3f
+private const val GOAL_WEIGHT = 2f
 
 /**
  * The main Composable function for the Blocks World application.
@@ -44,66 +45,75 @@ private const val MAX_MOVE_DELAY_MS = 2000f
 fun BlocksWorldApp(app: BlocksWorldAppState) {
     val scope = rememberCoroutineScope()
     val worldState by app.world.state.collectAsState()
-    val goalError = app.goalError
+    val goalReached = worldState.sameTowersAs(app.goal)
+    val editable = !app.isRunning
 
     Column(modifier = Modifier.fillMaxSize()) {
-        Column(
+        Row(
             modifier = Modifier.fillMaxWidth().padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(
-                    value = app.seed,
-                    onValueChange = { app.seed = it },
-                    label = { Text("Seed") },
-                    modifier = Modifier.width(120.dp),
-                )
-                OutlinedTextField(
-                    value = app.blockCount,
-                    onValueChange = { app.blockCount = it },
-                    label = { Text("Blocks") },
-                    modifier = Modifier.width(120.dp),
-                )
-                OutlinedTextField(
-                    value = app.goalText,
-                    onValueChange = { app.goalText = it },
-                    label = { Text(goalError ?: "Goal: towers listed top to bottom, separated by ;") },
-                    isError = goalError != null,
-                    modifier = Modifier.fillMaxWidth(),
-                )
+            Button(onClick = { app.play(scope) }, enabled = editable && !goalReached) {
+                Text("Play")
             }
-
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Button(onClick = { app.play(scope) }, enabled = !app.isRunning && goalError == null) {
-                    Text("Play")
-                }
-                Button(onClick = { app.stop() }, enabled = app.isRunning) {
-                    Text("Stop")
-                }
-                Button(onClick = { app.reset() }) {
-                    Text("Reset")
-                }
-                Text("Move delay: ${app.moveDelay.inWholeMilliseconds} ms", modifier = Modifier.padding(start = 16.dp))
-                Slider(
-                    value = app.moveDelay.inWholeMilliseconds.toFloat(),
-                    onValueChange = { app.moveDelay = it.roundToInt().milliseconds },
-                    valueRange = 0f..MAX_MOVE_DELAY_MS,
-                    modifier = Modifier.width(240.dp),
-                )
-            }
+            Text(
+                when {
+                    app.isRunning -> "The agent is working…"
+                    goalReached -> "Goal reached!"
+                    else -> "Drag blocks to arrange the world and the goal, then press Play"
+                },
+                modifier = Modifier.width(420.dp),
+            )
+            Text("Blocks")
+            OutlinedButton(onClick = { app.changeBlockCount(app.blockCount - 1) }, enabled = editable) { Text("-") }
+            Text("${app.blockCount}")
+            OutlinedButton(onClick = { app.changeBlockCount(app.blockCount + 1) }, enabled = editable) { Text("+") }
+            Text("Move delay: ${app.moveDelay.inWholeMilliseconds} ms", modifier = Modifier.padding(start = 16.dp))
+            Slider(
+                value = app.moveDelay.inWholeMilliseconds.toFloat(),
+                onValueChange = { app.moveDelay = it.roundToInt().milliseconds },
+                valueRange = 0f..MAX_MOVE_DELAY_MS,
+                modifier = Modifier.width(200.dp),
+            )
         }
 
         Divider()
 
         Row(modifier = Modifier.fillMaxSize()) {
-            Box(modifier = Modifier.weight(1f).fillMaxHeight().padding(8.dp)) {
-                BlocksWorldPlane(worldState)
+            Column(modifier = Modifier.weight(1f).fillMaxHeight().padding(8.dp)) {
+                PanelHeader("World") {
+                    // shuffling the world also interrupts the agent
+                    OutlinedButton(onClick = { app.shuffleWorld() }) { Text("Shuffle") }
+                }
+                BlocksWorldPlane(
+                    stacks = worldState,
+                    onMove = if (editable) app::moveInWorld else null,
+                    modifier = Modifier.weight(WORLD_WEIGHT),
+                )
+                PanelHeader("Goal") {
+                    OutlinedButton(onClick = { app.shuffleGoal() }, enabled = editable) { Text("Shuffle") }
+                }
+                BlocksWorldPlane(
+                    stacks = app.goal,
+                    onMove = if (editable) app::moveInGoal else null,
+                    modifier = Modifier.weight(GOAL_WEIGHT),
+                )
             }
             AgentTracePanel(modifier = Modifier.width(420.dp).fillMaxHeight())
         }
+    }
+}
+
+@Composable
+private fun PanelHeader(title: String, actions: @Composable () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(title, style = MaterialTheme.typography.h6)
+        actions()
     }
 }
 

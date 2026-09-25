@@ -7,8 +7,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.updateAndGet
 
 /**
  * Represents a block in the Blocks World.
@@ -18,94 +18,80 @@ import kotlinx.coroutines.sync.withLock
 data class Block(val id: String)
 
 /**
+ * Stacks of blocks, each listed bottom first.
+ */
+typealias Stacks = List<List<Block>>
+
+/**
  * Represents the Blocks World environment, which consists of stacks of blocks.
  *
- * @property seed The seed for the random number generator used to initialize the world.
- * @property blockCount The number of blocks in the world.
+ * @param initial the initial stacks of blocks.
  */
-class BlocksWorld(seed: Long = 42, blockCount: Int = 6) {
+class BlocksWorld(initial: Stacks) {
 
-    private val random = Random(seed)
-    private val mutex = Mutex()
-
-    private val stacks: MutableList<MutableList<Block>> = mutableListOf()
-
-    private val mutableState = MutableStateFlow<List<List<Block>>>(emptyList())
+    private val mutableState = MutableStateFlow(initial)
 
     /**
-     * The current state of the Blocks World as a list of stacks of blocks, bottom first.
+     * The current state of the Blocks World.
      */
-    val state: StateFlow<List<List<Block>>> = mutableState.asStateFlow()
+    val state: StateFlow<Stacks> = mutableState.asStateFlow()
 
     /**
-     * How long a single move takes, to make the agent's work visible.
+     * How long a single move of the agent takes, to make its work visible.
      */
     var moveDelay: Duration = 1.seconds
 
-    init {
-        initialize(blockCount)
-        mutableState.value = snapshot()
+    /**
+     * Moves a block on top of [destination], or on the table if [destination] is null, taking [moveDelay].
+     * Returns the new state of the world.
+     */
+    suspend fun move(block: Block, destination: Block?): Stacks {
+        delay(moveDelay)
+        return mutableState.updateAndGet { it.moved(block, destination) }
     }
 
     /**
-     * Moves a block on top of [destination], or on the table if [destination] is null.
-     * Returns the new state of the world.
+     * Instantly moves a block, e.g. when the user rearranges the world.
      */
-    suspend fun move(block: Block, destination: Block?): List<List<Block>> {
-        delay(moveDelay)
-        return mutex.withLock {
-            val fromStackIndex = checkNotNull(findStackIndex(block)) { "Block $block not found" }
-            val fromStack = stacks[fromStackIndex]
-            check(isTop(fromStack, block)) { "Block $block is not clear" }
+    fun rearrange(block: Block, destination: Block?) {
+        mutableState.update { it.moved(block, destination) }
+    }
+}
 
-            if (destination != null) {
-                val destStackIndex = checkNotNull(findStackIndex(destination)) { "Destination $destination not found" }
-                val destStack = stacks[destStackIndex]
-                check(isTop(destStack, destination)) { "Destination $destination is not clear" }
-                destStack.add(fromStack.removeAt(fromStack.lastIndex))
-            } else {
-                stacks.add(mutableListOf(fromStack.removeAt(fromStack.lastIndex)))
-            }
-            if (fromStack.isEmpty()) stacks.removeAt(fromStackIndex)
-
-            snapshot().also { mutableState.value = it }
+/**
+ * Returns these stacks with [block] moved on top of [destination], or on the table if [destination] is null.
+ */
+fun Stacks.moved(block: Block, destination: Block?): Stacks {
+    val from = indexOfFirst { block in it }
+    require(from >= 0) { "Block $block not found" }
+    require(this[from].last() == block) { "Block $block is not clear" }
+    val to = destination?.let { dest ->
+        indexOfFirst { dest in it }.also {
+            require(it >= 0) { "Destination $dest not found" }
+            require(this[it].last() == dest) { "Destination $dest is not clear" }
+            require(it != from) { "Cannot move $block on itself" }
         }
     }
+    if (to == null && this[from].size == 1) return this // already on the table
 
-    // ----------------------------
-    // Initialization
-    // ----------------------------
+    val result = map { it.toMutableList() }.toMutableList()
+    result[from].removeAt(result[from].lastIndex)
+    if (to == null) result.add(mutableListOf(block)) else result[to].add(block)
+    return result.filter { it.isNotEmpty() }
+}
 
-    private fun initialize(blockCount: Int) {
-        val blocks = ('A' until ('A' + blockCount)).map { Block(it.toString()) }.toList()
-
-        blocks.forEach { stacks.add(mutableListOf(it)) }
-
-        repeat(blockCount * 2) {
-            if (stacks.size < 2) return@repeat
-
-            val from = random.nextInt(stacks.size)
-            val to = random.nextInt(stacks.size)
-
-            if (from != to && stacks[from].isNotEmpty()) {
-                val block = stacks[from].removeAt(stacks[from].lastIndex)
-                stacks[to].add(block)
-
-                if (stacks[from].isEmpty()) {
-                    stacks.removeAt(from)
-                }
-            }
+/**
+ * Creates [blockCount] blocks named `A`, `B`, ... and piles them randomly.
+ */
+fun randomStacks(blockCount: Int, random: Random = Random.Default): Stacks {
+    val stacks = ('A' until 'A' + blockCount).map { mutableListOf(Block(it.toString())) }.toMutableList()
+    repeat(blockCount * 2) {
+        val from = random.nextInt(stacks.size)
+        val to = random.nextInt(stacks.size)
+        if (stacks.size > 1 && from != to) {
+            stacks[to].add(stacks[from].removeAt(stacks[from].lastIndex))
+            if (stacks[from].isEmpty()) stacks.removeAt(from)
         }
     }
-
-    // ----------------------------
-    // Internal helpers (lock-protected by caller)
-    // ----------------------------
-
-    private fun snapshot(): List<List<Block>> = stacks.map { it.toList() }
-
-    private fun findStackIndex(block: Block): Int? = stacks.indexOfFirst { it.contains(block) }
-        .takeIf { it >= 0 }
-
-    private fun isTop(stack: List<Block>, block: Block): Boolean = stack.lastOrNull() == block
+    return stacks
 }

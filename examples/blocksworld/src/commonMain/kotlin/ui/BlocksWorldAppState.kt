@@ -24,14 +24,26 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
+import model.Block
 import model.BlocksWorld
+import model.Stacks
+import model.moved
+import model.randomStacks
 
-private const val DEFAULT_SEED = 42L
-private const val DEFAULT_BLOCK_COUNT = 10
-private const val MAX_BLOCK_COUNT = 26
+private const val DEFAULT_BLOCK_COUNT = 6
 
 /**
- * State holder for the Blocks World application, managing the goal, world state, and agent execution.
+ * The fewest blocks the user can choose.
+ */
+const val MIN_BLOCK_COUNT = 2
+
+/**
+ * The most blocks the user can choose.
+ */
+const val MAX_BLOCK_COUNT = 12
+
+/**
+ * State holder for the Blocks World application: the world, the goal the user arranged, and the agent run.
  *
  * @property agentDispatcher where the agent runs, off the UI thread on desktop.
  */
@@ -43,24 +55,21 @@ class BlocksWorldAppState(private val agentDispatcher: CoroutineDispatcher = Dis
     }
 
     /**
-     * The seed used for initializing the Blocks World random generator.
+     * The number of blocks in the world and in the goal.
      */
-    var seed by mutableStateOf(DEFAULT_SEED.toString())
+    var blockCount by mutableStateOf(DEFAULT_BLOCK_COUNT)
+        private set
 
     /**
-     * The number of blocks in the Blocks World.
+     * The world the agent acts on.
      */
-    var blockCount by mutableStateOf(DEFAULT_BLOCK_COUNT.toString())
+    var world by mutableStateOf(BlocksWorld(randomStacks(DEFAULT_BLOCK_COUNT)))
+        private set
 
     /**
-     * The desired towers, listed top to bottom and separated by `;`, e.g. `[A, B]; [C]`.
+     * The arrangement the agent has to reach.
      */
-    var goalText by mutableStateOf("[A, B]; [C, D, E]; [F]")
-
-    /**
-     * The current instance of the BlocksWorld.
-     */
-    var world by mutableStateOf(BlocksWorld(DEFAULT_SEED, DEFAULT_BLOCK_COUNT))
+    var goal by mutableStateOf(randomStacks(DEFAULT_BLOCK_COUNT))
         private set
 
     private var moveDelayState by mutableStateOf(1.seconds)
@@ -76,85 +85,86 @@ class BlocksWorldAppState(private val agentDispatcher: CoroutineDispatcher = Dis
         }
 
     /**
-     * Whether the agent is currently running.
+     * Whether the agent is currently running; the user can edit world and goal only when it is not.
      */
     var isRunning by mutableStateOf(false)
         private set
 
-    /**
-     * Why [goalText] is not a valid goal for the current world, or null if it is.
-     */
-    val goalError: String?
-        get() {
-            val names = parseTowers(goalText).flatten()
-            val unknown = names - world.state.value.flatten().map { it.id }.toSet()
-            return when {
-                names.isEmpty() -> "The goal is empty"
-                names.size != names.toSet().size -> "Each block can appear only once"
-                unknown.isNotEmpty() -> "Unknown blocks: ${unknown.joinToString()}"
-                else -> null
-            }
-        }
-
     private var agentJob: Job? = null
 
     /**
-     * Stops the agent and creates a new world from [seed] and [blockCount].
+     * Changes the number of blocks, reshuffling world and goal.
      */
-    fun reset() {
-        stop()
-        val newSeed = seed.toLongOrNull() ?: DEFAULT_SEED
-        val newBlockCount = (blockCount.toIntOrNull() ?: DEFAULT_BLOCK_COUNT).coerceIn(1, MAX_BLOCK_COUNT)
-        blockCount = newBlockCount.toString()
-        world = BlocksWorld(newSeed, newBlockCount).also { it.moveDelay = moveDelay }
+    fun changeBlockCount(count: Int) {
+        blockCount = count.coerceIn(MIN_BLOCK_COUNT, MAX_BLOCK_COUNT)
+        shuffleWorld()
+        shuffleGoal()
     }
 
     /**
-     * Starts the agent, which tries to reach the goal from the current world state.
+     * Stops the agent, if running, and piles the blocks of the world randomly.
+     */
+    fun shuffleWorld() {
+        agentJob?.cancel()
+        agentJob = null
+        isRunning = false
+        world = BlocksWorld(randomStacks(blockCount)).also { it.moveDelay = moveDelay }
+    }
+
+    /**
+     * Piles the blocks of the goal randomly.
+     */
+    fun shuffleGoal() {
+        if (!isRunning) goal = randomStacks(blockCount)
+    }
+
+    /**
+     * Moves a block of the world by hand.
+     */
+    fun moveInWorld(block: Block, destination: Block?) {
+        if (!isRunning) world.rearrange(block, destination)
+    }
+
+    /**
+     * Moves a block of the goal by hand.
+     */
+    fun moveInGoal(block: Block, destination: Block?) {
+        if (!isRunning) goal = goal.moved(block, destination)
+    }
+
+    /**
+     * Starts the agent, which works until it reaches the goal (or gives up).
      */
     fun play(scope: CoroutineScope) {
-        if (isRunning || goalError != null) return
-        val goal = parseGoal(goalText)
+        if (isRunning) return
+        val desired = goalOf(goal)
         val currentWorld = world
         AgentTrace.clear()
         isRunning = true
         val job = scope.launch(agentDispatcher, start = CoroutineStart.LAZY) {
             try {
                 mas(NodeBuilders.baseNode()) {
-                    blocksWorldNode(currentWorld, goal)
+                    blocksWorldNode(currentWorld, desired)
                 }.run(CoroutineNodeRunner(SharedMemoryNetwork()))
             } finally {
-                // a stopped run must not flag a newer one as finished
+                // a cancelled run must not flag a newer one as finished
                 if (agentJob === coroutineContext.job) isRunning = false
             }
         }
         agentJob = job
         job.start()
     }
-
-    /**
-     * Stops the agent if it is currently running.
-     */
-    fun stop() {
-        agentJob?.cancel()
-        agentJob = null
-        isRunning = false
-    }
 }
 
 /**
- * Splits a goal like `[A, B]; [C]` into its towers of block names.
+ * Whether two arrangements have the same towers, regardless of their order on the table.
  */
-fun parseTowers(text: String): kotlin.collections.List<kotlin.collections.List<String>> = text
-    .split(";")
-    .map { it.trim().removePrefix("[").removeSuffix("]") }
-    .filter { it.isNotBlank() }
-    .map { tower -> tower.split(",").map { it.trim() }.filter { it.isNotEmpty() } }
+fun Stacks.sameTowersAs(other: Stacks): Boolean = toSet() == other.toSet()
 
 /**
- * Parses a goal like `[A, B]; [C]` into the `state/1` goal pursued by the agent.
+ * The `state/1` goal pursued by the agent to reach [stacks]; the agent lists towers top first.
  */
-fun parseGoal(text: String): PrologGoal {
-    val towers = parseTowers(text).map { tower -> List.of(tower.map { Atom.of(it) }) }
+fun goalOf(stacks: Stacks): PrologGoal {
+    val towers = stacks.map { stack -> List.of(stack.reversed().map { Atom.of(it.id) }) }
     return initialGoal { "state"(logicListOf(*towers.toTypedArray())) }
 }
