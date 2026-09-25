@@ -59,6 +59,12 @@ fun TicTacToeApp(app: TicTacToeAppState) {
                     Text("$mark: ${if (app.players[mark] == Player.HUMAN) "you" else "agent"}")
                 }
             }
+            Text("Difficulty", modifier = Modifier.padding(start = 16.dp))
+            for (difficulty in Difficulty.entries) {
+                OutlinedButton(onClick = { app.difficulty = difficulty }, enabled = difficulty != app.difficulty) {
+                    Text(difficulty.name.lowercase())
+                }
+            }
             Text("Size", modifier = Modifier.padding(start = 16.dp))
             for (size in BOARD_SIZES) {
                 val selected = size == app.size
