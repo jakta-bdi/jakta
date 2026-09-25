@@ -30,10 +30,9 @@ const alice = agent("alice")
 await runMas([alice]);
 ```
 
-Plans run as they do in Kotlin: intentions interleave at every `await` of a promise returned by the plan scope
-(`achieve`, `delay`), the code after it runs as part of the agent step that resumed it, and it never runs if the
-intention is cancelled. Awaiting other promises (e.g., `fetch`) works, but the code after them is scheduled by the
-JS engine instead: prefer `await self.delay(ms)` over `setTimeout`.
+Intentions interleave at every `await` of a promise returned by the plan scope (`achieve`, `delay`), and the code
+after it never runs if the intention is cancelled, as in Kotlin. Awaiting other promises (e.g., `fetch`) works, but
+the code after them keeps running after cancellation: prefer `await self.delay(ms)` over `setTimeout`.
 
 See the [documentation](https://jakta-bdi.github.io/) and [main repository](https://github.com/jakta-bdi/jakta)
 for setup and usage.

@@ -7,7 +7,6 @@ import co.touchlab.kermit.Severity
 import it.unibo.jakta.InternalJaktaAPI
 import it.unibo.jakta.agent.AgentSpecification
 import it.unibo.jakta.agent.BaseAgentID
-import it.unibo.jakta.agent.BaseMutableAgentState
 import it.unibo.jakta.agent.MutableAgentState
 import it.unibo.jakta.dsl.agent
 import it.unibo.jakta.dsl.agent.AgentBuilder
@@ -28,8 +27,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.await
 import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.job
 import kotlinx.coroutines.promise
 
 /**
@@ -171,25 +172,16 @@ class JsPlanScope internal constructor(
 
     /**
      * Runs [block] in the plan's intention, started undispatched so it begins within the current step
-     * (as Kotlin's suspending calls do). The returned promise settles within a later step of the intention, and the
-     * JS code it resumes is then run by the engine's microtask queue: the agent waits for it before its next event,
-     * so that code still belongs to that step, as the code after a Kotlin suspension point does.
+     * (as Kotlin's suspending calls do). The returned promise settles within a later step of the intention.
      */
+    // ponytail: the JS code it resumes runs later, from the engine's microtask queue, so the agent may handle
+    // further events first; matching Kotlin exactly needs the lifecycle to wait for it before its next event.
     private fun <T> inIntention(block: suspend () -> T): Promise<T> =
-        intention.promise(start = CoroutineStart.UNDISPATCHED) {
-            try {
-                block()
-            } finally {
-                (agent as? BaseMutableAgentState<*, *>)?.beforeNextEvent?.add(::drainMicrotasks)
-            }
-        }
+        // A supervisor child: a failure (e.g. of a subgoal) rejects only this promise, for JS to catch,
+        // instead of cancelling the whole intention; cancelling the intention still cancels it.
+        CoroutineScope(intention.coroutineContext + SupervisorJob(intention.coroutineContext.job))
+            .promise(start = CoroutineStart.UNDISPATCHED) { block() }
 }
-
-// A macrotask only runs once the microtask queue is empty, i.e., once the resumed JS code reached its next `await`.
-// ponytail: browsers clamp nested setTimeout to 4ms, switch to MessageChannel if JS plans in browsers are too slow.
-private suspend fun drainMicrotasks() = Promise<Unit> { resolve, _ ->
-    js("(typeof setImmediate === 'function' ? setImmediate : setTimeout)")(resolve)
-}.await()
 
 // JS plans are untyped: declaring Unit keeps them relevant both for `achieve` (Unit) and JS `achieve` (Any?).
 private val anyResult = typeOf<Unit>()

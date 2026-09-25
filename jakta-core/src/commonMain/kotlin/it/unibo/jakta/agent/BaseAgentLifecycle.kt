@@ -40,9 +40,6 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
         log.i { "received event: $event" }
         val scope = CoroutineScope(currentCoroutineContext() + agentJob)
         handleEvent(event, scope)
-        (executableAgent.state as? BaseMutableAgentState<*, *>)?.beforeNextEvent?.let { pending ->
-            while (pending.isNotEmpty()) pending.removeFirst()()
-        }
     }
 
     override fun tryStep(dispatcher: CoroutineDispatcher) {
