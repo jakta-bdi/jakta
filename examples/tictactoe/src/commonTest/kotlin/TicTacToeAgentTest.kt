@@ -32,7 +32,9 @@ class TicTacToeAgentTest {
         val board = Board(start)
         val game = launch {
             mas(NodeBuilders.baseNode()) {
-                ticTacToeNode(board, mapOf(X to Player.AGENT, O to Player.HUMAN), HumanMoves()) { Duration.ZERO }
+                ticTacToeNode(board, mapOf(X to Player.AGENT, O to Player.HUMAN), HumanMoves(), thinkTime = {
+                    Duration.ZERO
+                })
             }.run(CoroutineNodeRunner(SharedMemoryNetwork()))
         }
         check(board.state.first { it != start })
@@ -54,7 +56,9 @@ class TicTacToeAgentTest {
     fun twoAgentsPlayUntilTheGameIsOver() = runTest {
         val board = Board(BoardState(3))
         mas(NodeBuilders.baseNode()) {
-            ticTacToeNode(board, mapOf(X to Player.AGENT, O to Player.AGENT), HumanMoves()) { Duration.ZERO }
+            ticTacToeNode(board, mapOf(X to Player.AGENT, O to Player.AGENT), HumanMoves(), thinkTime = {
+                Duration.ZERO
+            })
         }.run(CoroutineNodeRunner(SharedMemoryNetwork()))
         assertTrue(board.state.value.isOver)
     }

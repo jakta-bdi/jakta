@@ -19,6 +19,7 @@ import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.Integer
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Term
+import kotlin.random.Random
 import kotlin.time.Duration
 import model.Board
 import model.Mark
@@ -33,6 +34,11 @@ private val directions = mapOf(
     "antidiagonal" to (1 to -1),
 )
 
+/**
+ * The board size on which the agent's strategy is optimal: it never loses.
+ */
+private const val OPTIMAL_SIZE = 3
+
 private val join = Atom.of("join")
 private val empty = Atom.of("e")
 
@@ -42,9 +48,27 @@ private fun turn(mark: Mark): Struct = Struct.of("turn", Atom.of(mark.symbol))
 /**
  * A line of [size] cells holding [owner]'s mark except for the empty cell `cell(X, Y, e)` at [gap].
  */
-private fun JaktaLogicProgrammingScope.lineWithGap(size: Int, gap: Int, owner: Mark): Struct = "aligned"(
-    logicListOf((0 until size).map { if (it == gap) cell(X, Y, empty) else cell(`_`, `_`, Atom.of(owner.symbol)) }),
+private fun JaktaLogicProgrammingScope.lineWithGap(size: Int, gap: Int, owner: Term): Struct = "aligned"(
+    logicListOf((0 until size).map { if (it == gap) cell(X, Y, empty) else cell(`_`, `_`, owner) }),
 )
+
+/**
+ * A line of [size] cells holding mark `M` except for two empty cells, `cell(X, Y, e)` at [move]
+ * and `cell(A, B, e)` at [rest]: playing (X, Y) would leave (A, B) to complete the line.
+ */
+private fun JaktaLogicProgrammingScope.lineWithTwoGaps(size: Int, move: Int, rest: Int): Struct = "aligned"(
+    logicListOf(
+        (0 until size).map {
+            when (it) {
+                move -> cell(X, Y, empty)
+                rest -> cell(A, B, empty)
+                else -> cell(`_`, `_`, M)
+            }
+        },
+    ),
+)
+
+private fun eq(left: Term, right: Term): Struct = Struct.of("=", left, right)
 
 /**
  * Creates the node of the game, with one player for each mark.
@@ -54,8 +78,10 @@ fun MasBuilder<BaseNode<Any>, BaseNodeBuilder<Any, BaseNode<Any>>>.ticTacToeNode
     players: Map<Mark, Player>,
     humanMoves: HumanMoves,
     thinkTime: () -> Duration,
+    mistakeChance: () -> Double = { 0.0 },
+    random: Random = Random.Default,
 ) = node {
-    val game = TicTacToeEnvironment(board, node, humanMoves, thinkTime)
+    val game = TicTacToeEnvironment(board, node, humanMoves, thinkTime, mistakeChance, random)
     for ((mark, player) in players) {
         val name = if (player == Player.HUMAN) "human-${mark.symbol}" else "${mark.symbol}-agent"
         agent<PrologBelief, PrologGoal>(BaseAgentID(name)) {
@@ -102,11 +128,17 @@ private fun AgentBuilder<PrologBelief, PrologGoal, Any>.humanPlayer(game: TicTac
 }
 
 /**
- * A BDI player. On its turn, the first applicable plan wins: complete a line, block the opponent's line,
- * take the centre, or play anywhere. Lines are recognised by rules, and both rules and plans are generated
- * for the board [size].
+ * A BDI player following the classic strategy for tic-tac-toe (Newell and Simon), which never loses on 3×3;
+ * on larger boards it only completes lines, blocks them and takes good cells.
+ * On its turn, the first applicable plan moves. Lines, threats and forks are recognised by rules, and both
+ * rules and plans are generated in Kotlin for the board [size]. When the environment says it is `distracted`,
+ * it plays a random cell instead.
  */
 private fun AgentBuilder<PrologBelief, PrologGoal, Any>.agentPlayer(game: TicTacToeSkills, mark: Mark, size: Int) {
+    val me = Atom.of(mark.symbol)
+    val opponent = Atom.of(mark.other.symbol)
+    val last = size - 1
+    val corners = listOf(0 to 0, last to 0, 0 to last, last to last)
     commonBehaviour(mark)
     believes {
         for ((direction, step) in directions) {
@@ -124,53 +156,68 @@ private fun AgentBuilder<PrologBelief, PrologGoal, Any>.agentPlayer(game: TicTac
             }
             +inferenceRule { "aligned"(L) impliedBy direction(L) }
         }
+        // the fork strategy is optimal on 3×3; on larger boards it is not, and too slow to be worth it
+        if (size == OPTIMAL_SIZE) {
+            // threat(X, Y, M, A, B): if M plays (X, Y), it threatens to complete a line at (A, B)
+            for (move in 0 until size) {
+                for (rest in (0 until size) - move) {
+                    +inferenceRule { "threat"(X, Y, M, A, B) impliedBy lineWithTwoGaps(size, move, rest) }
+                }
+            }
+            // fork(X, Y, M): if M plays (X, Y), it threatens two lines at once, and cannot be stopped
+            +inferenceRule {
+                "fork"(X, Y, M) impliedBy (
+                    "threat"(X, Y, M, A, B) and "threat"(X, Y, M, C, D) and not(eq(A, C) and eq(B, D))
+                    )
+            }
+        }
     }
     hasPlanLibrary {
         prologPlan {
             adding.goal { matchingGoal { join } } triggers { game.join() }
         }
-        for (gap in 0 until size) {
-            prologPlan {
-                adding.belief { matchingBelief { turn(mark) } } onlyWhen {
-                    satisfies { lineWithGap(size, gap, mark) }
-                } triggers {
-                    agent.print("I can complete a line at (", X, ", ", Y, "): I win!")
-                    game.think()
-                    game.put(X.value(), Y.value(), mark)
-                }
-            }
-        }
-        for (gap in 0 until size) {
-            prologPlan {
-                adding.belief { matchingBelief { turn(mark) } } onlyWhen {
-                    satisfies { lineWithGap(size, gap, mark.other) }
-                } triggers {
-                    agent.print("The opponent could complete a line: blocking (", X, ", ", Y, ")")
-                    game.think()
-                    game.put(X.value(), Y.value(), mark)
-                }
-            }
-        }
-        if (size % 2 == 1) {
-            val centre = Integer.of(size / 2)
-            prologPlan {
-                adding.belief { matchingBelief { turn(mark) } } onlyWhen {
-                    satisfies { cell(centre, centre, empty) }
-                } triggers {
-                    agent.print("Taking the centre")
-                    game.think()
-                    game.put(size / 2, size / 2, mark)
-                }
-            }
-        }
-        prologPlan {
+
+        /** A plan for our turn that plays the cell (X, Y) found by [guard], explaining why. */
+        fun move(why: String, guard: JaktaLogicProgrammingScope.() -> Struct) = prologPlan {
             adding.belief { matchingBelief { turn(mark) } } onlyWhen {
-                satisfies { cell(X, Y, empty) }
+                satisfies(guard)
             } triggers {
-                agent.print("Nothing better to do: playing (", X, ", ", Y, ")")
+                agent.print(why, ": playing (", X, ", ", Y, ")")
                 game.think()
                 game.put(X.value(), Y.value(), mark)
             }
         }
+
+        move("Oops, I got distracted") { "distracted"(me) and cell(X, Y, empty) }
+        for (gap in 0 until size) move("I can complete a line and win") { lineWithGap(size, gap, me) }
+        for (gap in 0 until size) {
+            move("The opponent could complete a line, blocking") {
+                lineWithGap(size, gap, opponent)
+            }
+        }
+        if (size == OPTIMAL_SIZE) {
+            move("Creating a fork") { "fork"(X, Y, me) }
+            move("The opponent could fork only here, taking it") {
+                "fork"(X, Y, opponent) and not("fork"(A, B, opponent) and not(eq(A, X) and eq(B, Y)))
+            }
+            move("The opponent could fork in many places: threatening, so it must answer where it cannot fork") {
+                "fork"(`_`, `_`, opponent) and "threat"(X, Y, me, A, B) and not("fork"(A, B, opponent))
+            }
+            move("Blocking a fork") { "fork"(X, Y, opponent) }
+        }
+        if (size % 2 == 1) {
+            val centre = Integer.of(size / 2)
+            move("Taking the centre") { eq(X, centre) and eq(Y, centre) and cell(X, Y, empty) }
+        }
+        for ((x, y) in corners) {
+            move("Taking the corner opposite to the opponent") {
+                eq(X, Integer.of(x)) and eq(Y, Integer.of(y)) and cell(X, Y, empty) and
+                    cell(Integer.of(last - x), Integer.of(last - y), opponent)
+            }
+        }
+        for ((x, y) in corners) {
+            move("Taking a corner") { eq(X, Integer.of(x)) and eq(Y, Integer.of(y)) and cell(X, Y, empty) }
+        }
+        move("Nothing better to do") { cell(X, Y, empty) }
     }
 }

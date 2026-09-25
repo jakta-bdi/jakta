@@ -31,6 +31,23 @@ private const val DEFAULT_THINK_TIME_MS = 600
 val BOARD_SIZES = 3..5
 
 /**
+ * How often agents get distracted and play a random cell instead of their best move.
+ *
+ * @property mistakeChance the probability of a random move on each turn.
+ */
+@Suppress("MagicNumber")
+enum class Difficulty(val mistakeChance: Double) {
+    /** Makes many mistakes. */
+    EASY(0.5),
+
+    /** Makes a mistake now and then. */
+    MEDIUM(0.2),
+
+    /** Never makes mistakes: on 3×3, the best you can get is a draw. */
+    UNBEATABLE(0.0),
+}
+
+/**
  * State holder for the Tic-Tac-Toe application: who plays, the board, and the running game.
  *
  * @property agentDispatcher where the agents run, off the UI thread on desktop.
@@ -58,6 +75,11 @@ class TicTacToeAppState(private val agentDispatcher: CoroutineDispatcher = Dispa
      */
     var board by mutableStateOf(Board(BoardState(size)))
         private set
+
+    /**
+     * How often agents make mistakes; it can be changed during a game.
+     */
+    var difficulty by mutableStateOf(Difficulty.MEDIUM)
 
     /**
      * How long agents think before each move.
@@ -110,7 +132,13 @@ class TicTacToeAppState(private val agentDispatcher: CoroutineDispatcher = Dispa
         val job = scope.launch(agentDispatcher, start = CoroutineStart.LAZY) {
             try {
                 mas(NodeBuilders.baseNode()) {
-                    ticTacToeNode(currentBoard, currentPlayers, currentMoves) { thinkTime }
+                    ticTacToeNode(
+                        currentBoard,
+                        currentPlayers,
+                        currentMoves,
+                        thinkTime = { thinkTime },
+                        mistakeChance = { difficulty.mistakeChance },
+                    )
                 }.run(CoroutineNodeRunner(SharedMemoryNetwork()))
             } finally {
                 // an abandoned game must not flag a newer one as finished
