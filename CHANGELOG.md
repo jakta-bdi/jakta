@@ -1,3 +1,115 @@
+## [1.1.14](https://github.com/jakta-bdi/jakta/compare/1.1.13...1.1.14) (2026-09-22)
+
+### Bug Fixes
+
+* **deps:** update citation-js monorepo to ^0.9.0 ([#944](https://github.com/jakta-bdi/jakta/issues/944)) ([b58a499](https://github.com/jakta-bdi/jakta/commit/b58a4990e6a5042843904fed0bea5e25d7310610))
+* **deps:** update dependency com.github.ben-manes.caffeine:caffeine to v3.3.0 ([#945](https://github.com/jakta-bdi/jakta/issues/945)) ([7f7e899](https://github.com/jakta-bdi/jakta/commit/7f7e899cc9ade6d370ff2092a8e677784b55d334))
+
+## [1.1.13](https://github.com/jakta-bdi/jakta/compare/1.1.12...1.1.13) (2026-09-19)
+
+### Bug Fixes
+
+* **deps:** update danysk/build-check-deploy-gradle-action action to v4.0.47 ([#943](https://github.com/jakta-bdi/jakta/issues/943)) ([dabbe86](https://github.com/jakta-bdi/jakta/commit/dabbe8618d76b882631c9eb08e19e28d81d7df3d))
+
+## [1.1.12](https://github.com/jakta-bdi/jakta/compare/1.1.11...1.1.12) (2026-09-17)
+
+### Bug Fixes
+
+* **deps:** update tuprolog to v2.0.5 ([#897](https://github.com/jakta-bdi/jakta/issues/897)) ([1bcf1f3](https://github.com/jakta-bdi/jakta/commit/1bcf1f34108e646b27a160480b69305f7a7e6573))
+
+## [1.1.11](https://github.com/jakta-bdi/jakta/compare/1.1.10...1.1.11) (2026-09-16)
+
+### Bug Fixes
+
+* **deps:** update dependency @iconify/react to v6 ([#924](https://github.com/jakta-bdi/jakta/issues/924)) ([f919d25](https://github.com/jakta-bdi/jakta/commit/f919d25598e358e11b917d029354d0261dbc0c3a))
+* **deps:** update dependency typescript to v6 ([#925](https://github.com/jakta-bdi/jakta/issues/925)) ([f96030e](https://github.com/jakta-bdi/jakta/commit/f96030ea7b8b7add63a02006d67dd6e7ab0619bb))
+* **deps:** update dependency typescript to v7 ([#926](https://github.com/jakta-bdi/jakta/issues/926)) ([c780372](https://github.com/jakta-bdi/jakta/commit/c780372fda464e8fad443e1388dfb0e8ece4453c))
+* **deps:** update tuprolog to v2 ([#940](https://github.com/jakta-bdi/jakta/issues/940)) ([dabdfa3](https://github.com/jakta-bdi/jakta/commit/dabdfa38464bcae7f0c142342293c9f3f01854f2))
+
+## [1.1.10](https://github.com/jakta-bdi/jakta/compare/1.1.9...1.1.10) (2026-09-15)
+
+### Bug Fixes
+
+* **deps:** update danysk/build-check-deploy-gradle-action action to v4.0.46 ([#941](https://github.com/jakta-bdi/jakta/issues/941)) ([7005f69](https://github.com/jakta-bdi/jakta/commit/7005f697afa02eab4834aa943dc6239bae1e8002))
+
+## [1.1.9](https://github.com/jakta-bdi/jakta/compare/1.1.8...1.1.9) (2026-09-15)
+
+### Bug Fixes
+
+* **deps:** update tuprolog to v1.5.1 ([#908](https://github.com/jakta-bdi/jakta/issues/908)) ([27dfc04](https://github.com/jakta-bdi/jakta/commit/27dfc04bfea0ee3b9900688fbeaa66a35fa0c8d7))
+
+## [1.1.8](https://github.com/jakta-bdi/jakta/compare/1.1.7...1.1.8) (2026-09-14)
+
+### Bug Fixes
+
+* **deps:** update react monorepo to v19.1.9 ([#922](https://github.com/jakta-bdi/jakta/issues/922)) ([193d504](https://github.com/jakta-bdi/jakta/commit/193d5047417f8b51de0d989ad8582765d73b3728))
+* **deps:** update react monorepo to v19.2.8 ([#923](https://github.com/jakta-bdi/jakta/issues/923)) ([c6b00e7](https://github.com/jakta-bdi/jakta/commit/c6b00e7ae42675580a0c7f38a868530eb37730cb))
+* **deps:** update react monorepo to v19.3.0 ([#937](https://github.com/jakta-bdi/jakta/issues/937)) ([7b613dd](https://github.com/jakta-bdi/jakta/commit/7b613dde9b6edb929fd109c3b669d3296940c5a4))
+* **deps:** update tuprolog to v1.4.1 ([#901](https://github.com/jakta-bdi/jakta/issues/901)) ([9264056](https://github.com/jakta-bdi/jakta/commit/926405659eb0cf9ea8cb808a1a1722d9c1be811c))
+
+## [1.1.7](https://github.com/jakta-bdi/jakta/compare/1.1.6...1.1.7) (2026-09-13)
+
+### Bug Fixes
+
+* **deps:** update plugin multijvmtesting to v4.5.7 ([#939](https://github.com/jakta-bdi/jakta/issues/939)) ([923f2b4](https://github.com/jakta-bdi/jakta/commit/923f2b4bcf1c25c407f8f3d2ab1c5ca547138783))
+
+## [1.1.6](https://github.com/jakta-bdi/jakta/compare/1.1.5...1.1.6) (2026-09-13)
+
+### Bug Fixes
+
+* **deps:** update plugin kotlin-qa to v1.9.2 ([#938](https://github.com/jakta-bdi/jakta/issues/938)) ([a9c1acb](https://github.com/jakta-bdi/jakta/commit/a9c1acb1b6063968cd34cf3e1c23d01affaf0114))
+
+## [1.1.5](https://github.com/jakta-bdi/jakta/compare/1.1.4...1.1.5) (2026-09-13)
+
+### Bug Fixes
+
+* **deps:** update plugin com.gradle.develocity to v4.5.1 ([#900](https://github.com/jakta-bdi/jakta/issues/900)) ([3da54db](https://github.com/jakta-bdi/jakta/commit/3da54db368a54f85fea134b6c8e267d7da2acac3))
+
+## [1.1.4](https://github.com/jakta-bdi/jakta/compare/1.1.3...1.1.4) (2026-09-12)
+
+### Bug Fixes
+
+* **deps:** update dependency typescript to ~5.9.0 ([#917](https://github.com/jakta-bdi/jakta/issues/917)) ([071e2d9](https://github.com/jakta-bdi/jakta/commit/071e2d9430e6d1a3d41b54519969d955205a29c2))
+* **deps:** update dependency yaml-loader to ^0.9.0 ([#918](https://github.com/jakta-bdi/jakta/issues/918)) ([a5224b4](https://github.com/jakta-bdi/jakta/commit/a5224b445731e746a26752e3609439418298328d))
+* **deps:** update docusaurus monorepo to v3.10.2 ([#921](https://github.com/jakta-bdi/jakta/issues/921)) ([f3b5d43](https://github.com/jakta-bdi/jakta/commit/f3b5d435600f4c65f955521a194fea6e3067364b))
+* **deps:** update node.js to 24.21 ([#928](https://github.com/jakta-bdi/jakta/issues/928)) ([b5bb92c](https://github.com/jakta-bdi/jakta/commit/b5bb92cc9dbb72ca9b59f672eb0306eb83cf5def))
+
+## [1.1.3](https://github.com/jakta-bdi/jakta/compare/1.1.2...1.1.3) (2026-09-12)
+
+### Bug Fixes
+
+* **deps:** update plugin kotlin-qa to v1.9.1 ([#936](https://github.com/jakta-bdi/jakta/issues/936)) ([ed9b02c](https://github.com/jakta-bdi/jakta/commit/ed9b02cb3cf8681927ee75d2b6cd5f7c38e4417a))
+
+## [1.1.2](https://github.com/jakta-bdi/jakta/compare/1.1.1...1.1.2) (2026-09-11)
+
+### Bug Fixes
+
+* **deps:** update dependency typescript to ~5.8.0 ([#916](https://github.com/jakta-bdi/jakta/issues/916)) ([d3960ca](https://github.com/jakta-bdi/jakta/commit/d3960ca333e9d0a3544d5cee3286aab1ea143e5a))
+
+### General maintenance
+
+* **ci:** fix the previous commit that got lost ([#935](https://github.com/jakta-bdi/jakta/issues/935)) ([bd349a6](https://github.com/jakta-bdi/jakta/commit/bd349a6a3c0ecd13d691fb4ac9f49ce5428e75f9))
+* **ci:** fixing small merging error ([#934](https://github.com/jakta-bdi/jakta/issues/934)) ([6d6c78d](https://github.com/jakta-bdi/jakta/commit/6d6c78d7b62f994d60d254904ff5750fdc58ad2d))
+* fixing npm release ([#933](https://github.com/jakta-bdi/jakta/issues/933)) ([82122e7](https://github.com/jakta-bdi/jakta/commit/82122e73ec03904a551c05bb9b5e1f99ec8be766))
+
+## [1.1.1](https://github.com/jakta-bdi/jakta/compare/1.1.0...1.1.1) (2026-09-11)
+
+### Bug Fixes
+
+* **deps:** update dependency typescript to ~5.7.0 ([#915](https://github.com/jakta-bdi/jakta/issues/915)) ([95a6442](https://github.com/jakta-bdi/jakta/commit/95a644284c2c7dfa2536ac6e8806a707f6250f88))
+* **deps:** update docusaurus monorepo to v3.9.2 ([#920](https://github.com/jakta-bdi/jakta/issues/920)) ([d27d697](https://github.com/jakta-bdi/jakta/commit/d27d697cb82c78e875fe5cce1c03d68a46596e4b))
+* **deps:** update react monorepo to v19.0.8 ([#913](https://github.com/jakta-bdi/jakta/issues/913)) ([80459dc](https://github.com/jakta-bdi/jakta/commit/80459dc782a6bd3a6635f107e461cf844b0d692d))
+
+### General maintenance
+
+* ci fixes ([#932](https://github.com/jakta-bdi/jakta/issues/932)) ([05a00cc](https://github.com/jakta-bdi/jakta/commit/05a00cccdce80db2b9b907b6ecae23e417c13c21))
+
+## [1.1.0](https://github.com/jakta-bdi/jakta/compare/1.0.7...1.1.0) (2026-09-10)
+
+### Features
+
+* prolog-incarnation multiplatform and npm publishing fixes ([#930](https://github.com/jakta-bdi/jakta/issues/930)) ([5648708](https://github.com/jakta-bdi/jakta/commit/5648708bad32e2bb9da44ffd8f558751ba5e570e))
+
 ## [1.0.7](https://github.com/jakta-bdi/jakta/compare/1.0.6...1.0.7) (2026-09-10)
 
 ### Bug Fixes
