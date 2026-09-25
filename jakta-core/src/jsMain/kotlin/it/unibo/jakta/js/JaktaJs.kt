@@ -7,6 +7,7 @@ import co.touchlab.kermit.Severity
 import it.unibo.jakta.InternalJaktaAPI
 import it.unibo.jakta.agent.AgentSpecification
 import it.unibo.jakta.agent.BaseAgentID
+import it.unibo.jakta.agent.BaseMutableAgentState
 import it.unibo.jakta.agent.MutableAgentState
 import it.unibo.jakta.dsl.agent
 import it.unibo.jakta.dsl.agent.AgentBuilder
@@ -24,6 +25,7 @@ import it.unibo.jakta.plan.PlanScope
 import kotlin.js.Promise
 import kotlin.reflect.typeOf
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.await
@@ -156,14 +158,38 @@ class JsPlanScope internal constructor(
     fun print(message: String) = agent.print(message)
 
     /** Pursues [goal] as a subgoal, resolving with the result of the plan that achieved it. */
-    fun achieve(goal: Any): Promise<Any?> = intention.promise { agent.internalAchieve(goal, typeOf<Any?>()) }
+    fun achieve(goal: Any): Promise<Any?> = inIntention { agent.internalAchieve(goal, typeOf<Any?>()) }
+
+    /** Suspends the plan for [millis] milliseconds, like Kotlin's `delay`, letting other intentions run. */
+    fun delay(millis: Int): Promise<Unit> = inIntention { kotlinx.coroutines.delay(millis.toLong()) }
 
     /** Pursues [goal] in a new intention, without waiting for it. */
     fun alsoAchieve(goal: Any) = agent.alsoAchieve(goal)
 
     /** Terminates the node the agent is running on. */
     fun terminateNode() = node.terminateNode()
+
+    /**
+     * Runs [block] in the plan's intention, started undispatched so it begins within the current step
+     * (as Kotlin's suspending calls do). The returned promise settles within a later step of the intention, and the
+     * JS code it resumes is then run by the engine's microtask queue: the agent waits for it before its next event,
+     * so that code still belongs to that step, as the code after a Kotlin suspension point does.
+     */
+    private fun <T> inIntention(block: suspend () -> T): Promise<T> =
+        intention.promise(start = CoroutineStart.UNDISPATCHED) {
+            try {
+                block()
+            } finally {
+                (agent as? BaseMutableAgentState<*, *>)?.beforeNextEvent?.add(::drainMicrotasks)
+            }
+        }
 }
+
+// A macrotask only runs once the microtask queue is empty, i.e., once the resumed JS code reached its next `await`.
+// ponytail: browsers clamp nested setTimeout to 4ms, switch to MessageChannel if JS plans in browsers are too slow.
+private suspend fun drainMicrotasks() = Promise<Unit> { resolve, _ ->
+    js("(typeof setImmediate === 'function' ? setImmediate : setTimeout)")(resolve)
+}.await()
 
 // JS plans are untyped: declaring Unit keeps them relevant both for `achieve` (Unit) and JS `achieve` (Any?).
 private val anyResult = typeOf<Unit>()
@@ -171,12 +197,23 @@ private val anyResult = typeOf<Unit>()
 private fun JsGuard?.toKotlin(): GuardScope<Any, Any>.() -> Any? =
     this?.let { guard -> { guard(JsGuardScope(beliefs.toTypedArray(), context)) } } ?: { context }
 
-// ponytail: synchronous JS code between awaits runs outside the intention stepping,
-// so interleaving is only guaranteed at await points.
+// ponytail: only promises returned by JsPlanScope resume within a step: code after awaiting any other promise
+// (e.g., fetch) runs whenever the engine schedules it, and is not stopped when the intention is cancelled.
 private fun JsPlanBody.toKotlin(node: Node<Any>): suspend context(Any)
 (PlanScope<Any, Any, Any>) -> Any? = { scope ->
     // Launching `achieve` in the plan's own coroutine context keeps the Intention it needs.
     val intention = CoroutineScope(currentCoroutineContext())
-    val result = this(JsPlanScope(scope.agent, node, intention, scope.context))
-    if (result is Promise<*>) result.await() else result
+    @Suppress("TooGenericExceptionCaught")
+    try {
+        val result = this(JsPlanScope(scope.agent, node, intention, scope.context))
+        if (result is Promise<*>) result.await() else result
+    } catch (e: Throwable) {
+        // A JS `Error` is not a Kotlin Exception: wrap it so the lifecycle handles it as a plan failure.
+        throw e as? Exception ?: JsPlanFailure(e)
+    }
 }
+
+/**
+ * A plan failure caused by an error thrown by a JS plan body.
+ */
+class JsPlanFailure(cause: Throwable) : Exception("JS plan failed: ${cause.message}", cause)
