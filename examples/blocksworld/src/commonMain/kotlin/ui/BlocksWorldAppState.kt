@@ -4,9 +4,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import blocksWorldNode
-import co.touchlab.kermit.Logger
-import co.touchlab.kermit.Severity
-import co.touchlab.kermit.platformLogWriter
 import it.unibo.jakta.dsl.goal.PrologGoal
 import it.unibo.jakta.dsl.goal.initialGoal
 import it.unibo.jakta.dsl.mas
@@ -50,8 +47,7 @@ const val MAX_BLOCK_COUNT = 12
 class BlocksWorldAppState(private val agentDispatcher: CoroutineDispatcher = Dispatchers.Default) {
 
     init {
-        Logger.setMinSeverity(Severity.Error)
-        Logger.setLogWriters(platformLogWriter(), AgentTrace)
+        AgentTrace.install()
     }
 
     /**

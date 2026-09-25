@@ -42,4 +42,6 @@ include(
     "jakta-prolog-incarnation",
     "examples:blocksworld",
     "examples:hello-world",
+    "examples:tictactoe",
+    "examples:ui-common",
 )
