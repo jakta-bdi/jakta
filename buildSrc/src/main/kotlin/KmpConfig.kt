@@ -45,7 +45,11 @@ fun KotlinDependencyHandler.jakta(project: String): ProjectDependency = project(
 fun DependencyHandler.jakta(project: String) = project(":jakta-$project")
 
 @OptIn(ExperimentalKotlinGradlePluginApi::class)
-fun Project.configureKotlinMultiplatform(includeNative: Boolean = true, targetJvm: JvmTarget = JvmTarget.JVM_1_8) {
+fun Project.configureKotlinMultiplatform(
+    includeNative: Boolean = true,
+    targetJvm: JvmTarget = JvmTarget.JVM_1_8,
+    esModules: Boolean = true,
+) {
     with(extensions.getByType<KotlinMultiplatformExtension>()) {
         jvm {
             compilerOptions {
@@ -83,6 +87,11 @@ fun Project.configureKotlinMultiplatform(includeNative: Boolean = true, targetJv
                 }
             }
             binaries.library()
+            // ES modules export the @JsExport-ed API flat (instead of nested under the package namespace).
+            if (esModules) {
+                useEsModules()
+                generateTypeScriptDefinitions()
+            }
         }
         applyDefaultHierarchyTemplate()
         if (includeNative) {
