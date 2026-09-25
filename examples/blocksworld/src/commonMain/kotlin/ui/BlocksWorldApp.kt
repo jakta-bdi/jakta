@@ -1,6 +1,5 @@
 package ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,9 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Button
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
@@ -19,16 +15,12 @@ import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Slider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -114,28 +106,5 @@ private fun PanelHeader(title: String, actions: @Composable () -> Unit) {
     ) {
         Text(title, style = MaterialTheme.typography.h6)
         actions()
-    }
-}
-
-/**
- * Shows what the agents printed, following the newest line.
- */
-@Suppress("MagicNumber")
-@Composable
-fun AgentTracePanel(modifier: Modifier = Modifier) {
-    val lines by AgentTrace.lines.collectAsState()
-    val listState = rememberLazyListState()
-
-    LaunchedEffect(lines.size) {
-        if (lines.isNotEmpty()) listState.animateScrollToItem(lines.lastIndex)
-    }
-
-    Column(modifier = modifier.background(Color(0xFF1E1E1E)).padding(8.dp)) {
-        Text("Agent trace", color = Color.White, style = MaterialTheme.typography.subtitle2)
-        LazyColumn(state = listState) {
-            items(lines) { line ->
-                Text(line, color = Color(0xFFD4D4D4), fontFamily = FontFamily.Monospace, fontSize = 12.sp)
-            }
-        }
     }
 }
