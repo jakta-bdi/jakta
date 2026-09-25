@@ -1,3 +1,9 @@
+## [1.1.15](https://github.com/jakta-bdi/jakta/compare/1.1.14...1.1.15) (2026-09-25)
+
+### Bug Fixes
+
+* **deps:** update dependency org.danilopianini.publish-on-central to v9.2.12 ([#947](https://github.com/jakta-bdi/jakta/issues/947)) ([3c8a983](https://github.com/jakta-bdi/jakta/commit/3c8a9836b2b4fe774870689190c17e9e7d328b7e))
+
 ## [1.1.14](https://github.com/jakta-bdi/jakta/compare/1.1.13...1.1.14) (2026-09-22)
 
 ### Bug Fixes
