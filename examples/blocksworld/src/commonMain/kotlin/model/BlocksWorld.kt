@@ -1,9 +1,12 @@
 package model
 
 import kotlin.random.Random
-import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -27,62 +30,45 @@ class BlocksWorld(seed: Long = 42, blockCount: Int = 6) {
 
     private val stacks: MutableList<MutableList<Block>> = mutableListOf()
 
+    private val mutableState = MutableStateFlow<List<List<Block>>>(emptyList())
+
+    /**
+     * The current state of the Blocks World as a list of stacks of blocks, bottom first.
+     */
+    val state: StateFlow<List<List<Block>>> = mutableState.asStateFlow()
+
+    /**
+     * How long a single move takes, to make the agent's work visible.
+     */
+    var moveDelay: Duration = 1.seconds
+
     init {
         initialize(blockCount)
-    }
-
-    // ----------------------------
-    // Public API (coroutine-safe)
-    // ----------------------------
-
-    /**
-     * Moves a block from its current stack to the destination stack.
-     */
-    suspend fun move(block: Block, destination: Block?): List<List<Block>> = mutex.withLock {
-        val fromStackIndex = checkNotNull(findStackIndex(block)) { "model.Block $block not found" }
-
-        val fromStack = stacks[fromStackIndex]
-
-        check(isTop(fromStack, block)) {
-            "model.Block $block is not clear"
-        }
-
-        val moving = fromStack.removeAt(fromStack.lastIndex)
-        if (fromStack.isEmpty()) stacks.removeAt(fromStackIndex)
-
-        if (destination == null) {
-            stacks.add(mutableListOf(moving))
-            return getStateUnsafe()
-        }
-
-        val destStackIndex = checkNotNull(findStackIndex(destination)) {
-            "Destination $destination not found"
-        }
-
-        val destStack = stacks[destStackIndex]
-
-        check(isTop(destStack, destination)) {
-            "Destination $destination is not clear"
-        }
-
-        delay(1.seconds)
-        destStack.add(moving)
-        return getStateUnsafe()
+        mutableState.value = snapshot()
     }
 
     /**
-     * Returns the current state of the Blocks World as a list of stacks of blocks.
+     * Moves a block on top of [destination], or on the table if [destination] is null.
+     * Returns the new state of the world.
      */
-    suspend fun getState(): List<List<Block>> = mutex.withLock {
-        getStateUnsafe()
-    }
+    suspend fun move(block: Block, destination: Block?): List<List<Block>> {
+        delay(moveDelay)
+        return mutex.withLock {
+            val fromStackIndex = checkNotNull(findStackIndex(block)) { "Block $block not found" }
+            val fromStack = stacks[fromStackIndex]
+            check(isTop(fromStack, block)) { "Block $block is not clear" }
 
-    /**
-     * Prints the current state of the Blocks World to the console.
-     */
-    suspend fun printState() = mutex.withLock {
-        stacks.forEachIndexed { i, stack ->
-            println("Stack $i: ${stack.joinToString(" ")}")
+            if (destination != null) {
+                val destStackIndex = checkNotNull(findStackIndex(destination)) { "Destination $destination not found" }
+                val destStack = stacks[destStackIndex]
+                check(isTop(destStack, destination)) { "Destination $destination is not clear" }
+                destStack.add(fromStack.removeAt(fromStack.lastIndex))
+            } else {
+                stacks.add(mutableListOf(fromStack.removeAt(fromStack.lastIndex)))
+            }
+            if (fromStack.isEmpty()) stacks.removeAt(fromStackIndex)
+
+            snapshot().also { mutableState.value = it }
         }
     }
 
@@ -116,7 +102,7 @@ class BlocksWorld(seed: Long = 42, blockCount: Int = 6) {
     // Internal helpers (lock-protected by caller)
     // ----------------------------
 
-    private fun getStateUnsafe(): List<List<Block>> = stacks.map { it.toList() }
+    private fun snapshot(): List<List<Block>> = stacks.map { it.toList() }
 
     private fun findStackIndex(block: Block): Int? = stacks.indexOfFirst { it.contains(block) }
         .takeIf { it >= 0 }

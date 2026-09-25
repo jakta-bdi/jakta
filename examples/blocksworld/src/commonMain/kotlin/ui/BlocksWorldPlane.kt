@@ -26,8 +26,10 @@ fun BlocksWorldPlane(state: List<List<Block>>) {
         val stackCount = state.size.coerceAtLeast(1)
 
         val stackSpacing = size.width / (stackCount + 1)
-        val blockW = 90f
-        val blockH = 90f
+        val tallest = state.maxOfOrNull { it.size }?.coerceAtLeast(1) ?: 1
+        val blockSize = minOf(90f, stackSpacing * 0.9f, (size.height - 120f) / tallest)
+        val blockW = blockSize
+        val blockH = blockSize
 
         drawLine(
             Color.DarkGray,

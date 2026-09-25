@@ -1,7 +1,7 @@
 plugins {
-    kotlin("jvm")
-    id("org.jetbrains.compose") version "1.11.1"
-    id("org.jetbrains.kotlin.plugin.compose") version "2.4.0"
+    kotlin("multiplatform")
+    alias(libs.plugins.compose.multiplatform)
+    alias(libs.plugins.kotlin.compose)
 }
 
 repositories {
@@ -9,14 +9,33 @@ repositories {
     google()
 }
 
-dependencies {
-    implementation(compose.desktop.currentOs)
+kotlinMultiplatform {
+    jvm("desktop")
+    js {
+        browser {
+            testTask { useMocha { timeout = "60s" } }
+        }
+        binaries.executable()
+    }
 
-    implementation(jakta("core"))
-    implementation(jakta("prolog-incarnation"))
+    sourceSets {
+        commonMain.dependencies {
+            implementation(libs.bundles.compose)
 
-    implementation(libs.kotlinx.coroutines.core)
-    implementation(libs.kermit)
+            implementation(jakta("core"))
+            implementation(jakta("prolog-incarnation"))
+
+            implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.kermit)
+        }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+            implementation(libs.kotlinx.coroutines.test)
+        }
+        named("desktopMain").dependencies {
+            implementation(compose.desktop.currentOs)
+        }
+    }
 }
 
 compose.desktop {
