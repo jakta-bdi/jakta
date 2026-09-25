@@ -9,6 +9,7 @@ import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.core.Term
 import it.unibo.tuprolog.solve.Solution
 import it.unibo.tuprolog.solve.Solver
+import it.unibo.tuprolog.solve.classic.ClassicSolverFactory
 import it.unibo.tuprolog.solve.flags.TrackVariables
 import it.unibo.tuprolog.solve.flags.Unknown
 import it.unibo.tuprolog.unify.AbstractUnificator
@@ -122,7 +123,8 @@ object JaktaSolver {
     /**
      * Factory method to create a new solver instance with a loaded theory.
      */
-    fun get(theory: Iterable<Clause>): Solver = Solver.prolog
+    // referenced directly: the by-name lookup behind Solver.prolog fails in bundled JS apps (webpack)
+    fun get(theory: Iterable<Clause>): Solver = ClassicSolverFactory
         .newBuilder()
         .unificator(annotationUnificator)
         .staticKb(theory)
