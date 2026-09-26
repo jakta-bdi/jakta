@@ -11,8 +11,14 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 
+/**
+ * Tests of how intentions and plans are cleaned up when they complete, or when the agent stops.
+ */
 class TestIntentionCleanup {
 
+    /**
+     * Intentions leave the pool once their plans have completed.
+     */
     @Test
     fun completedIntentionsAreRemoved() = runTest {
         var intentions = -1
@@ -36,6 +42,9 @@ class TestIntentionCleanup {
         assertEquals(1, intentions)
     }
 
+    /**
+     * Stopping an agent cancels its plans, which run their finally blocks but no removal plan.
+     */
     @Test
     fun plansOfAStoppedAgentAreCancelled() = runTest {
         val trace = mutableListOf<String>()

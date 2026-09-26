@@ -15,8 +15,15 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 
+/**
+ * Tests of [it.unibo.jakta.agent.MutableAgentState.dropGoal].
+ */
 class TestDropGoal {
 
+    /**
+     * Dropping a top-level goal cancels its whole intention,
+     * running the finally blocks and removal plans of the goal and its subgoals.
+     */
     @Test
     fun droppingAGoalCancelsItsWholeIntention() = runTest {
         Logger.setMinSeverity(Severity.Warn)
@@ -79,6 +86,9 @@ class TestDropGoal {
         )
     }
 
+    /**
+     * Dropping a subgoal cancels it and its own subgoals (triggering their removal plans), and fails the parent.
+     */
     @Test
     fun droppingASubgoalFailsTheParent() = runTest {
         Logger.setMinSeverity(Severity.Warn)
@@ -137,6 +147,9 @@ class TestDropGoal {
         )
     }
 
+    /**
+     * The parent of a dropped subgoal can catch the [GoalDroppedException] and continue.
+     */
     @Test
     fun theParentCanRecoverFromADroppedSubgoal() = runTest {
         Logger.setMinSeverity(Severity.Warn)

@@ -216,15 +216,12 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
         )?.let { launchPlan(GoalRemoveEvent.withNoResult(goal), goal, it) }
     }
 
-    /**
-     * Drops every desire pursuing [goal], triggering the removal plans of all the dropped goals.
-     * A top-level goal is dropped by cancelling its whole intention.
-     * A subgoal is dropped by cancelling it and the subgoals stacked on top of it in its intention,
-     * and by failing the plan waiting for it (which triggers the failure plans of the parent).
-     */
+    // A top-level goal is dropped by cancelling its whole intention, a subgoal by cancelling it and the subgoals
+    // stacked on top of it in its intention, and by failing the plan waiting for it (triggering its failure plans).
+    // The removal plans of all the dropped goals are triggered as their plans complete.
     private fun dropDesires(goal: Goal) {
-        executableAgent.state.desires.filter { it.goal == goal }.forEach { desire ->
-            if (!desire.job.isActive) return@forEach // already dropped along with another desire
+        for (desire in executableAgent.state.desires.filter { it.goal == goal }) {
+            if (!desire.job.isActive) continue // already dropped along with another desire
             log.i { "Dropping goal ${desire.goal} in intention ${desire.intention.id.displayId}" }
             val completion = desire.event.completion
             if (completion == null) {
