@@ -22,6 +22,7 @@ class TestDropGoal {
         Logger.setMinSeverity(Severity.Warn)
         val trace = mutableListOf<String>()
         val cleanups = mutableSetOf<String>()
+        val removals = mutableSetOf<String>()
         node(NodeBuilders.baseNode()) {
             agent {
                 embodiedAs { Any() }
@@ -49,9 +50,8 @@ class TestDropGoal {
                     failing.goal { ifGoalMatch("work") } triggers {
                         trace += "work failed"
                     }
-                    removing.goal { ifGoalMatch("work") } triggers {
-                        trace += "work removed"
-                    }
+                    removing.goal { ifGoalMatch("work") } triggers { removals += "work" }
+                    removing.goal { ifGoalMatch("subgoal") } triggers { removals += "subgoal" }
                     adding.goal { ifGoalMatch("drop") } triggers {
                         delay(1.seconds)
                         trace += "goals before drop: ${agent.goals.sorted()}"
@@ -60,6 +60,7 @@ class TestDropGoal {
                         trace += "goals after drop: ${agent.goals.sorted()}"
                         trace += "intentions after drop: ${agent.intentions.size}"
                         trace += "cleanups after drop: ${cleanups.sorted()}"
+                        trace += "removals after drop: ${removals.sorted()}"
                         delay(20.seconds)
                         node.terminateNode()
                     }
@@ -69,10 +70,10 @@ class TestDropGoal {
         assertEquals(
             listOf(
                 "goals before drop: [drop, subgoal, work]",
-                "work removed",
                 "goals after drop: [drop]",
                 "intentions after drop: 1",
                 "cleanups after drop: [subgoal, work]",
+                "removals after drop: [subgoal, work]",
             ),
             trace,
         )
@@ -83,6 +84,7 @@ class TestDropGoal {
         Logger.setMinSeverity(Severity.Warn)
         val trace = mutableListOf<String>()
         val cleanups = mutableSetOf<String>()
+        val removals = mutableSetOf<String>()
         node(NodeBuilders.baseNode()) {
             agent {
                 embodiedAs { Any() }
@@ -114,18 +116,25 @@ class TestDropGoal {
                     failing.goal { ifGoalMatch("work") } triggers {
                         trace += "work failed"
                     }
+                    removing.goal { ifGoalMatch("work") } triggers { removals += "work" }
+                    removing.goal { ifGoalMatch("subgoal") } triggers { removals += "subgoal" }
+                    removing.goal { ifGoalMatch("nested") } triggers { removals += "nested" }
                     adding.goal { ifGoalMatch("drop") } triggers {
                         delay(1.seconds)
                         agent.dropGoal("subgoal")
                         delay(20.seconds)
                         trace += "goals: ${agent.goals.sorted()}"
                         trace += "cleanups: ${cleanups.sorted()}"
+                        trace += "removals: ${removals.sorted()}"
                         node.terminateNode()
                     }
                 }
             }
         }.runToEnd()
-        assertEquals(listOf("work failed", "goals: [drop]", "cleanups: [nested, subgoal]"), trace)
+        assertEquals(
+            listOf("work failed", "goals: [drop]", "cleanups: [nested, subgoal]", "removals: [nested, subgoal]"),
+            trace,
+        )
     }
 
     @Test

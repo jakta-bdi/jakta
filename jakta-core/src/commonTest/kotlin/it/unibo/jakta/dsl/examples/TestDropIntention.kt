@@ -17,10 +17,11 @@ import kotlinx.coroutines.test.runTest
 class TestDropIntention {
 
     @Test
-    fun droppingAnIntentionByOneOfItsGoalsSilentlyCancelsIt() = runTest {
+    fun droppingAnIntentionRemovesAllItsGoalsWithoutFailures() = runTest {
         Logger.setMinSeverity(Severity.Warn)
         val trace = mutableListOf<String>()
         val cleanups = mutableSetOf<String>()
+        val removals = mutableSetOf<String>()
         node(NodeBuilders.baseNode()) {
             agent {
                 embodiedAs { Any() }
@@ -47,8 +48,8 @@ class TestDropIntention {
                         }
                     }
                     failing.goal { ifGoalMatch("work") } triggers { trace += "work failed" }
-                    removing.goal { ifGoalMatch("work") } triggers { trace += "work removed" }
-                    removing.goal { ifGoalMatch("subgoal") } triggers { trace += "subgoal removed" }
+                    removing.goal { ifGoalMatch("work") } triggers { removals += "work" }
+                    removing.goal { ifGoalMatch("subgoal") } triggers { removals += "subgoal" }
                     adding.goal { ifGoalMatch("other") } triggers {
                         delay(5.seconds)
                         trace += "other completed"
@@ -59,13 +60,17 @@ class TestDropIntention {
                         delay(1.seconds)
                         trace += "goals: ${agent.goals.sorted()}"
                         trace += "cleanups: ${cleanups.sorted()}"
+                        trace += "removals: ${removals.sorted()}"
                         delay(20.seconds)
                         node.terminateNode()
                     }
                 }
             }
         }.runToEnd()
-        assertEquals(listOf("goals: [drop, other]", "cleanups: [subgoal, work]", "other completed"), trace)
+        assertEquals(
+            listOf("goals: [drop, other]", "cleanups: [subgoal, work]", "removals: [subgoal, work]", "other completed"),
+            trace,
+        )
     }
 
     @Test
@@ -73,6 +78,7 @@ class TestDropIntention {
         Logger.setMinSeverity(Severity.Warn)
         val trace = mutableListOf<String>()
         val cleanups = mutableSetOf<String>()
+        val removals = mutableSetOf<String>()
         node(NodeBuilders.baseNode()) {
             agent {
                 embodiedAs { Any() }
@@ -107,15 +113,19 @@ class TestDropIntention {
                             cleanups += "drop"
                         }
                     }
+                    removing.goal { ifGoalMatch("a") } triggers { removals += "a" }
+                    removing.goal { ifGoalMatch("b") } triggers { removals += "b" }
+                    removing.goal { ifGoalMatch("drop") } triggers { removals += "drop" }
                     adding.goal { ifGoalMatch("after") } triggers {
                         delay(1.seconds)
                         trace += "intentions: ${agent.intentions.size}"
                         trace += "cleanups: ${cleanups.sorted()}"
+                        trace += "removals: ${removals.sorted()}"
                         node.terminateNode()
                     }
                 }
             }
         }.runToEnd()
-        assertEquals(listOf("intentions: 1", "cleanups: [a, b, drop]"), trace)
+        assertEquals(listOf("intentions: 1", "cleanups: [a, b, drop]", "removals: [a, b, drop]"), trace)
     }
 }

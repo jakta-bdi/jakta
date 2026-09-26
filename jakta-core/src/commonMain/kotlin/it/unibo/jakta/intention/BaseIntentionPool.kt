@@ -22,7 +22,7 @@ class BaseIntentionPool(val eventInbox: EventInbox<AgentEvent.Internal.Step>) : 
     override fun drop(intentionID: IntentionID): Boolean = intentions.find { it.id == intentionID }?.let { intention ->
         // Removing it right away would lose its queued continuations, that its plans need to complete the cancellation
         intention.job.invokeOnCompletion { intentions.remove(intention) }
-        intention.job.cancel()
+        intention.job.cancel(DropCancellation("Intention ${intention.id.displayId} has been dropped"))
         true
     } ?: false
 
@@ -52,9 +52,8 @@ class BaseIntentionPool(val eventInbox: EventInbox<AgentEvent.Internal.Step>) : 
 
     override fun stepIntention(event: AgentEvent.Internal.Step) {
         log.d { "Stepping intention ${event.intention.id.displayId}" }
-        intentions.find { it == event.intention }?.step() ?: run {
-            log.e { "Intention ${event.intention.id.displayId} not found" }
-        }
+        // Even if the intention already left the pool, its remaining continuations must run (e.g. a cancellation)
+        event.intention.step()
     }
 
     override fun getIntentionsSet(): Set<Intention> = setOf(*intentions.toTypedArray())

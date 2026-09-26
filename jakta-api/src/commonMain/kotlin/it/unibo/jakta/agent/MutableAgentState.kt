@@ -75,19 +75,21 @@ interface MutableAgentState<Belief : Any, Goal : Any> :
     fun alsoAchieve(goal: Goal)
 
     /**
-     * Drops a goal the agent is pursuing (equal to [goal]), then handles its removal (if a removal plan exists).
+     * Drops the goals the agent is pursuing that are equal to [goal].
      * Dropping a top-level goal cancels its whole intention, including all its subgoals.
      * Dropping a subgoal cancels it and its own subgoals, and fails the plan waiting for it
-     * with a [GoalDroppedException].
+     * with a [GoalDroppedException] (triggering the failure plans of the parent goal, if not caught).
+     * Every dropped goal is intentionally removed: once its plan has completed the cancellation
+     * (e.g. run its finally blocks), its removal plan is triggered, if any.
      * The drop is processed as an event, so it applies to goals adopted before this call.
-     * Dropped plans are cancelled, so their finally blocks run.
      * @param[goal] The goal to be dropped.
      */
     fun dropGoal(goal: Goal)
 
     /**
      * Drops every intention pursuing a goal equal to [goal], at any level of its stack of subgoals.
-     * Unlike [dropGoal], no plan is failed and no removal plan is triggered: the whole intention silently stops.
+     * Unlike [dropGoal], no plan is failed: the whole intention stops, and the removal plans of all the goals
+     * it was pursuing are triggered once their plans have completed the cancellation (e.g. run their finally blocks).
      * It applies to the intentions existing when invoked: if the current intention is dropped,
      * the calling plan stops at its next suspension point.
      * @param[goal] The goal whose intentions are to be dropped.
