@@ -15,6 +15,7 @@ import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.event.AgentEvent
 import it.unibo.jakta.event.AgentUpdate
 import it.unibo.jakta.node.Node
+import it.unibo.jakta.node.SendTo
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
@@ -54,7 +55,7 @@ class FixedTimeRecharging(val node: Node<BodyWithPosition>) : Recharging {
     override suspend fun Agent.recharge() {
         val agent = this
         delay(3.seconds)
-        node.publishEvent(chargeLevel(100), { it == node.agents[agent.id] })
+        node.publishEvent(chargeLevel(100), SendTo(agent.id))
     }
 }
 

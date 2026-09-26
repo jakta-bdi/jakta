@@ -45,9 +45,9 @@ open class BaseNode<Body : Any> : ExecutableNode<Body> {
         _systemEvents.send(ShutDownNodeEvent(nodeID, error))
     }
 
-    override fun publishEvent(event: AgentEvent.External, filterFunction: Node<Body>.(Body) -> Boolean) = when (event) {
-        is AgentEvent.External.Message<*> -> _systemEvents.send(AgentMessageEvent(event, filterFunction))
-        is AgentEvent.External.Perception -> deliverEvent(event, filterFunction)
+    override fun publishEvent(event: AgentEvent.External, filter: MessageFilter<Body>) = when (event) {
+        is AgentEvent.External.Message<*> -> _systemEvents.send(AgentMessageEvent(event, filter))
+        is AgentEvent.External.Perception -> deliverEvent(event, filter)
     }
 
     // TODO check this cast, can I remove it somehow?
@@ -55,7 +55,7 @@ open class BaseNode<Body : Any> : ExecutableNode<Body> {
     override fun handleExternalEvent(event: SystemEvent) {
         when (event) {
             is AgentMessageEvent<*, *> -> {
-                deliverEvent(event.message, event.filterFunction as Node<Body>.(Body) -> Boolean)
+                deliverEvent(event.message, event.filter as MessageFilter<Body>)
             }
 
             is AgentRemovalEvent -> {
@@ -75,8 +75,8 @@ open class BaseNode<Body : Any> : ExecutableNode<Body> {
         }
     }
 
-    private fun deliverEvent(event: AgentEvent.External, filterFunction: Node<Body>.(Body) -> Boolean) {
-        _agents.filter { filterFunction(it.body) }
+    private fun deliverEvent(event: AgentEvent.External, filter: MessageFilter<Body>) {
+        _agents.filter { filter.accept(this, it.id, it.body) }
             .forEach { it.externalInbox.send(event) }
     }
 }
