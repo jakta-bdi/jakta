@@ -2,7 +2,7 @@ package it.unibo.jakta.event
 
 import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.agent.ExecutableAgent
-import it.unibo.jakta.node.Node
+import it.unibo.jakta.node.MessageFilter
 import it.unibo.jakta.node.NodeID
 
 /**
@@ -53,7 +53,7 @@ sealed interface SystemEvent {
 
     /**
      * The wrapper of an agent message that is sent to the node and then delivered
-     * to all agents reachable by that node that satisfy the [filterFunction].
+     * to all agents reachable by that node that satisfy the [filter].
      */
     interface AgentMessage<P : Any, Body : Any> : SystemEvent {
         /**
@@ -62,9 +62,8 @@ sealed interface SystemEvent {
         val message: AgentEvent.External.Message<P>
 
         /**
-         * The function that determines the conditions under which an agent in the receiving node
-         * should receive the message.
+         * The [MessageFilter] that determines which agents of the receiving node should receive the message.
          */
-        val filterFunction: Node<Body>.(Body) -> Boolean
+        val filter: MessageFilter<Body>
     }
 }
