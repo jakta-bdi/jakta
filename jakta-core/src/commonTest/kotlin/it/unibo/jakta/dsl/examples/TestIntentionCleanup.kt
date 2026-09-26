@@ -12,6 +12,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 
 class TestIntentionCleanup {
+
     @Test
     fun completedIntentionsAreRemoved() = runTest {
         var intentions = -1
@@ -33,5 +34,34 @@ class TestIntentionCleanup {
             }
         }.runToEnd()
         assertEquals(1, intentions)
+    }
+
+    @Test
+    fun plansOfAStoppedAgentAreCancelled() = runTest {
+        val trace = mutableListOf<String>()
+        node(NodeBuilders.baseNode()) {
+            agent {
+                embodiedAs { Any() }
+                hasInitialGoals {
+                    !"long"
+                    !"stop"
+                }
+                hasPlanLibrary {
+                    adding.goal { ifGoalMatch("long") } triggers {
+                        try {
+                            delay(10.seconds)
+                            trace += "long completed"
+                        } finally {
+                            trace += "long cleanup"
+                        }
+                    }
+                    adding.goal { ifGoalMatch("stop") } triggers {
+                        delay(1.seconds)
+                        node.terminateNode()
+                    }
+                }
+            }
+        }.runToEnd()
+        assertEquals(listOf("long cleanup"), trace)
     }
 }

@@ -25,10 +25,11 @@ interface MutableIntentionPool : IntentionPool {
     fun nextIntention(event: AgentEvent.Internal, currentJob: Job): Intention
 
     /**
-     * Drops the intention with the given ID from the pool.
+     * Drops the intention with the given ID, cancelling all its plans.
+     * The intention leaves the pool once its plans have completed their cancellation (e.g. run their finally blocks).
      * @return true if the intention was found and dropped, false otherwise.
      */
-    suspend fun drop(intentionID: IntentionID): Boolean
+    fun drop(intentionID: IntentionID): Boolean
 
     /**
      * Executes one step of the intention referenced by this event.
