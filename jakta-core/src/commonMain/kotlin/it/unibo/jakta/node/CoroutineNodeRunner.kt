@@ -19,10 +19,19 @@ import kotlinx.coroutines.yield
  * A [NodeRunner] implementation that uses Kotlin coroutines
  * to manage the execution of agents within a node.
  * @param [connection] The [NodeNetwork] used for communication and event handling.
+ * @param [lifecycleOf] Creates the [AgentLifecycle] that runs each agent of the node.
  * @param [Body] The type of the agent's body.
  * @param [N] The type of the executable node that this runner will manage.
  */
-class CoroutineNodeRunner<Body : Any, N : ExecutableNode<Body>>(val connection: NodeNetwork) : NodeRunner<N> {
+class CoroutineNodeRunner<Body : Any, N : ExecutableNode<Body>>(
+    val connection: NodeNetwork,
+    private val lifecycleOf: (ExecutableAgent<*, *>) -> AgentLifecycle<*, *>,
+) : NodeRunner<N> {
+
+    /**
+     * Runs each agent with a [BaseAgentLifecycle].
+     */
+    constructor(connection: NodeNetwork) : this(connection, { BaseAgentLifecycle(it) })
 
     private val agents: MutableMap<AgentLifecycle<*, *>, Job> = mutableMapOf()
 
@@ -75,7 +84,7 @@ class CoroutineNodeRunner<Body : Any, N : ExecutableNode<Body>>(val connection: 
     }
 
     private fun CoroutineScope.startAgent(node: N, agent: ExecutableAgent<*, *>) {
-        val newAgent = BaseAgentLifecycle(agent)
+        val newAgent = lifecycleOf(agent)
         val newJob = launch {
             while (isActive) {
                 newAgent.step()
