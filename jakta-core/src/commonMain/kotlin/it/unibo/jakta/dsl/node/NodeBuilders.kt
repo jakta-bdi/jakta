@@ -1,15 +1,17 @@
 package it.unibo.jakta.dsl.node
 
 import it.unibo.jakta.node.BaseNode
+import it.unibo.jakta.node.NodeID
 
 /**
  * Helper object that provides a convenient way to create a [BaseNodeBuilder] for [BaseNodeBuilder] instances.
  */
 object NodeBuilders {
     /**
-     * Creates a [BaseNodeBuilder] for an [it.unibo.jakta.node.BaseNode] with the specified [Body] type.
+     * Creates a factory of [BaseNodeBuilder]s for [it.unibo.jakta.node.BaseNode]s
+     * with the specified [Body] type and the given [NodeID].
      */
-    fun <Body : Any> baseNode(): () -> BaseNodeBuilder<Body, BaseNode<Body>> = {
-        BaseNodeBuilder<Body, BaseNode<Body>>(BaseNode())
+    fun <Body : Any> baseNode(): (NodeID) -> BaseNodeBuilder<Body, BaseNode<Body>> = { id ->
+        BaseNodeBuilder<Body, BaseNode<Body>>(BaseNode(id))
     }
 }

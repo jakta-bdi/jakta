@@ -3,6 +3,7 @@ package it.unibo.jakta.dsl.mas
 import it.unibo.jakta.dsl.node.NodeBuilder
 import it.unibo.jakta.node.ExecutableNode
 import it.unibo.jakta.node.Node
+import it.unibo.jakta.node.NodeID
 import it.unibo.jakta.node.NodeRunner
 
 /**
@@ -11,9 +12,20 @@ import it.unibo.jakta.node.NodeRunner
 interface MasBuilder<N : ExecutableNode<*>, NB : NodeBuilder<*, N>> {
 
     /**
+     * The nodes of the MAS.
+     */
+    val nodes: List<N>
+
+    /**
      * Opens a scope for adding a node to the MAS.
      */
     fun node(block: NB.() -> Unit)
+
+    /**
+     * Opens a scope for adding a node with the given [id] to the MAS.
+     * Explicit ids are required to run the nodes of a MAS in different processes.
+     */
+    fun node(id: NodeID, block: NB.() -> Unit)
 
     /**
      * Adds nodes to the mas.
