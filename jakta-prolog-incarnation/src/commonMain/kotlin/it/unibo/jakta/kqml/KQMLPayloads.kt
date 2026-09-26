@@ -1,3 +1,5 @@
+@file:UseSerializers(StructSerializer::class, RuleSerializer::class)
+
 package it.unibo.jakta.kqml
 
 import it.unibo.jakta.dsl.belief.PrologBelief
@@ -7,22 +9,27 @@ import it.unibo.jakta.logic.requirePredicate
 import it.unibo.tuprolog.core.Fact
 import it.unibo.tuprolog.core.Struct
 import kotlin.uuid.Uuid
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.UseSerializers
 
 /**
  * Tag interface for all KQML payloads.
  */
-sealed class KQMLPayload {
+@Serializable
+sealed interface KQMLPayload {
     /**
      * A unique id of the message.
      */
-    val id: Uuid = Uuid.random()
+    val id: Uuid
 }
 
 /**
  * KQML payload for telling a beliefQuery to an agent.
  * The [beliefs] must be ground. [replyingTo] is an optional id of the message this tell message is replying to.
  */
-data class Tell(val beliefs: Set<PrologBelief>, val replyingTo: Uuid? = null) : KQMLPayload() {
+@Serializable
+data class Tell(val beliefs: Set<PrologBelief>, val replyingTo: Uuid? = null, override val id: Uuid = Uuid.random()) :
+    KQMLPayload {
     init {
         beliefs.all { it is Fact } || error { "All beliefs to tell must be facts, but got $beliefs" }
         beliefs.forEach { b ->
@@ -36,7 +43,8 @@ data class Tell(val beliefs: Set<PrologBelief>, val replyingTo: Uuid? = null) : 
  * KQML payload for untelling a beliefQuery to an agent.
  * The [beliefQuery] must be a predicate.
  */
-data class Untell(val beliefQuery: Struct) : KQMLPayload() {
+@Serializable
+data class Untell(val beliefQuery: Struct, override val id: Uuid = Uuid.random()) : KQMLPayload {
     init {
         requirePredicate(beliefQuery) { "The beliefQuery to untell must be a predicate, but got $beliefQuery" }
     }
@@ -46,7 +54,8 @@ data class Untell(val beliefQuery: Struct) : KQMLPayload() {
  * KQML payload to delegate a goal to an agent.
  * The [goal] must be ground.
  */
-data class Achieve(val goal: PrologGoal) : KQMLPayload() {
+@Serializable
+data class Achieve(val goal: PrologGoal, override val id: Uuid = Uuid.random()) : KQMLPayload {
     init {
         requirePredicate(goal) { "The goal to achieve must be a predicate, but got $goal" }
         requireGround(goal) { "The goal to achieve must be ground, but got $goal" }
@@ -59,7 +68,8 @@ data class Achieve(val goal: PrologGoal) : KQMLPayload() {
  * KQML payload for telling an agent to stop pursuing a (delegated) goal.
  * The [goalQuery] must be a predicate.
  */
-data class Unachieve(val goalQuery: Struct) : KQMLPayload() {
+@Serializable
+data class Unachieve(val goalQuery: Struct, override val id: Uuid = Uuid.random()) : KQMLPayload {
     init {
         requirePredicate(goalQuery) { "The goal to unachieve must be a predicate, but got $goalQuery" }
     }
@@ -69,7 +79,8 @@ data class Unachieve(val goalQuery: Struct) : KQMLPayload() {
  * KQML payload for asking an agent to reply with the first beliefQuery that satisfies the given query.
  * @param query the query to satisfy.
  */
-data class AskOne(val query: Struct) : KQMLPayload() {
+@Serializable
+data class AskOne(val query: Struct, override val id: Uuid = Uuid.random()) : KQMLPayload {
     init {
         requirePredicate(query) { "The query to askOne must be a predicate, but got $query" }
     }
@@ -79,7 +90,8 @@ data class AskOne(val query: Struct) : KQMLPayload() {
  * KQML payload for asking an agent to reply with all the beliefs that satisfy the given query.
  * @param query the query to satisfy.
  */
-data class AskAll(val query: Struct) : KQMLPayload() {
+@Serializable
+data class AskAll(val query: Struct, override val id: Uuid = Uuid.random()) : KQMLPayload {
     init {
         requirePredicate(query) { "The query to askAll must be a predicate, but got $query" }
     }
