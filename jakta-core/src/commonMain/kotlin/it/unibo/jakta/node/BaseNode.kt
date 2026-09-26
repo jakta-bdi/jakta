@@ -16,12 +16,11 @@ import it.unibo.jakta.event.UnlimitedChannelQueue
 /**
  * An implementation of the [it.unibo.jakta.node.Node] interface
  * that manages agents and system events within a single isolated node.
+ * @param id the unique identifier of the node, set it explicitly when the node must be recognized across processes.
  */
-open class BaseNode<Body : Any> : ExecutableNode<Body> {
+open class BaseNode<Body : Any>(override val id: NodeID = NodeID()) : ExecutableNode<Body> {
 
     private val _agents: MutableSet<BaseAgent<*, *, Body>> = mutableSetOf()
-
-    override val id: NodeID = NodeID()
 
     override val agents: Map<AgentID, Body>
         get() = _agents.associate { it.id to it.body }
