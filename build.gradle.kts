@@ -114,8 +114,8 @@ allprojects {
         check.dependsOn(detektAll)
     }
 
-    // Enforce the use of the Kotlin version in all subprojects
-    configurations.matching { it.name != "detekt" }.all {
+    // Enforce the use of the Kotlin version in all subprojects, except for tools shipping their own compiler
+    configurations.matching { it.name != "detekt" && !it.name.startsWith("ktlint") }.all {
         resolutionStrategy.eachDependency {
             if (requested.group == "org.jetbrains.kotlin") {
                 useVersion(rootProject.libs.versions.kotlin.get())
