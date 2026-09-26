@@ -55,7 +55,12 @@ private class PlaneLayout(size: Size, stacks: Stacks) {
  */
 @Suppress("MagicNumber")
 @Composable
-fun BlocksWorldPlane(stacks: Stacks, onMove: ((Block, Block?) -> Unit)?, modifier: Modifier = Modifier) {
+fun BlocksWorldPlane(
+    stacks: Stacks,
+    onMove: ((Block, Block?) -> Unit)?,
+    modifier: Modifier = Modifier,
+    background: Color = Color(0xFFE9E2D0),
+) {
     val textMeasurer = rememberTextMeasurer()
     var dragged by remember { mutableStateOf<Block?>(null) }
     var dragPosition by remember { mutableStateOf(Offset.Zero) }
@@ -87,7 +92,7 @@ fun BlocksWorldPlane(stacks: Stacks, onMove: ((Block, Block?) -> Unit)?, modifie
         }
     }
 
-    Canvas(modifier = modifier.background(Color(0xFFE9E2D0)).fillMaxSize().then(dragModifier)) {
+    Canvas(modifier = modifier.background(background).fillMaxSize().then(dragModifier)) {
         val layout = PlaneLayout(size, stacks)
 
         drawRect(Color.DarkGray, Offset(0f, layout.groundY), Size(size.width, GROUND_HEIGHT))
