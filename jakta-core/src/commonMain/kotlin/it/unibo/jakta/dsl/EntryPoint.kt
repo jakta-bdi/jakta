@@ -30,16 +30,6 @@ fun <N : ExecutableNode<*>, NB : NodeBuilder<*, N>> mas(
 ): MasBuilder<N, NB> = BaseMasBuilder(builderFactory).apply(block)
 
 /**
- * DSL entrypoint for creating a Multi-Agent System (MAS) with a node builder factory that cannot assign node ids.
- */
-@Deprecated("Use a node builder factory taking the NodeID, like NodeBuilders.baseNode()")
-@JaktaDSL
-fun <N : ExecutableNode<*>, NB : NodeBuilder<*, N>> mas(
-    builderFactory: () -> NB,
-    block: MasBuilder<N, NB>.() -> Unit,
-): MasBuilder<N, NB> = BaseMasBuilder<N, NB> { builderFactory() }.apply(block)
-
-/**
  * Entry point for creating a node with the given [id] using the JaKtA DSL.
  * @return an instantiated node.
  */
@@ -48,16 +38,6 @@ fun <Body : Any, N : ExecutableNode<Body>, NB : NodeBuilder<Body, N>> node(
     id: NodeID = NodeID(),
     block: NB.() -> Unit,
 ): ExecutableNode<Body> = builderFactory(id).apply(block).build()
-
-/**
- * Entry point for creating a node using the JaKtA DSL.
- * @return an instantiated node.
- */
-@Deprecated("Use a node builder factory taking the NodeID, like NodeBuilders.baseNode()")
-fun <Body : Any, N : ExecutableNode<Body>, NB : NodeBuilder<Body, N>> node(
-    builderFactory: () -> NB,
-    block: NB.() -> Unit,
-): ExecutableNode<Body> = builderFactory().apply(block).build()
 
 /**
  * Entry point for creating an agent using the JaKtA DSL.
