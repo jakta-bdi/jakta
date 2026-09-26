@@ -1,174 +1,127 @@
+---
+sidebar_position: 4
+---
+
 # Communication in JaKtA
 
-Agents in JaKtA communicate in different ways to coordinate and share information. This document covers two primary communication mechanisms:
+Agents communicate by exchanging **messages**. Sending requires the `MessagingSkill`, and every agent decides how
+received messages affect its state.
 
-1. **Direct Communication** – Using messages and beliefs.
-2. **Stigmergy** – Indirect coordination, which happens through modifications in the environment state.
+## Sending messages
 
+`MessagingSkill(node)` (in `jakta-core`) provides:
+- `agent.sendTo(receiver, payload)` to send a message to an agent, and
+- `agent.broadcast(payload)` to send it to every agent.
 
-## 1. Direct Communication
+The payload can be any object.
 
-Direct communication involves agents exchanging messages explicitly or sharing beliefs in a common knowledge base.
-
-Agents can send and receive structured messages using **performatives**.
-The available performatives in JaKtA base implementation are `Tell` and `Achieve`:
-  - `Tell`: shares the message as an information. This means that the receiver will see it as a belief.
-  - `Achieve`: shares the message as an instruction. The receiver will see it as a goal to pursue.
-
-### Example: `Tell` performative
-
-```kt showLineNumbers
-fun main() {
-     mas {
-        environment{
-            actions {
-                action("send", 2) {
-                    val receiver: String = argument<Atom>(0).value
-                    val payload: Struct = argument(1)
-                    sendMessage(receiver, Message(this.sender, Tell, payload))
+```kotlin
+node {
+    context(MessagingSkill(node)) {
+        agent(alice) {
+            // ...
+            hasPlanLibrary {
+                adding.goal {
+                    takeIf { it == "sendPing" }
+                } triggers {
+                    agent.sendTo(bob, "Ping!")
                 }
             }
         }
-
-        agent("sender") {
-            goals { achieve("sendMessage") }
-            plans {
-                + achieve("sendMessage") then {
-                    execute("send"("receiver", "handleMessage"("Hello!")))
-                    execute("print"("message sent!"))
-                }
-            }
-        }
-
-        agent("receiver") {
-            plans {
-                + "handleMessage"("source"(S), X) then {
-                    execute("print"("Received message: ", X))
-                    execute("stop")
-                }
-            }
-        }
-    }.start()
+    }
 }
 ```
 
-The expected output is:
-```
-[receiver] Received message:  Hello!
-[sender] message sent!
-```
+## Receiving messages
 
-> **Important**: 
-> 
-> Using messages, the agent knows who is the **source** of the information, meaning that I can inspect the name of the agent communicating with me.
-> This does not happen if I communicate using the `Achieve` performative and stigmergy.
+Received messages are external events. `handlesMessageEvents` converts them into an `AgentUpdate` — typically new
+beliefs, which then trigger `adding.belief { }` plans — or returns `null` to ignore the message:
 
-
-### Example: `Achieve` performative
-```kt showLineNumbers
-fun main() {
-     mas {
-        environment{
-            actions {
-                action("send", 2) {
-                    val receiver: String = argument<Atom>(0).value
-                    val payload: Struct = argument(1)
-                    sendMessage(receiver, Message(this.sender, Achieve, payload))
-                }
-            }
-        }
-
-        agent("sender") {
-            goals { achieve("sendMessage") }
-            plans {
-                + achieve("sendMessage") then {
-                    execute("send"("receiver", "handleMessage"("Hello!")))
-                    execute("print"("message sent!"))
-                }
-            }
-        }
-
-        agent("receiver") {
-            plans {
-                + achieve("handleMessage"(X)) then {
-                    execute("print"("Received message: ", X))
-                    execute("stop")
-                }
-            }
-        }
-    }.start()
+```kotlin
+handlesMessageEvents { message ->
+    when (val payload = message.payload) {
+        is String -> AgentUpdate.Belief(setOf(payload to message.sender), emptySet())
+        else -> null
+    }
 }
 ```
 
-The expected output is:
-```
-[receiver] Received message:  Hello!
-[sender] message sent!
-```
+`AgentUpdate.Goal(additions, removals)` can be returned instead, to accept a request as a new goal.
 
-## 2. Indirect Communication
+The [intermediate tutorial](../getting-started/tutorial.md) builds a full ping-pong example with these primitives.
 
-Stigmergy allows agents to leave traces in the environment, influencing other agents' behaviors without direct interaction.
+## KQML messaging (Prolog incarnation)
 
-### Example: Using an Environmental Marker
+The Prolog incarnation implements [KQML](https://en.wikipedia.org/wiki/Knowledge_Query_and_Manipulation_Language)
+performatives, in the style of Jason. To receive them, delegate message handling to `handleKQMLPayload`:
 
-In this example, an agent leaves a "marker" in the environment, which another agent detects and reacts to.
-
-```kt showLineNumbers
-fun main() {
-   mas {
-        environment{
-            from(
-                // Environment that manages the markers
-                StigmergyEnvironment()
-            )
-            actions {
-                action("leaveMarker", 1) {
-                    updateData("marker" to argument<Atom>(0))
-                }
-            }
-        }
-
-        agent("Worker") {
-            goals { achieve("leaveMarker") }
-
-            plans {
-                + achieve("leaveMarker") then {
-                    execute("leaveMarker"("$name was here!"))
-                    execute("print"("placed marker in environment."))
-                }
-            }
-        }
-
-        agent("Follower") {
-            plans {
-                + "marker"(X).fromPercept then {
-                    execute("print"("Perceived marker:", X))
-                    execute("stop")
-                }
-            }
-        }
-    }.start()
+```kotlin
+handlesMessageEvents {
+    when (val payload = it.payload) {
+        is KQMLPayload -> handleKQMLPayload(payload, it.sender)
+        else -> null
+    }
 }
 ```
 
-The expected outcome from the execution of this example is:
+Then, with a `MessagingSkill` in scope, plan bodies can use:
+
+| Function | Performative | Effect on the receiver |
+|---|---|---|
+| `tellTo(receiver, belief)` / `broadcastTell(belief)` | tell | adds the belief, annotated with `[source(sender)]` |
+| `untellTo(receiver, query)` / `broadcastUntell(query)` | untell | removes the matching beliefs received from that sender |
+| `delegateAchieveTo(receiver, goal)` / `broadcastAchieve(goal)` | achieve | adds the goal, annotated with `[source(sender)]` |
+| `sendUnachieveTo(receiver, query)` / `broadcastUnachieve(query)` | unachieve | removes the matching goal |
+| `askOneTo(receiver, query)` | askOne | adds a `replyOne(query, id)[source(sender)]` goal; the sender suspends until a reply arrives |
+
+```mermaid
+sequenceDiagram
+  participant A as Alice
+  participant B as Bob
+  A->>B: askOneTo(bob, beliefQuery { "b"(X) })
+  Note over A: suspended until the reply
+  B->>B: handleKQMLPayload → goal replyOne(Q, M)[source(alice)]
+  B->>B: replyOne plan proves Q on its beliefs
+  B->>A: tellTo(alice, M, belief)
+  Note over A: resumes, X is bound
 ```
-[Follower] Perceived marker: 'Worker was here!'
-[Worker] placed marker in environment.
+
+Unlike Jason, questions are not answered automatically: the receiver needs a plan for `replyOne(Q, M)[source(S)]`
+goals that answers with `tellTo(sender, questionId, belief)`.
+
+Delegated goals carry their source too, and — unlike beliefs — a goal pattern must mention it to match them:
+`matchingGoal { "job"(N)[source(S)] }`. See [Prolog caveats](./incarnations/prolog/caveats.md).
+
+Received beliefs carry their source, which plans can match:
+
+```kotlin
+// Alice
+agent.tellTo(bob, belief { "ping"(1) })
+
+// Bob
+prologPlan {
+    adding.belief {
+        matchingBelief { "ping"(1)[source(X)] }
+    } triggers {
+        agent.print("Received a ping from ", X)
+    }
+}
 ```
 
-More information about custom environments [here](environment.md).
+`askOneTo` returns the answer and binds the query's variables in the current plan. It returns `null` only on timeout;
+an answer that does not unify with the query is a failed substitution:
 
-## Summary
+```kotlin
+val reply = agent.askOneTo(bob, beliefQuery { "b"(X) })
+if (reply != null && reply.isSuccess) {
+    agent.print("Received reply: ", X)
+}
+```
 
-| Communication Type | Description | Example |
-|--------------------|-------------|---------|
-| **Direct (Shared Goals)** | Agents exchange explicit goals to achieve. The sender of the message is unknown with this communication option. | `Achieve` performative example |
-| **Direct (Shared Beliefs)** | Agents communicate using beliefs, triggering plans. With this communication option the agent knows the source of the message. | `Tell` performative example |
-| **Stigmergy** | Agents modify the environment to influence others. | Environmental Marker example |
+See [`TestKQMLMessaging`](https://github.com/jakta-bdi/jakta/blob/main/jakta-prolog-incarnation/src/commonTest/kotlin/it/unibo/jakta/TestKQMLMessaging.kt)
+for complete examples of every performative, including a `replyOne` plan.
 
-By leveraging these mechanisms, you can design complex, coordinated multi-agent systems in JaKtA.
+## Indirect communication
 
-For more examples, refer to [JaKtA Examples](https://github.com/jakta-bdi/jakta-examples).
-
+Agents can also coordinate *indirectly* (stigmergy) by acting on a shared world model through a
+[skill](../basic-concepts/skills.md) and perceiving its changes — see [Nodes and environment](./nodes.md#perceptions).

@@ -8,8 +8,10 @@ on:
       - "website/**"
       - ".github/workflows/deploy-website.yml"
   workflow_run:
+    # Must be the top-level workflow name: "CI/CD Process" only runs via
+    # workflow_call from "CI/CD", and workflow_run never fires for called workflows.
     workflows:
-      - "CI/CD Process"
+      - "CI/CD"
     types:
       - completed
   workflow_dispatch:
@@ -24,7 +26,7 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     if: >-
       github.event_name != 'workflow_run'
       || (
@@ -35,6 +37,30 @@ jobs:
     steps:
       - name: Checkout main repository
         uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      # API docs are built from the latest release tag, so /api always matches
+      # the version on Maven Central rather than unreleased main.
+      - name: Generate API docs (Dokka)
+        run: |
+          RELEASE_TAG=$(git describe --tags --abbrev=0)
+          git worktree add /tmp/jakta-release "$RELEASE_TAG"
+          (cd /tmp/jakta-release && ./gradlew :dokkaGenerateHtml --no-configuration-cache)
+          # Tags older than the root Dokka aggregation produce no module pages.
+          if [ -d /tmp/jakta-release/build/dokka/html/jakta-api ]; then
+            rm -rf website/static/api
+            cp -a /tmp/jakta-release/build/dokka/html website/static/api
+          else
+            echo "::warning::$RELEASE_TAG has no aggregated Dokka output, skipping /api"
+          fi
 
       - name: Setup Node.js
         uses: actions/setup-node@v7.0.0

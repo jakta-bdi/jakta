@@ -4,51 +4,127 @@ sidebar_position: 4
 
 # Plans in JaKtA
 
-Plans in JaKtA define **how** an agent achieves its goals by executing a sequence of actions. Plans react to events, such as new goals to achieve or changes in beliefs.
+Plans define **how** an agent reacts to events: new goals, belief changes, and failures.
+A plan is made of three parts:
 
-## Understanding Plans
-
-Inheriting the successful model of Jason, in JaKtA, plans are composed of a **triggering event** deciding whether the plan is relevant, an optional **context** restricting its
-applicability, and a **body** listing the operations to be performed whenever the plan is
-executed.
-
-The triggering event can be a goal/belief invocation/addition (**+**) or failure/deletion
-(**-**), in the form: 
+```kotlin
+adding.goal { /* trigger */ } onlyWhen { /* guard (optional) */ } triggers { /* body */ }
 ```
-[+|-] <triggering event> onlyIf {<context>} then {<body>}.
+
+Plans are declared in `hasPlanLibrary { }`.
+
+## Triggers
+
+A trigger selects the kind of event and decides whether the plan is **relevant** for it:
+
+| Trigger | Fires when |
+|---|---|
+| `adding.goal { }` | a goal is added |
+| `failing.goal { }` | a goal fails |
+| `removing.goal { }` | a goal is removed |
+| `adding.belief { }` | a belief is added |
+| `removing.belief { }` | a belief is removed |
+
+The trigger block receives the goal or belief as `this` and returns either `null` (the plan is not relevant)
+or a **context** value, which is then available to the guard and body as `context`:
+
+```kotlin
+adding.belief {
+    takeIf { it.first == "Ping!" }
+} triggers {
+    val (text, sender) = context
+    // ...
+}
 ```
-We inherit from Jason the usage of a prefix unary + to indicate invocation or additions,
-and a prefix unary - to indicate failures or deletions.
 
-If a logical expression is present in the context block (prefixed by **onlyIf**), it is
-then used to vet the relevant plan. 
-The condition therein expressed should be a logic formula to be tested against the belief base via logic resolution. 
-Finally, if the plan is selected for execution, the sequence of operations and actions
-contained in its body (prefixed by then) is performed by the agent. There, actions
-may consist of edits (additions or deletions) to the belief base, as well as additions of
-further achievement or test goals, or invocations of external or internal actions (see
-next paragraphs).
+Incarnations provide matching functions that build the context for you:
+`matchingGoal { }` / `matchingBelief { }` in the Prolog incarnation (the context is a unifier),
+`ifGoalMatches("...")` in the string incarnation.
 
-## Defining Plans in JaKtA DSL
+## Guards
 
-In JaKtA, plans are declared within an agent’s configuration, specifying what to do when a goal is pursued.
+`onlyWhen { }` makes a relevant plan **applicable** only if a condition holds in the current state.
+It can read `beliefs` and `context`, and returns the (possibly refined) context or `null`.
+In the Prolog incarnation, `satisfies { }` proves a query against the belief base and adds its bindings:
 
-```kt showLineNumbers
-agent("Robot") {            
-    plans {
-        +/-achieve("goal"(X)) onlyIf { "guard"(X) } then { 
-            achieve("goal"(X))
-            test("goal"(Y))
-            spawn("goal"(Z))
-            +/-"belief"(A)
-            update("belief"(C))
-            execute("action"(X, Y, Z)) 
-        }
-        +/-test("goal"(Y)) onlyIf { "guard"(Y) } 
-            then { /*...*/ }
-        +/-"belief"(Z) onlyIf { "guard"(Z) } 
-            then { /*...*/ }
+```kotlin
+prologPlan {
+    adding.goal {
+        matchingGoal { "start"(N, X) }
+    } onlyWhen {
+        satisfies { (N lowerThan X) and (S `is` (N + 1)) }
+    } triggers {
+        agent.print("Counting... ", N)
+        agent.achieve(goal { "start"(S, X) })
     }
 }
 ```
 
+When several plans are relevant for an event, the first applicable one in the plan library is chosen:
+
+```mermaid
+flowchart LR
+  E[Event<br/>goal or belief added/removed/failed] --> R{Relevant plans?<br/>trigger returns a context}
+  R -- none --> F[Goal fails]
+  R -- some --> G{Applicable plans?<br/>guard returns a context}
+  G -- none --> F
+  G -- some --> S[Pick the first one<br/>in library order]
+  S --> B[Run the body<br/>as an intention]
+  B -- throws --> F
+  F --> FP[failing.goal plans]
+```
+
+## Bodies
+
+The body, `triggers { }`, is a `suspend` Kotlin lambda. Anything Kotlin can do, a plan body can do:
+call functions, use `delay(...)`, launch computations. Its receiver provides:
+
+- `agent` — the agent's state:
+  `believe`, `forget`, `achieve`, `alsoAchieve`, `achieveWithResult`, `print`, `beliefs`, and
+  `wait(filter, timeout)` to suspend until a matching event happens;
+- `node` — the [node](../explanation/nodes.md) the agent lives in (e.g. `node.terminateNode()`). It is not part of
+  the plan scope: it comes from the enclosing `agent { }` / `node { }` builder, or from the `plans { node -> }` parameter;
+- `context` — the value produced by the trigger and guard;
+- any [skill](./skills.md) in scope.
+
+In the Prolog incarnation, `X.value<T>()` extracts the Kotlin value bound to a logic variable,
+e.g. `blocksWorld.move(X.value(), Y.value())`.
+
+## Failure plans
+
+`failing.goal { }` plans handle goal failures, e.g. to retry after changing the agent's knowledge:
+
+```kotlin
+prologPlan {
+    failing.goal {
+        matchingGoal { "start"(B) }
+    } triggers {
+        agent.print("start failed, retrying")
+        agent.alsoAchieve(goal { "start"(B) })
+    }
+}
+```
+
+## Reusable plan libraries
+
+`plans { node -> ... }` builds a list of plans outside an agent, which can then be installed with
+`withPredefinedPlans(...)`. The `node` parameter lets the plans use node-bound skills:
+
+```kotlin
+val pingPlans = plans { node ->
+    context(MessagingSkill(node)) {
+        prologPlan {
+            adding.goal {
+                matchingGoal { Atom.of("start") }
+            } triggers {
+                agent.tellTo(bob, belief { "ping"(1) })
+            }
+        }
+    }
+}
+
+agent(alice) {
+    // ...
+    withPredefinedPlans(pingPlans)
+}
+```

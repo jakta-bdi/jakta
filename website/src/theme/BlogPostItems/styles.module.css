@@ -1,0 +1,171 @@
+.topics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.topic {
+  padding: 0.25rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  background: var(--ifm-card-background-color);
+  color: var(--ifm-font-color-base);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.topic:hover {
+  border-color: var(--ifm-color-primary);
+  color: var(--ifm-color-primary);
+  text-decoration: none;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  margin: 0 !important; /* overrides the theme's margin-bottom--xl in list view */
+  padding: 1.25rem 1.5rem;
+  border-radius: 1rem;
+  background: var(--ifm-card-background-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.32);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.32);
+}
+
+.card header h2 {
+  font-size: 1.25rem;
+  line-height: 1.3;
+  margin-bottom: 0.4rem;
+}
+
+.card header h2 a {
+  color: var(--ifm-heading-color);
+}
+
+.card header h2 a:hover {
+  color: var(--ifm-color-primary);
+  text-decoration: none;
+}
+
+.card header :global(.avatar__photo) {
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+.card header :global(.avatar__subtitle) {
+  display: none;
+}
+
+.card :global(.markdown) {
+  font-size: 0.95rem;
+  flex-grow: 1;
+}
+
+.card footer {
+  margin-top: auto;
+  padding-top: 0.5rem;
+  font-size: 0.85rem;
+}
+
+/* The theme's list-view footer uses a 9/3 column split, too tight inside a card: stack it. */
+.card footer :global(.col) {
+  flex: 1 1 100%;
+  max-width: 100%;
+  text-align: left !important;
+}
+
+/* Compact author line inside cards: avatar + name only. */
+.card header :global([class*='authorTitle']),
+.card header :global([class*='authorSocials']) {
+  display: none;
+}
+
+.card header :global(.avatar) {
+  margin-bottom: 0 !important;
+}
+
+.card header :global(.avatar__name),
+.card header :global([class*='authorName']) {
+  font-size: 0.85rem;
+}
+
+.card header :global(.row) {
+  margin-top: 0 !important;
+}
+
+.card header > div:first-of-type {
+  margin: 0 0 0.5rem 0 !important;
+  font-size: 0.85rem;
+  color: var(--ifm-color-emphasis-700);
+}
+
+/* /releases: a compact changelog, one entry per version. */
+.releases {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.release {
+  margin: 0 !important;
+  padding: 0.9rem 1.25rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  background: var(--ifm-card-background-color);
+}
+
+.release header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 0.75rem;
+}
+
+.release header h2 {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.release header h2 a {
+  color: var(--ifm-heading-color);
+}
+
+.release header > div:first-of-type {
+  margin: 0 !important;
+  font-size: 0.85rem;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.release :global(.markdown) {
+  font-size: 0.9rem;
+  margin-top: 0.4rem;
+}
+
+.release :global(.markdown) h3 {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ifm-color-emphasis-700);
+  margin: 0.5rem 0 0.25rem;
+}
+
+.release :global(.markdown) ul {
+  margin-bottom: 0;
+}
+
+.release footer {
+  display: none;
+}

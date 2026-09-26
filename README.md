@@ -1,11 +1,11 @@
 
-| <img src="/site/static/images/logo.svg"  width="100"> | <h1>JaKtA (Jason-like Kotlin Agents)</h1> |
+| <img src="website/static/img/logo.svg"  width="100"> | <h1>JaKtA (Jason-like Kotlin Agents)</h1> |
 |:-:|:-:|
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10945579.svg)](https://doi.org/10.5281/zenodo.10945579)
 
 
-JaKtA is a Kotlin internal DSL adding support for the definition of BDI agents in the spirit of the well-known Jason language.
+JaKtA is a Kotlin Multiplatform internal DSL and coroutine-based engine for BDI agents, in the spirit of the well-known Jason language.
 
 [![CI/CD](https://github.com/jakta-bdi/jakta/actions/workflows/dispatcher.yml/badge.svg)](https://github.com/jakta-bdi/jakta/actions/workflows/dispatcher.yml)
 [![codecov](https://codecov.io/gh/jakta-bdi/jakta/branch/main/graph/badge.svg?token=ACIA7DKGT1)](https://codecov.io/gh/jakta-bdi/jakta)
@@ -25,20 +25,67 @@ JaKtA is a Kotlin internal DSL adding support for the definition of BDI agents i
 
 ## Import JaKtA in your project
 
-Maven Central: https://central.sonatype.com/artifact/it.unibo.jakta/jakta-dsl
+JaKtA is published on [Maven Central](https://central.sonatype.com/namespace/it.unibo.jakta) (and on npm under `@jakta`).
+Add `jakta-core` and an [incarnation](https://jakta-bdi.github.io/docs/explanation/incarnations), e.g. the Prolog one:
 
-Gradle (KTS) dependency:
+```kotlin
+dependencies {
+    implementation("it.unibo.jakta:jakta-core:<VERSION>")
+    implementation("it.unibo.jakta:jakta-prolog-incarnation:<VERSION>")
+}
 ```
-implementation("it.unibo.jakta:jakta-dsl:<VERSION>")
+
+| Module | Description |
+|---|---|
+| [`jakta-api`](jakta-api) | Representation-agnostic contracts (agents, events, plans, nodes) |
+| [`jakta-dsl`](jakta-dsl) | DSL builder interfaces |
+| [`jakta-core`](jakta-core) | Engine implementation and DSL entry points (`mas`, `node`, `agent`) |
+| [`jakta-prolog-incarnation`](jakta-prolog-incarnation) | Beliefs and goals as [2P-Kt](https://github.com/tuProlog/2p-kt) Prolog terms, KQML messaging |
+| [`jakta-string-incarnation`](jakta-string-incarnation) | Beliefs and goals as plain strings |
+| [`alchemist-jakta-incarnation`](alchemist-jakta-incarnation) | Run JaKtA agents in [Alchemist](https://alchemistsimulator.github.io/) simulations |
+
+## Hello, world
+
+```kotlin
+val helloGoal = Atom.of("sayHello")
+
+val helloWorldAgent = agent<PrologBelief, PrologGoal, Any> {
+    embodiedAs { Any() }
+    hasInitialGoals {
+        !initialGoal { helloGoal }
+    }
+    hasPlanLibrary {
+        prologPlan {
+            adding.goal {
+                matchingGoal { helloGoal }
+            } triggers {
+                agent.print("Hello, world!")
+                node.terminateNode()
+            }
+        }
+    }
+}
+
+fun main(): Unit = runBlocking {
+    mas(NodeBuilders.baseNode()) {
+        node { withAgents(helloWorldAgent) }
+    }.run(CoroutineNodeRunner(SharedMemoryNetwork()))
+}
 ```
 
 ## Documentation
 
-A working in progress documentation for this library can be found at this [link](https://jakta-bdi.github.io/)
+- User documentation: https://jakta-bdi.github.io/
+- API reference of the latest release: https://jakta-bdi.github.io/api/ (older versions on [javadoc.io](https://javadoc.io/doc/it.unibo.jakta))
 
 ## Usage examples
 
-Check [jakta-examples](https://github.com/jakta-bdi/jakta-examples) to see some application examples for JaKtA DSL!
+Runnable examples live in [`examples`](examples):
+
+```bash
+./gradlew :examples:hello-world:run
+./gradlew :examples:blocksworld:run
+```
 
 ## Citation
 If you want to cite this work, you can follow [citation instructions](https://github.com/jakta-bdi/jakta/blob/main/CITATION).

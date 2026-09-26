@@ -4,26 +4,49 @@ sidebar_position: 1
 
 # What is JaKtA?
 
-JaKtA is a full fledged, [AgentSpeak(L)](https://link.springer.com/chapter/10.1007/BFb0031845)-compliant [BDI](https://cdn.aaai.org/ICMAS/1995/ICMAS95-042.pdf) technology. 
-As such, it comes with its own BDI execution engine, giving semantics to the DSL. 
+JaKtA is a full fledged, [AgentSpeak(L)](https://link.springer.com/chapter/10.1007/BFb0031845)-compliant [BDI](https://cdn.aaai.org/ICMAS/1995/ICMAS95-042.pdf) technology
+for [Kotlin](https://kotlinlang.org). It comes with its own BDI execution engine and an internal Kotlin DSL
+to write agents, their beliefs, goals and plans, side by side with ordinary Kotlin code.
+
 The choice of realising a fresh implementation of a BDI execution engine instead of reusing an existing one was driven by two major design goals:
 1. to explore paradigm blending of AOP – and in particular BDI – with mainstream programming languages, and
 2. to support modularity and pluggability of any aspect involving the execution of BDI systems—there including reasoning capabilities, message passing mechanisms, concurrency models, and the like.
 
-Accordingly, the execution engine of JaKtA was designed and implemented from scratch to decouple agent specifications and their execution.
+## What's new in JaKtA 1.x
 
-Architecturally, the JaKtA framework is composed by three main modules, namely:
-1. the DSL module, which defines the syntax of the language;
-2. the BDI interpreter, which governs the execution of agents and environments, regardless of the particular syntax used to define them; and
-3. the concurrency management module, which regulates runtime, concurrency, and scheduling aspects for any system run by the BDI interpreter.
+Starting from version 1.0.0 JaKtA has been rewritten from the ground up:
 
+- **Kotlin Multiplatform**: the core libraries run on the JVM, in JavaScript (browser and Node.js, also published on npm) and natively.
+- **Coroutines-based engine**: every intention is a coroutine, plan bodies are plain `suspend` Kotlin code.
+- **Generic over the knowledge representation**: the engine does not force a belief or goal type.
+  An [incarnation](./explanation/incarnations/index.md) fixes it — use Prolog terms, plain strings, or your own Kotlin types.
+- **Skills instead of actions**: what an agent can do is modelled by ordinary Kotlin objects made available to plans
+  through [context parameters](https://kotlinlang.org/docs/context-parameters.html). See [Skills](./basic-concepts/skills.md).
+- **Nodes instead of environments**: agents live in [nodes](./explanation/nodes.md) that deliver perceptions and messages,
+  and can be simulated with [Alchemist](./how-to/alchemist.md).
 
-The three modules are inter-dependent in a layered way: 
-the DSL module is built on top of the BDI interpreter, which in turn is built on top of the concurrency management module.
-The DSL module is separate from the BDI interpreter module as it implements one possible syntax of many for BDI MAS specification. 
-Other languages could be plugged in the same BDI interpreter, for instance, the Jason’s parser can be, in principle, plugged on top of JaKtA’s BDI interpreter, using the latter as engine. 
-Similarly, Scala developers may design a different internal DSL and plug it on top of the existing BDI interpreter, realising in shorter time a way to write BDI agents in Scala. 
+:::info[Coming from JaKtA 0.x?]
+The 1.x DSL is not source-compatible with 0.x: `mas { ... }.start()`, `environment { }`, `actions { }`,
+`+achieve(...) onlyIf { } then { }` and friends are gone. The pages in this documentation describe the new API only;
+see [JaKtA 0.x](./jakta-0x.md) for the old version and how its concepts map to 1.x.
+:::
+
+## Architecture
+
+JaKtA is split into a set of modules, described in detail in [Modules](./reference/modules.md):
+
+| Module | Role |
+|---|---|
+| `jakta-api` | The representation-agnostic contracts: agents, events, plans, nodes. |
+| `jakta-dsl` | The builder interfaces that make up the DSL. |
+| `jakta-core` | The reference implementation of the engine and the DSL entry points (`mas`, `node`, `agent`, `plans`). |
+| `jakta-prolog-incarnation` | Beliefs and goals as [2P-Kt](https://github.com/tuProlog/2p-kt) Prolog terms, with unification and KQML messaging. |
+| `jakta-string-incarnation` | Beliefs and goals as plain strings — the smallest possible incarnation. |
+| `alchemist-jakta-incarnation` | Runs JaKtA nodes inside the [Alchemist](https://alchemistsimulator.github.io/) simulator. |
+
+The DSL is separate from the engine, since it implements one possible syntax of many for BDI MAS specification:
+other languages could be plugged on top of the same engine.
 
 ---
 
-Source reference: [Blending BDI Agents with Object-Oriented and Functional Programming with JaKtA](https://link.springer.com/article/10.1007/s42979-024-03244-y)    
+Source reference: [Blending BDI Agents with Object-Oriented and Functional Programming with JaKtA](https://link.springer.com/article/10.1007/s42979-024-03244-y)

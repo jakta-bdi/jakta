@@ -4,181 +4,98 @@ sidebar_position: 2
 
 # Beliefs in JaKtA
 
-Beliefs are a fundamental concept in the **Belief-Desire-Intention (BDI)** model and play a key role in defining an agent’s knowledge about the world. 
-In JaKtA, beliefs represent **facts** and **rules** that an agent holds, and they can dynamically change as the agent interacts with its environment.
+Beliefs are a fundamental concept in the **Belief-Desire-Intention (BDI)** model: they are the agent's knowledge
+about the world, itself, and other agents. Beliefs change as the agent perceives, receives messages, or acts.
 
-## Understanding Beliefs
+The type of a belief is chosen by the [incarnation](../explanation/incarnations/index.md).
+The examples below use the **Prolog incarnation**, where a belief is a Prolog clause (`PrologBelief`, a
+[2P-Kt](https://github.com/tuProlog/2p-kt) `Rule`): either a **fact** or an **inference rule**.
 
-JaKtA directly leverages (and exposes as an API) the logic programming toolkit for Kotlin [2P-Kt](https://github.com/tuProlog/2p-kt) and its internal [DSL for Prolog](https://pika-lab.gitlab.io/tuprolog/2p-in-kotlin/wiki/Developers%20Guide/kotlin-dsl/)
+## Initial beliefs
 
-Beliefs influence an agent’s **decision-making** by triggering goals or activating plans when conditions change.
+Initial beliefs are declared with `believes { }`, adding each belief with `+`:
 
-In JaKtA, Beliefs expose the **source** of their information, which can be:
-- *self* source: If the information comes from the agent's internal knowledge
-- *percept* source: If the information is obtained after perceiving changes that happen in the environment
-- *other* source: Occurs in the case agents are exchanging message information, the source contains the sender of the message. 
-
-## Defining Beliefs in JaKtA DSL
-
-In JaKtA, beliefs can be defined within an agent’s configuration.
-
-For instance, in the following, we define a belief base containing information about
-paths in a graph, by means of logic facts, as well as logic rules for computing whether
-some location X is reachable from another location Y:
-```kt showLineNumbers
-mas {
-    agent("moon walker") {
-    beliefs {
-        fact { "path"("location1", "location2") }
-        fact { "path"("location2", "location3") }                
-        rule { "reachable"(X, Y) impliedBy "path"(X, Y) }
-        rule { "reachable"(X, Z) impliedBy "path"(X, Y) and "reachable"(Y, Z) }
+```kotlin
+agent<PrologBelief, PrologGoal, Any> {
+    embodiedAs { Any() }
+    believes {
+        +initialBelief { "parent"("alice", "bob") }
+        +initialBelief { "parent"("alice", "carol") }
+        +inferenceRule { "sibling"(X, Y) impliedBy ("parent"(Z, X) and "parent"(Z, Y) and (X neq Y)) }
     }
 }
 ```
 
-Under the assumption that the graph represents some sort of map from the real
-world, the above belief base can be exploited by the agent to reason about reachability
-among any two locations in the map; in fact, through 2P-Kt, JaKtA fully supports
-Prolog’s unification and resolution mechanisms.
+- `initialBelief { }` creates a fact.
+- `inferenceRule { head impliedBy body }` creates a rule: `sibling(X, Y)` holds whenever its body can be proven.
 
-If you need other info about the library, visit its [documentation](https://pika-lab.gitlab.io/tuprolog/2p-in-kotlin/wiki).
+Inside these blocks you are in the 2P-Kt Prolog DSL: strings invoked like functions (`"parent"(...)`) build
+compound terms, and `X`, `Y`, `Z`, ... are logic variables. Check out the
+[2P-Kt documentation](https://github.com/tuProlog/2p-kt) for the full syntax.
 
----
+Beliefs can also be added one at a time with `addBelief(belief)` in the agent builder.
 
-## Updating and Using Beliefs
+## Updating beliefs from plans
 
-Beliefs are not static; they can be updated during execution. 
-Agents modify beliefs based on changes in the environment or after executing specific actions.
+Plan bodies change beliefs with `agent.believe(...)` and `agent.forget(...)`.
+In a Prolog plan use `belief { }`: variables bound by the plan's trigger or guard are substituted in.
 
-### Modifying Beliefs
-
-```kt showLineNumbers
-mas {
-    agent("Drinker") {
-        beliefs {
-            fact { "holding"("beer") }
-        }
-
-        goals { achieve("eatSomething") }
-
-        plans {
-            +achieve("eatSomething") onlyIf { "holding"("beer").fromSelf } then {
-                update("holding"("chips").fromSelf)
-                achieve("eatSomething")
-            }
-            +achieve("eatSomething") onlyIf { "holding"("chips").fromSelf } then {
-                execute("print"("I can finally eat!"))
-                execute("stop")
-            }
-        }
+```kotlin
+prologPlan {
+    adding.goal {
+        matchingGoal { "move"(X) }
+    } triggers {
+        agent.forget(belief { "position"("home") })
+        agent.believe(belief { "position"(X) })
     }
-}.start()
-
-```
-
-### Adding Beliefs
-
-```kt showLineNumbers
-mas {
-    agent("Drinker") {
-        goals { achieve("drink") }
-
-        plans {
-            +achieve("drink") then {
-                + "holding"("beer")
-            }
-        }
-    }
-}.start()
-
-```
-
-### Removing Beliefs
-
-```kt showLineNumbers
-mas {
-    agent("Drinker") {
-        beliefs {
-            fact { "holding"("beer") }
-        }
-        goals { achieve("dropBeer") }
-        plans {
-            +achieve("dropBeer") then {
-                - "holding"("beer").fromSelf
-            }
-        }
-    }
-}.start()
-
-```
-
-## Reacting to Belief Changes
-
-Agents can define **event-driven behaviors** that trigger actions when a belief changes.
-The events are triggered by the **addition** or the **removal** of a belief.
-
-### Example: Reacting to a Belief Addition from percept source
-
-```kt showLineNumbers
-fun main() {
-     mas {
-        environment(
-            // Custom implementation of the environment which models temperature
-            TemperatureEnvironment()
-        )
-        agent("reactiveAgent") {
-            plans {
-                +"temperature"(X).fromPercept onlyIf { X greaterThan 30 } then {
-                    execute("print"("Warning: High temperature detected!"))
-                }
-
-                +"temperature"(X).fromPercept then {
-                    execute("print"("Temperature under the threshold"))
-                }
-            }
-        }
-    }.start()
 }
 ```
 
-### Example: Reacting to a Belief Addition from self source
+## Querying beliefs
 
-```kt showLineNumbers
-mas {
-    agent("Drinker") {
-        goals { achieve("drink") }
+- In plan **guards**, `satisfies { query }` succeeds if the query can be proven from the current beliefs,
+  binding its variables. See [Plans](./plans.md#guards).
+- In plan **bodies**, `testQuery { query }` does the same and fails the plan if the query does not hold.
+- `agent.beliefs` gives direct access to the belief base, for instance `agent.beliefs.unifiesWith(query)`.
 
-        plans {
-            +achieve("drink") then {
-                + "holding"("beer")
-            }
-            + "holding"("beer").fromSelf then {
-                execute("print"("Finally I can have a beer!"))
-            }
-        }
+## Belief sources
+
+Beliefs coming from other agents are annotated with their **source**, like in Jason.
+A belief received through [KQML messaging](../explanation/communication.md#kqml-messaging-prolog-incarnation)
+can be matched with `[source(X)]`, binding `X` to the sender:
+
+```kotlin
+prologPlan {
+    adding.belief {
+        matchingBelief { "ping"(1)[source(X)] }
+    } triggers {
+        agent.print("Received a ping from ", X)
     }
-}.start()
+}
 ```
 
-### Example: Reacting to a Belief Removal from self source
+`source` and the `[...]` annotation operator are imported from `it.unibo.jakta` (`import it.unibo.jakta.source`,
+`import it.unibo.jakta.get`).
 
-```kt showLineNumbers
-mas {
-    agent("Drinker") {
-        beliefs {
-            fact { "holding"("beer") }
-        }
-        goals { achieve("dropBeer") }
-        plans {
-            +achieve("dropBeer") then {
-                - "holding"("beer").fromSelf
-            }
-            - "holding"("beer").fromSelf then {
-                execute("print"("Ops! I dropped my beer!"))
-            }
-        }
+## Perceptions
+
+Agents do not share a global belief base: what an agent perceives from its [node](../explanation/nodes.md)
+is converted into belief updates by the agent itself, with `handlesPerceptionEvents`:
+
+```kotlin
+handlesPerceptionEvents {
+    when (it) {
+        is BlocksWorldPerception -> handleBlocksWorldPerceptions(it, beliefs)
+        else -> null
     }
-}.start()
-
+}
 ```
+
+The handler returns an `AgentUpdate.Belief(additions, removals)` or `null` to ignore the perception.
+It can read the current `beliefs`, so it can replace stale perceived facts
+(see [`BlocksWorldSkills.kt`](https://github.com/jakta-bdi/jakta/blob/main/examples/blocksworld/src/main/kotlin/BlocksWorldSkills.kt)).
+
+## Belief events
+
+Every change to the belief base generates an event that can trigger plans:
+`adding.belief { }` reacts to additions and `removing.belief { }` to removals. See [Plans](./plans.md).
