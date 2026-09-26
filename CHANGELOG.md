@@ -1,3 +1,21 @@
+## [1.1.17](https://github.com/jakta-bdi/jakta/compare/1.1.16...1.1.17) (2026-09-26)
+
+### Bug Fixes
+
+* **deps:** update plugin org.danilopianini.gradle-pre-commit-git-hooks to v2.1.25 ([#952](https://github.com/jakta-bdi/jakta/issues/952)) ([d5f62f0](https://github.com/jakta-bdi/jakta/commit/d5f62f0351db5004b524f54fcbd91b03480a153a))
+
+## [1.1.16](https://github.com/jakta-bdi/jakta/compare/1.1.15...1.1.16) (2026-09-26)
+
+### Bug Fixes
+
+* **deps:** update plugin kotlin-qa to v1.9.3 ([#948](https://github.com/jakta-bdi/jakta/issues/948)) ([7f579fe](https://github.com/jakta-bdi/jakta/commit/7f579fe1ca78eb2c67d4799df5019656b534d04e))
+
+## [1.1.15](https://github.com/jakta-bdi/jakta/compare/1.1.14...1.1.15) (2026-09-25)
+
+### Bug Fixes
+
+* **deps:** update dependency org.danilopianini.publish-on-central to v9.2.12 ([#947](https://github.com/jakta-bdi/jakta/issues/947)) ([3c8a983](https://github.com/jakta-bdi/jakta/commit/3c8a9836b2b4fe774870689190c17e9e7d328b7e))
+
 ## [1.1.14](https://github.com/jakta-bdi/jakta/compare/1.1.13...1.1.14) (2026-09-22)
 
 ### Bug Fixes
