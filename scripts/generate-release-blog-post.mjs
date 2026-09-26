@@ -8,6 +8,14 @@ if (!version) {
   throw new Error('NEXT_RELEASE_VERSION must be set')
 }
 
+// Only feature (minor) and breaking (major) releases get a post; patch releases are listed in
+// CHANGELOG.md and on GitHub Releases. An unset type (e.g. a manual run) still generates the post.
+const releaseType = process.env.NEXT_RELEASE_TYPE
+if (releaseType && !['major', 'minor', 'premajor', 'preminor'].includes(releaseType)) {
+  console.log(`Skipping release post for ${releaseType} release ${version}`)
+  process.exit(0)
+}
+
 const rootDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..')
 
 // Read notes from CHANGELOG.md instead of threading them through a shell
@@ -24,22 +32,19 @@ const notesStart = changelog.indexOf('\n', sectionStart) + 1
 const notesEnd = changelog.indexOf('\n## [', notesStart)
 const notes = changelog.slice(notesStart, notesEnd === -1 ? undefined : notesEnd).trim()
 
-const blogDir = path.join(rootDir, 'website', 'blog')
-mkdirSync(blogDir, { recursive: true })
+// Release notes are a separate blog instance on the website (/releases), see website/docusaurus.config.ts.
+const releasesDir = path.join(rootDir, 'website', 'releases')
+mkdirSync(releasesDir, { recursive: true })
 
 const date = new Date().toISOString().slice(0, 10)
-const filePath = path.join(blogDir, `${date}-release-${version}.md`)
+const filePath = path.join(releasesDir, `${date}-release-${version}.md`)
 
+// A full timestamp keeps several releases published on the same day in the right order.
 const content = `---
-slug: release-${version}
-title: JaKtA ${version} released
-authors: [samubura]
-tags: [jakta, release]
+slug: ${version}
+title: JaKtA ${version}
+date: ${new Date().toISOString()}
 ---
-
-JaKtA ${version} is out.
-
-<!-- truncate -->
 
 ${notes}
 `
