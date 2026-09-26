@@ -61,9 +61,11 @@ interface MutableAgentState<Belief : Any, Goal : Any> :
     /**
      * Adds an event to the agent's queue to achieve a goal and suspends until the goal is achieved.
      * !! This method is deprecated as it is an internal method that should not be used directly.
+     * A plan pursues its subgoals one at a time: use [alsoAchieve] to pursue goals concurrently.
      * @param[goal] The goal to be achieved.
      * @param[resultType] The type of result expected from the plan that will handle this goal.
      * @return The result of the plan that achieved the goal.
+     * @throws IllegalStateException if the calling plan is already achieving another goal.
      */
     @InternalJaktaAPI
     suspend fun <PlanResult> internalAchieve(goal: Goal, resultType: KType): PlanResult
@@ -132,6 +134,7 @@ interface MutableAgentState<Belief : Any, Goal : Any> :
 
 /**
  * Public-facing extension function to achieve a goal with a specific return type, using reified type parameters.
+ * A plan pursues its subgoals one at a time (see [MutableAgentState.internalAchieve]).
  * @param goal The goal to be achieved.
  * @return The result of the plan execution of type [PlanResult].
  */
@@ -142,6 +145,7 @@ suspend inline fun <Goal : Any, reified PlanResult> MutableAgentState<*, Goal>.a
 
 /**
  * Public-facing extension function to achieve a goal and wait for its completion, discarding its result.
+ * A plan pursues its subgoals one at a time (see [MutableAgentState.internalAchieve]).
  * @param goal The goal to be achieved.
  */
 @OptIn(InternalJaktaAPI::class)

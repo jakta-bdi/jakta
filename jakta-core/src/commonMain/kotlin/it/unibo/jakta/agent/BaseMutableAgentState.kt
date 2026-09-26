@@ -19,7 +19,9 @@ import it.unibo.jakta.plan.Plan
 import kotlin.reflect.KType
 import kotlin.time.Duration
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.job
 import kotlinx.coroutines.withTimeoutOrNull
 
 /**
@@ -58,6 +60,9 @@ internal class BaseMutableAgentState<Belief : Any, Goal : Any>(
 
     override val waitEventFilters: MutableMap<(AgentEvent) -> Any?, CompletableDeferred<*>> =
         mutableMapOf()
+
+    /** The plans waiting for the subgoal they are achieving. */
+    private val achievingPlans: MutableSet<Job> = mutableSetOf()
 
     @InternalJaktaAPI
     override val desires: MutableList<Desire<Goal>> = mutableListOf()
@@ -101,10 +106,24 @@ internal class BaseMutableAgentState<Belief : Any, Goal : Any>(
 
         checkNotNull(intention) { "Cannot happen that an achieve invocation comes from a null intention." }
 
+        // The plans of an intention are children of its job: the calling one is the ancestor of this coroutine
+        val caller = currentCoroutineContext().job
+        val plan = intention.job.children.firstOrNull { it == caller || it.isAncestorOf(caller) }
+        check(plan == null || achievingPlans.add(plan)) {
+            "Cannot achieve $goal while the same plan is achieving another goal: " +
+                "an intention pursues its subgoals one at a time, use alsoAchieve to pursue goals concurrently"
+        }
+
         logger.d { "Achieving $goal. Previous intention $intention" }
         internalInbox.send(GoalAddEvent(goal, resultType, completion, intention))
-        return completion.await() // Blocking the continuation
+        try {
+            return completion.await() // Blocking the continuation
+        } finally {
+            plan?.let { achievingPlans -= it }
+        }
     }
+
+    private fun Job.isAncestorOf(job: Job): Boolean = children.any { it == job || it.isAncestorOf(job) }
 
     override fun alsoAchieve(goal: Goal) {
         internalInbox.send(GoalAddEvent.withNoResult(goal))
