@@ -1,7 +1,15 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "github>DanySK/renovate-config:kotlin", ":semanticCommitTypeAll(fix)"
+    "github>DanySK/renovate-config:kotlin"
+  ],
+  "packageRules": [
+    {
+      "description": "Only runtime libraries trigger a patch release; plugins, actions and website deps stay chore(deps)",
+      "matchManagers": ["gradle"],
+      "matchDepTypes": ["dependencies"],
+      "semanticCommitScope": "core-deps"
+    }
   ],
   "assignees": ["anitvam"]
 }
