@@ -28,6 +28,13 @@ interface MutableAgentState<Belief : Any, Goal : Any> :
     val waitEventFilters: MutableMap<(AgentEvent) -> Any?, CompletableDeferred<*>>
 
     /**
+     * The [Desire]s the agent is currently pursuing, in the order they were adopted.
+     * It is kept up to date by the [AgentLifecycle].
+     */
+    @InternalJaktaAPI
+    val desires: MutableList<Desire<Goal>>
+
+    /**
      * Modifies the perception handler function that defines which external events are of interest of the agent.
      * @param handler the new function handler the agent will use starting from next iteration of its lifecycle.
      */
@@ -54,9 +61,11 @@ interface MutableAgentState<Belief : Any, Goal : Any> :
     /**
      * Adds an event to the agent's queue to achieve a goal and suspends until the goal is achieved.
      * !! This method is deprecated as it is an internal method that should not be used directly.
+     * A plan pursues its subgoals one at a time: use [alsoAchieve] to pursue goals concurrently.
      * @param[goal] The goal to be achieved.
      * @param[resultType] The type of result expected from the plan that will handle this goal.
      * @return The result of the plan that achieved the goal.
+     * @throws IllegalStateException if the calling plan is already achieving another goal.
      */
     @InternalJaktaAPI
     suspend fun <PlanResult> internalAchieve(goal: Goal, resultType: KType): PlanResult
@@ -66,6 +75,34 @@ interface MutableAgentState<Belief : Any, Goal : Any> :
      * @param[goal] The goal to be achieved.
      */
     fun alsoAchieve(goal: Goal)
+
+    /**
+     * Drops the goals the agent is pursuing that are equal to [goal].
+     * Dropping a top-level goal cancels its whole intention, including all its subgoals.
+     * Dropping a subgoal cancels it and its own subgoals, and fails the plan waiting for it
+     * with a [GoalDroppedException] (triggering the failure plans of the parent goal, if not caught).
+     * Every dropped goal is intentionally removed: once its plan has completed the cancellation
+     * (e.g. run its finally blocks), its removal plan is triggered, if any.
+     * The drop is processed as an event, so it applies to goals adopted before this call.
+     * @param[goal] The goal to be dropped.
+     */
+    fun dropGoal(goal: Goal)
+
+    /**
+     * Drops every intention pursuing a goal equal to [goal], at any level of its stack of subgoals.
+     * Unlike [dropGoal], no plan is failed: the whole intention stops, and the removal plans of all the goals
+     * it was pursuing are triggered once their plans have completed the cancellation (e.g. run their finally blocks).
+     * It applies to the intentions existing when invoked: if the current intention is dropped,
+     * the calling plan stops at its next suspension point.
+     * @param[goal] The goal whose intentions are to be dropped.
+     */
+    fun dropIntention(goal: Goal)
+
+    /**
+     * Drops all the intentions of the agent, the current one included (see [dropIntention]).
+     * Goals not adopted yet (e.g. just added with [alsoAchieve]) are not affected.
+     */
+    fun dropAllIntentions()
 
     /**
      * Add the belief to the agent's belief base (eventually generating events).
@@ -97,6 +134,7 @@ interface MutableAgentState<Belief : Any, Goal : Any> :
 
 /**
  * Public-facing extension function to achieve a goal with a specific return type, using reified type parameters.
+ * A plan pursues its subgoals one at a time (see [MutableAgentState.internalAchieve]).
  * @param goal The goal to be achieved.
  * @return The result of the plan execution of type [PlanResult].
  */
@@ -107,6 +145,7 @@ suspend inline fun <Goal : Any, reified PlanResult> MutableAgentState<*, Goal>.a
 
 /**
  * Public-facing extension function to achieve a goal and wait for its completion, discarding its result.
+ * A plan pursues its subgoals one at a time (see [MutableAgentState.internalAchieve]).
  * @param goal The goal to be achieved.
  */
 @OptIn(InternalJaktaAPI::class)

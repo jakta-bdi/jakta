@@ -4,7 +4,6 @@ import co.touchlab.kermit.Logger
 import it.unibo.jakta.event.AgentEvent
 import it.unibo.jakta.event.EventInbox
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancelAndJoin
 
 /**
  * Implementation of a mutable intention pool.
@@ -20,10 +19,11 @@ class BaseIntentionPool(val eventInbox: EventInbox<AgentEvent.Internal.Step>) : 
     /** List of intentions currently managed by the agent. **/
     private val intentions: MutableSet<Intention> = mutableSetOf()
 
-    // TODO(This needs to be invoked by someone)
-    override suspend fun drop(intentionID: IntentionID): Boolean = intentions.find { it.id == intentionID }?.let {
-        it.job.cancelAndJoin() // Cancel the job associated to the intention
-        intentions.remove(it)
+    override fun drop(intentionID: IntentionID): Boolean = intentions.find { it.id == intentionID }?.let { intention ->
+        // Removing it right away would lose its queued continuations, that its plans need to complete the cancellation
+        intention.job.invokeOnCompletion { intentions.remove(intention) }
+        intention.job.cancel(DropCancellation("Intention ${intention.id.displayId} has been dropped"))
+        true
     } ?: false
 
     override fun tryPut(intention: Intention): Boolean = intentions.add(intention)
@@ -52,9 +52,8 @@ class BaseIntentionPool(val eventInbox: EventInbox<AgentEvent.Internal.Step>) : 
 
     override fun stepIntention(event: AgentEvent.Internal.Step) {
         log.d { "Stepping intention ${event.intention.id.displayId}" }
-        intentions.find { it == event.intention }?.step() ?: run {
-            log.e { "Intention ${event.intention.id.displayId} not found" }
-        }
+        // Even if the intention already left the pool, its remaining continuations must run (e.g. a cancellation)
+        event.intention.step()
     }
 
     override fun getIntentionsSet(): Set<Intention> = setOf(*intentions.toTypedArray())

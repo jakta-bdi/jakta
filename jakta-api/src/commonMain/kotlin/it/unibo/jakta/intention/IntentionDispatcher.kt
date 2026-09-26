@@ -35,6 +35,8 @@ import kotlinx.coroutines.job
 
 /**
  * A custom dispatcher for intentions, that enqueues the continuation of an intention instead of dispatching it.
+ * Continuations are enqueued even when the intention is cancelled: running them on the intention's next steps
+ * lets its plans complete their cancellation (e.g. run their finally blocks) sequentially with the agent.
  */
 @OptIn(InternalCoroutinesApi::class)
 class IntentionDispatcher(wrappedInterceptor: ContinuationInterceptor) :
@@ -55,8 +57,6 @@ class IntentionDispatcher(wrappedInterceptor: ContinuationInterceptor) :
     override fun dispatch(context: CoroutineContext, block: Runnable) {
         log.d { "Intercepting continuation with context: $context" }
         val currentIntention: Intention = context[Intention] as Intention
-        if (currentIntention.job.isActive) {
-            currentIntention.enqueue { block.run() }
-        }
+        currentIntention.enqueue { block.run() }
     }
 }
