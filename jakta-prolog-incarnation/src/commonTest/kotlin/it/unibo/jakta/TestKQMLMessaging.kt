@@ -239,6 +239,60 @@ class TestKQMLMessaging {
     }
 
     @Test
+    fun `test unachieve of a goal adopted by the receiver itself`() = runTest {
+        val aliceNode = masNode(alice) {
+            plans { node ->
+                context(MessagingSkill(node)) {
+                    prologPlan {
+                        adding.goal {
+                            matchingGoal { startGoal }
+                        } triggers {
+                            agent.print("Hello! Waiting for bob to start and then stop him")
+                            delay(3.seconds)
+                            agent.sendUnachieveTo(bob, goalQuery { delegatedGoal })
+                            node.terminateNode()
+                        }
+                    }
+                }
+            }
+        }
+
+        val bobNode = masNode(bob) {
+            plans { node ->
+                prologPlan {
+                    adding.goal {
+                        matchingGoal { startGoal }
+                    } triggers {
+                        agent.print("Hello! I will start achieving the goal")
+                        agent.achieve(goal { delegatedGoal })
+                        node.terminateNode(RuntimeException("The goal should have been dropped, failing this plan"))
+                    }
+                }
+                prologPlan {
+                    adding.goal {
+                        matchingGoal { delegatedGoal[source(X)] }
+                    } triggers {
+                        agent.print("Hello, achieving the goal from ", X)
+                        delay(10.seconds)
+                        node.terminateNode(RuntimeException("This goal should have been removed before completion"))
+                    }
+                }
+                prologPlan {
+                    removing.goal {
+                        matchingGoal { delegatedGoal[source(self)] }
+                    } triggers {
+                        agent.print("Removing my own goal")
+                        delay(20.seconds) // the dropped plan would fail the node after 10 seconds
+                        node.terminateNode()
+                    }
+                }
+            }
+        }
+
+        run(aliceNode, bobNode)
+    }
+
+    @Test
     fun `test askOne`() = runTest {
         val aliceNode = masNode(alice) {
             plans { node ->

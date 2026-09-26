@@ -16,21 +16,17 @@ import it.unibo.tuprolog.unify.AbstractUnificator
 /**
  * Custom unificator that handles annotations in Prolog terms.
  * It extends the AbstractUnificator and overrides the mgu method to consider annotations during unification.
+ * Following the tuProlog convention, [term1] is the query (e.g. the goal being solved, or a plan trigger)
+ * and [term2] is the annotated data it is matched against (e.g. a stored belief, or the goal of an event).
  */
 private val annotationUnificator = object : AbstractUnificator() {
     override fun checkTermsEquality(first: Term, second: Term): Boolean = first == second
 
     override fun mgu(term1: Term, term2: Term, occurCheckEnabled: Boolean): Substitution {
-        var fact = annotatedTerm(term1)
-        var query = annotatedTerm(term2)
+        val query = annotatedTerm(term1)
+        val fact = annotatedTerm(term2)
 
-        // TODO this is a workaround that might cause problems in the future
-        if (!term1.isFact) {
-            fact = annotatedTerm(term2)
-            query = annotatedTerm(term1)
-        }
-
-        var result = super.mgu(fact, query, occurCheckEnabled)
+        var result = super.mgu(query, fact, occurCheckEnabled)
 
         if (result !is Substitution.Fail) {
             result = unifyTags(fact, query, result, occurCheckEnabled)
@@ -139,10 +135,11 @@ object JaktaSolver {
 fun Collection<Rule>.unifiesWith(query: Struct): Solution = JaktaSolver.get(this).solveOnce(query)
 
 /**
-* Extension function to compute the most general unifier (MGU) between a [Struct] and a query [Struct]
- * using annotation semantics.
+ * Extension function to compute the most general unifier (MGU) between a [Struct] and a query [Struct]
+ * using annotation semantics: the receiver is the annotated data (e.g. a belief or a goal), which is implicitly
+ * annotated with `source(self)` when it has no annotations.
  */
-fun Struct.annotatedMguWith(query: Struct): Substitution = annotationUnificator.mgu(this, query)
+fun Struct.annotatedMguWith(query: Struct): Substitution = annotationUnificator.mgu(query, this)
 
 /**
  * Extension function to check if a collection of Prolog rules unifies with a given query [Struct].

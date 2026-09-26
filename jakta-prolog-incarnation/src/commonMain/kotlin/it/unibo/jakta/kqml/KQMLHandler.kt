@@ -44,9 +44,8 @@ fun AgentState<PrologBelief, PrologGoal>.handleKQMLPayload(payload: KQMLPayload,
         }
 
         // As in Jason, unachieve drops every matching goal, whoever adopted it.
-        // The query goes first: for non-fact terms the matcher takes the second term as the annotated one.
         is Unachieve -> {
-            val toRemove = goals.filter { payload.goalQuery.annotatedMguWith(it) !is Substitution.Fail }.toSet()
+            val toRemove = goals.filter { it.annotatedMguWith(payload.goalQuery) !is Substitution.Fail }.toSet()
             Goal(emptySet(), toRemove)
         }
 
