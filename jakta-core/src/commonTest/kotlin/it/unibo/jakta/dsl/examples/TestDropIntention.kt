@@ -14,8 +14,16 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 
+/**
+ * Tests of [it.unibo.jakta.agent.MutableAgentState.dropIntention]
+ * and [it.unibo.jakta.agent.MutableAgentState.dropAllIntentions].
+ */
 class TestDropIntention {
 
+    /**
+     * Dropping an intention by one of its subgoals stops it,
+     * triggering the removal plans of all its goals and no failure plan.
+     */
     @Test
     fun droppingAnIntentionRemovesAllItsGoalsWithoutFailures() = runTest {
         Logger.setMinSeverity(Severity.Warn)
@@ -73,6 +81,9 @@ class TestDropIntention {
         )
     }
 
+    /**
+     * Dropping all intentions also stops the calling one, but not the goals whose adoption is still pending.
+     */
     @Test
     fun droppingAllIntentionsKeepsGoalsNotAdoptedYet() = runTest {
         Logger.setMinSeverity(Severity.Warn)
