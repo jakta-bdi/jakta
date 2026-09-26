@@ -21,6 +21,7 @@ class TestDropGoal {
     fun droppingAGoalCancelsItsWholeIntention() = runTest {
         Logger.setMinSeverity(Severity.Warn)
         val trace = mutableListOf<String>()
+        val cleanups = mutableSetOf<String>()
         node(NodeBuilders.baseNode()) {
             agent {
                 embodiedAs { Any() }
@@ -30,12 +31,20 @@ class TestDropGoal {
                 }
                 hasPlanLibrary {
                     adding.goal { ifGoalMatch("work") } triggers {
-                        agent.achieve("subgoal")
-                        trace += "work completed"
+                        try {
+                            agent.achieve("subgoal")
+                            trace += "work completed"
+                        } finally {
+                            cleanups += "work"
+                        }
                     }
                     adding.goal { ifGoalMatch("subgoal") } triggers {
-                        delay(10.seconds)
-                        trace += "subgoal completed"
+                        try {
+                            delay(10.seconds)
+                            trace += "subgoal completed"
+                        } finally {
+                            cleanups += "subgoal"
+                        }
                     }
                     failing.goal { ifGoalMatch("work") } triggers {
                         trace += "work failed"
@@ -50,6 +59,7 @@ class TestDropGoal {
                         delay(1.seconds)
                         trace += "goals after drop: ${agent.goals.sorted()}"
                         trace += "intentions after drop: ${agent.intentions.size}"
+                        trace += "cleanups after drop: ${cleanups.sorted()}"
                         delay(20.seconds)
                         node.terminateNode()
                     }
@@ -62,6 +72,7 @@ class TestDropGoal {
                 "work removed",
                 "goals after drop: [drop]",
                 "intentions after drop: 1",
+                "cleanups after drop: [subgoal, work]",
             ),
             trace,
         )
@@ -71,6 +82,7 @@ class TestDropGoal {
     fun droppingASubgoalFailsTheParent() = runTest {
         Logger.setMinSeverity(Severity.Warn)
         val trace = mutableListOf<String>()
+        val cleanups = mutableSetOf<String>()
         node(NodeBuilders.baseNode()) {
             agent {
                 embodiedAs { Any() }
@@ -84,12 +96,20 @@ class TestDropGoal {
                         trace += "work completed"
                     }
                     adding.goal { ifGoalMatch("subgoal") } triggers {
-                        agent.achieve("nested")
-                        trace += "subgoal completed"
+                        try {
+                            agent.achieve("nested")
+                            trace += "subgoal completed"
+                        } finally {
+                            cleanups += "subgoal"
+                        }
                     }
                     adding.goal { ifGoalMatch("nested") } triggers {
-                        delay(10.seconds)
-                        trace += "nested completed"
+                        try {
+                            delay(10.seconds)
+                            trace += "nested completed"
+                        } finally {
+                            cleanups += "nested"
+                        }
                     }
                     failing.goal { ifGoalMatch("work") } triggers {
                         trace += "work failed"
@@ -99,12 +119,13 @@ class TestDropGoal {
                         agent.dropGoal("subgoal")
                         delay(20.seconds)
                         trace += "goals: ${agent.goals.sorted()}"
+                        trace += "cleanups: ${cleanups.sorted()}"
                         node.terminateNode()
                     }
                 }
             }
         }.runToEnd()
-        assertEquals(listOf("work failed", "goals: [drop]"), trace)
+        assertEquals(listOf("work failed", "goals: [drop]", "cleanups: [nested, subgoal]"), trace)
     }
 
     @Test

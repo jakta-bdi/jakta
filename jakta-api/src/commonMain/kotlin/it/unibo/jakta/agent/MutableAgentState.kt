@@ -80,9 +80,25 @@ interface MutableAgentState<Belief : Any, Goal : Any> :
      * Dropping a subgoal cancels it and its own subgoals, and fails the plan waiting for it
      * with a [GoalDroppedException].
      * The drop is processed as an event, so it applies to goals adopted before this call.
+     * Dropped plans are cancelled, so their finally blocks run.
      * @param[goal] The goal to be dropped.
      */
     fun dropGoal(goal: Goal)
+
+    /**
+     * Drops every intention pursuing a goal equal to [goal], at any level of its stack of subgoals.
+     * Unlike [dropGoal], no plan is failed and no removal plan is triggered: the whole intention silently stops.
+     * It applies to the intentions existing when invoked: if the current intention is dropped,
+     * the calling plan stops at its next suspension point.
+     * @param[goal] The goal whose intentions are to be dropped.
+     */
+    fun dropIntention(goal: Goal)
+
+    /**
+     * Drops all the intentions of the agent, the current one included (see [dropIntention]).
+     * Goals not adopted yet (e.g. just added with [alsoAchieve]) are not affected.
+     */
+    fun dropAllIntentions()
 
     /**
      * Add the belief to the agent's belief base (eventually generating events).

@@ -25,4 +25,10 @@ interface AgentLifecycle<Belief : Any, Goal : Any> {
      * Runs a reasoning cycle step if an event is available, otherwise does nothing.
      */
     fun tryStep(dispatcher: CoroutineDispatcher)
+
+    /**
+     * Stops the agent, cancelling all its plans and suspending until they have completed their cancellation
+     * (e.g. run their finally blocks). The agent should not be stepped anymore afterwards.
+     */
+    suspend fun stop()
 }

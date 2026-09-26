@@ -9,10 +9,12 @@ import it.unibo.jakta.event.SystemEvent
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
 
 /**
@@ -77,9 +79,14 @@ class CoroutineNodeRunner<Body : Any, N : ExecutableNode<Body>>(val connection: 
     private fun CoroutineScope.startAgent(node: N, agent: ExecutableAgent<*, *>) {
         val newAgent = BaseAgentLifecycle(agent)
         val newJob = launch {
-            while (isActive) {
-                newAgent.step()
-                yield()
+            try {
+                while (isActive) {
+                    newAgent.step()
+                    yield()
+                }
+            } finally {
+                // However the agent stops (removal, node shutdown, failure), let its plans complete their cancellation
+                withContext(NonCancellable) { newAgent.stop() }
             }
         }
         agents += newAgent to newJob

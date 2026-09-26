@@ -114,6 +114,18 @@ internal class BaseMutableAgentState<Belief : Any, Goal : Any>(
         internalInbox.send(GoalRemoveEvent.withNoResult(goal))
     }
 
+    @OptIn(InternalJaktaAPI::class)
+    override fun dropIntention(goal: Goal) {
+        desires.filter { it.goal == goal }
+            .map { it.intention }
+            .distinct()
+            .forEach { mutableIntentionPool.drop(it.id) }
+    }
+
+    override fun dropAllIntentions() {
+        intentions.forEach { mutableIntentionPool.drop(it.id) }
+    }
+
     override fun believe(belief: Belief) {
         this.beliefBase.add(belief)
     }

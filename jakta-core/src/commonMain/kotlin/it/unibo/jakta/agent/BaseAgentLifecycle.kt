@@ -33,8 +33,6 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
             executableAgent.id.displayName,
         )
 
-    // TODO consider making this public or add a method to cancel it e.g. stop()
-    //  so far it does not seem to be necessary
     private val agentJob = SupervisorJob()
 
     override suspend fun step() {
@@ -50,6 +48,16 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
             val scope = CoroutineScope(dispatcher + agentJob)
             handleEvent(it, scope)
         }
+    }
+
+    override suspend fun stop() {
+        agentJob.cancel()
+        // Plans resumed before the cancellation have their continuation queued in their intention, waiting for a
+        // step the stopped agent will not perform: run those steps here, so that the plans complete their cancellation.
+        generateSequence { executableAgent.events.tryNext() }
+            .filterIsInstance<AgentEvent.Internal.Step>()
+            .forEach { handleStepEvent(it) }
+        agentJob.join()
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -198,7 +206,7 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
             log.i { "Dropping goal ${desire.goal} in intention ${desire.intention.id.displayId}" }
             val completion = desire.event.completion
             if (completion == null) {
-                desire.intention.job.cancel()
+                executableAgent.state.mutableIntentionPool.drop(desire.intention.id)
             } else {
                 // ponytail: the subgoals of a desire are the ones adopted after it in the same intention,
                 //  which is wrong only if a plan body pursues subgoals concurrently (e.g. launch { achieve(..) }).
