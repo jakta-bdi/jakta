@@ -27,6 +27,7 @@ with(extensions.getByType<VersionCatalogsExtension>().named("libs")) {
     dependencies {
         implementation(kotlin("reflect"))
         implementation(findLibrary("kotlin-gradle-plugin").get())
+        implementation(findLibrary("kotlin-serialization-plugin").get())
         implementation(
             findPlugin("npm-publish").get().map { "${it.pluginId}:${it.pluginId}.gradle.plugin:${it.version}" },
         )

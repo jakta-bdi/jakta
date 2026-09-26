@@ -23,11 +23,11 @@ interface Node<Body : Any> {
 
     /**
      * Publishes an external [event] that is delivered to all agents
-     * reachable by that node that satisfy the [filterFunction].
+     * reachable by that node that satisfy the [filter].
      * @param event The external event to be sent.
-     * @param filterFunction A function that determines the conditions under which an agent should receive the event.
+     * @param filter A [MessageFilter] that determines which agents should receive the event.
      */
-    fun publishEvent(event: AgentEvent.External, filterFunction: Node<Body>.(Body) -> Boolean = { true })
+    fun publishEvent(event: AgentEvent.External, filter: MessageFilter<Body> = AcceptAll)
 
     /**
      * Adds a new agent to the node based on the provided [agentFactory].

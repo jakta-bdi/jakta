@@ -6,6 +6,7 @@ kotlin = "2.4.10"
 alchemist = "43.1.5"
 tuprolog = "2.0.5"
 publish-central = "9.2.12"
+serialization = "1.11.0"
 
 
 [libraries]
@@ -15,6 +16,11 @@ alchemist = { module = "it.unibo.alchemist:alchemist", version.ref = "alchemist"
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
 kotlinx-coroutines-core = {module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref="coroutines"}
 kotlinx-coroutines-test = {module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref="coroutines"}
+kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "serialization" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
+kotlin-serialization-plugin = { module = "org.jetbrains.kotlin:kotlin-serialization", version.ref = "kotlin" }
+paho-mqttv3 = "org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5"
+moquette = "io.moquette:moquette-broker:0.17"
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 caffeine = "com.github.ben-manes.caffeine:caffeine:3.3.0"
 
@@ -48,6 +54,7 @@ dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 gitSemVer = { id = "org.danilopianini.git-sensitive-semantic-versioning", version = "7.0.24" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 kotlin-qa = { id = "org.danilopianini.gradle-kotlin-qa", version = "1.9.3" }
 kover = "org.jetbrains.kotlinx.kover:0.9.9"
 multiJvmTesting = { id = "org.danilopianini.multi-jvm-test-plugin", version = "4.5.7" }

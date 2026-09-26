@@ -10,6 +10,7 @@ import it.unibo.jakta.dsl.node.NodeBuilders
 import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.node.CoroutineNodeRunner
 import it.unibo.jakta.node.SharedMemoryNetwork
+import it.unibo.jakta.skills.AgentTerminationSkill
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.seconds
@@ -91,5 +92,24 @@ class TestAgentAdditionAndRemoval {
             }
             mas.run(CoroutineNodeRunner(SharedMemoryNetwork()))
         }
+    }
+
+    @Test
+    fun `a node stops when its last agent leaves`() = runTest(timeout = 5.seconds) {
+        mas(NodeBuilders.baseNode()) {
+            node {
+                agent<String, String>(BaseAgentID("Leaver")) {
+                    embodiedAs { Any() }
+                    hasInitialGoals { !"leave" }
+                    hasPlanLibrary {
+                        adding.goal {
+                            ifGoalMatch("leave")
+                        } triggers {
+                            with(AgentTerminationSkill(node)) { agent.terminate() }
+                        }
+                    }
+                }
+            }
+        }.run(CoroutineNodeRunner(SharedMemoryNetwork()))
     }
 }

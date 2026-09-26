@@ -16,12 +16,11 @@ import it.unibo.jakta.event.UnlimitedChannelQueue
 /**
  * An implementation of the [it.unibo.jakta.node.Node] interface
  * that manages agents and system events within a single isolated node.
+ * @param id the unique identifier of the node, set it explicitly when the node must be recognized across processes.
  */
-open class BaseNode<Body : Any> : ExecutableNode<Body> {
+open class BaseNode<Body : Any>(override val id: NodeID = NodeID()) : ExecutableNode<Body> {
 
     private val _agents: MutableSet<BaseAgent<*, *, Body>> = mutableSetOf()
-
-    override val id: NodeID = NodeID()
 
     override val agents: Map<AgentID, Body>
         get() = _agents.associate { it.id to it.body }
@@ -45,9 +44,9 @@ open class BaseNode<Body : Any> : ExecutableNode<Body> {
         _systemEvents.send(ShutDownNodeEvent(nodeID, error))
     }
 
-    override fun publishEvent(event: AgentEvent.External, filterFunction: Node<Body>.(Body) -> Boolean) = when (event) {
-        is AgentEvent.External.Message<*> -> _systemEvents.send(AgentMessageEvent(event, filterFunction))
-        is AgentEvent.External.Perception -> deliverEvent(event, filterFunction)
+    override fun publishEvent(event: AgentEvent.External, filter: MessageFilter<Body>) = when (event) {
+        is AgentEvent.External.Message<*> -> _systemEvents.send(AgentMessageEvent(event, filter))
+        is AgentEvent.External.Perception -> deliverEvent(event, filter)
     }
 
     // TODO check this cast, can I remove it somehow?
@@ -55,7 +54,7 @@ open class BaseNode<Body : Any> : ExecutableNode<Body> {
     override fun handleExternalEvent(event: SystemEvent) {
         when (event) {
             is AgentMessageEvent<*, *> -> {
-                deliverEvent(event.message, event.filterFunction as Node<Body>.(Body) -> Boolean)
+                deliverEvent(event.message, event.filter as MessageFilter<Body>)
             }
 
             is AgentRemovalEvent -> {
@@ -75,8 +74,8 @@ open class BaseNode<Body : Any> : ExecutableNode<Body> {
         }
     }
 
-    private fun deliverEvent(event: AgentEvent.External, filterFunction: Node<Body>.(Body) -> Boolean) {
-        _agents.filter { filterFunction(it.body) }
+    private fun deliverEvent(event: AgentEvent.External, filter: MessageFilter<Body>) {
+        _agents.filter { filter.accept(this, it.id, it.body) }
             .forEach { it.externalInbox.send(event) }
     }
 }

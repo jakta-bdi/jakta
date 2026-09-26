@@ -3,7 +3,10 @@ package it.unibo.jakta.skills
 import it.unibo.jakta.agent.Agent
 import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.event.AgentEvent.External.Message
+import it.unibo.jakta.node.BroadcastFrom
+import it.unibo.jakta.node.MessageFilter
 import it.unibo.jakta.node.Node
+import it.unibo.jakta.node.SendTo
 
 /**
  * A skill that provides messaging capabilities to agents,
@@ -14,21 +17,30 @@ import it.unibo.jakta.node.Node
 open class MessagingSkill(node: Node<Any>) : Skill<Any>(node) {
 
     /**
+     * Sends a message with the given [payload] to the agents selected by the [filter].
+     */
+    fun <P : Any> Agent.send(payload: P, filter: MessageFilter<Any>) {
+        node.publishEvent(Message(payload, id), filter)
+    }
+
+    /**
      * Sends a message with the given [payload] to the specified [receiver] agent.
      */
-    fun <P : Any> Agent.sendTo(receiver: AgentID, payload: P) {
-        node.publishEvent(Message(payload, id)) { body ->
-            this.getAgentIDfromBody(body) == receiver
-        }
-    }
+    fun <P : Any> Agent.sendTo(receiver: AgentID, payload: P) = send(payload, SendTo(receiver))
 
     /**
      * Broadcasts a message with the given [payload] to all other agents in the node except the sender itself.
      */
-    fun <P : Any> Agent.broadcast(payload: P) {
-        node.publishEvent(Message(payload, id)) { body ->
-            this.getAgentIDfromBody(body) != id
-        }
+    fun <P : Any> Agent.broadcast(payload: P) = send(payload, BroadcastFrom(id))
+}
+
+/**
+ * Extension function to send a message to the agents selected by the [filter] using the provided [MessagingSkill].
+ */
+context(skill: MessagingSkill)
+fun <P : Any> Agent.send(payload: P, filter: MessageFilter<Any>) {
+    with(skill) {
+        send(payload, filter)
     }
 }
 

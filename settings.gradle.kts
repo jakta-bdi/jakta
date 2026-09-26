@@ -40,6 +40,8 @@ include(
     "alchemist-jakta-incarnation",
     "jakta-string-incarnation",
     "jakta-prolog-incarnation",
+    "jakta-distributed",
     "examples:blocksworld",
     "examples:hello-world",
+    "examples:mqtt-ping-pong",
 )

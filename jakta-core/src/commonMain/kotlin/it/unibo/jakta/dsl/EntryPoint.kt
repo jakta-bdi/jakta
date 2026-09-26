@@ -16,6 +16,7 @@ import it.unibo.jakta.dsl.plan.TriggerRemovalImpl
 import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.node.ExecutableNode
 import it.unibo.jakta.node.Node
+import it.unibo.jakta.node.NodeID
 import it.unibo.jakta.plan.Plan
 
 /**
@@ -24,22 +25,19 @@ import it.unibo.jakta.plan.Plan
  */
 @JaktaDSL
 fun <N : ExecutableNode<*>, NB : NodeBuilder<*, N>> mas(
-    builderFactory: () -> NB,
+    builderFactory: (NodeID) -> NB,
     block: MasBuilder<N, NB>.() -> Unit,
 ): MasBuilder<N, NB> = BaseMasBuilder(builderFactory).apply(block)
 
 /**
- * Entry point for creating a node using the JaKtA DSL.
- * @return an instantiated MAS.
+ * Entry point for creating a node with the given [id] using the JaKtA DSL.
+ * @return an instantiated node.
  */
 fun <Body : Any, N : ExecutableNode<Body>, NB : NodeBuilder<Body, N>> node(
-    builderFactory: () -> NB,
+    builderFactory: (NodeID) -> NB,
+    id: NodeID = NodeID(),
     block: NB.() -> Unit,
-): ExecutableNode<Body> {
-    val builder = builderFactory()
-    builder.apply(block)
-    return builder.build()
-}
+): ExecutableNode<Body> = builderFactory(id).apply(block).build()
 
 /**
  * Entry point for creating an agent using the JaKtA DSL.
