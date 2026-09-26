@@ -43,4 +43,5 @@ include(
     "jakta-distributed",
     "examples:blocksworld",
     "examples:hello-world",
+    "examples:mqtt-ping-pong",
 )
