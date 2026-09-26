@@ -5,15 +5,18 @@ package it.unibo.jakta.js
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import it.unibo.jakta.InternalJaktaAPI
+import it.unibo.jakta.agent.AgentLifecycle
 import it.unibo.jakta.agent.AgentSpecification
 import it.unibo.jakta.agent.BaseAgentID
+import it.unibo.jakta.agent.BaseAgentLifecycle
 import it.unibo.jakta.agent.MutableAgentState
 import it.unibo.jakta.dsl.agent
 import it.unibo.jakta.dsl.agent.AgentBuilder
 import it.unibo.jakta.dsl.mas
-import it.unibo.jakta.dsl.mas.runLocally
 import it.unibo.jakta.dsl.node.NodeBuilders
+import it.unibo.jakta.node.CoroutineNodeRunner
 import it.unibo.jakta.node.Node
+import it.unibo.jakta.node.SharedMemoryNetwork
 import it.unibo.jakta.plan.BeliefAdditionPlan
 import it.unibo.jakta.plan.BeliefRemovalPlan
 import it.unibo.jakta.plan.GoalAdditionPlan
@@ -21,6 +24,8 @@ import it.unibo.jakta.plan.GoalFailurePlan
 import it.unibo.jakta.plan.GoalRemovalPlan
 import it.unibo.jakta.plan.GuardScope
 import it.unibo.jakta.plan.PlanScope
+import kotlin.coroutines.AbstractCoroutineContextElement
+import kotlin.coroutines.CoroutineContext
 import kotlin.js.Promise
 import kotlin.reflect.typeOf
 import kotlinx.coroutines.CoroutineScope
@@ -32,6 +37,7 @@ import kotlinx.coroutines.await
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.job
 import kotlinx.coroutines.promise
+import kotlinx.coroutines.withContext
 
 /**
  * A trigger: given the triggering belief or goal, returns a context object if the plan is relevant,
@@ -73,7 +79,7 @@ fun setLogSeverity(severity: String) = Logger.setMinSeverity(Severity.valueOf(se
 fun runMas(agents: Array<JsAgent>): Promise<Unit> = GlobalScope.promise {
     mas(NodeBuilders.baseNode<Any>()) {
         node { withAgents(*agents.map { it.toSpecification() }.toTypedArray()) }
-    }.runLocally()
+    }.run(CoroutineNodeRunner(SharedMemoryNetwork()) { JsAgentLifecycle(BaseAgentLifecycle(it)) })
 }
 
 /**
@@ -164,6 +170,12 @@ class JsPlanScope internal constructor(
     /** Suspends the plan for [millis] milliseconds, like Kotlin's `delay`, letting other intentions run. */
     fun delay(millis: Int): Promise<Unit> = inIntention { kotlinx.coroutines.delay(millis.toLong()) }
 
+    /**
+     * Waits for a promise not created by JaKtA (e.g., `fetch`) as a suspension of the plan: the code after
+     * `await self.external(p)` runs within a step of the agent, and never runs if the plan is stopped meanwhile.
+     */
+    fun external(promise: Promise<Any?>): Promise<Any?> = inIntention { promise.await() }
+
     /** Pursues [goal] in a new intention, without waiting for it. */
     fun alsoAchieve(goal: Any) = agent.alsoAchieve(goal)
 
@@ -172,15 +184,45 @@ class JsPlanScope internal constructor(
 
     /**
      * Runs [block] in the plan's intention, started undispatched so it begins within the current step
-     * (as Kotlin's suspending calls do). The returned promise settles within a later step of the intention.
+     * (as Kotlin's suspending calls do). The returned promise settles within a later step of the intention,
+     * and the [JsAgentLifecycle] lets the JS code it resumes run before the agent's next event.
      */
-    // ponytail: the JS code it resumes runs later, from the engine's microtask queue, so the agent may handle
-    // further events first; matching Kotlin exactly needs the lifecycle to wait for it before its next event.
     private fun <T> inIntention(block: suspend () -> T): Promise<T> =
         // A supervisor child: a failure (e.g. of a subgoal) rejects only this promise, for JS to catch,
         // instead of cancelling the whole intention; cancelling the intention still cancels it.
         CoroutineScope(intention.coroutineContext + SupervisorJob(intention.coroutineContext.job))
-            .promise(start = CoroutineStart.UNDISPATCHED) { block() }
+            .promise(start = CoroutineStart.UNDISPATCHED) {
+                try {
+                    block()
+                } finally {
+                    intention.coroutineContext[JsSteps]?.resumedJs = true
+                }
+            }
+}
+
+/**
+ * Runs an agent like [base], but when a step settles a promise of a [JsPlanScope], waits for the JS code awaiting it
+ * before the next event: that code is the rest of the step, which the JS engine runs only after the step returns.
+ */
+private class JsAgentLifecycle<Belief : Any, Goal : Any>(private val base: AgentLifecycle<Belief, Goal>) :
+    AgentLifecycle<Belief, Goal> by base {
+    // One instance for the whole agent: plans keep the context of the step that launched them.
+    private val steps = JsSteps()
+
+    override suspend fun step() {
+        withContext(steps) { base.step() }
+        if (steps.resumedJs) {
+            steps.resumedJs = false
+            // A macrotask runs after all queued microtasks, i.e. after the resumed code reached its next `await`.
+            Promise { resolve, _ -> js("setTimeout")({ resolve(Unit) }, 0) }.await()
+        }
+    }
+}
+
+private class JsSteps : AbstractCoroutineContextElement(JsSteps) {
+    var resumedJs = false
+
+    companion object Key : CoroutineContext.Key<JsSteps>
 }
 
 // JS plans are untyped: declaring Unit keeps them relevant both for `achieve` (Unit) and JS `achieve` (Any?).
@@ -190,7 +232,7 @@ private fun JsGuard?.toKotlin(): GuardScope<Any, Any>.() -> Any? =
     this?.let { guard -> { guard(JsGuardScope(beliefs.toTypedArray(), context)) } } ?: { context }
 
 // ponytail: only promises returned by JsPlanScope resume within a step: code after awaiting any other promise
-// (e.g., fetch) runs whenever the engine schedules it, and is not stopped when the intention is cancelled.
+// (e.g., fetch) runs whenever the engine schedules it, even after the plan is stopped, unless wrapped in `external`.
 private fun JsPlanBody.toKotlin(node: Node<Any>): suspend context(Any)
 (PlanScope<Any, Any, Any>) -> Any? = { scope ->
     // Launching `achieve` in the plan's own coroutine context keeps the Intention it needs.
