@@ -12,56 +12,78 @@ The best way to use JaKtA is in a `Kotlin` project, so that you can benefit from
 ## Prerequisites
 
 You need:
-* A terminal, bash compatible preferred
-* [Java 11+](https://adoptium.net/) installed and working
-    - Java can be downloaded from [https://adoptium.net/](https://adoptium.net/)
+* [Java 17+](https://adoptium.net/) installed and working
+    - the JVM libraries target Java 8 bytecode, but the build tooling and the Alchemist incarnation need Java 17
+* [Kotlin 2.4+](https://kotlinlang.org/docs/releases.html) — the DSL relies on [context parameters](https://kotlinlang.org/docs/context-parameters.html)
 * [Git](https://git-scm.com) installed and working
-    - Git can be downloaded from https://git-scm.com
 
-## Distribution 
+## Distribution
 
-JaKtA is distributed on Maven Central.
-You can find the project at this [link](https://central.sonatype.com/namespace/it.unibo.jakta).
+JaKtA is distributed on [Maven Central](https://central.sonatype.com/namespace/it.unibo.jakta) under the group `it.unibo.jakta`,
+and on [npm](https://www.npmjs.com/org/jakta) under the `@jakta` organization.
+
+A JaKtA project needs **two** dependencies:
+- `jakta-core`, which contains the engine and the DSL entry points (`mas`, `node`, `agent`, ...), and
+- one [incarnation](../explanation/incarnations/index.md), which fixes how beliefs and goals are represented.
+  If in doubt, start with `jakta-prolog-incarnation`.
 
 ## Setup your JaKtA project
 
-To get started with JaKtA, create a new `gradle` project 
-and import the following Maven Central dependency in your `build.gradle.kts` file:
+The quickest way is to start from the [JaKtA Prolog incarnation template](https://github.com/jakta-bdi/jakta-prolog-incarnation-template).
 
-1. Create a new Kotlin project using Gradle:
+Otherwise, create a new Kotlin project with Gradle:
+
 ```bash
 mkdir jakta-project
 cd jakta-project
 gradle init --type kotlin-application
 ```
-2. Add JaKtA dependency in `build.gradle.kts`:
-```bash
-dependencies {
-    implementation("it.unibo.jakta:jakta-dsl:<latest.release>")
-}
-```
 
-Or, alternatively, use the [JaKta template](https://github.com/jakta-bdi/template-for-JaKtA-project).
+and add the dependencies to your `build.gradle.kts`:
+
+<Tabs>
+  <TabItem value="jvm" label="Kotlin/JVM" default>
+    ```kotlin
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        implementation("it.unibo.jakta:jakta-core:<VERSION>")
+        implementation("it.unibo.jakta:jakta-prolog-incarnation:<VERSION>")
+        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:<COROUTINES_VERSION>")
+    }
+    ```
+  </TabItem>
+  <TabItem value="kmp" label="Kotlin Multiplatform">
+    ```kotlin
+    repositories {
+        mavenCentral()
+    }
+
+    kotlin {
+        sourceSets {
+            commonMain.dependencies {
+                implementation("it.unibo.jakta:jakta-core:<VERSION>")
+                implementation("it.unibo.jakta:jakta-prolog-incarnation:<VERSION>")
+            }
+        }
+    }
+    ```
+    `jakta-prolog-incarnation` is available for the JVM and JS targets.
+    `jakta-api`, `jakta-dsl`, `jakta-core` and `jakta-string-incarnation` also support native targets
+    (Linux, Windows, macOS, iOS).
+  </TabItem>
+</Tabs>
 
 :::tip[Versioning]
-It is always preferrable to select a fixed version for your dependencies. Check out JaKtA's latest available version [here](https://central.sonatype.com/artifact/it.unibo.jakta/jakta).
+It is always preferable to select a fixed version for your dependencies.
+Check out JaKtA's latest available version on [Maven Central](https://central.sonatype.com/artifact/it.unibo.jakta/jakta-core)
+or in the [release notes](/releases).
 :::
 
 :::tip[Gradle]
 If you're not familiar with Gradle you can learn it from [here](https://docs.gradle.org/current/userguide/getting_started_eng.html).
 :::
 
-<details>
-
-    <summary> 
-    Gradle will import JaKtA as a dependency from **Maven Central**, make sure your repository configuration is including it.
-    </summary>
-
-    To setup Maven Central copy this in your `build.gralde.kts` file:
-    ```
-    repositories {
-        mavenCentral()
-    }
-    ```
-</details>
-
+Once your project is set up, [write your first agent](./hello-world.md) or [run the bundled examples](./quick-start.md).

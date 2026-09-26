@@ -3,6 +3,7 @@ import styles from './HomePageNavbar.module.css';
 
 const sections = [
 	{ id: 'features', label: 'Features' },
+	{ id: 'example', label: 'Example' },
 	{ id: 'team', label: 'Team' },
 	{ id: 'about', label: 'About' },
 ];

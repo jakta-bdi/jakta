@@ -4,74 +4,91 @@ sidebar_position: 3
 
 # Goals in JaKtA
 
-Goals represent the objectives that an agent aims to achieve. 
-In JaKtA, goals drive the agent’s behavior by activating plans that execute actions.
+Goals are the objectives an agent aims to achieve. Adding a goal generates an event that
+selects a relevant [plan](./plans.md); executing that plan is an **intention**.
 
-## Understanding Goals
+As for beliefs, the goal type is chosen by the [incarnation](../explanation/incarnations/index.md):
+a Prolog `Struct` (`PrologGoal`) in the Prolog incarnation, a `String` in the string incarnation,
+or any type you like.
 
-Goals can indicate either something that the agent wants to **achieve** by finding
-an appropriate plan, or something that it wants to **test** (discover), prioritising the
-consultation of the knowledge base over the execution of plans.
-Similarly to Jason, JaKtA supports the definition of agents’ initial goals by means of the goals block.
-Further goals may arise during the execution of the MAS, 
-thus creating a hierarchy of plans to execute in order to fulfill the initial goal. 
+## Initial goals
 
-## Defining initial Goals in JaKtA DSL
-
-In JaKtA, goals are defined as part of an agent’s configuration:
+Initial goals are pursued as soon as the agent starts. Declare them with `hasInitialGoals { }` and `!`:
 
 ```kotlin
-import io.github.jakta.bdi.dsl.agentSystem
-agent("Robot") {
-    goals { 
-        test("batteryLevel")
-        achieve("chargeBattery") 
+agent<PrologBelief, PrologGoal, Any> {
+    embodiedAs { Any() }
+    hasInitialGoals {
+        !initialGoal { "start"(0, 10) }
     }
 }
 ```
 
-In this example, the `Robot` agent tests the current `batteryLevel`, and tries to achieve the goal of charging its battery.
+With the string incarnation (or plain `String` goals) it is simply `!"start"`.
+Goals can also be added with `addGoal(goal)` in the agent builder.
 
-## Adding Goals Dynamically
+## Sub-goals
 
-An agent can **adopt new goals** at runtime based on its current beliefs and environment.
+A plan body can pursue new goals in two ways:
 
-#### Example: Adding a Goal Dynamically
+- `agent.achieve(goal)` pursues a **sub-goal** within the current intention and *suspends* until the sub-goal
+  has been achieved. If the sub-goal fails and no [failure plan](./plans.md#failure-plans) recovers it,
+  the calling plan fails as well.
+- `agent.alsoAchieve(goal)` adds a goal that is pursued by a **new, concurrent intention**; the current plan
+  does not wait for it.
+
+```mermaid
+sequenceDiagram
+  participant I1 as Intention 1
+  participant E as Engine
+  participant I2 as Intention 2
+  I1->>E: agent.achieve(g1)
+  Note over I1: suspended
+  E->>E: select and run a plan for g1<br/>(same intention)
+  E-->>I1: g1 achieved (or its result)
+  I1->>E: agent.alsoAchieve(g2)
+  E->>I2: new intention for g2
+  Note over I1,I2: I1 continues without waiting
+```
+
+In a Prolog plan use `goal { }` to build the goal, so that bound variables are substituted:
 
 ```kotlin
-
-mas {
-    agent("Explorer") {
-        beliefs {
-            fact{ "batteryLevel"(80) }
-        }
-        goals { achieve("exploreTerrain") }
-
-        plans {
-            + achieve("exploreTerrain") onlyIf {
-                "batteryLevel"(X).fromSelf and (X greaterThanOrEqualsTo 30) and (Y `is` (X - 10))
-            } then {
-                execute("print"("I'm exploring... Battery level is now", Y))
-                update("batteryLevel"(Y).fromSelf) // Simulating battery drain
-                achieve("exploreTerrain")
-            }
-            + achieve("exploreTerrain") onlyIf { "batteryLevel"(X).fromSelf and (X lowerThan  30) } then {
-                execute("print"("Charging battery..."))
-                update("batteryLevel"(100).fromSelf)
-                execute("stop")
-            }
-        }
+prologPlan {
+    adding.goal {
+        matchingGoal { "tower"(logicList(X, Y, tail = T)) }
+    } triggers {
+        agent.achieve(goal { "tower"(logicList(Y, tail = T)) })
+        agent.achieve(goal { "on"(X, Y) })
     }
-}.start()
+}
 ```
 
-#### Expected Output:
+## Goals with results
+
+Plans are Kotlin functions, so they can return a value. `achieveWithResult` pursues a sub-goal and returns
+the value produced by the plan that achieved it:
+
+```kotlin
+adding.goal {
+    takeIf { it == "compute" }
+} triggers {
+    42
+}
+
+adding.goal {
+    takeIf { it == "start" }
+} triggers {
+    val result: Int = agent.achieveWithResult("compute")
+    agent.print("The result is $result")
+}
 ```
-[Explorer] I'm exploring... Battery level is now 70
-[Explorer] I'm exploring... Battery level is now 60
-[Explorer] I'm exploring... Battery level is now 50
-[Explorer] I'm exploring... Battery level is now 40
-[Explorer] I'm exploring... Battery level is now 30
-[Explorer] I'm exploring... Battery level is now 20
-[Explorer] Charging battery...
-```
+
+## Failure
+
+A goal fails when no plan is applicable for it, or when the plan pursuing it throws an exception.
+The failure generates a new event, which `failing.goal { }` plans can handle — see [Plans](./plans.md#failure-plans).
+
+If a failure plan handles it, whoever was waiting on the goal (e.g. an `agent.achieve(...)` call) resumes
+with the result of the failure plan. If no failure plan is applicable, or the failure plan fails too,
+the failure propagates to the waiting plan.

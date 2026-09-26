@@ -4,26 +4,31 @@ sidebar_position: 2
 
 # Quickstart
 
-## Extremely-Quick-Start -- `(ba|z|fi)?sh` users only
+The JaKtA repository ships runnable examples in the [`examples`](https://github.com/jakta-bdi/jakta/tree/main/examples) folder.
+Clone it and run them with Gradle:
 
-* requires a Unix terminal (`(ba|z|fi)?sh`)
-* `curl` must be installed
-* run
+```bash
+git clone https://github.com/jakta-bdi/jakta.git
+cd jakta
+./gradlew :examples:hello-world:run
 ```
-curl https://raw.githubusercontent.com/jakta-bdi/jakta-examples/main/jakta-example.sh | bash
-```
-* the repository is in your `Downloads` folder for further inspection
 
-## Quick-Start
-On a terminal, type the following commands:
-1. ```git clone https://github.com/jakta-bdi/jakta-examples.git```
-2. ```cd jakta-examples```
-3. Explore the `src` folder, containing examples implemented using `JaKtA` DSL. 
-Choose one file that you want to launch, for example `PingPong`.
-4. Depending on the platform, launch:
-   * Bash compatible (Linux, MacOS X, Git Bash, Cygwin): `./gradlew jaktaPingPong`
-   * Windows native (cmd.exe, Powershell): `gradlew.bat jaktaPingPong`
+## Available examples
 
-In addition, you can run `./gradlew tasks` (or `gradlew.bat tasks` if using Windows) to see all the available examples that you can run.
-JaKtA examples are visible under the `JaKtA examples tasks` section.
+| Example | Command | What it shows |
+|---|---|---|
+| [`hello-world`](https://github.com/jakta-bdi/jakta/tree/main/examples/hello-world) | `./gradlew :examples:hello-world:run` | A single Prolog agent with one goal and one plan that prints a message and stops the node. Walked through in [Writing a simple agent](./hello-world.md). |
+| [`blocksworld`](https://github.com/jakta-bdi/jakta/tree/main/examples/blocksworld) | `./gradlew :examples:blocksworld:run` | The classic blocks-world planner (ported from Jason) with a Compose Desktop UI: Prolog inference rules, guards, recursive sub-goals, custom [skills](../basic-concepts/skills.md) and perceptions. |
 
+## More examples in the test suites
+
+The test suites double as a catalogue of small, focused examples:
+
+- [`jakta-core/src/commonTest/.../dsl/examples`](https://github.com/jakta-bdi/jakta/tree/main/jakta-core/src/commonTest/kotlin/it/unibo/jakta/dsl/examples):
+  ping-pong messaging, belief addition and removal plans, plan failure, delays and concurrent intentions,
+  waiting for events, custom agent bodies and skills (`TestSpatialRobot`), adding and removing agents at runtime,
+  multi-node systems.
+- [`jakta-prolog-incarnation/src/commonTest`](https://github.com/jakta-bdi/jakta/tree/main/jakta-prolog-incarnation/src/commonTest/kotlin/it/unibo/jakta):
+  Prolog matching, guards, inference rules and [KQML messaging](../explanation/communication.md#kqml-messaging-prolog-incarnation).
+- [`alchemist-jakta-incarnation/src/test`](https://github.com/jakta-bdi/jakta/tree/main/alchemist-jakta-incarnation/src/test):
+  JaKtA agents running inside [Alchemist](../how-to/alchemist.md) simulations.

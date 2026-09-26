@@ -57,10 +57,10 @@ export default function FeaturesSection() {
         <p>Mix Functional and Object-Oriented programming within your MAS codebase</p>
       </FeatureCard>
       <FeatureCard Icon={MultiplatformIcon} title="Multi Platform">
-        <p>Write once, run on JVM, JS, Native, Android, and iOS</p>
+        <p>Write once, run on the JVM, in JavaScript (browser and Node.js), and natively on Linux, Windows, macOS and iOS</p>
       </FeatureCard>
       <FeatureCard Icon={ConfigurationIcon} title="Configurable">
-        <p>Control concurrency and knowledge representation models</p>
+        <p>Plug in the knowledge representation (Prolog, strings, or your own types) and the execution model, from coroutines to Alchemist simulations</p>
       </FeatureCard>
     </section>
   );

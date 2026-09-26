@@ -1,0 +1,37 @@
+.helloSection {
+  background: var(--ifm-card-background-color);
+  color: var(--ifm-font-color-base);
+  border-radius: 1.5rem;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.32);
+  width: 80%;
+  margin: 2rem auto 3rem auto;
+  padding: 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  scroll-margin-top: calc(var(--ifm-navbar-height) + 8rem + 10px);
+}
+
+.helloText {
+  flex: 1;
+  min-width: 280px;
+}
+
+.helloCode {
+  flex: 1.4;
+  min-width: 0;
+}
+
+.helloButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+@media (max-width: 996px) {
+  .helloSection {
+    width: calc(100% - 2rem);
+    flex-direction: column;
+    padding: 1.25rem;
+  }
+}

@@ -1,12 +1,10 @@
 import React from 'react';
-import * as citationJs from '@citation-js/core';
+import { Cite } from '@citation-js/core';
 import '@citation-js/plugin-bibtex';
 import '@citation-js/plugin-csl';
 
 // @ts-ignore
 import bibtexText from '!!raw-loader!../../../static/jakta-references.bib';
-
-const Cite = citationJs.Cite || (citationJs as any).default.Cite;
 
 const PublicationsList: React.FC = () => {
 	let sections: Record<string, string[]> = {};

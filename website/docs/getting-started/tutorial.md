@@ -4,137 +4,124 @@ sidebar_position: 5
 
 # Intermediate tutorial
 
-This section covers slightly more advanced concepts in JaKtA, 
-helping you build more sophisticated BDI agents. 
+This tutorial builds a two-agent *ping-pong* system. Along the way it shows how to:
+- use your own Kotlin types as beliefs and goals, without any incarnation;
+- turn incoming messages into beliefs;
+- react to belief additions with plans;
+- give agents a [skill](../basic-concepts/skills.md) — here, the ability to send messages.
 
-You will learn how to:
-- Implement agent communication.
-- Use event-driven behaviors.
+It only needs `jakta-core`.
 
-## Prerequisites
+## Beliefs and goals are just types
 
-Before proceeding, ensure you are familiar with:
+The engine is generic over the belief and goal types.
+Here goals are `String`s and a belief is a received message: its text and its sender.
 
-- Basic JaKtA agent creation (covered [here](hello-world.md)).
-- Kotlin programming fundamentals.
+```kotlin
+typealias Message = Pair<String, AgentID>
 
+val alice = BaseAgentID("Alice")
+val bob = BaseAgentID("Bob")
+```
 
-## 1. Agent Communication
+## From messages to beliefs
 
-Agents in JaKtA can communicate **directly** using messages. 
-The message exchange implementation is not provided by default from JaKtA by choice:
-users can inject their preferred message exchange frameworks in the Multi-Agent Systems.
+A message sent to an agent is an *external event*. The agent decides how to turn it into updates of its
+own state with `handlesMessageEvents`: return an `AgentUpdate` to accept it, or `null` to ignore it.
+Both agents behave in the same way, so let's write it once as an extension of the agent builder:
 
-
-```kt showLineNumbers
-fun main() {
-     mas {
-        environment{
-            actions {
-                action("send", 2) {
-                    val receiver: String = argument<Atom>(0).value
-                    val payload: Struct = argument(1)
-                    sendMessage(receiver, Message(this.sender, Achieve, payload))
-                }
-            }
+```kotlin
+fun AgentBuilder<Message, String, Any>.receivesTextMessages() {
+    embodiedAs { Any() }
+    handlesMessageEvents { message ->
+        when (val payload = message.payload) {
+            is String -> AgentUpdate.Belief(setOf(payload to message.sender), emptySet())
+            else -> null
         }
-
-        agent("sender") {
-            goals { achieve("sendMessage") }
-            plans {
-                + achieve("sendMessage") then {
-                    execute("send"("receiver", "handleMessage"("Hello!")))
-                    execute("print"("message sent!"))
-                }
-            }
-        }
-
-        agent("receiver") {
-            plans {
-                + achieve("handleMessage"(X)) then {
-                    execute("print"("Received message: ", X))
-                    execute("stop")
-                }
-            }
-        }
-    }.start()
+    }
 }
 ```
 
-### Expected behavior
+`AgentUpdate.Belief(additions, removals)` adds the belief `("Ping!", sender)`, which in turn generates
+a belief-addition event that plans can react to. Perceptions work the same way through `handlesPerceptionEvents`.
 
-The expected output is something similar to:
-```
-[receiver] Received message:  Hello!
-[sender] message sent!
-```
+## The agents
 
-### Deeper explanation
-
-More information about communication in JaKtA in [explanation](../explanation/communication.md).
-
-## 2. Event-Driven Behaviors
-
-JaKtA allows agents to react to dynamic environmental changes using plan triggers.
-
-```kt showLineNumbers
-fun main() {
-     mas {
-        environment(
-            // Custom implementation of the environment which models temperature
-            TemperatureEnvironment()
-        )
-        agent("reactiveAgent") {
-            plans {
-                +"temperature"(X).fromPercept onlyIf { X greaterThan 30 } then {
-                    execute("print"("Warning: High temperature detected!"))
+```kotlin
+fun main(): Unit = runBlocking {
+    mas(NodeBuilders.baseNode()) {
+        node {
+            context(MessagingSkill(node)) {
+                agent<Message, String>(bob) {
+                    receivesTextMessages()
+                    hasPlanLibrary {
+                        adding.belief {
+                            takeIf { it.first == "Ping!" }
+                        } triggers {
+                            val (text, sender) = context
+                            agent.print("Received \"$text\" from ${sender.displayName}")
+                            agent.sendTo(sender, "Pong!")
+                        }
+                    }
                 }
-
-                +"temperature"(X).fromPercept then {
-                    execute("print"("Temperature under the threshold"))
+                agent<Message, String>(alice) {
+                    receivesTextMessages()
+                    hasInitialGoals {
+                        !"sendPing"
+                    }
+                    hasPlanLibrary {
+                        adding.goal {
+                            takeIf { it == "sendPing" }
+                        } triggers {
+                            agent.sendTo(bob, "Ping!")
+                        }
+                        adding.belief {
+                            takeIf { it.first == "Pong!" }
+                        } triggers {
+                            agent.print("Got the pong, stopping.")
+                            node.terminateNode()
+                        }
+                    }
                 }
             }
         }
-    }.start()
+    }.runLocally()
 }
 ```
 
-### Expected Behavior
+A few things to notice:
 
-If the `temperature` belief changes to a value above 30, the console should print:
+- **Triggers are functions.** `adding.belief { ... }` receives the new belief and returns either `null`
+  (the plan is not relevant) or a *context* value. Here `takeIf` returns the belief itself.
+- **The context flows into the body.** Inside `triggers { }`, `context` is the value returned by the trigger,
+  so Bob can destructure it to find out who sent the ping.
+  Incarnations provide richer matching: in the [Prolog incarnation](../explanation/incarnations/prolog/index.md)
+  the context is the substitution produced by unification.
+- **Skills are context parameters.** `context(MessagingSkill(node)) { ... }` makes the messaging skill available
+  to every agent defined inside the block, and `agent.sendTo(...)` only compiles there.
+  See [Skills](../basic-concepts/skills.md) to write your own.
+
+## Imports
+
+```kotlin
+import it.unibo.jakta.agent.AgentID
+import it.unibo.jakta.agent.BaseAgentID
+import it.unibo.jakta.dsl.agent.AgentBuilder
+import it.unibo.jakta.dsl.mas
+import it.unibo.jakta.dsl.mas.runLocally
+import it.unibo.jakta.dsl.node.NodeBuilders
+import it.unibo.jakta.dsl.plan.triggers
+import it.unibo.jakta.event.AgentUpdate
+import it.unibo.jakta.skills.MessagingSkill
+import it.unibo.jakta.skills.sendTo
+import kotlinx.coroutines.runBlocking
 ```
-[reactiveAgent] Warning: High temperature detected!
-```
 
-### Deeper explanation
+## Going further
 
-More information about environments in JaKtA in [explanation](../explanation/environment.md)
+- The Prolog incarnation ships [KQML messaging](../explanation/communication.md#kqml-messaging-prolog-incarnation):
+  `tell`, `achieve`, `askOne`, ... with `[source(X)]` annotations on received beliefs.
+- The [`blocksworld`](https://github.com/jakta-bdi/jakta/tree/main/examples/blocksworld) example shows perceptions
+  coming from a world model and a custom skill to act on it.
 
-## Troubleshoot
-
-The MAS you defined is not behaving as expected?
-You can try using Kotlin debugger to inspect the runtime value of variables to identify the mistake.
-
-However, Kotlin debugger may be helpful only inside actions body.
-This happens because the DSL is executable Kotlin code,
-thus if inspected, the monitor would show you the DSL classes instead of the agency ones.
-
-We acknowledge this behavior mey be surprising for non-expert Kotlin users,
-and in future we plan to release an **inspector** that may help you in the development process.
-
-In the meanwhile,
-you can gather information about what's happening inside agents' lifecycle by declaring `debugEnabled` variable:
-```kt
-mas{ ... }.start(debugEnabled = true) 
-```
-
-Next Steps
-
-Experiment with different message types and performatives.
-
-Implement complex decision-making strategies.
-
-Integrate external APIs for more dynamic agent behaviors.
-
-For more examples, refer to JaKtA Examples.
-
+Next: [Tutorial: planning in the Blocks World](./blocks-world.md).
