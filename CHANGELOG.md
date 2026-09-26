@@ -1,3 +1,9 @@
+## [1.1.19](https://github.com/jakta-bdi/jakta/compare/1.1.18...1.1.19) (2026-09-26)
+
+### Bug Fixes
+
+* **deps:** update plugin com.gradle.develocity to v4.6.0 ([#950](https://github.com/jakta-bdi/jakta/issues/950)) ([03ee839](https://github.com/jakta-bdi/jakta/commit/03ee8393a066acc887a2e96a3ca584a460a0fb6d))
+
 ## [1.1.18](https://github.com/jakta-bdi/jakta/compare/1.1.17...1.1.18) (2026-09-26)
 
 ### Bug Fixes
