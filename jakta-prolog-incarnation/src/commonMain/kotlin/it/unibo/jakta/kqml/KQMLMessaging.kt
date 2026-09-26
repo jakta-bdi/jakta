@@ -143,7 +143,7 @@ suspend fun MutableAgentState<PrologBelief, PrologGoal>.askAllTo(
     query: Struct,
     timeout: Duration? = null,
 ): List<Substitution>? {
-    val message = AskOne(query)
+    val message = AskAll(query)
     kqmlSend(receiver, message)
     val eventFilter: (AgentEvent) -> List<Substitution>? = { event ->
         when (event) {
