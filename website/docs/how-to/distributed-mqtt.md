@@ -58,7 +58,7 @@ fun main(args: Array<String>) = runBlocking {
   (default `tcp://localhost:1883`). This is what each container does.
 
 The nodes wait for each other before starting their agents, so no message is lost while containers start.
-A container exits when its node terminates (`node.terminateNode()`).
+A container exits when its node terminates: with `node.terminateNode()`, or when its last agent is removed.
 
 ## Serialize payloads and filters
 
