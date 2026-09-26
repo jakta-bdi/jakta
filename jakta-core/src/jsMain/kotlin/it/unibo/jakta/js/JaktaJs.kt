@@ -76,10 +76,21 @@ fun setLogSeverity(severity: String) = Logger.setMinSeverity(Severity.valueOf(se
  * Runs the given [agents] on a single local node, resolving when the node terminates.
  */
 @JsExport
-fun runMas(agents: Array<JsAgent>): Promise<Unit> = GlobalScope.promise {
+fun runMas(agents: Array<JsAgentDefinition>): Promise<Unit> = GlobalScope.promise {
     mas(NodeBuilders.baseNode<Any>()) {
-        node { withAgents(*agents.map { it.toSpecification() }.toTypedArray()) }
+        node { withAgents(*agents.map { it.toJsAgent().toSpecification() }.toTypedArray()) }
     }.run(CoroutineNodeRunner(SharedMemoryNetwork()) { JsAgentLifecycle(BaseAgentLifecycle(it)) })
+}
+
+/**
+ * An agent that [runMas] can run: a [JsAgent], or an agent built by the facade of an incarnation (e.g., Prolog).
+ */
+@JsExport
+abstract class JsAgentDefinition {
+    /** The [JsAgent] this agent is built on. */
+    @JsExport.Ignore
+    @InternalJaktaAPI
+    abstract fun toJsAgent(): JsAgent
 }
 
 /**
@@ -87,7 +98,7 @@ fun runMas(agents: Array<JsAgent>): Promise<Unit> = GlobalScope.promise {
  * (compared with Kotlin equality, i.e. `===` for plain JS objects).
  */
 @JsExport
-class JsAgent internal constructor(private val name: String?) {
+class JsAgent internal constructor(private val name: String?) : JsAgentDefinition() {
     private val setup = mutableListOf<AgentBuilder<Any, Any, Any>.() -> Unit>()
 
     /** Adds [beliefs] to the initial beliefs. */
@@ -120,6 +131,17 @@ class JsAgent internal constructor(private val name: String?) {
     fun onGoalFailed(trigger: JsTrigger, body: JsPlanBody, guard: JsGuard? = null): JsAgent = apply {
         setup += { addGoalPlan(GoalFailurePlan(trigger, guard.toKotlin(), body.toKotlin(node), anyResult)) }
     }
+
+    /**
+     * Adds [block] to the agent setup, for facades of incarnations (e.g., Prolog) that build their own plans
+     * with [jsPlanBody].
+     */
+    @JsExport.Ignore
+    @InternalJaktaAPI
+    fun configure(block: AgentBuilder<Any, Any, Any>.() -> Unit): JsAgent = apply { setup += block }
+
+    @JsExport.Ignore
+    override fun toJsAgent(): JsAgent = this
 
     internal fun toSpecification(): (Node<Any>) -> AgentSpecification<Any, Any, Any> = agent(BaseAgentID(name)) {
         embodiedAs { Any() }
@@ -231,15 +253,25 @@ private val anyResult = typeOf<Unit>()
 private fun JsGuard?.toKotlin(): GuardScope<Any, Any>.() -> Any? =
     this?.let { guard -> { guard(JsGuardScope(beliefs.toTypedArray(), context)) } } ?: { context }
 
+private fun JsPlanBody.toKotlin(node: Node<Any>) = jsPlanBody(this, node) { it }
+
+/**
+ * Turns a (possibly `async`) JS [body] into a plan body, running it with the [JsPlanScope] adapted by [scope].
+ */
 // ponytail: only promises returned by JsPlanScope resume within a step: code after awaiting any other promise
 // (e.g., fetch) runs whenever the engine schedules it, even after the plan is stopped, unless wrapped in `external`.
-private fun JsPlanBody.toKotlin(node: Node<Any>): suspend context(Any)
-(PlanScope<Any, Any, Any>) -> Any? = { scope ->
+@InternalJaktaAPI
+fun <S> jsPlanBody(
+    body: (S) -> Any?,
+    node: Node<Any>,
+    scope: (JsPlanScope) -> S,
+): suspend context(Any)
+(PlanScope<Any, Any, Any>) -> Any? = { planScope ->
     // Launching `achieve` in the plan's own coroutine context keeps the Intention it needs.
     val intention = CoroutineScope(currentCoroutineContext())
     @Suppress("TooGenericExceptionCaught")
     try {
-        val result = this(JsPlanScope(scope.agent, node, intention, scope.context))
+        val result = body(scope(JsPlanScope(planScope.agent, node, intention, planScope.context)))
         if (result is Promise<*>) result.await() else result
     } catch (e: Throwable) {
         // A JS `Error` is not a Kotlin Exception: wrap it so the lifecycle handles it as a plan failure.
