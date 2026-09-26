@@ -56,6 +56,10 @@ const sidebars: SidebarsConfig = {
         { type: 'link', label: 'API Docs (older versions)', href: 'https://javadoc.io/doc/it.unibo.jakta' },
       ],
     },
+    {
+      type: 'doc',
+      id: 'jakta-0x',
+    },
   ],
    
 };

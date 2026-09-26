@@ -27,7 +27,8 @@ Starting from version 1.0.0 JaKtA has been rewritten from the ground up:
 
 :::info[Coming from JaKtA 0.x?]
 The 1.x DSL is not source-compatible with 0.x: `mas { ... }.start()`, `environment { }`, `actions { }`,
-`+achieve(...) onlyIf { } then { }` and friends are gone. The pages in this documentation describe the new API only.
+`+achieve(...) onlyIf { } then { }` and friends are gone. The pages in this documentation describe the new API only;
+see [JaKtA 0.x](./jakta-0x.md) for the old version and how its concepts map to 1.x.
 :::
 
 ## Architecture
