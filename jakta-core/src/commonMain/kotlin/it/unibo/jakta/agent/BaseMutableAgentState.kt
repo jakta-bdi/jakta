@@ -11,6 +11,7 @@ import it.unibo.jakta.event.AgentEvent.Internal
 import it.unibo.jakta.event.AgentUpdate
 import it.unibo.jakta.event.EventInbox
 import it.unibo.jakta.event.GoalAddEvent
+import it.unibo.jakta.event.GoalRemoveEvent
 import it.unibo.jakta.intention.BaseIntentionPool
 import it.unibo.jakta.intention.Intention
 import it.unibo.jakta.intention.MutableIntentionPool
@@ -58,6 +59,13 @@ internal class BaseMutableAgentState<Belief : Any, Goal : Any>(
     override val waitEventFilters: MutableMap<(AgentEvent) -> Any?, CompletableDeferred<*>> =
         mutableMapOf()
 
+    @InternalJaktaAPI
+    override val desires: MutableList<Desire<Goal>> = mutableListOf()
+
+    @OptIn(InternalJaktaAPI::class)
+    override val goals: Collection<Goal>
+        get() = desires.filter { it.job.isActive }.map { it.goal }
+
     private var _perceptionHandler: AgentState<Belief, Goal>.(Perception) -> AgentUpdate<*>? =
         initialAgentState.perceptionHandler
 
@@ -100,6 +108,10 @@ internal class BaseMutableAgentState<Belief : Any, Goal : Any>(
 
     override fun alsoAchieve(goal: Goal) {
         internalInbox.send(GoalAddEvent.withNoResult(goal))
+    }
+
+    override fun dropGoal(goal: Goal) {
+        internalInbox.send(GoalRemoveEvent.withNoResult(goal))
     }
 
     override fun believe(belief: Belief) {

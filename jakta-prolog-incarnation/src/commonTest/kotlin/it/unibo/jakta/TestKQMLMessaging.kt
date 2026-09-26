@@ -39,7 +39,6 @@ import it.unibo.jakta.skills.MessagingSkill
 import it.unibo.tuprolog.core.toAtom
 import it.unibo.tuprolog.solve.Solution
 import kotlin.test.BeforeTest
-import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.coroutineScope
@@ -192,8 +191,6 @@ class TestKQMLMessaging {
         run(aliceNode, bobNode)
     }
 
-    // TODO this is currently failing as the dropping of goals is not correctly implemented
-    @Ignore
     @Test
     fun `test unachieve`() = runTest {
         val aliceNode = masNode(alice) {
@@ -203,7 +200,8 @@ class TestKQMLMessaging {
                         adding.goal {
                             matchingGoal { startGoal }
                         } triggers {
-                            agent.print("Hello! Waiting for bob to start and then stop him")
+                            agent.print("Hello! Delegating a goal to bob and then stopping him")
+                            agent.delegateAchieveTo(bob, goal { delegatedGoal })
                             delay(3.seconds)
                             agent.sendUnachieveTo(bob, goalQuery { delegatedGoal })
                             node.terminateNode()
@@ -215,15 +213,6 @@ class TestKQMLMessaging {
 
         val bobNode = masNode(bob) {
             plans { node ->
-                prologPlan {
-                    adding.goal {
-                        matchingGoal { startGoal }
-                    } triggers {
-                        agent.print("Hello! I will start achieving the goal")
-                        agent.achieve(goal { delegatedGoal })
-                        node.terminateNode()
-                    }
-                }
                 prologPlan {
                     adding.goal {
                         matchingGoal { delegatedGoal[source(X)] }
@@ -239,6 +228,8 @@ class TestKQMLMessaging {
                         matchingGoal { delegatedGoal[source(X)] }
                     } triggers {
                         agent.print("Removing the goal. From ", X)
+                        delay(20.seconds) // the dropped plan would fail the node after 10 seconds
+                        node.terminateNode()
                     }
                 }
             }
