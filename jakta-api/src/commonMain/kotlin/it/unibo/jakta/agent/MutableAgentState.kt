@@ -28,6 +28,13 @@ interface MutableAgentState<Belief : Any, Goal : Any> :
     val waitEventFilters: MutableMap<(AgentEvent) -> Any?, CompletableDeferred<*>>
 
     /**
+     * The [Desire]s the agent is currently pursuing, in the order they were adopted.
+     * It is kept up to date by the [AgentLifecycle].
+     */
+    @InternalJaktaAPI
+    val desires: MutableList<Desire<Goal>>
+
+    /**
      * Modifies the perception handler function that defines which external events are of interest of the agent.
      * @param handler the new function handler the agent will use starting from next iteration of its lifecycle.
      */
@@ -66,6 +73,16 @@ interface MutableAgentState<Belief : Any, Goal : Any> :
      * @param[goal] The goal to be achieved.
      */
     fun alsoAchieve(goal: Goal)
+
+    /**
+     * Drops a goal the agent is pursuing (equal to [goal]), then handles its removal (if a removal plan exists).
+     * Dropping a top-level goal cancels its whole intention, including all its subgoals.
+     * Dropping a subgoal cancels it and its own subgoals, and fails the plan waiting for it
+     * with a [GoalDroppedException].
+     * The drop is processed as an event, so it applies to goals adopted before this call.
+     * @param[goal] The goal to be dropped.
+     */
+    fun dropGoal(goal: Goal)
 
     /**
      * Add the belief to the agent's belief base (eventually generating events).

@@ -1,6 +1,7 @@
 package it.unibo.jakta.agent
 
 import co.touchlab.kermit.Logger
+import it.unibo.jakta.InternalJaktaAPI
 import it.unibo.jakta.event.AgentEvent
 import it.unibo.jakta.event.AgentUpdate
 import it.unibo.jakta.event.GoalAddEvent
@@ -11,6 +12,7 @@ import it.unibo.jakta.plan.Plan
 import kotlin.coroutines.ContinuationInterceptor
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CompletableJob
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -22,6 +24,7 @@ import kotlinx.coroutines.launch
  * A base implementation of the [it.unibo.jakta.agent.AgentLifecycle] interface
  * that defines the core logic for handling agent events and executing plans.
  */
+@OptIn(InternalJaktaAPI::class)
 class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent: ExecutableAgent<Belief, Goal>) :
     AgentLifecycle<Belief, Goal> {
     private val log =
@@ -117,6 +120,7 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
     // TODO In order to be capable to complete the completion, i had to remove the star projection and put Any?
     //  This requires refactoring of type management
     private fun CoroutineScope.handleGoalEvent(event: AgentEvent.Internal.Goal<Goal, Any?>) {
+        if (event is AgentEvent.Internal.Goal.Remove<Goal, *>) dropDesires(event.goal)
         selectPlan(
             entity = event.goal,
             entityMessage = when (event) {
@@ -156,7 +160,7 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
         val interceptor =
             this.coroutineContext[ContinuationInterceptor] ?: error { "No ContinuationInterceptor in context" }
 
-        launch(IntentionDispatcher(interceptor) + intention + intention.job) {
+        val job = launch(IntentionDispatcher(interceptor) + intention + intention.job) {
             @Suppress("TooGenericExceptionCaught")
             try {
                 log.d { "Running plan $plan for event $event" }
@@ -168,8 +172,40 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
                 log.e("Goal failed for exception: ${e.message} ${e.stackTraceToString()}")
                 handleFailure(event, e)
             }
-        }.invokeOnCompletion {
+        }
+        // A new intention ends with the plan that created it (and the subgoals it pursues)
+        if (event.intention == null) (intention.job as? CompletableJob)?.complete()
+        // Removal plans only clean up after a goal, they do not pursue it.
+        val desire = (event as? AgentEvent.Internal.Goal<Goal, *>)
+            ?.takeIf { it !is AgentEvent.Internal.Goal.Remove<*, *> }
+            ?.let { Desire(it, intention, job) }
+            ?.also { executableAgent.state.desires += it }
+        job.invokeOnCompletion {
+            if (desire != null) executableAgent.state.desires -= desire
             log.d { "Plan Completed: $plan for event $event" }
+        }
+    }
+
+    /**
+     * Drops every desire pursuing [goal].
+     * A top-level goal is dropped by cancelling its whole intention.
+     * A subgoal is dropped by cancelling it and the subgoals stacked on top of it in its intention,
+     * and by failing the plan waiting for it.
+     */
+    private fun dropDesires(goal: Goal) {
+        executableAgent.state.desires.filter { it.goal == goal }.forEach { desire ->
+            if (!desire.job.isActive) return@forEach // already dropped along with another desire
+            log.i { "Dropping goal ${desire.goal} in intention ${desire.intention.id.displayId}" }
+            val completion = desire.event.completion
+            if (completion == null) {
+                desire.intention.job.cancel()
+            } else {
+                // ponytail: the subgoals of a desire are the ones adopted after it in the same intention,
+                //  which is wrong only if a plan body pursues subgoals concurrently (e.g. launch { achieve(..) }).
+                val stack = executableAgent.state.desires.filter { it.intention == desire.intention }
+                stack.drop(stack.indexOf(desire)).forEach { it.job.cancel() }
+                completion.completeExceptionally(GoalDroppedException(desire.goal))
+            }
         }
     }
 
@@ -264,9 +300,6 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
         additionsOnly.forEach { executableAgent.state.believe(it) }
     }
 
-    // TODO this should change to have a proper set of desires
-    //  for now I simply forward the goal addition and removal events
-    // TODO this has problems because goal removal is not actually stopping goals already in pursue.
     private fun handleGoalUpdateEvent(event: AgentUpdate.Goal<Goal>) {
         log.i { "Handling goal update event $event" }
         val additionsOnly = event.additions - event.removals

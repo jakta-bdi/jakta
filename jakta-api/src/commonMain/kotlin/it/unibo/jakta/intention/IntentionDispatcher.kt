@@ -37,7 +37,7 @@ import kotlinx.coroutines.job
  * A custom dispatcher for intentions, that enqueues the continuation of an intention instead of dispatching it.
  */
 @OptIn(InternalCoroutinesApi::class)
-class IntentionDispatcher(wrappedInterceptor: ContinuationInterceptor) :
+class IntentionDispatcher(private val wrappedInterceptor: ContinuationInterceptor) :
     CoroutineDispatcher(),
     Delay by (
         (wrappedInterceptor as? Delay)
@@ -57,6 +57,10 @@ class IntentionDispatcher(wrappedInterceptor: ContinuationInterceptor) :
         val currentIntention: Intention = context[Intention] as Intention
         if (currentIntention.job.isActive) {
             currentIntention.enqueue { block.run() }
+        } else {
+            // The intention is cancelled and will not step again: let the continuation run its cancellation
+            // on the wrapped dispatcher, otherwise the coroutine would never complete.
+            (wrappedInterceptor as? CoroutineDispatcher)?.dispatch(context, block) ?: block.run()
         }
     }
 }
