@@ -48,7 +48,7 @@ fun DependencyHandler.jakta(project: String) = project(":jakta-$project")
 fun Project.configureKotlinMultiplatform(
     includeNative: Boolean = true,
     targetJvm: JvmTarget = JvmTarget.JVM_1_8,
-    esModules: Boolean = true,
+    publishNpm: Boolean = false,
 ) {
     with(extensions.getByType<KotlinMultiplatformExtension>()) {
         jvm {
@@ -88,10 +88,10 @@ fun Project.configureKotlinMultiplatform(
             }
             binaries.library()
             // ES modules export the @JsExport-ed API flat (instead of nested under the package namespace).
-            if (esModules) {
-                useEsModules()
-                generateTypeScriptDefinitions()
-            }
+            useEsModules()
+            generateTypeScriptDefinitions()
+            // Exports Long as bigint: needed for the TypeScript definitions of 2p-kt's kt-math.
+            compilerOptions { freeCompilerArgs.add("-Xes-long-as-bigint") }
         }
         applyDefaultHierarchyTemplate()
         if (includeNative) {
@@ -129,7 +129,8 @@ fun Project.configureKotlinMultiplatform(
         }
 
     }
-    configureNpmPublishing()
+    // Only modules with a JS-friendly API are worth an npm package.
+    if (publishNpm) configureNpmPublishing()
 }
 
 private fun Project.configureNpmPublishing() {

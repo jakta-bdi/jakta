@@ -2,8 +2,7 @@ import de.aaschmid.gradle.plugins.cpd.Cpd
 
 apply(plugin = rootProject.libs.plugins.kotlin.multiplatform.id)
 
-// 2p-kt looks up its solver implementations at runtime in a way that fails under ES modules.
-configureKotlinMultiplatform(includeNative = false, esModules = false)
+configureKotlinMultiplatform(includeNative = false, publishNpm = true)
 
 kotlinMultiplatform {
     sourceSets {
