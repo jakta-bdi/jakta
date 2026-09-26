@@ -30,16 +30,6 @@ interface Node<Body : Any> {
     fun publishEvent(event: AgentEvent.External, filter: MessageFilter<Body> = AcceptAll)
 
     /**
-     * Publishes an external [event] that is delivered to all agents
-     * reachable by that node that satisfy the [filterFunction].
-     * @param event The external event to be sent.
-     * @param filterFunction A function that determines the conditions under which an agent should receive the event.
-     */
-    @Deprecated("Use a MessageFilter, which can be serialized to cross the network")
-    fun publishEvent(event: AgentEvent.External, filterFunction: Node<Body>.(Body) -> Boolean) =
-        publishEvent(event, MessageFilter { _, _, body -> filterFunction(body) })
-
-    /**
      * Adds a new agent to the node based on the provided [agentFactory].
      * @param agentFactory A function that creates an agent specification based on the node.
      */
