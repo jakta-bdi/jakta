@@ -8,7 +8,6 @@ import it.unibo.jakta.dsl.mas.runLocally
 import it.unibo.jakta.dsl.node.NodeBuilders
 import it.unibo.jakta.dsl.plan.triggers
 import kotlin.js.Promise
-import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlinx.coroutines.await
@@ -43,9 +42,6 @@ class TestKotlinParity {
         },
     )
 
-    // Diverges: the code after `await` runs from the JS microtask queue, after the agent handled the later events.
-    // Needs the lifecycle to wait for resumed JS code before its next event, which is a jakta-core change.
-    @Ignore
     @Test
     fun resumedCodeRunsBeforeLaterEvents() = assertParity(
         goals = listOf("g1", "g2"),
@@ -140,6 +136,29 @@ class TestKotlinParity {
     )
 
     @Test
+    fun cancellationWhileAwaitingExternal() = assertParity(
+        goals = listOf("long", "stop"),
+        kotlin = { log ->
+            hasPlanLibrary {
+                adding.goal { takeIf { it == "long" } } triggers {
+                    log += "before"
+                    realDelay(SLOW).await()
+                    log += "after"
+                }
+                adding.goal { takeIf { it == "stop" } } triggers {
+                    delay(SLOW / 2)
+                    log += "terminating"
+                    node.terminateNode()
+                }
+            }
+        },
+        js = { log ->
+            onGoalAdded({ if (it == "long") true else null }, jsBodies(log).externalTimerThenLog)
+                .onGoalAdded({ if (it == "stop") true else null }, jsBodies(log).delayThenTerminate)
+        },
+    )
+
+    @Test
     fun subgoalFailureIsCaught() = assertParity(
         goals = listOf("main"),
         kotlin = { log ->
@@ -210,6 +229,9 @@ class TestKotlinParity {
                 },
                 awaitThenLog: async (self) => {
                     log("g1:a"); await self.achieve("sub"); log("g1:b");
+                },
+                externalTimerThenLog: async (self) => {
+                    log("before"); await self.external(new Promise(r => setTimeout(r, 100))); log("after");
                 },
                 slow: async (self) => { await self.delay(100); },
                 delayThenLog: async (self) => {
