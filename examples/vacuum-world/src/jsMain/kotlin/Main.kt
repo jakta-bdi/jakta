@@ -3,17 +3,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.window.ComposeViewport
 import kotlinx.browser.document
-import ui.CleaningRobotsApp
-import ui.CleaningRobotsAppState
+import ui.VacuumWorldApp
+import ui.VacuumWorldAppState
 
 /**
- * Entry point of the Cleaning Robots web application.
+ * Entry point of the Vacuum World web application.
  */
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
     ComposeViewport(checkNotNull(document.body)) {
         MaterialTheme {
-            CleaningRobotsApp(remember { CleaningRobotsAppState() })
+            VacuumWorldApp(remember { VacuumWorldAppState() })
         }
     }
 }

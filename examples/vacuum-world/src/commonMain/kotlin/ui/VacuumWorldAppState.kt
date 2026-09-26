@@ -16,30 +16,29 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
-import marsNode
-import model.Mars
 import model.Pos
-import model.randomMars
+import model.VacuumWorld
+import model.defaultWorld
+import vacuumNode
 
-private const val SIZE = 7
-private const val GARBAGE = 6
-private const val DEFAULT_STEP_TIME_MS = 300
+private const val DEFAULT_STEP_TIME_MS = 250
+private const val DEFAULT_DUST_CHANCE = 0.05
 
 /**
- * State holder for the Cleaning Robots application: the planet and the robots' run.
+ * State holder for the Vacuum World application: the world and the robot's run.
  *
- * @property agentDispatcher where the robots run, off the UI thread on desktop.
+ * @property agentDispatcher where the robot runs, off the UI thread on desktop.
  */
-class CleaningRobotsAppState(private val agentDispatcher: CoroutineDispatcher = Dispatchers.Default) {
+class VacuumWorldAppState(private val agentDispatcher: CoroutineDispatcher = Dispatchers.Default) {
 
     init {
         AgentTrace.install()
     }
 
     /**
-     * The planet the robots clean.
+     * The world the robot cleans.
      */
-    var mars by mutableStateOf(Mars(randomMars(SIZE, GARBAGE)))
+    var world by mutableStateOf(VacuumWorld(defaultWorld()))
         private set
 
     /**
@@ -48,7 +47,12 @@ class CleaningRobotsAppState(private val agentDispatcher: CoroutineDispatcher = 
     var stepTime: Duration by mutableStateOf(DEFAULT_STEP_TIME_MS.milliseconds)
 
     /**
-     * Whether the robots are working.
+     * The probability that new dust appears after each robot action.
+     */
+    var dustChance by mutableStateOf(DEFAULT_DUST_CHANCE)
+
+    /**
+     * Whether the robot is working.
      */
     var isRunning by mutableStateOf(false)
         private set
@@ -56,35 +60,42 @@ class CleaningRobotsAppState(private val agentDispatcher: CoroutineDispatcher = 
     private var job: Job? = null
 
     /**
-     * Stops the robots, if working, and scatters new garbage.
+     * Stops the robot and restores the map with some fresh dust.
      */
     fun reset() {
-        job?.cancel()
-        job = null
-        isRunning = false
-        mars = Mars(randomMars(SIZE, GARBAGE))
+        stop()
+        world = VacuumWorld(defaultWorld())
     }
 
     /**
-     * Adds or removes garbage, also while the robots work.
+     * Adds or removes dust, also while the robot works.
      */
-    fun toggleGarbage(pos: Pos) = mars.toggleGarbage(pos)
+    fun toggleDust(pos: Pos) = world.toggleDust(pos)
 
     /**
-     * Sends the robots to work; r1 stops them once it has checked every slot.
+     * Stops the robot where it is.
+     */
+    fun stop() {
+        job?.cancel()
+        job = null
+        isRunning = false
+    }
+
+    /**
+     * Starts the robot, which keeps cleaning until stopped; it remembers nothing of previous runs.
      */
     fun start(scope: CoroutineScope) {
         if (isRunning) return
-        val currentMars = mars
+        val currentWorld = world
         AgentTrace.clear()
         isRunning = true
         val newJob = scope.launch(agentDispatcher, start = CoroutineStart.LAZY) {
             try {
                 mas(NodeBuilders.baseNode()) {
-                    marsNode(currentMars) { stepTime }
+                    vacuumNode(currentWorld, stepTime = { stepTime }, dustChance = { dustChance })
                 }.run(CoroutineNodeRunner(SharedMemoryNetwork()))
             } finally {
-                // a cancelled run must not flag a newer one as finished
+                // a stopped run must not flag a newer one as finished
                 if (job === coroutineContext.job) isRunning = false
             }
         }
