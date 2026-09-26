@@ -1,3 +1,9 @@
+## [1.1.18](https://github.com/jakta-bdi/jakta/compare/1.1.17...1.1.18) (2026-09-26)
+
+### Bug Fixes
+
+* **deps:** update gradle to v9.8.0 ([#949](https://github.com/jakta-bdi/jakta/issues/949)) ([2c79e2b](https://github.com/jakta-bdi/jakta/commit/2c79e2b7b4792af2f0fd04d3bad38f13a6422808))
+
 ## [1.1.17](https://github.com/jakta-bdi/jakta/compare/1.1.16...1.1.17) (2026-09-26)
 
 ### Bug Fixes
