@@ -54,10 +54,11 @@ The same agent in 1.x is shown in [Writing a simple agent](./getting-started/hel
 
 ## Resources
 
-- **Source code:** the last 0.x tag, [`v0.15.187`](https://github.com/jakta-bdi/jakta/tree/v0.15.187).
-- **Artifacts:** the last 0.x release on Maven Central is **0.15.1**
-  (`it.unibo.jakta:jakta-dsl`, `jakta-bdi`, `jakta-state-machine`).
-  Note that `jakta-dsl` is also the name of a 1.x module, so old projects must pin `0.15.1` explicitly.
+- **Version:** the last 0.x release is **0.15.1**, on Maven Central as `it.unibo.jakta:jakta-dsl`, `jakta-bdi`
+  and `jakta-state-machine`. `jakta-dsl` is also the name of a 1.x module, so pin `0.15.1` explicitly:
+  `implementation("it.unibo.jakta:jakta-dsl:0.15.1")`.
+- **Source code:** tag [`v0.15.1`](https://github.com/jakta-bdi/jakta/tree/v0.15.1). The later 0.15.x tags
+  (up to `v0.15.187`) were never published because of issues with the Maven Central releases, and contain no relevant changes.
 - **API docs:** [javadoc.io](https://javadoc.io/doc/it.unibo.jakta/jakta-dsl/0.15.1).
 - **Old documentation:** the source of the 0.x version of this website is
   [archived on GitHub](https://github.com/jakta-bdi/jakta-bdi.github.io/tree/60a0e9b/docs).
