@@ -55,6 +55,8 @@ class TestIntentionCleanup {
                             trace += "long cleanup"
                         }
                     }
+                    // the agent stopping is not an intentional removal of its goals
+                    removing.goal { ifGoalMatch("long") } triggers { trace += "long removed" }
                     adding.goal { ifGoalMatch("stop") } triggers {
                         delay(1.seconds)
                         node.terminateNode()

@@ -7,6 +7,7 @@ import it.unibo.jakta.event.AgentUpdate
 import it.unibo.jakta.event.GoalAddEvent
 import it.unibo.jakta.event.GoalFailedEvent
 import it.unibo.jakta.event.GoalRemoveEvent
+import it.unibo.jakta.intention.DropCancellation
 import it.unibo.jakta.intention.IntentionDispatcher
 import it.unibo.jakta.plan.Plan
 import kotlin.coroutines.ContinuationInterceptor
@@ -16,6 +17,7 @@ import kotlinx.coroutines.CompletableJob
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
@@ -52,12 +54,17 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
 
     override suspend fun stop() {
         agentJob.cancel()
-        // Plans resumed before the cancellation have their continuation queued in their intention, waiting for a
-        // step the stopped agent will not perform: run those steps here, so that the plans complete their cancellation.
-        generateSequence { executableAgent.events.tryNext() }
-            .filterIsInstance<AgentEvent.Internal.Step>()
-            .forEach { handleStepEvent(it) }
-        agentJob.join()
+        // The plans complete their cancellation on the steps of their intentions, which the agent no longer
+        // performs on its own: keep running them until all the plans have completed.
+        coroutineScope {
+            val steps = launch {
+                while (true) {
+                    (executableAgent.events.next() as? AgentEvent.Internal.Step)?.let { handleStepEvent(it) }
+                }
+            }
+            agentJob.join()
+            steps.cancel()
+        }
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -128,7 +135,8 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
     // TODO In order to be capable to complete the completion, i had to remove the star projection and put Any?
     //  This requires refactoring of type management
     private fun CoroutineScope.handleGoalEvent(event: AgentEvent.Internal.Goal<Goal, Any?>) {
-        if (event is AgentEvent.Internal.Goal.Remove<Goal, *>) dropDesires(event.goal)
+        // A removal event requests to drop the goal: its removal plans are triggered as its plans complete
+        if (event is AgentEvent.Internal.Goal.Remove<Goal, *>) return dropDesires(event.goal)
         selectPlan(
             entity = event.goal,
             entityMessage = when (event) {
@@ -188,17 +196,31 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
             ?.takeIf { it !is AgentEvent.Internal.Goal.Remove<*, *> }
             ?.let { Desire(it, intention, job) }
             ?.also { executableAgent.state.desires += it }
-        job.invokeOnCompletion {
-            if (desire != null) executableAgent.state.desires -= desire
+        job.invokeOnCompletion { cause ->
             log.d { "Plan Completed: $plan for event $event" }
+            if (desire != null) {
+                executableAgent.state.desires -= desire
+                // Removal plans handle intentional removals, while failure plans handle unexpected failures
+                if (cause is DropCancellation) launchRemovalPlan(desire.goal)
+            }
         }
     }
 
+    private fun CoroutineScope.launchRemovalPlan(goal: Goal) {
+        selectPlan(
+            entity = goal,
+            entityMessage = "removal of goal",
+            planList = executableAgent.state.goalPlans,
+            relevantFilter = { it is Plan.Goal.Removal<Belief, Goal, *, *> && it.isRelevant(goal) },
+            applicableFilter = { it.isApplicable(executableAgent.state.beliefs, goal) },
+        )?.let { launchPlan(GoalRemoveEvent.withNoResult(goal), goal, it) }
+    }
+
     /**
-     * Drops every desire pursuing [goal].
+     * Drops every desire pursuing [goal], triggering the removal plans of all the dropped goals.
      * A top-level goal is dropped by cancelling its whole intention.
      * A subgoal is dropped by cancelling it and the subgoals stacked on top of it in its intention,
-     * and by failing the plan waiting for it.
+     * and by failing the plan waiting for it (which triggers the failure plans of the parent).
      */
     private fun dropDesires(goal: Goal) {
         executableAgent.state.desires.filter { it.goal == goal }.forEach { desire ->
@@ -211,7 +233,8 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
                 // ponytail: the subgoals of a desire are the ones adopted after it in the same intention,
                 //  which is wrong only if a plan body pursues subgoals concurrently (e.g. launch { achieve(..) }).
                 val stack = executableAgent.state.desires.filter { it.intention == desire.intention }
-                stack.drop(stack.indexOf(desire)).forEach { it.job.cancel() }
+                val cause = DropCancellation("Goal ${desire.goal} has been dropped")
+                stack.drop(stack.indexOf(desire)).forEach { it.job.cancel(cause) }
                 completion.completeExceptionally(GoalDroppedException(desire.goal))
             }
         }
