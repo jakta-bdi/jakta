@@ -5,6 +5,7 @@ kermit = "2.2.0"
 kotlin = "2.4.10"
 alchemist = "43.1.5"
 tuprolog = "2.0.5"
+tesserakt = "0.4.0"
 publish-central = "9.2.12"
 
 
@@ -26,6 +27,9 @@ tuprolog-dsl-unify = { module = "it.unibo.tuprolog:dsl-unify", version.ref = "tu
 tuprolog-dsl-theory = { module = "it.unibo.tuprolog:dsl-theory", version.ref = "tuprolog" }
 tuprolog-serialize-core = { module = "it.unibo.tuprolog:serialize-core", version.ref = "tuprolog" }
 
+tesserakt-rdf = { module = "io.github.tomwindels:tesserakt-rdf", version.ref = "tesserakt" }
+tesserakt-sparql = { module = "io.github.tomwindels:tesserakt-sparql", version.ref = "tesserakt" }
+tesserakt-serialization-turtle = { module = "io.github.tomwindels:tesserakt-serialization-turtle", version.ref = "tesserakt" }
 
 tuprolog-unify = { module = "it.unibo.tuprolog:unify", version.ref = "tuprolog" }
 
