@@ -227,8 +227,8 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
             if (completion == null) {
                 executableAgent.state.mutableIntentionPool.drop(desire.intention.id)
             } else {
-                // ponytail: the subgoals of a desire are the ones adopted after it in the same intention,
-                //  which is wrong only if a plan body pursues subgoals concurrently (e.g. launch { achieve(..) }).
+                // The subgoals of a desire are the ones adopted after it in the same intention, since an intention
+                // pursues its subgoals one at a time (parallel achieves in a plan body are not supported).
                 val stack = executableAgent.state.desires.filter { it.intention == desire.intention }
                 val cause = DropCancellation("Goal ${desire.goal} has been dropped")
                 stack.drop(stack.indexOf(desire)).forEach { it.job.cancel(cause) }
