@@ -1,3 +1,9 @@
+## [1.1.22](https://github.com/jakta-bdi/jakta/compare/1.1.21...1.1.22) (2026-09-29)
+
+### Bug Fixes
+
+* **deps:** update danysk/build-check-deploy-gradle-action action to v4.0.48 ([#965](https://github.com/jakta-bdi/jakta/issues/965)) ([f4b3d4a](https://github.com/jakta-bdi/jakta/commit/f4b3d4a4bd8afca5ace815701705f6ca029f9310))
+
 ## [1.1.21](https://github.com/jakta-bdi/jakta/compare/1.1.20...1.1.21) (2026-09-29)
 
 ### Bug Fixes
