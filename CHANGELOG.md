@@ -1,3 +1,18 @@
+## [1.1.24](https://github.com/jakta-bdi/jakta/compare/1.1.23...1.1.24) (2026-09-30)
+
+### Bug Fixes
+
+* **deps:** update kotlin to v2.4.20 and tuprolog to v2.0.9 ([#959](https://github.com/jakta-bdi/jakta/issues/959)) ([250f6ef](https://github.com/jakta-bdi/jakta/commit/250f6ef4c9173ec1c5ef1154d231d854209a6d99))
+* **deps:** update plugin npm-publish to v4.1.11 ([#896](https://github.com/jakta-bdi/jakta/issues/896)) ([9e535b2](https://github.com/jakta-bdi/jakta/commit/9e535b285b3a3bd70776f622150e0deb401ab4e4))
+
+### Build and continuous integration
+
+* release only for runtime dependency updates ([#956](https://github.com/jakta-bdi/jakta/issues/956)) ([6418c8f](https://github.com/jakta-bdi/jakta/commit/6418c8f787d6519cd38ce50c1e9442550d9a2e72))
+
+### General maintenance
+
+* **codacy:** exclude test sources from detekt analysis ([#957](https://github.com/jakta-bdi/jakta/issues/957)) ([8c53420](https://github.com/jakta-bdi/jakta/commit/8c534205c07d543e5a378f4fc3b27f7fc008ec4f))
+
 ## [1.1.23](https://github.com/jakta-bdi/jakta/compare/1.1.22...1.1.23) (2026-09-30)
 
 ### Bug Fixes
