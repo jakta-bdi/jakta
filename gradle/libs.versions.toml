@@ -49,7 +49,7 @@ gitSemVer = { id = "org.danilopianini.git-sensitive-semantic-versioning", versio
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-qa = { id = "org.danilopianini.gradle-kotlin-qa", version = "1.10.0" }
-kover = "org.jetbrains.kotlinx.kover:0.9.10"
+kover = "org.jetbrains.kotlinx.kover:0.9.11"
 multiJvmTesting = { id = "org.danilopianini.multi-jvm-test-plugin", version = "4.5.7" }
 npm-publish = "org.danilopianini.npm.publish:4.1.5"
 publishOnCentral =  { id = "org.danilopianini.publish-on-central", version.ref = "publish-central" }
