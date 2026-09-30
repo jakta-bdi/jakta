@@ -30,7 +30,7 @@ class AlchemistDispatcher<P : Position<P>>(private val alchemistEnvironment: Env
     }
 
     override fun scheduleResumeAfterDelay(timeMillis: Long, continuation: CancellableContinuation<Unit>) {
-        val targetTime = alchemistEnvironment.simulation.time.toDouble() + (timeMillis / 1000)
+        val targetTime = alchemistEnvironment.simulation.time.toDouble() + (timeMillis / 1000.0)
         queue.add(
             ScheduledTask(targetTime) {
                 continuation.resume(Unit)
