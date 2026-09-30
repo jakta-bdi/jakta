@@ -1,20 +1,29 @@
+variables:
+  messaging: &messaging
+    type: ArbitraryVariable
+    parameters: [ global, [ global, neighborhood ] ]
+  range: &range
+    type: ArbitraryVariable
+    parameters: [ 5, [ 5, 10 ] ]
+
 network-model:
   type: ConnectWithinDistance
-  parameters: [ 5 ]
+  parameters: [ *range ]
 
 incarnation: jakta
 
-_pool: &program
-  - program:
-      entrypoint: it.unibo.jakta.test.TwoAgentsSameNode.entrypoint
-
+# The two nodes are ~6.4 apart
 deployments:
   - type: Point
     parameters: [ 2, 2 ]
     programs:
-      - program: it.unibo.jakta.test.TwoAgentsTwoNodes.entrypointNodeOne
+      - program:
+          entrypoint: it.unibo.jakta.test.TwoAgentsTwoNodes.entrypointNodeOne
+          messaging: *messaging
 
   - type: Point
     parameters: [ 6, 7 ]
     programs:
-      - program: it.unibo.jakta.test.TwoAgentsTwoNodes.entrypointNodeTwo
+      - program:
+          entrypoint: it.unibo.jakta.test.TwoAgentsTwoNodes.entrypointNodeTwo
+          messaging: *messaging

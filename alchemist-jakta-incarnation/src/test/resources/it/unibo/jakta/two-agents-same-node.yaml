@@ -4,10 +4,6 @@ network-model:
 
 incarnation: jakta
 
-_pool: &program
-  - program:
-      entrypoint: it.unibo.jakta.test.TwoAgentsSameNode.entrypoint
-
 deployments:
   - type: Point
     parameters: [ 2, 2 ]
