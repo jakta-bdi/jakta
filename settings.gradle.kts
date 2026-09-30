@@ -43,4 +43,5 @@ include(
     "jakta-llm-incarnation",
     "examples:blocksworld",
     "examples:hello-world",
+    "examples:llm-smart-home",
 )
