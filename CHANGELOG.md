@@ -1,3 +1,9 @@
+## [1.1.23](https://github.com/jakta-bdi/jakta/compare/1.1.22...1.1.23) (2026-09-30)
+
+### Bug Fixes
+
+* **core-deps:** update plugin kover to v0.9.11 ([#966](https://github.com/jakta-bdi/jakta/issues/966)) ([74d12d6](https://github.com/jakta-bdi/jakta/commit/74d12d6e510bff8907e9b9c2034e0e33ec1f25e5))
+
 ## [1.1.22](https://github.com/jakta-bdi/jakta/compare/1.1.21...1.1.22) (2026-09-29)
 
 ### Bug Fixes
