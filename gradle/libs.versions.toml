@@ -2,6 +2,7 @@
 coroutines = "1.11.0"
 dokka = "2.2.0"
 kermit = "2.2.0"
+koog = "1.3.0"
 kotlin = "2.4.20"
 alchemist = "43.1.5"
 tuprolog = "2.0.9"
@@ -17,6 +18,9 @@ kotlinx-coroutines-core = {module = "org.jetbrains.kotlinx:kotlinx-coroutines-co
 kotlinx-coroutines-test = {module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref="coroutines"}
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 caffeine = "com.github.ben-manes.caffeine:caffeine:3.3.0"
+koog-agents-test = { module = "ai.koog:agents-test", version.ref = "koog" }
+koog-http-client-ktor = { module = "ai.koog:http-client-ktor", version.ref = "koog" }
+koog-prompt-executor-model = { module = "ai.koog:prompt-executor-model", version.ref = "koog" }
 
 tuprolog-core = { module = "it.unibo.tuprolog:core", version.ref = "tuprolog" }
 tuprolog-solve-classic = { module = "it.unibo.tuprolog:solve-classic", version.ref = "tuprolog" }
@@ -48,6 +52,7 @@ dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 gitSemVer = { id = "org.danilopianini.git-sensitive-semantic-versioning", version = "7.0.24" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 kotlin-qa = { id = "org.danilopianini.gradle-kotlin-qa", version = "1.10.0" }
 kover = "org.jetbrains.kotlinx.kover:0.9.11"
 multiJvmTesting = { id = "org.danilopianini.multi-jvm-test-plugin", version = "4.5.7" }
