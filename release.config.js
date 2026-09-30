@@ -7,6 +7,9 @@ NEXT_RELEASE_VERSION=\${nextRelease.version} node scripts/generate-release-blog-
 `
 
 var config = require('semantic-release-preconfigured-conventional-commits');
+// Documentation (website, Dokka) is deployed on its own: do not cut a release for it
+var analyzer = config.plugins.find(p => p[0] === "@semantic-release/commit-analyzer")[1];
+analyzer.releaseRules = analyzer.releaseRules.filter(rule => rule.type !== "docs");
 config.plugins.push(
     [
         "@semantic-release/exec",
