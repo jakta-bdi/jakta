@@ -1,3 +1,39 @@
+## [1.1.23](https://github.com/jakta-bdi/jakta/compare/1.1.22...1.1.23) (2026-09-30)
+
+### Bug Fixes
+
+* **core-deps:** update plugin kover to v0.9.11 ([#966](https://github.com/jakta-bdi/jakta/issues/966)) ([74d12d6](https://github.com/jakta-bdi/jakta/commit/74d12d6e510bff8907e9b9c2034e0e33ec1f25e5))
+
+## [1.1.22](https://github.com/jakta-bdi/jakta/compare/1.1.21...1.1.22) (2026-09-29)
+
+### Bug Fixes
+
+* **deps:** update danysk/build-check-deploy-gradle-action action to v4.0.48 ([#965](https://github.com/jakta-bdi/jakta/issues/965)) ([f4b3d4a](https://github.com/jakta-bdi/jakta/commit/f4b3d4a4bd8afca5ace815701705f6ca029f9310))
+
+## [1.1.21](https://github.com/jakta-bdi/jakta/compare/1.1.20...1.1.21) (2026-09-29)
+
+### Bug Fixes
+
+* **core-deps:** update plugin kover to v0.9.10 ([#964](https://github.com/jakta-bdi/jakta/issues/964)) ([bd9217c](https://github.com/jakta-bdi/jakta/commit/bd9217c39687fbc963e85b1c011c371d8c2c3883))
+
+## [1.1.20](https://github.com/jakta-bdi/jakta/compare/1.1.19...1.1.20) (2026-09-27)
+
+### Bug Fixes
+
+* **deps:** update plugin kotlin-qa to v1.10.0 ([#963](https://github.com/jakta-bdi/jakta/issues/963)) ([a6bb662](https://github.com/jakta-bdi/jakta/commit/a6bb6626b8c4cef2afe56eb50b01b2d1d74e5202))
+
+## [1.1.19](https://github.com/jakta-bdi/jakta/compare/1.1.18...1.1.19) (2026-09-26)
+
+### Bug Fixes
+
+* **deps:** update plugin com.gradle.develocity to v4.6.0 ([#950](https://github.com/jakta-bdi/jakta/issues/950)) ([03ee839](https://github.com/jakta-bdi/jakta/commit/03ee8393a066acc887a2e96a3ca584a460a0fb6d))
+
+## [1.1.18](https://github.com/jakta-bdi/jakta/compare/1.1.17...1.1.18) (2026-09-26)
+
+### Bug Fixes
+
+* **deps:** update gradle to v9.8.0 ([#949](https://github.com/jakta-bdi/jakta/issues/949)) ([2c79e2b](https://github.com/jakta-bdi/jakta/commit/2c79e2b7b4792af2f0fd04d3bad38f13a6422808))
+
 ## [1.1.17](https://github.com/jakta-bdi/jakta/compare/1.1.16...1.1.17) (2026-09-26)
 
 ### Bug Fixes
