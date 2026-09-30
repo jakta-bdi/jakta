@@ -33,6 +33,7 @@ kotlinJvm {
         val test by getting {
             dependencies {
                 implementation(kotlin("test"))
+                implementation(libs.alchemist.euclidean.geometry)
             }
         }
     }
