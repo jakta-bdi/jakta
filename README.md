@@ -75,8 +75,8 @@ fun main(): Unit = runBlocking {
 
 ## Documentation
 
-- User documentation: https://jakta-bdi.github.io/
-- API reference of the latest release: https://jakta-bdi.github.io/api/ (older versions on [javadoc.io](https://javadoc.io/doc/it.unibo.jakta))
+- User documentation: <https://jakta-bdi.github.io/>
+- API reference of the latest release: <https://jakta-bdi.github.io/api/> (older versions on [javadoc.io](https://javadoc.io/doc/it.unibo.jakta))
 
 ## Usage examples
 

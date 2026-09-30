@@ -85,6 +85,7 @@ publish the resulting perceptions.
 ## Managing agents at runtime
 
 From a plan body or a skill:
+
 - `node.addAgent(agentFactory)` adds a new agent built with `agent { }`;
 - `node.removeAgent(id)` removes an agent;
 - `node.terminateNode()` stops the node and all its agents.
@@ -92,6 +93,7 @@ From a plan body or a skill:
 ## Running
 
 A `NodeRunner` executes the nodes of a MAS:
+
 - `CoroutineNodeRunner(SharedMemoryNetwork())` runs every agent on coroutines, with all nodes in the same process
   sharing memory for message delivery. `runLocally()` is a shorthand for it.
 - The [Alchemist incarnation](../how-to/alchemist.md) runs nodes as simulated devices, with simulated time.

@@ -55,6 +55,7 @@ fun main(): Unit = runBlocking {
 ### The agent
 
 `agent<Belief, Goal, Body> { ... }` defines an agent specification. The three type parameters are:
+
 - `PrologBelief` and `PrologGoal`, the belief and goal types fixed by the Prolog incarnation;
 - `Any`, the type of the agent **body** — the agent's embodiment in the node it lives in.
   `embodiedAs { Any() }` creates it. This agent needs no body, so any object will do.
@@ -69,6 +70,7 @@ The `!` operator adds a goal, like `!` in AgentSpeak. See [Goals](../basic-conce
 ### Plans
 
 `hasPlanLibrary { }` contains the agent's [plans](../basic-concepts/plans.md). A plan has:
+
 - a **trigger** — `adding.goal { matchingGoal { helloGoal } }` fires when the goal `sayHello` is added;
 - an optional **guard** — `onlyWhen { ... }`, omitted here;
 - a **body** — the `triggers { }` block, a `suspend` lambda of ordinary Kotlin code.

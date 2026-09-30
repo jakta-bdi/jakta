@@ -54,7 +54,7 @@ If you want to use your own belief and goal types, `jakta-core` alone is enough.
 
 ## Source layout
 
-```
+```text
 jakta/
 ├── jakta-api/                     # contracts
 ├── jakta-dsl/                     # DSL interfaces

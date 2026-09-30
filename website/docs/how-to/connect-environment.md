@@ -126,7 +126,7 @@ fun main(): Unit = runBlocking {
 
 Output:
 
-```
+```text
 It's 17°C, heating
 It's 18°C, heating
 It's 19°C, heating

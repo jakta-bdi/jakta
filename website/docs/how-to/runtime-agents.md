@@ -62,7 +62,7 @@ fun main(): Unit = runBlocking {
 
 Output:
 
-```
+```text
 Worker started
 Agents: [Manager, Worker]
 Agents: [Manager]

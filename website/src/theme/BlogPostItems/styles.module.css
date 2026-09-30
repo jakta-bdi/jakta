@@ -50,7 +50,8 @@
   margin-bottom: 0.4rem;
 }
 
-.card header h2 a {
+.card header h2 a,
+.release header h2 a {
   color: var(--ifm-heading-color);
 }
 
@@ -137,10 +138,6 @@
 .release header h2 {
   font-size: 1.1rem;
   margin: 0;
-}
-
-.release header h2 a {
-  color: var(--ifm-heading-color);
 }
 
 .release header > div:first-of-type {

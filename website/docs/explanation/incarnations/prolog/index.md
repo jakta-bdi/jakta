@@ -1,11 +1,11 @@
 ---
-title: Prolog Incarnation
 sidebar_label: Overview
 ---
 
 # Prolog Incarnation
 
 `jakta-prolog-incarnation` is the closest thing to Jason in JaKtA:
+
 - beliefs are Prolog **facts and rules**;
 - goals are Prolog **terms**;
 - triggers and guards work by **unification**, so a plan can match `on(X, Y)` and use `X` and `Y` in its body.

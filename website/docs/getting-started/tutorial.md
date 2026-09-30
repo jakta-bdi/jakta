@@ -5,6 +5,7 @@ sidebar_position: 5
 # Intermediate tutorial
 
 This tutorial builds a two-agent *ping-pong* system. Along the way it shows how to:
+
 - use your own Kotlin types as beliefs and goals, without any incarnation;
 - turn incoming messages into beliefs;
 - react to belief additions with plans;

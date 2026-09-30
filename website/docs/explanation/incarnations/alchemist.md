@@ -1,5 +1,4 @@
 ---
-title: Alchemist Incarnation
 sidebar_position: 3
 ---
 

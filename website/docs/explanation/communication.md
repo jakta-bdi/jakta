@@ -10,6 +10,7 @@ received messages affect its state.
 ## Sending messages
 
 `MessagingSkill(node)` (in `jakta-core`) provides:
+
 - `agent.sendTo(receiver, payload)` to send a message to an agent, and
 - `agent.broadcast(payload)` to send it to every agent.
 

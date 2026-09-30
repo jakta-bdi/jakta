@@ -79,7 +79,7 @@ fun main(): Unit = runBlocking {
 
 Output:
 
-```
+```text
 Hello, bob!
 I don't greet strangers like eve
 ```

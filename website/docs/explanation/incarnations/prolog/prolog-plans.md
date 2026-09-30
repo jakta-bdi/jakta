@@ -1,5 +1,4 @@
 ---
-title: Prolog Plans
 sidebar_position: 2
 ---
 

@@ -1,5 +1,4 @@
 ---
-title: Incarnations in JaKtA
 sidebar_label: Overview
 ---
 

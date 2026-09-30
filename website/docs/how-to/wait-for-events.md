@@ -92,7 +92,7 @@ fun main(): Unit = runBlocking {
 
 Output:
 
-```
+```text
 Waiting for the parcel...
 Parcel received!
 Celebrating, concurrently

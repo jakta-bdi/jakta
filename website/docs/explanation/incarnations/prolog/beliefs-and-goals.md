@@ -1,5 +1,4 @@
 ---
-title: Beliefs, Goals and Annotations
 sidebar_position: 3
 ---
 
@@ -25,6 +24,7 @@ If `P` were unbound, `belief { }` would throw instead.
 ## Annotations and sources
 
 As in Jason, terms can carry **annotations**, written with `[...]`. The main one is `source(...)`:
+
 - beliefs and goals an agent creates itself count as `[source(self)]`;
 - beliefs told by another agent, and goals it delegated, get `[source(sender)]`.
 

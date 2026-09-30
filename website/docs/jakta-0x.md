@@ -1,5 +1,4 @@
 ---
-title: JaKtA 0.x (deprecated)
 sidebar_label: JaKtA 0.x (deprecated)
 ---
 

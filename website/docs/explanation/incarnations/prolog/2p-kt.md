@@ -1,5 +1,4 @@
 ---
-title: 2P-Kt Integration and Syntax
 sidebar_label: 2P-Kt integration
 sidebar_position: 1
 ---

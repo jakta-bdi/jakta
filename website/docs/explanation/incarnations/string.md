@@ -1,5 +1,4 @@
 ---
-title: String Incarnation
 sidebar_position: 2
 ---
 
@@ -32,6 +31,7 @@ agent {
 ## What it provides
 
 All in `it.unibo.jakta.belief`:
+
 - `ifGoalMatches(text)`: a trigger that matches a goal or belief *equal* to `text`;
 - `matchesRegex(regex)`: a trigger that matches strings *containing* a match of `regex`;
 - `containsBeliefMatching(text)`: a guard that holds when `text` is in the belief base.

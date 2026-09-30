@@ -32,6 +32,7 @@ flowchart TB
 ## One queue per agent
 
 Every agent (`BaseAgent.kt`) owns a **single FIFO event queue**. It is exposed as two inboxes:
+
 - the **internal inbox**, where the agent itself posts belief events, goal events and intention steps;
 - the **external inbox**, where the node delivers perceptions and messages.
 
@@ -79,6 +80,7 @@ flowchart LR
   Order your plans from the most specific to the most general (see the [Blocks World tutorial](../getting-started/blocks-world.md#4-the-plans)).
 
 If no plan is selected:
+
 - for a **goal addition**, the goal **fails** (see [Failure](#failure-handling));
 - for a **belief event** or a goal removal, the event is just logged and dropped. Belief changes without a matching plan are normal.
 
@@ -111,6 +113,7 @@ sequenceDiagram
 ```
 
 As a consequence:
+
 - **Agents are reactive while plans suspend.** During a `delay(...)` or while waiting for a sub-goal, the agent keeps
   processing perceptions, messages and other intentions.
 - **Intentions interleave step by step.** Between two suspension points a plan body runs without interruption, and
@@ -167,6 +170,7 @@ A MAS (`BaseMasBuilder.kt`) runs each of its nodes concurrently with the given `
 all nodes have terminated.
 
 `CoroutineNodeRunner` (`CoroutineNodeRunner.kt`) runs a node as follows:
+
 - it subscribes the node to a `NodeNetwork` and forwards the node's **system events** to it:
   agent additions and removals, messages, shutdown requests;
 - it receives system events from the network, lets the node handle them, and reacts to them:
