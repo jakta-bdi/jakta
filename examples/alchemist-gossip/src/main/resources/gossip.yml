@@ -1,0 +1,47 @@
+incarnation: jakta
+
+environment:
+  type: Continuous2DEnvironment
+
+seeds:
+  scenario: 0
+  simulation: 0
+
+variables:
+  messaging: &messaging
+    type: ArbitraryVariable
+    parameters: [ neighborhood, [ neighborhood, global ] ]
+
+# A 10x10 grid with unit spacing, slightly perturbed: each node is linked to its (diagonal) neighbors
+network-model:
+  type: ConnectWithinDistance
+  parameters: [ 1.5 ]
+
+deployments:
+  - type: Grid
+    parameters: [ 0, 0, 10, 10, 1, 1, 0.1, 0.1 ]
+    contents:
+      - in: { type: Rectangle, parameters: [ -0.5, -0.5, 1, 1 ] }
+        molecule: source
+        concentration: true
+    programs:
+      - time-distribution: { type: ExponentialTime, parameters: [ 1 ] }
+        program:
+          entrypoint: Gossip.entrypoint
+          messaging: *messaging
+
+terminate:
+  - type: AfterTime
+    parameters: [ 50 ]
+
+export:
+  - type: CSVExporter
+    parameters:
+      fileNameRoot: gossip
+      interval: 1.0
+      exportPath: build/exports
+    data:
+      - time
+      - molecule: informed
+        aggregators: [ sum ]
+        value-filter: onlyfinite
