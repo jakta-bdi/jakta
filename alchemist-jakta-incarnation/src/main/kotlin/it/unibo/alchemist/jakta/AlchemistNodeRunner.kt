@@ -70,6 +70,7 @@ class AlchemistNodeRunner<P : Position<P>, N : ExecutableNode<*>>(
                         running.values.forEach { pending ->
                             simulation.error.ifPresentOrElse(pending::completeExceptionally) { pending.complete(Unit) }
                         }
+                        running.clear()
                     }
                 },
             )
