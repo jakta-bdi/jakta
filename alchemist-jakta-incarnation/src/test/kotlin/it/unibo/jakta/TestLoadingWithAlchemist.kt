@@ -29,7 +29,9 @@ class TestLoadingWithAlchemist {
 
     @Test
     fun testCommunicationInSameNode() {
-        assertTrue(run("two-agents-same-node").contains(PONG))
+        val environment = run("two-agents-same-node").environment
+        // as read by Alchemist exporters, with no property
+        assertEquals(1.0, environment.incarnation.getProperty(environment.nodes.single(), PONG, null))
     }
 
     @Test
