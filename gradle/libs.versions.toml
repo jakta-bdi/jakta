@@ -2,9 +2,9 @@
 coroutines = "1.11.0"
 dokka = "2.2.0"
 kermit = "2.2.0"
-kotlin = "2.4.10"
+kotlin = "2.4.20"
 alchemist = "43.1.5"
-tuprolog = "2.0.5"
+tuprolog = "2.0.9"
 publish-central = "9.2.12"
 
 
