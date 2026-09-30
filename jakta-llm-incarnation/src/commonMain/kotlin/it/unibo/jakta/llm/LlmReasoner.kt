@@ -1,11 +1,17 @@
 package it.unibo.jakta.llm
 
 import ai.koog.agents.core.tools.annotations.LLMDescription
+import ai.koog.prompt.Prompt
 import ai.koog.prompt.dsl.prompt
 import ai.koog.prompt.executor.model.PromptExecutor
 import ai.koog.prompt.executor.model.executeStructured
+import ai.koog.prompt.llm.LLMCapability
 import ai.koog.prompt.llm.LLModel
+import ai.koog.prompt.params.LLMParams
 import co.touchlab.kermit.Logger
+import kotlin.concurrent.atomics.AtomicInt
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
+import kotlin.concurrent.atomics.incrementAndFetch
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -13,13 +19,24 @@ import kotlinx.serialization.Serializable
  * Does, with a language [model] reached through a Koog [executor], the reasoning that other incarnations do
  * with matching and unification, on beliefs and goals written in natural language.
  * Every method is a single structured-output call; malformed answers and executor errors are thrown.
+ * Since the LLM may send a goal back to the plan that posted it, looping forever, calls beyond [maxCalls] throw too.
  *
  * Put it in scope with `with(LlmReasoner(executor, model)) { agent { ... } }` to use
  * [llmPlans], [test] and [revise].
  */
-class LlmReasoner(private val executor: PromptExecutor, private val model: LLModel) {
+@OptIn(ExperimentalAtomicApi::class)
+class LlmReasoner(
+    private val executor: PromptExecutor,
+    private val model: LLModel,
+    private val maxCalls: Int = Int.MAX_VALUE,
+) {
 
     private val log = Logger.withTag("LlmReasoner")
+
+    private val calls = AtomicInt(0)
+
+    // As deterministic as the model allows (e.g., GPT-5 models accept no temperature)
+    private val params = LLMParams(temperature = 0.0.takeIf { model.supports(LLMCapability.Temperature) })
 
     /**
      * Returns the first of the [plans] that is relevant for the [event] (e.g. `goal added: "greet bob"`)
@@ -50,11 +67,11 @@ class LlmReasoner(private val executor: PromptExecutor, private val model: LLMod
     internal suspend fun contradicted(belief: String, beliefs: Collection<String>): List<String> {
         if (beliefs.isEmpty()) return emptyList()
         val numbered = beliefs.toList()
-        val request = prompt("jakta-llm-revise") {
+        val request = prompt("jakta-llm-revise", params) {
             system(REVISE)
             user("${numbered("Beliefs", numbered)}\nNew belief: \"$belief\"")
         }
-        val revision = executor.executeStructured<Revision>(request, model).getOrThrow().data
+        val revision = ask<Revision>(request)
         log.d { "New belief \"$belief\" contradicts ${revision.contradicted} (${revision.reason})" }
         require(revision.contradicted.all { it in 1..numbered.size }) {
             "The LLM retracted beliefs ${revision.contradicted}, but only 1 to ${numbered.size} exist"
@@ -74,11 +91,14 @@ class LlmReasoner(private val executor: PromptExecutor, private val model: LLMod
         options: List<String>,
         parameters: (Int) -> Set<String>,
     ): Pair<Int, Map<String, String>>? {
-        val request = prompt("jakta-llm-choose") {
-            system(instructions)
-            user("${numbered("Beliefs", beliefs)}\n$question\n${numbered("Options", options)}")
+        val described = options.mapIndexed { i, option ->
+            option + parameters(i).takeIf { it.isNotEmpty() }?.joinToString(prefix = "; parameters: ").orEmpty()
         }
-        val choice = executor.executeStructured<Choice>(request, model).getOrThrow().data
+        val request = prompt("jakta-llm-choose", params) {
+            system(instructions)
+            user("${numbered("Beliefs", beliefs)}\n$question\n${numbered("Options", described)}")
+        }
+        val choice = ask<Choice>(request)
         log.d { "$question -> option ${choice.option} ${choice.bindings} (${choice.reason})" }
         if (choice.option == 0) return null
         require(choice.option in 1..options.size) {
@@ -91,16 +111,22 @@ class LlmReasoner(private val executor: PromptExecutor, private val model: LLMod
         return index to bindings
     }
 
+    private suspend inline fun <reified T> ask(request: Prompt): T {
+        check(calls.incrementAndFetch() <= maxCalls) { "The budget of $maxCalls LLM calls is exhausted" }
+        return executor.executeStructured<T>(request, model).getOrThrow().data
+    }
+
     private companion object {
         const val BASE = "You are the reasoning engine of a BDI agent. " +
             "Its beliefs, events, plans and conditions are written in natural language. " +
             "A statement is true when the beliefs state or clearly imply it: do not assume anything else. " +
-            "Words in curly braces, like {name}, are parameters: for the option you choose, give every parameter " +
-            "the value it takes in the event or in the beliefs, without the braces. "
+            "Words in curly braces, like {name}, are parameters: for the option you choose, give one binding " +
+            "to each of its parameters, whose value is what the parameter stands for in the event or in the beliefs. "
 
         const val SELECT_PLAN = BASE +
-            "A plan is relevant when the event is an instance of its trigger, and applicable when it is relevant " +
-            "and its condition, if any, is true. " +
+            "A plan is relevant when the event matches its trigger: the event is, means, or asks for what the " +
+            "trigger describes, possibly in other words, with its parameters taking specific values. " +
+            "A relevant plan is applicable when its condition, if any, is true. " +
             "Choose the first applicable plan, answering with its number, or with 0 if no plan is applicable."
 
         const val TEST = BASE + "Answer 1 if the statement of option 1 is true, 0 otherwise."

@@ -5,6 +5,7 @@ import ai.koog.prompt.executor.clients.openai.OpenAIModels
 import ai.koog.prompt.executor.model.PromptExecutor
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
+import it.unibo.jakta.agent.achieve
 import it.unibo.jakta.dsl.mas
 import it.unibo.jakta.dsl.node.NodeBuilders
 import it.unibo.jakta.dsl.plan.PlanLibraryBuilder
@@ -43,13 +44,14 @@ class TestLlmIncarnation {
         beliefs: List<String> = emptyList(),
         goal: String,
         expected: List<String>,
+        maxCalls: Int = Int.MAX_VALUE,
         plans: context(NodeTerminationSkill, LlmReasoner) PlanLibraryBuilder<String, String>.() -> Unit,
     ): TestResult = runTest {
         launch {
             mas(NodeBuilders.baseNode()) {
                 node {
                     // A model with native structured output, so Koog sends the prompt unchanged to the mock.
-                    context(NodeTerminationSkill(node), LlmReasoner(executor, OpenAIModels.Chat.GPT5_6Luna)) {
+                    context(NodeTerminationSkill(node), LlmReasoner(executor, OpenAIModels.Chat.GPT5_6Luna, maxCalls)) {
                         agent {
                             embodiedAs { Any() }
                             believes { beliefs.forEach { +it } }
@@ -77,8 +79,8 @@ class TestLlmIncarnation {
             1. Bob is a friend
             Event: goal added: "say hi to Bob"
             Options:
-            1. trigger: "greet {name}"; condition: "{name} is an enemy"
-            2. trigger: "greet {name}"; condition: "{name} is a friend"
+            1. trigger: "greet {name}"; condition: "{name} is an enemy"; parameters: name
+            2. trigger: "greet {name}"; condition: "{name} is a friend"; parameters: name
         """.trimIndent()
         return runMas(executor, listOf("Bob is a friend"), "say hi to Bob", expected = listOf("Hello, Bob!")) {
             llmPlans {
@@ -169,6 +171,18 @@ class TestLlmIncarnation {
                 log += agent.beliefs.toList().toString()
                 terminateNode()
             }
+        }
+    }
+
+    @Test
+    fun `the call budget stops a goal that the LLM keeps sending back to the same plan`(): TestResult {
+        val executor = getMockExecutor { mockLLMAnswer(choice(1)).asDefaultResponse }
+        return runMas(executor, goal = "loop", expected = listOf("failed: loop"), maxCalls = 3) {
+            failing.goal { this } triggers {
+                log += "failed: $context"
+                terminateNode()
+            }
+            llmPlans { goal("loop") { agent.achieve(context.event) } }
         }
     }
 }
