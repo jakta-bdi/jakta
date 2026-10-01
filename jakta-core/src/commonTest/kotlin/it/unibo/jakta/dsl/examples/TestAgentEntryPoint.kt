@@ -18,6 +18,7 @@ import it.unibo.jakta.skills.MessagingSkill
 import it.unibo.jakta.skills.sendTo
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlinx.coroutines.test.TestResult
 import kotlinx.coroutines.test.runTest
 
 class TestAgentEntryPoint {
@@ -65,23 +66,21 @@ class TestAgentEntryPoint {
     }
 
     @Test
-    fun testWithAgentConfigurationSyntax() {
-        runTest {
-            mas(NodeBuilders.baseNode()) {
-                node {
-                    withAgents(alice)
+    fun testWithAgentConfigurationSyntax(): TestResult = runTest {
+        mas(NodeBuilders.baseNode()) {
+            node {
+                withAgents(alice)
+            }
+            node {
+                context(MessagingSkill(node)) {
+                    withAgents(bob)
                 }
-                node {
-                    context(MessagingSkill(node)) {
-                        withAgents(bob)
-                    }
-                }
-            }.run(CoroutineNodeRunner(SharedMemoryNetwork()))
-        }
+            }
+        }.run(CoroutineNodeRunner(SharedMemoryNetwork()))
     }
 
     @Test
-    fun testPlansEntryPoint() {
+    fun testPlansEntryPoint(): TestResult {
         val myCustomPlans = plans<String, String, Any> { node ->
             adding.goal {
                 ifGoalMatch("hello")
@@ -109,7 +108,7 @@ class TestAgentEntryPoint {
             withPredefinedPlans(myCustomPlans, myOtherPlans)
         }
 
-        runTest {
+        return runTest {
             mas(NodeBuilders.baseNode()) {
                 node {
                     withAgents(myAgent)
