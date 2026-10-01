@@ -1,33 +1,29 @@
 # Exploration: an LLM incarnation of JaKtA with Koog
 
-Branch `feat/llm-incarnation`. New modules:
+Branch `feat/llm-incarnation`.
 
-- `jakta-llm-incarnation`: the incarnation (JVM + JS);
-- `examples:llm-smart-home`: a runnable example and a live-LLM test, skipped unless a provider is configured.
+- `jakta-llm-incarnation`: the incarnation (JVM only, see [section 3](#3-v3-design-current)).
+- `examples:llm-smart-home`: a runnable example, and a live-LLM test that is skipped unless a provider is configured.
+- No change to `jakta-api`, `jakta-dsl` or `jakta-core`.
 
-Beliefs and goals are `String`s. Plans have natural-language triggers and conditions with `{parameters}`.
-One structured-output LLM call per event picks the plan and fills in its parameters.
+Beliefs and goals are `String`s. Plans are **ordinary JaKtA plans**. Their triggers and guards are written in
+natural language with `{parameters}`, and match literally or, through a language model, by meaning. The engine's
+own plan selection tries them in order and runs the first applicable one, blocking the agent while the LLM answers.
 
 ```kotlin
-with(LlmReasoner(executor, model, maxCalls = 20)) {
+with(LlmReasoner(executor, model, maxQuestions = 100)) {
     agent<String, String, Any> {
         embodiedAs { Any() }
-        believes { +"the living room window is open"; +"the heating is off" }
-        hasInitialGoals { !"Brr, it's freezing in here!" }
+        believes { +"Bob is a friend" }
+        hasInitialGoals { !"say hi to Bob" }
         hasPlanLibrary {
-            llmPlans {
-                goal("make the room warmer", onlyWhen = "a window is open") {
-                    agent.forget("the living room window is open")
-                    agent.believe("the living room window is closed")
-                    agent.achieve("set the heating to 21 degrees")
-                }
-                goal("set the heating to {degrees} degrees") {
-                    revise("the heating is set to ${context["degrees"]} degrees") // LLM belief revision
-                }
-                belief("the temperature is {degrees} degrees") { /* ... */ }
-                failure("{request}") { agent.print("Sorry, I cannot ${context["request"]}") }
+            adding.goal { meaning("greet {name}") } onlyWhen { holds("{name} is an enemy") } triggers { /* ... */ }
+            adding.goal { meaning("greet {name}") } onlyWhen { holds("{name} is a friend") } triggers {
+                agent.print("Hello, ${context["name"]}!")     // "say hi to Bob" means "greet {name}", name = Bob
+                test("{name} is at home")                       // LLM test goal on the beliefs: bindings or null
+                revise("Bob was greeted")                       // forgets the beliefs it contradicts, then believes it
             }
-            // test("the door is {state}") in any body: an LLM test goal, returns the bindings or null
+            failing.goal { meaning("{task}") } triggers { agent.print("I cannot ${context["task"]}") }
         }
     }
 }
@@ -39,153 +35,154 @@ with(LlmReasoner(executor, model, maxCalls = 20)) {
 |---|---|
 | Version | **1.3.0** (GitHub release and Maven Central, 2026-09-24; 1.2.0 was 2026-08-28). |
 | Built with | Kotlin 2.3.10. It works from this repo's Kotlin 2.4.20, which the root build forces on every `org.jetbrains.kotlin` dependency. |
-| JVM | Bytecode is **Java 17** (class version 61). The module uses `configureKotlinMultiplatform(targetJvm = JVM_17)`, while the other modules target 1.8. Otherwise inlining `executeStructured` fails. |
+| JVM | Bytecode is **Java 17** (class version 61). The module targets JVM 17, like `alchemist-jakta-incarnation`, while the other modules target 1.8. Otherwise inlining `executeStructured` fails. |
 | Published targets | `jvm`, `js` (IR), `wasmJs`, `android`, `iosArm64`, `iosX64`, `iosSimulatorArm64`. |
-| Missing targets | **No `linuxX64`, `linuxArm64`, `mingwX64`, `macosArm64`**, which `jakta-api/core/string-incarnation` build for. The module therefore uses `includeNative = false` (JVM + JS, like the Prolog and RDF incarnations). Koog does support wasmJs and iOS, but the JaKtA build doesn't enable those targets, so I skipped them. |
+| Missing targets | **No `linuxX64`, `linuxArm64`, `mingwX64`, `macosArm64`**, which `jakta-api/core/string-incarnation` build for. v2 was JVM + JS; v3 blocks on the LLM calls, which JS cannot do, so it is a JVM-only module. |
 
 Artifacts (group `ai.koog`):
 
-- `prompt-executor-model`: the only dependency of the incarnation (`api`). It provides `PromptExecutor`, the `prompt {}` DSL, `executeStructured<T>`, `LLModel`, `LLMCapability` and `LLMParams`, plus `@LLMDescription` through `agents-tools`. On the JVM it also brings the OpenAI, Anthropic and Ollama clients and Ktor CIO.
-- `agents-test`: test only. `getMockExecutor { mockLLMAnswer(json) onRequestContains "..." / onCondition { } / asDefaultResponse }`. It matches on the text of the **last** message of the prompt.
+- `prompt-executor-model`: the incarnation's only dependency (`api`). It provides `PromptExecutor`, the `prompt {}` DSL, `executeStructured<T>`, `LLModel`, `LLMCapability` and `LLMParams`, plus `@LLMDescription` through `agents-tools`. On the JVM it also brings the OpenAI, Anthropic and Ollama clients and Ktor CIO.
+- `agents-test`: test only. `getMockExecutor { mockLLMAnswer(json) onCondition { ... } / onRequestContains "..." / asDefaultResponse }` matches on the text of the **last** prompt message.
 - `http-client-ktor`: runtime only, in the example. The JVM clients built without a factory (e.g. `OpenAILLMClient(key)`) find their HTTP client through `ServiceLoader`.
-- `prompt-executor-llms-all` (`simpleOpenAIExecutor`, `simpleAnthropicExecutor`, `simpleOllamaAIExecutor`) is **published only as `1.3.0-beta`**. I avoided it: `MultiLLMPromptExecutor(OpenAILLMClient(key))` gives the same result. On JS, the `simple*` and client constructors need an explicit `KoogHttpClient.Factory`.
+- `prompt-executor-llms-all` (`simpleOpenAIExecutor`, ...) is published only as `1.3.0-beta`. I avoided it: `MultiLLMPromptExecutor(OpenAILLMClient(key))` is equivalent. On JS, clients need an explicit `KoogHttpClient.Factory`.
 
-API notes that differ from older docs and from memory:
+API notes:
 
 - `PromptExecutor.execute(...)` returns a single `Message.Assistant`, not a list.
-- `executeStructured<T>(prompt, model)` returns a `Result<StructuredResponse<T>>`. It uses native JSON-schema output if the `LLModel` declares `Schema.JSON.Standard` or `Basic`. Otherwise it uses "manual" mode, which **appends a user message** with format instructions. That's why the offline tests use `OpenAIModels.Chat.GPT5_6Luna` (native): the mock then sees the prompt unchanged.
-- Model capabilities are data on the `LLModel`, so a model declared without `Temperature` should not get a temperature. I haven't checked whether every client filters it out, so the incarnation sends `temperature = 0` only when the model declares the capability.
-
-Available but not used (each is a drop-in when needed):
-
-- Tool calling (`ToolDescriptor`, `agents-tools`). One structured answer per event fits plan selection better than a tool loop.
-- Embeddings: `embeddings-base` `Embedder.embed(text): Vector` / `diff`, and `embeddings-llm` `LLMEmbedder(client, model)`. This is the natural cheap pre-filter.
-- Caching: `prompt-executor-cached` `CachedPromptExecutor(cache, nested)`. It wraps any executor with no change to the incarnation.
-- Robustness: `StructureFixingParser` (a second LLM call repairs malformed JSON) and `MultiLLMPromptExecutor` fallback settings.
+- `executeStructured<T>(prompt, model)` returns a `Result<StructuredResponse<T>>`. It uses native JSON-schema output when the `LLModel` declares `Schema.JSON.Standard` or `Basic`. Otherwise it uses "manual" mode, which **appends a user message** with format instructions. The offline tests therefore use a native model (`OpenAIModels.Chat.GPT5_6Luna`), so the mock sees the prompt unchanged.
+- Capabilities are data on the `LLModel`. The incarnation sends `temperature = 0` only when the model declares `Temperature` (GPT-5 models don't).
+- Available but unused, each a drop-in:
+  - `CachedPromptExecutor(InMemoryPromptCache(n), executor)` from `prompt-executor-cached`. Its keys exclude timestamps, but are 32-bit hashes.
+  - Embeddings: `Embedder` / `LLMEmbedder`.
+  - Tool calling.
+  - `StructureFixingParser`, which repairs malformed JSON with a second call.
 
 ## 2. How JaKtA incarnations work
 
-- `jakta-api` and `jakta-core` are generic over `Belief`, `Goal` and `Body`. A plan is a synchronous `trigger: (Entity) -> Context?`, a synchronous `guard: GuardScope<Belief, Context>.() -> Context?`, and a `suspend` body receiving the `Context`.
-- `BaseAgentLifecycle.selectPlan` runs *synchronously in the agent loop*. It filters the plans of the event's kind by `isRelevant` (trigger non-null and result type compatible), then by `isApplicable` (guard non-null), and takes the first. When nothing applies, a goal addition becomes a `GoalFailedEvent`, a failure completes the waiting `achieve` exceptionally, and a belief event is logged.
-- The **string incarnation** matches by equality or regex, and no data reaches the body.
-- The **Prolog incarnation** unifies terms and carries a `MutableSubstitutionPlanContext` from trigger to guard to body. Its guards call a Prolog solver, and KQML handles messaging.
+- `jakta-api` and `jakta-core` are generic over `Belief`, `Goal` and `Body`. A plan has three parts:
+  - a `trigger: (Entity) -> Context?`;
+  - a `guard: GuardScope<Belief, Context>.() -> Context?`;
+  - a `suspend` body receiving the `Context`.
+- Incarnations provide trigger and guard helpers:
+  - string: `ifGoalMatches`, `containsBeliefMatching`;
+  - Prolog: unification, `satisfies { }` through a solver, plus KQML messaging;
+  - RDF: SPARQL patterns.
+- On `main`, triggers and guards are **synchronous**. The lifecycle selects a plan synchronously in the agent loop:
+  1. filter the plans by kind and `isRelevant`;
+  2. filter those by `isApplicable`;
+  3. take the first.
+- Then `run(agent, entity)` evaluates the trigger and the guard **again** to compute the context. In total, the selected plan's trigger runs 3 times and its guard 2 times.
 
-## 3. Design
+## 3. v3 design (current)
 
-### The central constraint
+v1 worked around synchronous triggers with wrapper plans ([section 4](#4-superseded-designs)). v2 made triggers and guards `suspend` in core. On review, you asked to keep the API and to block in the selection instead: v3 does that, with **no core change**.
 
-Triggers and guards are **synchronous and evaluated one plan at a time**, while an LLM call is `suspend`, slow and costly. I considered three options:
+### Blocking selection
 
-1. **Make triggers and guards `suspend` in core.** This is the principled fix, but it's an API change across `jakta-api`, `jakta-core` and every incarnation, and it would stall the agent loop on the network anyway. Out of scope.
-2. **`runBlocking` inside guards.** This doesn't exist on JS, blocks the agent loop, and costs one call per candidate plan. Rejected.
-3. **Chosen: one dispatcher plan per event kind.** `llmPlans { }` registers one ordinary JaKtA plan for each of *goal added*, *belief added* and *goal failed*, but only for the kinds that have LLM plans. Each dispatcher is relevant for every event of its kind. Its body is `suspend` and runs inside the intention, so the agent keeps processing other events while the LLM answers. The body makes **one** structured-output call over the beliefs, the event and all the LLM plans of that kind (batching for free), then runs the chosen plan's body with an `LlmContext(event, bindings)`.
+- `meaning` and `holds` are ordinary (non-suspend) trigger and guard helpers. When the text does not match literally, they call the LLM inside `runBlocking`, so the agent's thread waits for the answer while the engine selects the plan.
+- **JVM only**: JS has a single thread and no `runBlocking`, so a synchronous trigger cannot wait for an HTTP response there. The module is now a plain Kotlin/JVM module (`src/main`, `src/test`), like the Alchemist incarnation.
+- **Errors do not hold**: on `main`, an exception thrown by a trigger or guard propagates out of the agent loop. So a malformed answer, an executor error or an exhausted budget makes the trigger or guard return null (logged as an error). If no plan is left, the goal fails and failure plans run, as before. `test` and `revise` run in plan bodies, so they still throw and fail the plan.
+- **Remembered answers**: the engine evaluates the selected plan's trigger 3 times and its guard twice (`isRelevant`, `isApplicable`, then `run`). `LlmReasoner` remembers its latest 100 answers, keyed by the full question (for guards, it includes the beliefs). So the LLM is asked once per distinct question, and the repeated evaluations get the same answer, instead of failing with "Execution not possible without a plan context" when the model changes its mind.
+- **Budget**: `maxQuestions` (was `maxCalls`) counts every question, including those answered from memory. Otherwise a plan that the LLM matches to its own subgoal would loop forever for free, since every iteration repeats a remembered question. The budget is consumed about 3 times faster than the LLM calls it caps.
 
-Consequences:
+### The incarnation
 
-- Semantics match JaKtA's first-applicable rule, but "first" is judged by the LLM over the numbered list.
-- Ordinary JaKtA plans declared *before* `llmPlans` take precedence, and those after it are shadowed for that kind. They can be mixed: the example handles failures with a plain `failing.goal { this }`, so failures cost no LLM call.
-- LLM plans return `Unit`, because a dispatcher has one result type. `achieveWithResult<T>` isn't supported.
+- **`String.meaning(template)`** is a trigger helper. It holds when the goal or belief matches the template, e.g. `"greet {name}"`.
+  1. **Literally first**: `literalMatch` turns the template into an anchored regex with one `(.+?)` per parameter, so `"set the heating to 21 degrees"` binds `degrees = 21`. This needs no LLM call.
+  2. Otherwise **by meaning**: one structured call asks whether the event matches the trigger and requests a binding for each parameter.
+  It returns an `LlmContext(event, bindings)`, or null.
+- **`GuardScope.holds(condition)`** is a guard helper. It replaces the bound parameters (`"{name} is a friend"` becomes `"Bob is a friend"`), then checks:
+  1. whether that is literally one of the beliefs, possibly binding the remaining parameters, like a Prolog fact lookup;
+  2. otherwise, by asking whether the beliefs state or clearly imply it.
+  It returns the context extended with any new bindings, or null.
+- **`PlanScope.test(condition)`** is an LLM test goal in plan bodies, with the same literal-first logic. It returns the bindings, or null.
+- **`PlanScope.revise(belief)`** asks which current beliefs the new one contradicts or makes obsolete, forgets them, and believes the new one. It's explicit: `agent.believe` still adds a belief without revision.
+- **Answer format**: every question gets a structured `Answer(reason, holds, bindings: [{parameter, value}])`. A list rather than a map, so OpenAI strict schemas accept it.
+  - Validation: if `holds` is true, every parameter of the template must be bound, or the answer is invalid (the trigger or guard does not hold, `test` throws). Extra bindings are dropped.
+  - Revision answers carry belief numbers, which must be in range.
+- **Budget**: `LlmReasoner(executor, model, maxQuestions = Int.MAX_VALUE)`, see above. Past the budget, triggers and guards do not hold and `test`/`revise` throw, so goals fail instead of looping.
 
-### Bindings: the "unification"
+**Per-plan flags (v1's open question 1)**: this is now inherent. Each plan's trigger and guard are separate yes-or-no questions with their own validated answer, and the engine picks the first applicable plan in declaration order. That restores Jason ordering, so a well-formed answer that is wrong for one plan no longer changes which later plan runs.
 
-Parameters are written inside the text, as in `"set the heating to {degrees} degrees"`. The prompt lists each option's parameters, and the LLM returns `bindings: [{parameter, value}]`. A condition can introduce parameters that are bound from the beliefs, as a Prolog guard can.
+### Cost
 
-I used a list of objects rather than a map because it works with strict JSON schemas (OpenAI strict mode rejects open maps). Values are strings, and the body converts them.
+For one event, the engine on `main` evaluates the trigger of **every** plan of the event's kind, then the guard of every relevant plan, before taking the first applicable one (it does not stop at the first, unlike v2). Thanks to the remembered answers, the LLM is asked at most one question per distinct trigger and one per distinct guard. The calls are sequential, and literal matches are free.
 
-### Queries and belief revision
+Plans sharing a trigger share the question: the first offline test shows it, with the trigger asked once for two plans. Ordering still matters for cost: in the example, the specific `set the heating to {degrees} degrees` plan comes first, so the subgoals posted by other plans match it literally.
 
-- The belief base is the core's `MutableSet<String>`: `believe` and `forget` are exact, with no LLM involved.
-- `test("the door is {state}")` is an LLM test goal. It returns the bindings (`{state=closed}`) or `null`.
-- `revise(belief)` asks the LLM which current beliefs the new one contradicts or makes obsolete, forgets them, then believes the new one. So `revise("the heating is set to 23 degrees")` retracts both "the heating is off" and "...21 degrees".
-- Revision is **explicit, not automatic**. The core creates the belief base internally, with no hook to customise it, and a revision call on every `believe` would double the cost of every belief change.
+v1 cost exactly one call per event, but with "first" judged by the LLM. v2 and v3 trade calls for engine-controlled ordering and per-plan validation. The upgrade paths are left as open questions in the limitations.
 
-### Failure handling
+### Determinism and tests
 
-| Situation | Result |
-|---|---|
-| No LLM plan applies (the LLM answers `0`) | A goal fails and becomes a `GoalFailedEvent`, handled by LLM `failure(...)` plans or plain `failing.goal`. An added belief is ignored, logged at debug level. |
-| Executor error (network, auth, OOM-killed local model) | The exception propagates out of the plan body and the goal fails, as above. Seen live: an OOM-killed Ollama led to every request going to the failure plan, and the agent carried on. |
-| Malformed output (bad JSON, option out of range, a parameter left unbound, a retraction index out of range) | `require` fails and the goal fails. The chosen body never runs. |
-| The LLM keeps sending a goal back to the plan that posted it | `LlmReasoner(..., maxCalls)`: once the budget is spent every call throws, so goals fail and the agent terminates. |
-| A failure that no failure plan handles | The core completes the parent's `achieve` exceptionally, so the parent fails too. In the example this used to leave `terminateNode` unreached (a hang), which is why the example uses a catch-all failure plan. |
+There's no extra abstraction: `LlmReasoner` takes any Koog `PromptExecutor`, and tests pass `getMockExecutor`.
 
-### Determinism and testability
+`jakta-llm-incarnation` has 8 offline tests, on the JVM:
+1. plans are tried in order, with triggers and guards matched by meaning, including the exact prompt texts (each asked once);
+2. a literal match makes no LLM call;
+3. no matching plan leads to a failure plan;
+4. a malformed answer fails the goal, not the agent;
+5. a match with an unbound parameter fails the goal;
+6. added beliefs trigger plans by meaning;
+7. `test` (literal, true, false) and `revise`;
+8. the question budget stops a self-feeding plan.
 
-- `LlmReasoner` takes any Koog `PromptExecutor`, so there is no extra abstraction: tests pass Koog's `getMockExecutor`.
-- The 7 offline tests pass on **JVM, JS/node and JS/browser**. They cover:
-  - selecting the first applicable plan, including the exact prompt text;
-  - no applicable plan leading to an LLM failure plan;
-  - malformed JSON leading to goal failure;
-  - an unbound parameter leading to goal failure;
-  - belief-triggered plans;
-  - `test` (true with bindings, and false) and `revise`;
-  - the call budget stopping a loop.
-- Live runs use `temperature = 0` where the model supports it. They are still not deterministic.
-- `examples:llm-smart-home:test` is the gated integration test. It uses `assumeTrue`, so it's *skipped*, not passed, when neither `JAKTA_LLM_PROVIDER`, `ANTHROPIC_API_KEY` nor `OPENAI_API_KEY` is set. It has a 10-minute timeout and a 20-call budget.
+Live runs use `temperature = 0` where the model supports it, but are not deterministic. `examples:llm-smart-home:test` is skipped (`assumeTrue`) unless `JAKTA_LLM_PROVIDER`, `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` is set. It has a 10-minute timeout and a 100-question budget.
 
-### Cost and latency
+## 4. Superseded designs
 
-- A goal event costs 1 call. A failure handled by LLM failure plans costs 1 more.
-- A belief event costs 1 call **only if** the agent has LLM belief plans; otherwise no dispatcher is registered. With belief plans, *every* belief change calls the LLM, including those made by bodies and by `revise`.
-- `test` and `revise` cost 1 call each.
-- The prompt grows linearly with beliefs × plans. There is no retrieval or pre-filter yet.
-- Not implemented (upgrade paths):
-  - an exact-match or embedding pre-filter before the call: `Embedder` exists, and the risk is breaking first-applicable order;
-  - caching: `CachedPromptExecutor`, keyed on the whole prompt, which includes the beliefs, so it's safe;
-  - a cheaper model for revision than for selection.
+### v2: suspending triggers and guards (`feat(core)!`)
 
-## 4. What was run
+`Plan.trigger` and `Plan.guard` became `suspend`, `isRelevant`/`isApplicable`/`run(agent, entity)` were replaced by `contextFor` and `run(agent, context)` (evaluating each trigger and guard once, stopping at the first applicable plan), throwing matchers failed the event, and `tryStep` launched the selection undispatched. It worked on JS too, but it was a breaking API change. It is kept, unmerged, on the local branch `backup/llm-suspending-plans`.
 
-- `./gradlew :jakta-llm-incarnation:check`: green (compile JVM and JS, 7 tests × 3 platforms, ktlint, detekt). Also passed by the pre-commit hook on each commit.
-- `./gradlew :examples:llm-smart-home:check`: green, with the live test skipped because there are no API keys on this machine.
-- **No run against OpenAI or Anthropic**: no key was available. The default models (`GPT5_6Luna`, `Haiku_4_5`) are therefore unverified live.
-- **Live runs against a local Ollama** (CPU only, about 5 to 20 s per call):
-  - `qwen2.5-coder:7b` (the example's `JAKTA_LLM_MODEL` override):
-    - Correct: "Brr, it's freezing" picked *make the room warmer while a window is open*. The window closed, the heating went to 21, and `revise` retracted "the heating is off". The pizza request got 0 plans and went to the failure plan.
-    - Wrong: for "Make it 23 degrees" and for the subgoal "set the heating to 21 degrees", the model repeatedly chose plan 1. It even wrote that plan 1's condition was false. Plan 1 posts that same subgoal, so it looped until `maxCalls` stopped it; before the budget existed, it ran until the timeout.
-    - Also wrong, in earlier runs: `bindings: []`, which validation caught, and a wrong plan number. Listing parameters per option and matching triggers "by meaning" (not "as an instance") fixed the missing bindings and the pizza case.
-  - `qwen2.5-coder:14b`: Ollama was OOM-killed on this machine, so there's no quality signal. It did exercise the executor-error path.
+### v1: one wrapper plan per event kind
+
+`llmPlans { goal(...); belief(...); failure(...) }` registered one catch-all JaKtA plan per event kind. Its body made one structured call listing every LLM plan and ran the chosen one. That avoided touching core, at the cost of "fake" plans that shadowed later plans, `Unit`-only results, no removal plans, and plan order judged by the LLM. v2 and v3 remove all of these: LLM plans are real plans, any result type and every event kind work, and ordering is the engine's.
+
+Live runs of v1 against a local Ollama (CPU only), before you asked for no live runs:
+- `qwen2.5-coder:7b`:
+  - Correct: "Brr, it's freezing" led to closing the window and setting the heating to 21. `revise` retracted "the heating is off", and the pizza request went to the failure plan.
+  - Wrong: it repeatedly picked a plan whose condition it said was false. That plan posts the same subgoal, so it looped until the call budget, which was added because of this.
+- `qwen2.5-coder:14b`: OOM-killed, which only exercised the executor-error path.
+
+v2 and v3 ask different questions (one yes/no per plan), and the example orders plans so canonical subgoals match literally, which removes that loop. **Neither has been run against a real model.**
 
 ## 5. How to run the example with a real model
 
 ```bash
-# Anthropic (default when ANTHROPIC_API_KEY is set): claude-haiku-4-5
-ANTHROPIC_API_KEY=... ./gradlew :examples:llm-smart-home:run
-# OpenAI (default when OPENAI_API_KEY is set): gpt-5.6-luna
-OPENAI_API_KEY=... ./gradlew :examples:llm-smart-home:run
-# Local Ollama (default otherwise): llama3.2, or any pulled model
-ollama serve & ollama pull llama3.2
-JAKTA_LLM_PROVIDER=ollama ./gradlew :examples:llm-smart-home:run
-JAKTA_LLM_PROVIDER=ollama JAKTA_LLM_MODEL=qwen2.5-coder:7b ./gradlew :examples:llm-smart-home:run
-# The same scenario as an asserted integration test
-ANTHROPIC_API_KEY=... ./gradlew :examples:llm-smart-home:test
+ANTHROPIC_API_KEY=... ./gradlew :examples:llm-smart-home:run        # claude-haiku-4-5
+OPENAI_API_KEY=...    ./gradlew :examples:llm-smart-home:run        # gpt-5.6-luna
+JAKTA_LLM_PROVIDER=ollama [JAKTA_LLM_MODEL=qwen2.5-coder:7b] ./gradlew :examples:llm-smart-home:run  # llama3.2 by default
+ANTHROPIC_API_KEY=... ./gradlew :examples:llm-smart-home:test       # the same scenario, asserted
 ```
 
-- `JAKTA_LLM_PROVIDER` (`anthropic`, `openai`, `ollama`) forces the provider.
-- `JAKTA_LLM_MODEL` replaces the default model's id and keeps its declared capabilities.
-- Keys are only ever read from the environment.
-- To see why the LLM chose each plan, set `Logger.setMinSeverity(Severity.Debug)` (the core is verbose at that level). The `reason` field of every answer is logged.
+- `JAKTA_LLM_PROVIDER` (`anthropic`, `openai`, `ollama`) forces the provider. Without it, the first provider with a key is used, else a local Ollama.
+- `JAKTA_LLM_MODEL` replaces the default model id and keeps its declared capabilities.
+- Keys are read only from the environment.
+- `Logger.setMinSeverity(Severity.Debug)` logs every question, answer and reason.
 
-## 6. Limitations
+## 6. Current limitations
 
-- **Plan choice is only as good as the model.** Validation catches malformed answers, but not well-formed wrong ones, such as choosing a plan whose condition is false. Small local models do that often. See the first open question.
-- JVM (17+) and JS only, with no native targets, because Koog doesn't publish them. No wasmJs or iOS, because JaKtA doesn't build those.
-- No `removing.goal` / `removing.belief` LLM plans, and no plan results other than `Unit`.
-- No messaging protocol. Map a `String` message to a belief such as `"bob says: ..."` with `handlesMessageEvents`, and LLM belief plans take it from there.
-- The whole belief base goes into every prompt, with no retrieval, so this won't scale to large belief bases as is.
-- `maxCalls` is a lifetime budget per `LlmReasoner`, not a rate: a long-running agent needs a large value, or a new reasoner.
+- **Never run live since v1**: no API key was available, and you asked for no Ollama runs. Only the mock-based tests ran.
+- **Model quality**: validation catches malformed answers and unbound parameters, but not a well-formed wrong yes or no. Small local models gave many of those in v1.
+- **Blocking**: the agent's thread waits for every LLM call. On `Dispatchers.Default`, many agents waiting at once can exhaust its threads; in simulation (Alchemist), LLM latency is invisible to simulated time.
+- **JVM only**, because of the blocking. No messaging protocol: map `String` messages to beliefs with `handlesMessageEvents`.
+- **Errors in triggers and guards are swallowed** (logged, the plan does not apply), since throwing would stop the agent on `main`.
+- **Sequential calls, all plans evaluated**: the engine evaluates every plan's trigger, even after an applicable one, so an event costs one question per distinct trigger of its kind. Remembered answers remove only the repetitions. Only a core change (stopping at the first applicable plan, as v2 did) would cut this.
+- **Remembered answers are global to the reasoner**: an answer about the meaning of an event is reused even much later (only the latest 100 are kept). Guard answers include the beliefs in their key, so they are asked again once beliefs change.
+- **Every belief change** evaluates the belief-plans' triggers, costing LLM calls unless they match literally.
+- **Revision is explicit**: there's no core hook for a custom `BeliefBase`.
+- **`maxQuestions`**: unlimited by default, a lifetime budget per reasoner (not a rate), and it counts remembered answers.
+- **Prompt size**: the whole belief base goes into every guard and revision prompt, with no retrieval.
 
-## 7. Side findings in the existing code (not changed)
+Open questions for you:
+1. **Engine evaluations**: would you accept a small, non-breaking core change so selection evaluates each trigger and guard once and stops at the first applicable plan? It would make the remembered answers unnecessary for consistency, and cut the cost.
+2. **Errors in triggers and guards**: should core catch them and fail the event (as v2 did), instead of each incarnation swallowing them?
+3. **Revision hook**: add a core hook (a custom `BeliefBase`) so `believe` can revise automatically, at the cost of one call per belief change?
+4. **Default budget**: should the library default to a finite budget (the example and the README use 100)?
+5. **Publishing**: should `jakta-llm-incarnation` be published and documented on the website like the other incarnations?
 
-- `BeliefBaseImpl.snapshot()` is `this.copy()` of a data class, which shares the same `MutableSet`. So `agent.beliefs` is a **live view**, not a snapshot, and its `toString()` prints the implementation. The incarnation copies it (`toList()`) before numbering beliefs.
-- On JS, Kotlin compiles `Regex` with the `u` flag, where an unescaped `}` is a syntax error (`\{(\w+)}` works on the JVM). The JS tests caught this here, and the pattern is worth keeping in mind for other incarnations.
-- For every belief change without a matching plan, the core logs a *warning* ("No plan found for BeliefAddEvent"), which is noisy for agents that don't react to beliefs.
+## 7. Side findings in the existing code
 
-## 8. Open questions for you
-
-1. **How much to trust the model's selection.** Should the answer list relevance and applicability *per plan* (`[{relevant, conditionHolds}]`), so that code picks the first applicable plan and can reject inconsistent answers? That's more output tokens, but it would have caught the 7B model's "condition is false, choose it anyway". *Default: not done; the model's `option` is trusted.*
-2. **Suspending guards in core.** Is it worth making `trigger` and `guard` `suspend`? LLM plans could then be real JaKtA plans, freely mixed and ordered, at the cost of an API change and slow plan selection. *Default: not done; the dispatcher design works without touching core.*
-3. **Automatic belief revision.** Should `believe` revise automatically? That needs a core hook for a custom `BeliefBase` and doubles the cost of every belief change. *Default: explicit `revise`.*
-4. **Default models and budget.** The defaults are `claude-haiku-4-5` for Anthropic, `gpt-5.6-luna` for OpenAI and `llama3.2` for Ollama, with `maxCalls = 20` in the example and unlimited in the library. Should the library have a finite default budget? *Default: unlimited, documented.*
-5. **Publishing.** Should `jakta-llm-incarnation` be published (Maven Central / npm) like the others? It inherits the publishing setup, and I didn't add it to the root Kover aggregation or to the website docs. *Default: left as-is for an exploration branch.*
-6. **Pre-filter and caching.** Add an embedding pre-filter or `CachedPromptExecutor` now, or wait for a real workload to measure? *Default: wait.*
+- `BeliefBaseImpl.snapshot()` was a live view, and `executeInTestScope` (and many other common tests) discarded the `TestResult` of `runTest`, so JS tests couldn't fail. Both are fixed on the separate branch `fix/core-bugs`; the incarnation still copies the beliefs (`toList()`) before numbering them.
+- On JS, `Regex` uses the `u` flag, where an unescaped `}` is a syntax error (`\{(\w+)}` works on the JVM). The v2 JS tests caught it; the escaped regex is kept.
+- For every belief change without a matching plan, the core logs a *warning*. That's noisy for agents that don't react to beliefs.
