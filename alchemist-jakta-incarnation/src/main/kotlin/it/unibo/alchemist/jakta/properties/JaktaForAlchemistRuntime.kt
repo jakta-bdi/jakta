@@ -1,12 +1,14 @@
 package it.unibo.alchemist.jakta.properties
 
 import co.touchlab.kermit.Logger
+import it.unibo.alchemist.jakta.AlchemistSkills
 import it.unibo.alchemist.jakta.Messaging
 import it.unibo.alchemist.model.Environment
 import it.unibo.alchemist.model.Node as AlchemistNode
 import it.unibo.alchemist.model.Node.Companion.asPropertyOrNull
 import it.unibo.alchemist.model.NodeProperty
 import it.unibo.alchemist.model.Position
+import it.unibo.alchemist.model.molecules.SimpleMolecule
 import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.agent.BaseAgentLifecycle
 import it.unibo.jakta.agent.ExecutableAgent
@@ -15,6 +17,7 @@ import it.unibo.jakta.event.SystemEvent
 import it.unibo.jakta.event.UnlimitedChannelQueue
 import it.unibo.jakta.node.ExecutableNode
 import it.unibo.jakta.node.RuntimeNodes
+import it.unibo.jakta.situated.Situated
 import org.apache.commons.math3.random.RandomGenerator
 
 /** One Alchemist Node may contain more than one Jakta Node.
@@ -38,6 +41,16 @@ class JaktaForAlchemistRuntime<P : Position<P>>(
      * The Alchemist node hosting this runtime, i.e. [node], under a name that is not shadowed inside JaKtA DSL blocks.
      */
     val alchemistNode: AlchemistNode<Any?> get() = node
+
+    /**
+     * The situated skills of the hosted agents, backed by this Alchemist node.
+     */
+    val skills: AlchemistSkills<P> = AlchemistSkills { this }
+
+    /**
+     * The agents hosted by this Alchemist node.
+     */
+    val hostedAgents: Set<AgentID> get() = agents.keys.toSet()
 
     private val jaktaNodes: MutableList<ExecutableNode<*>> = mutableListOf()
     private val agents: MutableMap<AgentID, HostedAgent> = mutableMapOf()
@@ -78,29 +91,49 @@ class JaktaForAlchemistRuntime<P : Position<P>>(
 
     private fun receiveSystemEvents() = generateSequence { inbox.tryNext() }.forEach(::handle)
 
+    /**
+     * The runtimes of this Alchemist node and of its neighbors.
+     */
+    internal fun reachableNodes(): Set<JaktaForAlchemistRuntime<*>> =
+        (alchemistEnvironment.getNeighborhood(node).neighbors + listOf(node)).runtimes()
+
+    /**
+     * Sets the molecule [name] of this Alchemist node to [value], or removes it if [value] is null.
+     */
+    internal fun setProperty(name: String, value: Any?) {
+        val molecule = SimpleMolecule(name)
+        when {
+            value != null -> node.setConcentration(molecule, value)
+            node.contains(molecule) -> node.removeConcentration(molecule)
+        }
+    }
+
     // ponytail: every non-message event is broadcast to all Alchemist nodes (O(nodes) per event),
     // address them by NodeID if agent additions/removals become frequent in large simulations.
     private fun route(event: SystemEvent) {
-        val reachable: Iterable<AlchemistNode<Any?>> = when {
-            event is SystemEvent.AgentMessage<*, *> && messaging == Messaging.NEIGHBORHOOD ->
-                alchemistEnvironment.getNeighborhood(node).neighbors
+        val recipients = when {
+            event is SystemEvent.AgentMessage<*, *> && messaging == Messaging.NEIGHBORHOOD -> reachableNodes()
 
-            else -> alchemistEnvironment.nodes
+            // this node might not be in the environment yet, while loading
+            else -> (alchemistEnvironment.nodes + listOf(node)).runtimes()
         }
-        // this node might not be in the environment yet, while loading.
-        // Not `reachable + node`: Alchemist nodes are Iterable, it would add the node's reactions
-        val recipients = reachable.toMutableSet().apply { add(node) }
         if (event is SystemEvent.AgentMessage<*, *>) {
             logger.d { "Message ${event.message} reaches ${recipients.size} Alchemist nodes" }
         }
-        recipients.forEach { it.asPropertyOrNull<Any?, JaktaForAlchemistRuntime<*>>()?.inbox?.send(event) }
+        recipients.forEach { it.inbox.send(event) }
     }
+
+    // Not `nodes + node`: Alchemist nodes are Iterable, it would add the node's reactions
+    private fun Iterable<AlchemistNode<Any?>>.runtimes(): Set<JaktaForAlchemistRuntime<*>> =
+        mapNotNull { it.asPropertyOrNull<Any?, JaktaForAlchemistRuntime<*>>() }.toSet()
 
     private fun handle(event: SystemEvent) {
         jaktaNodes.toList().forEach { it.handleExternalEvent(event) }
         when (event) {
             is SystemEvent.AgentAddition<*, *> -> jaktaNodes.find { it.id == event.nodeID }?.let {
-                agents[event.executableAgent.id] = HostedAgent(it, event.executableAgent)
+                val id = event.executableAgent.id
+                agents[id] = HostedAgent(it, event.executableAgent)
+                (it.agents[id] as? Situated)?.initialProperties?.forEach(::setProperty)
             }
 
             is SystemEvent.AgentRemoval -> agents.remove(event.id)

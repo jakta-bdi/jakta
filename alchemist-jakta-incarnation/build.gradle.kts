@@ -23,6 +23,7 @@ kotlinJvm {
                 implementation(project(":jakta-dsl"))
                 implementation(project(":jakta-core"))
                 api(project(":jakta-api"))
+                api(project(":jakta-situated"))
                 api(libs.bundles.alchemist.api)
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.caffeine)
@@ -34,6 +35,7 @@ kotlinJvm {
             dependencies {
                 implementation(kotlin("test"))
                 implementation(libs.alchemist.euclidean.geometry)
+                implementation(libs.kotlinx.coroutines.test)
             }
         }
     }

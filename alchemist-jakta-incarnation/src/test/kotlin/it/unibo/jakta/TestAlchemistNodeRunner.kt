@@ -10,6 +10,7 @@ import it.unibo.alchemist.model.environments.Continuous2DEnvironment
 import it.unibo.alchemist.model.linkingrules.ConnectWithinDistance
 import it.unibo.alchemist.model.positions.Euclidean2DPosition
 import it.unibo.alchemist.model.terminators.AfterTime
+import it.unibo.alchemist.model.timedistributions.DiracComb
 import it.unibo.alchemist.model.times.DoubleTime
 import it.unibo.jakta.agent.BaseAgentID
 import it.unibo.jakta.dsl.mas
@@ -19,6 +20,8 @@ import it.unibo.jakta.dsl.node.NodeBuilders
 import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.event.AgentUpdate
 import it.unibo.jakta.node.BaseNode
+import it.unibo.jakta.situated.Coordinates
+import it.unibo.jakta.situated.SituatedBody
 import it.unibo.jakta.skills.AgentTerminationSkill
 import it.unibo.jakta.skills.MessagingSkill
 import it.unibo.jakta.skills.broadcast
@@ -47,12 +50,17 @@ class TestAlchemistNodeRunner {
         messaging: Messaging = Messaging.GLOBAL,
         rate: Double = 1.0,
     ) {
-        val runner = AlchemistNodeRunner<Euclidean2DPosition, BaseNode<Any>>(this, messaging, rate) {
-            environment.makePosition(SPACING * it, 0.0)
-        }
+        val runner = AlchemistNodeRunner<Euclidean2DPosition, BaseNode<Any>>(
+            this,
+            messaging,
+            timeDistribution = { DiracComb(rate) },
+        )
         runBlocking { mas.run(runner) }
         error.ifPresent { throw it }
     }
+
+    // The i-th node starts at (SPACING * i, 0)
+    private fun bodyOfNode(index: Int) = SituatedBody(Coordinates(SPACING * index, 0.0))
 
     @BeforeTest
     fun setup() {
@@ -69,7 +77,7 @@ class TestAlchemistNodeRunner {
             node {
                 context(MessagingSkill(node)) {
                     agent<String, String>(bob) {
-                        embodiedAs { Any() }
+                        embodiedAs { bodyOfNode(0) }
                         handlesMessageEvents { AgentUpdate.Belief(setOf(it.payload.toString()), emptySet()) }
                         hasPlanLibrary {
                             adding.belief { takeIf { it == "ping" } } triggers {
@@ -83,7 +91,7 @@ class TestAlchemistNodeRunner {
             node {
                 context(MessagingSkill(node)) {
                     agent<String, String>(alice) {
-                        embodiedAs { Any() }
+                        embodiedAs { bodyOfNode(1) }
                         handlesMessageEvents { AgentUpdate.Belief(setOf(it.payload.toString()), emptySet()) }
                         hasInitialGoals { !"start" }
                         hasPlanLibrary {
@@ -110,11 +118,11 @@ class TestAlchemistNodeRunner {
     private fun receiversOfBroadcast(messaging: Messaging): Set<String> {
         val receivers = ConcurrentHashMap.newKeySet<String>()
         val mas = mas(NodeBuilders.baseNode<Any>()) {
-            listOf("A", "B", "C").forEach { name ->
+            listOf("A", "B", "C").forEachIndexed { index, name ->
                 node {
                     context(MessagingSkill(node), AgentTerminationSkill(node)) {
                         agent<String, String>(BaseAgentID(name)) {
-                            embodiedAs { Any() }
+                            embodiedAs { bodyOfNode(index) }
                             handlesMessageEvents {
                                 receivers += name
                                 null
