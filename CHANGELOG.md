@@ -1,3 +1,9 @@
+## [1.1.26](https://github.com/jakta-bdi/jakta/compare/1.1.25...1.1.26) (2026-10-01)
+
+### Bug Fixes
+
+* **prolog-incarnation:** classic solver bundle issue and interactive Compose Multiplatform examples (blocksworld, tic-tac-toe, cleaning robots) and console BDI demos ([#951](https://github.com/jakta-bdi/jakta/issues/951)) ([c6279fb](https://github.com/jakta-bdi/jakta/commit/c6279fbcc5b4a6ba7abe80a658169f72bdbc2270))
+
 ## [1.1.25](https://github.com/jakta-bdi/jakta/compare/1.1.24...1.1.25) (2026-10-01)
 
 ### Bug Fixes
