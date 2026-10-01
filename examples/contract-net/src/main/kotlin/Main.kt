@@ -1,3 +1,5 @@
+@file:Suppress("LongMethod") // example code: DSL definitions read best in one place
+
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import it.unibo.jakta.agent.BaseAgentID

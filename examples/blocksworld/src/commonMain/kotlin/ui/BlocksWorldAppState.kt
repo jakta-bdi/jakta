@@ -162,5 +162,5 @@ fun Stacks.sameTowersAs(other: Stacks): Boolean = toSet() == other.toSet()
  */
 fun goalOf(stacks: Stacks): PrologGoal {
     val towers = stacks.map { stack -> List.of(stack.reversed().map { Atom.of(it.id) }) }
-    return initialGoal { "state"(logicListOf(*towers.toTypedArray())) }
+    return initialGoal { "state"(List.of(towers)) }
 }

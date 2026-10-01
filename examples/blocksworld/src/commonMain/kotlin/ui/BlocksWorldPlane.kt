@@ -1,3 +1,5 @@
+@file:Suppress("LongMethod") // example code: DSL definitions read best in one place
+
 package ui
 
 import androidx.compose.foundation.Canvas
@@ -116,21 +118,13 @@ fun BlocksWorldPlane(
             stack.forEachIndexed { level, block ->
                 if (block != dragged) {
                     val rect = layout.blockRect(i, level)
-                    drawBlock(block.id, rect.left, rect.top, rect.width, rect.height, textMeasurer)
+                    drawBlock(block.id, rect, textMeasurer)
                 }
             }
         }
 
         dragged?.let {
-            val half = layout.blockSize / 2
-            drawBlock(
-                it.id,
-                dragPosition.x - half,
-                dragPosition.y - half,
-                layout.blockSize,
-                layout.blockSize,
-                textMeasurer,
-            )
+            drawBlock(it.id, Rect(center = dragPosition, radius = layout.blockSize / 2), textMeasurer)
         }
     }
 }

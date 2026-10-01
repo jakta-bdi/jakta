@@ -1,3 +1,5 @@
+@file:Suppress("StringLiteralDuplication", "LongMethod") // example code: DSL definitions read best in one place
+
 import it.unibo.jakta.agent.BaseAgentID
 import it.unibo.jakta.agent.achieve
 import it.unibo.jakta.dsl.belief.PrologBelief

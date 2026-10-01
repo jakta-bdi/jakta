@@ -1,7 +1,7 @@
 package ui
 
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.text.TextMeasurer
@@ -32,12 +32,12 @@ val colorMap: Map<String, Color> = mapOf(
 /**
  * Draws a block with the given label at the specified position and size.
  */
-fun DrawScope.drawBlock(label: String, x: Float, y: Float, width: Float, height: Float, textMeasurer: TextMeasurer) {
+fun DrawScope.drawBlock(label: String, rect: Rect, textMeasurer: TextMeasurer) {
     // block shape
     drawRect(
         color = colorMap[label] ?: Color.Gray,
-        topLeft = Offset(x, y),
-        size = Size(width, height),
+        topLeft = rect.topLeft,
+        size = rect.size,
     )
 
     // measure text
@@ -52,9 +52,6 @@ fun DrawScope.drawBlock(label: String, x: Float, y: Float, width: Float, height:
     // centered text
     drawText(
         textLayoutResult = textLayout,
-        topLeft = Offset(
-            x + width / 2 - textLayout.size.width / 2,
-            y + height / 2 - textLayout.size.height / 2,
-        ),
+        topLeft = rect.center - Offset(textLayout.size.width / 2f, textLayout.size.height / 2f),
     )
 }

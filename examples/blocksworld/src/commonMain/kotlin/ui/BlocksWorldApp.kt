@@ -1,3 +1,5 @@
+@file:Suppress("LongMethod") // example code: DSL definitions read best in one place
+
 package ui
 
 import androidx.compose.foundation.background

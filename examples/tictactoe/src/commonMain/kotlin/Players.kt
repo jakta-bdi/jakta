@@ -1,3 +1,5 @@
+@file:Suppress("StringLiteralDuplication", "LongMethod") // example code: DSL definitions read best in one place
+
 import it.unibo.jakta.agent.BaseAgentID
 import it.unibo.jakta.dsl.agent.AgentBuilder
 import it.unibo.jakta.dsl.belief.PrologBelief
@@ -73,6 +75,7 @@ private fun eq(left: Term, right: Term): Struct = Struct.of("=", left, right)
 /**
  * Creates the node of the game, with one player for each mark.
  */
+@Suppress("LongParameterList") // game settings with defaults, kept flat for the callers
 fun MasBuilder<BaseNode<Any>, BaseNodeBuilder<Any, BaseNode<Any>>>.ticTacToeNode(
     board: Board,
     players: Map<Mark, Player>,
