@@ -19,6 +19,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 
@@ -181,10 +182,12 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
             try {
                 log.d { "Running plan $plan for event $event" }
                 val result = plan.run(executableAgent.state, entity)
+                ensureActive() // a cancelled plan achieves nothing, even if it did not stop
                 completion?.complete(result)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                ensureActive() // a cancelled plan does not fail its goal, even if its cleanup throws
                 log.e("Goal failed for exception: ${e.message} ${e.stackTraceToString()}")
                 handleFailure(event, e)
             }
@@ -198,6 +201,8 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
             ?.also { executableAgent.state.desires += it }
         job.invokeOnCompletion { cause ->
             log.d { "Plan Completed: $plan for event $event" }
+            // The plan waiting for a dropped goal fails only once its plan has completed (e.g. run its finally blocks)
+            if (cause is DropCancellation) completion?.completeExceptionally(GoalDroppedException(entity))
             if (desire != null) {
                 executableAgent.state.desires -= desire
                 // Removal plans handle intentional removals, while failure plans handle unexpected failures
@@ -217,14 +222,13 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
     }
 
     // A top-level goal is dropped by cancelling its whole intention, a subgoal by cancelling it and the subgoals
-    // stacked on top of it in its intention, and by failing the plan waiting for it (triggering its failure plans).
-    // The removal plans of all the dropped goals are triggered as their plans complete.
+    // stacked on top of it in its intention: the plan waiting for it fails once it has completed the cancellation
+    // (triggering its failure plans). The removal plans of all the dropped goals are triggered as their plans complete.
     private fun dropDesires(goal: Goal) {
         for (desire in executableAgent.state.desires.filter { it.goal == goal }) {
             if (!desire.job.isActive) continue // already dropped along with another desire
             log.i { "Dropping goal ${desire.goal} in intention ${desire.intention.id.displayId}" }
-            val completion = desire.event.completion
-            if (completion == null) {
+            if (desire.event.completion == null) {
                 executableAgent.state.mutableIntentionPool.drop(desire.intention.id)
             } else {
                 // The subgoals of a desire are the ones adopted after it in the same intention, since an intention
@@ -232,7 +236,6 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
                 val stack = executableAgent.state.desires.filter { it.intention == desire.intention }
                 val cause = DropCancellation("Goal ${desire.goal} has been dropped")
                 stack.drop(stack.indexOf(desire)).forEach { it.job.cancel(cause) }
-                completion.completeExceptionally(GoalDroppedException(desire.goal))
             }
         }
     }

@@ -11,8 +11,10 @@ import it.unibo.jakta.dsl.runToEnd
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
 
 /**
  * Tests of [it.unibo.jakta.agent.MutableAgentState.dropIntention]
@@ -138,5 +140,52 @@ class TestDropIntention {
             }
         }.runToEnd()
         assertEquals(listOf("intentions: 1", "cleanups: [a, b, drop]", "removals: [a, b, drop]"), trace)
+    }
+
+    /**
+     * A dropped intention unwinds from its innermost goal, like nested calls, even when a cleanup suspends.
+     * The removal plans run once the goals have completed their cancellation.
+     */
+    @Test
+    fun aDroppedIntentionUnwindsFromTheInnermostGoal() = runTest {
+        Logger.setMinSeverity(Severity.Warn)
+        val trace = mutableListOf<String>()
+        node(NodeBuilders.baseNode()) {
+            agent {
+                embodiedAs { Any() }
+                hasInitialGoals {
+                    !"work"
+                    !"drop"
+                }
+                hasPlanLibrary {
+                    adding.goal { ifGoalMatch("work") } triggers {
+                        try {
+                            agent.achieve("subgoal")
+                            trace += "work completed"
+                        } finally {
+                            trace += "work cleanup"
+                        }
+                    }
+                    adding.goal { ifGoalMatch("subgoal") } triggers {
+                        try {
+                            delay(10.seconds)
+                            trace += "subgoal completed"
+                        } finally {
+                            withContext(NonCancellable) { delay(1.seconds) }
+                            trace += "subgoal cleanup"
+                        }
+                    }
+                    failing.goal { ifGoalMatch("work") } triggers { trace += "work failed" }
+                    removing.goal { ifGoalMatch("work") } triggers { trace += "work removed" }
+                    adding.goal { ifGoalMatch("drop") } triggers {
+                        delay(1.seconds)
+                        agent.dropIntention("work")
+                        delay(20.seconds)
+                        node.terminateNode()
+                    }
+                }
+            }
+        }.runToEnd()
+        assertEquals(listOf("subgoal cleanup", "work cleanup", "work removed"), trace)
     }
 }

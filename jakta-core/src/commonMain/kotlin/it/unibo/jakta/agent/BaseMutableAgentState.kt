@@ -20,8 +20,10 @@ import kotlin.reflect.KType
 import kotlin.time.Duration
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.job
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 
 /**
@@ -119,6 +121,9 @@ internal class BaseMutableAgentState<Belief : Any, Goal : Any>(
         try {
             return completion.await() // Blocking the continuation
         } finally {
+            // Like a nested call, a cancelled subgoal completes its cancellation (e.g. runs its finally blocks) first
+            desires.firstOrNull { it.event.completion === completion }?.job?.takeIf { it.isCancelled }
+                ?.let { withContext(NonCancellable) { it.join() } }
             plan?.let { achievingPlans -= it }
         }
     }

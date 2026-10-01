@@ -12,8 +12,10 @@ import it.unibo.jakta.dsl.runToEnd
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
 
 /**
  * Tests of [it.unibo.jakta.agent.MutableAgentState.dropGoal].
@@ -176,5 +178,94 @@ class TestDropGoal {
             }
         }.runToEnd()
         assertEquals(listOf("subgoal dropped"), trace)
+    }
+
+    /**
+     * A dropped subgoal and its own subgoals complete their cancellation, from the innermost one,
+     * before the parent is failed, even when their cleanups suspend.
+     */
+    @Test
+    fun theParentFailsOnceTheDroppedSubgoalHasCompleted() = runTest {
+        Logger.setMinSeverity(Severity.Warn)
+        val trace = mutableListOf<String>()
+        val removals = mutableSetOf<String>()
+        node(NodeBuilders.baseNode()) {
+            agent {
+                embodiedAs { Any() }
+                hasInitialGoals {
+                    !"work"
+                    !"drop"
+                }
+                hasPlanLibrary {
+                    adding.goal { ifGoalMatch("work") } triggers {
+                        try {
+                            agent.achieve("subgoal")
+                        } catch (e: GoalDroppedException) {
+                            trace += "${e.goal} dropped"
+                        }
+                    }
+                    for (goal in listOf("subgoal", "nested")) {
+                        adding.goal { ifGoalMatch(goal) } triggers {
+                            try {
+                                if (goal == "subgoal") agent.achieve("nested") else delay(10.seconds)
+                                trace += "$goal completed"
+                            } finally {
+                                withContext(NonCancellable) { delay(1.seconds) }
+                                trace += "$goal cleanup"
+                            }
+                        }
+                        removing.goal { ifGoalMatch(goal) } triggers { removals += goal }
+                    }
+                    failing.goal { ifGoalMatch("work") } triggers { trace += "work failed" }
+                    adding.goal { ifGoalMatch("drop") } triggers {
+                        delay(1.seconds)
+                        agent.dropGoal("subgoal")
+                        delay(20.seconds)
+                        trace += "removals: ${removals.sorted()}"
+                        node.terminateNode()
+                    }
+                }
+            }
+        }.runToEnd()
+        assertEquals(
+            listOf("nested cleanup", "subgoal cleanup", "subgoal dropped", "removals: [nested, subgoal]"),
+            trace,
+        )
+    }
+
+    /**
+     * A dropped plan whose cleanup throws does not fail its goal: the goal is still removed.
+     */
+    @Test
+    fun aFailingCleanupDoesNotFailADroppedGoal() = runTest {
+        Logger.setMinSeverity(Severity.Assert)
+        val trace = mutableListOf<String>()
+        node(NodeBuilders.baseNode()) {
+            agent {
+                embodiedAs { Any() }
+                hasInitialGoals {
+                    !"work"
+                    !"drop"
+                }
+                hasPlanLibrary {
+                    adding.goal { ifGoalMatch("work") } triggers {
+                        try {
+                            delay(10.seconds)
+                        } finally {
+                            error("cleanup failed")
+                        }
+                    }
+                    failing.goal { ifGoalMatch("work") } triggers { trace += "work failed" }
+                    removing.goal { ifGoalMatch("work") } triggers { trace += "work removed" }
+                    adding.goal { ifGoalMatch("drop") } triggers {
+                        delay(1.seconds)
+                        agent.dropGoal("work")
+                        delay(20.seconds)
+                        node.terminateNode()
+                    }
+                }
+            }
+        }.runToEnd()
+        assertEquals(listOf("work removed"), trace)
     }
 }
