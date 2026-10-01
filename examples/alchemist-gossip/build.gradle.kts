@@ -9,6 +9,7 @@ repositories {
 
 dependencies {
     implementation(project(":alchemist-jakta-incarnation"))
+    implementation(project(":jakta-situated"))
     implementation(jakta("core"))
     implementation(jakta("dsl"))
 
@@ -33,4 +34,11 @@ tasks.register<JavaExec>("runGui") {
     mainClass.set(application.mainClass)
     // Alchemist overrides are YAML strings, not files
     args("run", "gossip.yml", "--override", file("gui.yml").readText(), "--verbosity", "error")
+}
+
+tasks.register<JavaExec>("runInMemory") {
+    group = ApplicationPlugin.APPLICATION_GROUP
+    description = "Runs the same gossip agents without Alchemist, with the default runner."
+    classpath = sourceSets.main.get().runtimeClasspath
+    mainClass.set("InMemoryGossipKt")
 }

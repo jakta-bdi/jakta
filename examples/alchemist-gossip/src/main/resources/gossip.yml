@@ -7,11 +7,6 @@ seeds:
   scenario: 0
   simulation: 0
 
-variables:
-  messaging: &messaging
-    type: ArbitraryVariable
-    parameters: [ neighborhood, [ neighborhood, global ] ]
-
 # A 10x10 grid with unit spacing, slightly perturbed: each node is linked to its (diagonal) neighbors
 network-model:
   type: ConnectWithinDistance
@@ -27,8 +22,8 @@ deployments:
     programs:
       - time-distribution: { type: ExponentialTime, parameters: [ 1 ] }
         program:
-          entrypoint: Gossip.entrypoint
-          messaging: *messaging
+          entrypoint: AlchemistGossip.entrypoint
+          messaging: neighborhood
 
 terminate:
   - type: AfterTime
