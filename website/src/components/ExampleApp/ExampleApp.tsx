@@ -6,10 +6,8 @@ import styles from './ExampleApp.module.css';
 const APP_WIDTH = 1200;
 const APP_HEIGHT = 800;
 
-// A Compose Multiplatform example built for the browser by scripts/build-examples.sh.
-// It starts on click: each app downloads several MB and its agents keep running.
+// A Compose Multiplatform example built for the browser by scripts/build-examples.sh, one per showcase page.
 export default function ExampleApp({ name, title }: { name: string; title: string }) {
-  const [started, setStarted] = useState(false);
   const [scale, setScale] = useState(1);
   const frame = useRef<HTMLDivElement>(null);
   const src = useBaseUrl(`/examples/${name}/index.html`);
@@ -23,18 +21,12 @@ export default function ExampleApp({ name, title }: { name: string; title: strin
   return (
     <>
       <div ref={frame} className={styles.frame} style={{ height: APP_HEIGHT * scale }}>
-        {started ? (
-          <iframe
-            className={styles.app}
-            src={src}
-            title={title}
-            style={{ width: APP_WIDTH, height: APP_HEIGHT, transform: `scale(${scale})` }}
-          />
-        ) : (
-          <button type="button" className="button button--primary button--lg" onClick={() => setStarted(true)}>
-            Run {title} in the browser
-          </button>
-        )}
+        <iframe
+          className={styles.app}
+          src={src}
+          title={title}
+          style={{ width: APP_WIDTH, height: APP_HEIGHT, transform: `scale(${scale})` }}
+        />
       </div>
       <p className={styles.newTab}>
         <a href={src} target="_blank" rel="noreferrer">Open {title} in a new tab</a>

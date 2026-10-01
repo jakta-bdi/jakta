@@ -12,7 +12,7 @@ side by side with ordinary Kotlin code.
 The engine is generic over knowledge representation and plan matching semantics: an
 [incarnation](./explanation/incarnations/index.md) decides what beliefs and goals are (Prolog terms, plain strings,
 or your own Kotlin types) and how plans match them, so JaKtA can adapt to different use cases.
-Start with the [Getting Started](./tutorials/index.mdx) guide, explore the [Showcase](./showcase/index.md),
+Start with the [Getting Started](./tutorials/index.mdx) guide, run the [Showcase](./showcase/blocksworld.md) examples in your browser,
 or read the [JaKtA 1.x redesign](./history/jakta-1-x.md) for the main ideas behind the current architecture.
 
 The choice of realising a fresh implementation of a BDI execution engine instead of reusing an existing one was driven by two major design goals:
