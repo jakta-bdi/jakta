@@ -54,7 +54,7 @@ timeout; check `isSuccess` on the returned substitution before reading the varia
 ## Performance
 
 Each `satisfies` call builds a solver whose theory is the current belief base. That is cheap for small belief bases,
-but it grows with their size: keep bulky data in Kotlin objects (for example in a [skill](../../../basic-concepts/skills.md)),
+but it grows with their size: keep bulky data in Kotlin objects (for example in a [skill](../../basic-concepts/skills.md)),
 and keep in beliefs what the agent reasons about.
 
 ## Platforms

@@ -2,12 +2,12 @@
 sidebar_position: 2
 ---
 
-# Beliefs in JaKtA
+# Beliefs
 
 Beliefs are a fundamental concept in the **Belief-Desire-Intention (BDI)** model: they are the agent's knowledge
 about the world, itself, and other agents. Beliefs change as the agent perceives, receives messages, or acts.
 
-The type of a belief is chosen by the [incarnation](../explanation/incarnations/index.md).
+The type of a belief is chosen by the [incarnation](../incarnations/index.md).
 The examples below use the **Prolog incarnation**, where a belief is a Prolog clause (`PrologBelief`, a
 [2P-Kt](https://github.com/tuProlog/2p-kt) `Rule`): either a **fact** or an **inference rule**.
 
@@ -61,7 +61,7 @@ prologPlan {
 ## Belief sources
 
 Beliefs coming from other agents are annotated with their **source**, like in Jason.
-A belief received through [KQML messaging](../explanation/communication.md#kqml-messaging-prolog-incarnation)
+A belief received through [KQML messaging](../communication.md#kqml-messaging-prolog-incarnation)
 can be matched with `[source(X)]`, binding `X` to the sender:
 
 ```kotlin
@@ -79,7 +79,7 @@ prologPlan {
 
 ## Perceptions
 
-Agents do not share a global belief base: what an agent perceives from its [node](../explanation/nodes.md)
+Agents do not share a global belief base: what an agent perceives from its [node](../nodes.md)
 is converted into belief updates by the agent itself, with `handlesPerceptionEvents`:
 
 ```kotlin

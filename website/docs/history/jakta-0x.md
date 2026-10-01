@@ -1,12 +1,14 @@
 ---
 sidebar_label: JaKtA 0.x (deprecated)
+sidebar_position: 2
+slug: /jakta-0x
 ---
 
 # JaKtA 0.x (deprecated)
 
 :::danger[Deprecated]
 JaKtA 0.x is no longer maintained and is **not compatible** with JaKtA 1.x.
-New projects should use the current version: start from [Getting Started](./getting-started/index.mdx).
+New projects should use the current version: start from [Getting Started](../tutorials/index.mdx).
 :::
 
 This page is kept as a historical reference. The [publications](/publications) from 2023 and 2024 describe
@@ -34,22 +36,22 @@ fun main() {
 }
 ```
 
-The same agent in 1.x is shown in [Writing a simple agent](./getting-started/hello-world.md).
+The same agent in 1.x is shown in [Writing a simple agent](../tutorials/hello-world.md).
 
 ## From 0.x to 1.x
 
 | JaKtA 0.x | JaKtA 1.x |
 |---|---|
 | JVM only | Kotlin Multiplatform: JVM, JS, native |
-| Beliefs and goals always Prolog terms | Pluggable [incarnations](./explanation/incarnations/index.md): Prolog, strings, your own types |
+| Beliefs and goals always Prolog terms | Pluggable [incarnations](../explanation/incarnations/index.md): Prolog, strings, your own types |
 | `mas { ... }.start()` | `mas(NodeBuilders.baseNode()) { node { ... } }.runLocally()` |
 | `beliefs { fact { } ; rule { } }` | `believes { +initialBelief { } ; +inferenceRule { } }` |
 | `goals { achieve(...) ; test(...) }` | `hasInitialGoals { !initialGoal { } }`; test goals are replaced by guards (`satisfies`) |
 | `+achieve(g) onlyIf { } then { }` | `adding.goal { matchingGoal { g } } onlyWhen { } triggers { }` |
-| `execute("print"(...))`, `actions { action(...) { } }` | Plain Kotlin in plan bodies, and [skills](./basic-concepts/skills.md) through context parameters |
-| `environment { }`, `.fromPercept` beliefs | [Nodes](./explanation/nodes.md): perceptions published on the node, turned into beliefs by each agent |
-| Messages sent through environment actions | `MessagingSkill` and [KQML messaging](./explanation/communication.md) |
-| Custom concurrency models | A coroutine-based engine: each intention is a coroutine, see the [execution model](./explanation/execution-model.md) |
+| `execute("print"(...))`, `actions { action(...) { } }` | Plain Kotlin in plan bodies, and [skills](../explanation/basic-concepts/skills.md) through context parameters |
+| `environment { }`, `.fromPercept` beliefs | [Nodes](../explanation/nodes.md): perceptions published on the node, turned into beliefs by each agent |
+| Messages sent through environment actions | `MessagingSkill` and [KQML messaging](../explanation/communication.md) |
+| Custom concurrency models | A coroutine-based engine: each intention is a coroutine, see the [execution model](../explanation/execution-model.md) |
 
 ## Resources
 

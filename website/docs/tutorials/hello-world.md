@@ -65,11 +65,11 @@ fun main(): Unit = runBlocking {
 ### Goals
 
 `hasInitialGoals { !initialGoal { helloGoal } }` gives the agent the goal `sayHello` when it starts.
-The `!` operator adds a goal, like `!` in AgentSpeak. See [Goals](../basic-concepts/goals.md).
+The `!` operator adds a goal, like `!` in AgentSpeak. See [Goals](../explanation/basic-concepts/goals.md).
 
 ### Plans
 
-`hasPlanLibrary { }` contains the agent's [plans](../basic-concepts/plans.md). A plan has:
+`hasPlanLibrary { }` contains the agent's [plans](../explanation/basic-concepts/plans.md). A plan has:
 
 - a **trigger** — `adding.goal { matchingGoal { helloGoal } }` fires when the goal `sayHello` is added;
 - an optional **guard** — `onlyWhen { ... }`, omitted here;
@@ -101,4 +101,4 @@ Run it with:
 ./gradlew :examples:hello-world:run
 ```
 
-Next: learn about [beliefs](../basic-concepts/beliefs.md), or continue with the [intermediate tutorial](./tutorial.md).
+Next: learn about [beliefs](../explanation/basic-concepts/beliefs.md), or continue with the [intermediate tutorial](./tutorial.md).

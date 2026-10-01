@@ -18,7 +18,7 @@ cd jakta
 | Example | Command | What it shows |
 |---|---|---|
 | [`hello-world`](https://github.com/jakta-bdi/jakta/tree/main/examples/hello-world) | `./gradlew :examples:hello-world:run` | A single Prolog agent with one goal and one plan that prints a message and stops the node. Walked through in [Writing a simple agent](./hello-world.md). |
-| [`blocksworld`](https://github.com/jakta-bdi/jakta/tree/main/examples/blocksworld) | `./gradlew :examples:blocksworld:run` | The classic blocks-world planner (ported from Jason) with a Compose Desktop UI: Prolog inference rules, guards, recursive sub-goals, custom [skills](../basic-concepts/skills.md) and perceptions. |
+| [`blocksworld`](https://github.com/jakta-bdi/jakta/tree/main/examples/blocksworld) | `./gradlew :examples:blocksworld:run` | The classic blocks-world planner (ported from Jason) with a Compose Desktop UI: Prolog inference rules, guards, recursive sub-goals, custom [skills](../explanation/basic-concepts/skills.md) and perceptions. |
 
 ## More examples in the test suites
 

@@ -66,7 +66,7 @@ Strings that start with an uppercase letter or `_` become **variables**: `"likes
 ## Using 2P-Kt directly
 
 Outside the DSL, for example when turning a perception into facts, build terms with the 2P-Kt core API.
-The [Blocks World](../../../getting-started/blocks-world.md) example does this:
+The [Blocks World](../../../tutorials/blocks-world.md) example does this:
 
 ```kotlin
 Fact.of(Struct.of("on", Atom.of(block.id), support))

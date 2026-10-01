@@ -2,12 +2,12 @@
 sidebar_position: 3
 ---
 
-# Goals in JaKtA
+# Goals
 
 Goals are the objectives an agent aims to achieve. Adding a goal generates an event that
 selects a relevant [plan](./plans.md); executing that plan is an **intention**.
 
-As for beliefs, the goal type is chosen by the [incarnation](../explanation/incarnations/index.md):
+As for beliefs, the goal type is chosen by the [incarnation](../incarnations/index.md):
 a Prolog `Struct` (`PrologGoal`) in the Prolog incarnation, a `String` in the string incarnation,
 or any type you like.
 

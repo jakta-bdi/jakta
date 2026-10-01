@@ -2,7 +2,7 @@
 sidebar_position: 4
 ---
 
-# Communication in JaKtA
+# Communication
 
 Agents communicate by exchanging **messages**. Sending requires the `MessagingSkill`, and every agent decides how
 received messages affect its state.
@@ -49,7 +49,7 @@ handlesMessageEvents { message ->
 
 `AgentUpdate.Goal(additions, removals)` can be returned instead, to accept a request as a new goal.
 
-The [intermediate tutorial](../getting-started/tutorial.md) builds a full ping-pong example with these primitives.
+The [intermediate tutorial](../tutorials/tutorial.md) builds a full ping-pong example with these primitives.
 
 ## KQML messaging (Prolog incarnation)
 
@@ -125,4 +125,4 @@ for complete examples of every performative, including a `replyOne` plan.
 ## Indirect communication
 
 Agents can also coordinate *indirectly* (stigmergy) by acting on a shared world model through a
-[skill](../basic-concepts/skills.md) and perceiving its changes — see [Nodes and environment](./nodes.md#perceptions).
+[skill](./basic-concepts/skills.md) and perceiving its changes — see [Nodes and environment](./nodes.md#perceptions).

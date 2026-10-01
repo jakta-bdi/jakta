@@ -37,7 +37,7 @@ const dependencies = `dependencies {
 
 export default function HelloWorldSection() {
   return (
-    <section className={styles.helloSection} id="example">
+    <section className={styles.helloSection} id="showcase">
       <div className={styles.helloText}>
         <Heading as="h2">Hello, world!</Heading>
         <p>
@@ -52,10 +52,10 @@ export default function HelloWorldSection() {
         <p>Add JaKtA to your Gradle build:</p>
         <CodeBlock language="kotlin">{dependencies}</CodeBlock>
         <div className={styles.helloButtons}>
-          <Link className="button button--primary" to="/docs/getting-started/hello-world">
+          <Link className="button button--primary" to="/docs/tutorials/hello-world">
             Walk through the example
           </Link>
-          <Link className="button button--secondary" to="/docs/getting-started/quick-start">
+          <Link className="button button--secondary" to="/docs/tutorials/quick-start">
             Run the examples
           </Link>
         </div>

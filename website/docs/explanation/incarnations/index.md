@@ -2,7 +2,7 @@
 sidebar_label: Overview
 ---
 
-# Incarnations in JaKtA
+# Incarnations
 
 The JaKtA engine is generic over three types: `Belief`, `Goal` and `Body`. It never looks inside beliefs and goals:
 plans decide whether an event is **relevant** (their trigger) and **applicable** (their guard).

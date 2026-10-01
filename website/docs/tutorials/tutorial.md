@@ -9,7 +9,7 @@ This tutorial builds a two-agent *ping-pong* system. Along the way it shows how 
 - use your own Kotlin types as beliefs and goals, without any incarnation;
 - turn incoming messages into beliefs;
 - react to belief additions with plans;
-- give agents a [skill](../basic-concepts/skills.md) — here, the ability to send messages.
+- give agents a [skill](../explanation/basic-concepts/skills.md) — here, the ability to send messages.
 
 It only needs `jakta-core`.
 
@@ -100,7 +100,7 @@ A few things to notice:
   the context is the substitution produced by unification.
 - **Skills are context parameters.** `context(MessagingSkill(node)) { ... }` makes the messaging skill available
   to every agent defined inside the block, and `agent.sendTo(...)` only compiles there.
-  See [Skills](../basic-concepts/skills.md) to write your own.
+  See [Skills](../explanation/basic-concepts/skills.md) to write your own.
 
 ## Imports
 

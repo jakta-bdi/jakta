@@ -8,27 +8,20 @@ JaKtA is a full fledged, [AgentSpeak(L)](https://link.springer.com/chapter/10.10
 for [Kotlin](https://kotlinlang.org). It comes with its own BDI execution engine and an internal Kotlin DSL
 to write agents, their beliefs, goals and plans, side by side with ordinary Kotlin code.
 
+JaKtA 1.x is a multiplatform, coroutine-based BDI framework with pluggable knowledge representations,
+skills, and nodes for connecting agents to their surroundings. Start with the
+[Getting Started](./tutorials/index.mdx) guide, explore the [Showcase](./showcase/index.md),
+or read the [JaKtA 1.x redesign](./history/jakta-1-x.md)
+for the main ideas behind the current architecture.
+
 The choice of realising a fresh implementation of a BDI execution engine instead of reusing an existing one was driven by two major design goals:
 1. to explore paradigm blending of AOP – and in particular BDI – with mainstream programming languages, and
 2. to support modularity and pluggability of any aspect involving the execution of BDI systems—there including reasoning capabilities, message passing mechanisms, concurrency models, and the like.
 
-## What's new in JaKtA 1.x
-
-Starting from version 1.0.0 JaKtA has been rewritten from the ground up:
-
-- **Kotlin Multiplatform**: the core libraries run on the JVM, in JavaScript (browser and Node.js, also published on npm) and natively.
-- **Coroutines-based engine**: every intention is a coroutine, plan bodies are plain `suspend` Kotlin code.
-- **Generic over the knowledge representation**: the engine does not force a belief or goal type.
-  An [incarnation](./explanation/incarnations/index.md) fixes it — use Prolog terms, plain strings, or your own Kotlin types.
-- **Skills instead of actions**: what an agent can do is modelled by ordinary Kotlin objects made available to plans
-  through [context parameters](https://kotlinlang.org/docs/context-parameters.html). See [Skills](./basic-concepts/skills.md).
-- **Nodes instead of environments**: agents live in [nodes](./explanation/nodes.md) that deliver perceptions and messages,
-  and can be simulated with [Alchemist](./how-to/alchemist.md).
-
 :::info[Coming from JaKtA 0.x?]
 The 1.x DSL is not source-compatible with 0.x: `mas { ... }.start()`, `environment { }`, `actions { }`,
 `+achieve(...) onlyIf { } then { }` and friends are gone. The pages in this documentation describe the new API only;
-see [JaKtA 0.x](./jakta-0x.md) for the old version and how its concepts map to 1.x.
+see [JaKtA 0.x](/docs/jakta-0x) for the old version and how its concepts map to 1.x.
 :::
 
 ## Architecture

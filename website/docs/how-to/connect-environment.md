@@ -7,7 +7,7 @@ sidebar_position: 2
 JaKtA has no built-in environment class: the environment is **your** Kotlin model of the world.
 Agents are connected to it in two directions:
 
-- **acting**: a [skill](../basic-concepts/skills.md) exposes the operations agents can perform on the model;
+- **acting**: a [skill](../explanation/basic-concepts/skills.md) exposes the operations agents can perform on the model;
 - **perceiving**: the model (or the skill) publishes **perceptions** on the node, and each agent turns them into
   beliefs with `handlesPerceptionEvents`.
 

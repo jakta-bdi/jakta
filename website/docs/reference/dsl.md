@@ -139,7 +139,7 @@ and the context is also available as a Kotlin context parameter. The value of it
 | `context: Ctx` | The context produced by the trigger and the guard. |
 | `node` | Not a member of `PlanScope`: it is the `node` of the enclosing builder (or the parameter of `plans { node -> }`), captured by the lambda. |
 
-Plus any [skill](../basic-concepts/skills.md) available in the enclosing `context(...)` blocks, reachable with
+Plus any [skill](../explanation/basic-concepts/skills.md) available in the enclosing `context(...)` blocks, reachable with
 `contextOf<Skill>()` or through the skill's extension functions.
 
 ## Agent state

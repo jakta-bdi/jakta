@@ -2,7 +2,7 @@
 sidebar_position: 5
 ---
 
-# Skills in JaKtA
+# Skills
 
 In JaKtA 1.x there are no dedicated "action" constructs: plan bodies are plain `suspend` Kotlin code.
 What an agent can *do* beyond changing its own state — send messages, move a robot, update a world model —
@@ -23,7 +23,7 @@ where a `MessagingSkill` is in scope.
 | `NodeTerminationSkill(node)` | `terminateNode()` — stop the whole node |
 
 The built-in skills take a `Node<Any>`, so they work with nodes built with `NodeBuilders.baseNode()`, whose body type is `Any`.
-For agents with a custom body, write a skill for your node type (see [Give agents a body](../how-to/custom-body.md)).
+For agents with a custom body, write a skill for your node type (see [Give agents a body](../../how-to/custom-body.md)).
 
 Plan bodies can also always reach the node directly (`node.terminateNode()`, `node.publishEvent(...)`).
 
@@ -93,7 +93,7 @@ context(BlocksWorldSkillsImpl(world, node)) {
 
 Skills that change the world should report the outcome back as a **perception**
 (`node.publishEvent(...)`), which each agent turns into beliefs with `handlesPerceptionEvents` —
-see [Nodes and environment](../explanation/nodes.md).
+see [Nodes and environment](../nodes.md).
 
 For a skill that depends on the agent's body, see
 [`TestSpatialRobot`](https://github.com/jakta-bdi/jakta/blob/main/jakta-core/src/commonTest/kotlin/it/unibo/jakta/dsl/examples/TestSpatialRobot.kt),

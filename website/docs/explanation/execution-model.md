@@ -2,7 +2,7 @@
 sidebar_position: 5
 ---
 
-# Execution Model in JaKtA
+# Execution Model
 
 This page describes how the JaKtA engine (`jakta-core`) runs agents: the reasoning cycle, how intentions map to
 coroutines, and how nodes exchange events. Knowing it helps predict in which order things happen, and why plan bodies
@@ -77,7 +77,7 @@ flowchart LR
   trigger returns a non-null context for the event's goal or belief.
 - It is **applicable** if its guard, evaluated on the current beliefs and that context, returns a non-null context.
 - The **first** applicable plan, in the order plans were added to the library, is selected.
-  Order your plans from the most specific to the most general (see the [Blocks World tutorial](../getting-started/blocks-world.md#4-the-plans)).
+  Order your plans from the most specific to the most general (see the [Blocks World tutorial](../tutorials/blocks-world.md#4-the-plans)).
 
 If no plan is selected:
 

@@ -44,7 +44,7 @@ agent<PrologBelief, PrologGoal, Any> {
   store every consequence as a belief.
 - **Pattern-matching plans.** A plan's trigger is a pattern, and one plan handles a whole family of goals.
 - **Jason compatibility.** Belief sources (`[source(bob)]`) and KQML messaging work as they do in Jason,
-  which makes porting AgentSpeak programs straightforward (see the [Blocks World](../../../getting-started/blocks-world.md) tutorial).
+  which makes porting AgentSpeak programs straightforward (see the [Blocks World](../../../tutorials/blocks-world.md) tutorial).
 
 ## In this section
 

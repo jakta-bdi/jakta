@@ -2,7 +2,7 @@
 sidebar_position: 3
 ---
 
-# Nodes and Environment in JaKtA
+# Nodes and Environment
 
 A JaKtA multi-agent system is made of **nodes**, and each node hosts a set of **agents**.
 The node is the agents' environment: it delivers perceptions and messages to them, and it is where agents are
@@ -79,7 +79,7 @@ sequenceDiagram
 `publishEvent(event, filterFunction)` accepts a filter on agent bodies, to deliver a perception only to some agents
 (e.g. those close to where something happened).
 
-Agents act on the world through [skills](../basic-concepts/skills.md), which typically update the world model and
+Agents act on the world through [skills](./basic-concepts/skills.md), which typically update the world model and
 publish the resulting perceptions.
 
 ## Managing agents at runtime

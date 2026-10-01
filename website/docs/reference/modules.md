@@ -31,7 +31,7 @@ which is why `jakta-core` must be declared explicitly next to an incarnation.
 |---|---|---|---|
 | `jakta-api` | Representation-agnostic contracts: `Agent`, `AgentID`, `AgentState`/`MutableAgentState`, events (`AgentEvent`, `AgentUpdate`), `Plan`, `PlanScope`, `GuardScope`, `Node`, `NodeRunner`. | — | JVM, JS, native |
 | `jakta-dsl` | The DSL builder interfaces: `MasBuilder`, `NodeBuilder`, `AgentBuilder`, `PlanLibraryBuilder`, `PlanBuilder`, ... No implementation. | api | JVM, JS, native |
-| `jakta-core` | The engine and the DSL entry points: `mas`, `node`, `agent`, `plans`, `NodeBuilders.baseNode()`, `runLocally()`, `CoroutineNodeRunner`, `SharedMemoryNetwork`, and the built-in [skills](../basic-concepts/skills.md). | api, dsl | JVM, JS, native |
+| `jakta-core` | The engine and the DSL entry points: `mas`, `node`, `agent`, `plans`, `NodeBuilders.baseNode()`, `runLocally()`, `CoroutineNodeRunner`, `SharedMemoryNetwork`, and the built-in [skills](../explanation/basic-concepts/skills.md). | api, dsl | JVM, JS, native |
 | `jakta-prolog-incarnation` | Beliefs and goals as [2P-Kt](https://github.com/tuProlog/2p-kt) terms, `prologPlan`, unification-based matching, belief sources, KQML messaging. | api, dsl, core, 2P-Kt | JVM, JS |
 | `jakta-string-incarnation` | Beliefs and goals as `String`s. | api, dsl, core | JVM, JS, native |
 | `alchemist-jakta-incarnation` | Runs JaKtA nodes as [Alchemist](https://alchemistsimulator.github.io/) simulated devices. | api, dsl, core, Alchemist | JVM (17+) |

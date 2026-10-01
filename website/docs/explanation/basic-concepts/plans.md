@@ -2,7 +2,7 @@
 sidebar_position: 4
 ---
 
-# Plans in JaKtA
+# Plans
 
 Plans define **how** an agent reacts to events: new goals, belief changes, and failures.
 A plan is made of three parts:
@@ -82,7 +82,7 @@ call functions, use `delay(...)`, launch computations. Its receiver provides:
 - `agent` — the agent's state:
   `believe`, `forget`, `achieve`, `alsoAchieve`, `achieveWithResult`, `print`, `beliefs`, and
   `wait(filter, timeout)` to suspend until a matching event happens;
-- `node` — the [node](../explanation/nodes.md) the agent lives in (e.g. `node.terminateNode()`). It is not part of
+- `node` — the [node](../nodes.md) the agent lives in (e.g. `node.terminateNode()`). It is not part of
   the plan scope: it comes from the enclosing `agent { }` / `node { }` builder, or from the `plans { node -> }` parameter;
 - `context` — the value produced by the trigger and guard;
 - any [skill](./skills.md) in scope.
