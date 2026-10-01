@@ -5,21 +5,17 @@ import CodeBlock from '@theme/CodeBlock';
 import styles from './HelloWorldSection.module.css';
 
 // Same code as examples/hello-world/src/main/kotlin/Main.kt
-const helloWorld = `val helloGoal = Atom.of("sayHello")
-
-val helloWorldAgent = agent<PrologBelief, PrologGoal, Any> {
+const helloWorld = `val helloWorldAgent = agent<String, String, Any> {
     embodiedAs { Any() }
     hasInitialGoals {
-        !initialGoal { helloGoal }
+        !"sayHello"
     }
     hasPlanLibrary {
-        prologPlan {
-            adding.goal {
-                matchingGoal { helloGoal }
-            } triggers {
-                agent.print("Hello, world!")
-                node.terminateNode()
-            }
+        adding.goal {
+            takeIf { it == "sayHello" }
+        } triggers {
+            agent.print("Hello, world!")
+            node.terminateNode()
         }
     }
 }
@@ -32,7 +28,8 @@ fun main(): Unit = runBlocking {
 
 const dependencies = `dependencies {
     implementation("it.unibo.jakta:jakta-core:<VERSION>")
-    implementation("it.unibo.jakta:jakta-prolog-incarnation:<VERSION>")
+    implementation("it.unibo.jakta:jakta-dsl:<VERSION>")
+    implementation("it.unibo.jakta:jakta-api:<VERSION>")
 }`;
 
 export default function HelloWorldSection() {
@@ -41,11 +38,11 @@ export default function HelloWorldSection() {
       <div className={styles.helloText}>
         <Heading as="h2">Hello, world!</Heading>
         <p>
-          An agent is a Kotlin value: its <b>goals</b>, <b>beliefs</b> and <b>plans</b> are declared with the DSL,
-          and plan bodies are plain <code>suspend</code> Kotlin code.
+          Agents are written in pure Kotlin: their <b>goals</b>, <b>beliefs</b> and <b>plans</b> are declared
+          with the DSL, and plan bodies are plain <code>suspend</code> Kotlin code.
         </p>
         <ol>
-          <li>The agent starts with the goal <code>sayHello</code>.</li>
+          <li>The agent starts with the goal <code>"sayHello"</code>, a plain string.</li>
           <li>The plan triggered by adding that goal prints a message and stops the node.</li>
           <li>The MAS, one node with one agent, runs on Kotlin coroutines.</li>
         </ol>
