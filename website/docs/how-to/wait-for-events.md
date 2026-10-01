@@ -6,6 +6,7 @@ sidebar_position: 6
 
 Plan bodies are `suspend` functions running on coroutines, so an intention can pause — for some time, or until
 something happens — without blocking the agent: its other intentions keep running meanwhile.
+The complete program is the [`wait-for-events`](https://github.com/jakta-bdi/jakta/tree/main/examples/wait-for-events) example; run it with `./gradlew :examples:wait-for-events:run`.
 
 ## Wait for some time
 
@@ -28,11 +29,8 @@ The filter sees every event the agent handles: belief and goal events (`AgentEve
 messages and perceptions (`AgentEvent.External`).
 
 ```kotlin
-fun beliefAdded(expected: String): (AgentEvent) -> String? = { event ->
-    (event as? AgentEvent.Internal.Belief.Add<*>)?.belief?.takeIf { it == expected } as String?
-}
+private fun beliefAdded(expected: String): (AgentEvent) -> String? = { event ->
 
-// in a plan body
 val parcel = agent.wait(beliefAdded("parcel"), timeout = 5.seconds)
 if (parcel != null) agent.print("Parcel received!") else agent.print("Gave up waiting")
 ```
@@ -47,6 +45,7 @@ if (parcel != null) agent.print("Parcel received!") else agent.print("Gave up wa
 
 ```kotlin
 fun main(): Unit = runBlocking {
+    Logger.setMinSeverity(Severity.Assert)
     mas(NodeBuilders.baseNode()) {
         node {
             agent<String, String> {
@@ -116,6 +115,8 @@ sequenceDiagram
 <summary>Imports</summary>
 
 ```kotlin
+import co.touchlab.kermit.Logger
+import co.touchlab.kermit.Severity
 import it.unibo.jakta.agent.achieve
 import it.unibo.jakta.dsl.mas
 import it.unibo.jakta.dsl.mas.runLocally

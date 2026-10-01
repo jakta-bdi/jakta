@@ -11,7 +11,7 @@ This tutorial builds a two-agent *ping-pong* system. Along the way it shows how 
 - react to belief additions with plans;
 - give agents a [skill](../explanation/basic-concepts/skills.md) — here, the ability to send messages.
 
-It only needs `jakta-core`.
+It only needs `jakta-core`. The complete program is the [`ping-pong`](https://github.com/jakta-bdi/jakta/tree/main/examples/ping-pong) example; run it with `./gradlew :examples:ping-pong:run`.
 
 ## Beliefs and goals are just types
 
@@ -19,10 +19,10 @@ The engine is generic over the belief and goal types.
 Here goals are `String`s and a belief is a received message: its text and its sender.
 
 ```kotlin
-typealias Message = Pair<String, AgentID>
+private typealias Message = Pair<String, AgentID>
 
-val alice = BaseAgentID("Alice")
-val bob = BaseAgentID("Bob")
+private val alice = BaseAgentID("Alice")
+private val bob = BaseAgentID("Bob")
 ```
 
 ## From messages to beliefs
@@ -32,7 +32,7 @@ own state with `handlesMessageEvents`: return an `AgentUpdate` to accept it, or 
 Both agents behave in the same way, so let's write it once as an extension of the agent builder:
 
 ```kotlin
-fun AgentBuilder<Message, String, Any>.receivesTextMessages() {
+private fun AgentBuilder<Message, String, Any>.receivesTextMessages() {
     embodiedAs { Any() }
     handlesMessageEvents { message ->
         when (val payload = message.payload) {
@@ -50,6 +50,7 @@ a belief-addition event that plans can react to. Perceptions work the same way t
 
 ```kotlin
 fun main(): Unit = runBlocking {
+    Logger.setMinSeverity(Severity.Assert)
     mas(NodeBuilders.baseNode()) {
         node {
             context(MessagingSkill(node)) {
@@ -90,6 +91,13 @@ fun main(): Unit = runBlocking {
 }
 ```
 
+It prints:
+
+```text
+Received "Ping!" from Alice
+Got the pong, stopping.
+```
+
 A few things to notice:
 
 - **Triggers are functions.** `adding.belief { ... }` receives the new belief and returns either `null`
@@ -105,6 +113,8 @@ A few things to notice:
 ## Imports
 
 ```kotlin
+import co.touchlab.kermit.Logger
+import co.touchlab.kermit.Severity
 import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.agent.BaseAgentID
 import it.unibo.jakta.dsl.agent.AgentBuilder

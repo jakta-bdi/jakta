@@ -22,18 +22,16 @@ flowchart LR
 ```
 
 This guide builds a thermostat agent that heats a room until it is warm enough. It only needs `jakta-core`.
+The complete program is the [`connect-environment`](https://github.com/jakta-bdi/jakta/tree/main/examples/connect-environment) example; run it with `./gradlew :examples:connect-environment:run`.
 
 ## 1. Model the world
 
 ```kotlin
-// The world model: a room with a temperature.
-class Room(var temperature: Int)
+private class Room(var temperature: Int)
 
-// What agents perceive.
-data class TemperatureChanged(val degrees: Int) : Perception
+private data class TemperatureChanged(val degrees: Int) : Perception
 
-// What agents believe.
-data class Temperature(val degrees: Int)
+private data class Temperature(val degrees: Int)
 ```
 
 A perception is any class implementing `AgentEvent.External.Perception`.
@@ -44,7 +42,7 @@ It is kept separate from the belief type: agents decide how a perception affects
 The skill holds the model and the node, acts on the former and notifies the latter:
 
 ```kotlin
-class Heater(private val room: Room, private val node: Node<*>) {
+private class Heater(private val room: Room, private val node: Node<*>) {
     fun sense() = node.publishEvent(TemperatureChanged(room.temperature))
 
     fun heat() {
@@ -54,7 +52,7 @@ class Heater(private val room: Room, private val node: Node<*>) {
 }
 
 context(heater: Heater)
-val PlanScope<*, *, *>.heater get() = heater
+private val PlanScope<*, *, *>.heater get() = heater
 ```
 
 The extension property lets plan bodies write `heater.heat()`, and only compiles where a `Heater` is in scope.
@@ -71,9 +69,9 @@ handlesPerceptionEvents { perception ->
             additions = setOf(Temperature(perception.degrees)),
             removals = beliefs.toSet(), // forget the old temperature
         )
+
         else -> null
     }
-}
 ```
 
 A belief that appears in both sets is left untouched, and generates no event.
@@ -81,7 +79,10 @@ A belief that appears in both sets is left untouched, and generates no event.
 ## 4. Put it together
 
 ```kotlin
+private const val WARM_ENOUGH = 20
+
 fun main(): Unit = runBlocking {
+    Logger.setMinSeverity(Severity.Assert)
     val room = Room(temperature = 17)
     mas(NodeBuilders.baseNode()) {
         node {
@@ -92,8 +93,9 @@ fun main(): Unit = runBlocking {
                         when (perception) {
                             is TemperatureChanged -> AgentUpdate.Belief(
                                 additions = setOf(Temperature(perception.degrees)),
-                                removals = beliefs.toSet(),
+                                removals = beliefs.toSet(), // forget the old temperature
                             )
+
                             else -> null
                         }
                     }
@@ -105,13 +107,13 @@ fun main(): Unit = runBlocking {
                             heater.sense()
                         }
                         adding.belief {
-                            takeIf { it.degrees < 20 }
+                            takeIf { it.degrees < WARM_ENOUGH }
                         } triggers {
                             agent.print("It's ${context.degrees}°C, heating")
                             heater.heat()
                         }
                         adding.belief {
-                            takeIf { it.degrees >= 20 }
+                            takeIf { it.degrees >= WARM_ENOUGH }
                         } triggers {
                             agent.print("It's ${context.degrees}°C, warm enough")
                             node.terminateNode()
@@ -140,6 +142,8 @@ and the new belief triggers the next plan.
 <summary>Imports</summary>
 
 ```kotlin
+import co.touchlab.kermit.Logger
+import co.touchlab.kermit.Severity
 import it.unibo.jakta.dsl.mas
 import it.unibo.jakta.dsl.mas.runLocally
 import it.unibo.jakta.dsl.node.NodeBuilders
@@ -174,4 +178,4 @@ Perceptions are delivered to agents of the node that publishes them. To reach ag
 
 The same pattern works with Prolog beliefs: the perception handler builds Prolog facts and removes the stale ones.
 The [`blocksworld`](https://github.com/jakta-bdi/jakta/tree/main/examples/blocksworld) example does exactly that in
-[`BlocksWorldSkills.kt`](https://github.com/jakta-bdi/jakta/blob/main/examples/blocksworld/src/main/kotlin/BlocksWorldSkills.kt).
+[`BlocksWorldSkills.kt`](https://github.com/jakta-bdi/jakta/blob/main/examples/blocksworld/src/commonMain/kotlin/BlocksWorldSkills.kt).

@@ -11,13 +11,14 @@ while **messages** travel across nodes through the network that connects them.
 
 Nodes can be declared inline, with several `node { }` blocks in `mas { }`, or on their own with
 `node(NodeBuilders.baseNode()) { }` and combined with `withNodes(...)`.
-Here two agents on two different nodes play ping-pong:
+Here two agents on two different nodes play ping-pong. The complete program is the [`multi-node`](https://github.com/jakta-bdi/jakta/tree/main/examples/multi-node) example; run it with `./gradlew :examples:multi-node:run`.
+
 
 ```kotlin
-val pinger = BaseAgentID("Pinger")
-val ponger = BaseAgentID("Ponger")
+private val pinger = BaseAgentID("Pinger")
+private val ponger = BaseAgentID("Ponger")
 
-val pingNode = node(NodeBuilders.baseNode()) {
+private val pingNode = node(NodeBuilders.baseNode()) {
     context(MessagingSkill(node)) {
         agent<String, String>(pinger) {
             embodiedAs { Any() }
@@ -42,7 +43,7 @@ val pingNode = node(NodeBuilders.baseNode()) {
     }
 }
 
-val pongNode = node(NodeBuilders.baseNode()) {
+private val pongNode = node(NodeBuilders.baseNode()) {
     context(MessagingSkill(node)) {
         agent<Pair<String, AgentID>, String>(ponger) {
             embodiedAs { Any() }
@@ -67,6 +68,7 @@ val pongNode = node(NodeBuilders.baseNode()) {
 
 ```kotlin
 fun main(): Unit = runBlocking {
+    Logger.setMinSeverity(Severity.Assert)
     mas(NodeBuilders.baseNode()) {
         withNodes(pingNode, pongNode)
     }.run(CoroutineNodeRunner(SharedMemoryNetwork()))
@@ -102,6 +104,8 @@ sequenceDiagram
 <summary>Imports</summary>
 
 ```kotlin
+import co.touchlab.kermit.Logger
+import co.touchlab.kermit.Severity
 import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.agent.BaseAgentID
 import it.unibo.jakta.dsl.mas

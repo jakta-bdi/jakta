@@ -8,15 +8,16 @@ The engine is generic over the belief and goal types, so you can use any Kotlin 
 An [incarnation](../explanation/incarnations/index.md) is just that choice, plus a few helper functions that make
 triggers and guards pleasant to write. This guide builds a tiny one, where beliefs and goals are *facts* such as
 `friend(bob)`.
+The complete program is the [`custom-incarnation`](https://github.com/jakta-bdi/jakta/tree/main/examples/custom-incarnation) example; run it with `./gradlew :examples:custom-incarnation:run`.
 
 ## 1. Choose the representation
 
 ```kotlin
-data class Fact(val name: String, val args: List<Any>) {
+private data class Fact(val name: String, val args: List<Any>) {
     override fun toString() = "$name(${args.joinToString()})"
 }
 
-fun fact(name: String, vararg args: Any) = Fact(name, args.toList())
+private fun fact(name: String, vararg args: Any) = Fact(name, args.toList())
 ```
 
 Beliefs and goals are compared with `equals` (e.g. when a belief is removed), so data classes are a good fit.
@@ -27,8 +28,7 @@ A trigger receives the goal or belief as `this` and returns `null` if the plan i
 passed to the guard and the body. Here, a fact matches by name and arity, and its arguments become the context:
 
 ```kotlin
-fun Fact.matches(name: String, arity: Int): List<Any>? =
-    args.takeIf { this.name == name && args.size == arity }
+private fun Fact.matches(name: String, arity: Int): List<Any>? = args.takeIf { this.name == name && args.size == arity }
 ```
 
 ## 3. Write guard helpers
@@ -37,14 +37,14 @@ A guard runs in a `GuardScope`, which exposes the agent's `beliefs` and the plan
 It returns the context (possibly refined) if the plan is applicable, `null` otherwise:
 
 ```kotlin
-fun <Context : Any> GuardScope<Fact, Context>.believes(belief: Fact): Context? =
+private fun <Context : Any> GuardScope<Fact, Context>.believes(belief: Fact): Context? =
     context.takeIf { belief in beliefs }
 ```
 
 ## 4. Use it
 
 ```kotlin
-val greeter = agent<Fact, Fact, Any> {
+private val greeter = agent<Fact, Fact, Any> {
     embodiedAs { Any() }
     believes {
         +fact("friend", "bob")
@@ -71,6 +71,7 @@ val greeter = agent<Fact, Fact, Any> {
 }
 
 fun main(): Unit = runBlocking {
+    Logger.setMinSeverity(Severity.Assert)
     mas(NodeBuilders.baseNode()) {
         node { withAgents(greeter) }
     }.runLocally()
@@ -91,6 +92,8 @@ handles it.
 <summary>Imports</summary>
 
 ```kotlin
+import co.touchlab.kermit.Logger
+import co.touchlab.kermit.Severity
 import it.unibo.jakta.dsl.agent
 import it.unibo.jakta.dsl.mas
 import it.unibo.jakta.dsl.mas.runLocally

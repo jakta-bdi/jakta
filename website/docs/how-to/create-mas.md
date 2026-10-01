@@ -4,15 +4,42 @@ sidebar_position: 1
 
 # Create a JaKtA Multi-Agent System
 
-After [setting up your project](../tutorials/index.mdx), a MAS is defined and run from a `main` function:
+After [setting up your project](../tutorials/index.mdx), a MAS is defined and run from a `main` function.
+The complete program is the [`create-mas`](https://github.com/jakta-bdi/jakta/tree/main/examples/create-mas) example; run it with `./gradlew :examples:create-mas:run`.
 
 ```kotlin
+private fun greeter(name: String) = agent<String, String, Any>(BaseAgentID(name)) {
+    embodiedAs { Any() }
+    hasInitialGoals { !"greet" }
+    hasPlanLibrary {
+        adding.goal {
+            takeIf { it == "greet" }
+        } triggers {
+            agent.print("Hello from $name")
+        }
+    }
+}
+
+private val agentA = greeter("agentA")
+private val agentB = greeter("agentB")
+
 fun main(): Unit = runBlocking {
+    Logger.setMinSeverity(Severity.Assert)
     mas(NodeBuilders.baseNode()) {
         node {
-            // your agents go in here
             withAgents(agentA, agentB)
-            agent(BaseAgentID("agentC")) { /* ... */ }
+            agent<String, String>(BaseAgentID("agentC")) {
+                embodiedAs { Any() }
+                hasInitialGoals { !"stop" }
+                hasPlanLibrary {
+                    adding.goal {
+                        takeIf { it == "stop" }
+                    } triggers {
+                        agent.print("Stopping the node")
+                        node.terminateNode()
+                    }
+                }
+            }
         }
     }.runLocally()
 }

@@ -13,50 +13,89 @@ It combines most JaKtA features in a small program:
 - Prolog **inference rules** that let the agent reason about towers;
 - **guards** to choose between alternative plans, and **recursive sub-goals** to decompose the problem.
 
-Run it with:
+It is a [Compose Multiplatform](https://www.jetbrains.com/compose-multiplatform/) application that runs both on the
+desktop and in the browser:
 
 ```bash
-./gradlew :examples:blocksworld:run
+./gradlew :examples:blocksworld:run                      # desktop
+./gradlew :examples:blocksworld:jsBrowserDevelopmentRun  # browser
 ```
 
-A Compose Desktop window opens: set the seed, the number of blocks and the goal, then press **Play**.
+Drag the blocks to arrange the goal (shown first) and the world, or shuffle them, then press **Play**.
+The agent works until the world matches the goal, and an *agent trace* panel shows what it prints while it reasons.
 
 ## 1. The world model
 
-[`model/BlocksWorld.kt`](https://github.com/jakta-bdi/jakta/blob/main/examples/blocksworld/src/main/kotlin/model/BlocksWorld.kt)
-knows nothing about agents. It keeps a list of stacks (bottom block first), shuffled from a random seed,
-and exposes coroutine-safe operations guarded by a `Mutex`:
+[`model/BlocksWorld.kt`](https://github.com/jakta-bdi/jakta/blob/main/examples/blocksworld/src/commonMain/kotlin/model/BlocksWorld.kt)
+knows nothing about agents. It keeps the stacks (bottom block first) in a `StateFlow`, which the UI observes:
 
 ```kotlin
 data class Block(val id: String)
 
-class BlocksWorld(seed: Long = 42, blockCount: Int = 6) {
-    suspend fun move(block: Block, destination: Block?): List<List<Block>> = mutex.withLock { /* ... */ }
-    suspend fun getState(): List<List<Block>> = mutex.withLock { getStateUnsafe() }
-    suspend fun printState() = mutex.withLock { /* ... */ }
+typealias Stacks = List<List<Block>>
+
+class BlocksWorld(initial: Stacks) {
+
+    private val mutableState = MutableStateFlow(initial)
+
+    /**
+     * The current state of the Blocks World.
+     */
+    val state: StateFlow<Stacks> = mutableState.asStateFlow()
+
+    /**
+     * How long a single move of the agent takes, to make its work visible.
+     */
+    var moveDelay: Duration = 1.seconds
+
+    /**
+     * Moves a block on top of [destination], or on the table if [destination] is null, taking [moveDelay].
+     * Returns the new state of the world.
+     */
+    suspend fun move(block: Block, destination: Block?): Stacks {
+        delay(moveDelay)
+        return mutableState.updateAndGet { it.moved(block, destination) }
+    }
+
+    /**
+     * Instantly moves a block, e.g. when the user rearranges the world.
+     */
+    fun rearrange(block: Block, destination: Block?) {
+        mutableState.update { it.moved(block, destination) }
+    }
 }
 ```
 
-`move` checks that both the moved block and the destination are clear, moves the block (`null` means the table),
-and returns the new state. Stacking onto another block takes one second, so the UI can show it.
+`move` waits `moveDelay` (one second by default, adjustable from the UI) so that each move is visible, then moves the
+block (`null` means the table) and returns the new state. The moved block and the destination must both be clear.
+`rearrange` is used by the UI when you drag blocks yourself.
 
 ## 2. Perceptions and the skill
 
-[`BlocksWorldSkills.kt`](https://github.com/jakta-bdi/jakta/blob/main/examples/blocksworld/src/main/kotlin/BlocksWorldSkills.kt)
+[`BlocksWorldSkills.kt`](https://github.com/jakta-bdi/jakta/blob/main/examples/blocksworld/src/commonMain/kotlin/BlocksWorldSkills.kt)
 connects the world to the agent. First, a **perception** type carries a snapshot of the world:
 
 ```kotlin
 data class BlocksWorldPerception(val state: List<List<Block>>) : Perception
 ```
 
-Then a **skill** defines what the agent can do. Every operation that changes (or reveals) the world publishes
-a perception on the agent's node:
+Then a **skill** defines what the agent can do. Both operations publish a perception on the agent's node:
+`move` after changing the world, `join` with its current state.
 
 ```kotlin
 interface BlocksWorldSkills {
+    /**
+     * Moves a block to a specified destination in the Blocks World.
+     *
+     * @param block The identifier of the block to be moved.
+     * @param destination The identifier of the destination block or "table" for moving to the table.
+     */
     suspend fun move(block: String, destination: String)
+
+    /**
+     * Joins the Blocks World and sends the current state as a perception event.
+     */
     suspend fun join()
-    suspend fun displayWorld()
 }
 
 class BlocksWorldSkillsImpl(private val world: BlocksWorld, private val node: Node<*>) : BlocksWorldSkills {
@@ -68,12 +107,7 @@ class BlocksWorldSkillsImpl(private val world: BlocksWorld, private val node: No
     }
 
     override suspend fun join() {
-        val state = world.getState()
-        node.publishEvent(BlocksWorldPerception(state))
-    }
-
-    override suspend fun displayWorld() {
-        world.printState()
+        node.publishEvent(BlocksWorldPerception(world.state.value))
     }
 }
 ```
@@ -88,9 +122,7 @@ fun handleBlocksWorldPerceptions(
     previousBeliefs: Collection<PrologBelief>,
 ): AgentUpdate<*> = AgentUpdate.Belief(
     event.state.toPrologFacts(),
-    previousBeliefs.filter {
-        it matches filterQuery
-    }.toSet(),
+    previousBeliefs.filter { it.matchBelief(filterQuery) != null }.toSet(),
 )
 ```
 
@@ -108,7 +140,7 @@ val PlanScope<*, *, *>.blocksWorld
 
 ## 3. The agent
 
-[`Agent.kt`](https://github.com/jakta-bdi/jakta/blob/main/examples/blocksworld/src/main/kotlin/Agent.kt)
+[`Agent.kt`](https://github.com/jakta-bdi/jakta/blob/main/examples/blocksworld/src/commonMain/kotlin/Agent.kt)
 defines a node with one agent, wrapped in the skill's context:
 
 ```kotlin
@@ -120,9 +152,13 @@ fun MasBuilder<BaseNode<Any>, BaseNodeBuilder<Any, BaseNode<Any>>>.blocksWorldNo
         agent<PrologBelief, PrologGoal>(BaseAgentID("BlocksWorldAgent")) {
             val start = "start".toAtom()
             val table = "table".toAtom()
+            fun state(list: List): Struct = Struct.of("state", list)
+            fun state(list: Var): Struct = Struct.of("state", list)
             fun tower(list: List): Struct = Struct.of("tower", list)
+            fun tower(list: Var): Struct = Struct.of("tower", list)
+            fun clear(block: Atom): Struct = Struct.of("clear", block)
+            fun clear(block: Var): Struct = Struct.of("clear", block)
             fun on(block: Term, support: Term): Struct = Struct.of("on", block, support)
-            // ... similar helpers for state/1 and clear/1
 ```
 
 The small helper functions build Prolog terms with readable names: `tower(X)` instead of `Struct.of("tower", X)`.
@@ -171,22 +207,30 @@ handlesPerceptionEvents {
 ### The goal
 
 The desired configuration is a `state/1` goal holding a list of towers, for instance
-`state([[a, b], [c, d, e], [f]])`: `a` on `b`, `c` on `d` on `e`, and `f` alone on the table.
-The UI parses it from text like `[A, B]; [C, D, E]; [F]`.
+`state([['A', 'B'], ['C', 'D', 'E'], ['F']])`: `A` on `B`, `C` on `D` on `E`, and `F` alone on the table
+(blocks are named `A`, `B`, ..., so their atoms are quoted).
+The UI builds it from the arrangement you drag in the goal area, with `goalOf` in `BlocksWorldAppState.kt`.
 
 ## 4. The plans
 
 Each plan below is a `prologPlan { }` in the agent's `hasPlanLibrary { }`.
 
-**Start.** Join the world — which produces the first perception — then pursue the desired state:
+**Start.** Join the world — which produces the first perception — then pursue the desired state.
+If that fails, a failure plan for the same goal gives up and stops the node:
 
 ```kotlin
 adding.goal {
     matchingGoal { start }
 } triggers {
     blocksWorld.join()
-    blocksWorld.displayWorld()
     agent.achieve(desiredWorldState)
+}
+
+failing.goal {
+    matchingGoal { start }
+} triggers {
+    agent.print("I could not reach the goal, giving up.")
+    node.terminateNode()
 }
 ```
 
@@ -195,13 +239,14 @@ so by the time the first `state` plan is selected, the agent already believes th
 (see [Execution model](../explanation/execution-model.md)).
 
 **Build the towers, one at a time.** `state/1` is decomposed recursively: build the first tower, then the rest.
+Once no tower is left, the agent stops its node.
 
 ```kotlin
 adding.goal {
     matchingGoal { state(emptyLogicList) }
 } triggers {
     agent.print("Finished! Final state reached.")
-    blocksWorld.displayWorld()
+    node.terminateNode()
 }
 
 adding.goal {
@@ -260,8 +305,11 @@ adding.goal {
 adding.goal {
     matchingGoal { on(X, Y) }
 } triggers {
+    agent.print("Check if block ", X, " is clear")
     agent.achieve(goal { clear(X) })
+    agent.print("Check if block ", Y, " is clear")
     agent.achieve(goal { clear(Y) })
+    agent.print("Moving block ", X, " on ", Y)
     blocksWorld.move(X.value(), Y.value())
 }
 ```
@@ -276,7 +324,7 @@ adding.goal {
 } onlyWhen {
     satisfies { clear(X) }
 } triggers {
-    agent.print("Block", X, "is clear.")
+    agent.print("Block ", X, " is clear.")
 }
 
 adding.goal {
@@ -284,8 +332,12 @@ adding.goal {
 } onlyWhen {
     satisfies { tower(logicList(H, tail = T)) and member(X, T) }
 } triggers {
-    agent.achieve(goal { clear(H) })
+    agent.print("Block ", X, " is not clear.")
+    agent.print("Check if I can move ", H, " to clear ", X)
+    agent.achieve(goal { clear(H) }) // TODO the Jason solution does not include this
+    agent.print("Moving block ", H, " on ", table)
     blocksWorld.move(H.value(), table.value)
+    agent.print(X, " should now be clear.")
     agent.achieve(goal { clear(X) })
 }
 ```
@@ -299,39 +351,44 @@ achieves `clear(H)` itself before moving it.
 
 ## 5. Launching the MAS from the UI
 
-[`ui/BlocksWorldViewModel.kt`](https://github.com/jakta-bdi/jakta/blob/main/examples/blocksworld/src/main/kotlin/ui/BlocksWorldViewModel.kt)
+[`ui/BlocksWorldAppState.kt`](https://github.com/jakta-bdi/jakta/blob/main/examples/blocksworld/src/commonMain/kotlin/ui/BlocksWorldAppState.kt)
 starts the MAS in a coroutine when you press **Play**:
 
 ```kotlin
 fun play(scope: CoroutineScope) {
-    if (agentJob?.isActive == true) {
-        return
+    if (isRunning) return
+    val desired = goalOf(goal)
+    val currentWorld = world
+    AgentTrace.clear()
+    isRunning = true
+    val job = scope.launch(agentDispatcher, start = CoroutineStart.LAZY) {
+        try {
+            mas(NodeBuilders.baseNode()) {
+                blocksWorldNode(currentWorld, desired)
+            }.run(CoroutineNodeRunner(SharedMemoryNetwork()))
+        } finally {
+            // a cancelled run must not flag a newer one as finished
+            if (agentJob === coroutineContext.job) isRunning = false
+        }
     }
-
-    val currentGoal = goal
-
-    agentJob = scope.launch {
-        mas(NodeBuilders.baseNode()) {
-            blocksWorldNode(world, currentGoal)
-        }.run(CoroutineNodeRunner(SharedMemoryNetwork()))
-    }
-}
-
-fun stop() {
-    agentJob?.cancel()
-    agentJob = null
+    agentJob = job
+    job.start()
 }
 ```
 
-The MAS is an ordinary suspending computation: **Stop** simply cancels its coroutine.
-The agent and the UI share the same `BlocksWorld` instance. The screen polls it (every 33 ms) to draw the stacks,
-while the agent changes it through its skill.
-[`Main.kt`](https://github.com/jakta-bdi/jakta/blob/main/examples/blocksworld/src/main/kotlin/Main.kt)
-only opens the window and sets the log level to `Error`, so the console shows what the agent prints.
+The MAS is an ordinary suspending computation: it ends when the agent stops its node, and shuffling the world
+while it runs simply cancels its coroutine.
+The agent and the UI share the same `BlocksWorld` instance: the screen observes its `state` to draw the stacks,
+while the agent changes it through its skill. `AgentTrace` (from the shared `examples:ui-common` module) collects
+what the agent prints and shows it next to the world.
+The platform entry points only mount the app: a window on the desktop
+([`desktopMain/kotlin/Main.kt`](https://github.com/jakta-bdi/jakta/blob/main/examples/blocksworld/src/desktopMain/kotlin/Main.kt))
+and the page body in the browser
+([`jsMain/kotlin/Main.kt`](https://github.com/jakta-bdi/jakta/blob/main/examples/blocksworld/src/jsMain/kotlin/Main.kt)).
 
 ## Things to try
 
-- Change the goal text or the seed, and press **Reset** then **Play**.
+- Drag blocks to change the goal or the world, or press **Shuffle**, then **Play** again.
 - Swap the order of the two `on(X, Y)` plans: the unguarded one is now always selected first,
   and the agent tries to move blocks that are already in place.
 - Add a `removing.belief { matchingBelief { on(X, Y) } }` plan that prints every `on/2` fact the agent stops believing.

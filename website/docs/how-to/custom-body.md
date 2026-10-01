@@ -8,12 +8,12 @@ Every agent has a **body**: its representation inside the node. The body is wher
 per-agent state — a position, a battery level, a name — that skills can read and change.
 Agents that don't need one use `Any`.
 
-This guide builds a robot that moves on a grid.
+This guide builds a robot that moves on a grid. The complete program is the [`custom-body`](https://github.com/jakta-bdi/jakta/tree/main/examples/custom-body) example; run it with `./gradlew :examples:custom-body:run`.
 
 ## 1. Define the body type
 
 ```kotlin
-class Robot(val name: String) {
+private class Robot(val name: String) {
     var x = 0
     var y = 0
 }
@@ -25,14 +25,7 @@ The body type is fixed by the node builder, `NodeBuilders.baseNode<Robot>()`, an
 with `embodiedAs`, which receives the agent's ID:
 
 ```kotlin
-mas(NodeBuilders.baseNode<Robot>()) {
-    node {
-        agent<String, String>(BaseAgentID("R2")) {
-            embodiedAs { id -> Robot(id.displayName) }
-            // ...
-        }
-    }
-}
+embodiedAs { id -> Robot(id.displayName) }
 ```
 
 `node.agents` maps every agent ID to its body, so both skills and plan bodies can find it:
@@ -41,9 +34,9 @@ mas(NodeBuilders.baseNode<Robot>()) {
 ## 3. Write a skill that uses the body
 
 ```kotlin
-data class Moved(val x: Int, val y: Int) : Perception
+private data class Moved(val x: Int, val y: Int) : Perception
 
-class GridMovement(private val node: Node<Robot>) {
+private class GridMovement(private val node: Node<Robot>) {
     fun Agent.moveTo(x: Int, y: Int) {
         val body = node.agents.getValue(id)
         body.x = x
@@ -54,7 +47,7 @@ class GridMovement(private val node: Node<Robot>) {
 }
 
 context(movement: GridMovement)
-fun Agent.moveTo(x: Int, y: Int) = with(movement) { moveTo(x, y) }
+private fun Agent.moveTo(x: Int, y: Int) = with(movement) { moveTo(x, y) }
 ```
 
 The skill changes the body and publishes a perception, using the body filter of `publishEvent` so that only
@@ -65,6 +58,7 @@ is in scope, the same way `MessagingSkill` provides `agent.sendTo(...)`.
 
 ```kotlin
 fun main(): Unit = runBlocking {
+    Logger.setMinSeverity(Severity.Assert)
     mas(NodeBuilders.baseNode<Robot>()) {
         node {
             context(GridMovement(node)) {
@@ -76,6 +70,7 @@ fun main(): Unit = runBlocking {
                                 setOf("at(${perception.x},${perception.y})"),
                                 beliefs.filter { it.startsWith("at(") }.toSet(),
                             )
+
                             else -> null
                         }
                     }
@@ -108,6 +103,8 @@ It prints `R2 reached (1, 1)`.
 <summary>Imports</summary>
 
 ```kotlin
+import co.touchlab.kermit.Logger
+import co.touchlab.kermit.Severity
 import it.unibo.jakta.agent.Agent
 import it.unibo.jakta.agent.BaseAgentID
 import it.unibo.jakta.dsl.mas

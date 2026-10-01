@@ -93,7 +93,7 @@ handlesPerceptionEvents {
 
 The handler returns an `AgentUpdate.Belief(additions, removals)` or `null` to ignore the perception.
 It can read the current `beliefs`, so it can replace stale perceived facts
-(see [`BlocksWorldSkills.kt`](https://github.com/jakta-bdi/jakta/blob/main/examples/blocksworld/src/main/kotlin/BlocksWorldSkills.kt)).
+(see [`BlocksWorldSkills.kt`](https://github.com/jakta-bdi/jakta/blob/main/examples/blocksworld/src/commonMain/kotlin/BlocksWorldSkills.kt)).
 
 ## Belief events
 
