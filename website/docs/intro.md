@@ -4,17 +4,19 @@ sidebar_position: 1
 
 # What is JaKtA?
 
-JaKtA is a full fledged, [AgentSpeak(L)](https://link.springer.com/chapter/10.1007/BFb0031845)-compliant [BDI](https://cdn.aaai.org/ICMAS/1995/ICMAS95-042.pdf) technology
-for [Kotlin](https://kotlinlang.org). It comes with its own BDI execution engine and an internal Kotlin DSL
-to write agents, their beliefs, goals and plans, side by side with ordinary Kotlin code.
+JaKtA is a [BDI](https://cdn.aaai.org/ICMAS/1995/ICMAS95-042.pdf) agent-oriented programming framework,
+built as an internal DSL targeting [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform.html).
+It comes with its own coroutine-based BDI execution engine, and lets you write agents, their beliefs, goals and plans
+side by side with ordinary Kotlin code.
 
-JaKtA 1.x is a multiplatform, coroutine-based BDI framework with pluggable knowledge representations,
-skills, and nodes for connecting agents to their surroundings. Start with the
-[Getting Started](./tutorials/index.mdx) guide, explore the [Showcase](./showcase/index.md),
-or read the [JaKtA 1.x redesign](./history/jakta-1-x.md)
-for the main ideas behind the current architecture.
+The engine is generic over knowledge representation and plan matching semantics: an
+[incarnation](./explanation/incarnations/index.md) decides what beliefs and goals are (Prolog terms, plain strings,
+or your own Kotlin types) and how plans match them, so JaKtA can adapt to different use cases.
+Start with the [Getting Started](./tutorials/index.mdx) guide, explore the [Showcase](./showcase/index.md),
+or read the [JaKtA 1.x redesign](./history/jakta-1-x.md) for the main ideas behind the current architecture.
 
 The choice of realising a fresh implementation of a BDI execution engine instead of reusing an existing one was driven by two major design goals:
+
 1. to explore paradigm blending of AOP – and in particular BDI – with mainstream programming languages, and
 2. to support modularity and pluggability of any aspect involving the execution of BDI systems—there including reasoning capabilities, message passing mechanisms, concurrency models, and the like.
 
