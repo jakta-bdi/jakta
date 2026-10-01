@@ -5,11 +5,16 @@ import it.unibo.alchemist.model.Position
 import it.unibo.alchemist.model.molecules.SimpleMolecule
 import it.unibo.jakta.agent.Agent
 import it.unibo.jakta.agent.AgentID
+import it.unibo.jakta.situated.ClockSkill
 import it.unibo.jakta.situated.Coordinates
 import it.unibo.jakta.situated.NeighborhoodSkill
 import it.unibo.jakta.situated.PropertySkill
+import it.unibo.jakta.situated.RandomSkill
 import it.unibo.jakta.situated.Situated
 import it.unibo.jakta.situated.SpatialSkill
+import kotlin.random.Random
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * The situated skills of the agents hosted by an Alchemist node.
@@ -17,12 +22,16 @@ import it.unibo.jakta.situated.SpatialSkill
  * The position of the Alchemist node is copied into the [Situated] bodies of its agents
  * at each step of the node and whenever they move.
  * The neighbors of an agent are the other agents of the same Alchemist node and of its neighbors, per the linking rule.
+ * The time is the simulated time, in seconds, and the random generator is the one of the runtime,
+ * i.e. [JaktaForAlchemistRuntime.randomGenerator].
  * @param runtime gives the runtime of the Alchemist node, when a skill is used.
  */
 class AlchemistSkills<P : Position<P>>(private val runtime: () -> JaktaForAlchemistRuntime<P>) :
     SpatialSkill,
     NeighborhoodSkill,
-    PropertySkill {
+    PropertySkill,
+    ClockSkill,
+    RandomSkill {
 
     override val Agent.position: Coordinates
         get() = runtime().position
@@ -37,4 +46,10 @@ class AlchemistSkills<P : Position<P>>(private val runtime: () -> JaktaForAlchem
     }
 
     override fun Agent.setProperty(name: String, value: Any?) = runtime().setProperty(name, value)
+
+    override val Agent.time: Duration
+        get() = runtime().alchemistEnvironment.simulation.time.toDouble().seconds
+
+    override val Agent.random: Random
+        get() = runtime().random
 }

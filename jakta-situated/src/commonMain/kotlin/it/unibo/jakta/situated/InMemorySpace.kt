@@ -3,19 +3,30 @@ package it.unibo.jakta.situated
 import it.unibo.jakta.agent.Agent
 import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.node.Node
+import kotlin.random.Random
+import kotlin.time.Duration
+import kotlin.time.TimeSource
 
 /**
  * An in-memory space for agents with [Situated] bodies, which can be shared by the nodes of a MAS.
  * The position of an agent is the one of its body. Agents are neighbors when they are within [range].
  * Install the skills on the agents of each node with `context(space.skillsFor(node)) { ... }`.
+ * @param timeSource the source of the time given by the [ClockSkill], which counts from the creation of the space.
+ * Under `runTest`, pass `testScheduler.timeSource` to agree with the virtual time of `delay`.
+ * @param random the random generator given by the [RandomSkill].
  *
  * ponytail: not thread-safe and neighbors are a linear scan of all agents;
  * run the MAS on a single thread (e.g. in `runBlocking`), use a spatial index if it gets large.
  */
-class InMemorySpace(private val range: Double) {
+class InMemorySpace(
+    private val range: Double,
+    timeSource: TimeSource = TimeSource.Monotonic,
+    private val random: Random = Random(0),
+) {
 
     private val nodes = mutableListOf<Node<*>>()
     private val properties = mutableMapOf<AgentID, MutableMap<String, Any?>>()
+    private val start = timeSource.markNow()
     private val skills = Skills()
 
     /**
@@ -36,7 +47,9 @@ class InMemorySpace(private val range: Double) {
     inner class Skills :
         SpatialSkill,
         NeighborhoodSkill,
-        PropertySkill {
+        PropertySkill,
+        ClockSkill,
+        RandomSkill {
         override val Agent.position: Coordinates
             get() = body.position
 
@@ -58,6 +71,12 @@ class InMemorySpace(private val range: Double) {
         override fun Agent.setProperty(name: String, value: Any?) {
             if (value == null) propertiesOf(id) -= name else propertiesOf(id)[name] = value
         }
+
+        override val Agent.time: Duration
+            get() = start.elapsedNow()
+
+        override val Agent.random: Random
+            get() = this@InMemorySpace.random
 
         private val Agent.body: Situated
             get() = checkNotNull(bodyOf(id)) { "Agent ${id.displayName} has no position: embody it as Situated" }

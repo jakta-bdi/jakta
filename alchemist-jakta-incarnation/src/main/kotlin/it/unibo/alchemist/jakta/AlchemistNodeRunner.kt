@@ -38,7 +38,8 @@ import org.apache.commons.math3.random.RandomGenerator
  * Nodes can also join a running simulation with [run]: if the simulation terminates before, they fail to start.
  * [runAll] returns when all its nodes terminate or when the simulation ends, e.g. because of one of its terminators.
  * @param messaging which Alchemist nodes the messages of the agents can reach.
- * @param randomGenerator the random generator exposed to the agents by [JaktaForAlchemistRuntime.randomGenerator].
+ * @param randomGenerator the random generator of the agents, given by the random skill of [skillsFor]
+ * and by [JaktaForAlchemistRuntime.randomGenerator].
  */
 class AlchemistNodeRunner<P : Position<P>, N : ExecutableNode<*>>(
     private val simulation: Simulation<Any?, P>,

@@ -19,6 +19,9 @@ import it.unibo.jakta.node.ExecutableNode
 import it.unibo.jakta.node.RuntimeNodes
 import it.unibo.jakta.situated.Coordinates
 import it.unibo.jakta.situated.Situated
+import kotlin.random.Random
+import kotlin.random.asKotlinRandom
+import org.apache.commons.math3.random.RandomAdaptor
 import org.apache.commons.math3.random.RandomGenerator
 
 /** One Alchemist Node may contain more than one Jakta Node.
@@ -58,6 +61,11 @@ class JaktaForAlchemistRuntime<P : Position<P>>(
      */
     internal val position: Coordinates
         get() = Coordinates(alchemistEnvironment.getPosition(node).coordinates.toList())
+
+    /**
+     * [randomGenerator] as a Kotlin [Random].
+     */
+    internal val random: Random = RandomAdaptor(randomGenerator).asKotlinRandom()
 
     private val jaktaNodes: MutableList<ExecutableNode<*>> = mutableListOf()
     private val agents: MutableMap<AgentID, HostedAgent> = mutableMapOf()
