@@ -63,10 +63,10 @@ const config: Config = {
         },
       },
     ],
-    function yamlLoader(context, options) {
+    function yamlLoader() {
       return {
         name: "yaml-loader",
-        configureWebpack(config, isServer) {
+        configureWebpack() {
           return {
             module: {
               rules: [
@@ -80,10 +80,10 @@ const config: Config = {
         },
       };
     },
-    function bibtexLoader(context, options) {
+    function bibtexLoader() {
     return {
       name: "bibtex-loader",
-      configureWebpack(config, isServer) {
+      configureWebpack() {
         return {
           module: {
             rules: [

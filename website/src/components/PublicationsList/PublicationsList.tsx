@@ -32,7 +32,7 @@ const PublicationsList: React.FC = () => {
 			});
 			// Replace plain URLs in citation text with clickable links
 			if (entry.URL) {
-				const urlRegex = new RegExp(`(https?://[^\s<]+)`, 'g');
+				const urlRegex = /(https?:\/\/[^\s<]+)/g;
 				citation = citation.replace(urlRegex, `<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>`);
 			}
 			if (!grouped[year]) grouped[year] = [];

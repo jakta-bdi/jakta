@@ -180,6 +180,7 @@ all nodes have terminated.
 every subscribed node. The Alchemist incarnation provides its own node and dispatching on top of the simulator.
 
 Two kinds of events reach agents differently (`BaseNode.kt`):
+
 - **Perceptions** published with `node.publishEvent(...)` are delivered directly to the node's own agents whose body
   passes the filter. They never leave the node.
 - **Messages** travel as system events through the network, so every node receives them and delivers them to its

@@ -30,7 +30,11 @@ if (sectionStart === -1) {
 }
 const notesStart = changelog.indexOf('\n', sectionStart) + 1
 const notesEnd = changelog.indexOf('\n## [', notesStart)
-const notes = changelog.slice(notesStart, notesEnd === -1 ? undefined : notesEnd).trim()
+// The post title is the page's h1, so promote the changelog's ### subsections to ##.
+const notes = changelog
+  .slice(notesStart, notesEnd === -1 ? undefined : notesEnd)
+  .trim()
+  .replace(/^#(#+ )/gm, '$1')
 
 // Release notes are a separate blog instance on the website (/releases), see website/docusaurus.config.ts.
 const releasesDir = path.join(rootDir, 'website', 'releases')

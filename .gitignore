@@ -8,3 +8,4 @@ node_modules/
 kotlin-js-store
 *.hprof
 local.properties
+.codacy/
