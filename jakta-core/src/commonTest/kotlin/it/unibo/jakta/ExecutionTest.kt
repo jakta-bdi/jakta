@@ -14,6 +14,7 @@ import kotlin.reflect.typeOf
 import kotlin.test.Test
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.test.TestResult
 import kotlinx.coroutines.test.runTest
 
 class ExecutionTest {
@@ -26,7 +27,7 @@ class ExecutionTest {
     }
 
     @Test
-    fun testAgentExecution() {
+    fun testAgentExecution(): TestResult {
         val node = BaseNode<Any>()
         val node2 = BaseNode<Any>()
 
@@ -59,7 +60,7 @@ class ExecutionTest {
 
         val runner = CoroutineNodeRunner<Any, BaseNode<Any>>(SharedMemoryNetwork())
 
-        runTest {
+        return runTest {
             node.addAgent({ agentSpecGenerator("Agent1", it) })
             try {
                 runner.run(node)
