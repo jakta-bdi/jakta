@@ -40,6 +40,7 @@ include(
     "alchemist-jakta-incarnation",
     "jakta-string-incarnation",
     "jakta-prolog-incarnation",
+    "jakta-artifacts",
     "examples:blocksworld",
     "examples:hello-world",
 )

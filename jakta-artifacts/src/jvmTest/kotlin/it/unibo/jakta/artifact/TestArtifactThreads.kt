@@ -3,7 +3,6 @@ package it.unibo.jakta.artifact
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import it.unibo.jakta.agent.BaseAgentID
-import it.unibo.jakta.dsl.ifGoalMatch
 import it.unibo.jakta.dsl.mas
 import it.unibo.jakta.dsl.node.NodeBuilders
 import it.unibo.jakta.dsl.plan.triggers
@@ -29,7 +28,7 @@ class TestArtifactThreads {
         Executors.newFixedThreadPool(agents).asCoroutineDispatcher().use { pool ->
             runBlocking(pool) {
                 withTimeout(TIMEOUT) {
-                    mas(NodeBuilders.baseNode<Any>()) {
+                    mas(NodeBuilders.artifactNode<Any>()) {
                         node {
                             val counter = node.makeArtifact(Counter("counter"))
                             repeat(agents) { i ->
