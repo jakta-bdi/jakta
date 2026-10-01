@@ -1,13 +1,16 @@
 # Alchemist incarnation: exploration notes
 
 Branch `feat/alchemist-communication`, cut from `origin/main` (1.1.24).
-There were two iterations: v1 (communication, fixes, example, NodeRunner prototype), then v2
-(generic situated skills, a reworked `AlchemistNodeRunner`, the Alchemist upgrade and GUI check).
+There were three iterations: v1 (communication, fixes, example, NodeRunner prototype), v2
+(generic situated skills, a reworked `AlchemistNodeRunner`, the Alchemist upgrade and GUI check), then v3
+(bodies that follow their agents, clock and random skills).
 
 ## TL;DR
 
 - **Generic situated skills** (v2), in the new multiplatform module `jakta-situated`: `SpatialSkill` (position,
-  `moveTo`, `moveBy`, `moveTowards`), `NeighborhoodSkill` and `PropertySkill`, plus `Situated` bodies.
+  `moveTo`, `moveBy`, `moveTowards`), `NeighborhoodSkill` and `PropertySkill`, plus `Situated` bodies. v3 added
+  `ClockSkill` (`agent.time`) and `RandomSkill` (`agent.random`), and `Situated` bodies now hold the agent's current
+  `position`.
   There are two implementations: `InMemorySpace` for the default runner, and `AlchemistSkills` (positions, linking
   rule and molecules of the Alchemist node). Agent code written against the interfaces runs unchanged under both.
   This is shown by a test (`TestSameAgentCode`) and by the gossip example.
@@ -42,14 +45,17 @@ cat examples/alchemist-gossip/build/exports/gossip.csv
 
 Files in `examples/alchemist-gossip`:
 
-- `src/main/kotlin/Gossip.kt`: the agent. It only uses `NeighborhoodSkill`, `PropertySkill` and `MessagingSkill`. It
-  reads the `source` property, then sets `informed`, tells the rumor to each neighbor, and stops its node.
+- `src/main/kotlin/Gossip.kt`: the agent. It only uses `NeighborhoodSkill`, `PropertySkill`, `ClockSkill` and
+  `MessagingSkill`. It reads the `source` property, then sets `informed`, prints the time (v3), tells the rumor to each
+  neighbor, and stops its node.
 - `src/main/kotlin/AlchemistGossip.kt`: the YAML entrypoint, which installs `skills` (the Alchemist skills of the node).
 - `src/main/kotlin/InMemoryGossip.kt`: the in-memory main.
 - `src/main/resources/gossip.yml`, `gui.yml` (GUI override), `effects.json` (GUI effects).
 
 In Alchemist, `source` is a molecule set through a YAML `contents` filter; in memory, it is an initial property of
 the `SituatedBody`. All 100 nodes are informed by t≈33 (seeds 0/0). Two runs gave identical CSV files and logs.
+With the clock (v3), each agent prints `Informed at <time>`: simulated time in Alchemist (the last one at 32.85s), the
+wall-clock time since the `InMemorySpace` was created in memory (about 215ms for the whole grid).
 
 **Not verified: I could not view the GUI.** No virtual display was available, and the session was unattended. I
 checked that the GUI override loads headless (the `SwingGUI` monitor is built and only warns about headless mode) and
@@ -96,22 +102,34 @@ so plans write `agent.position`, `agent.moveTowards(target, step)`, `agent.neigh
 
 | Interface | Members | `InMemorySpace` | `AlchemistSkills` |
 |---|---|---|---|
-| `SpatialSkill` | `position`, `moveTo`; helpers `moveBy`, `moveTowards(target, maxDistance)` | per-agent map | position of the Alchemist node; `moveNodeToPosition` |
+| `SpatialSkill` | `position`, `moveTo`; helpers `moveBy`, `moveTowards(target, maxDistance)` | `position` of the `Situated` body (v3) | position of the Alchemist node; `moveNodeToPosition`, then copied into the bodies (v3) |
 | `NeighborhoodSkill` | `neighbors: Set<AgentID>` | agents within `range` | agents of the same and neighboring Alchemist nodes (linking rule) |
 | `PropertySkill` | `property(name)`, `setProperty(name, value)` (null removes it) | per-agent map | molecule `name` of the Alchemist node |
+| `ClockSkill` (v3) | `time: Duration`, elapsed since the environment started | `timeSource.markNow()` at creation, then `elapsedNow()`; `TimeSource.Monotonic` by default | simulated time, in seconds |
+| `RandomSkill` (v3) | `random: kotlin.random.Random` | the `random` passed in, `Random(0)` by default | the runtime's seeded `RandomGenerator`, through commons-math `RandomAdaptor(...).asKotlinRandom()` |
 
 Decisions:
 
 - **Where**: a new small module, not `jakta-core`, because core is being changed concurrently on other branches. The
   interfaces are general, so they don't belong in the Alchemist module either.
-- **Embodiment**: `Situated` bodies declare the *initial* state, `initialPosition` and `initialProperties`.
-  Implementations read it when they first meet the agent, then track state themselves, so the body is never updated.
-  This gives both implementations the same semantics; use the skills for current values.
+- **Embodiment** (reworked in v3, as the user asked): a `Situated` body has the agent's current position,
+  `var position`, which starts where the agent starts, plus `initialProperties`.
+  - In memory the body *is* the position: `InMemorySpace` reads and writes `body.position`, so every move is in the
+    body at once. Spatial skills now need a `Situated` body; before v3, `moveTo` gave a position to any agent.
+  - In Alchemist the environment is the source of truth, because other reactions or the GUI can move a node. The
+    runtime copies the position of the Alchemist node into the `Situated` bodies of all its agents at each step of the
+    node, after it has handled the new agents and before the agents reason, and right after `moveTo`. A node moved
+    in between is seen by `agent.position` at once, and by the body at the node's next step.
+  - `position` is a public `var`: plain Kotlin cannot let only the skills write it. Its KDoc says to move with the
+    skill. Writing it directly moves the agent in memory, but in Alchemist it is overwritten at the next step.
+  - Properties are not mirrored in the body. In memory that would have been easy, but in Alchemist it means copying
+    every molecule of the node into each body at every step, and it raises questions (molecules set by other
+    reactions, concentration types). So the body keeps only `initialProperties`, and the skill gives current values.
   - `SituatedBody` is deliberately not a data class: bodies identify agents (`getAgentIDfromBody`), so equal positions
     must not make bodies equal.
   - Bodies stay typed `Any` at the node level (`NodeBuilders.baseNode<Any>()`). That keeps `MessagingSkill`, which
     needs a `Node<Any>`, usable.
-- **One combined object, several requirements**: a skills object implements all three interfaces. `context(skills)`
+- **One combined object, several requirements**: a skills object implements all five interfaces. `context(skills)`
   satisfies any `context(_: SpatialSkill, _: NeighborhoodSkill, ...)`, and agent code declares only what it uses.
 - **Getting the skills**:
   - YAML entrypoints use `skills`, a property of `JaktaForAlchemistRuntime`;
@@ -120,6 +138,14 @@ Decisions:
   - in memory, `space.skillsFor(node)`.
 - **Movement** is immediate (`moveTo`). To move at a speed, call `moveTowards` repeatedly with `delay`; the delay is
   simulated in Alchemist and virtual under `runTest`.
+- **Clock and random generator** (v3) are part of the same bundles, `InMemorySpace(range, timeSource, random)` and
+  `AlchemistSkills`. The interfaces have no Alchemist types, and core and api are unchanged.
+  - Time is a `Duration` elapsed since the environment started: the start of the simulation in Alchemist, the
+    creation of the space in memory. Under `runTest`, pass `testScheduler.timeSource`, so that the clock agrees with
+    the virtual `delay`.
+  - The random generator is a `kotlin.random.Random`. In Alchemist it draws from the seeded `RandomGenerator` of the
+    runtime (the simulation's in YAML, the runner's `randomGenerator` with `AlchemistNodeRunner`), so runs stay
+    reproducible. All the agents share one generator, in Alchemist and in memory.
 - `Coordinates` is an N-dimensional Euclidean point; `moveTowards` uses Euclidean math.
 
 ### `AlchemistNodeRunner` (v1 prototype, v2 rework)
@@ -159,8 +185,8 @@ How it fixes the three v1 limitations:
 Mapping and other behaviour:
 
 - One Alchemist node per JaKtA node.
-- Position: `position(node)` if given. Otherwise the `initialPosition` of the first `Situated` agent of the node; if
-  there is none, a clear error stops the simulation.
+- Position: `position(node)` if given. Otherwise the `position` of the first `Situated` agent of the node, read when
+  the node is created; if there is none, a clear error stops the simulation.
 - `initialProperties` of `Situated` agents become molecules when the agent is added. This happens in the YAML path
   too, where positions come from the deployment instead.
 - The simulation runs on a daemon thread and is terminated when all nodes have terminated. `runAll` returns then, or
@@ -169,10 +195,15 @@ Mapping and other behaviour:
 **Tests**:
 
 - `TestAlchemistNodeRunner`: ping-pong in simulated time, including sub-second delays and the stop when all nodes have
-  terminated, plus global vs. neighborhood broadcast.
+  terminated, plus global vs. neighborhood broadcast. v3: a node moved by Alchemist directly, not through the skill,
+  shows its new position in the agent's body at the next step. The test fails without the per-step copy.
 - `TestSameAgentCode`: the same MAS (a walker moving towards a target until it is a neighbor, then greeting it) runs
   with `CoroutineNodeRunner` + `InMemorySpace` and with `AlchemistNodeRunner`. Both give the same outcome, and in
-  Alchemist the property is checked as a molecule.
+  Alchemist the property is checked as a molecule. v3 checks, on both runners, that:
+  - the walker's body ends where it greeted from;
+  - its clock measures exactly 4s for its 4 one-second `delay`s (with `testScheduler.timeSource` in memory);
+  - its first random draw is the first value of the configured generator: `Random(42)` in memory, `MersenneTwister(42)`
+    in Alchemist.
 
 ### Alchemist version and GUI (v2)
 
@@ -203,7 +234,10 @@ Mapping and other behaviour:
 ## API changes (not marked as breaking in the commits)
 
 - `jakta-api`: new `NodeRunner.runAll`, with a default implementation. `jakta-core`: `BaseMasBuilder.run` delegates to it.
-- New module `jakta-situated`. The incarnation depends on it through `api`.
+- New module `jakta-situated`. The incarnation depends on it through `api`. In v3, `Situated.initialPosition` became
+  `var position` and `SituatedBody`'s first parameter became `position`. `InMemorySpace` gained the optional
+  `timeSource` and `random` parameters, and both skill bundles also implement `ClockSkill` and `RandomSkill`. The module
+  is new on this branch, so nothing published breaks.
 - Incarnation:
   - removed `JaktaAgentAction`, `NodeEventsAction`, the global `NodeNetwork` value and
     `JaktaForAlchemistNode.subscription`;
@@ -230,9 +264,13 @@ Still open from the gap analysis (none of these were implemented):
 | Agent crash handling | An exception outside plan bodies stops the simulation, whereas `CoroutineNodeRunner` removes the agent and logs. |
 | Logging | Kermit logs to stdout and ignores Alchemist's `--verbosity`; the examples set the Kermit severity themselves. |
 | Routing scalability | Non-message system events are broadcast to all Alchemist nodes (O(N) each). |
-| `InMemorySpace` | Not thread-safe (use a single-threaded dispatcher such as `runBlocking`/`runTest`); neighbors are a linear scan. |
-| Shared device state | Agents on the same Alchemist node share its position and molecules. The node's placement is decided by its first `Situated` agent, and in the YAML path `initialPosition` is ignored. |
-| No generic clock or RNG skill | Agent code written only against the generic skills cannot read the simulated time or the seeded RNG; the gossip agent prints without a time. |
+| `InMemorySpace` | Not thread-safe (use a single-threaded dispatcher such as `runBlocking`/`runTest`); neighbors are a linear scan. Its spatial skills need `Situated` bodies. |
+| Shared device state | Agents on the same Alchemist node share its position and molecules. The node's placement is decided by the `position` of its first `Situated` agent. In the YAML path the deployment decides it, and the bodies are overwritten at the first step. |
+| Bodies lag behind Alchemist between steps (v3) | When another reaction or the GUI moves a node, the bodies are updated at the node's next JaKtA step. Code reading bodies from outside the step (e.g. a `publishEvent` filter run by another node) can see the old position until then. `agent.position` is always current. |
+| `Situated.position` is writable by anyone (v3) | It must be a `var` for the skills to write it. Writing it directly moves the agent in memory, but in Alchemist it is overwritten at the next step. |
+| Properties are not mirrored in bodies (v3) | Bodies have only `initialProperties`; current values come from `PropertySkill`. In Alchemist, mirroring means copying the molecules into every body at every step. |
+| Clock origin in memory (v3) | `InMemorySpace`'s clock counts from the creation of the space, not from the start of the MAS. Create the space right before running it. |
+| One random generator for all agents (v3) | Draws are reproducible only if the agents run in a deterministic order: the default `Engine` in Alchemist, a single-threaded dispatcher in memory. In YAML, agents also share the generator with Alchemist's own random time distributions, so adding a draw shifts the later ones. |
 | A late `run(node)` after all the other nodes terminated fails | The simulation is already terminated. Use `runAll`, i.e. `mas.run`. |
 | Untested by me | Typed Alchemist `actions:` inside a JaKtA program (should be appended, per the loader code); the runner on a YAML-loaded `Simulation` (should give exporters and monitors); the GUI on screen. |
 | Website docs not updated | The newer docs live on the unmerged branch in `../jakta`. Their Alchemist caveats (delays, agent removal, fixed rates) are now outdated. |
@@ -251,11 +289,17 @@ Still open from the gap analysis (none of these were implemented):
    `feat/distributed-communication` also change `BaseMasBuilder`, so expect a small merge conflict there. OK, or would
    you rather expose the nodes from `MasBuilder` (as `feat/mqtt-messaging` does) and run them from there?
 8. **`jakta-situated`**: is the module name and placement right, or should the interfaces move to `jakta-core` once
-   the other branches land? Should it also offer a clock and an RNG skill, so that fully generic agents can be
-   time-aware and reproducible?
-9. **Embodiment as an initial-state descriptor** (the body is never updated), rather than live state in the body as
-   in the custom-body how-to. Is that the right trade-off for portability?
-10. **Example**: the gossiper stops its node after relaying, which the in-memory run needs in order to end. Is that
+   the other branches land? (v3 added the clock and random skills there.)
+9. **Embodiment** (v3: bodies hold the current position):
+   - Should properties be mirrored in the body too?
+   - Should `Situated` expose a read-only `position`, with the skills writing through an implementation-only mutable
+     body (e.g. `SituatedBody` only)?
+10. **Clock** (v3):
+    - Is `Duration` since the start right for agents, or would they rather have an instant/`TimeMark`?
+    - Should the in-memory clock start with the MAS instead of the space? That needs a hook from the runner.
+11. **Random generator** (v3): one shared generator, or one per agent, derived from the seed and the agent ID? The
+    latter makes draws independent of the scheduling order, but is a bigger change.
+12. **Example**: the gossiper stops its node after relaying, which the in-memory run needs in order to end. Is that
     fine?
-11. **GUI**: keep the deprecated Swing GUI until upstream publishes a usable web/Compose UI?
-12. **Keep `AlchemistNodeRunner` as public API?**
+13. **GUI**: keep the deprecated Swing GUI until upstream publishes a usable web/Compose UI?
+14. **Keep `AlchemistNodeRunner` as public API?**
