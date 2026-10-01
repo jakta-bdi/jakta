@@ -1,4 +1,5 @@
 [versions]
+compose = "1.11.1"
 coroutines = "1.11.0"
 dokka = "2.2.0"
 kermit = "2.2.0"
@@ -9,6 +10,10 @@ publish-central = "9.2.12"
 
 
 [libraries]
+compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
+compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "compose" }
+compose-material = { module = "org.jetbrains.compose.material:material", version.ref = "compose" }
+compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose" }
 kermit = {module = "co.touchlab:kermit", version.ref = "kermit"}
 alchemist-api = { module = "it.unibo.alchemist:alchemist-api", version.ref = "alchemist" }
 alchemist = { module = "it.unibo.alchemist:alchemist", version.ref = "alchemist" }
@@ -38,12 +43,20 @@ tuprolog-dsl-solve = { module = "it.unibo.tuprolog:dsl-solve-jvm", version.ref =
 tuprolog-oop-lib = { module = "it.unibo.tuprolog:oop-lib-jvm", version.ref = "tuprolog" }
 
 [bundles]
+compose = [
+    "compose-runtime",
+    "compose-foundation",
+    "compose-material",
+    "compose-ui",
+]
 alchemist-api = [
     "alchemist",
     "alchemist-api"
 ]
 
 [plugins]
+compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "compose" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 gitSemVer = { id = "org.danilopianini.git-sensitive-semantic-versioning", version = "7.0.24" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
