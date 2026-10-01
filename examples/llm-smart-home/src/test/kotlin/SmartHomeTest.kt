@@ -31,7 +31,7 @@ class SmartHomeTest {
             runBlocking {
                 withTimeout(10.minutes) {
                     mas(NodeBuilders.baseNode()) {
-                        node { withAgents(smartHome(LlmReasoner(it, model, MAX_CALLS), requests) { beliefs = it }) }
+                        node { withAgents(smartHome(LlmReasoner(it, model, MAX_QUESTIONS), requests) { beliefs = it }) }
                     }.run(CoroutineNodeRunner(SharedMemoryNetwork()))
                 }
             }

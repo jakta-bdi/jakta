@@ -15,7 +15,8 @@ import it.unibo.jakta.dsl.mas
 import it.unibo.jakta.dsl.node.NodeBuilders
 import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.llm.LlmReasoner
-import it.unibo.jakta.llm.llmPlans
+import it.unibo.jakta.llm.holds
+import it.unibo.jakta.llm.meaning
 import it.unibo.jakta.llm.revise
 import it.unibo.jakta.node.CoroutineNodeRunner
 import it.unibo.jakta.node.SharedMemoryNetwork
@@ -32,12 +33,13 @@ val requests = listOf(
 
 /**
  * More than enough for the [requests]: a cap on the cost of a model that keeps choosing the wrong plan.
+ * It counts the questions answered from memory too, about three per plan the engine considers.
  */
-const val MAX_CALLS = 20
+const val MAX_QUESTIONS = 100
 
 /**
- * A smart-home agent that handles each of the [requests] with the plan chosen by the LLM of the [reasoner],
- * then passes its final beliefs to [onDone].
+ * A smart-home agent that handles each of the [requests] with the first plan whose trigger and guard the LLM of the
+ * [reasoner] finds to hold, then passes its final beliefs to [onDone].
  */
 fun smartHome(reasoner: LlmReasoner, requests: List<String>, onDone: (List<String>) -> Unit = {}) = with(reasoner) {
     agent<String, String, Any> {
@@ -56,20 +58,19 @@ fun smartHome(reasoner: LlmReasoner, requests: List<String>, onDone: (List<Strin
                 onDone(agent.beliefs.toList())
                 node.terminateNode()
             }
-            llmPlans {
-                goal("make the room warmer", onlyWhen = "a window is open") {
-                    agent.print("Closing the window first.")
-                    agent.forget("the living room window is open")
-                    agent.believe("the living room window is closed")
-                    agent.achieve("set the heating to 21 degrees")
-                }
-                goal("make the room warmer") {
-                    agent.achieve("set the heating to 21 degrees")
-                }
-                goal("set the heating to {degrees} degrees") {
-                    agent.print("Setting the heating to ${context["degrees"]} degrees.")
-                    revise("the heating is set to ${context["degrees"]} degrees")
-                }
+            // The most specific plan first: its trigger matches canonical subgoals literally, with no LLM call
+            adding.goal { meaning("set the heating to {degrees} degrees") } triggers {
+                agent.print("Setting the heating to ${context["degrees"]} degrees.")
+                revise("the heating is set to ${context["degrees"]} degrees")
+            }
+            adding.goal { meaning("make the room warmer") } onlyWhen { holds("a window is open") } triggers {
+                agent.print("Closing the window first.")
+                agent.forget("the living room window is open")
+                agent.believe("the living room window is closed")
+                agent.achieve("set the heating to 21 degrees")
+            }
+            adding.goal { meaning("make the room warmer") } triggers {
+                agent.achieve("set the heating to 21 degrees")
             }
             // A plain JaKtA plan, so failures are handled without calling the LLM
             failing.goal { this } triggers {
@@ -109,7 +110,7 @@ fun main(): Unit = runBlocking {
     executor.use {
         mas(NodeBuilders.baseNode()) {
             node {
-                withAgents(smartHome(LlmReasoner(it, model, MAX_CALLS), requests) { println("Beliefs: $it") })
+                withAgents(smartHome(LlmReasoner(it, model, MAX_QUESTIONS), requests) { println("Beliefs: $it") })
             }
         }.run(CoroutineNodeRunner(SharedMemoryNetwork()))
     }
