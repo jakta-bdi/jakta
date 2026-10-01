@@ -33,6 +33,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 
@@ -112,6 +113,32 @@ class TestAlchemistNodeRunner {
         simulation.run(mas, rate = 10.0)
         assertTrue(elapsed in 1.5..1.6, "A delay of 1.5 seconds lasted $elapsed simulated seconds")
         assertTrue(simulation.time.toDouble() < MAX_TIME, "The simulation must stop once all nodes terminated")
+    }
+
+    @Test
+    fun testBodiesFollowTheAlchemistNode() {
+        val simulation = simulation()
+        val body = bodyOfNode(0)
+        var seen: Coordinates? = null
+        val mas = mas(NodeBuilders.baseNode<Any>()) {
+            node {
+                agent<String, String>(BaseAgentID("moved")) {
+                    embodiedAs { body }
+                    hasInitialGoals { !"wait" }
+                    hasPlanLibrary {
+                        adding.goal { takeIf { it == "wait" } } triggers {
+                            // moved by Alchemist, not by the agent
+                            with(simulation.environment) { moveNodeToPosition(nodes.single(), makePosition(3.0, 4.0)) }
+                            delay(1.seconds)
+                            seen = body.position
+                            node.terminateNode()
+                        }
+                    }
+                }
+            }
+        }
+        simulation.run(mas)
+        assertEquals(Coordinates(3.0, 4.0), seen)
     }
 
     // Three nodes on a line, only consecutive ones are neighbors: A - B - C

@@ -25,6 +25,7 @@ import it.unibo.jakta.situated.Coordinates
 import it.unibo.jakta.situated.InMemorySpace
 import it.unibo.jakta.situated.NeighborhoodSkill
 import it.unibo.jakta.situated.PropertySkill
+import it.unibo.jakta.situated.Situated
 import it.unibo.jakta.situated.SituatedBody
 import it.unibo.jakta.situated.SpatialSkill
 import it.unibo.jakta.situated.moveTowards
@@ -50,6 +51,7 @@ import kotlinx.coroutines.test.runTest
 class TestSameAgentCode {
 
     private class Outcome {
+        var walkerBody: Situated? = null
         var greetedFrom: Coordinates? = null
         var greeted = false
     }
@@ -59,7 +61,7 @@ class TestSameAgentCode {
 
     context(_: SpatialSkill, _: NeighborhoodSkill, _: MessagingSkill)
     private fun NodeBuilder<Any, *>.walker(outcome: Outcome) = agent<String, String>(walker) {
-        embodiedAs { SituatedBody(Coordinates(0.0, 0.0)) }
+        embodiedAs { SituatedBody(Coordinates(0.0, 0.0)).also { body -> outcome.walkerBody = body } }
         hasInitialGoals { !"approach" }
         hasPlanLibrary {
             adding.goal { takeIf { it == "approach" } } triggers {
@@ -104,6 +106,7 @@ class TestSameAgentCode {
         // it steps by 1.5 from 0 towards 10, and is in range from 6
         val from = checkNotNull(greetedFrom) { "The walker never greeted" }
         assertTrue(from.distanceTo(Coordinates(6.0, 0.0)) < 1e-9, "The walker greeted from $from")
+        assertEquals(from, walkerBody?.position, "The body of the walker must follow it")
         assertTrue(greeted)
     }
 

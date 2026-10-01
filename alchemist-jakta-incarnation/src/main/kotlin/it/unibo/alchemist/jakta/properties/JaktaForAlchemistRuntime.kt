@@ -17,6 +17,7 @@ import it.unibo.jakta.event.SystemEvent
 import it.unibo.jakta.event.UnlimitedChannelQueue
 import it.unibo.jakta.node.ExecutableNode
 import it.unibo.jakta.node.RuntimeNodes
+import it.unibo.jakta.situated.Coordinates
 import it.unibo.jakta.situated.Situated
 import org.apache.commons.math3.random.RandomGenerator
 
@@ -52,6 +53,12 @@ class JaktaForAlchemistRuntime<P : Position<P>>(
      */
     val hostedAgents: Set<AgentID> get() = agents.keys.toSet()
 
+    /**
+     * The position of this Alchemist node.
+     */
+    internal val position: Coordinates
+        get() = Coordinates(alchemistEnvironment.getPosition(node).coordinates.toList())
+
     private val jaktaNodes: MutableList<ExecutableNode<*>> = mutableListOf()
     private val agents: MutableMap<AgentID, HostedAgent> = mutableMapOf()
     private val inbox = UnlimitedChannelQueue<SystemEvent>()
@@ -78,6 +85,7 @@ class JaktaForAlchemistRuntime<P : Position<P>>(
      */
     fun step() {
         receiveSystemEvents()
+        updateBodies() // Alchemist may have moved this node since the last step
         agents.values.toList().forEach { it.step() }
         sendSystemEvents()
     }
@@ -96,6 +104,20 @@ class JaktaForAlchemistRuntime<P : Position<P>>(
      */
     internal fun reachableNodes(): Set<JaktaForAlchemistRuntime<*>> =
         (alchemistEnvironment.getNeighborhood(node).neighbors + listOf(node)).runtimes()
+
+    /**
+     * Moves this Alchemist node to [position], with all its agents.
+     */
+    internal fun moveTo(position: Coordinates) {
+        alchemistEnvironment.moveNodeToPosition(node, alchemistEnvironment.makePosition(position.values))
+        updateBodies()
+    }
+
+    // The environment is the source of truth: the Situated bodies of the hosted agents mirror its position
+    private fun updateBodies() {
+        val here = position
+        agents.values.forEach { it.body?.position = here }
+    }
 
     /**
      * Sets the molecule [name] of this Alchemist node to [value], or removes it if [value] is null.
@@ -132,8 +154,9 @@ class JaktaForAlchemistRuntime<P : Position<P>>(
         when (event) {
             is SystemEvent.AgentAddition<*, *> -> jaktaNodes.find { it.id == event.nodeID }?.let {
                 val id = event.executableAgent.id
-                agents[id] = HostedAgent(it, event.executableAgent)
-                (it.agents[id] as? Situated)?.initialProperties?.forEach(::setProperty)
+                val body = it.agents[id] as? Situated
+                agents[id] = HostedAgent(it, event.executableAgent, body)
+                body?.initialProperties?.forEach(::setProperty)
             }
 
             is SystemEvent.AgentRemoval -> agents.remove(event.id)
@@ -150,7 +173,11 @@ class JaktaForAlchemistRuntime<P : Position<P>>(
         }
     }
 
-    private inner class HostedAgent(val jaktaNode: ExecutableNode<*>, agent: ExecutableAgent<*, *>) {
+    private inner class HostedAgent(
+        val jaktaNode: ExecutableNode<*>,
+        agent: ExecutableAgent<*, *>,
+        val body: Situated?,
+    ) {
         private val lifecycle = BaseAgentLifecycle(agent)
         private val dispatcher = AlchemistDispatcher(alchemistEnvironment)
 

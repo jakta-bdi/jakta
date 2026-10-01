@@ -6,7 +6,7 @@ import it.unibo.jakta.node.Node
 
 /**
  * An in-memory space for agents with [Situated] bodies, which can be shared by the nodes of a MAS.
- * Agents are neighbors when they are within [range].
+ * The position of an agent is the one of its body. Agents are neighbors when they are within [range].
  * Install the skills on the agents of each node with `context(space.skillsFor(node)) { ... }`.
  *
  * ponytail: not thread-safe and neighbors are a linear scan of all agents;
@@ -15,7 +15,6 @@ import it.unibo.jakta.node.Node
 class InMemorySpace(private val range: Double) {
 
     private val nodes = mutableListOf<Node<*>>()
-    private val positions = mutableMapOf<AgentID, Coordinates>()
     private val properties = mutableMapOf<AgentID, MutableMap<String, Any?>>()
     private val skills = Skills()
 
@@ -31,8 +30,6 @@ class InMemorySpace(private val range: Double) {
 
     private fun bodyOf(id: AgentID): Situated? = nodes.firstNotNullOfOrNull { it.agents[id] as? Situated }
 
-    private fun positionOf(id: AgentID): Coordinates? = positions[id] ?: bodyOf(id)?.initialPosition
-
     /**
      * The implementation of the skills on this space.
      */
@@ -41,18 +38,19 @@ class InMemorySpace(private val range: Double) {
         NeighborhoodSkill,
         PropertySkill {
         override val Agent.position: Coordinates
-            get() = checkNotNull(positionOf(id)) { "Agent ${id.displayName} has no position: embody it as Situated" }
+            get() = body.position
 
         override fun Agent.moveTo(position: Coordinates) {
-            positions[id] = position
+            body.position = position
         }
 
         override val Agent.neighbors: Set<AgentID>
             get() {
                 val here = position
-                return nodes.flatMap { it.agents.keys }
-                    .filter { it != id && (positionOf(it)?.distanceTo(here) ?: Double.POSITIVE_INFINITY) <= range }
-                    .toSet()
+                val nearby = nodes.flatMap { it.agents.entries }.filter { (_, body) ->
+                    body is Situated && body.position.distanceTo(here) <= range
+                }
+                return nearby.mapTo(mutableSetOf()) { it.key } - id
             }
 
         override fun Agent.property(name: String): Any? = propertiesOf(id)[name]
@@ -60,6 +58,9 @@ class InMemorySpace(private val range: Double) {
         override fun Agent.setProperty(name: String, value: Any?) {
             if (value == null) propertiesOf(id) -= name else propertiesOf(id)[name] = value
         }
+
+        private val Agent.body: Situated
+            get() = checkNotNull(bodyOf(id)) { "Agent ${id.displayName} has no position: embody it as Situated" }
 
         private fun propertiesOf(id: AgentID) =
             properties.getOrPut(id) { bodyOf(id)?.initialProperties.orEmpty().toMutableMap() }

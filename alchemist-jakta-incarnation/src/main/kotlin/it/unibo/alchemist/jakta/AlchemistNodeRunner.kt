@@ -30,7 +30,7 @@ import org.apache.commons.math3.random.RandomGenerator
  * Each Alchemist node executes a [JaktaForAlchemistRuntime.step] according to the [timeDistribution] of its JaKtA node,
  * so agents run in simulated time.
  * Each node is placed at its [position] or, by default,
- * at the [Situated.initialPosition] of the first agent of the node with a [Situated] body.
+ * at the [Situated.position] of the first agent of the node with a [Situated] body.
  * Agents reach Alchemist through the skills given by [skillsFor].
  *
  * The simulation starts, on its own thread, when the nodes of a MAS are run with [runAll],
@@ -91,7 +91,7 @@ class AlchemistNodeRunner<P : Position<P>, N : ExecutableNode<*>>(
     }
 
     private fun Environment<Any?, P>.embodiedPosition(node: N): P {
-        val start = node.agents.values.firstNotNullOfOrNull { (it as? Situated)?.initialPosition }
+        val start = node.agents.values.firstNotNullOfOrNull { (it as? Situated)?.position }
         checkNotNull(start) {
             "Cannot place the JaKtA node ${node.id}: " +
                 "embody one of its agents as Situated, or give the runner a position function"
