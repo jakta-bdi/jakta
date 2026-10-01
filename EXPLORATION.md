@@ -1,38 +1,127 @@
 # Exploration: CArtAgO-style artifacts in JaKtA
 
-Branch `feat/artifacts`, cut from `origin/main` at `bfc89dcc` (1.1.24).
-This document covers four things:
+Branch `feat/artifacts`, cut from `origin/main` at `bfc89dcc` (1.1.24). This is the second iteration (v2).
+The first one hosted artifacts on internal agents. The user's review asked for four changes:
 
+- artifacts must not be agents;
+- agents use artifacts through skills;
+- artifacts live in a dedicated module;
+- go deeper on distribution, failures and CArtAgO's semantics.
+
+This document covers:
+
+- what changed in v2, and why;
 - a reference summary of CArtAgO and the A&A meta-model;
 - the parts of the JaKtA execution model that matter for environment programming;
-- three designs with their trade-offs, and a recommendation;
-- what the prototype on this branch covers, its limitations, and the open questions.
+- the designs considered, and the one implemented;
+- the `jakta-artifacts` module, its tests, the current limitations and the open questions.
+
+The work is aligned with issue #887, "Environment Interaction and 'Artifacts' Active Behavior":
+
+- environment stubs in an optional module;
+- active behaviour that runs independently of agents (e.g. polling a sensor);
+- something that scales to distributed deployments;
+- native support for shared distributed environments.
 
 ## TL;DR
 
-- **An artifact lives on exactly one node, and that node is its workspace.** The node runner executes it like an agent.
-  Under the hood, the artifact runs on an internal JaKtA agent whose goals are the tasks to execute: operations,
-  internal operations, focus requests.
-  - The agent's reasoning loop serializes those tasks, which gives CArtAgO's atomicity for free: one step at a time,
-    and suspension points (`await`, `delay`) release the artifact.
-  - Time, virtual time and cancellation behave exactly as they do for agents.
-  - Invoking an operation from a plan (`counter.inc()`) suspends only the calling intention. It returns the result, or
-    throws, and a throw becomes a plan failure.
-- **Other nodes use the artifact through a mirror** (`node.mirrorArtifact(Counter("counter"))`).
-  - The mirror is a local stand-in that forwards operations to the home node as messages over the existing
-    `NodeNetwork`.
-  - It republishes the artifact's events as *local perceptions*.
-  - Agents write the same code whether the artifact is local or remote.
-  - Nodes stay independent: the only cross-node traffic is messages, so it rides on `SharedMemoryNetwork` today and on
-    the MQTT network of PR #962 once the protocol payloads are serializable.
-- **The prototype changes nothing in `jakta-api`, `jakta-core`'s engine, the runners or the networks.**
-  - It is about 310 lines in `jakta-core/src/commonMain/kotlin/it/unibo/jakta/artifact/`.
-  - Its tests cover a shared counter, a tuple space with a blocking `take`, a clock with an internal operation on
-    virtual time, an artifact used from another node, atomicity with agents running on 4 threads, and Prolog beliefs.
-- **The main cost is that artifact hosts are agents under the hood.** They show up in `node.agents`, receive broadcasts,
-  need a body (so for now they only work on `Node<Any>`), and count for node termination.
-  - If that leak matters, the next step is to make artifacts first-class in the API (design C below).
-  - That change keeps the user-facing API of the prototype.
+**Core gains one general extension point: node processes.** `node.launchProcess { ... }` runs a suspending process
+alongside the node's agents, on the dispatcher the runner uses for the node, and cancels it when the node terminates.
+
+- It is the "active behaviour" of #887. A sensor-polling test is in core.
+- It is how artifacts run.
+- It takes 26 lines in 4 files of `jakta-api`/`jakta-core`, and nothing else in core changes.
+
+**Artifacts live in the new `jakta-artifacts` module** and are not agents:
+
+- `Artifact` is the base class: observable properties, operations, signals, `await`, internal operations.
+- `ArtifactNode` is a node that hosts artifacts as node processes (`node.makeArtifact(...)`). It is the
+  workspace. It handles the artifact messages arriving from the node network instead of delivering them to agents.
+- `ArtifactSkill` is the agent side, installed with `context(ArtifactSkill(node)) { agent { ... } }`. Plan bodies
+  then read:
+  - `val counter = artifacts.lookup("counter", ::Counter)`
+  - `agent.focus(counter)`
+  - `counter.inc()`
+  - `agent.stopFocus(counter)`
+  - `agent.awaitSignal(clock, "done")`
+- Whether the artifact is local or on another node is decided by the skill and the node, not by the plan.
+
+**Atomicity follows CArtAgO.**
+
+- Each artifact runs its coroutines on a serial view of the node dispatcher (`limitedParallelism(1)`), so they
+  interleave only at suspension points.
+- A *step* is the code between two suspension points. Steps are atomic, even with agents running in parallel on
+  4 threads (tested).
+- Changes to observable properties are committed at the end of each step and before each signal.
+- A failed operation rolls back its uncommitted changes.
+
+**Distribution rides on the existing node network**, with no host agents:
+
+- a lookup is broadcast, and the home node replies;
+- operations and focus requests then go as request/reply messages addressed to the home node;
+- artifact events are sent to the nodes of remote observers, which deliver them as *local perceptions*.
+
+**Failures:**
+
+- A remote operation that fails throws an `ArtifactException` carrying the original message.
+- When the home node terminates itself, it disposes its artifacts first:
+  - remote observers perceive the removal of the properties;
+  - pending and later remote calls fail.
+- **Not detected:** crashes, and terminations requested by another node. They are the main open problem.
+
+**Tests.**
+
+- `jakta-artifacts` has 9 tests. 7 are common, and they pass on JVM, JS and Linux native. The other 2 are JVM-only:
+  the multi-threaded atomicity test and Prolog.
+- `jakta-core` has a new process test.
+
+---
+
+## v2: what changed and why
+
+| Requirement | v1 | v2 |
+|---|---|---|
+| Artifacts are not agents | Each artifact was run by an internal agent (its goals were the tasks), so it showed up in `node.agents`, received broadcasts, needed a body (`Node<Any>` only) and counted as an agent for node termination | Each artifact is a **node process** with its own serial dispatcher. `node.agents` only contains agents (asserted in a test), broadcasts never reach artifacts, any body type works, and processes are cancelled with the node instead of keeping it alive |
+| Agent side through skills | Free functions plus artifact references captured by plans | `ArtifactSkill(node)` installed with `context(...)`. It offers `make`, `lookup`, `focus`, `stopFocus` and `awaitSignal`, following the `MessagingSkill` pattern (member extensions plus `context(skill)` top-level functions, and a `PlanScope.artifacts` property like `blocksWorld`) |
+| Dedicated module | Package inside `jakta-core` | `jakta-artifacts`, depending on `jakta-api`/`jakta-dsl`/`jakta-core`. The core diff is node processes only (see below) |
+| Remote without host agents | A mirror agent per node forwarded requests | `ArtifactNode` overrides `handleExternalEvent`: messages whose payload is an artifact protocol message go to its *router* process instead of to agents. Requests are addressed to the home node found by lookup |
+| Failure of the home node | Callers hung forever | Graceful self-termination of the home node broadcasts `Disposed`. Observers perceive `PropertyRemoved`, and pending and later calls throw `ArtifactException`. Crashes are still not detected (limitations) |
+| `stopFocus` cleanup | Beliefs were kept | `stopFocus` delivers `PropertyRemoved` for every property before returning, locally and remotely. The agent's perception handler removes the beliefs, as `-count(V)` in Jason |
+| Property publishing | Published on every assignment | CArtAgO semantics: changes are committed at the end of each step and before a `signal`, and rolled back if the operation fails. `count++; count++` is perceived as one change (tested) |
+| Signals and an engine trigger | Mapped to goals by convention | Same conclusion, now argued (see §4): **no engine trigger is needed.** `ArtifactSkill.awaitSignal` covers waiting for a signal inside a plan |
+
+### Changes to `jakta-api` / `jakta-core`, and why
+
+`git diff origin/main..HEAD -- jakta-api jakta-core/src/commonMain` touches 4 files, +26 lines, no deletions:
+
+1. **`Node.launchProcess(process: suspend () -> Unit)`** (api) is the one capability the module cannot build
+   itself. Non-agent code has no other way to run on the node's runner:
+   - on its dispatcher, so that `delay` follows virtual time in tests and the runner's time in general;
+   - in its lifecycle, cancelled when the node terminates.
+
+   Artifacts need it for operations, internal operations and timers. #887 asks for it directly ("processes that run
+   independently of agents, such as polling a sensor"). It is general: core knows nothing about artifacts.
+2. **`ExecutableNode.processes: EventStream<suspend () -> Unit>`** (api) is the runner-facing stream of launched
+   processes. It follows the same pattern as `systemEvents`.
+3. **`BaseNode`** (core) queues processes in an `UnlimitedChannelQueue`, like system events. A process launched
+   before the node runs is started when it runs.
+4. **`CoroutineNodeRunner`** (core) gets one more loop. It launches each process in the node's `supervisorScope`, so
+   the existing `stopNode` cancels processes together with agents.
+
+Alternatives I rejected:
+
+- **A `NodeRunner` decorator in the module.** It changes nothing in core, but it does not compose with `runLocally()`
+  or with PR #962's `runDistributed`.
+- **Capturing the runner's coroutine context inside `systemEvents.next()`.** It works, but it is a hack.
+- **A new `SystemEvent` subtype.** The sealed hierarchy would break exhaustive `when`s in other runners, and
+  system events get broadcast over the network.
+
+**What is not changed:**
+
+- `ManualStepNodeRunner` (core tests) and the Alchemist incarnation ignore processes, so artifacts do not run there
+  (see the limitations).
+- Routing needs no core change. `ArtifactNode` extends `BaseNode` and overrides `handleExternalEvent` and
+  `terminateNode`, which are already open.
 
 ---
 
@@ -345,12 +434,16 @@ failure maps onto this directly.
   dispatcher such as `Executors.newFixedThreadPool(n).asCoroutineDispatcher()`, which is truly parallel.
 - Hence "atomic between suspension points" holds for free on a single event loop, but **not** on an executor
   dispatcher, where different agents run in parallel.
+- Another agent is working on the `Delay` restriction. Artifacts inherit it: their step dispatcher also needs a
+  `Delay` dispatcher, so that delays follow the node's time.
 
 **Cancellation.**
 
 - Intention jobs are children of a per-agent `SupervisorJob` that is not linked to the runner's coroutine.
 - A removed agent's loop stops, so its intentions are never stepped again, and their `finally` blocks never run.
 - **Any lock held by a removed agent's intention is never released.** This matters for design A below.
+- Another agent is working on this, so v2 neither fixes it nor depends on it: operations run on the artifact's own
+  coroutines, not on the caller's intention.
 
 **Distribution** (PR #962, `feat/mqtt-messaging`, read-only):
 
@@ -364,362 +457,385 @@ failure maps onto this directly.
 
 ### Concept mapping
 
-| A&A / CArtAgO | JaKtA (this prototype) |
+| A&A / CArtAgO | JaKtA (`jakta-artifacts`) |
 |---|---|
-| Workspace | **The node.** Artifacts are hosted by one node; agents of that node use them directly. |
-| `joinRemoteWorkspace` / `lookupArtifact` | `node.mirrorArtifact(Counter("counter"))`: a local mirror that finds the home by artifact name |
-| `makeArtifact` | `node.makeArtifact(Counter("counter"))`, at build time (tested) or from a plan (untested) |
-| Operation (`@OPERATION`) | `val inc by operation { ... }` / `val add by operationWith { n: Int -> ... }`, called as `counter.inc()` from plans |
+| Workspace | **An `ArtifactNode`.** It hosts artifacts, and its agents use them and the artifacts of other nodes |
+| `makeArtifact` | `node.makeArtifact(Counter("counter"))` when building the node, or `artifacts.make(...)` in a plan |
+| `lookupArtifact` / `joinRemoteWorkspace` | `artifacts.lookup("counter", ::Counter)`: local, or found on another node by a broadcast lookup |
+| Operation (`@OPERATION`) | `val inc by operation { ... }` / `val add by operationWith { n: Int -> ... }`, called as `counter.inc()` |
 | `OpFeedbackParam` | The operation's return value |
-| `failed(...)` → plan failure | Throwing in the operation → exception in the caller → plan failure → `failing.goal { }` |
+| `failed(...)` → plan failure | Throwing in the operation → exception in the caller → plan failure → `failing.goal { }` (an `ArtifactException` if remote) |
 | Observable property | `var count by observable(0)` → `ArtifactEvent.PropertyChanged` perception → belief via `handlesPerceptionEvents` |
-| Signal | `signal("tick", value)` → `ArtifactEvent.Signal` perception → typically a goal (event-like) or `agent.wait` |
-| `focus` / `stopFocus` | `agent.focus(counter)` / `agent.stopFocus(counter)`; focus replays the current values |
+| Commit / rollback | At the end of each step and before a signal; a failed operation rolls back its uncommitted changes |
+| Signal | `signal("tick", value)` → `ArtifactEvent.Signal` perception → a goal, or `agent.awaitSignal(artifact, "tick")` |
+| `focus` / `stopFocus` | `agent.focus(counter)` (perceives the current values) / `agent.stopFocus(counter)` (perceives `PropertyRemoved`) |
 | Guard / `await` / `await_time` | `await { condition }` / `delay(...)` inside an operation |
 | `execInternalOp` | `internalOperation { ... }` |
-| One lock per artifact | One host loop per artifact (an internal agent): tasks interleave only at suspension points |
-| `execLinkedOp` | An operation calls another artifact's operation (just a `suspend` call; untested) |
-| Manual | Not modelled (the Kotlin class and KDoc are the manual) |
+| One lock per artifact, worker threads | One serial view of the node dispatcher per artifact; artifacts run in parallel with each other and with agents |
+| `execLinkedOp` | An operation invoking another artifact's operation (a plain `suspend` call; untested) |
+| `disposeArtifact` | Only when the home node terminates (`Disposed`); no explicit dispose yet |
+| Manual | Not modelled (the Kotlin class and its KDoc) |
 
 ---
 
 ## 3. Designs
 
-All three designs share the user-facing model sketched above. They differ in **where operation code runs** and **how
-remote use works**.
+The designs differ in **where operation code runs** and **how remote use works**. The user-facing model (properties,
+operations, focus, perceptions) is the same in all of them.
 
-### A. Artifact as a synchronized skill
+### A. Artifact as a synchronized skill (rejected)
 
-The artifact is a plain object captured by plans, like today's skills. Operations are `suspend` functions that run
-**on the caller's intention** under a per-artifact `Mutex`. `await` releases the mutex and waits for a change.
-Properties and signals are published with `node.publishEvent` to the focusing agents.
+The artifact is a plain object captured by plans. Its operations run **on the caller's intention**, under a
+per-artifact `Mutex`.
 
-**Pros:**
-
-- It is the smallest design, with no extra entity.
-- It is fully typed.
-- An operation costs no event hops.
+**Pros:** it is the smallest design.
 
 **Cons:**
 
-- **Internal operations have no home.** User code has no node-level scope. A clock started by an agent runs on that
-  agent's intention and dies with it, and on Alchemist it would need the agent's dispatcher anyway.
-- **Removing an agent can freeze the artifact.** If a removed agent's intention holds the mutex (e.g. across a `delay`
-  in an operation), the lock is never released (see Cancellation above).
-- **Artifact state is touched on the callers' threads.** On an executor dispatcher, correctness then depends entirely
-  on the mutex discipline.
-- **Remote use needs a second mechanism.** Callers on other nodes would need to exchange messages and handle replies.
-  Their events would arrive as messages, not perceptions, so agent code would differ by location.
+- Internal operations and timers have nowhere to run, short of borrowing an agent.
+- A removed agent's intention that holds the mutex never releases it (see Cancellation).
+- Artifact state is touched on the callers' threads.
+- Remote use needs a second mechanism, so agent code would differ by location.
 
-### B. Artifact hosted as an internal agent, with mirrors on other nodes (prototype)
+### B. Artifact hosted by an internal agent (v1, rejected by the user)
 
-`node.makeArtifact(a)` adds an agent to the node, whose body is the artifact:
-
-- its goals are `ArtifactTask`s;
-- its single plan runs them.
-
-**Running work on the host.** Invoking an operation (or `focus`) posts a task with `host.alsoAchieve(task)` and
-suspends the caller on a `CompletableDeferred` until the host completes it. `internalOperation` posts a task too.
-`await` suspends the task on a `StateFlow` that is bumped after every step and every property change.
-
-**Mirrors.** `node.mirrorArtifact(a)` adds the same kind of host in *mirror* mode:
-
-- it forwards operations to the home host as messages, and waits for the reply with `wait`;
-- it sends one `Focus` message to subscribe;
-- it republishes the events it receives as local perceptions to its own focusers.
-
-The home host's id is derived from the artifact name, `BaseAgentID(name, "artifact:<name>")`, so no discovery is
-needed.
+The artifact runs as an agent whose goals are the tasks to execute, and mirror agents on other nodes forward
+operations as messages.
 
 **Pros:**
 
-- It changes **nothing** in the API, the engine, the runners or the networks.
-- **Atomicity** is what the agent reasoning cycle already provides. It holds even with parallel agents, and I tested
-  it on 4 threads.
-- **Time and virtual time** work as they do for agents.
-- On Alchemist, hosts registered at build time go through the same `AgentAddition` path as the initial agents
-  (untested, and `JaktaForAlchemistRuntime` carries a TODO saying it is probably broken since the latest runner
-  changes).
-- Removing a caller cannot corrupt the artifact.
-- Agent code is the same for local and remote artifacts.
+- Zero changes to API, runners and networks.
+- Atomicity comes from the reasoning cycle.
 
-**Cons:**
+**Cons:** hosts are agents. They show up in `node.agents`, receive broadcasts, need a body (`Node<Any>` only), and keep
+nodes alive.
 
-- **The host is visible as an agent.** It is in `node.agents`, it receives broadcasts (and ignores them), it needs a
-  body (so it only works on `Node<Any>`), and it counts as an agent for termination.
-- **Every operation costs a few event hops**, and a remote one costs two network messages.
-- **Remote operations are dispatched by name**, with untyped arguments on the wire. The call site stays typed because
-  every node has the artifact class.
+### C. Artifacts as node processes, with an artifact-aware node (v2, implemented)
 
-### C. First-class artifacts in the runtime
+Core gains one general extension point, node processes. Everything else is in the `jakta-artifacts` module:
 
-Add `ExecutableArtifact` to `jakta-api`, next to agents in `Node`, and teach every runner to step artifacts (Coroutine,
-the test `ManualStepNodeRunner`, and Alchemist actions). Add artifact system events (`ArtifactOperation`,
-`ArtifactFocus`, `ArtifactEvent`) that networks carry. The MQTT wire format would carry them too.
+- **Execution.** `ArtifactNode.makeArtifact(a)` launches `a` as a node process. The process reads the node's
+  dispatcher and runs every coroutine of the artifact on a `StepDispatcher`, which is
+  `dispatcher.limitedParallelism(1)` plus an `endStep()` hook run after each dispatched block.
+  - **Operations, internal operations and `focus` requests are coroutines** on that dispatcher, so they interleave
+    only at suspension points.
+  - **`endStep()`** commits property changes, and wakes `await`ers when the step may have changed the state. A step
+    that only re-evaluated a false condition does not wake anyone, which avoids busy loops.
+  - **`delay` follows the node's time**, because the step dispatcher delegates `Delay` to the node dispatcher.
+- **Local use.** Invoking an operation sends a task to the artifact's inbox and suspends the caller's intention until
+  the task completes. Committed changes are delivered as perceptions *before* the result is returned, so the agent's
+  beliefs already reflect an operation when the plan resumes. This is like JaCaMo, where percepts are added before
+  the action feedback.
+- **Remote use.** Each `ArtifactNode` has a **router** process that owns the node's artifact tables: hosted artifacts,
+  references to remote ones, remote focus, and pending requests. Protocol messages are ordinary `AgentEvent.Message`s
+  whose filter accepts no agent. `handleExternalEvent` hands them to the router, which handles them one at a time:
+
+  | Message | Sent to | Effect |
+  |---|---|---|
+  | `Lookup(artifact)` | everyone | the node hosting it replies with its `NodeID` (retried every second, until the lookup timeout) |
+  | `Invoke` / `Focus` / `StopFocus` | the home node | served by the artifact as a task, answered with a `Reply` |
+  | `Reply(value \| error)` | the requesting node | completes the pending request, after running its reply handler (e.g. delivering the focus snapshot) |
+  | `Notify(event, observers)` | each node with remote observers | delivers the event as a perception to those agents |
+  | `Disposed(artifact)` | everyone | observers perceive `PropertyRemoved`, then pending calls fail and the local reference is disposed |
 
 **Pros:**
 
-- The model is clean: a node has agents *and* artifacts.
-- There is no body hack.
-- It opens the door to explicit termination semantics, fast paths, and discovery through manuals or Thing Descriptions.
+- No agent machinery is involved.
+- The core change is small and general.
+- Artifacts run in parallel with each other and with agents.
+- Remote use rides on whatever `NodeNetwork` the MAS uses.
+- Agents perceive the same events whether the artifact is local or remote.
 
 **Cons:**
 
-- It touches the API, every runner and every network, including the MQTT serialization.
-- It is the biggest change, and B already shows the semantics it would implement.
-
-### Where an artifact lives, concretely
-
-**In one node.** That node is the artifact's workspace, and its runner executes it. There is no shared-memory sharing
-across nodes, not even with `SharedMemoryNetwork`: the mirror path uses messages only, so the same code works when
-distributed.
-
-**"Its own node-like runnable."** An *environment node* hosting only artifacts is already expressible with B
-(`node { node.makeArtifact(...) }`). It needs a termination policy, because nobody terminates it (see limitations).
-
-### Recommendation
-
-**Adopt B's user model and semantics now. Move the host to C only if the "hosts are agents" leak turns out to matter.**
-
-The prototype shows that artifacts fit the independent-nodes model without touching it:
-
-- an artifact is one more *participant* that the node runner executes;
-- it interacts with local agents through the two channels agents already have: suspending calls inside plans, and
-  perceptions;
-- it interacts with other nodes only through messages.
-
-The user-facing API would stay the same under C: `Artifact`, `observable`, `operation`, `makeArtifact`,
-`mirrorArtifact`, `focus`.
+- Runners must support node processes; only `CoroutineNodeRunner` does today.
+- An artifact node is a specific node type: users write `NodeBuilders.artifactNode()` instead of `baseNode()`.
 
 ```mermaid
 flowchart LR
-  subgraph NodeA[Node A: home of counter]
-    AA[agents] -- "counter.inc() (suspends the intention)" --> HA[counter host<br/>serializes tasks]
-    HA -- "PropertyChanged / Signal perceptions<br/>to focusing agents" --> AA
+  subgraph NodeA["ArtifactNode A (home of counter)"]
+    AA[agents] -- "counter.inc()<br/>(suspends the intention)" --> CA["counter<br/>(process, serial steps)"]
+    CA -- "PropertyChanged / Signal<br/>perceptions to focusing agents" --> AA
+    RA[router process]
   end
-  subgraph NodeB[Node B]
-    AB[agents] -- "counter.inc()" --> MB[counter mirror]
-    MB -- "perceptions to local focusers" --> AB
+  subgraph NodeB[ArtifactNode B]
+    AB[agents] -- "artifacts.lookup(...), counter.inc()" --> RB[router process]
+    RB -- "perceptions to local focusers" --> AB
   end
-  MB -- "Invoke / Focus messages" --> NET[(NodeNetwork<br/>SharedMemory / MQTT)]
-  NET --> HA
-  HA -- "Outcome / ArtifactEvent messages" --> NET
-  NET --> MB
+  RB -- "Lookup / Invoke / Focus / StopFocus" --> NET[(NodeNetwork<br/>SharedMemory / MQTT)]
+  NET --> RA
+  RA -- "serve" --> CA
+  CA -- "Reply / Notify / Disposed" --> NET
+  NET --> RB
 ```
 
 ```mermaid
 sequenceDiagram
   participant P as Plan on node B
-  participant M as Mirror (node B)
+  participant RB as Router B
   participant N as NodeNetwork
-  participant H as Host (node A)
-  P->>M: counter.inc() - alsoAchieve(task); P's intention suspends
-  M->>N: Message(Invoke("inc", Unit, 7)) to artifact:counter
-  N->>H: delivered by node A
-  H->>H: task runs inc (atomic step), count = 1
-  H-->>N: Message(PropertyChanged(count, 1)) to focusing mirrors
-  H-->>N: Message(Outcome(7, 1, null)) to the mirror
-  N->>M: PropertyChanged, published as a perception to node B's focusers
-  N->>M: Outcome; the mirror's wait resumes
-  M->>P: result 1; the intention resumes
+  participant RA as Router A
+  participant C as counter (on A)
+  P->>RB: artifacts.lookup("counter", ::Counter)
+  RB->>N: Lookup(counter)
+  N->>RA: hosted here
+  RA-->>N: Reply(home = A)
+  N-->>RB: the reference is bound to home A
+  P->>RB: counter.inc() - the intention suspends
+  RB->>N: Invoke(to A, inc)
+  N->>RA: serve
+  RA->>C: task: one atomic step, then commit
+  C-->>N: Notify(to B, PropertyChanged(count, 1), observers)
+  C-->>N: Reply(to B, value 1)
+  N-->>RB: Notify, delivered as a perception to B's focusing agents
+  N-->>RB: Reply completes the request
+  RB-->>P: 1 - the intention resumes
 ```
 
 ---
 
-## 4. The prototype
+## 4. The `jakta-artifacts` module
 
-It lives in `jakta-core`, package `it.unibo.jakta.artifact`, next to the other environment-support code (skills). It
-uses only the public API and core's `agent { }` DSL, so moving it to its own module later is a mechanical change.
+| File | Lines | Content |
+|---|---|---|
+| `jakta-artifacts/src/commonMain/kotlin/it/unibo/jakta/artifact/Artifact.kt` | ~320 | `Artifact`, `Operation`, `ArtifactEvent`, `ArtifactException`, `StepDispatcher` |
+| `jakta-artifacts/src/commonMain/kotlin/it/unibo/jakta/artifact/ArtifactNode.kt` | ~290 | `ArtifactNode` (router, lookup, remote requests, disposal), `NodeBuilders.artifactNode()`, the protocol messages |
+| `jakta-artifacts/src/commonMain/kotlin/it/unibo/jakta/artifact/ArtifactSkill.kt` | ~80 | `ArtifactSkill` and its `context(skill)` functions |
 
-- `jakta-core/src/commonMain/kotlin/it/unibo/jakta/artifact/Artifact.kt` holds `Artifact`, `Operation`,
-  `ArtifactEvent` and the internal protocol (`Invoke`, `Outcome`, `Focus`).
-- `jakta-core/src/commonMain/kotlin/it/unibo/jakta/artifact/ArtifactHosting.kt` holds `Node<Any>.makeArtifact`,
-  `Node<Any>.mirrorArtifact`, `Agent.focus` / `Agent.stopFocus`, and the host agent.
-
-### Defining and using an artifact
+### Defining artifacts
 
 ```kotlin
 class Counter(name: String) : Artifact(name) {
-    var count by observable(0)                  // observable property "count"
-    val inc by operation {                      // operation "inc": returns the new count
+    var count by observable(0)                     // observable property "count"
+    val inc by operation {                         // operation "inc", returns the new count
         count++
-        if (count == 3) signal("three")
+        if (count == 3) signal("three")            // commits count, then signals
         count
     }
-    val dec by operation { check(count > 0) { "count is already 0" }; count-- }   // may fail
+    val incTwice by operation { count++; count++ } // perceived as a single change, to count + 2
+    val dec by operation {
+        count--
+        check(count >= 0) { "count is already 0" } // fails, and count-- is rolled back
+    }
 }
 
 class TupleSpace(name: String) : Artifact(name) {
     private val tuples = mutableListOf<String>()
-    val write by operationWith { tuple: String -> tuples += tuple }
-    val take by operationWith { prefix: String ->                                 // blocking "in"
+    var size by observable(0)
+    val write by operationWith { tuple: String -> tuples += tuple; size = tuples.size }
+    val take by operationWith { prefix: String ->  // blocking "in": waits for a matching tuple
         await { tuples.any { it.startsWith(prefix) } }
-        tuples.first { it.startsWith(prefix) }.also { tuples -= it }
+        tuples.first { it.startsWith(prefix) }.also { tuples -= it; size = tuples.size }
     }
 }
 
 class Clock(name: String) : Artifact(name) {
+    var ticks by observable(0)
     val start by operation {
-        internalOperation { for (tick in 1..3) { delay(1.seconds); signal("tick", tick) } }
+        internalOperation {                        // runs alongside the other operations
+            repeat(3) { delay(1.seconds); ticks++ } // each tick is committed when the step ends, at the next delay
+            signal("done")
+        }
     }
 }
 ```
 
+### Using them
+
 ```kotlin
-mas(NodeBuilders.baseNode<Any>()) {
+mas(NodeBuilders.artifactNode<Any>()) {
     node {
-        val counter = node.makeArtifact(Counter("counter"))
-        agent<String, String>(BaseAgentID("user")) {
-            embodiedAs { Any() }
-            handlesPerceptionEvents { e ->                     // the incarnation decides what a percept is
-                when (e) {
-                    is ArtifactEvent.PropertyChanged -> AgentUpdate.Belief(
-                        setOf("${e.property}(${e.value})"),
-                        beliefs.filter { it.startsWith("${e.property}(") }.toSet(),
-                    )
-                    is ArtifactEvent.Signal -> AgentUpdate.Goal(setOf(e.signal))
-                    else -> null
+        node.makeArtifact(Counter("counter"))          // this node is the counter's home
+        context(ArtifactSkill(node)) {
+            agent<String, String>(BaseAgentID("observer")) {
+                embodiedAs { Any() }
+                handlesPerceptionEvents { e ->          // each incarnation decides what a percept becomes
+                    when (e) {
+                        is ArtifactEvent.PropertyChanged -> AgentUpdate.Belief(
+                            setOf("${e.property}(${e.value})"),
+                            beliefs.filter { it.startsWith("${e.property}(") }.toSet(),
+                        )
+                        is ArtifactEvent.PropertyRemoved ->
+                            AgentUpdate.Belief(emptySet(), beliefs.filter { it.startsWith("${e.property}(") }.toSet())
+                        is ArtifactEvent.Signal -> AgentUpdate.Goal(setOf(e.signal))
+                        else -> null
+                    }
                 }
-            }
-            hasInitialGoals { !"use" }
-            hasPlanLibrary {
-                adding.goal { ifGoalMatch("use") } triggers {
-                    agent.focus(counter)
-                    val n = counter.inc()                      // suspends this intention only
+                hasInitialGoals { !"observe" }
+                hasPlanLibrary {
+                    adding.goal { takeIf { it == "observe" } } triggers {
+                        agent.focus(artifacts.lookup("counter", ::Counter))
+                    }
                 }
             }
         }
     }
     node {
-        val counter = node.mirrorArtifact(Counter("counter")) // the one hosted by the first node
-        // ... identical agent code
+        context(ArtifactSkill(node)) {
+            agent<String, String>(BaseAgentID("user")) {
+                // ...
+                hasPlanLibrary {
+                    adding.goal { takeIf { it == "use" } } triggers {
+                        val counter = artifacts.lookup("counter", ::Counter) // hosted by the other node
+                        val n = counter.inc()                               // suspends this intention only
+                    }
+                }
+            }
+        }
     }
 }.run(CoroutineNodeRunner(SharedMemoryNetwork()))
 ```
 
-### How the DSL is shaped
+### Design notes
 
-- **Names come from the Kotlin properties.** `by observable(...)` and `by operation { }` take their names from the
-  property (`provideDelegate`), so no names are repeated. Remote dispatch then only needs those names.
-- **One argument uses a separate name.** Operations with one argument use `operationWith { a: A -> }`. Kotlin
-  cannot resolve an overload between `suspend () -> R` and `suspend (A) -> R` for a lambda without parameters (I tried
-  it). Several arguments go in a data class or a `Pair`.
-- **Operations are values.** They are `Operation<A, R>` values with a `suspend operator fun invoke`, so the call site
-  reads like a method call and is typed. Operations can be called from anywhere that can suspend, including from
-  another artifact's operation (that gives linking, untested).
-- **`focus` is an extension on `Agent`, like `sendTo`.** Hence `agent.focus(counter)`: the artifact needs the
-  caller's id.
-- **The core is incarnation-agnostic.**
-  - Artifacts produce plain Kotlin events (`ArtifactEvent`), and each agent maps them in `handlesPerceptionEvents`.
-  - In the string incarnation the mapping is `"count(3)"`. In the Prolog one it is
-    `count(3)[artifact_name(counter)]`, like JaCaMo: see `TestPrologArtifacts`.
-  - Signals map best to goals. JaKtA plans are only triggered by belief and goal events, and a belief set would
-    swallow a repeated signal.
-  - Alchemist is untested, but hosts are ordinary agents to it: see the limitations.
+- **One artifact class serves both roles.** The same class is used at home and on the other nodes: a looked-up remote
+  reference is a new instance (`::Counter`) bound to the home node. Typed operation calls (`counter.inc()`) then work
+  everywhere. On the wire, operations are dispatched by name, which the delegates take from the Kotlin property.
+- **One-argument operations use a separate name.** They are declared with `operationWith { a: A -> }`, because Kotlin
+  cannot resolve an overload between `suspend () -> R` and `suspend (A) -> R` for a lambda without parameters. Several
+  arguments go in a data class or a `Pair`.
+- **Operations are `Operation<A, R>` values** with a `suspend operator fun invoke`. So they are callable from any
+  suspending code, plans and other artifacts included, which is how linking would work.
+- **The skill uses `Agent` extensions, like `MessagingSkill`.** `focus` and `stopFocus` need the caller's id, so
+  they are extensions on `Agent`. `awaitSignal` is an extension on `MutableAgentState` (`agent` in plans), because
+  it uses `wait`.
+- **The core is incarnation-agnostic.** Artifacts produce plain Kotlin `ArtifactEvent`s, and each agent maps them to
+  its beliefs. `TestPrologArtifacts` maps them to `count(N)[artifact_name(counter)]`, as JaCaMo does.
+
+### Do signals need an engine trigger? No
+
+JaKtA plans are triggered only by belief and goal events. Two mechanisms already cover CArtAgO's `+signal` events:
+
+- **Mapping a signal to a goal** (`AgentUpdate.Goal(setOf(e.signal))`) starts one plan per signal, on a new
+  intention. A belief would not work: the belief base is a set, so a repeated signal would be swallowed.
+- **Waiting inside a plan:** `agent.awaitSignal(artifact, "done")` (`wait` on the external event).
+
+An engine trigger for external events would only add a third way to do the same thing. Its one benefit would be
+avoiding the "no plan for goal" warning that appears when a mapped signal has no plan. Mapping only the signals a
+plan handles avoids that warning already.
 
 ### Tests
 
-**`jakta-core/src/commonTest/.../artifact/TestArtifacts.kt`** (runs on the JVM, JS and Linux native, on `runTest`
-virtual time):
-
-- `twoAgentsShareACounterOnTheSameNode`: one agent focuses and observes 0, 1, 2, 3, and terminates on the `three`
-  signal. The other agent gets the return values 1, 2, 3. A failing `dec` is handled by a `failing.goal` plan.
-- `awaitSuspendsOnlyTheCallerIntention`: `take("job")` blocks the consumer's intention. Its other intention runs
-  meanwhile. The consumer then receives `job-1`, skipping the non-matching tuple.
-- `internalOperationsRunOnTheNodeTime`: the clock's ticks arrive at virtual times 1000, 2000 and 3000 ms.
-- `agentsOnAnotherNodeUseTheArtifactThroughAMirror`: the artifact is hosted on node A and used from node B. Both
-  nodes' focusers observe 0, 1, 2. Return values cross the network, and the failure message `"count is already 0"`
-  crosses the network too.
-
-**`jakta-core/src/jvmTest/.../artifact/TestArtifactThreads.kt`**: 4 agents on a 4-thread pool call `inc` 250 times
-each. Every call must see a distinct count from 1 to 1000.
-
-- As a check that the test works, I made operations run on the caller instead of the host. Increments were then lost
-  and the test failed with a timeout. That change was reverted.
-
-**`jakta-prolog-incarnation/src/commonTest/.../TestPrologArtifacts.kt`**: properties become Prolog facts annotated with
-`artifact_name`, and plans match them.
+| Test | What it shows |
+|---|---|
+| `jakta-core/src/commonTest/.../dsl/examples/TestNodeProcesses.kt` | A process polls a "sensor" every second and an agent reacts at virtual times 1000, 2000 and 3000. The process stops when the node terminates (#887) |
+| `jakta-artifacts/src/commonTest/.../TestArtifacts.kt`: `agentsShareAnArtifactOnTheSameNode` | Two agents use the counter through the skill. The observer perceives 0, 1, 2, 3, never −1, because the failed `dec` is rolled back. The failure is handled by `failing.goal`. `node.agents` has exactly the 2 agents |
+| `changesArePerceivedAtTheEndOfEachStepAndForgottenWithStopFocus` | `incTwice` is perceived as 0 → 2. The beliefs already show `count(2)` when the operation returns. After `stopFocus` the beliefs are empty, and later changes are not perceived |
+| `awaitSuspendsOnlyTheCallerIntention` | A blocking `take` suspends one intention; the agent's other intention runs meanwhile |
+| `internalOperationsRunOnTheNodeTime` | Clock ticks are committed and perceived at 1000, 2000 and 3000, and `awaitSignal(clock, "done")` returns at 3000 |
+| `agentsOnAnotherNodeUseTheArtifactThroughTheSkill` | Lookup, focus, a remote failure (`ArtifactException("count is already 0")`), and remote results. Observers on both nodes perceive 0, 1, 2. A remote `stopFocus` removes the beliefs |
+| `remoteUsersFailWhenTheHomeNodeTerminates` | A remote blocking `take` fails when the home node terminates itself, and so does the next call. The remote observer's beliefs about the space are removed |
+| `lookingUpAMissingArtifactFails` | `lookup` throws `ArtifactException` after its timeout |
+| `jakta-artifacts/src/jvmTest/.../TestArtifactThreads.kt` | 4 agents on a 4-thread pool, 250 `inc` each: every call sees a distinct count from 1 to 1000. Running steps on the node dispatcher without `limitedParallelism(1)` makes it fail, with lost increments ending in a timeout; I checked this and reverted it |
+| `jakta-artifacts/src/jvmTest/.../TestPrologArtifacts.kt` | Properties become Prolog facts annotated with `artifact_name`, and plans match them |
 
 Run them with:
 
 ```
-./gradlew :jakta-core:jvmTest --tests 'it.unibo.jakta.artifact.*' :jakta-prolog-incarnation:jvmTest --tests 'it.unibo.jakta.TestPrologArtifacts'
+./gradlew :jakta-artifacts:jvmTest :jakta-artifacts:jsNodeTest :jakta-artifacts:linuxX64Test
 ```
 
 ---
 
-## 5. Known limitations of the prototype
+## 5. Current limitations
 
-**Hosts are agents** (the cost of design B):
+### Runners and incarnations
 
-- They only work on `Node<Any>`: the host's body is the artifact.
-- They appear in `node.agents` and receive broadcasts (they ignore them).
-- They keep a node alive in the MQTT branch's "stop when the last agent is removed" rule.
-- No termination policy exists for nodes that only host artifacts.
+- **Only `CoroutineNodeRunner` runs node processes.**
+  - `ManualStepNodeRunner` (core tests) and the Alchemist incarnation ignore them, so artifacts do not run there.
+  - On those runners, `terminateNode()` on an `ArtifactNode` never takes effect, because it goes through the router
+    process to send `Disposed` first.
+  - Alchemist would need a reaction that steps processes on its simulated-time dispatcher. Its runtime already
+    carries a TODO saying it is probably broken since the latest runner changes.
+- **`NodeBuilders.artifactNode()` is required.** Plain `BaseNode`s ignore the artifact protocol (its messages reach no
+  agent there). The `runLocally()` shorthand is typed for base nodes, so use `run(CoroutineNodeRunner(...))`.
 
-**Remote use:**
+### Distribution
 
-- **Startup race on `SharedMemoryNetwork`.** A message is lost if the destination node has not subscribed yet. This is
-  a pre-existing problem for all messages, and `MqttNetwork` solves it by waiting for its peers.
-- **Callers hang if the home dies.** Nothing reports that a host was removed or its node terminated, so operations
-  waiting on it never complete, and neither do mirrors. Callers can wrap calls in `withTimeout`.
-- **Only the message of a remote failure crosses the network.** It becomes an `IllegalStateException`; the exception
-  type is lost.
-- **Not wired to MQTT yet.** That needs:
-  - `@Serializable` versions of `Invoke`/`Outcome`/`Focus`/`ArtifactEvent`, plus the user's argument and result types,
-    in the `SerializersModule`;
-  - `SendTo(receiver)` in place of the lambda filters (the PR changes `publishEvent`'s signature).
+- **Crashes are not detected.** Neither is a home node stopped by *another* node (`terminateNode(nodeID = home)`).
+  - In both cases no `Disposed` is sent: remote calls wait forever, and observers keep stale beliefs.
+  - Workaround: wrap calls in `withTimeout`. The pending request is cleaned up on cancellation.
+  - A real fix needs membership events from the network. `MqttNetwork` in PR #962 already tracks peers through
+    retained presence topics and a last will.
+- **Not wired to MQTT yet.**
+  - The protocol messages and the user's argument and result types would need `@Serializable` versions registered in
+    the `SerializersModule`.
+  - The `{ false }` and body-based lambda filters would become `MessageFilter`s.
+  - The ids are already compatible: the home is addressed by `NodeID`, and PR #962 makes those stable; artifacts are
+    addressed by name.
+- **Every protocol message is broadcast** by `SharedMemoryNetwork` (and by the MQTT messages topic). Each router drops
+  what is not addressed to its node, which costs O(nodes) per message.
+- **Startup.** A lookup sent before the home node subscribed is lost. The lookup retries every second until its
+  timeout (10 s by default), which covers startup.
+- **Remote failures keep only their message**, as an `ArtifactException`; local failures keep their original type.
+- **Arguments and results are passed by reference** in-process, so mutable objects are shared between nodes.
 
-  Artifact names are already stable ids, which is what MQTT needs.
-- **Argument aliasing in-process.** On `SharedMemoryNetwork`, arguments and results are passed by reference, so
-  mutable objects are shared between nodes.
+### Semantics
 
-**Visibility differs from CArtAgO.** Each assignment of an observable property is published immediately, so
-`count++; count++` produces two events. CArtAgO buffers changes and commits at the end of the step. The steps are still
-atomic, and publishing at the end of each step would be a small change (see the open questions).
+- **Operations have no start guards.** Calling `await` first does the same job.
+- **Not implemented:**
+  - per-agent signals;
+  - explicit `disposeArtifact`;
+  - dynamic properties (`defineObsProperty` at runtime): properties are declared by delegates;
+  - manuals;
+  - several workspaces per node.
+- **Artifact names are global to the MAS.** A lookup takes the first node that replies.
+- **Observers are never pruned.** Entries for agents that are removed while focusing are only dropped when the
+  artifact's node goes away; their events are filtered out at delivery.
+- **Direct property reads are unsynchronized.** A plan can read `counter.count` directly, bypassing the step
+  dispatcher. On a looked-up remote reference it returns the initial value. Agents are meant to use their beliefs.
+- **Unchecked typing in `lookup`.** `lookup(name, ::Counter)` casts a *hosted* artifact to the expected class without
+  checking it.
 
-**Unsynchronized direct reads.** Plans *can* read `counter.count` directly, bypassing the host.
-
-- The read is unsynchronized on executor dispatchers.
-- On a mirror it returns the last mirrored value.
-- Agents are meant to use beliefs.
-
-**Not implemented:**
-
-- `stopFocus` keeps the beliefs derived from the artifact.
-- No per-agent signals.
-- No operation *start* guards, other than calling `await` first.
-- No `disposeArtifact`, manuals, typed remote exceptions, or multiple workspaces per node.
-- Artifact names are global to the MAS.
-
-**Untested:**
+### Untested
 
 - linked operations (an operation calling another artifact);
-- `ManualStepNodeRunner`;
-- Alchemist. Hosts are agents, so build-time artifacts should be scheduled like initial agents. Runtime
-  `makeArtifact` shares the fate of runtime `addAgent` there, and `JaktaForAlchemistRuntime` has a TODO about it.
+- `artifacts.make(...)` from a plan;
+- nodes with custom body types (the code does not depend on `Any` any more).
+
+### Issues found in core
+
+These are not fixed here: they are being handled elsewhere, or are out of scope.
+
+- **Agents cannot run on `Dispatchers.Default`/`IO`** ("must implement Delay"). Another agent is on it. Artifacts
+  have the same requirement, so that delays follow the node's time.
+- **A removed agent's intentions never resume**, so their `finally` blocks never run. Another agent is on it.
+  Artifacts are unaffected because operations do not run on the caller's intention.
+- **`agent.beliefs` is a live view, not a snapshot.** `BeliefBaseImpl.snapshot()` returns `copy()`, a data-class copy
+  that shares the same mutable set. The tests copy it with `toList()`. This is a new finding.
+- **`BaseNode` delivers to its unsynchronized agent set.** Artifacts publish perceptions from their own dispatcher,
+  and on an executor dispatcher this can race with the runner adding or removing agents. Skills that publish from
+  plans have the same race today.
 
 ---
 
-## 6. Open questions for the user
+## 6. Open questions
 
-I picked a default for each of these, marked *(default)*.
+**Settled in v2.**
 
-1. **B or C?** Is it acceptable that artifact hosts are agents under the hood? *(default: yes for now, C later)*
-   Would you rather make artifacts first-class in `Node` and the runners?
-2. **Module.** Should artifacts live inside `jakta-core` *(default)*, or in their own `jakta-artifacts` module?
-3. **Workspaces.** Is one node = one workspace enough *(default)*, or do you want named workspaces inside a node?
-   Should artifact names be global *(default)* or namespaced by node id? The latter needs stable `NodeID`s, as in
-   PR #962.
-4. **Property visibility.** Publish on every assignment *(default, simplest)*, or commit at the end of each step like
-   CArtAgO?
-5. **Signals.** Map signals to goals by convention *(default, in the tests)*, or add a plan trigger for external
-   events in the engine? JaKtA plans can only react to beliefs and goals.
-6. **Default percept mappings per incarnation.** Should incarnations offer a default mapping from artifact events to
-   beliefs? An example is a helper in the Prolog incarnation producing
-   `prop(V)[artifact_name(A), source(percept)]`. *(default: none, users write the mapping)*
-7. **Distribution.** Should the artifact protocol ride on messages *(default)*, or be its own system event? PR #962
-   only carries `AgentMessage`s, so messages work there once serializable. Should the MQTT work land first, so the
-   artifact protocol is written against `MessageFilter` and kotlinx.serialization directly?
-8. **Failure of a host.** Should callers and mirrors be notified, or fail, when an artifact's host or home node goes
-   away? This needs a small runner change, or timeouts.
+- *B or C?* C, as the user asked.
+- *Module?* `jakta-artifacts`.
+- *Property visibility?* CArtAgO's semantics: commit at the end of each step, rollback on failure.
+- *Signals?* No engine trigger (§4).
+- *Protocol on messages or on new system events?* Messages, because they need no core change and are what PR #962
+  already carries.
+- *Graceful failure of a home node?* `Disposed`.
+
+**Still open.** Each one has a default I picked.
+
+1. **Crash detection.** Should `NodeNetwork` expose node-left events, so that routers can dispose the artifacts of
+   lost nodes? *(default: no; callers use `withTimeout`.)* This is the main remaining gap for #887's "scale to
+   distributed deployments".
+2. **Process support in the other runners.** Should `ManualStepNodeRunner` and the Alchemist incarnation run node
+   processes? *(default: not done.)* For Alchemist, a node-level action could step them with its dispatcher.
+3. **Naming.** Global artifact names *(default)*, or names qualified by node, e.g. `node/counter`? The latter needs
+   stable `NodeID`s, as in PR #962.
+4. **MQTT.** Should the artifact protocol be made serializable once PR #962 lands? *(default: yes, as a follow-up on
+   top of it.)*
+5. **Default percept mappings.** Should incarnations ship a default mapping from `ArtifactEvent` to beliefs, e.g.
+   Prolog `prop(V)[artifact_name(A), source(percept)]`? *(default: no; the agent writes the mapping, as for any other
+   perception.)*
+6. **Remaining CArtAgO features.** Which of explicit dispose, per-agent signals, start guards and dynamic properties
+   are worth adding? *(default: none until there is a use case.)*
+7. **Node API naming.** Is `Node.launchProcess` the right name and place for the core extension point? It is also
+   usable by any code holding the node, not only artifacts. *(default: yes, as #887 suggests.)*
