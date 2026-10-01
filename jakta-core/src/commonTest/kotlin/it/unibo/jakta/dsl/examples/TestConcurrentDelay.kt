@@ -11,6 +11,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.test.TestResult
 
 class TestConcurrentDelay {
 
@@ -50,7 +51,5 @@ class TestConcurrentDelay {
     }
 
     @Test
-    fun testConcurrentDelay() {
-        executeInTestScope { helloWorld }
-    }
+    fun testConcurrentDelay(): TestResult = executeInTestScope { helloWorld }
 }

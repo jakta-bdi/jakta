@@ -12,7 +12,7 @@ internal data class BeliefBaseImpl<Belief : Any>(
 ) : BeliefBase<Belief>,
     MutableSet<Belief> by beliefs {
 
-    override fun snapshot(): Collection<Belief> = this.copy()
+    override fun snapshot(): Collection<Belief> = beliefs.toSet()
 
     override fun add(element: Belief): Boolean = beliefs.add(element).alsoWhenTrue {
         events.send(BeliefAddEvent(element))

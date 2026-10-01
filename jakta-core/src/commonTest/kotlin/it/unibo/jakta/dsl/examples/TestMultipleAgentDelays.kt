@@ -11,6 +11,7 @@ import it.unibo.jakta.skills.terminate
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.test.TestResult
 
 class TestMultipleAgentDelays {
     val helloWorld =
@@ -52,8 +53,8 @@ class TestMultipleAgentDelays {
         }
 
     @Test
-    fun testMultipleAgentsDelays() {
+    fun testMultipleAgentsDelays(): TestResult {
         Logger.setMinSeverity(Severity.Error)
-        executeInTestScope { helloWorld }
+        return executeInTestScope { helloWorld }
     }
 }

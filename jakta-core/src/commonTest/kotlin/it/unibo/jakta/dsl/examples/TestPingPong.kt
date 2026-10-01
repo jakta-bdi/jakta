@@ -21,6 +21,7 @@ import kotlin.collections.emptySet
 import kotlin.test.Test
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestResult
 import kotlinx.coroutines.test.runTest
 
 class TestPingPong {
@@ -89,9 +90,9 @@ class TestPingPong {
     }
 
     @Test
-    fun testLocalPingPong() {
+    fun testLocalPingPong(): TestResult {
         Logger.setMinSeverity(Severity.Assert)
-        executeInTestScope { node }
+        return executeInTestScope { node }
     }
 
     val nodeBob = node(NodeBuilders.baseNode()) {
@@ -140,9 +141,9 @@ class TestPingPong {
     }
 
     @Test
-    fun testDistributedPingPong() {
+    fun testDistributedPingPong(): TestResult {
         Logger.setMinSeverity(Severity.Info)
-        runTest {
+        return runTest {
             val runner = CoroutineNodeRunner<Any, ExecutableNode<Any>>(SharedMemoryNetwork())
             val job = launch {
                 runner.run(nodeBob)

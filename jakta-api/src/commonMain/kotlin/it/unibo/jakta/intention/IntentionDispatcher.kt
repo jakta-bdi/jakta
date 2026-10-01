@@ -9,42 +9,10 @@ import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.job
 
-// /**
-// * A [ContinuationInterceptor] that wraps another interceptor and implements [Delay] by delegating
-// * to the wrapped interceptor. It is necessary that interceptors used in tests, with one of the
-// * [TestDispatcher]s, propagate delay like this in order to work with the delay skipping that those
-// * dispatchers perform.
-// */
-// TODO(b/263369561): avoid InternalCoroutinesApi - it is not expected that Delay gain a method but
-// if it ever did this would have potential runtime crashes for tests. Medium term we will leave
-// this dependency as the chance of this faulting is low, and it should only effect tests until next
-// recompile if it did fault.
-// THIS CODE COMES FROM: https://github.com/Kotlin/kotlinx.coroutines/issues/3758#issuecomment-3059351061
-
-// @OptIn(InternalCoroutinesApi::class)
-// abstract class DelayPropagatingContinuationInterceptorWrapper(wrappedInterceptor: ContinuationInterceptor) :
-//    CoroutineDispatcher(),
-//    // Coroutines will internally use the Default dispatcher as the delay if the
-//    // ContinuationInterceptor does not implement Delay.
-//    Delay by (
-//        (wrappedInterceptor as? Delay)
-//            ?: error(
-//                "wrappedInterceptor of DelayPropagatingContinuationInterceptorWrapper must implement Delay",
-//            )
-//        )
-
 /**
  * A custom dispatcher for intentions, that enqueues the continuation of an intention instead of dispatching it.
  */
-@OptIn(InternalCoroutinesApi::class)
-class IntentionDispatcher(wrappedInterceptor: ContinuationInterceptor) :
-    CoroutineDispatcher(),
-    Delay by (
-        (wrappedInterceptor as? Delay)
-            ?: error(
-                "wrappedInterceptor of DelayPropagatingContinuationInterceptorWrapper must implement Delay",
-            )
-        ) {
+open class IntentionDispatcher protected constructor() : CoroutineDispatcher() {
 
     private val log =
         Logger(
@@ -59,4 +27,24 @@ class IntentionDispatcher(wrappedInterceptor: ContinuationInterceptor) :
             currentIntention.enqueue { block.run() }
         }
     }
+
+    /** Factory for [IntentionDispatcher]s. */
+    companion object {
+        /**
+         * Creates an [IntentionDispatcher] for plans launched on [interceptor].
+         * If [interceptor] is a [Delay] (e.g. a `TestDispatcher` with virtual time, or a simulated clock),
+         * delays are scheduled on it. Otherwise `delay` falls back to the kotlinx.coroutines default, as it does
+         * for any other non-[Delay] dispatcher (e.g. `Dispatchers.Default` and `Dispatchers.IO` on JVM and native).
+         */
+        @OptIn(InternalCoroutinesApi::class)
+        operator fun invoke(interceptor: ContinuationInterceptor): IntentionDispatcher =
+            if (interceptor is Delay) DelayingIntentionDispatcher(interceptor) else IntentionDispatcher()
+    }
 }
+
+// Pattern from https://github.com/Kotlin/kotlinx.coroutines/issues/3758#issuecomment-3059351061
+// Delay is @InternalCoroutinesApi: kotlinx.coroutines offers no public way to propagate it.
+@OptIn(InternalCoroutinesApi::class)
+private class DelayingIntentionDispatcher(delay: Delay) :
+    IntentionDispatcher(),
+    Delay by delay

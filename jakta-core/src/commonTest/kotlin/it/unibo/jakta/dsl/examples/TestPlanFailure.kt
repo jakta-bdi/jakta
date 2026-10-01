@@ -9,13 +9,14 @@ import it.unibo.jakta.dsl.node
 import it.unibo.jakta.dsl.node.NodeBuilders
 import it.unibo.jakta.dsl.plan.triggers
 import kotlin.test.Test
+import kotlinx.coroutines.test.TestResult
 
 class TestPlanFailure {
 
     @Test
-    fun testPlanFailureHandling() {
+    fun testPlanFailureHandling(): TestResult {
         Logger.setMinSeverity(Severity.Warn)
-        executeInTestScope {
+        return executeInTestScope {
             node(NodeBuilders.baseNode()) {
                 agent {
                     embodiedAs { Any() }
