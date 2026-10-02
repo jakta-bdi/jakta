@@ -88,16 +88,15 @@ class TestSpatialRobot {
                 handlesPerceptionEvents { event ->
                     when (event) {
                         is Movement.Events.Position<*> ->
-                            AgentUpdate.Belief(
-                                setOf(("position(${event.agentId}, ${event.position})")),
-                                beliefs.filter { it.startsWith("position(") }.toSet(),
+                            AgentUpdate.Replace(
+                                { it.startsWith("position(") },
+                                listOf("position(${event.agentId}, ${event.position})"),
                             )
 
                         is Recharging.Events.ChargeLevel ->
-                            AgentUpdate.Belief(
-                                setOf("chargeLevel(${event.level})"),
-                                beliefs.filter { it.startsWith("chargeLevel(") }.toSet(),
-                            )
+                            AgentUpdate.Replace({
+                                it.startsWith("chargeLevel(")
+                            }, listOf("chargeLevel(${event.level})"))
 
                         else -> null
                     }

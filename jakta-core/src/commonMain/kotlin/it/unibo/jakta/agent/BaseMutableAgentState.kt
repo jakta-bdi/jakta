@@ -4,6 +4,7 @@ import co.touchlab.kermit.Logger
 import it.unibo.jakta.InternalJaktaAPI
 import it.unibo.jakta.belief.BeliefBase
 import it.unibo.jakta.belief.BeliefBaseFactory
+import it.unibo.jakta.belief.BeliefRevision
 import it.unibo.jakta.event.AgentEvent
 import it.unibo.jakta.event.AgentEvent.External.Message
 import it.unibo.jakta.event.AgentEvent.External.Perception
@@ -35,7 +36,10 @@ internal class BaseMutableAgentState<Belief : Any, Goal : Any>(
         id.displayName,
     )
 
-    private val beliefBase: BeliefBase<Belief> = BeliefBaseFactory.of(internalInbox, initialAgentState.beliefs)
+    override val beliefRevision: BeliefRevision<Belief> = initialAgentState.beliefRevision
+
+    private val beliefBase: BeliefBase<Belief> =
+        BeliefBaseFactory.of(internalInbox, initialAgentState.beliefs, beliefRevision)
     override val beliefs: Collection<Belief>
         get() = beliefBase.snapshot()
 
@@ -108,6 +112,10 @@ internal class BaseMutableAgentState<Belief : Any, Goal : Any>(
 
     override fun forget(belief: Belief) {
         this.beliefBase.remove(belief)
+    }
+
+    override fun replace(scope: (Belief) -> Boolean, beliefs: List<Belief>) {
+        this.beliefBase.replace(scope, beliefs)
     }
 
     override fun print(message: String) {

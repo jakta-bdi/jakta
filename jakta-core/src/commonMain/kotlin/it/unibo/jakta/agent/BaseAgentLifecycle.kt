@@ -246,40 +246,26 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
             return
         }
 
+        log.i { "Handling update $update" }
+        val state = executableAgent.state
         @Suppress("UNCHECKED_CAST")
         when (update) {
-            is AgentUpdate.Belief<*> ->
-                handleBeliefUpdateEvent(update as AgentUpdate.Belief<Belief>)
+            is AgentUpdate.Believe<*> -> (update as AgentUpdate.Believe<Belief>).beliefs.forEach { state.believe(it) }
 
-            is AgentUpdate.Goal<*> ->
-                handleGoalUpdateEvent(update as AgentUpdate.Goal<Goal>)
-        }
-    }
+            is AgentUpdate.Forget<*> -> (update as AgentUpdate.Forget<Belief>).beliefs.forEach { state.forget(it) }
 
-    private fun handleBeliefUpdateEvent(event: AgentUpdate.Belief<Belief>) {
-        log.i { "Handling belief update event $event" }
-        val additionsOnly = event.additions - event.removals
-        val removalsOnly = event.removals - event.additions
-        removalsOnly.forEach { executableAgent.state.forget(it) }
-        additionsOnly.forEach { executableAgent.state.believe(it) }
-    }
+            is AgentUpdate.Replace<*> -> (update as AgentUpdate.Replace<Belief>).let {
+                state.replace(it.scope, it.beliefs)
+            }
 
-    // TODO this should change to have a proper set of desires
-    //  for now I simply forward the goal addition and removal events
-    // TODO this has problems because goal removal is not actually stopping goals already in pursue.
-    private fun handleGoalUpdateEvent(event: AgentUpdate.Goal<Goal>) {
-        log.i { "Handling goal update event $event" }
-        val additionsOnly = event.additions - event.removals
-        val removalsOnly = event.removals - event.additions
-        removalsOnly.forEach {
-            executableAgent.internalInbox.send(
-                GoalRemoveEvent.withNoResult(it),
-            )
-        }
-        additionsOnly.forEach {
-            executableAgent.internalInbox.send(
-                GoalAddEvent.withNoResult(it),
-            )
+            // TODO goal removal does not stop the intentions already pursuing the goal
+            is AgentUpdate.Adopt<*> -> (update as AgentUpdate.Adopt<Goal>).goals.forEach {
+                executableAgent.internalInbox.send(GoalAddEvent.withNoResult(it))
+            }
+
+            is AgentUpdate.Drop<*> -> (update as AgentUpdate.Drop<Goal>).goals.forEach {
+                executableAgent.internalInbox.send(GoalRemoveEvent.withNoResult(it))
+            }
         }
     }
 }
