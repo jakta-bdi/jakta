@@ -8,6 +8,7 @@ import it.unibo.jakta.dsl.node
 import it.unibo.jakta.dsl.node.NodeBuilders
 import it.unibo.jakta.dsl.plan.triggers
 import kotlin.test.Test
+import kotlinx.coroutines.test.TestResult
 
 class TestHelloWorld {
 
@@ -29,8 +30,8 @@ class TestHelloWorld {
     }
 
     @Test
-    fun testHelloWorld() {
+    fun testHelloWorld(): TestResult {
         Logger.setMinSeverity(Severity.Debug)
-        executeInTestScope { helloWorld }
+        return executeInTestScope { helloWorld }
     }
 }

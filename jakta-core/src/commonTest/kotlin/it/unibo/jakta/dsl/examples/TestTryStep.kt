@@ -15,6 +15,7 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestResult
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 
@@ -55,33 +56,31 @@ class TestTryStep {
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
-    fun testBeliefAddition() {
-        runTest {
-            val runner = ManualStepNodeRunner<Any, ExecutableNode<Any>>()
-            runner.run(helloWorld)
+    fun testBeliefAddition(): TestResult = runTest {
+        val runner = ManualStepNodeRunner<Any, ExecutableNode<Any>>()
+        runner.run(helloWorld)
 
-            val dispatcher1 = StandardTestDispatcher(testScheduler)
+        val dispatcher1 = StandardTestDispatcher(testScheduler)
 
-            runner.stepAll(dispatcher1)
-            assertFalse(firstStep, "First step should not have been executed yet")
+        runner.stepAll(dispatcher1)
+        assertFalse(firstStep, "First step should not have been executed yet")
 
-            advanceUntilIdle()
+        advanceUntilIdle()
 
-            val dispatcher2 = StandardTestDispatcher(testScheduler)
+        val dispatcher2 = StandardTestDispatcher(testScheduler)
 
-            runner.stepAll(dispatcher2)
-            assertTrue(firstStep, "First step should have been executed")
+        runner.stepAll(dispatcher2)
+        assertTrue(firstStep, "First step should have been executed")
 
-            advanceUntilIdle()
+        advanceUntilIdle()
 
-            val dispatcher3 = StandardTestDispatcher(testScheduler)
-            runner.stepAll(dispatcher3)
-            assertTrue(secondStep, "Second step should have been executed")
+        val dispatcher3 = StandardTestDispatcher(testScheduler)
+        runner.stepAll(dispatcher3)
+        assertTrue(secondStep, "Second step should have been executed")
 
-            advanceUntilIdle()
+        advanceUntilIdle()
 
-            runner.stepAll(dispatcher3)
-            assertTrue(done, "Done should have been executed")
-        }
+        runner.stepAll(dispatcher3)
+        assertTrue(done, "Done should have been executed")
     }
 }

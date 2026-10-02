@@ -1,14 +1,19 @@
 [versions]
+compose = "1.11.1"
 coroutines = "1.11.0"
 dokka = "2.2.0"
 kermit = "2.2.0"
-kotlin = "2.4.10"
+kotlin = "2.4.20"
 alchemist = "43.1.5"
-tuprolog = "1.3.0"
-publish-central = "9.2.11"
+tuprolog = "2.0.9"
+publish-central = "9.2.12"
 
 
 [libraries]
+compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
+compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "compose" }
+compose-material = { module = "org.jetbrains.compose.material:material", version.ref = "compose" }
+compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose" }
 kermit = {module = "co.touchlab:kermit", version.ref = "kermit"}
 alchemist-api = { module = "it.unibo.alchemist:alchemist-api", version.ref = "alchemist" }
 alchemist = { module = "it.unibo.alchemist:alchemist", version.ref = "alchemist" }
@@ -16,7 +21,7 @@ kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref =
 kotlinx-coroutines-core = {module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref="coroutines"}
 kotlinx-coroutines-test = {module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref="coroutines"}
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
-caffeine = "com.github.ben-manes.caffeine:caffeine:3.2.3"
+caffeine = "com.github.ben-manes.caffeine:caffeine:3.3.0"
 
 tuprolog-core = { module = "it.unibo.tuprolog:core", version.ref = "tuprolog" }
 tuprolog-solve-classic = { module = "it.unibo.tuprolog:solve-classic", version.ref = "tuprolog" }
@@ -38,20 +43,28 @@ tuprolog-dsl-solve = { module = "it.unibo.tuprolog:dsl-solve-jvm", version.ref =
 tuprolog-oop-lib = { module = "it.unibo.tuprolog:oop-lib-jvm", version.ref = "tuprolog" }
 
 [bundles]
+compose = [
+    "compose-runtime",
+    "compose-foundation",
+    "compose-material",
+    "compose-ui",
+]
 alchemist-api = [
     "alchemist",
     "alchemist-api"
 ]
 
 [plugins]
+compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "compose" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 gitSemVer = { id = "org.danilopianini.git-sensitive-semantic-versioning", version = "7.0.24" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
-kotlin-qa = { id = "org.danilopianini.gradle-kotlin-qa", version = "1.9.0" }
-kover = "org.jetbrains.kotlinx.kover:0.9.9"
-multiJvmTesting = { id = "org.danilopianini.multi-jvm-test-plugin", version = "4.5.6" }
-npm-publish = "org.danilopianini.npm.publish:4.1.5"
+kotlin-qa = { id = "org.danilopianini.gradle-kotlin-qa", version = "1.10.0" }
+kover = "org.jetbrains.kotlinx.kover:0.9.11"
+multiJvmTesting = { id = "org.danilopianini.multi-jvm-test-plugin", version = "4.5.7" }
+npm-publish = "org.danilopianini.npm.publish:4.1.11"
 publishOnCentral =  { id = "org.danilopianini.publish-on-central", version.ref = "publish-central" }
 taskTree = { id = "com.dorongold.task-tree", version = "4.0.2" }
 

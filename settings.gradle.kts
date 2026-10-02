@@ -7,8 +7,8 @@ pluginManagement {
 }
 
 plugins {
-    id("com.gradle.develocity") version "4.4.3"
-    id("org.danilopianini.gradle-pre-commit-git-hooks") version "2.1.24"
+    id("com.gradle.develocity") version "4.6.0"
+    id("org.danilopianini.gradle-pre-commit-git-hooks") version "2.1.25"
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
@@ -41,5 +41,10 @@ include(
     "jakta-string-incarnation",
     "jakta-prolog-incarnation",
     "examples:blocksworld",
+    "examples:contract-net",
+    "examples:failure-handling",
     "examples:hello-world",
+    "examples:tictactoe",
+    "examples:ui-common",
+    "examples:vacuum-world",
 )
