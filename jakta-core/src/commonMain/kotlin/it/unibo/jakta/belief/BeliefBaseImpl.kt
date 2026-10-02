@@ -24,6 +24,9 @@ internal data class BeliefBaseImpl<Belief : Any>(
 
     override fun remove(element: Belief): Boolean = apply(revision.remove(beliefs, element))
 
+    override fun replace(scope: (Belief) -> Boolean, beliefs: List<Belief>): Boolean =
+        apply(revision.replace(this.beliefs, scope, beliefs))
+
     private fun apply(revision: BeliefRevision.Revision<Belief>, notify: Boolean = true): Boolean {
         revision.dropped.forEach { beliefs.remove(it) }
         revision.stored.forEach {

@@ -26,13 +26,13 @@ class TestBeliefBase {
     private val latestReading = object : BeliefRevision<String> {
         private fun Collection<String>.sameSensor(reading: String) = filter {
             it.substringBefore('=') == reading.substringBefore('=') && it != reading
-        }.toSet()
+        }
 
         override fun add(beliefs: Collection<String>, belief: String): Revision<String> = when (belief) {
             in beliefs -> Revision()
 
             else -> beliefs.sameSensor(belief).let { old ->
-                Revision(stored = setOf(belief), dropped = old, added = setOf(belief), removed = old)
+                Revision(stored = listOf(belief), dropped = old, added = listOf(belief), removed = old)
             }
         }
 
@@ -77,7 +77,7 @@ class TestBeliefBase {
         }
         val replacing = object : BeliefRevision<Reading> {
             override fun add(beliefs: Collection<Reading>, belief: Reading) =
-                Revision(stored = setOf(belief), added = setOf(belief))
+                Revision(stored = listOf(belief), added = listOf(belief))
 
             override fun remove(beliefs: Collection<Reading>, belief: Reading) =
                 BeliefRevision.plain<Reading>().remove(beliefs, belief)
@@ -85,5 +85,19 @@ class TestBeliefBase {
         val beliefBase = BeliefBaseFactory.of(UnlimitedChannelQueue(), listOf(Reading("temp", "alice")), replacing)
         beliefBase.add(Reading("temp", "carol"))
         assertEquals("carol", beliefBase.snapshot().single().source)
+    }
+
+    @Test
+    fun theDefaultRevisionReplacesTheBeliefsInScope() {
+        val events = UnlimitedChannelQueue<AgentEvent.Internal.Belief<String>>()
+        val beliefBase = BeliefBaseFactory.of(events, listOf("at(1)", "door=open", "charge=3"))
+        // the beliefs in scope are now at(2) and charge=3: at(1) goes, at(2) comes, charge=3 is unchanged
+        val inScope: (String) -> Boolean = { it.startsWith("at(") || it.startsWith("charge=") }
+        assertEquals(true, beliefBase.replace(inScope, listOf("at(2)", "charge=3")))
+        assertEquals(setOf("at(2)", "door=open", "charge=3"), beliefBase.snapshot().toSet())
+        assertEquals(listOf(BeliefRemoveEvent("at(1)"), BeliefAddEvent("at(2)")), events.drain())
+        // the same replacement again changes nothing
+        assertEquals(false, beliefBase.replace(inScope, listOf("at(2)", "charge=3")))
+        assertEquals(emptyList(), events.drain())
     }
 }

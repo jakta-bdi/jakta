@@ -12,6 +12,9 @@ import it.unibo.jakta.dsl.belief.forgetAllMatching
 import it.unibo.jakta.dsl.belief.initialBelief
 import it.unibo.jakta.dsl.belief.matchingBelief
 import it.unibo.jakta.dsl.belief.newContextBeliefQuery
+import it.unibo.jakta.dsl.belief.replaceAll
+import it.unibo.jakta.dsl.belief.replaceFrom
+import it.unibo.jakta.dsl.belief.replaceSelf
 import it.unibo.jakta.dsl.belief.sourcesOf
 import it.unibo.jakta.dsl.belief.usesAnnotatedBeliefs
 import it.unibo.jakta.dsl.goal.initialGoal
@@ -134,6 +137,111 @@ class TestAnnotatedBeliefs {
     fun `without annotated beliefs, beliefs that differ only in their source collapse`() {
         val beliefBase = BeliefBaseFactory.of(UnlimitedChannelQueue(), listOf(fromAlice, fromCarol))
         assertEquals(sources("alice"), beliefBase.snapshot().single().annotations)
+    }
+
+    private val pingQuery = newContextBeliefQuery { "ping"(X) }
+
+    private fun replaced(
+        replace: it.unibo.jakta.event.AgentUpdate.Replace<PrologBelief>,
+        vararg beliefs: PrologBelief,
+    ): Pair<List<Pair<String, Set<Struct>>>, List<Pair<AgentEvent.Internal.Belief<PrologBelief>, Set<Struct>>>> {
+        val (beliefBase, events) = annotatedBeliefBase(*beliefs)
+        beliefBase.replace(replace.scope, replace.beliefs)
+        val held = beliefBase.snapshot().map { it.head.toString() to it.annotations }.sortedBy { it.first }
+        return held to events.drain()
+    }
+
+    @Test
+    fun `a perception no longer seeing its own belief removes it`() {
+        val (held, events) = replaced(replaceSelf(listOf(pingQuery), emptyList()), ping)
+        assertEquals(emptyList(), held)
+        assertEquals(listOf(sources("self")), events.map { it.second })
+    }
+
+    @Test
+    fun `a perception no longer seeing a belief keeps what others told`() {
+        val (held, events) = replaced(replaceSelf(listOf(pingQuery), emptyList()), ping, fromAlice)
+        assertEquals(listOf("ping(1)" to sources("alice")), held)
+        assertEquals(true, events.single().first is BeliefRemoveEvent)
+        assertEquals(sources("self"), events.single().second)
+    }
+
+    @Test
+    fun `a perception does not retract what others told`() {
+        val (held, events) = replaced(replaceSelf(listOf(pingQuery), emptyList()), fromAlice)
+        assertEquals(listOf("ping(1)" to sources("alice")), held)
+        assertEquals(emptyList(), events)
+    }
+
+    @Test
+    fun `a perception seeing its own belief again changes nothing`() {
+        val (held, events) = replaced(replaceSelf(listOf(pingQuery), listOf(ping)), ping)
+        assertEquals(listOf("ping(1)" to sources("self")), held)
+        assertEquals(emptyList(), events)
+    }
+
+    @Test
+    fun `a perception seeing what others told adds its own source`() {
+        val (held, events) = replaced(replaceSelf(listOf(pingQuery), listOf(ping)), fromAlice)
+        assertEquals(listOf("ping(1)" to sources("alice", "self")), held)
+        assertEquals(true, events.single().first is BeliefAddEvent)
+        assertEquals(sources("self"), events.single().second)
+    }
+
+    @Test
+    fun `a perception replaces the old value with the new one`() {
+        val newPing = initialBelief { "ping"(2) }
+        val (held, events) = replaced(
+            replaceSelf(listOf(pingQuery), listOf(newPing)),
+            ping,
+            initialBelief {
+                "pong"(1)
+            },
+        )
+        assertEquals(listOf("ping(2)" to sources("self"), "pong(1)" to sources("self")), held)
+        assertEquals(
+            listOf("ping(1)" to false, "ping(2)" to true),
+            events.map {
+                it.first.belief.head.toString() to
+                    (it.first is BeliefAddEvent)
+            },
+        )
+    }
+
+    @Test
+    fun `a replacement from Alice replaces only what Alice told`() {
+        val fromAlice2 = initialBelief { "ping"(2)[source("alice")] }
+        val (held, _) = replaced(
+            replaceFrom("alice".toAtom(), listOf(pingQuery), listOf(initialBelief { "ping"(3) })),
+            fromAlice,
+            fromAlice2,
+            fromCarol,
+            ping,
+        )
+        assertEquals(listOf("ping(1)" to sources("carol", "self"), "ping(3)" to sources("alice")), held)
+    }
+
+    @Test
+    fun `replaceAll replaces every source`() {
+        val (held, events) = replaced(replaceAll(listOf(pingQuery), emptyList()), ping, fromAlice, fromCarol)
+        assertEquals(emptyList(), held)
+        assertEquals(listOf(sources("self", "alice", "carol")), events.map { it.second })
+    }
+
+    @Test
+    fun `without annotated beliefs, a perception replaces the agent's own beliefs only`() {
+        val beliefBase = BeliefBaseFactory.of<PrologBelief>(
+            UnlimitedChannelQueue(),
+            listOf(
+                ping,
+                initialBelief {
+                    "ping"(2)[source("alice")]
+                },
+            ),
+        )
+        val replace = replaceSelf(listOf(pingQuery), listOf(initialBelief { "ping"(3) }))
+        beliefBase.replace(replace.scope, replace.beliefs)
+        assertEquals(setOf("ping(2)", "ping(3)"), beliefBase.snapshot().map { it.head.toString() }.toSet())
     }
 
     private val alice: AgentID = BaseAgentID("alice")
