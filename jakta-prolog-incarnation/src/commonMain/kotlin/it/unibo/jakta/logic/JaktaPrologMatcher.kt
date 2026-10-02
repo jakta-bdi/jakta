@@ -27,7 +27,9 @@ private val annotationUnificator = object : AbstractUnificator() {
         val query = annotatedTerm(term1)
         val fact = annotatedTerm(term2)
 
-        var result = super.mgu(query, fact, occurCheckEnabled)
+        // the stored term first, so that its variables (fresh, during resolution) are bound to the query's terms:
+        // the other way around builds longer substitution chains and makes solving about twice as slow
+        var result = super.mgu(fact, query, occurCheckEnabled)
 
         if (result !is Substitution.Fail) {
             result = unifyTags(fact, query, result, occurCheckEnabled)
