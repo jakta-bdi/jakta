@@ -3,11 +3,9 @@ package it.unibo.jakta.dsl.mas
 import it.unibo.jakta.dsl.node.NodeBuilder
 import it.unibo.jakta.node.ExecutableNode
 import it.unibo.jakta.node.NodeRunner
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.supervisorScope
 
 /**
- * Base implementation of a MasBuilder, with a strategy to build nodes and run them concurrently.
+ * Base implementation of a MasBuilder, with a strategy to build nodes, run with [NodeRunner.runAll].
  * @param builderFactory the strategy factory to create new node builders.
  */
 class BaseMasBuilder<N : ExecutableNode<*>, NB : NodeBuilder<*, N>>(val builderFactory: () -> NB) : MasBuilder<N, NB> {
@@ -22,13 +20,5 @@ class BaseMasBuilder<N : ExecutableNode<*>, NB : NodeBuilder<*, N>>(val builderF
         nodes += node
     }
 
-    override suspend fun run(runner: NodeRunner<N>) {
-        supervisorScope {
-            nodes.forEach {
-                launch {
-                    runner.run(it)
-                }
-            }
-        }
-    }
+    override suspend fun run(runner: NodeRunner<N>) = runner.runAll(nodes)
 }
