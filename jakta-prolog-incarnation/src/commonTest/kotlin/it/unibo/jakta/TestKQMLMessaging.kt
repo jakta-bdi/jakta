@@ -15,6 +15,7 @@ import it.unibo.jakta.dsl.goal.goal
 import it.unibo.jakta.dsl.goal.goalQuery
 import it.unibo.jakta.dsl.goal.initialGoal
 import it.unibo.jakta.dsl.goal.matchingGoal
+import it.unibo.jakta.dsl.goal.replyAllTo
 import it.unibo.jakta.dsl.goal.replyOne
 import it.unibo.jakta.dsl.mas
 import it.unibo.jakta.dsl.node
@@ -22,6 +23,7 @@ import it.unibo.jakta.dsl.node.NodeBuilders
 import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.dsl.plans
 import it.unibo.jakta.kqml.KQMLPayload
+import it.unibo.jakta.kqml.askAllTo
 import it.unibo.jakta.kqml.askOneTo
 import it.unibo.jakta.kqml.delegateAchieveTo
 import it.unibo.jakta.kqml.handleKQMLPayload
@@ -29,6 +31,7 @@ import it.unibo.jakta.kqml.sendUnachieveTo
 import it.unibo.jakta.kqml.tellTo
 import it.unibo.jakta.kqml.untellTo
 import it.unibo.jakta.logic.JaktaLogicProgrammingScope.Companion.prologPlan
+import it.unibo.jakta.logic.allSolutionsOf
 import it.unibo.jakta.logic.unifiesWith
 import it.unibo.jakta.node.CoroutineNodeRunner
 import it.unibo.jakta.node.ExecutableNode
@@ -36,11 +39,14 @@ import it.unibo.jakta.node.Node
 import it.unibo.jakta.node.SharedMemoryNetwork
 import it.unibo.jakta.plan.Plan
 import it.unibo.jakta.skills.MessagingSkill
+import it.unibo.tuprolog.core.Struct
+import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.core.toAtom
 import it.unibo.tuprolog.solve.Solution
 import kotlin.test.BeforeTest
 import kotlin.test.Ignore
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
@@ -299,5 +305,45 @@ class TestKQMLMessaging {
         }
 
         run(aliceNode, bobNode)
+    }
+
+    @Test
+    fun `test askAll receives every solution`() = runTest {
+        var replies: List<Substitution>? = null
+        val aliceNode = masNode(alice) {
+            plans { node ->
+                context(MessagingSkill(node)) {
+                    prologPlan {
+                        adding.goal {
+                            matchingGoal { startGoal }
+                        } triggers {
+                            replies = agent.askAllTo(bob, beliefQuery { "b"(X) }, timeout = 10.seconds)
+                            node.terminateNode()
+                        }
+                    }
+                }
+            }
+        }
+
+        val bobNode = masNode(bob, initialBelief { "b"(1) }, initialBelief { "b"(2) }) {
+            plans { node ->
+                context(MessagingSkill(node)) {
+                    prologPlan {
+                        adding.goal {
+                            matchingGoal { replyAllTo(Q, M)[source(S)] }
+                        } triggers {
+                            val answers = agent.beliefs.allSolutionsOf(Q.value<Struct>())
+                                .filterIsInstance<Solution.Yes>()
+                                .map { belief { it.solvedQuery } }
+                            agent.tellTo(BaseAgentID(id = S.value()), M.value<String>(), *answers.toTypedArray())
+                            node.terminateNode()
+                        }
+                    }
+                }
+            }
+        }
+
+        run(aliceNode, bobNode)
+        assertEquals(setOf("1", "2"), replies?.map { it.getByName("X").toString() }?.toSet())
     }
 }
