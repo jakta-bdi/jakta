@@ -11,6 +11,7 @@ import it.unibo.jakta.node.CoroutineNodeRunner
 import it.unibo.jakta.node.SharedMemoryNetwork
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlinx.coroutines.test.TestResult
 import kotlinx.coroutines.test.runTest
 
 class TestMultiNodeExecution {
@@ -53,9 +54,7 @@ class TestMultiNodeExecution {
     }
 
     @Test
-    fun testMultiNodeExecution() {
-        runTest {
-            mas.run(CoroutineNodeRunner(SharedMemoryNetwork()))
-        }
+    fun testMultiNodeExecution(): TestResult = runTest {
+        mas.run(CoroutineNodeRunner(SharedMemoryNetwork()))
     }
 }

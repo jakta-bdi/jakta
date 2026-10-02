@@ -14,6 +14,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.test.TestResult
 import kotlinx.coroutines.test.runTest
 
 class TestAgentAdditionAndRemoval {
@@ -38,58 +39,54 @@ class TestAgentAdditionAndRemoval {
     }
 
     @Test
-    fun testAgentAdditionOnSameNode() {
-        runTest {
-            val mas = mas(NodeBuilders.baseNode()) {
-                node {
-                    agent(BaseAgentID("Creator")) {
-                        embodiedAs { Any() }
-                        hasInitialGoals { !"create" }
-                        hasPlanLibrary {
-                            adding.goal {
-                                ifGoalMatch("create")
-                            } triggers {
-                                agent.print("Creating Alice...")
-                                node.addAgent(alice)
-                                delay(3.seconds)
-                                agent.print("Alice created.")
-                                agent.print(node.agents.keys.joinToString(", "))
-                                node.terminateNode()
-                            }
+    fun testAgentAdditionOnSameNode(): TestResult = runTest {
+        val mas = mas(NodeBuilders.baseNode()) {
+            node {
+                agent(BaseAgentID("Creator")) {
+                    embodiedAs { Any() }
+                    hasInitialGoals { !"create" }
+                    hasPlanLibrary {
+                        adding.goal {
+                            ifGoalMatch("create")
+                        } triggers {
+                            agent.print("Creating Alice...")
+                            node.addAgent(alice)
+                            delay(3.seconds)
+                            agent.print("Alice created.")
+                            agent.print(node.agents.keys.joinToString(", "))
+                            node.terminateNode()
                         }
                     }
                 }
             }
-
-            mas.run(CoroutineNodeRunner(SharedMemoryNetwork()))
         }
+
+        mas.run(CoroutineNodeRunner(SharedMemoryNetwork()))
     }
 
     @Test
-    fun testAgentRemovalOnSameNode() {
-        runTest {
-            val mas = mas(NodeBuilders.baseNode()) {
-                node {
-                    withAgents(alice)
-                    agent(BaseAgentID("Destroyer")) {
-                        embodiedAs { Any() }
-                        hasInitialGoals { !"destroy" }
-                        hasPlanLibrary {
-                            adding.goal {
-                                ifGoalMatch("destroy")
-                            } triggers {
-                                agent.print("Destroying Alice...")
-                                node.removeAgent(aliceID)
-                                agent.print("Alice destroyed.")
-                                delay(3.seconds)
-                                agent.print(node.agents.keys.joinToString(", "))
-                                node.terminateNode()
-                            }
+    fun testAgentRemovalOnSameNode(): TestResult = runTest {
+        val mas = mas(NodeBuilders.baseNode()) {
+            node {
+                withAgents(alice)
+                agent(BaseAgentID("Destroyer")) {
+                    embodiedAs { Any() }
+                    hasInitialGoals { !"destroy" }
+                    hasPlanLibrary {
+                        adding.goal {
+                            ifGoalMatch("destroy")
+                        } triggers {
+                            agent.print("Destroying Alice...")
+                            node.removeAgent(aliceID)
+                            agent.print("Alice destroyed.")
+                            delay(3.seconds)
+                            agent.print(node.agents.keys.joinToString(", "))
+                            node.terminateNode()
                         }
                     }
                 }
             }
-            mas.run(CoroutineNodeRunner(SharedMemoryNetwork()))
         }
+        mas.run(CoroutineNodeRunner(SharedMemoryNetwork()))
     }
 }

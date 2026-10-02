@@ -15,6 +15,7 @@ import it.unibo.jakta.skills.terminateNode
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestResult
 import kotlinx.coroutines.test.runTest
 
 class TestStringIncarnationFunctions {
@@ -26,7 +27,7 @@ class TestStringIncarnationFunctions {
 
     private fun fail(message: String = ""): Unit = kotlin.test.fail(message)
 
-    private fun runMas(block: context(NodeTerminationSkill) PlanLibraryBuilder<String, String>.() -> Unit) {
+    private fun runMas(block: context(NodeTerminationSkill) PlanLibraryBuilder<String, String>.() -> Unit): TestResult =
         runTest {
             val job = launch {
                 mas(NodeBuilders.baseNode()) {
@@ -50,69 +51,60 @@ class TestStringIncarnationFunctions {
             }
             job.join()
         }
-    }
 
     @Test
-    fun `test that string Goal triggers a plan and matches a Belief Query`() {
-        runMas {
-            adding.goal {
-                ifGoalMatches("goal")
-            } onlyWhen {
-                containsBeliefMatching("goal")
-            } triggers {
-                agent.print("Hello World!")
-                terminateNode()
-            }
+    fun `test that string Goal triggers a plan and matches a Belief Query`(): TestResult = runMas {
+        adding.goal {
+            ifGoalMatches("goal")
+        } onlyWhen {
+            containsBeliefMatching("goal")
+        } triggers {
+            agent.print("Hello World!")
+            terminateNode()
         }
     }
 
     @Test
-    fun `test that string Goal failure a plan and matches a Belief Query`() {
-        runMas {
-            adding.goal {
-                ifGoalMatches("goal")
-            } onlyWhen {
-                containsBeliefMatching("non-existing-belief")
-            } triggers {
-                fail()
-            }
-            failing.goal {
-                ifGoalMatches("goal")
-            } triggers {
-                agent.print("Hello World!")
-                terminateNode()
-            }
+    fun `test that string Goal failure a plan and matches a Belief Query`(): TestResult = runMas {
+        adding.goal {
+            ifGoalMatches("goal")
+        } onlyWhen {
+            containsBeliefMatching("non-existing-belief")
+        } triggers {
+            fail()
+        }
+        failing.goal {
+            ifGoalMatches("goal")
+        } triggers {
+            agent.print("Hello World!")
+            terminateNode()
         }
     }
 
     @Test
-    fun `test that string Belief triggers a plan and matches a Belief Query`() {
-        runMas {
-            adding.goal {
-                ifGoalMatches("goal")
-            } triggers {
-                agent.believe("belief")
-            }
-            adding.belief {
-                ifGoalMatches("belief")
-            } triggers {
-                agent.print("Hello World!")
-                terminateNode()
-            }
+    fun `test that string Belief triggers a plan and matches a Belief Query`(): TestResult = runMas {
+        adding.goal {
+            ifGoalMatches("goal")
+        } triggers {
+            agent.believe("belief")
+        }
+        adding.belief {
+            ifGoalMatches("belief")
+        } triggers {
+            agent.print("Hello World!")
+            terminateNode()
         }
     }
 
     @Test
-    fun `test trigger using regex`() {
-        runMas {
-            adding.goal {
-                matchesRegex("g+")
-            } onlyWhen {
-                containsBeliefMatching("goal")
-            } triggers {
-                agent.print("Hello World!")
-                terminateNode()
-            }
+    fun `test trigger using regex`(): TestResult = runMas {
+        adding.goal {
+            matchesRegex("g+")
+        } onlyWhen {
+            containsBeliefMatching("goal")
+        } triggers {
+            agent.print("Hello World!")
+            terminateNode()
         }
     }
 }

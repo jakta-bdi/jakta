@@ -18,6 +18,7 @@ import it.unibo.jakta.node.Node
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.test.TestResult
 
 class BodyWithPosition {
     var position2D: DoubleArray = doubleArrayOf(0.0, 0.0)
@@ -127,8 +128,8 @@ class TestSpatialRobot {
     }
 
     @Test
-    fun testSkillFeature() {
+    fun testSkillFeature(): TestResult {
         Logger.setMinSeverity(Severity.Error)
-        executeInTestScope { mas }
+        return executeInTestScope { mas }
     }
 }

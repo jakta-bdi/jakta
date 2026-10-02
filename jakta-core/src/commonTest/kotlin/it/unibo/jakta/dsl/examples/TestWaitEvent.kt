@@ -15,6 +15,7 @@ import kotlin.test.Test
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.test.TestResult
 import kotlinx.coroutines.test.runTest
 
 class TestWaitEvent {
@@ -52,9 +53,9 @@ class TestWaitEvent {
     }
 
     @Test
-    fun testWaitEvent() {
+    fun testWaitEvent(): TestResult {
         Logger.setMinSeverity(Severity.Assert)
-        runTest {
+        return runTest {
             mas(NodeBuilders.baseNode()) {
                 node {
                     withAgents(waitingAgent(null))
@@ -64,9 +65,9 @@ class TestWaitEvent {
     }
 
     @Test
-    fun testWaitEventWithTimeout() {
+    fun testWaitEventWithTimeout(): TestResult {
         Logger.setMinSeverity(Severity.Assert)
-        runTest {
+        return runTest {
             mas(NodeBuilders.baseNode()) {
                 node {
                     withAgents(waitingAgent(5.seconds))
