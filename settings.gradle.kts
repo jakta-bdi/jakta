@@ -40,6 +40,7 @@ include(
     "alchemist-jakta-incarnation",
     "jakta-string-incarnation",
     "jakta-prolog-incarnation",
+    "jakta-situated",
     "examples:blocksworld",
     "examples:contract-net",
     "examples:failure-handling",
