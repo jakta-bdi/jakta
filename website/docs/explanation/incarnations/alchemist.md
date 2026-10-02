@@ -32,9 +32,6 @@ The setup is described in [Simulate a MAS with Alchemist](../../how-to/alchemist
 
 - **Entry points are found by reflection.** The YAML `program` is `<JVM class>.<function>`. The function must be
   public and return the result of `device(...)`. Use `@file:JvmName` to give the file a predictable class name.
-- **Delays are rounded down to whole seconds.** A `delay` inside a plan is converted to simulated time by integer
-  division (`timeMillis / 1000`), so `delay(500.milliseconds)` takes no simulated time and `delay(1500.milliseconds)`
-  takes one second.
 - **No agent removal.** Removing an agent from a node during a simulation is not supported yet.
 - **No Alchemist actions or conditions from YAML.** Behavior must be defined in JaKtA; only the time distribution
   (a fixed rate) can be configured in YAML.
