@@ -24,6 +24,8 @@ kotlinx-coroutines-test = {module = "org.jetbrains.kotlinx:kotlinx-coroutines-te
 kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "serialization" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
 kotlin-serialization-plugin = { module = "org.jetbrains.kotlin:kotlin-serialization", version.ref = "kotlin" }
+paho-mqttv3 = "org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5"
+moquette = "io.moquette:moquette-broker:0.17"
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 caffeine = "com.github.ben-manes.caffeine:caffeine:3.3.0"
 
