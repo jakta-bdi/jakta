@@ -1,0 +1,94 @@
+---
+sidebar_position: 1
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Getting Started
+
+The best way to use JaKtA is in a `Kotlin` project, so that you can benefit from its declarative DSL.
+
+## Prerequisites
+
+You need:
+* [Java 17+](https://adoptium.net/) installed and working
+    - the JVM libraries target Java 8 bytecode, but the build tooling and the Alchemist incarnation need Java 17
+* [Kotlin 2.4+](https://kotlinlang.org/docs/releases.html) — the DSL relies on [context parameters](https://kotlinlang.org/docs/context-parameters.html)
+* [Git](https://git-scm.com) installed and working
+
+## Distribution
+
+JaKtA is distributed on [Maven Central](https://central.sonatype.com/namespace/it.unibo.jakta) under the group `it.unibo.jakta`,
+and on [npm](https://www.npmjs.com/org/jakta) under the `@jakta` organization.
+
+A JaKtA project needs **two** dependencies:
+- `jakta-core`, which contains the engine and the DSL entry points (`mas`, `node`, `agent`, ...), and
+- (optionally) one [incarnation](../explanation/incarnations/index.md), which fixes how beliefs and goals are represented.
+  If in doubt, start with `jakta-prolog-incarnation`.
+
+## Setup your JaKtA project
+
+The quickest way is to start from the [JaKtA Prolog incarnation template](https://github.com/jakta-bdi/jakta-prolog-incarnation-template).
+
+Otherwise, create a new Kotlin project with Gradle:
+
+```bash
+mkdir jakta-project
+cd jakta-project
+gradle init --type kotlin-application
+```
+
+and add the dependencies to your `build.gradle.kts`:
+
+<Tabs>
+  <TabItem value="jvm" label="Kotlin/JVM" default>
+    ```kotlin
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        implementation("it.unibo.jakta:jakta-core:<VERSION>")
+        implementation("it.unibo.jakta:jakta-prolog-incarnation:<VERSION>")
+        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:<COROUTINES_VERSION>")
+    }
+    ```
+  </TabItem>
+  <TabItem value="kmp" label="Kotlin Multiplatform">
+    ```kotlin
+    repositories {
+        mavenCentral()
+    }
+
+    kotlin {
+        sourceSets {
+            commonMain.dependencies {
+                implementation("it.unibo.jakta:jakta-core:<VERSION>")
+                implementation("it.unibo.jakta:jakta-prolog-incarnation:<VERSION>")
+            }
+        }
+    }
+    ```
+    `jakta-prolog-incarnation` is available for the JVM and JS targets.
+    `jakta-api`, `jakta-dsl`, `jakta-core` and `jakta-string-incarnation` also support native targets
+    (Linux, Windows, macOS, iOS).
+  </TabItem>
+</Tabs>
+
+:::tip[Versioning]
+It is always preferable to select a fixed version for your dependencies.
+Check out JaKtA's latest available version on [Maven Central](https://central.sonatype.com/artifact/it.unibo.jakta/jakta-core)
+or in the [release notes](/releases).
+:::
+
+:::tip[Gradle]
+If you're not familiar with Gradle you can learn it from [here](https://docs.gradle.org/current/userguide/getting_started_eng.html).
+:::
+
+Once your project is set up, [write your first agent](./hello-world.md) or [run the bundled examples](./quick-start.md).
+The three tutorials build on each other, with plain Kotlin types and no Prolog:
+
+1. [Basic: Hello world](./hello-world.md), a single agent with one goal and one plan;
+2. [Intermediate: Ping-pong agents](./ping-pong.md), two agents on two nodes exchanging messages;
+3. [Advanced: Thermostat](./thermostat.md), an agent perceiving and acting on an environment that keeps changing.

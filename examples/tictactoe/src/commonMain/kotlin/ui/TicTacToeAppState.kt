@@ -1,7 +1,7 @@
 package ui
 
-import HumanMoves
 import Player
+import TicTacToeEnvironment
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -92,7 +92,7 @@ class TicTacToeAppState(private val agentDispatcher: CoroutineDispatcher = Dispa
     var isRunning by mutableStateOf(false)
         private set
 
-    private var humanMoves = HumanMoves()
+    private var game: TicTacToeEnvironment? = null
     private var gameJob: Job? = null
 
     /**
@@ -112,11 +112,11 @@ class TicTacToeAppState(private val agentDispatcher: CoroutineDispatcher = Dispa
     }
 
     /**
-     * Forwards a click on a cell to the human player, if it is their turn.
+     * Plays the clicked cell for the user, if it is their turn.
      */
     fun click(x: Int, y: Int) {
         val state = board.state.value
-        if (isRunning && players[state.turn] == Player.HUMAN && state[x, y] == null) humanMoves.click(x, y)
+        if (isRunning && players[state.turn] == Player.HUMAN && state[x, y] == null) game?.put(x, y, state.turn)
     }
 
     /**
@@ -127,19 +127,18 @@ class TicTacToeAppState(private val agentDispatcher: CoroutineDispatcher = Dispa
         AgentTrace.clear()
         val currentBoard = Board(BoardState(size)).also { board = it }
         val currentPlayers = players
-        val currentMoves = HumanMoves().also { humanMoves = it }
+        val system = mas(NodeBuilders.baseNode()) {
+            game = ticTacToeNode(
+                currentBoard,
+                currentPlayers,
+                thinkTime = { thinkTime },
+                mistakeChance = { difficulty.mistakeChance },
+            )
+        }
         isRunning = true
         val job = scope.launch(agentDispatcher, start = CoroutineStart.LAZY) {
             try {
-                mas(NodeBuilders.baseNode()) {
-                    ticTacToeNode(
-                        currentBoard,
-                        currentPlayers,
-                        currentMoves,
-                        thinkTime = { thinkTime },
-                        mistakeChance = { difficulty.mistakeChance },
-                    )
-                }.run(CoroutineNodeRunner(SharedMemoryNetwork()))
+                system.run(CoroutineNodeRunner(SharedMemoryNetwork()))
             } finally {
                 // an abandoned game must not flag a newer one as finished
                 if (gameJob === coroutineContext.job) isRunning = false

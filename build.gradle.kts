@@ -164,6 +164,17 @@ dependencies {
     ).forEach{
         kover(project(it))
     }
+    // Aggregated API docs published on the website under /api (see deploy-website.yml)
+    listOf(
+        "jakta-api",
+        "jakta-dsl",
+        "jakta-core",
+        "alchemist-jakta-incarnation",
+        "jakta-string-incarnation",
+        "jakta-prolog-incarnation",
+    ).forEach {
+        dokka(project(it))
+    }
 }
 
 tasks {
