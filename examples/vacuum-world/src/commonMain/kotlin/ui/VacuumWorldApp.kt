@@ -1,5 +1,6 @@
 package ui
 
+import RobotState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -51,6 +52,7 @@ private const val PERCENT = 100
 fun VacuumWorldApp(app: VacuumWorldAppState) {
     val scope = rememberCoroutineScope()
     val world by app.world.state.collectAsState()
+    val robot by app.robot.state.collectAsState()
 
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
@@ -64,7 +66,7 @@ fun VacuumWorldApp(app: VacuumWorldAppState) {
                 Button(onClick = { app.start(scope) }) { Text("Start") }
             }
             OutlinedButton(onClick = { app.reset() }) { Text("Reset") }
-            Text("Cleaned: ${world.cleaned}   Dust left: ${world.dust.size}", modifier = Modifier.width(220.dp))
+            Text("Cleaned: ${robot.cleaned}   Dust left: ${world.dust.size}", modifier = Modifier.width(220.dp))
             Text("Step: ${app.stepTime.inWholeMilliseconds} ms")
             Slider(
                 value = app.stepTime.inWholeMilliseconds.toFloat(),
@@ -89,7 +91,7 @@ fun VacuumWorldApp(app: VacuumWorldAppState) {
 
         Row(modifier = Modifier.fillMaxSize()) {
             Box(modifier = Modifier.weight(1f).fillMaxHeight().padding(16.dp), contentAlignment = Alignment.Center) {
-                WorldGrid(world, onClick = app::toggleDust)
+                WorldGrid(world, robot, onClick = app::toggleDust)
             }
             AgentTracePanel(modifier = Modifier.width(420.dp).fillMaxHeight())
         }
@@ -98,7 +100,7 @@ fun VacuumWorldApp(app: VacuumWorldAppState) {
 
 @Suppress("MagicNumber")
 @Composable
-private fun WorldGrid(world: VacuumState, onClick: (Pos) -> Unit) {
+private fun WorldGrid(world: VacuumState, robot: RobotState, onClick: (Pos) -> Unit) {
     BoxWithConstraints(modifier = Modifier.aspectRatio(world.width.toFloat() / world.height)) {
         val cellSize = minOf(maxWidth / world.width, maxHeight / world.height)
         Column {
@@ -116,7 +118,7 @@ private fun WorldGrid(world: VacuumState, onClick: (Pos) -> Unit) {
                             contentAlignment = Alignment.Center,
                         ) {
                             if (content == Content.DUST) Dust(cellSize * 0.35f)
-                            if (pos == world.robot) Robot(world.facing, cellSize)
+                            if (pos == robot.position) Robot(robot.facing, cellSize)
                         }
                     }
                 }

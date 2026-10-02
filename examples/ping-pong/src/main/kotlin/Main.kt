@@ -2,6 +2,7 @@ import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.agent.BaseAgentID
+import it.unibo.jakta.dsl.agent
 import it.unibo.jakta.dsl.agent.AgentBuilder
 import it.unibo.jakta.dsl.mas
 import it.unibo.jakta.dsl.mas.runLocally
@@ -27,26 +28,33 @@ private fun AgentBuilder<Message, String, Any>.receivesTextMessages() {
     }
 }
 
+private val ponger = agent<Message, String, Any>(bob) {
+    receivesTextMessages()
+    context(MessagingSkill(node)) {
+        hasPlanLibrary {
+            adding.belief {
+                takeIf { it.first == "Ping!" }
+            } triggers {
+                val (text, sender) = context
+                agent.print("Received \"$text\" from ${sender.displayName}")
+                agent.sendTo(sender, "Pong!")
+                node.terminateNode()
+            }
+        }
+    }
+}
+
 /**
- * Alice pings Bob, Bob answers with a pong.
+ * Alice pings Bob, who lives on another node, and Bob answers with a pong.
  */
 fun main(): Unit = runBlocking {
     Logger.setMinSeverity(Severity.Assert)
     mas(NodeBuilders.baseNode()) {
         node {
+            withAgents(ponger)
+        }
+        node {
             context(MessagingSkill(node)) {
-                agent<Message, String>(bob) {
-                    receivesTextMessages()
-                    hasPlanLibrary {
-                        adding.belief {
-                            takeIf { it.first == "Ping!" }
-                        } triggers {
-                            val (text, sender) = context
-                            agent.print("Received \"$text\" from ${sender.displayName}")
-                            agent.sendTo(sender, "Pong!")
-                        }
-                    }
-                }
                 agent<Message, String>(alice) {
                     receivesTextMessages()
                     hasInitialGoals {

@@ -24,7 +24,8 @@ kotlinMultiplatform {
             implementation(libs.kermit)
 
             implementation(jakta("core"))
-            implementation(jakta("prolog-incarnation"))
+            implementation(jakta("dsl"))
+            implementation(jakta("api"))
 
             implementation(libs.kotlinx.coroutines.core)
         }

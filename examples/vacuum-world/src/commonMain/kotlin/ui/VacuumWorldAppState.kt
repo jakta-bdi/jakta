@@ -1,5 +1,6 @@
 package ui
 
+import VacuumBody
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -25,7 +26,7 @@ private const val DEFAULT_STEP_TIME_MS = 250
 private const val DEFAULT_DUST_CHANCE = 0.05
 
 /**
- * State holder for the Vacuum World application: the world and the robot's run.
+ * State holder for the Vacuum World application: the world, the robot's body, and the robot's run.
  *
  * @property agentDispatcher where the robot runs, off the UI thread on desktop.
  */
@@ -39,6 +40,12 @@ class VacuumWorldAppState(private val agentDispatcher: CoroutineDispatcher = Dis
      * The world the robot cleans.
      */
     var world by mutableStateOf(VacuumWorld(defaultWorld()))
+        private set
+
+    /**
+     * The body of the robot, placed in the [world].
+     */
+    var robot by mutableStateOf(VacuumBody(world))
         private set
 
     /**
@@ -65,6 +72,7 @@ class VacuumWorldAppState(private val agentDispatcher: CoroutineDispatcher = Dis
     fun reset() {
         stop()
         world = VacuumWorld(defaultWorld())
+        robot = VacuumBody(world)
     }
 
     /**
@@ -86,13 +94,13 @@ class VacuumWorldAppState(private val agentDispatcher: CoroutineDispatcher = Dis
      */
     fun start(scope: CoroutineScope) {
         if (isRunning) return
-        val currentWorld = world
+        val currentRobot = robot
         AgentTrace.clear()
         isRunning = true
         val newJob = scope.launch(agentDispatcher, start = CoroutineStart.LAZY) {
             try {
-                mas(NodeBuilders.baseNode()) {
-                    vacuumNode(currentWorld, stepTime = { stepTime }, dustChance = { dustChance })
+                mas(NodeBuilders.baseNode<VacuumBody>()) {
+                    vacuumNode(currentRobot, stepTime = { stepTime }, dustChance = { dustChance })
                 }.run(CoroutineNodeRunner(SharedMemoryNetwork()))
             } finally {
                 // a stopped run must not flag a newer one as finished
