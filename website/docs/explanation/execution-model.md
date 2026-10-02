@@ -77,7 +77,7 @@ flowchart LR
   trigger returns a non-null context for the event's goal or belief.
 - It is **applicable** if its guard, evaluated on the current beliefs and that context, returns a non-null context.
 - The **first** applicable plan, in the order plans were added to the library, is selected.
-  Order your plans from the most specific to the most general (see the [Blocks World tutorial](../tutorials/blocks-world.md#4-the-plans)).
+  Order your plans from the most specific to the most general (see the [Blocks World showcase](../showcase/blocksworld.md#plan-selection-by-context)).
 
 If no plan is selected:
 

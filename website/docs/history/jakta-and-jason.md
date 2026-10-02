@@ -31,5 +31,5 @@ writing BDI agents with the same syntax and tools as ordinary object-oriented an
 
 Jason is still an influence. The [Prolog incarnation](../explanation/incarnations/prolog/index.md) supports belief
 sources and KQML messaging in the style of Jason, which makes porting Jason programs straightforward
-(see the [Blocks World](../tutorials/blocks-world.md) tutorial). But it is one incarnation among others, and today
+(see the [Blocks World](../showcase/blocksworld.md) showcase). But it is one incarnation among others, and today
 JaKtA is just a name rather than an acronym.

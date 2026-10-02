@@ -35,7 +35,7 @@ JaKtA is split into a set of modules, described in detail in [Modules](./referen
 | `jakta-api` | The representation-agnostic contracts: agents, events, plans, nodes. |
 | `jakta-dsl` | The builder interfaces that make up the DSL. |
 | `jakta-core` | The reference implementation of the engine and the DSL entry points (`mas`, `node`, `agent`, `plans`). |
-| `jakta-prolog-incarnation` | Beliefs and goals as [2P-Kt](https://github.com/tuProlog/2p-kt) Prolog terms, with unification and KQML messaging. |
+| `jakta-prolog-incarnation` | Beliefs and goals as [2P-Kt](https://tuprolog.github.io/2p-kt/) Prolog terms, with unification and KQML messaging. |
 | `jakta-string-incarnation` | Beliefs and goals as plain strings — the smallest possible incarnation. |
 | `alchemist-jakta-incarnation` | Runs JaKtA nodes inside the [Alchemist](https://alchemistsimulator.github.io/) simulator. |
 
