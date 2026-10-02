@@ -10,15 +10,16 @@ import it.unibo.jakta.dsl.plan.triggers
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.test.TestResult
 
 class TestHelloDelay {
 
     @Test
-    fun testHelloDelay() {
+    fun testHelloDelay(): TestResult {
         Logger.setMinSeverity(Severity.Debug)
         val timeToWait = 10.seconds
 
-        executeInTestScope<Any> {
+        return executeInTestScope<Any> {
             node(NodeBuilders.baseNode()) {
                 agent {
                     embodiedAs { Any() }

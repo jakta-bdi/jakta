@@ -9,6 +9,7 @@ import it.unibo.jakta.dsl.node.NodeBuilders
 import it.unibo.jakta.dsl.plan.triggers
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlinx.coroutines.test.TestResult
 
 class TestBeliefRemoval {
     val helloWorld =
@@ -43,7 +44,5 @@ class TestBeliefRemoval {
     }
 
     @Test
-    fun testBeliefRemoval() {
-        executeInTestScope { helloWorld }
-    }
+    fun testBeliefRemoval(): TestResult = executeInTestScope { helloWorld }
 }

@@ -42,6 +42,11 @@ include(
     "jakta-prolog-incarnation",
     "jakta-llm-incarnation",
     "examples:blocksworld",
+    "examples:contract-net",
+    "examples:failure-handling",
     "examples:hello-world",
     "examples:llm-smart-home",
+    "examples:tictactoe",
+    "examples:ui-common",
+    "examples:vacuum-world",
 )

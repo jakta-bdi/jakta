@@ -13,6 +13,7 @@ import it.unibo.jakta.node.BaseNode
 import it.unibo.jakta.skills.NodeTerminationSkill
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlinx.coroutines.test.TestResult
 
 class TestBeliefPlan {
 
@@ -53,7 +54,5 @@ class TestBeliefPlan {
     }
 
     @Test
-    fun testBeliefAddition() {
-        executeInTestScope { helloWorld }
-    }
+    fun testBeliefAddition(): TestResult = executeInTestScope { helloWorld }
 }

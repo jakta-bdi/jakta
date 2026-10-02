@@ -14,6 +14,7 @@ import it.unibo.tuprolog.core.toAtom
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestResult
 import kotlinx.coroutines.test.runTest
 
 class TestTermination {
@@ -24,30 +25,28 @@ class TestTermination {
     }
 
     @Test
-    fun `test termination`() {
-        runTest {
-            val job = launch {
-                mas(NodeBuilders.baseNode()) {
-                    node {
-                        agent {
-                            embodiedAs { Any() }
-                            hasInitialGoals {
-                                !initialGoal { "start".toAtom() }
-                            }
-                            hasPlanLibrary {
-                                prologPlan {
-                                    adding.goal {
-                                        matchingGoal { "start".toAtom() }
-                                    } triggers {
-                                        node.terminateNode()
-                                    }
+    fun `test termination`(): TestResult = runTest {
+        val job = launch {
+            mas(NodeBuilders.baseNode()) {
+                node {
+                    agent {
+                        embodiedAs { Any() }
+                        hasInitialGoals {
+                            !initialGoal { "start".toAtom() }
+                        }
+                        hasPlanLibrary {
+                            prologPlan {
+                                adding.goal {
+                                    matchingGoal { "start".toAtom() }
+                                } triggers {
+                                    node.terminateNode()
                                 }
                             }
                         }
                     }
-                }.run(CoroutineNodeRunner(SharedMemoryNetwork()))
-            }
-            job.join()
+                }
+            }.run(CoroutineNodeRunner(SharedMemoryNetwork()))
         }
+        job.join()
     }
 }
