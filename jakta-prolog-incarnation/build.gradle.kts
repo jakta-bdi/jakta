@@ -1,6 +1,7 @@
 import de.aaschmid.gradle.plugins.cpd.Cpd
 
 apply(plugin = rootProject.libs.plugins.kotlin.multiplatform.id)
+apply(plugin = rootProject.libs.plugins.kotlin.serialization.id)
 
 configureKotlinMultiplatform(includeNative = false)
 
@@ -20,10 +21,12 @@ kotlinMultiplatform {
             api(libs.tuprolog.dsl.unify)
             api(libs.tuprolog.dsl.theory)
             api(libs.tuprolog.serialize.core)
+            api(libs.kotlinx.serialization.core)
         }
         commonTest.dependencies {
             implementation(kotlin("test"))
             implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.kotlinx.serialization.json)
         }
     }
 }
