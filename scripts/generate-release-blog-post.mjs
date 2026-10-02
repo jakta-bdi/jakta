@@ -4,8 +4,8 @@ import path from 'node:path'
 
 const version = process.env.NEXT_RELEASE_VERSION
 
-if (!version) {
-  throw new Error('NEXT_RELEASE_VERSION must be set')
+if (!version || !/^\d+\.\d+\.\d[0-9A-Za-z.-]*$/.test(version)) {
+  throw new Error(`NEXT_RELEASE_VERSION must be a semantic version, got: ${version}`)
 }
 
 // Only feature (minor) and breaking (major) releases get a post; patch releases are listed in
@@ -53,5 +53,7 @@ date: ${new Date().toISOString()}
 ${notes}
 `
 
+// filePath is built from the repository root and the semver-validated version only.
+// eslint-disable-next-line security/detect-non-literal-fs-filename
 writeFileSync(filePath, content)
 console.log(`Generated release blog post at ${filePath}`)

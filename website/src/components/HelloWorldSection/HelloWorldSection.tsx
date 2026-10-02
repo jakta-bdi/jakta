@@ -36,13 +36,13 @@ export default function HelloWorldSection() {
   return (
     <section className={styles.helloSection} id="showcase">
       <div className={styles.helloText}>
-        <Heading as="h2">Hello, world!</Heading>
+        <Heading as="h2">Hello world</Heading>
         <p>
           Agents are written in pure Kotlin: their <b>goals</b>, <b>beliefs</b> and <b>plans</b> are declared
           with the DSL, and plan bodies are plain <code>suspend</code> Kotlin code.
         </p>
         <ol>
-          <li>The agent starts with the goal <code>"sayHello"</code>, a plain string.</li>
+          <li>The agent starts with the goal <code>&quot;sayHello&quot;</code>, a plain string.</li>
           <li>The plan triggered by adding that goal prints a message and stops the node.</li>
           <li>The MAS, one node with one agent, runs on Kotlin coroutines.</li>
         </ol>

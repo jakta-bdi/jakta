@@ -1,4 +1,4 @@
-
+<!-- markdownlint-disable-next-line first-line-heading -->
 | <img src="website/static/img/logo.svg" alt="JaKtA logo" width="100"> | <h1>JaKtA</h1> |
 |:-:|:-:|
 
@@ -47,11 +47,11 @@ dependencies {
 | [`jakta-api`](jakta-api) | Representation-agnostic contracts (agents, events, plans, nodes) |
 | [`jakta-dsl`](jakta-dsl) | DSL builder interfaces |
 | [`jakta-core`](jakta-core) | Engine implementation and DSL entry points (`mas`, `node`, `agent`) |
-| [`jakta-prolog-incarnation`](jakta-prolog-incarnation) | Beliefs and goals as [2P-Kt](https://github.com/tuProlog/2p-kt) Prolog terms, KQML messaging |
+| [`jakta-prolog-incarnation`](jakta-prolog-incarnation) | Beliefs and goals as [2P-Kt](https://tuprolog.github.io/2p-kt/) Prolog terms, KQML messaging |
 | [`jakta-string-incarnation`](jakta-string-incarnation) | Beliefs and goals as plain strings |
 | [`alchemist-jakta-incarnation`](alchemist-jakta-incarnation) | Run JaKtA agents in [Alchemist](https://alchemistsimulator.github.io/) simulations |
 
-## Hello, world
+## Hello world
 
 ```kotlin
 val helloWorldAgent = agent<String, String, Any> {

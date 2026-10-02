@@ -7,14 +7,13 @@ import '@citation-js/plugin-csl';
 import bibtexText from '!!raw-loader!../../../static/jakta-references.bib';
 
 const PublicationsList: React.FC = () => {
-	let sections: Record<string, string[]> = {};
+	const sections = new Map<string, string[]>();
 	let years: string[] = [];
 	let error: string | null = null;
 	try {
 		const cite = new Cite(bibtexText);
 		const data = cite.get({ type: 'json' });
 		// Group entries by year
-		const grouped: Record<string, { entry: any; citation: string }[]> = {};
 		data.forEach((entry: any) => {
 			let year = '';
 			if (entry.issued && entry.issued['date-parts'] && entry.issued['date-parts'][0]) {
@@ -35,15 +34,10 @@ const PublicationsList: React.FC = () => {
 				const urlRegex = /(https?:\/\/[^\s<]+)/g;
 				citation = citation.replace(urlRegex, `<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>`);
 			}
-			if (!grouped[year]) grouped[year] = [];
-			grouped[year].push({ entry, citation });
+			sections.set(year, [...(sections.get(year) ?? []), citation]);
 		});
 		// Sort years descending
-		years = Object.keys(grouped).sort((a, b) => b.localeCompare(a, undefined, { numeric: true }));
-		// Prepare sections
-		years.forEach((year) => {
-			sections[year] = grouped[year].map((item) => item.citation);
-		});
+		years = [...sections.keys()].sort((a, b) => b.localeCompare(a, undefined, { numeric: true }));
 	} catch (e: any) {
 		error = e.message;
 	}
@@ -55,7 +49,7 @@ const PublicationsList: React.FC = () => {
 				<section key={year} style={{ marginBottom: '2.5rem' }}>
 					<h2>{year}</h2>
 					<ul style={{ paddingLeft: '1.5em' }}>
-						{sections[year].map((citation, idx) => (
+						{sections.get(year)?.map((citation, idx) => (
 							<li key={idx} style={{ marginBottom: '1rem'}}
 									dangerouslySetInnerHTML={{ __html: citation }} />
 						))}
