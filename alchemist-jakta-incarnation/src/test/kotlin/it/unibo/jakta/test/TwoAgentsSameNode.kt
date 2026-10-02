@@ -4,6 +4,7 @@ package it.unibo.jakta.test
 
 import it.unibo.alchemist.jakta.properties.JaktaForAlchemistRuntime
 import it.unibo.alchemist.model.Position
+import it.unibo.alchemist.model.molecules.SimpleMolecule
 import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.agent.BaseAgentID
 import it.unibo.jakta.dsl.agent.AgentBuilder
@@ -20,6 +21,16 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
 
 fun String.ifGoalMatch(goal: String): Unit? = if (this == goal) Unit else null
+
+/**
+ * Molecule set on the Alchemist node of the agent receiving the ping.
+ */
+val PING = SimpleMolecule("ping")
+
+/**
+ * Molecule set on the Alchemist node of the agent receiving the pong.
+ */
+val PONG = SimpleMolecule("pong")
 
 fun <Goal : Any> BaseNodeBuilder<Any, JaktaForAlchemistNode<Any>>.messageEnabledAgent(
     id: AgentID,
@@ -50,6 +61,7 @@ fun <P : Position<P>> JaktaForAlchemistRuntime<P>.entrypoint() = device(NodeBuil
                     } triggers {
                         val (message, sender) = context
                         agent.print("Received: \"$message\" from $sender")
+                        alchemistNode.setConcentration(PING, true)
                         agent.print("Sending pong to Alice")
                         agent.sendTo(sender, "Pong!")
                     }
@@ -75,6 +87,7 @@ fun <P : Position<P>> JaktaForAlchemistRuntime<P>.entrypoint() = device(NodeBuil
                     } triggers {
                         val (message, sender) = context
                         agent.print("Received: \"$message\" from $sender")
+                        alchemistNode.setConcentration(PONG, true)
                         agent.print("Terminating!")
                         node.terminateNode()
                     }
