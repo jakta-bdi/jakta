@@ -1,13 +1,8 @@
 package it.unibo.jakta.node
 
 /**
- * [Node] specialization of [BaseNode] which holds the [NodeSubscription],
- * made for the execution in simulation.
+ * [Node] executed in an Alchemist simulation.
+ * Its system events are exchanged by the [it.unibo.alchemist.jakta.properties.JaktaForAlchemistRuntime]
+ * of the Alchemist node hosting it.
  */
-class JaktaForAlchemistNode<Body : Any> : BaseNode<Body>() {
-    /**
-     * The [NodeSubscription] for communicating with the [NodeNetwork].
-     */
-    val subscription: NodeSubscription = NodeNetwork.trySubscribe()
-        ?: error("It was not possible to subscribe this Node to the NodeNetwork.")
-}
+class JaktaForAlchemistNode<Body : Any> : BaseNode<Body>()

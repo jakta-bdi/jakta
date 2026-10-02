@@ -1,0 +1,7 @@
+incarnation: jakta
+
+deployments:
+  - type: Point
+    parameters: [ 2, 2 ]
+    programs:
+      - program: it.unibo.jakta.test.TwoAgentsTwoNodes.entrypointBothNodes
