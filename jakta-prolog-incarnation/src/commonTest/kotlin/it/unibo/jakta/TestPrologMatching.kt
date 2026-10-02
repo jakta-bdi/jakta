@@ -8,6 +8,8 @@ import it.unibo.jakta.dsl.goal.goalQuery
 import it.unibo.jakta.logic.JaktaLogicProgrammingScope
 import it.unibo.jakta.logic.annotatedMguWith
 import it.unibo.jakta.logic.unifiesWith
+import it.unibo.tuprolog.core.Fact
+import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.solve.Solution
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -178,6 +180,42 @@ class TestPrologMatching {
             assertEquals(true, goal.annotatedMguWith(goalQuery { "parent"(X, Y)[source("alice")] }).isFailed)
             val selfGoal: PrologGoal = "parent"("alice", "charlie")
             assertEquals(true, selfGoal.annotatedMguWith(goalQuery { "parent"(X, Y)[source("bob")] }).isFailed)
+        }
+    }
+
+    /**
+     * Goals and beliefs follow the same annotation semantics, as in Jason:
+     * data without annotations counts as `source(self)`, and a pattern without annotations matches any source.
+     */
+    @Test
+    fun `goals and beliefs match annotations the same way`() {
+        with(JaktaLogicProgrammingScope()) {
+            val own = "job"(1)
+            val delegated = "job"(1).tag(source("alice"))
+            // data, pattern, and the expected binding of S (null: no match, "-": match without binding S)
+            val cases: List<Triple<Struct, Struct, String?>> = listOf(
+                Triple(own, "job"(N), "-"),
+                Triple(own, "job"(N)[source(S)], self.toString()),
+                Triple(own, "job"(N)[source(self)], "-"),
+                Triple(own, "job"(N)[source("alice")], null),
+                Triple(delegated, "job"(N), "-"),
+                Triple(delegated, "job"(N)[source(S)], "alice"),
+                Triple(delegated, "job"(N)[source(self)], null),
+                Triple(delegated, "job"(N)[source("alice")], "-"),
+            )
+            for ((data, pattern, expected) in cases) {
+                for ((kind, match) in listOf(
+                    Pair("goal", data.annotatedMguWith(pattern)),
+                    Pair("belief", Fact.of(data).annotatedMguWith(pattern)),
+                )) {
+                    val actual = when {
+                        match.isFailed -> null
+                        S in match -> match[S].toString()
+                        else -> "-"
+                    }
+                    assertEquals(expected, actual, "$kind $data against $pattern")
+                }
+            }
         }
     }
 }
