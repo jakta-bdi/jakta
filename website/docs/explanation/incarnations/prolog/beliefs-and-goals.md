@@ -29,15 +29,15 @@ As in Jason, terms can carry **annotations**, written with `[...]`. The main one
 - beliefs told by another agent, and goals it delegated, get `[source(sender)]`.
 
 ```kotlin
-matchingBelief { "ping"(1)[source(X)] }   // matches only told beliefs, binds X to the sender
-matchingBelief { "ping"(1) }              // matches ping(1) whatever its source
-matchingGoal { "job"(N)[source(S)] }      // needed to match a goal delegated by another agent
+matchingBelief { "ping"(1) }                  // ping(1), whatever its source
+matchingBelief { "ping"(1)[source(X)] }       // the same, binding X to the sender, or to self
+matchingBelief { "ping"(1)[source(self)] }    // only the agent's own ping(1)
+matchingGoal { "job"(N)[source(S)] }          // any job goal, binding S to the agent that delegated it, or to self
 ```
 
-:::caution[Goals and beliefs match annotations differently]
-A belief pattern **without** annotations matches beliefs with any source.
-A goal pattern **without** annotations does *not* match a goal delegated by another agent
-(`job(1)[source(alice)]`). Include `[source(S)]` in plans meant for delegated goals.
+:::note[The same rules for beliefs and goals]
+A pattern **without** annotations matches beliefs and goals from any source, and a belief or goal without
+annotations counts as `[source(self)]`, as in Jason.
 :::
 
 `source` and `self` come from `it.unibo.jakta`, and the `[...]` syntax needs `import it.unibo.jakta.get`.

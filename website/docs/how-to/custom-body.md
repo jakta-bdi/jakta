@@ -4,125 +4,128 @@ sidebar_position: 3
 
 # Give agents a body
 
-Every agent has a **body**: its representation inside the node. The body is where the environment keeps
-per-agent state — a position, a battery level, a name — that skills can read and change.
+Every agent has a **body**: its representation inside the node, through which it is situated in the environment.
+The body owns what belongs to the agent in the world, such as its position, and its sensors and actuators.
+Skills act through it, and perceptions can be delivered to specific bodies only.
 Agents that don't need one use `Any`.
 
-This guide builds a robot that moves on a grid. The complete program is the [`custom-body`](https://github.com/jakta-bdi/jakta/tree/main/examples/custom-body) example; run it with `./gradlew :examples:custom-body:run`.
+The snippets below come from the robot of the
+[`vacuum-world`](https://github.com/jakta-bdi/jakta/tree/main/examples/vacuum-world) example
+([`VacuumBody.kt`](https://github.com/jakta-bdi/jakta/blob/main/examples/vacuum-world/src/commonMain/kotlin/VacuumBody.kt)),
+which you can also [try in the browser](../showcase/vacuum-world.md).
 
-## 1. Define the body type
+## Define the body type
+
+The body keeps the robot's own state, separate from the environment it is placed in:
 
 ```kotlin
-private class Robot(val name: String) {
-    var x = 0
-    var y = 0
+data class RobotState(val position: Pos, val facing: Direction, val cleaned: Int = 0)
+
+class VacuumBody(val world: VacuumWorld, start: Pos = ROBOT_START) {
+    private val mutableState = MutableStateFlow(RobotState(start, Direction.EAST))
+    val state: StateFlow<RobotState> = mutableState.asStateFlow()
+    // ...
 }
 ```
 
-## 2. Use it in the node and in the agents
+Exposing the state as a `StateFlow` lets a UI draw the robot from its body.
 
-The body type is fixed by the node builder, `NodeBuilders.baseNode<Robot>()`, and each agent creates its own body
-with `embodiedAs`, which receives the agent's ID:
+## Give it actuators
+
+Actions change the body, and the world only where the robot affects it:
 
 ```kotlin
-embodiedAs { id -> Robot(id.displayName) }
+fun forward() = mutableState.update { robot ->
+    val ahead = robot.cellOf(Square.FORWARD)
+    if (world.state.value.contentAt(ahead) == Content.OBSTACLE) robot else robot.copy(position = ahead)
+}
+
+fun clean() {
+    if (world.removeDust(state.value.position)) mutableState.update { it.copy(cleaned = it.cleaned + 1) }
+}
 ```
 
-`node.agents` maps every agent ID to its body, so both skills and plan bodies can find it:
-`node.agents.getValue(agent.id)`.
+## Give it sensors
 
-## 3. Write a skill that uses the body
+A perception is what the sensors read, not the whole world:
 
 ```kotlin
-private data class Moved(val x: Int, val y: Int) : Perception
+data class VacuumPerception(
+    val location: Pos,
+    val facing: Direction,
+    val time: Int,
+    val squares: Map<Square, Content>,
+) : Perception
 
-private class GridMovement(private val node: Node<Robot>) {
-    fun Agent.moveTo(x: Int, y: Int) {
-        val body = node.agents.getValue(id)
-        body.x = x
-        body.y = y
-        // only the robot that moved perceives its new position
-        node.publishEvent(Moved(x, y)) { it === body }
+fun sense(): VacuumPerception {
+    val robot = state.value
+    val world = world.state.value
+    val squares = Square.entries.associateWith { world.contentAt(robot.cellOf(it)) }
+    return VacuumPerception(robot.position, robot.facing, world.time, squares)
+}
+```
+
+## Use it in the node and in the agent
+
+The body type is fixed by the node builder, and `embodiedAs` gives the agent its body:
+
+```kotlin
+mas(NodeBuilders.baseNode<VacuumBody>()) {
+    node {
+        agent<PrologBelief, PrologGoal>(BaseAgentID("vacuum")) {
+            embodiedAs { body }
+            // ...
+        }
     }
 }
-
-context(movement: GridMovement)
-private fun Agent.moveTo(x: Int, y: Int) = with(movement) { moveTo(x, y) }
 ```
 
-The skill changes the body and publishes a perception, using the body filter of `publishEvent` so that only
-the moving robot receives it. The top-level `moveTo` makes `agent.moveTo(...)` available wherever a `GridMovement`
-is in scope, the same way `MessagingSkill` provides `agent.sendTo(...)`.
+`embodiedAs` receives the agent's ID, so it can also create a new body for each agent.
+`node.agents` maps every agent ID to its body: `node.agents.getValue(agent.id)`.
 
-## 4. Put it together
+## Act through the body with a skill
+
+A skill finds the body of the acting agent, acts through it, and delivers what the robot senses afterwards only to
+that body, using the body filter of `publishEvent`. Simplified from the example, which also lets dust appear:
 
 ```kotlin
-fun main(): Unit = runBlocking {
-    Logger.setMinSeverity(Severity.Assert)
-    mas(NodeBuilders.baseNode<Robot>()) {
-        node {
-            context(GridMovement(node)) {
-                agent<String, String>(BaseAgentID("R2")) {
-                    embodiedAs { id -> Robot(id.displayName) }
-                    handlesPerceptionEvents { perception ->
-                        when (perception) {
-                            is Moved -> AgentUpdate.Belief(
-                                setOf("at(${perception.x},${perception.y})"),
-                                beliefs.filter { it.startsWith("at(") }.toSet(),
-                            )
+class VacuumSkill(node: Node<VacuumBody>, private val stepTime: () -> Duration) : Skill<VacuumBody>(node) {
+    private val Agent.body get() = node.agents.getValue(id)
 
-                            else -> null
-                        }
-                    }
-                    hasInitialGoals { !"patrol" }
-                    hasPlanLibrary {
-                        adding.goal {
-                            takeIf { it == "patrol" }
-                        } triggers {
-                            agent.moveTo(1, 0)
-                            agent.moveTo(1, 1)
-                        }
-                        adding.belief {
-                            takeIf { it == "at(1,1)" }
-                        } triggers {
-                            val body = node.agents.getValue(agent.id)
-                            agent.print("${body.name} reached (${body.x}, ${body.y})")
-                            node.terminateNode()
-                        }
-                    }
-                }
-            }
-        }
-    }.runLocally()
+    fun Agent.look() {
+        val body = body
+        node.publishEvent(body.sense()) { it === body }
+    }
+
+    suspend fun Agent.forward() {
+        delay(stepTime())
+        body.forward()
+        look()
+    }
 }
 ```
 
-It prints `R2 reached (1, 1)`.
+`with(VacuumSkill(node, stepTime)) { agent(...) { ... } }` brings the actions into scope, so that plans can call
+`agent.look()` and `agent.forward()`.
+To use a skill as a context parameter instead, as `MessagingSkill` is, add top-level functions such as
+`context(skill: VacuumSkill) suspend fun Agent.forward() = with(skill) { forward() }`.
 
-<details>
-<summary>Imports</summary>
+## Turn readings into beliefs
+
+`handlesPerceptionEvents` maps each reading to beliefs, replacing the previous readings:
 
 ```kotlin
-import co.touchlab.kermit.Logger
-import co.touchlab.kermit.Severity
-import it.unibo.jakta.agent.Agent
-import it.unibo.jakta.agent.BaseAgentID
-import it.unibo.jakta.dsl.mas
-import it.unibo.jakta.dsl.mas.runLocally
-import it.unibo.jakta.dsl.node.NodeBuilders
-import it.unibo.jakta.dsl.plan.triggers
-import it.unibo.jakta.event.AgentEvent.External.Perception
-import it.unibo.jakta.event.AgentUpdate
-import it.unibo.jakta.node.Node
-import kotlinx.coroutines.runBlocking
+handlesPerceptionEvents { if (it is VacuumPerception) handleVacuumPerception(it, beliefs) else null }
 ```
 
-</details>
+Here `handleVacuumPerception` turns the reading into `location/2`, `direction/1`, `time/1` and `square/2` facts,
+plus the `dust_at/2` memory of the dust seen, and returns an `AgentUpdate.Belief` with only what changed
+(see [Turn perceptions into Prolog facts](./prolog/perceptions.md)).
 
 :::note
 Built-in skills such as `MessagingSkill(node)` expect a `Node<Any>`. On a node with a custom body type, define your
 own skills against `Node<YourBody>`, as above.
 :::
 
-For a larger example, with two skills (movement and battery recharging) sharing the same body, see
+For an example with two skills (movement and battery recharging) sharing the same body, see
 [`TestSpatialRobot`](https://github.com/jakta-bdi/jakta/blob/main/jakta-core/src/commonTest/kotlin/it/unibo/jakta/dsl/examples/TestSpatialRobot.kt).

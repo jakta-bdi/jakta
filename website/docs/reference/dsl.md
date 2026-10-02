@@ -83,6 +83,7 @@ Package `it.unibo.jakta.dsl.agent`.
 The handlers run with the agent's `AgentState` as receiver, so they can read `beliefs`, `intentions`,
 `beliefPlans` and `goalPlans`.
 
+
 ## Plans
 
 Package `it.unibo.jakta.dsl.plan`. Inside `hasPlanLibrary { }` (a `PlanLibraryBuilder<B, G>`):

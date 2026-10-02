@@ -4,7 +4,7 @@ sidebar_position: 3
 
 # Prolog Incarnation Reference
 
-Everything provided by `jakta-prolog-incarnation`, where beliefs are [2P-Kt](https://github.com/tuProlog/2p-kt)
+Everything provided by `jakta-prolog-incarnation`, where beliefs are [2P-Kt](https://tuprolog.github.io/2p-kt/)
 clauses and goals are 2P-Kt terms. For an introduction see [Incarnations](../explanation/incarnations/prolog/index.md).
 
 ## Types
@@ -129,17 +129,17 @@ Package `it.unibo.jakta`.
 | `source(agentId)`, `source("name")`, `source(term)` | The `source(...)` annotation. `source(agentId)` uses the id's `toString()`, i.e. its UUID for a `BaseAgentID`. |
 | `self` | The atom `self`. |
 
-Matching semantics. A term without annotations is treated as annotated with `[source(self)]`. Then:
+Matching semantics, the same for beliefs (`matchingBelief`, `satisfies`, `testQuery`) and goals (`matchingGoal`),
+as in Jason. A belief or goal without annotations is treated as annotated with `[source(self)]`. Then every annotation
+of the *query* must unify with a distinct annotation of the belief or goal, so a query without annotations matches
+whatever the source.
 
-- **beliefs** (`matchingBelief`, `satisfies`, `testQuery`): every annotation of the *query* must unify with a distinct
-  annotation of the belief. A query without annotations matches regardless of the belief's annotations.
-- **goals** (`matchingGoal`): the check is reversed, every annotation of the *goal* must unify with a distinct
-  annotation of the query. A query without annotations only matches the agent's own goals.
+So `matchingBelief { "ping"(N) }` matches both the agent's own beliefs and those told by others,
+`matchingBelief { "ping"(N)[source(self)] }` only the agent's own, and `matchingBelief { "ping"(N)[source(S)] }` both,
+binding `S` to the sender or to `self`. Goals delegated with `delegateAchieveTo` work the same way.
 
-So `matchingBelief { "ping"(N) }` matches both the agent's own beliefs and those told by others, while
-`matchingBelief { "ping"(N)[source(self)] }` only matches the agent's own.
-For goals delegated by other agents (with `delegateAchieveTo` or `sendUnachieveTo`), the trigger must mention the source:
-`matchingGoal { "job"(N)[source(S)] }`.
+Beliefs that differ only in their annotations are the same belief: an agent cannot hold `ping(1)[source(alice)]` and
+`ping(1)[source(carol)]` at once.
 
 ## KQML
 
@@ -168,7 +168,7 @@ handlesMessageEvents {
 | `agent.sendUnachieveTo(receiver, query)` | `Unachieve(query)` | Removes the goal `query[source(sender)]`, triggering `removing.goal` plans. It does not stop intentions already pursuing it. |
 | `agent.broadcastUnachieve(query)` | `Unachieve` | As above, for every other agent. |
 | `agent.askOneTo(receiver, query, timeout = null)` | `AskOne(query)` | Adds the goal `replyOne(query, id)[source(sender)]`. |
-| `agent.askAllTo(receiver, query, timeout = null)` | see caution below | |
+| `agent.askAllTo(receiver, query, timeout = null)` | `AskAll(query)` | Adds the goal `replyAllTo(query, id)[source(sender)]`. |
 | `agent.tellTo(receiver, replyingTo, vararg beliefs)` | `Tell(beliefs, replyingTo)` | A tell that answers the question with id `replyingTo`. |
 
 Every payload has a unique `id`.
@@ -184,54 +184,10 @@ Every payload has a unique `id`.
    if the reply does not unify with the query.
 
 Questions are not answered automatically: the receiver must have a plan for `replyOne` goals, which answers with the
-question id.
+question id. `BaseAgentID(id = S.value())` rebuilds the sender's identifier from the source annotation, since
+`source(agentId)` stores the id's UUID. See [Ask and answer with KQML](../how-to/prolog/kqml.md#answer-a-question)
+for the asking and answering plans.
 
-```mermaid
-sequenceDiagram
-  participant A as Alice
-  participant B as Bob
-  A->>B: askOneTo(bob, beliefQuery { "b"(X) })
-  Note over B: goal replyOne(b(X), id)[source(alice)]
-  B->>A: tellTo(alice, id, belief { "b"(1) })
-  Note over A: askOneTo returns, X = 1
-```
-
-```kotlin
-// Alice
-prologPlan {
-    adding.goal {
-        matchingGoal { Atom.of("ask") }
-    } triggers {
-        val reply = agent.askOneTo(bob, beliefQuery { "b"(X) }, timeout = 5.seconds)
-        if (reply != null && reply.isSuccess) {
-            agent.print("Bob believes b(", X, ")")
-        }
-    }
-}
-
-// Bob
-prologPlan {
-    adding.goal {
-        matchingGoal { replyOne(Q, M)[source(S)] }
-    } triggers {
-        when (val solution = agent.beliefs.unifiesWith(Q.value())) {
-            is Solution.Yes -> agent.tellTo(
-                BaseAgentID(id = S.value()),
-                M.value<String>(),
-                Fact.of(solution.solvedQuery),
-            )
-            else -> agent.print("I don't know")
-        }
-    }
-}
-```
-
-`BaseAgentID(id = S.value())` rebuilds the sender's identifier from the source annotation, since `source(agentId)`
-stores the id's UUID.
-
-:::caution[`askAllTo`]
-In the current release `askAllTo` sends an `AskOne` payload instead of an `AskAll`
-(see [`KQMLMessaging.kt`](https://github.com/jakta-bdi/jakta/blob/main/jakta-prolog-incarnation/src/commonMain/kotlin/it/unibo/jakta/kqml/KQMLMessaging.kt)),
-so the receiver gets a `replyOne` goal rather than a `replyAllTo` one. Prefer `askOneTo`, or answer `replyOne` goals
-with a `Tell` containing all the solutions.
-:::
+`askAllTo` works the same way with a `replyAllTo(Q, M)[source(S)]` goal, which the receiver answers with a single
+`tellTo(sender, questionId, ...)` carrying every solution: it returns the list of successful substitutions of `query`
+against the told beliefs, or `null` on timeout. It does not bind the query variables in the plan context.

@@ -21,7 +21,9 @@ dependencies {
 ## Define the device
 
 An entry point is an extension function on `JaktaForAlchemistRuntime` that builds a device with
-`device(NodeBuilders.alchemistNode()) { node { ... } }`. Inside, you define agents as usual:
+`device(NodeBuilders.alchemistNode()) { node { ... } }`; agents are defined inside as usual.
+`device` and `alchemistNode` come from `it.unibo.jakta.dsl`, `JaktaForAlchemistRuntime` from
+`it.unibo.alchemist.jakta.properties`.
 
 ```kotlin
 @file:JvmName("PingPong")
@@ -32,25 +34,25 @@ fun <P : Position<P>> JaktaForAlchemistRuntime<P>.entrypoint() = device(NodeBuil
     node {
         context(MessagingSkill(node)) {
             agent(BaseAgentID("Alice")) {
-                embodiedAs { Any() }
-                hasInitialGoals { !"start" }
-                hasPlanLibrary {
-                    adding.goal {
-                        takeIf { it == "start" }
-                    } triggers {
-                        agent.print("Time: ${alchemistEnvironment.simulation.time}")
-                        delay(5000.milliseconds) // simulated time
-                        agent.print("Time after delay: ${alchemistEnvironment.simulation.time}")
-                    }
-                }
+                // as in any other node
             }
         }
     }
 }
 ```
 
-`alchemistEnvironment` gives access to the Alchemist environment (and simulation) from the runtime,
-and `delay` advances in simulated time.
+## Use simulated time
+
+`delay` advances in simulated time, and `alchemistEnvironment` gives access to the Alchemist environment
+and simulation:
+
+```kotlin
+} triggers {
+    agent.print("Time: ${alchemistEnvironment.simulation.time}")
+    delay(5000.milliseconds)
+    agent.print("Time after delay: ${alchemistEnvironment.simulation.time}")
+}
+```
 
 ## Configure the simulation
 

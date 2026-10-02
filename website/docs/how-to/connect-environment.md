@@ -7,175 +7,104 @@ sidebar_position: 2
 JaKtA has no built-in environment class: the environment is **your** Kotlin model of the world.
 Agents are connected to it in two directions:
 
-- **acting**: a [skill](../explanation/basic-concepts/skills.md) exposes the operations agents can perform on the model;
-- **perceiving**: the model (or the skill) publishes **perceptions** on the node, and each agent turns them into
-  beliefs with `handlesPerceptionEvents`.
+- **perceiving**: the environment publishes **perceptions** on the node, and each agent turns them into beliefs;
+- **acting**: a [skill](../explanation/basic-concepts/skills.md) exposes the operations agents can perform on it.
 
-```mermaid
-flowchart LR
-    plan[Plan body] -- "heater.heat()" --> skill[Heater skill]
-    skill -- updates --> room[(Room model)]
-    skill -- "node.publishEvent(TemperatureChanged)" --> node[Node]
-    node -- perception --> handler[handlesPerceptionEvents]
-    handler -- "AgentUpdate.Belief" --> beliefs[(Belief base)]
-    beliefs -- "belief added" --> plan
-```
+The snippets come from the [`thermostat`](https://github.com/jakta-bdi/jakta/tree/main/examples/thermostat) example,
+walked through in the [thermostat tutorial](../tutorials/thermostat.md).
 
-This guide builds a thermostat agent that heats a room until it is warm enough. It only needs `jakta-core`.
-The complete program is the [`connect-environment`](https://github.com/jakta-bdi/jakta/tree/main/examples/connect-environment) example; run it with `./gradlew :examples:connect-environment:run`.
+## Define a perception
 
-## 1. Model the world
+Any class implementing `AgentEvent.External.Perception` (from `it.unibo.jakta.event`):
 
 ```kotlin
-private class Room(var temperature: Int)
-
-private data class TemperatureChanged(val degrees: Int) : Perception
-
-private data class Temperature(val degrees: Int)
+data class RoomReading(val temperature: Double, val target: Double, val mode: Mode) : Perception
 ```
 
-A perception is any class implementing `AgentEvent.External.Perception`.
-It is kept separate from the belief type: agents decide how a perception affects what they believe.
+Keep perceptions separate from the belief type: each agent decides what a perception means to it.
 
-## 2. Write the skill
+## Publish it
 
-The skill holds the model and the node, acts on the former and notifies the latter:
+Anything holding the node can publish, e.g. the environment's own loop:
 
 ```kotlin
-private class Heater(private val room: Room, private val node: Node<*>) {
-    fun sense() = node.publishEvent(TemperatureChanged(room.temperature))
+node.publishEvent(RoomReading(state.temperature, state.target, state.mode))
+```
 
-    fun heat() {
-        room.temperature += 1
-        node.publishEvent(TemperatureChanged(room.temperature))
-    }
+To get the node from outside the DSL, build it on its own and add it to the MAS with `withNodes`:
+
+```kotlin
+val home = node(NodeBuilders.baseNode()) {
+    withAgents(thermostat(Hvac(room)))
 }
-
-context(heater: Heater)
-private val PlanScope<*, *, *>.heater get() = heater
+launch { room.simulate(home, stepTime) }
+mas(NodeBuilders.baseNode()) { withNodes(home) }.run(CoroutineNodeRunner(SharedMemoryNetwork()))
 ```
 
-The extension property lets plan bodies write `heater.heat()`, and only compiles where a `Heater` is in scope.
+Inside the DSL, `node` is in scope in `node { }` blocks, agent builders and plan bodies.
 
-## 3. Turn perceptions into beliefs
+## Deliver it to some agents only
 
-`handlesPerceptionEvents` returns an `AgentUpdate.Belief(additions, removals)`, or `null` to ignore a perception.
-Removing the previously perceived temperature keeps a single, up-to-date belief:
+`publishEvent` takes an optional filter on agent **bodies**:
+
+```kotlin
+node.publishEvent(reading) { body -> body === node.agents[agentId] }
+```
+
+This is most useful with [custom bodies](./custom-body.md), e.g. to deliver a sensor reading only to the robot that
+made it. Perceptions only reach the agents of the node that publishes them; use
+[messages](../explanation/communication.md) to reach other nodes.
+
+## Turn perceptions into beliefs
+
+Return an `AgentUpdate.Belief(additions, removals)` from `handlesPerceptionEvents`, or `null` to ignore a perception:
 
 ```kotlin
 handlesPerceptionEvents { perception ->
     when (perception) {
-        is TemperatureChanged -> AgentUpdate.Belief(
-            additions = setOf(Temperature(perception.degrees)),
-            removals = beliefs.toSet(), // forget the old temperature
-        )
+        is RoomReading -> {
+            val readings = setOf(Temperature(perception.temperature), Target(perception.target), Running(perception.mode))
+            AgentUpdate.Belief(readings - beliefs.toSet(), beliefs.toSet() - readings)
+        }
 
         else -> null
     }
-```
-
-A belief that appears in both sets is left untouched, and generates no event.
-
-## 4. Put it together
-
-```kotlin
-private const val WARM_ENOUGH = 20
-
-fun main(): Unit = runBlocking {
-    Logger.setMinSeverity(Severity.Assert)
-    val room = Room(temperature = 17)
-    mas(NodeBuilders.baseNode()) {
-        node {
-            context(Heater(room, node)) {
-                agent<Temperature, String> {
-                    embodiedAs { Any() }
-                    handlesPerceptionEvents { perception ->
-                        when (perception) {
-                            is TemperatureChanged -> AgentUpdate.Belief(
-                                additions = setOf(Temperature(perception.degrees)),
-                                removals = beliefs.toSet(), // forget the old temperature
-                            )
-
-                            else -> null
-                        }
-                    }
-                    hasInitialGoals { !"keepWarm" }
-                    hasPlanLibrary {
-                        adding.goal {
-                            takeIf { it == "keepWarm" }
-                        } triggers {
-                            heater.sense()
-                        }
-                        adding.belief {
-                            takeIf { it.degrees < WARM_ENOUGH }
-                        } triggers {
-                            agent.print("It's ${context.degrees}°C, heating")
-                            heater.heat()
-                        }
-                        adding.belief {
-                            takeIf { it.degrees >= WARM_ENOUGH }
-                        } triggers {
-                            agent.print("It's ${context.degrees}°C, warm enough")
-                            node.terminateNode()
-                        }
-                    }
-                }
-            }
-        }
-    }.runLocally()
 }
 ```
 
-Output:
+Adding only what is new and removing only what is stale keeps the belief base up to date, and generates events only
+for what changed.
 
-```text
-It's 17°C, heating
-It's 18°C, heating
-It's 19°C, heating
-It's 20°C, warm enough
-```
+## React to them
 
-The agent never polls the room: each `heat()` produces a perception, the perception replaces the temperature belief,
-and the new belief triggers the next plan.
-
-<details>
-<summary>Imports</summary>
+A belief addition triggers the plans whose trigger accepts the new belief and whose guard holds:
 
 ```kotlin
-import co.touchlab.kermit.Logger
-import co.touchlab.kermit.Severity
-import it.unibo.jakta.dsl.mas
-import it.unibo.jakta.dsl.mas.runLocally
-import it.unibo.jakta.dsl.node.NodeBuilders
-import it.unibo.jakta.dsl.plan.triggers
-import it.unibo.jakta.event.AgentEvent.External.Perception
-import it.unibo.jakta.event.AgentUpdate
-import it.unibo.jakta.node.Node
-import it.unibo.jakta.plan.PlanScope
-import kotlinx.coroutines.runBlocking
+adding.belief {
+    this as? Temperature
+} onlyWhen {
+    context.takeIf { it.degrees < beliefs.target - TOLERANCE }
+} triggers {
+    hvac.heat()
+}
 ```
 
-</details>
+## Act through a skill
 
-## Deliver a perception to some agents only
-
-`publishEvent` takes an optional filter on agent **bodies**: the perception is delivered only to the agents of the
-node whose body satisfies it. For instance, to notify a single agent:
+A skill is an ordinary object wrapping the operations on the environment:
 
 ```kotlin
-node.publishEvent(Moved(x, y)) { body -> body === node.agents[agentId] }
+class Hvac(private val room: Room) {
+    fun heat() = room.switch(Mode.HEATING)
+    fun off() = room.switch(Mode.OFF)
+}
 ```
 
-This is most useful together with [custom bodies](./custom-body.md), e.g. to deliver a perception only to the
-agents close to where something happened.
+Pass it to the agents that use it (`thermostat(Hvac(room))`), or make it available to every agent in a block with
+`context(Hvac(room)) { ... }` plus a property such as
+`context(hvac: Hvac) val PlanScope<*, *, *>.hvac get() = hvac`, the way `MessagingSkill` provides `agent.sendTo(...)`.
 
-:::note
-Perceptions are delivered to agents of the node that publishes them. To reach agents on other nodes, use
-[messages](../explanation/communication.md).
-:::
+## With the Prolog incarnation
 
-## Using the Prolog incarnation
-
-The same pattern works with Prolog beliefs: the perception handler builds Prolog facts and removes the stale ones.
-The [`blocksworld`](https://github.com/jakta-bdi/jakta/tree/main/examples/blocksworld) example does exactly that in
-[`BlocksWorldSkills.kt`](https://github.com/jakta-bdi/jakta/blob/main/examples/blocksworld/src/commonMain/kotlin/BlocksWorldSkills.kt).
+The pattern is the same with Prolog beliefs: the perception handler builds Prolog facts and removes the stale ones.
+See [Turn perceptions into Prolog facts](./prolog/perceptions.md).

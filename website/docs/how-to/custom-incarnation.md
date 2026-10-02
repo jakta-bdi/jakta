@@ -36,76 +36,43 @@ private fun Fact.matches(name: String, arity: Int): List<Any>? = args.takeIf { t
 A guard runs in a `GuardScope`, which exposes the agent's `beliefs` and the plan `context`.
 It returns the context (possibly refined) if the plan is applicable, `null` otherwise:
 
+`GuardScope` comes from `it.unibo.jakta.plan.GuardScope`.
+
 ```kotlin
 private fun <Context : Any> GuardScope<Fact, Context>.believes(belief: Fact): Context? =
     context.takeIf { belief in beliefs }
 ```
 
-## 4. Use it
+## 4. Use it in plans
+
+The helpers make triggers and guards read like the representation:
 
 ```kotlin
-private val greeter = agent<Fact, Fact, Any> {
-    embodiedAs { Any() }
-    believes {
-        +fact("friend", "bob")
+hasPlanLibrary {
+    adding.goal {
+        matches("greet", 1)
+    } onlyWhen {
+        believes(fact("friend", context[0]))
+    } triggers {
+        agent.print("Hello, ${context[0]}!")
     }
-    hasInitialGoals {
-        !fact("greet", "bob")
-        !fact("greet", "eve")
-    }
-    hasPlanLibrary {
-        adding.goal {
-            matches("greet", 1)
-        } onlyWhen {
-            believes(fact("friend", context[0]))
-        } triggers {
-            agent.print("Hello, ${context[0]}!")
-        }
-        failing.goal {
-            matches("greet", 1)
-        } triggers {
-            agent.print("I don't greet strangers like ${context[0]}")
-            node.terminateNode()
-        }
-    }
-}
-
-fun main(): Unit = runBlocking {
-    Logger.setMinSeverity(Severity.Assert)
-    mas(NodeBuilders.baseNode()) {
-        node { withAgents(greeter) }
-    }.runLocally()
 }
 ```
 
-Output:
+## 5. Handle the goals no plan applies to
 
-```text
-Hello, bob!
-I don't greet strangers like eve
-```
-
-Greeting `eve` has a relevant plan, but its guard fails: no plan is applicable, the goal fails, and the failure plan
-handles it.
-
-<details>
-<summary>Imports</summary>
+With `believes { +fact("friend", "bob") }`, the goal `greet(eve)` has a relevant plan whose guard fails:
+no plan is applicable and the goal fails. A failure plan handles it:
 
 ```kotlin
-import co.touchlab.kermit.Logger
-import co.touchlab.kermit.Severity
-import it.unibo.jakta.dsl.agent
-import it.unibo.jakta.dsl.mas
-import it.unibo.jakta.dsl.mas.runLocally
-import it.unibo.jakta.dsl.node.NodeBuilders
-import it.unibo.jakta.dsl.plan.triggers
-import it.unibo.jakta.plan.GuardScope
-import kotlinx.coroutines.runBlocking
+failing.goal {
+    matches("greet", 1)
+} triggers {
+    agent.print("I don't greet strangers like ${context[0]}")
+}
 ```
 
-</details>
-
-## 5. Package it
+## 6. Package it
 
 To reuse the incarnation, put the types and helpers in their own module, as
 [`jakta-string-incarnation`](https://github.com/jakta-bdi/jakta/tree/main/jakta-string-incarnation) does:

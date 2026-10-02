@@ -1,6 +1,6 @@
 ---
 sidebar_label: Caveats
-sidebar_position: 4
+sidebar_position: 5
 ---
 
 # Prolog Incarnation Caveats
@@ -10,13 +10,13 @@ Things that commonly trip people up, and how to deal with them.
 ## Capitalized strings are variables
 
 `"likes"("Bob", "alice")` is `likes(Bob, alice)` with `Bob` a **variable**. Use lowercase atoms, or
-`Atom.of("Bob")`.
+`Atom.of("Bob")`. See [the DSL in a nutshell](./2p-kt.md#the-dsl-in-a-nutshell).
 
 ## Beliefs and goals must be ground
 
 `initialBelief`, `initialGoal`, `belief { }` and `goal { }` throw `IllegalArgumentException`
 (`Belief must be ground, ...`) if the term contains unbound variables. In a body, make sure every variable was bound
-by the trigger or the guard.
+by the trigger or the guard (see [which function where](./beliefs-and-goals.md#which-function-where)).
 
 ## Unknown predicates fail silently
 
@@ -27,29 +27,32 @@ names and arities first.
 ## Guards use the first solution
 
 `satisfies { }` and `testQuery { }` only look at the first solution. To use all of them, collect them explicitly,
-e.g. with `agent.beliefs.allSolutionsOf(query)` or a `findall/3` query.
+e.g. with `agent.beliefs.allSolutionsOf(query)` or a `findall/3` query: see
+[use every solution](../../../how-to/prolog/guards-and-rules.md#use-every-solution).
 
-## Delegated goals need `[source(S)]`
+## A belief has a single source
 
-Goal patterns without annotations do not match goals received with `delegateAchieveTo`. See
-[annotations](./beliefs-and-goals.md#annotations-and-sources).
+Beliefs that differ only in their annotations are the same belief: if Alice and Carol both tell `ping(1)`, the agent
+keeps a single `ping(1)` with the first source. Include the information in the belief itself, e.g. `ping(1, alice)`,
+when several sources matter. See [annotations and sources](./beliefs-and-goals.md#annotations-and-sources).
 
 ## Perceptions do not replace beliefs by themselves
 
 A perception handler returns *additions* and *removals*. If it only adds `on(a, b)`, the stale `on(a, table)` stays.
-Remove the old facts explicitly, as the Blocks World example does with a
-`newContextBeliefQuery { "on"(X, Y) }` filter.
+Remove the old facts explicitly, selecting them with `newContextBeliefQuery { }` filters: see
+[Turn perceptions into Prolog facts](../../../how-to/prolog/perceptions.md).
 
 ## No test goals
 
-AgentSpeak's `?g` test goals are not available. Use `satisfies { }` in guards, or `testQuery { }` in bodies.
+AgentSpeak's `?g` test goals are not available. Use `satisfies { }` in guards, or `testQuery { }` in bodies: see
+[Write guards and inference rules](../../../how-to/prolog/guards-and-rules.md).
 
 ## KQML questions need an explicit answer
 
 `askOneTo` puts a `replyOne(Q, M)[source(S)]` goal in the receiver, and someone must write the plan that answers it
-(see [Communication](../../communication.md#kqml-messaging-prolog-incarnation)). `askOneTo` returns `null` only on
+(see [answer a question](../../../how-to/prolog/kqml.md#answer-a-question)). `askOneTo` returns `null` only on
 timeout; check `isSuccess` on the returned substitution before reading the variables.
-`askAllTo` currently sends an `askOne` message, so it behaves like `askOneTo`.
+`askAllTo` likewise needs a plan for `replyAllTo(Q, M)[source(S)]` goals.
 
 ## Performance
 

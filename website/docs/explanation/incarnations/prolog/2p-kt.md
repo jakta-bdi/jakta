@@ -38,7 +38,7 @@ Inside `initialBelief { }`, `inferenceRule { }`, `initialGoal { }` and `prologPl
 | ``M `is` (N + 1)`` | `M is N + 1` |
 | `member(X, L)`, `findall(...)`, `between(...)` | the Prolog standard library predicates |
 
-A few more rules and a guard, all verified against JaKtA:
+For instance, a rule and a guard using lists and arithmetic:
 
 ```kotlin
 believes {
@@ -65,14 +65,9 @@ Strings that start with an uppercase letter or `_` become **variables**: `"likes
 
 ## Using 2P-Kt directly
 
-Outside the DSL, for example when turning a perception into facts, build terms with the 2P-Kt core API.
-The [Blocks World](../../../tutorials/blocks-world.md) example does this:
-
-```kotlin
-Fact.of(Struct.of("on", Atom.of(block.id), support))
-```
-
-`Atom`, `Struct`, `Var`, `Fact`, `Rule` and `Substitution` are all in `it.unibo.tuprolog.core`.
+Outside the DSL there is no logic programming scope: terms are built with the 2P-Kt core API (`Atom`, `Struct`, `Var`,
+`Fact`, `Rule` and `Substitution`, all in `it.unibo.tuprolog.core`), e.g. `Fact.of(Struct.of("on", Atom.of("a"), table))`.
+See [Turn perceptions into Prolog facts](../../../how-to/prolog/perceptions.md).
 
 ## Learn more about 2P-Kt
 

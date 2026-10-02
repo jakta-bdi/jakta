@@ -9,7 +9,7 @@ about the world, itself, and other agents. Beliefs change as the agent perceives
 
 The type of a belief is chosen by the [incarnation](../incarnations/index.md).
 The examples below use the **Prolog incarnation**, where a belief is a Prolog clause (`PrologBelief`, a
-[2P-Kt](https://github.com/tuProlog/2p-kt) `Rule`): either a **fact** or an **inference rule**.
+[2P-Kt](https://tuprolog.github.io/2p-kt/) `Rule`): either a **fact** or an **inference rule**.
 
 ## Initial beliefs
 
@@ -31,7 +31,7 @@ agent<PrologBelief, PrologGoal, Any> {
 
 Inside these blocks you are in the 2P-Kt Prolog DSL: strings invoked like functions (`"parent"(...)`) build
 compound terms, and `X`, `Y`, `Z`, ... are logic variables. Check out the
-[2P-Kt documentation](https://github.com/tuProlog/2p-kt) for the full syntax.
+[2P-Kt documentation](https://tuprolog.github.io/2p-kt/reference/prolog-dsl/) for the full syntax.
 
 Beliefs can also be added one at a time with `addBelief(belief)` in the agent builder.
 
@@ -61,7 +61,7 @@ prologPlan {
 ## Belief sources
 
 Beliefs coming from other agents are annotated with their **source**, like in Jason.
-A belief received through [KQML messaging](../communication.md#kqml-messaging-prolog-incarnation)
+A belief received through [KQML messaging](../incarnations/prolog/kqml.md)
 can be matched with `[source(X)]`, binding `X` to the sender:
 
 ```kotlin
