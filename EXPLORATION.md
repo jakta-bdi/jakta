@@ -291,7 +291,7 @@ This is a known source of ambiguity: the JaCaMo tutorial warns that a message "i
 
 **Declarations in `.jcm` files.** For example:
 
-```
+```text
 workspace w { artifact c: pkg.Counter(10) { focused-by: bob } }
 ```
 
@@ -731,7 +731,7 @@ plan handles avoids that warning already.
 
 Run them with:
 
-```
+```bash
 ./gradlew :jakta-artifacts:jvmTest :jakta-artifacts:jsNodeTest :jakta-artifacts:linuxX64Test
 ```
 
@@ -797,12 +797,14 @@ Run them with:
 
 These are not fixed here: they are being handled elsewhere, or are out of scope.
 
-- **Agents cannot run on `Dispatchers.Default`/`IO`** ("must implement Delay"). Another agent is on it. Artifacts
-  have the same requirement, so that delays follow the node's time.
-- **A removed agent's intentions never resume**, so their `finally` blocks never run. Another agent is on it.
+- **Agents cannot run on `Dispatchers.Default`/`IO`** ("must implement Delay"). Fixed by #969, now on `main` and
+  `develop`. Artifacts have the same requirement, so that delays follow the node's time.
+- **A removed agent's intentions never resume**, so their `finally` blocks never run. Handled by the goal and
+  intention dropping work in #954 (on `develop`).
   Artifacts are unaffected because operations do not run on the caller's intention.
-- **`agent.beliefs` is a live view, not a snapshot.** `BeliefBaseImpl.snapshot()` returns `copy()`, a data-class copy
-  that shares the same mutable set. The tests copy it with `toList()`. This is a new finding.
+- **`agent.beliefs` is a live view, not a snapshot.** `BeliefBaseImpl.snapshot()` returned `copy()`, a data-class
+  copy sharing the same mutable set. Fixed by #968, now on `main` and `develop`; the tests' `toList()` copies are
+  harmless.
 - **`BaseNode` delivers to its unsynchronized agent set.** Artifacts publish perceptions from their own dispatcher,
   and on an executor dispatcher this can race with the runner adding or removing agents. Skills that publish from
   plans have the same race today.
@@ -839,3 +841,37 @@ These are not fixed here: they are being handled elsewhere, or are out of scope.
    are worth adding? *(default: none until there is a use case.)*
 7. **Node API naming.** Is `Node.launchProcess` the right name and place for the core extension point? It is also
    usable by any code holding the node, not only artifacts. *(default: yes, as #887 suggests.)*
+
+**Proposed answers** (added 2026-10-02, to make the decisions quicker; the defaults above still stand where they agree):
+
+1. *Crash detection:* yes, but as a follow-up once the distribution stack (#983–#988) is in. Add node-joined and
+   node-left events to `NodeNetwork`; `SharedMemoryNetwork` can emit them on subscribe and close, and `MqttNetwork`
+   (#986) already has what it needs in its retained presence topics and last will. Routers then dispose the artifacts
+   of a lost node, which also removes the need for `withTimeout` in the common case.
+2. *Other runners:* yes for `ManualStepNodeRunner`, now, as a small change: stepping processes there makes the artifact
+   tests deterministic. For Alchemist, do it on top of #981, which replaces the old runtime with `AlchemistNodeRunner`:
+   processes become one more thing the runner schedules on its simulated-time dispatcher.
+3. *Naming:* keep global names for now. Once node ids are stable (#984), accept an optional qualified form,
+   `lookup("home/counter")`, while plain names keep working.
+4. *MQTT:* yes, as a follow-up on top of #985 and #986: the protocol messages become `@Serializable` and registered in
+   the serializers module, and the lambda filters become `MessageFilter`s (see the next section, which #983 forces
+   anyway).
+5. *Default percept mappings:* not in core, but a one-line helper in the Prolog incarnation is worth it once #977 is in:
+   an `ArtifactEvent.PropertyChanged` maps naturally to a `Replace` scoped to that artifact's property, so the helper
+   is small and the hand-written mappings in the tests disappear.
+6. *Remaining CArtAgO features:* none until there is a use case, agreed. Explicit dispose is the first candidate, since
+   crash detection (1) will need the same disposal path.
+7. *Node API naming:* `launchProcess` is fine. Note that adding it (and `ExecutableNode.processes`) as abstract members
+   is what makes this PR breaking; that is acceptable on `develop`, as 2.0 breaks compatibility anyway.
+
+## 7. Interaction with the other 2.0 PRs on `develop`
+
+A trial merge of this branch with #983 (message filters) and #977 (belief revision), done locally on 2026-10-02 and not
+pushed, merges without conflicts but needs these changes, to make in whichever PR merges second:
+
+- **#983**, which drops the lambda-based `publishEvent`: the two filters in `ArtifactNode` become `MessageFilter`s.
+  - `deliver`: `publishEvent(event) { _, agent, _ -> agent in agents }`
+  - `send`: `publishEvent(Message(message, sender)) { _, _, _ -> false }`
+- **#977**, which replaces `AgentUpdate.Belief`/`Goal`: the percept mappings of the tests (`TestArtifacts.kt` lines 82,
+  87 and 92, `TestPrologArtifacts.kt` line 40) become `AgentUpdate.Replace(...)`, `AgentUpdate.Forget(...)` and
+  `AgentUpdate.Adopt(...)`. The main code of the module does not use `AgentUpdate`.

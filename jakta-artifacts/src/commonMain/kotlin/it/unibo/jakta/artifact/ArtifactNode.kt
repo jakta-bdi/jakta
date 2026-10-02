@@ -24,6 +24,7 @@ import kotlinx.coroutines.withTimeoutOrNull
  * Artifacts on other nodes are used through the node network: requests and replies travel as messages,
  * that this node handles itself instead of delivering them to its agents.
  */
+@Suppress("TooManyFunctions") // hosting, lookup, request/reply routing and disposal of the artifact protocol
 class ArtifactNode<Body : Any> : BaseNode<Body>() {
     private val logger = Logger.withTag("ArtifactNode")
     private val sender = BaseAgentID("artifacts", "artifacts@$id")

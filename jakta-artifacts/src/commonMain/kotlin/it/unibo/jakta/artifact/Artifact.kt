@@ -39,7 +39,8 @@ import kotlinx.coroutines.launch
  *
  * @param name the name of the artifact, unique in the MAS: other nodes look it up by name.
  */
-@Suppress("AbstractClassCanBeConcreteClass") // it is meant to be extended with properties and operations
+// meant to be extended with properties and operations; its many functions are the artifact API of CArtAgO
+@Suppress("AbstractClassCanBeConcreteClass", "TooManyFunctions")
 abstract class Artifact(val name: String) {
     private val operations = mutableMapOf<String, Operation<*, *>>()
     internal val properties = mutableMapOf<String, Any?>()
