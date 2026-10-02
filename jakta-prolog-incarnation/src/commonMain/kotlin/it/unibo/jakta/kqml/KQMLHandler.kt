@@ -4,6 +4,7 @@ import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.agent.AgentState
 import it.unibo.jakta.dsl.belief.PrologBelief
 import it.unibo.jakta.dsl.belief.matchBelief
+import it.unibo.jakta.dsl.belief.withAnnotations
 import it.unibo.jakta.dsl.goal.PrologGoal
 import it.unibo.jakta.dsl.goal.replyAllTo
 import it.unibo.jakta.dsl.goal.replyOne
@@ -28,11 +29,12 @@ fun AgentState<PrologBelief, PrologGoal>.handleKQMLPayload(payload: KQMLPayload,
             Belief(beliefs)
         }
 
+        // Only the sender's source is removed: with annotated beliefs, what others told stays.
         is Untell -> {
             val query = payload.beliefQuery.tag(source(sender))
             val toRemove = beliefs.filter {
                 it.matchBelief(query) != null
-            }.toSet()
+            }.map { it.withAnnotations(setOf(source(sender))) }.toSet()
             Belief(emptySet(), toRemove)
         }
 
