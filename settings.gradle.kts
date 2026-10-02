@@ -41,6 +41,7 @@ include(
     "jakta-string-incarnation",
     "jakta-prolog-incarnation",
     "jakta-situated",
+    "examples:alchemist-gossip",
     "examples:blocksworld",
     "examples:contract-net",
     "examples:failure-handling",

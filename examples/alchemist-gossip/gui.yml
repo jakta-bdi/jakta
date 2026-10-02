@@ -1,0 +1,9 @@
+# Override of gossip.yml opening the Alchemist Swing GUI, colouring in red the informed nodes.
+# Press P to play/pause, R to toggle real time, L to show the links.
+launcher:
+  type: DefaultLauncher
+  parameters: [ false ]
+
+monitors:
+  - type: SwingGUI
+    parameters: [ effects.json ]
