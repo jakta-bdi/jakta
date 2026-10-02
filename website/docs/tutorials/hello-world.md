@@ -2,12 +2,15 @@
 sidebar_position: 3
 ---
 
-# Hello, world!
+# Basic: Hello world
 
 This is the [`hello-world`](https://github.com/jakta-bdi/jakta/tree/main/examples/hello-world) example.
 It only needs `jakta-core`: beliefs and goals are plain strings, matched with ordinary Kotlin code.
 
-```kotlin title="Main.kt"
+<details>
+<summary>Imports</summary>
+
+```kotlin
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import it.unibo.jakta.dsl.agent
@@ -16,7 +19,11 @@ import it.unibo.jakta.dsl.mas.runLocally
 import it.unibo.jakta.dsl.node.NodeBuilders
 import it.unibo.jakta.dsl.plan.triggers
 import kotlinx.coroutines.runBlocking
+```
 
+</details>
+
+```kotlin title="Main.kt"
 val helloWorldAgent = agent<String, String, Any> {
     embodiedAs { Any() }
     hasInitialGoals {
@@ -92,4 +99,4 @@ Run it with:
 ./gradlew :examples:hello-world:run
 ```
 
-Next: learn about [beliefs](../explanation/basic-concepts/beliefs.md), or continue with the [intermediate tutorial](./tutorial.md).
+Next: learn about [beliefs](../explanation/basic-concepts/beliefs.md), or continue with [Intermediate: Ping-pong agents](./ping-pong.md).
