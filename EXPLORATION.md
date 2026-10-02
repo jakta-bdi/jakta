@@ -117,6 +117,7 @@ v1 cost exactly one call per event, but with "first" judged by the LLM. v2 and v
 There's no extra abstraction: `LlmReasoner` takes any Koog `PromptExecutor`, and tests pass `getMockExecutor`.
 
 `jakta-llm-incarnation` has 8 offline tests, on the JVM:
+
 1. plans are tried in order, with triggers and guards matched by meaning, including the exact prompt texts (each asked once);
 2. a literal match makes no LLM call;
 3. no matching plan leads to a failure plan;
@@ -139,6 +140,7 @@ Live runs use `temperature = 0` where the model supports it, but are not determi
 `llmPlans { goal(...); belief(...); failure(...) }` registered one catch-all JaKtA plan per event kind. Its body made one structured call listing every LLM plan and ran the chosen one. That avoided touching core, at the cost of "fake" plans that shadowed later plans, `Unit`-only results, no removal plans, and plan order judged by the LLM. v2 and v3 remove all of these: LLM plans are real plans, any result type and every event kind work, and ordering is the engine's.
 
 Live runs of v1 against a local Ollama (CPU only), before you asked for no live runs:
+
 - `qwen2.5-coder:7b`:
   - Correct: "Brr, it's freezing" led to closing the window and setting the heating to 21. `revise` retracted "the heating is off", and the pizza request went to the failure plan.
   - Wrong: it repeatedly picked a plan whose condition it said was false. That plan posts the same subgoal, so it looped until the call budget, which was added because of this.
@@ -170,19 +172,30 @@ ANTHROPIC_API_KEY=... ./gradlew :examples:llm-smart-home:test       # the same s
 - **Sequential calls, all plans evaluated**: the engine evaluates every plan's trigger, even after an applicable one, so an event costs one question per distinct trigger of its kind. Remembered answers remove only the repetitions. Only a core change (stopping at the first applicable plan, as v2 did) would cut this.
 - **Remembered answers are global to the reasoner**: an answer about the meaning of an event is reused even much later (only the latest 100 are kept). Guard answers include the beliefs in their key, so they are asked again once beliefs change.
 - **Every belief change** evaluates the belief-plans' triggers, costing LLM calls unless they match literally.
-- **Revision is explicit**: there's no core hook for a custom `BeliefBase`.
+- **Revision is explicit**: on `main` there's no core hook for it. #977, on `develop`, adds one (`BeliefRevision`, see question 3).
 - **`maxQuestions`**: unlimited by default, a lifetime budget per reasoner (not a rate), and it counts remembered answers.
 - **Prompt size**: the whole belief base goes into every guard and revision prompt, with no retrieval.
 
-Open questions for you:
+Open questions for you, each with a proposed answer (added 2026-10-02, to make the decisions quicker):
+
 1. **Engine evaluations**: would you accept a small, non-breaking core change so selection evaluates each trigger and guard once and stops at the first applicable plan? It would make the remembered answers unnecessary for consistency, and cut the cost.
+
+   *Proposed:* yes, as its own small core PR on `develop`. Evaluating each trigger and guard once is what any incarnation with expensive matching needs (Prolog solving costs too, and #976 showed how sensitive the solver is to small changes). Keep `isRelevant`/`isApplicable` for compatibility, and add one selection path that computes the context once and stops at the first applicable plan, as v2 did. Then drop the remembered answers here, or keep them only as a cache.
 2. **Errors in triggers and guards**: should core catch them and fail the event (as v2 did), instead of each incarnation swallowing them?
+
+   *Proposed:* yes, in the same core PR. A trigger or guard that throws should make that plan inapplicable and log the error, as here, rather than stop the agent. Doing it once in core removes the `blocking` wrapper's catch from this incarnation and protects every other incarnation too. It's a behaviour change, so it belongs on `develop`.
 3. **Revision hook**: add a core hook (a custom `BeliefBase`) so `believe` can revise automatically, at the cost of one call per belief change?
+
+   *Proposed:* this hook now exists, as `BeliefRevision` in #977 (on `develop`), which every belief change goes through. `revise` can become an `LlmBeliefRevision` installed with `revisesBeliefsWith(...)`, so `believe` and perception updates revise automatically, while the explicit `revise` stays for plans that want it only sometimes. It would block like triggers and guards do, which is consistent with this module being JVM-only. That makes #972 depend on #977, so it should target `develop` too.
 4. **Default budget**: should the library default to a finite budget (the example and the README use 100)?
+
+   *Proposed:* make `maxQuestions` a required parameter, with no default. Any finite default is wrong for someone (a long-running agent exhausts 100 quickly, since remembered answers count), while unlimited hides the self-feeding loops of section 4. Requiring it makes the cost a conscious choice, and the README can recommend 100 for experiments.
 5. **Publishing**: should `jakta-llm-incarnation` be published and documented on the website like the other incarnations?
+
+   *Proposed:* publish it, marked experimental in its README and KDoc, after at least one live run with a real model (none since v1). Document it with the 2.0 docs, next to the other incarnations, since it should land on `develop`.
 
 ## 7. Side findings in the existing code
 
-- `BeliefBaseImpl.snapshot()` was a live view, and `executeInTestScope` (and many other common tests) discarded the `TestResult` of `runTest`, so JS tests couldn't fail. Both are fixed on the separate branch `fix/core-bugs`; the incarnation still copies the beliefs (`toList()`) before numbering them.
+- `BeliefBaseImpl.snapshot()` was a live view, and `executeInTestScope` (and many other common tests) discarded the `TestResult` of `runTest`, so JS tests couldn't fail. Both were fixed in #968, now on `main`; the incarnation still copies the beliefs (`toList()`) before numbering them, which is harmless.
 - On JS, `Regex` uses the `u` flag, where an unescaped `}` is a syntax error (`\{(\w+)}` works on the JVM). The v2 JS tests caught it; the escaped regex is kept.
 - For every belief change without a matching plan, the core logs a *warning*. That's noisy for agents that don't react to beliefs.
