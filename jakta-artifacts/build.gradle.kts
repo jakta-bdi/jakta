@@ -1,0 +1,22 @@
+apply(plugin = rootProject.libs.plugins.kotlin.multiplatform.id)
+
+configureKotlinMultiplatform()
+
+kotlinMultiplatform {
+    sourceSets {
+        commonMain.dependencies {
+            api(jakta("api"))
+            api(jakta("dsl"))
+            api(jakta("core"))
+            implementation(libs.kermit)
+            implementation(libs.kotlinx.coroutines.core)
+        }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+            implementation(libs.kotlinx.coroutines.test)
+        }
+        jvmTest.dependencies {
+            implementation(jakta("prolog-incarnation"))
+        }
+    }
+}
