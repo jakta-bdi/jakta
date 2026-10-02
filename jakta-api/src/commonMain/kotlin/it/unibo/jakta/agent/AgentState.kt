@@ -19,6 +19,11 @@ interface AgentState<Belief : Any, Goal : Any> {
     val beliefs: Collection<Belief>
 
     /**
+     * The *goals* the agent is currently pursuing, including subgoals.
+     */
+    val goals: Collection<Goal>
+
+    /**
      * The set of [Intention]s being pursued by the agent.
      */
     val intentions: Set<Intention>

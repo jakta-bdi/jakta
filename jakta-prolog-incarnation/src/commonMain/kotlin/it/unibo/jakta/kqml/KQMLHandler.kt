@@ -11,9 +11,11 @@ import it.unibo.jakta.event.AgentUpdate
 import it.unibo.jakta.event.AgentUpdate.Belief
 import it.unibo.jakta.event.AgentUpdate.Goal
 import it.unibo.jakta.logic.JaktaLogicProgrammingScope
+import it.unibo.jakta.logic.annotatedMguWith
 import it.unibo.jakta.source
 import it.unibo.jakta.tag
 import it.unibo.tuprolog.core.Fact
+import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.core.toAtom
 
 /**
@@ -41,9 +43,10 @@ fun AgentState<PrologBelief, PrologGoal>.handleKQMLPayload(payload: KQMLPayload,
             Goal(setOf(goal))
         }
 
+        // As in Jason, unachieve drops every matching goal, whoever adopted it.
         is Unachieve -> {
-            val goal = payload.goalQuery.tag(source(sender))
-            Goal(emptySet(), setOf(goal))
+            val toRemove = goals.filter { it.annotatedMguWith(payload.goalQuery) !is Substitution.Fail }.toSet()
+            Goal(emptySet(), toRemove)
         }
 
         is AskAll -> {
