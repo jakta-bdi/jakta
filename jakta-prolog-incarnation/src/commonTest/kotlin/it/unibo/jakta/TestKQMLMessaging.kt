@@ -26,6 +26,8 @@ import it.unibo.jakta.kqml.KQMLPayload
 import it.unibo.jakta.kqml.askAllTo
 import it.unibo.jakta.kqml.askOneTo
 import it.unibo.jakta.kqml.broadcastAchieve
+import it.unibo.jakta.kqml.broadcastAskAll
+import it.unibo.jakta.kqml.broadcastAskOne
 import it.unibo.jakta.kqml.broadcastTell
 import it.unibo.jakta.kqml.broadcastUnachieve
 import it.unibo.jakta.kqml.broadcastUntell
@@ -58,6 +60,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 
+@Suppress("LargeClass")
 class TestKQMLMessaging {
 
     @BeforeTest
@@ -68,6 +71,7 @@ class TestKQMLMessaging {
     val bob = BaseAgentID("bob")
     val alice = BaseAgentID("alice")
     val carol = BaseAgentID("carol")
+    val dave = BaseAgentID("dave")
 
     val startGoal = "start".toAtom()
     val delegatedGoal = "delegatedGoal".toAtom()
@@ -553,5 +557,200 @@ class TestKQMLMessaging {
 
         run(aliceNode, bobNode)
         assertEquals(setOf("1", "2"), replies?.map { it.getByName("X").toString() }?.toSet())
+    }
+
+    @Test
+    fun `test askOne to many receivers`() = runTest {
+        var replies: Map<AgentID, Substitution>? = null
+        val aliceNode = masNode(alice) {
+            plans { node ->
+                context(MessagingSkill(node)) {
+                    prologPlan {
+                        adding.goal {
+                            matchingGoal { startGoal }
+                        } triggers {
+                            delay(1.seconds)
+                            replies = agent.askOneTo(listOf(bob, carol), beliefQuery { "b"(X) }, timeout = 10.seconds)
+                            node.terminateNode()
+                        }
+                    }
+                }
+            }
+        }
+
+        val receiver = { id: BaseAgentID, n: Int ->
+            masNode(id, initialBelief { "b"(n) }) {
+                plans { node ->
+                    context(MessagingSkill(node)) {
+                        prologPlan {
+                            adding.goal {
+                                matchingGoal { replyOne(Q, M)[source(S)] }
+                            } triggers {
+                                val solution = agent.beliefs.unifiesWith(Q.value<Struct>()) as Solution.Yes
+                                val answer = belief { solution.solvedQuery }
+                                agent.tellTo(BaseAgentID(id = S.value()), M.value<String>(), answer)
+                                node.terminateNode()
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        run(aliceNode, receiver(bob, 1), receiver(carol, 2))
+        assertEquals(
+            mapOf<AgentID, String>(bob to "1", carol to "2"),
+            replies?.mapValues { it.value.getByName("X").toString() },
+        )
+    }
+
+    @Test
+    fun `test askAll to many receivers returns the replies received before the timeout`() = runTest {
+        var replies: Map<AgentID, List<Substitution>>? = null
+        val aliceNode = masNode(alice) {
+            plans { node ->
+                context(MessagingSkill(node)) {
+                    prologPlan {
+                        adding.goal {
+                            matchingGoal { startGoal }
+                        } triggers {
+                            delay(1.seconds)
+                            replies = agent.askAllTo(listOf(bob, carol), beliefQuery { "b"(X) }, timeout = 5.seconds)
+                            node.terminateNode()
+                        }
+                    }
+                }
+            }
+        }
+
+        val bobNode = masNode(bob, initialBelief { "b"(1) }, initialBelief { "b"(2) }) {
+            plans { node ->
+                context(MessagingSkill(node)) {
+                    prologPlan {
+                        adding.goal {
+                            matchingGoal { replyAllTo(Q, M)[source(S)] }
+                        } triggers {
+                            val answers = agent.beliefs.allSolutionsOf(Q.value<Struct>())
+                                .filterIsInstance<Solution.Yes>()
+                                .map { belief { it.solvedQuery } }
+                            agent.tellTo(BaseAgentID(id = S.value()), M.value<String>(), *answers.toTypedArray())
+                            node.terminateNode()
+                        }
+                    }
+                }
+            }
+        }
+
+        // Carol never answers, and stops once Alice has given up
+        val carolNode = masNode(carol) {
+            plans { node ->
+                prologPlan {
+                    adding.goal {
+                        matchingGoal { startGoal }
+                    } triggers {
+                        delay(10.seconds)
+                        node.terminateNode()
+                    }
+                }
+            }
+        }
+
+        run(aliceNode, bobNode, carolNode)
+        assertEquals(
+            mapOf<AgentID, Set<String>>(bob to setOf("1", "2")),
+            replies?.mapValues { (_, answers) -> answers.map { it.getByName("X").toString() }.toSet() },
+        )
+    }
+
+    @Test
+    fun `test broadcastAskOne waits for the first reply`() = runTest {
+        var replies: Map<AgentID, Substitution>? = null
+        val aliceNode = masNode(alice) {
+            plans { node ->
+                context(MessagingSkill(node)) {
+                    prologPlan {
+                        adding.goal {
+                            matchingGoal { startGoal }
+                        } triggers {
+                            delay(1.seconds)
+                            replies = agent.broadcastAskOne(beliefQuery { "b"(X) }, timeout = 10.seconds)
+                            node.terminateNode()
+                        }
+                    }
+                }
+            }
+        }
+
+        // Bob answers right away, Carol later
+        val receiver = { id: BaseAgentID, n: Int, after: Int ->
+            masNode(id, initialBelief { "b"(n) }) {
+                plans { node ->
+                    context(MessagingSkill(node)) {
+                        prologPlan {
+                            adding.goal {
+                                matchingGoal { replyOne(Q, M)[source(S)] }
+                            } triggers {
+                                delay(after.seconds)
+                                val solution = agent.beliefs.unifiesWith(Q.value<Struct>()) as Solution.Yes
+                                val answer = belief { solution.solvedQuery }
+                                agent.tellTo(BaseAgentID(id = S.value()), M.value<String>(), answer)
+                                node.terminateNode()
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        run(aliceNode, receiver(bob, 1, 0), receiver(carol, 2, 2))
+        assertEquals(mapOf<AgentID, String>(bob to "1"), replies?.mapValues { it.value.getByName("X").toString() })
+    }
+
+    @Test
+    fun `test broadcastAskAll waits for the given number of replies`() = runTest {
+        var replies: Map<AgentID, List<Substitution>>? = null
+        val aliceNode = masNode(alice) {
+            plans { node ->
+                context(MessagingSkill(node)) {
+                    prologPlan {
+                        adding.goal {
+                            matchingGoal { startGoal }
+                        } triggers {
+                            delay(1.seconds)
+                            replies = agent.broadcastAskAll(beliefQuery { "b"(X) }, timeout = 10.seconds, replies = 2)
+                            node.terminateNode()
+                        }
+                    }
+                }
+            }
+        }
+
+        // Bob and Carol answer right away, Dave later
+        val receiver = { id: BaseAgentID, n: Int, after: Int ->
+            masNode(id, initialBelief { "b"(n) }) {
+                plans { node ->
+                    context(MessagingSkill(node)) {
+                        prologPlan {
+                            adding.goal {
+                                matchingGoal { replyAllTo(Q, M)[source(S)] }
+                            } triggers {
+                                delay(after.seconds)
+                                val answers = agent.beliefs.allSolutionsOf(Q.value<Struct>())
+                                    .filterIsInstance<Solution.Yes>()
+                                    .map { belief { it.solvedQuery } }
+                                agent.tellTo(BaseAgentID(id = S.value()), M.value<String>(), *answers.toTypedArray())
+                                node.terminateNode()
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        run(aliceNode, receiver(bob, 1, 0), receiver(carol, 2, 0), receiver(dave, 3, 2))
+        assertEquals(
+            mapOf<AgentID, List<String>>(bob to listOf("1"), carol to listOf("2")),
+            replies?.mapValues { (_, answers) -> answers.map { it.getByName("X").toString() } },
+        )
     }
 }
