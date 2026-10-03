@@ -19,14 +19,16 @@ import it.unibo.tuprolog.core.toAtom
 /**
  * Handles a KQML payload message and returns the corresponding agent update.
  * @param payload the payload of the message to handle
- * @return the corresponding agent update
+ * @return the corresponding agent update, or `null` for a [Reply], which only the ask waiting for it receives
  */
-fun AgentState<PrologBelief, PrologGoal>.handleKQMLPayload(payload: KQMLPayload, sender: AgentID): AgentUpdate<*> =
+fun AgentState<PrologBelief, PrologGoal>.handleKQMLPayload(payload: KQMLPayload, sender: AgentID): AgentUpdate<*>? =
     when (payload) {
         is Tell -> {
             val beliefs = payload.beliefs.map { Fact.of(it.head.tag(source(sender))) }.toSet()
             Belief(beliefs)
         }
+
+        is Reply -> null
 
         is Untell -> {
             val query = payload.beliefQuery.tag(source(sender))

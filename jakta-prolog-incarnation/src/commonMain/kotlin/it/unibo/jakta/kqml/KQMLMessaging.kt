@@ -43,11 +43,11 @@ context(skill: MessagingSkill)
 fun Agent.tellTo(receiver: AgentID, vararg belief: PrologBelief) = kqmlSend(receiver, Tell(belief.toSet()))
 
 /**
- * Extension function to send a message using the [Tell] performative.
+ * Extension function to reply to the question with id [replyingTo], sent by [receiver], with the [Reply] performative.
  */
 context(skill: MessagingSkill)
-fun Agent.tellTo(receiver: AgentID, replyingTo: String, vararg belief: PrologBelief) =
-    kqmlSend(receiver, Tell(belief.toSet(), Uuid.parse(replyingTo)))
+fun Agent.replyTo(receiver: AgentID, replyingTo: String, vararg belief: PrologBelief) =
+    kqmlSend(receiver, Reply(belief.toSet(), Uuid.parse(replyingTo)))
 
 /**
  * Extension function to broadcast a message using the [Tell] performative.
@@ -109,7 +109,7 @@ suspend fun MutableAgentState<PrologBelief, PrologGoal>.askOneTo(
     val eventFilter: (AgentEvent) -> Substitution? = { event ->
         when (event) {
             is AgentEvent.External.Message<*> -> when (val payload = event.payload) {
-                is Tell -> {
+                is Reply -> {
                     if (event.sender != receiver || payload.replyingTo != message.id || payload.beliefs.isEmpty()) {
                         null
                     } else {
@@ -133,7 +133,7 @@ suspend fun MutableAgentState<PrologBelief, PrologGoal>.askOneTo(
 /**
  * Extension function to send a message using the [AskAll] performative and wait for a reply.
  * The agent will wait for the [timeout] duration for a reply from the [receiver] that matches the id of the question.
- * The reply should be a [Tell] message with a [List] of beliefs that unify with the [query].
+ * The reply should be a [Reply] message with a [List] of beliefs that unify with the [query].
  * If a matching reply is received, the a [List] of [Substitution]s is returned.
  * If no matching reply is received or the timeout is reached `null` is returned.
  */
@@ -143,12 +143,12 @@ suspend fun MutableAgentState<PrologBelief, PrologGoal>.askAllTo(
     query: Struct,
     timeout: Duration? = null,
 ): List<Substitution>? {
-    val message = AskOne(query)
+    val message = AskAll(query)
     kqmlSend(receiver, message)
     val eventFilter: (AgentEvent) -> List<Substitution>? = { event ->
         when (event) {
             is AgentEvent.External.Message<*> -> when (val payload = event.payload) {
-                is Tell -> {
+                is Reply -> {
                     if (payload.replyingTo != message.id) {
                         null
                     } else {
@@ -165,36 +165,103 @@ suspend fun MutableAgentState<PrologBelief, PrologGoal>.askAllTo(
     return this.wait(eventFilter, timeout)
 }
 
-// TODO should we even allow broadcasting `ask` performatives?
-//  What happens if more than one agent replies?
-//  How should we handle this?
-//  How do we know how many reply to wait for? We could have that only the first is waited upon.
-//  but what happens to the others?
+/**
+ * Extension function to send a message using the [AskOne] performative to every one of the [receivers],
+ * and wait for each of them to reply.
+ * Waits at most [timeout], if given, then returns the replies received so far.
+ * The substitution of the first reply received is applied to the [planContext].
+ * @return the [Substitution] of the [query] with the reply of each receiver that answered.
+ */
+context(skill: MessagingSkill, planContext: MutableSubstitutionPlanContext)
+suspend fun MutableAgentState<PrologBelief, PrologGoal>.askOneTo(
+    receivers: Collection<AgentID>,
+    query: Struct,
+    timeout: Duration? = null,
+): Map<AgentID, Substitution> {
+    val message = AskOne(query)
+    receivers.forEach { kqmlSend(it, message) }
+    return waitReplies(message.id, receivers.toSet().size, timeout) { answerOne(query) }
+        .also { answers -> answers.values.firstOrNull()?.let { planContext += it } }
+}
 
-// /**
-// * Extension function to broadcast a message using the `askOne` performative and wait for a reply.
-// */
-// context(skill: MessagingSkill)
-// suspend fun MutableAgentState<PrologBelief, PrologGoal>.broadcastAskOne(
-//    payload: AskOne,
-//    timeout: Duration? = null,
-// ): Substitution? {
-//    kqmlBroadcast(payload)
-//    val eventFilter = TODO()
-//    return this.wait(eventFilter, timeout)
-// }
-//
-// /**
-// * Extension function to broadcast a message using the `askAll` performative and wait for the earliest set of replies.
-// */
-// context(skill: MessagingSkill)
-// suspend fun MutableAgentState<PrologBelief, PrologGoal>.broadcastAskAll(
-//    payload: AskAll,
-//    timeout: Duration? = null,
-// ): List<Substitution>? {
-//    with(skill) {
-//        broadcast(payload)
-//    }
-//    val eventFilter = TODO()
-//    return this.wait(eventFilter, timeout)
-// }
+/**
+ * Extension function to send a message using the [AskAll] performative to every one of the [receivers],
+ * and wait for each of them to reply.
+ * Waits at most [timeout], if given, then returns the replies received so far.
+ * @return the [Substitution]s of the [query] with the reply of each receiver that answered.
+ */
+context(skill: MessagingSkill)
+suspend fun MutableAgentState<PrologBelief, PrologGoal>.askAllTo(
+    receivers: Collection<AgentID>,
+    query: Struct,
+    timeout: Duration? = null,
+): Map<AgentID, List<Substitution>> {
+    val message = AskAll(query)
+    receivers.forEach { kqmlSend(it, message) }
+    return waitReplies(message.id, receivers.toSet().size, timeout) { answerAll(query) }
+}
+
+/**
+ * Extension function to broadcast a message using the [AskOne] performative, and wait for the first [replies].
+ * As the number of agents that will reply is not known, it waits at most [timeout],
+ * then returns the replies received so far.
+ * The substitution of the first reply received is applied to the [planContext].
+ * @return the [Substitution] of the [query] with the reply of each agent that answered.
+ */
+context(skill: MessagingSkill, planContext: MutableSubstitutionPlanContext)
+suspend fun MutableAgentState<PrologBelief, PrologGoal>.broadcastAskOne(
+    query: Struct,
+    timeout: Duration,
+    replies: Int = 1,
+): Map<AgentID, Substitution> {
+    val message = AskOne(query)
+    kqmlBroadcast(message)
+    return waitReplies(message.id, replies, timeout) { answerOne(query) }
+        .also { answers -> answers.values.firstOrNull()?.let { planContext += it } }
+}
+
+/**
+ * Extension function to broadcast a message using the [AskAll] performative, and wait for the first [replies].
+ * As the number of agents that will reply is not known, it waits at most [timeout],
+ * then returns the replies received so far.
+ * @return the [Substitution]s of the [query] with the reply of each agent that answered.
+ */
+context(skill: MessagingSkill)
+suspend fun MutableAgentState<PrologBelief, PrologGoal>.broadcastAskAll(
+    query: Struct,
+    timeout: Duration,
+    replies: Int = 1,
+): Map<AgentID, List<Substitution>> {
+    val message = AskAll(query)
+    kqmlBroadcast(message)
+    return waitReplies(message.id, replies, timeout) { answerAll(query) }
+}
+
+private fun Reply.answerOne(query: Struct): Substitution? =
+    beliefs.firstOrNull()?.annotatedMguWith(query)?.takeIf { it.isSuccess }
+
+private fun Reply.answerAll(query: Struct): List<Substitution> =
+    beliefs.allSolutionsOf(query).map { it.substitution }.filter { it.isSuccess }
+
+/**
+ * Waits for the replies to the question [questionId], keeping the [answer] of the first reply of each sender,
+ * until [replies] senders answered or the [timeout] expires.
+ * @return the answers received, by sender.
+ */
+private suspend fun <T : Any> MutableAgentState<PrologBelief, PrologGoal>.waitReplies(
+    questionId: Uuid,
+    replies: Int,
+    timeout: Duration?,
+    answer: Reply.() -> T?,
+): Map<AgentID, T> {
+    if (replies <= 0) return emptyMap()
+    val answers = mutableMapOf<AgentID, T>()
+    val eventFilter: (AgentEvent) -> Map<AgentID, T>? = { event ->
+        val payload = (event as? AgentEvent.External.Message<*>)?.payload
+        if (payload is Reply && payload.replyingTo == questionId && answers.size < replies) {
+            payload.answer()?.let { answers.getOrPut(event.sender) { it } }
+        }
+        answers.toMap().takeIf { it.size >= replies }
+    }
+    return wait(eventFilter, timeout) ?: answers.toMap()
+}
