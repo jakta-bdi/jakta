@@ -4,7 +4,6 @@ import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.agent.BaseAgentID
-import it.unibo.jakta.agent.achieve
 import it.unibo.jakta.dsl.belief.PrologBelief
 import it.unibo.jakta.dsl.belief.belief
 import it.unibo.jakta.dsl.belief.beliefQuery
@@ -25,6 +24,10 @@ import it.unibo.jakta.dsl.plans
 import it.unibo.jakta.kqml.KQMLPayload
 import it.unibo.jakta.kqml.askAllTo
 import it.unibo.jakta.kqml.askOneTo
+import it.unibo.jakta.kqml.broadcastAchieve
+import it.unibo.jakta.kqml.broadcastTell
+import it.unibo.jakta.kqml.broadcastUnachieve
+import it.unibo.jakta.kqml.broadcastUntell
 import it.unibo.jakta.kqml.delegateAchieveTo
 import it.unibo.jakta.kqml.handleKQMLPayload
 import it.unibo.jakta.kqml.sendUnachieveTo
@@ -44,9 +47,9 @@ import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.core.toAtom
 import it.unibo.tuprolog.solve.Solution
 import kotlin.test.BeforeTest
-import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
@@ -62,6 +65,7 @@ class TestKQMLMessaging {
 
     val bob = BaseAgentID("bob")
     val alice = BaseAgentID("alice")
+    val carol = BaseAgentID("carol")
 
     val startGoal = "start".toAtom()
     val delegatedGoal = "delegatedGoal".toAtom()
@@ -98,6 +102,7 @@ class TestKQMLMessaging {
 
     @Test
     fun `test tell`() = runTest {
+        var source: BaseAgentID? = null
         val aliceNode = masNode(alice) {
             plans { node ->
                 context(MessagingSkill(node)) {
@@ -105,7 +110,6 @@ class TestKQMLMessaging {
                         adding.goal {
                             matchingGoal { startGoal }
                         } triggers {
-                            agent.print("Hello!")
                             agent.tellTo(bob, belief { "ping"(1) })
                             node.terminateNode()
                         }
@@ -120,7 +124,7 @@ class TestKQMLMessaging {
                     adding.belief {
                         matchingBelief { "ping"(1)[source(X)] }
                     } triggers {
-                        agent.print("Hello, message received from ", X)
+                        source = BaseAgentID(id = X.value())
                         node.terminateNode()
                     }
                 }
@@ -128,10 +132,12 @@ class TestKQMLMessaging {
         }
 
         run(aliceNode, bobNode)
+        assertEquals(alice, source)
     }
 
     @Test
-    fun `test untell`() = runTest {
+    fun `test broadcastTell`() = runTest {
+        val received = mutableSetOf<Pair<BaseAgentID, BaseAgentID>>()
         val aliceNode = masNode(alice) {
             plans { node ->
                 context(MessagingSkill(node)) {
@@ -139,8 +145,8 @@ class TestKQMLMessaging {
                         adding.goal {
                             matchingGoal { startGoal }
                         } triggers {
-                            agent.print("Hello!")
-                            agent.untellTo(bob, beliefQuery { "ping"(1) })
+                            delay(1.seconds)
+                            agent.broadcastTell(belief { "ping"(1) })
                             node.terminateNode()
                         }
                     }
@@ -148,24 +154,28 @@ class TestKQMLMessaging {
             }
         }
 
-        val bobNode = masNode(bob, initialBelief { "ping"(1)[source(alice)] }) {
-            plans { node ->
-                prologPlan {
-                    removing.belief {
-                        matchingBelief { "ping"(1)[source(X)] }
-                    } triggers {
-                        agent.print("Hello, message received from ", X)
-                        node.terminateNode()
+        val receiver = { id: BaseAgentID ->
+            masNode(id) {
+                plans { node ->
+                    prologPlan {
+                        adding.belief {
+                            matchingBelief { "ping"(1)[source(X)] }
+                        } triggers {
+                            received += Pair(id, BaseAgentID(id = X.value()))
+                            node.terminateNode()
+                        }
                     }
                 }
             }
         }
 
-        run(aliceNode, bobNode)
+        run(aliceNode, receiver(bob), receiver(carol))
+        assertEquals(setOf(bob to alice, carol to alice), received)
     }
 
     @Test
-    fun `test achieve`() = runTest {
+    fun `test untell`() = runTest {
+        var removed: Pair<BaseAgentID, Int>? = null
         val aliceNode = masNode(alice) {
             plans { node ->
                 context(MessagingSkill(node)) {
@@ -173,7 +183,85 @@ class TestKQMLMessaging {
                         adding.goal {
                             matchingGoal { startGoal }
                         } triggers {
-                            agent.print("Hello!")
+                            agent.untellTo(bob, beliefQuery { "ping"(N) })
+                            node.terminateNode()
+                        }
+                    }
+                }
+            }
+        }
+
+        // Different arguments, as beliefs differing only in their source are equal
+        val bobNode = masNode(
+            bob,
+            initialBelief { "ping"(1)[source(carol)] },
+            initialBelief { "ping"(2)[source(alice)] },
+        ) {
+            plans { node ->
+                prologPlan {
+                    removing.belief {
+                        matchingBelief { "ping"(N)[source(X)] }
+                    } triggers {
+                        removed = Pair(BaseAgentID(id = X.value()), agent.beliefs.count { it.head.functor == "ping" })
+                        node.terminateNode()
+                    }
+                }
+            }
+        }
+
+        run(aliceNode, bobNode)
+        // Alice's ping(2) is gone, Carol's ping(1) is still there
+        assertEquals(alice to 1, removed)
+    }
+
+    @Test
+    fun `test broadcastUntell`() = runTest {
+        val removed = mutableSetOf<Pair<BaseAgentID, BaseAgentID>>()
+        val aliceNode = masNode(alice) {
+            plans { node ->
+                context(MessagingSkill(node)) {
+                    prologPlan {
+                        adding.goal {
+                            matchingGoal { startGoal }
+                        } triggers {
+                            delay(1.seconds)
+                            agent.broadcastUntell(beliefQuery { "ping"(1) })
+                            node.terminateNode()
+                        }
+                    }
+                }
+            }
+        }
+
+        val receiver = { id: BaseAgentID ->
+            masNode(id, initialBelief { "ping"(1)[source(alice)] }) {
+                plans { node ->
+                    prologPlan {
+                        removing.belief {
+                            matchingBelief { "ping"(1)[source(X)] }
+                        } triggers {
+                            removed += Pair(id, BaseAgentID(id = X.value()))
+                            node.terminateNode()
+                        }
+                    }
+                }
+            }
+        }
+
+        run(aliceNode, receiver(bob), receiver(carol))
+        assertEquals(setOf(bob to alice, carol to alice), removed)
+    }
+
+    @Test
+    fun `test achieve`() = runTest {
+        var source: BaseAgentID? = null
+        val aliceNode = masNode(alice) {
+            plans { node ->
+                context(MessagingSkill(node)) {
+                    prologPlan {
+                        adding.goal {
+                            matchingGoal { startGoal }
+                        } triggers {
                             agent.delegateAchieveTo(bob, goal { delegatedGoal })
                             node.terminateNode()
                         }
@@ -188,7 +276,7 @@ class TestKQMLMessaging {
                     adding.goal {
                         matchingGoal { delegatedGoal[source(X)] }
                     } triggers {
-                        agent.print("Hello, message received from ", X)
+                        source = BaseAgentID(id = X.value())
                         node.terminateNode()
                     }
                 }
@@ -196,12 +284,12 @@ class TestKQMLMessaging {
         }
 
         run(aliceNode, bobNode)
+        assertEquals(alice, source)
     }
 
-    // TODO this is currently failing as the dropping of goals is not correctly implemented
-    @Ignore
     @Test
-    fun `test unachieve`() = runTest {
+    fun `test broadcastAchieve`() = runTest {
+        val adopted = mutableSetOf<Pair<BaseAgentID, BaseAgentID>>()
         val aliceNode = masNode(alice) {
             plans { node ->
                 context(MessagingSkill(node)) {
@@ -209,8 +297,46 @@ class TestKQMLMessaging {
                         adding.goal {
                             matchingGoal { startGoal }
                         } triggers {
-                            agent.print("Hello! Waiting for bob to start and then stop him")
-                            delay(3.seconds)
+                            delay(1.seconds)
+                            agent.broadcastAchieve(goal { delegatedGoal })
+                            node.terminateNode()
+                        }
+                    }
+                }
+            }
+        }
+
+        val receiver = { id: BaseAgentID ->
+            masNode(id) {
+                plans { node ->
+                    prologPlan {
+                        adding.goal {
+                            matchingGoal { delegatedGoal[source(X)] }
+                        } triggers {
+                            adopted += Pair(id, BaseAgentID(id = X.value()))
+                            node.terminateNode()
+                        }
+                    }
+                }
+            }
+        }
+
+        run(aliceNode, receiver(bob), receiver(carol))
+        assertEquals(setOf(bob to alice, carol to alice), adopted)
+    }
+
+    @Test
+    fun `test unachieve`() = runTest {
+        var source: BaseAgentID? = null
+        val aliceNode = masNode(alice) {
+            plans { node ->
+                context(MessagingSkill(node)) {
+                    prologPlan {
+                        adding.goal {
+                            matchingGoal { startGoal }
+                        } triggers {
+                            agent.delegateAchieveTo(bob, goal { delegatedGoal })
+                            delay(1.seconds)
                             agent.sendUnachieveTo(bob, goalQuery { delegatedGoal })
                             node.terminateNode()
                         }
@@ -223,38 +349,30 @@ class TestKQMLMessaging {
             plans { node ->
                 prologPlan {
                     adding.goal {
-                        matchingGoal { startGoal }
-                    } triggers {
-                        agent.print("Hello! I will start achieving the goal")
-                        agent.achieve(goal { delegatedGoal })
-                        node.terminateNode()
-                    }
-                }
-                prologPlan {
-                    adding.goal {
                         matchingGoal { delegatedGoal[source(X)] }
                     } triggers {
-                        agent.print("Hello, achieving the goal from ", X)
                         delay(10.seconds)
                         node.terminateNode(RuntimeException("This goal should have been removed before completion"))
                     }
                 }
-
                 prologPlan {
                     removing.goal {
                         matchingGoal { delegatedGoal[source(X)] }
                     } triggers {
-                        agent.print("Removing the goal. From ", X)
+                        source = BaseAgentID(id = X.value())
+                        node.terminateNode()
                     }
                 }
             }
         }
 
         run(aliceNode, bobNode)
+        assertEquals(alice, source)
     }
 
     @Test
-    fun `test askOne`() = runTest {
+    fun `test broadcastUnachieve`() = runTest {
+        val dropped = mutableSetOf<Pair<BaseAgentID, BaseAgentID>>()
         val aliceNode = masNode(alice) {
             plans { node ->
                 context(MessagingSkill(node)) {
@@ -262,14 +380,10 @@ class TestKQMLMessaging {
                         adding.goal {
                             matchingGoal { startGoal }
                         } triggers {
-                            agent.print("Hello!")
-                            delay(3.seconds)
-                            val reply = agent.askOneTo(bob, beliefQuery { "b"(X) })
-                            if (reply != null) {
-                                agent.print("Received reply: ", X)
-                            } else {
-                                agent.print("No reply, I will stop.")
-                            }
+                            delay(1.seconds)
+                            agent.broadcastAchieve(goal { delegatedGoal })
+                            delay(1.seconds)
+                            agent.broadcastUnachieve(goalQuery { delegatedGoal })
                             node.terminateNode()
                         }
                     }
@@ -277,25 +391,63 @@ class TestKQMLMessaging {
             }
         }
 
-        val bobNode = masNode(bob, initialBelief { "b"(1) }, initialBelief { "b"(2) }) {
+        val receiver = { id: BaseAgentID ->
+            masNode(id) {
+                plans { node ->
+                    prologPlan {
+                        adding.goal {
+                            matchingGoal { delegatedGoal[source(X)] }
+                        } triggers {
+                            delay(10.seconds)
+                        }
+                    }
+                    prologPlan {
+                        removing.goal {
+                            matchingGoal { delegatedGoal[source(X)] }
+                        } triggers {
+                            dropped += Pair(id, BaseAgentID(id = X.value()))
+                            node.terminateNode()
+                        }
+                    }
+                }
+            }
+        }
+
+        run(aliceNode, receiver(bob), receiver(carol))
+        assertEquals(setOf(bob to alice, carol to alice), dropped)
+    }
+
+    @Test
+    fun `test askOne`() = runTest {
+        var answer: Int? = null
+        val aliceNode = masNode(alice) {
+            plans { node ->
+                context(MessagingSkill(node)) {
+                    prologPlan {
+                        adding.goal {
+                            matchingGoal { startGoal }
+                        } triggers {
+                            delay(1.seconds)
+                            val reply = agent.askOneTo(bob, beliefQuery { "b"(X) }, timeout = 10.seconds)
+                            if (reply != null && reply.isSuccess) answer = X.value<Int>()
+                            node.terminateNode()
+                        }
+                    }
+                }
+            }
+        }
+
+        val bobNode = masNode(bob, initialBelief { "b"(1) }) {
             plans { node ->
                 context(MessagingSkill(node)) {
                     prologPlan {
                         adding.goal {
                             matchingGoal { replyOne(Q, M)[source(S)] }
                         } triggers {
-                            agent.print("Reply to ", S)
-                            agent.print("Id: ", M)
-                            when (val solution = agent.beliefs.unifiesWith(Q.value())) {
-                                is Solution.Yes -> {
-                                    agent.print("Found a solution: ", solution.solvedQuery)
-                                    this.context += solution.substitution
-                                    val sender = BaseAgentID(id = S.value())
-                                    val questionId = M.value<String>()
-                                    agent.tellTo(sender, questionId, belief { solution.solvedQuery })
-                                }
-
-                                else -> agent.print("No matches.")
+                            val solution = agent.beliefs.unifiesWith(Q.value<Struct>())
+                            if (solution is Solution.Yes) {
+                                val answer = belief { solution.solvedQuery }
+                                agent.tellTo(BaseAgentID(id = S.value()), M.value<String>(), answer)
                             }
                             node.terminateNode()
                         }
@@ -305,6 +457,44 @@ class TestKQMLMessaging {
         }
 
         run(aliceNode, bobNode)
+        assertEquals(1, answer)
+    }
+
+    @Test
+    fun `test askOne timeout`() = runTest {
+        var reply: Any? = "not asked yet"
+        val aliceNode = masNode(alice) {
+            plans { node ->
+                context(MessagingSkill(node)) {
+                    prologPlan {
+                        adding.goal {
+                            matchingGoal { startGoal }
+                        } triggers {
+                            delay(1.seconds)
+                            reply = agent.askOneTo(bob, beliefQuery { "b"(X) }, timeout = 5.seconds)
+                            node.terminateNode()
+                        }
+                    }
+                }
+            }
+        }
+
+        // Bob never answers, and stops once Alice has given up
+        val bobNode = masNode(bob) {
+            plans { node ->
+                prologPlan {
+                    adding.goal {
+                        matchingGoal { startGoal }
+                    } triggers {
+                        delay(10.seconds)
+                        node.terminateNode()
+                    }
+                }
+            }
+        }
+
+        run(aliceNode, bobNode)
+        assertNull(reply)
     }
 
     @Test
