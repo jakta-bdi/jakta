@@ -203,9 +203,10 @@ suspend fun MutableAgentState<PrologBelief, PrologGoal>.askAllTo(
  * Extension function to broadcast a message using the [AskOne] performative, and wait for the first [replies].
  * As the number of agents that will reply is not known, it waits at most [timeout],
  * then returns the replies received so far.
+ * The substitution of the first reply received is applied to the [planContext].
  * @return the [Substitution] of the [query] with the reply of each agent that answered.
  */
-context(skill: MessagingSkill)
+context(skill: MessagingSkill, planContext: MutableSubstitutionPlanContext)
 suspend fun MutableAgentState<PrologBelief, PrologGoal>.broadcastAskOne(
     query: Struct,
     timeout: Duration,
@@ -214,6 +215,7 @@ suspend fun MutableAgentState<PrologBelief, PrologGoal>.broadcastAskOne(
     val message = AskOne(query)
     kqmlBroadcast(message)
     return waitReplies(message.id, replies, timeout) { answerOne(query) }
+        .also { answers -> answers.values.firstOrNull()?.let { planContext += it } }
 }
 
 /**
