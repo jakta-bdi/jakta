@@ -1,0 +1,8 @@
+incarnation: jakta
+
+deployments:
+  - type: Point
+    parameters: [ 0, 0 ]
+    programs:
+      - program: it.unibo.jakta.test.AgentWithTimeout.entrypointWithTimeout
+        time-distribution: 10
