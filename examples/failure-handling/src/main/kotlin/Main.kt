@@ -2,7 +2,6 @@
 
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
-import it.unibo.jakta.agent.BaseAgentID
 import it.unibo.jakta.agent.achieve
 import it.unibo.jakta.dsl.agent
 import it.unibo.jakta.dsl.belief.PrologBelief
@@ -33,7 +32,7 @@ private val beans = Atom.of("beans")
  * plan it fails, and so do the goals above it, until one has a failure plan (`-!prepare`, here `failing.goal`).
  * That plan recovers by buying beans and trying again, so the goals above it carry on as if nothing happened.
  */
-val barista = agent<PrologBelief, PrologGoal, Any>(BaseAgentID("barista")) {
+val barista = agent<PrologBelief, PrologGoal, Any>("barista") {
     embodiedAs { Any() }
     believes {
         +initialBelief { "has"(beans) }

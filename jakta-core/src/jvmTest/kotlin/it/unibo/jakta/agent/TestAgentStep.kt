@@ -8,6 +8,7 @@ import kotlin.reflect.typeOf
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.uuid.Uuid
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -101,7 +102,7 @@ class TestAgentStep {
         val specification =
             object : AgentSpecification<String, String, Unit> {
                 override val body: Unit = Unit
-                override val id: AgentID = BaseAgentID("test-agent")
+                override val id: AgentID = AgentID("test-agent", Uuid.random())
                 override val initialGoals: List<String> = emptyList()
                 override val initialState: AgentState<String, String> = BaseAgentState(
                     beliefs = emptyList(),

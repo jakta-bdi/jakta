@@ -4,7 +4,6 @@ import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import it.unibo.jakta.agent.Agent
 import it.unibo.jakta.agent.AgentID
-import it.unibo.jakta.agent.BaseAgentID
 import it.unibo.jakta.dsl.examples.Movement.Events.Factory.position
 import it.unibo.jakta.dsl.examples.Recharging.Events.Factory.chargeLevel
 import it.unibo.jakta.dsl.executeInTestScope
@@ -75,7 +74,7 @@ class TestSpatialRobot {
             FixedTimeRecharging(node),
             GridMovement(node),
         ) {
-            agent(BaseAgentID("robot")) {
+            agent("robot") {
                 embodiedAs { BodyWithPosition() }
 
                 believes {

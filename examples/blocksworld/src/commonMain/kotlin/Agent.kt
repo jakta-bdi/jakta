@@ -1,6 +1,5 @@
 @file:Suppress("StringLiteralDuplication", "LongMethod") // example code: DSL definitions read best in one place
 
-import it.unibo.jakta.agent.BaseAgentID
 import it.unibo.jakta.agent.achieve
 import it.unibo.jakta.dsl.belief.PrologBelief
 import it.unibo.jakta.dsl.belief.inferenceRule
@@ -33,7 +32,7 @@ fun MasBuilder<BaseNode<Any>, BaseNodeBuilder<Any, BaseNode<Any>>>.blocksWorldNo
     desiredWorldState: PrologGoal,
 ) = node {
     context(BlocksWorldSkillsImpl(world, node)) {
-        agent<PrologBelief, PrologGoal>(BaseAgentID("BlocksWorldAgent")) {
+        agent<PrologBelief, PrologGoal>("BlocksWorldAgent") {
             val start = "start".toAtom()
             val table = "table".toAtom()
             fun state(list: List): Struct = Struct.of("state", list)

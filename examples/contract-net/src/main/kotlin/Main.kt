@@ -2,7 +2,7 @@
 
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
-import it.unibo.jakta.agent.BaseAgentID
+import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.dsl.belief.PrologBelief
 import it.unibo.jakta.dsl.belief.belief
 import it.unibo.jakta.dsl.belief.beliefQuery
@@ -27,7 +27,9 @@ import it.unibo.jakta.logic.unifiesWith
 import it.unibo.jakta.node.CoroutineNodeRunner
 import it.unibo.jakta.node.SharedMemoryNetwork
 import it.unibo.jakta.print
+import it.unibo.jakta.skills.InMemoryDirectory
 import it.unibo.jakta.skills.MessagingSkill
+import it.unibo.jakta.skills.lookup
 import it.unibo.jakta.source
 import it.unibo.jakta.value
 import it.unibo.tuprolog.core.Atom
@@ -45,10 +47,6 @@ private val start = Atom.of("start")
  */
 private val contractors = mapOf("alice" to 30, "bob" to 20, "carol" to 25)
 
-// an ID is equal only to itself (it holds a random UUID), so each agent's ID is created once and shared
-private val managerId = BaseAgentID("manager")
-private val contractorIds = contractors.keys.associateWith { BaseAgentID(it) }
-
 /**
  * A minimal contract net with KQML messages:
  * the manager asks every contractor for a price (askOne), delegates the task to the cheapest one (achieve),
@@ -58,8 +56,9 @@ fun main(): Unit = runBlocking {
     Logger.setMinSeverity(Severity.Assert)
     mas(NodeBuilders.baseNode()) {
         node {
-            context(MessagingSkill(node)) {
-                agent<PrologBelief, PrologGoal>(managerId) {
+            // the manager finds the contractors by name in the directory
+            context(MessagingSkill(node), InMemoryDirectory().skillFor(node)) {
+                agent<PrologBelief, PrologGoal>("manager") {
                     embodiedAs { Any() }
                     handlesMessageEvents {
                         (it.payload as? KQMLPayload)?.let { payload -> handleKQMLPayload(payload, it.sender) }
@@ -74,7 +73,7 @@ fun main(): Unit = runBlocking {
                                     // one variable per question, so that answers do not clash
                                     val price = Var.of("Price_$name")
                                     val query = beliefQuery { "price"(task, price) }
-                                    val answer = agent.askOneTo(contractorIds.getValue(name), query, 5.seconds)
+                                    val answer = agent.askOneTo(agent.lookup(name).single(), query, 5.seconds)
                                     val bid = answer?.get(price) as? Integer
                                     if (bid != null) bids[name] = bid.intValue.toInt()
                                 }
@@ -85,13 +84,13 @@ fun main(): Unit = runBlocking {
                                     node.terminateNode()
                                 } else {
                                     agent.print("Awarding the task to ", cheapest.key, " for ", cheapest.value)
-                                    agent.delegateAchieveTo(contractorIds.getValue(cheapest.key), goal { "do"(task) })
+                                    agent.delegateAchieveTo(agent.lookup(cheapest.key).single(), goal { "do"(task) })
                                 }
                             }
                         }
                         prologPlan {
                             adding.belief { matchingBelief { "done"(T)[source(S)] } } triggers {
-                                val name = contractorIds.entries.first { it.value.toString() == S.value<String>() }.key
+                                val name = S.value<AgentID>().name
                                 agent.print(name, " reports that ", T, " is done. Thanks!")
                                 node.terminateNode()
                             }
@@ -100,7 +99,7 @@ fun main(): Unit = runBlocking {
                 }
 
                 for ((name, price) in contractors) {
-                    agent<PrologBelief, PrologGoal>(contractorIds.getValue(name)) {
+                    agent<PrologBelief, PrologGoal>(name) {
                         embodiedAs { Any() }
                         handlesMessageEvents {
                             (it.payload as? KQMLPayload)?.let { payload -> handleKQMLPayload(payload, it.sender) }
@@ -113,7 +112,7 @@ fun main(): Unit = runBlocking {
                                     val answer = agent.beliefs.unifiesWith(Q.value())
                                     if (answer is Solution.Yes) {
                                         agent.tellTo(
-                                            BaseAgentID(id = S.value()),
+                                            S.value<AgentID>(),
                                             M.value<String>(),
                                             belief {
                                                 answer.solvedQuery
@@ -125,7 +124,7 @@ fun main(): Unit = runBlocking {
                             prologPlan {
                                 adding.goal { matchingGoal { "do"(T)[source(S)] } } triggers {
                                     agent.print("Working on ", T)
-                                    agent.tellTo(BaseAgentID(id = S.value()), belief { "done"(T) })
+                                    agent.tellTo(S.value<AgentID>(), belief { "done"(T) })
                                 }
                             }
                         }

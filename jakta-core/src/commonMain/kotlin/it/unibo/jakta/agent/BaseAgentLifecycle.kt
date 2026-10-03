@@ -27,7 +27,7 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
     private val log =
         Logger(
             Logger.config,
-            executableAgent.id.displayName,
+            executableAgent.id.name,
         )
 
     // TODO consider making this public or add a method to cancel it e.g. stop()

@@ -3,7 +3,6 @@ package it.unibo.jakta
 import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.agent.AgentSpecification
 import it.unibo.jakta.agent.AgentState
-import it.unibo.jakta.agent.BaseAgentID
 import it.unibo.jakta.agent.BaseAgentState
 import it.unibo.jakta.node.BaseNode
 import it.unibo.jakta.node.CoroutineNodeRunner
@@ -12,6 +11,7 @@ import it.unibo.jakta.node.SharedMemoryNetwork
 import it.unibo.jakta.plan.GoalAdditionPlan
 import kotlin.reflect.typeOf
 import kotlin.test.Test
+import kotlin.uuid.Uuid
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.test.TestResult
@@ -55,7 +55,7 @@ class ExecutionTest {
                     messageHandler = { null },
                 )
                 override val initialGoals: List<String> = listOf("hello")
-                override val id: AgentID = BaseAgentID(agentname)
+                override val id: AgentID = AgentID(agentname, Uuid.random())
             }
 
         val runner = CoroutineNodeRunner<Any, BaseNode<Any>>(SharedMemoryNetwork())

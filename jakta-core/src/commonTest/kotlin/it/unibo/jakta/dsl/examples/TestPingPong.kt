@@ -3,7 +3,6 @@ package it.unibo.jakta.dsl.examples
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import it.unibo.jakta.agent.AgentID
-import it.unibo.jakta.agent.BaseAgentID
 import it.unibo.jakta.dsl.agent.AgentBuilder
 import it.unibo.jakta.dsl.executeInTestScope
 import it.unibo.jakta.dsl.ifGoalMatch
@@ -15,7 +14,9 @@ import it.unibo.jakta.event.AgentUpdate
 import it.unibo.jakta.node.CoroutineNodeRunner
 import it.unibo.jakta.node.ExecutableNode
 import it.unibo.jakta.node.SharedMemoryNetwork
+import it.unibo.jakta.skills.InMemoryDirectory
 import it.unibo.jakta.skills.MessagingSkill
+import it.unibo.jakta.skills.lookup
 import it.unibo.jakta.skills.sendTo
 import kotlin.collections.emptySet
 import kotlin.test.Test
@@ -27,10 +28,10 @@ import kotlinx.coroutines.test.runTest
 class TestPingPong {
 
     private fun <Goal : Any, N : ExecutableNode<Any>> NodeBuilder<Any, N>.messageEnabledAgent(
-        id: AgentID,
+        name: String,
         block: AgentBuilder<Pair<String, AgentID>, Goal, Any>.() -> Unit,
     ) {
-        agent(id) {
+        agent(name) {
             embodiedAs { Any() }
             handlesMessageEvents { message ->
                 when (message.payload) {
@@ -46,16 +47,15 @@ class TestPingPong {
         }
     }
 
-    val bob = BaseAgentID("Bob")
-    val alice = BaseAgentID("Alice")
+    private fun Pair<String, AgentID>.isFrom(text: String, name: String) = first == text && second.name == name
 
     val node = node(NodeBuilders.baseNode()) {
 
-        context(MessagingSkill(node)) {
-            messageEnabledAgent(bob) {
+        context(MessagingSkill(node), InMemoryDirectory().skillFor(node)) {
+            messageEnabledAgent("Bob") {
                 hasPlanLibrary {
                     adding.belief {
-                        this.takeIf { it == Pair("Ping!", alice) }
+                        this.takeIf { it.isFrom("Ping!", "Alice") }
                     } triggers {
                         val (message, sender) = context
                         agent.print("Received: \"$message\" from $sender")
@@ -65,7 +65,7 @@ class TestPingPong {
                 }
             }
 
-            messageEnabledAgent(alice) {
+            messageEnabledAgent("Alice") {
                 hasInitialGoals {
                     !"sendMessage"
                 }
@@ -74,10 +74,10 @@ class TestPingPong {
                         ifGoalMatch("sendMessage")
                     } triggers {
                         agent.print("Sending ping to Bob")
-                        agent.sendTo(bob, "Ping!")
+                        agent.sendTo(agent.lookup("Bob").single(), "Ping!")
                     }
                     adding.belief {
-                        this.takeIf { it == Pair("Pong!", bob) }
+                        this.takeIf { it.isFrom("Pong!", "Bob") }
                     } triggers {
                         val (message, sender) = context
                         agent.print("Received: \"$message\" from $sender")
@@ -95,13 +95,16 @@ class TestPingPong {
         return executeInTestScope { node }
     }
 
+    // shared by the nodes of the distributed test, so that Alice finds Bob on the other node
+    private val directory = InMemoryDirectory()
+
     val nodeBob = node(NodeBuilders.baseNode()) {
 
-        context(MessagingSkill(node)) {
-            messageEnabledAgent(bob) {
+        context(MessagingSkill(node), directory.skillFor(node)) {
+            messageEnabledAgent("Bob") {
                 hasPlanLibrary {
                     adding.belief {
-                        this.takeIf { it == Pair("Ping!", alice) }
+                        this.takeIf { it.isFrom("Ping!", "Alice") }
                     } triggers {
                         val (message, sender) = context
                         agent.print("Received: \"$message\" from $sender")
@@ -115,8 +118,8 @@ class TestPingPong {
     }
 
     val nodeAlice = node(NodeBuilders.baseNode()) {
-        context(MessagingSkill(node)) {
-            messageEnabledAgent(alice) {
+        context(MessagingSkill(node), directory.skillFor(node)) {
+            messageEnabledAgent("Alice") {
                 hasInitialGoals {
                     !"sendMessage"
                 }
@@ -125,10 +128,10 @@ class TestPingPong {
                         ifGoalMatch("sendMessage")
                     } triggers {
                         agent.print("Sending ping to Bob")
-                        agent.sendTo(bob, "Ping!")
+                        agent.sendTo(agent.lookup("Bob").single(), "Ping!")
                     }
                     adding.belief {
-                        this.takeIf { it == Pair("Pong!", bob) }
+                        this.takeIf { it.isFrom("Pong!", "Bob") }
                     } triggers {
                         val (message, sender) = context
                         agent.print("Received: \"$message\" from $sender")

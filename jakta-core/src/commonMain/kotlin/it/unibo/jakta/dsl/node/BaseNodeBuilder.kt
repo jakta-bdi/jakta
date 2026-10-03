@@ -1,6 +1,5 @@
 package it.unibo.jakta.dsl.node
 
-import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.agent.AgentSpecification
 import it.unibo.jakta.dsl.agent.AgentBuilder
 import it.unibo.jakta.dsl.agent.AgentBuilderImpl
@@ -20,10 +19,10 @@ open class BaseNodeBuilder<Body : Any, out N : ExecutableNode<Body>>(private val
     protected val agents = mutableListOf<AgentBuilder<*, *, Body>>()
 
     override fun <Belief : Any, Goal : Any> agent(block: AgentBuilder<Belief, Goal, Body>.() -> Unit) =
-        buildAgent(null, block)
+        buildAgent(AgentBuilderImpl.DEFAULT_NAME, block)
 
-    override fun <Belief : Any, Goal : Any> agent(id: AgentID, block: AgentBuilder<Belief, Goal, Body>.() -> Unit) =
-        buildAgent(id, block)
+    override fun <Belief : Any, Goal : Any> agent(name: String, block: AgentBuilder<Belief, Goal, Body>.() -> Unit) =
+        buildAgent(name, block)
 
     override fun <Belief : Any, Goal : Any> withAgents(
         vararg agentFactories: (Node<Body>) -> AgentSpecification<Belief, Goal, Body>,
@@ -32,10 +31,10 @@ open class BaseNodeBuilder<Body : Any, out N : ExecutableNode<Body>>(private val
     }
 
     private fun <Belief : Any, Goal : Any> buildAgent(
-        id: AgentID?,
+        name: String,
         block: AgentBuilder<Belief, Goal, Body>.() -> Unit,
     ) {
-        val agentBuilder = AgentBuilderImpl<Belief, Goal, Body>(node, id)
+        val agentBuilder = AgentBuilderImpl<Belief, Goal, Body>(node, name)
         val agent: AgentBuilder<Belief, Goal, Body> = agentBuilder.apply(block)
         agents += agent
     }

@@ -32,7 +32,7 @@ internal class BaseMutableAgentState<Belief : Any, Goal : Any>(
 
     private val logger: Logger = Logger(
         Logger.config,
-        id.displayName,
+        id.name,
     )
 
     private val beliefBase: BeliefBase<Belief> = BeliefBaseFactory.of(internalInbox, initialAgentState.beliefs)

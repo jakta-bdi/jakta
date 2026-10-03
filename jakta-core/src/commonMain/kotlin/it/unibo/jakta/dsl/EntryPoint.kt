@@ -56,15 +56,15 @@ fun <Belief : Any, Goal : Any, Body : Any> agent(
 
 /**
  * Entry point for creating an agent using the JaKtA DSL.
- * @param id the id for the Agent.
+ * @param name the name of the agent, which the framework makes part of its unique [AgentID].
  * @return a factory to create an agent, given the node the agent will run on.
  */
 @JaktaDSL
 fun <Belief : Any, Goal : Any, Body : Any> agent(
-    id: AgentID,
+    name: String,
     block: AgentBuilder<Belief, Goal, Body>.() -> Unit,
 ): (Node<Body>) -> AgentSpecification<Belief, Goal, Body> = { node ->
-    val ab = AgentBuilderImpl<Belief, Goal, Body>(node, id)
+    val ab = AgentBuilderImpl<Belief, Goal, Body>(node, name)
     ab.apply(block)
     ab.build()
 }

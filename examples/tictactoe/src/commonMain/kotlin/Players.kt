@@ -1,6 +1,5 @@
 @file:Suppress("StringLiteralDuplication", "LongMethod") // example code: DSL definitions read best in one place
 
-import it.unibo.jakta.agent.BaseAgentID
 import it.unibo.jakta.dsl.agent.AgentBuilder
 import it.unibo.jakta.dsl.belief.PrologBelief
 import it.unibo.jakta.dsl.belief.inferenceRule
@@ -87,7 +86,7 @@ fun MasBuilder<BaseNode<Any>, BaseNodeBuilder<Any, BaseNode<Any>>>.ticTacToeNode
     val game = TicTacToeEnvironment(board, node, humanMoves, thinkTime, mistakeChance, random)
     for ((mark, player) in players) {
         val name = if (player == Player.HUMAN) "human-${mark.symbol}" else "${mark.symbol}-agent"
-        agent<PrologBelief, PrologGoal>(BaseAgentID(name)) {
+        agent<PrologBelief, PrologGoal>(name) {
             when (player) {
                 Player.AGENT -> agentPlayer(game, mark, board.state.value.size)
                 Player.HUMAN -> humanPlayer(game, mark)
