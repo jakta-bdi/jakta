@@ -216,6 +216,7 @@ class TestKQMLAsk {
     @Test
     fun `test askOne to many receivers`() = runTest {
         var replies: Map<AgentID, Substitution>? = null
+        var bound: Int? = null
         val aliceNode = masNode(alice) {
             plans { node ->
                 context(MessagingSkill(node)) {
@@ -225,6 +226,7 @@ class TestKQMLAsk {
                         } triggers {
                             delay(1.seconds)
                             replies = agent.askOneTo(listOf(bob, carol), beliefQuery { "b"(X) }, timeout = 10.seconds)
+                            bound = X.value<Int>()
                             node.terminateNode()
                         }
                     }
@@ -256,6 +258,8 @@ class TestKQMLAsk {
             mapOf<AgentID, String>(bob to "1", carol to "2"),
             replies?.mapValues { it.value.getByName("X").toString() },
         )
+        // the query is bound to the first reply received
+        assertEquals(replies?.values?.first()?.getByName("X").toString(), bound.toString())
     }
 
     @Test

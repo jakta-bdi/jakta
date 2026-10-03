@@ -169,9 +169,10 @@ suspend fun MutableAgentState<PrologBelief, PrologGoal>.askAllTo(
  * Extension function to send a message using the [AskOne] performative to every one of the [receivers],
  * and wait for each of them to reply.
  * Waits at most [timeout], if given, then returns the replies received so far.
+ * The substitution of the first reply received is applied to the [planContext].
  * @return the [Substitution] of the [query] with the reply of each receiver that answered.
  */
-context(skill: MessagingSkill)
+context(skill: MessagingSkill, planContext: MutableSubstitutionPlanContext)
 suspend fun MutableAgentState<PrologBelief, PrologGoal>.askOneTo(
     receivers: Collection<AgentID>,
     query: Struct,
@@ -180,6 +181,7 @@ suspend fun MutableAgentState<PrologBelief, PrologGoal>.askOneTo(
     val message = AskOne(query)
     receivers.forEach { kqmlSend(it, message) }
     return waitReplies(message.id, receivers.toSet().size, timeout) { answerOne(query) }
+        .also { answers -> answers.values.firstOrNull()?.let { planContext += it } }
 }
 
 /**
