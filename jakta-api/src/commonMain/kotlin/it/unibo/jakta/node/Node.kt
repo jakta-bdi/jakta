@@ -47,10 +47,4 @@ interface Node<Body : Any> {
      * @param nodeID The unique identifier of the node to be terminated. If not provided, the current node's ID is used.
      */
     fun terminateNode(error: Throwable? = null, nodeID: NodeID = this.id)
-
-    /**
-     * Retrieves the unique identifier of an agent in this node based on its body.
-     * @param body The body of the agent for which to retrieve the identifier.
-     */
-    fun getAgentIDfromBody(body: Body): AgentID? = agents.entries.find { it.value == body }?.key
 }

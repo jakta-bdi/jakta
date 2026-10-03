@@ -21,6 +21,7 @@ import it.unibo.tuprolog.utils.setTag
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
+import kotlin.uuid.Uuid
 import org.gciatto.kt.math.BigDecimal
 import org.gciatto.kt.math.BigInteger
 
@@ -30,9 +31,29 @@ import org.gciatto.kt.math.BigInteger
 const val JAKTA_ANNOTATIONS_TAG = "jakta.annotations"
 
 /**
- * Creates a [Struct] for the source annotation using the passed [AgentID.displayName] as the source.
+ * The term `agent(Name, Uuid)` representing this [AgentID], with its name and uuid as atoms.
+ * Plans can match an agent by name with `agent(bob, _)`.
  */
-fun source(id: AgentID): Struct = source(id.toString())
+fun AgentID.toTerm(): Struct = Struct.of(AGENT_FUNCTOR, Atom.of(name), Atom.of(uuid.toString()))
+
+/**
+ * The [AgentID] represented by this term, as created by [toTerm].
+ * @throws IllegalArgumentException if the term is not of the form `agent(Name, Uuid)`.
+ */
+fun Term.toAgentID(): AgentID {
+    val struct = this as? Struct
+    require(struct != null && struct.functor == AGENT_FUNCTOR && struct.arity == 2 && struct.args.all { it.isAtom }) {
+        "$this is not an agent identifier of the form $AGENT_FUNCTOR(Name, Uuid)"
+    }
+    return AgentID(struct[0].castToAtom().value, Uuid.parse(struct[1].castToAtom().value))
+}
+
+private const val AGENT_FUNCTOR = "agent"
+
+/**
+ * Creates a [Struct] for the source annotation with the term of the passed [AgentID], i.e. `source(agent(Name, Uuid))`.
+ */
+fun source(id: AgentID): Struct = source(id.toTerm())
 
 /**
  * Creates a [Struct] for the source annotation using the passed string as the source.
@@ -71,6 +92,7 @@ operator fun <T : Term> T.get(annotation: Struct, vararg otherAnnotations: Struc
 /**
  * Extension function to convert a variable to a Kotlin type using the provided substitution.
  * @receiver The [Var] to be converted.
+ * An `agent(Name, Uuid)` term is converted to an [AgentID].
  * @return The value of the variable as the specified Kotlin type [T].
  * @throws IllegalStateException if the variable cannot be cast to the expected type.
  */
@@ -82,10 +104,10 @@ inline fun <reified T : Any> Var.value(): T {
 
     if (term is T) return term
 
-    val raw = term.accept(JaktaTermObjectifier)
-    val targetType = typeOf<T>()
-
-    val converted = coerceValue(raw, targetType)
+    val converted = when (T::class) {
+        AgentID::class -> term.toAgentID()
+        else -> coerceValue(term.accept(JaktaTermObjectifier), typeOf<T>())
+    }
 
     return converted as? T
         ?: throw ClassCastException(

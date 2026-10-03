@@ -3,7 +3,6 @@ package it.unibo.jakta.dsl.examples
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import it.unibo.jakta.agent.AgentSpecification
-import it.unibo.jakta.agent.BaseAgentID
 import it.unibo.jakta.dsl.agent
 import it.unibo.jakta.dsl.ifGoalMatch
 import it.unibo.jakta.dsl.mas
@@ -14,7 +13,10 @@ import it.unibo.jakta.event.AgentUpdate
 import it.unibo.jakta.node.CoroutineNodeRunner
 import it.unibo.jakta.node.Node
 import it.unibo.jakta.node.SharedMemoryNetwork
+import it.unibo.jakta.skills.DirectorySkill
+import it.unibo.jakta.skills.InMemoryDirectory
 import it.unibo.jakta.skills.MessagingSkill
+import it.unibo.jakta.skills.lookup
 import it.unibo.jakta.skills.sendTo
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -23,10 +25,7 @@ import kotlinx.coroutines.test.runTest
 
 class TestAgentEntryPoint {
 
-    val aliceID = BaseAgentID("Alice")
-    val bobID = BaseAgentID("Bob")
-
-    val alice = agent<String, String, Any>(aliceID) {
+    val alice = agent<String, String, Any>("Alice") {
         embodiedAs { Any() }
         handlesMessageEvents {
             when (it.payload) {
@@ -44,16 +43,16 @@ class TestAgentEntryPoint {
         }
     }
 
-    context(messaging: MessagingSkill)
+    context(messaging: MessagingSkill, directory: DirectorySkill)
     val bob: (Node<Any>) -> AgentSpecification<Any, String, Any>
-        get() = agent(bobID) {
+        get() = agent("Bob") {
             embodiedAs { Any() }
             hasInitialGoals { !"greet" }
             hasPlanLibrary {
                 adding.goal {
                     ifGoalMatch("greet")
                 } triggers {
-                    agent.sendTo(aliceID, "greet")
+                    agent.sendTo(agent.lookup("Alice").single(), "greet")
                     agent.print("Hello from Bob")
                     node.terminateNode()
                 }
@@ -67,12 +66,15 @@ class TestAgentEntryPoint {
 
     @Test
     fun testWithAgentConfigurationSyntax(): TestResult = runTest {
+        val directory = InMemoryDirectory()
         mas(NodeBuilders.baseNode()) {
             node {
-                withAgents(alice)
+                context(directory.skillFor(node)) {
+                    withAgents(alice)
+                }
             }
             node {
-                context(MessagingSkill(node)) {
+                context(MessagingSkill(node), directory.skillFor(node)) {
                     withAgents(bob)
                 }
             }

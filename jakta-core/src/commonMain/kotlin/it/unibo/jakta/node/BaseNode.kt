@@ -19,12 +19,13 @@ import it.unibo.jakta.event.UnlimitedChannelQueue
  */
 open class BaseNode<Body : Any> : ExecutableNode<Body> {
 
-    private val _agents: MutableSet<BaseAgent<*, *, Body>> = mutableSetOf()
+    private val _agents: MutableMap<AgentID, BaseAgent<*, *, Body>> = mutableMapOf()
+
+    private val bodies: MutableMap<AgentID, Body> = mutableMapOf()
 
     override val id: NodeID = NodeID()
 
-    override val agents: Map<AgentID, Body>
-        get() = _agents.associate { it.id to it.body }
+    override val agents: Map<AgentID, Body> get() = bodies
 
     private val _systemEvents: EventQueue<SystemEvent> = UnlimitedChannelQueue()
 
@@ -34,6 +35,8 @@ open class BaseNode<Body : Any> : ExecutableNode<Body> {
     override fun addAgent(agentFactory: (Node<Body>) -> AgentSpecification<*, *, Body>, nodeID: NodeID) {
         val agentSpecification = agentFactory(this)
         val agent = BaseAgent(agentSpecification)
+        // known right away, so that agents started before it already find it (e.g. with a directory)
+        if (nodeID == id) host(agent)
         _systemEvents.send(AgentAdditionEvent(agent, nodeID))
     }
 
@@ -59,15 +62,13 @@ open class BaseNode<Body : Any> : ExecutableNode<Body> {
             }
 
             is AgentRemovalEvent -> {
-                _agents.firstOrNull { it.id == event.id }?.let {
-                    _agents.remove(it)
-                }
+                _agents -= event.id
+                bodies -= event.id
             }
 
             is SystemEvent.AgentAddition<*, *> -> {
                 if (event.nodeID == id) {
-                    val agent = event.executableAgent as BaseAgent<*, *, Body>
-                    _agents.add(agent)
+                    host(event.executableAgent as BaseAgent<*, *, Body>)
                 }
             }
 
@@ -75,8 +76,13 @@ open class BaseNode<Body : Any> : ExecutableNode<Body> {
         }
     }
 
+    private fun host(agent: BaseAgent<*, *, Body>) {
+        _agents[agent.id] = agent
+        bodies[agent.id] = agent.body
+    }
+
     private fun deliverEvent(event: AgentEvent.External, filter: MessageFilter<Body>) {
-        _agents.filter { filter.accept(this, it.id, it.body) }
+        _agents.values.filter { filter.accept(this, it.id, it.body) }
             .forEach { it.externalInbox.send(event) }
     }
 }

@@ -3,7 +3,6 @@ package it.unibo.jakta
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import it.unibo.jakta.agent.AgentID
-import it.unibo.jakta.agent.BaseAgentID
 import it.unibo.jakta.agent.achieve
 import it.unibo.jakta.dsl.belief.PrologBelief
 import it.unibo.jakta.dsl.belief.belief
@@ -35,7 +34,9 @@ import it.unibo.jakta.node.ExecutableNode
 import it.unibo.jakta.node.Node
 import it.unibo.jakta.node.SharedMemoryNetwork
 import it.unibo.jakta.plan.Plan
+import it.unibo.jakta.skills.InMemoryDirectory
 import it.unibo.jakta.skills.MessagingSkill
+import it.unibo.jakta.skills.lookup
 import it.unibo.tuprolog.core.toAtom
 import it.unibo.tuprolog.solve.Solution
 import kotlin.test.BeforeTest
@@ -54,18 +55,22 @@ class TestKQMLMessaging {
         Logger.setMinSeverity(Severity.Warn)
     }
 
-    val bob = BaseAgentID("bob")
-    val alice = BaseAgentID("alice")
+    val bob = "bob"
+    val alice = "alice"
+
+    // shared by the nodes of each test, so that alice finds bob
+    val directory = InMemoryDirectory()
 
     val startGoal = "start".toAtom()
     val delegatedGoal = "delegatedGoal".toAtom()
 
     fun masNode(
-        id: AgentID,
+        name: String,
         vararg beliefs: PrologBelief,
         block: () -> ((Node<Any>) -> List<Plan<PrologBelief, PrologGoal, *, *, *>>),
     ) = node(NodeBuilders.baseNode()) {
-        agent(id) {
+        directory.skillFor(node)
+        agent(name) {
             embodiedAs { Any() }
             handlesMessageEvents {
                 when (val payload = it.payload) {
@@ -94,13 +99,13 @@ class TestKQMLMessaging {
     fun `test tell`() = runTest {
         val aliceNode = masNode(alice) {
             plans { node ->
-                context(MessagingSkill(node)) {
+                context(MessagingSkill(node), directory.skillFor(node)) {
                     prologPlan {
                         adding.goal {
                             matchingGoal { startGoal }
                         } triggers {
                             agent.print("Hello!")
-                            agent.tellTo(bob, belief { "ping"(1) })
+                            agent.tellTo(agent.lookup(bob).single(), belief { "ping"(1) })
                             node.terminateNode()
                         }
                     }
@@ -128,13 +133,13 @@ class TestKQMLMessaging {
     fun `test untell`() = runTest {
         val aliceNode = masNode(alice) {
             plans { node ->
-                context(MessagingSkill(node)) {
+                context(MessagingSkill(node), directory.skillFor(node)) {
                     prologPlan {
                         adding.goal {
                             matchingGoal { startGoal }
                         } triggers {
                             agent.print("Hello!")
-                            agent.untellTo(bob, beliefQuery { "ping"(1) })
+                            agent.untellTo(agent.lookup(bob).single(), beliefQuery { "ping"(1) })
                             node.terminateNode()
                         }
                     }
@@ -142,7 +147,7 @@ class TestKQMLMessaging {
             }
         }
 
-        val bobNode = masNode(bob, initialBelief { "ping"(1)[source(alice)] }) {
+        val bobNode = masNode(bob, initialBelief { "ping"(1)[source(aliceNode.agents.keys.single())] }) {
             plans { node ->
                 prologPlan {
                     removing.belief {
@@ -162,13 +167,13 @@ class TestKQMLMessaging {
     fun `test achieve`() = runTest {
         val aliceNode = masNode(alice) {
             plans { node ->
-                context(MessagingSkill(node)) {
+                context(MessagingSkill(node), directory.skillFor(node)) {
                     prologPlan {
                         adding.goal {
                             matchingGoal { startGoal }
                         } triggers {
                             agent.print("Hello!")
-                            agent.delegateAchieveTo(bob, goal { delegatedGoal })
+                            agent.delegateAchieveTo(agent.lookup(bob).single(), goal { delegatedGoal })
                             node.terminateNode()
                         }
                     }
@@ -198,14 +203,14 @@ class TestKQMLMessaging {
     fun `test unachieve`() = runTest {
         val aliceNode = masNode(alice) {
             plans { node ->
-                context(MessagingSkill(node)) {
+                context(MessagingSkill(node), directory.skillFor(node)) {
                     prologPlan {
                         adding.goal {
                             matchingGoal { startGoal }
                         } triggers {
                             agent.print("Hello! Waiting for bob to start and then stop him")
                             delay(3.seconds)
-                            agent.sendUnachieveTo(bob, goalQuery { delegatedGoal })
+                            agent.sendUnachieveTo(agent.lookup(bob).single(), goalQuery { delegatedGoal })
                             node.terminateNode()
                         }
                     }
@@ -251,14 +256,14 @@ class TestKQMLMessaging {
     fun `test askOne`() = runTest {
         val aliceNode = masNode(alice) {
             plans { node ->
-                context(MessagingSkill(node)) {
+                context(MessagingSkill(node), directory.skillFor(node)) {
                     prologPlan {
                         adding.goal {
                             matchingGoal { startGoal }
                         } triggers {
                             agent.print("Hello!")
                             delay(3.seconds)
-                            val reply = agent.askOneTo(bob, beliefQuery { "b"(X) })
+                            val reply = agent.askOneTo(agent.lookup(bob).single(), beliefQuery { "b"(X) })
                             if (reply != null) {
                                 agent.print("Received reply: ", X)
                             } else {
@@ -273,7 +278,7 @@ class TestKQMLMessaging {
 
         val bobNode = masNode(bob, initialBelief { "b"(1) }, initialBelief { "b"(2) }) {
             plans { node ->
-                context(MessagingSkill(node)) {
+                context(MessagingSkill(node), directory.skillFor(node)) {
                     prologPlan {
                         adding.goal {
                             matchingGoal { replyOne(Q, M)[source(S)] }
@@ -284,7 +289,7 @@ class TestKQMLMessaging {
                                 is Solution.Yes -> {
                                     agent.print("Found a solution: ", solution.solvedQuery)
                                     this.context += solution.substitution
-                                    val sender = BaseAgentID(id = S.value())
+                                    val sender = S.value<AgentID>()
                                     val questionId = M.value<String>()
                                     agent.tellTo(sender, questionId, belief { solution.solvedQuery })
                                 }

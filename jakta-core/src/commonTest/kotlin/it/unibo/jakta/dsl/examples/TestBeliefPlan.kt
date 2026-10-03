@@ -2,7 +2,6 @@ package it.unibo.jakta.dsl.examples
 
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
-import it.unibo.jakta.agent.BaseAgentID
 import it.unibo.jakta.dsl.executeInTestScope
 import it.unibo.jakta.dsl.node
 import it.unibo.jakta.dsl.node.BaseNodeBuilder
@@ -26,7 +25,7 @@ class TestBeliefPlan {
     }
 
     context(terminator: NodeTerminationSkill)
-    fun BaseNodeBuilder<Any, BaseNode<Any>>.testAgent() = agent(BaseAgentID("TestAgent")) {
+    fun BaseNodeBuilder<Any, BaseNode<Any>>.testAgent() = agent("TestAgent") {
         embodiedAs { Any() }
         hasInitialGoals {
             !"testGoal"

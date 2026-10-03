@@ -2,7 +2,6 @@ package it.unibo.jakta.dsl.examples
 
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
-import it.unibo.jakta.agent.BaseAgentID
 import it.unibo.jakta.dsl.ifGoalMatch
 import it.unibo.jakta.dsl.mas
 import it.unibo.jakta.dsl.node.NodeBuilders
@@ -18,7 +17,7 @@ class TestMultiNodeExecution {
 
     val mas = mas(NodeBuilders.baseNode()) {
         node {
-            agent(BaseAgentID("Alice")) {
+            agent("Alice") {
                 embodiedAs { Any() }
                 hasInitialGoals { !"greet" }
                 hasPlanLibrary {
@@ -33,7 +32,7 @@ class TestMultiNodeExecution {
         }
 
         node {
-            agent(BaseAgentID("Bob")) {
+            agent("Bob") {
                 embodiedAs { Any() }
                 hasInitialGoals { !"greet" }
                 hasPlanLibrary {

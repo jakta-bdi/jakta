@@ -3,7 +3,6 @@ package it.unibo.jakta.dsl.agent
 import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.agent.AgentSpecification
 import it.unibo.jakta.agent.AgentState
-import it.unibo.jakta.agent.BaseAgentID
 import it.unibo.jakta.agent.BaseAgentState
 import it.unibo.jakta.dsl.plan.PlanLibraryBuilder
 import it.unibo.jakta.dsl.plan.PlanLibraryBuilderImpl
@@ -13,13 +12,15 @@ import it.unibo.jakta.event.AgentUpdate
 import it.unibo.jakta.node.Node
 import it.unibo.jakta.plan.Plan
 import kotlin.properties.Delegates
+import kotlin.uuid.Uuid
 
 /**
  * Implementation of the AgentBuilder interface.
+ * @param name the name of the agent, to which [build] adds a random [Uuid] to make its [AgentID] unique.
  */
 class AgentBuilderImpl<Belief : Any, Goal : Any, Body : Any>(
     override val node: Node<Body>,
-    private val id: AgentID? = null,
+    private val name: String = DEFAULT_NAME,
 ) : AgentBuilder<Belief, Goal, Body> {
     private var initialBeliefs = listOf<Belief>()
     private var initialGoals = listOf<Goal>()
@@ -88,7 +89,7 @@ class AgentBuilderImpl<Belief : Any, Goal : Any, Body : Any>(
     }
 
     override fun build(): AgentSpecification<Belief, Goal, Body> = object : AgentSpecification<Belief, Goal, Body> {
-        override val id: AgentID = this@AgentBuilderImpl.id ?: BaseAgentID()
+        override val id: AgentID = AgentID(name, Uuid.random())
         override val body: Body = this@AgentBuilderImpl.bodyFactory(id)
         override val initialGoals: List<Goal> = this@AgentBuilderImpl.initialGoals
         override val initialState: AgentState<Belief, Goal> = BaseAgentState(
@@ -99,5 +100,15 @@ class AgentBuilderImpl<Belief : Any, Goal : Any, Body : Any>(
             perceptionHandler = perceptionHandler,
             messageHandler = messageHandler,
         )
+    }
+
+    /**
+     * Constants of [AgentBuilderImpl].
+     */
+    companion object {
+        /**
+         * The name of agents defined without one.
+         */
+        const val DEFAULT_NAME = "agent"
     }
 }

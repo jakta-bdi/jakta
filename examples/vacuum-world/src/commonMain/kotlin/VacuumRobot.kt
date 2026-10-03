@@ -1,6 +1,5 @@
 @file:Suppress("StringLiteralDuplication", "LongMethod") // example code: DSL definitions read best in one place
 
-import it.unibo.jakta.agent.BaseAgentID
 import it.unibo.jakta.dsl.belief.PrologBelief
 import it.unibo.jakta.dsl.belief.belief
 import it.unibo.jakta.dsl.belief.inferenceRule
@@ -48,7 +47,7 @@ fun MasBuilder<BaseNode<Any>, BaseNodeBuilder<Any, BaseNode<Any>>>.vacuumNode(
 ) = node {
     val env = VacuumEnvironment(world, node, stepTime, dustChance)
 
-    agent<PrologBelief, PrologGoal>(BaseAgentID("vacuum")) {
+    agent<PrologBelief, PrologGoal>("vacuum") {
         embodiedAs { Any() }
         handlesPerceptionEvents { if (it is VacuumPerception) handleVacuumPerception(it, beliefs) else null }
         believes {

@@ -2,7 +2,6 @@ package it.unibo.jakta.dsl.examples
 
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
-import it.unibo.jakta.agent.BaseAgentID
 import it.unibo.jakta.dsl.agent
 import it.unibo.jakta.dsl.ifGoalMatch
 import it.unibo.jakta.dsl.mas
@@ -19,9 +18,7 @@ import kotlinx.coroutines.test.runTest
 
 class TestAgentAdditionAndRemoval {
 
-    val aliceID = BaseAgentID("Alice")
-
-    val alice = agent<String, String, Any>(aliceID) {
+    val alice = agent<String, String, Any>("Alice") {
         embodiedAs { Any() }
         hasInitialGoals { !"greet" }
         hasPlanLibrary {
@@ -42,7 +39,7 @@ class TestAgentAdditionAndRemoval {
     fun testAgentAdditionOnSameNode(): TestResult = runTest {
         val mas = mas(NodeBuilders.baseNode()) {
             node {
-                agent(BaseAgentID("Creator")) {
+                agent("Creator") {
                     embodiedAs { Any() }
                     hasInitialGoals { !"create" }
                     hasPlanLibrary {
@@ -69,7 +66,7 @@ class TestAgentAdditionAndRemoval {
         val mas = mas(NodeBuilders.baseNode()) {
             node {
                 withAgents(alice)
-                agent(BaseAgentID("Destroyer")) {
+                agent("Destroyer") {
                     embodiedAs { Any() }
                     hasInitialGoals { !"destroy" }
                     hasPlanLibrary {
@@ -77,7 +74,7 @@ class TestAgentAdditionAndRemoval {
                             ifGoalMatch("destroy")
                         } triggers {
                             agent.print("Destroying Alice...")
-                            node.removeAgent(aliceID)
+                            node.removeAgent(node.agents.keys.single { it.name == "Alice" })
                             agent.print("Alice destroyed.")
                             delay(3.seconds)
                             agent.print(node.agents.keys.joinToString(", "))
