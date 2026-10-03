@@ -21,6 +21,7 @@ import it.unibo.jakta.kqml.KQMLPayload
 import it.unibo.jakta.kqml.askOneTo
 import it.unibo.jakta.kqml.delegateAchieveTo
 import it.unibo.jakta.kqml.handleKQMLPayload
+import it.unibo.jakta.kqml.replyTo
 import it.unibo.jakta.kqml.tellTo
 import it.unibo.jakta.logic.JaktaLogicProgrammingScope.Companion.prologPlan
 import it.unibo.jakta.logic.unifiesWith
@@ -112,7 +113,7 @@ fun main(): Unit = runBlocking {
                                 adding.goal { matchingGoal { replyOne(Q, M)[source(S)] } } triggers {
                                     val answer = agent.beliefs.unifiesWith(Q.value())
                                     if (answer is Solution.Yes) {
-                                        agent.tellTo(
+                                        agent.replyTo(
                                             BaseAgentID(id = S.value()),
                                             M.value<String>(),
                                             belief {

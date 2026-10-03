@@ -33,6 +33,7 @@ import it.unibo.jakta.kqml.broadcastUnachieve
 import it.unibo.jakta.kqml.broadcastUntell
 import it.unibo.jakta.kqml.delegateAchieveTo
 import it.unibo.jakta.kqml.handleKQMLPayload
+import it.unibo.jakta.kqml.replyTo
 import it.unibo.jakta.kqml.sendUnachieveTo
 import it.unibo.jakta.kqml.tellTo
 import it.unibo.jakta.kqml.untellTo
@@ -469,7 +470,7 @@ class TestKQMLMessaging {
                             val solution = agent.beliefs.unifiesWith(Q.value<Struct>())
                             if (solution is Solution.Yes) {
                                 val answer = belief { solution.solvedQuery }
-                                agent.tellTo(BaseAgentID(id = S.value()), M.value<String>(), answer)
+                                agent.replyTo(BaseAgentID(id = S.value()), M.value<String>(), answer)
                             }
                             node.terminateNode()
                         }
@@ -547,7 +548,7 @@ class TestKQMLMessaging {
                             val answers = agent.beliefs.allSolutionsOf(Q.value<Struct>())
                                 .filterIsInstance<Solution.Yes>()
                                 .map { belief { it.solvedQuery } }
-                            agent.tellTo(BaseAgentID(id = S.value()), M.value<String>(), *answers.toTypedArray())
+                            agent.replyTo(BaseAgentID(id = S.value()), M.value<String>(), *answers.toTypedArray())
                             node.terminateNode()
                         }
                     }
@@ -588,7 +589,7 @@ class TestKQMLMessaging {
                             } triggers {
                                 val solution = agent.beliefs.unifiesWith(Q.value<Struct>()) as Solution.Yes
                                 val answer = belief { solution.solvedQuery }
-                                agent.tellTo(BaseAgentID(id = S.value()), M.value<String>(), answer)
+                                agent.replyTo(BaseAgentID(id = S.value()), M.value<String>(), answer)
                                 node.terminateNode()
                             }
                         }
@@ -633,7 +634,7 @@ class TestKQMLMessaging {
                             val answers = agent.beliefs.allSolutionsOf(Q.value<Struct>())
                                 .filterIsInstance<Solution.Yes>()
                                 .map { belief { it.solvedQuery } }
-                            agent.tellTo(BaseAgentID(id = S.value()), M.value<String>(), *answers.toTypedArray())
+                            agent.replyTo(BaseAgentID(id = S.value()), M.value<String>(), *answers.toTypedArray())
                             node.terminateNode()
                         }
                     }
@@ -663,8 +664,9 @@ class TestKQMLMessaging {
     }
 
     @Test
-    fun `test broadcastAskOne waits for the first reply`() = runTest {
+    fun `test broadcastAskOne waits for the first reply, and drops the others`() = runTest {
         var replies: Map<AgentID, Substitution>? = null
+        var beliefsFromReplies: Int? = null
         val aliceNode = masNode(alice) {
             plans { node ->
                 context(MessagingSkill(node)) {
@@ -674,6 +676,9 @@ class TestKQMLMessaging {
                         } triggers {
                             delay(1.seconds)
                             replies = agent.broadcastAskOne(beliefQuery { "b"(X) }, timeout = 10.seconds)
+                            // Carol's late reply arrives meanwhile
+                            delay(3.seconds)
+                            beliefsFromReplies = agent.beliefs.count { it.head.functor == "b" }
                             node.terminateNode()
                         }
                     }
@@ -693,7 +698,7 @@ class TestKQMLMessaging {
                                 delay(after.seconds)
                                 val solution = agent.beliefs.unifiesWith(Q.value<Struct>()) as Solution.Yes
                                 val answer = belief { solution.solvedQuery }
-                                agent.tellTo(BaseAgentID(id = S.value()), M.value<String>(), answer)
+                                agent.replyTo(BaseAgentID(id = S.value()), M.value<String>(), answer)
                                 node.terminateNode()
                             }
                         }
@@ -704,6 +709,7 @@ class TestKQMLMessaging {
 
         run(aliceNode, receiver(bob, 1, 0), receiver(carol, 2, 2))
         assertEquals(mapOf<AgentID, String>(bob to "1"), replies?.mapValues { it.value.getByName("X").toString() })
+        assertEquals(0, beliefsFromReplies)
     }
 
     @Test
@@ -738,7 +744,7 @@ class TestKQMLMessaging {
                                 val answers = agent.beliefs.allSolutionsOf(Q.value<Struct>())
                                     .filterIsInstance<Solution.Yes>()
                                     .map { belief { it.solvedQuery } }
-                                agent.tellTo(BaseAgentID(id = S.value()), M.value<String>(), *answers.toTypedArray())
+                                agent.replyTo(BaseAgentID(id = S.value()), M.value<String>(), *answers.toTypedArray())
                                 node.terminateNode()
                             }
                         }

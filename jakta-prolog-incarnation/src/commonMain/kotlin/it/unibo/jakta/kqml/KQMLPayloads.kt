@@ -20,14 +20,28 @@ sealed class KQMLPayload {
 
 /**
  * KQML payload for telling a beliefQuery to an agent.
- * The [beliefs] must be ground. [replyingTo] is an optional id of the message this tell message is replying to.
+ * The [beliefs] must be ground.
  */
-data class Tell(val beliefs: Set<PrologBelief>, val replyingTo: Uuid? = null) : KQMLPayload() {
+data class Tell(val beliefs: Set<PrologBelief>) : KQMLPayload() {
     init {
         beliefs.all { it is Fact } || error { "All beliefs to tell must be facts, but got $beliefs" }
         beliefs.forEach { b ->
             requirePredicate(b.head) { "All beliefs to tell must be a predicate, but got $b" }
             requireGround(b) { "All beliefs to tell must be ground, but got $it" }
+        }
+    }
+}
+
+/**
+ * KQML payload for replying to the question [replyingTo] (an [AskOne] or an [AskAll]) with the [beliefs] answering it.
+ * The [beliefs] must be ground.
+ */
+data class Reply(val beliefs: Set<PrologBelief>, val replyingTo: Uuid) : KQMLPayload() {
+    init {
+        beliefs.all { it is Fact } || error { "All beliefs to reply must be facts, but got $beliefs" }
+        beliefs.forEach { b ->
+            requirePredicate(b.head) { "All beliefs to reply must be a predicate, but got $b" }
+            requireGround(b) { "All beliefs to reply must be ground, but got $it" }
         }
     }
 }
