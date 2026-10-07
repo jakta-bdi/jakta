@@ -6,7 +6,7 @@ kermit = "2.2.0"
 kotlin = "2.4.20"
 alchemist = "43.1.5"
 tuprolog = "2.0.9"
-publish-central = "9.2.12"
+publish-central = "9.2.13"
 
 
 [libraries]
