@@ -10,7 +10,6 @@ import it.unibo.tuprolog.core.Integer
 import it.unibo.tuprolog.core.Struct
 import kotlin.random.Random
 import kotlin.time.Duration
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import model.Board
 import model.BoardState
@@ -37,25 +36,6 @@ enum class Player {
 }
 
 /**
- * The moves of the human player, as clicked in the UI.
- */
-class HumanMoves {
-    private val clicks = Channel<Pair<Int, Int>>(Channel.CONFLATED)
-
-    /**
-     * Records that the human clicked the cell at column [x] and row [y].
-     */
-    fun click(x: Int, y: Int) {
-        clicks.trySend(x to y)
-    }
-
-    /**
-     * Waits for the next click.
-     */
-    suspend fun next(): Pair<Int, Int> = clicks.receive()
-}
-
-/**
  * What players can do in the game.
  */
 interface TicTacToeSkills {
@@ -72,12 +52,7 @@ interface TicTacToeSkills {
     /**
      * Puts [mark] at column [x] and row [y].
      */
-    suspend fun put(x: Int, y: Int, mark: Mark)
-
-    /**
-     * Waits for the human to choose a cell.
-     */
-    suspend fun humanMove(): Pair<Int, Int>
+    fun put(x: Int, y: Int, mark: Mark)
 }
 
 /**
@@ -87,7 +62,6 @@ interface TicTacToeSkills {
 class TicTacToeEnvironment(
     private val board: Board,
     private val node: Node<*>,
-    private val humanMoves: HumanMoves,
     private val thinkTime: () -> Duration,
     private val mistakeChance: () -> Double,
     private val random: Random,
@@ -106,14 +80,12 @@ class TicTacToeEnvironment(
         delay(thinkTime())
     }
 
-    override suspend fun put(x: Int, y: Int, mark: Mark) {
+    override fun put(x: Int, y: Int, mark: Mark) {
         board.put(x, y, mark)
         val state = board.state.value
         publish(state)
         if (state.isOver) node.terminateNode()
     }
-
-    override suspend fun humanMove(): Pair<Int, Int> = humanMoves.next()
 }
 
 private val cellQuery = newContextBeliefQuery { "cell"(X, Y, Z) }

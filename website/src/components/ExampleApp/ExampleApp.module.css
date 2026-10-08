@@ -1,0 +1,21 @@
+.frame {
+  position: relative;
+  margin-bottom: 0.5rem;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: var(--ifm-global-radius);
+  background: var(--ifm-color-emphasis-100);
+  overflow: hidden;
+}
+
+.app {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border: 0;
+  transform-origin: top left;
+}
+
+.newTab {
+  text-align: right;
+  font-size: 0.85rem;
+}
