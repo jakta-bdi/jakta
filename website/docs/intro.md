@@ -4,26 +4,53 @@ sidebar_position: 1
 
 # What is JaKtA?
 
-JaKtA is a full fledged, [AgentSpeak(L)](https://link.springer.com/chapter/10.1007/BFb0031845)-compliant [BDI](https://cdn.aaai.org/ICMAS/1995/ICMAS95-042.pdf) technology. 
-As such, it comes with its own BDI execution engine, giving semantics to the DSL. 
-The choice of realising a fresh implementation of a BDI execution engine instead of reusing an existing one was driven by two major design goals:
-1. to explore paradigm blending of AOP – and in particular BDI – with mainstream programming languages, and
-2. to support modularity and pluggability of any aspect involving the execution of BDI systems—there including reasoning capabilities, message passing mechanisms, concurrency models, and the like.
+JaKtA is a [BDI](./explanation/basic-concepts/bdi.mdx) agent-oriented programming framework
+for [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform.html).
+Agents have **beliefs** about the world, **goals** to achieve, and **plans** that say how to achieve them.
+You write all three with a Kotlin DSL, and plan bodies are ordinary `suspend` Kotlin code:
 
-Accordingly, the execution engine of JaKtA was designed and implemented from scratch to decouple agent specifications and their execution.
+```kotlin title="Main.kt"
+val helloWorldAgent = agent<String, String, Any> {
+    embodiedAs { Any() }
+    hasInitialGoals {
+        !"sayHello"
+    }
+    hasPlanLibrary {
+        adding.goal {
+            takeIf { it == "sayHello" }
+        } triggers {
+            agent.print("Hello, world!")
+            node.terminateNode()
+        }
+    }
+}
 
-Architecturally, the JaKtA framework is composed by three main modules, namely:
-1. the DSL module, which defines the syntax of the language;
-2. the BDI interpreter, which governs the execution of agents and environments, regardless of the particular syntax used to define them; and
-3. the concurrency management module, which regulates runtime, concurrency, and scheduling aspects for any system run by the BDI interpreter.
+fun main(): Unit = runBlocking {
+    mas(NodeBuilders.baseNode()) {
+        node { withAgents(helloWorldAgent) }
+    }.runLocally()
+}
+```
 
+The agent starts with the goal `"sayHello"`. Adding the goal triggers the plan, which prints a message and stops
+the node the agent lives in. The [Hello world tutorial](./tutorials/hello-world.md) explains it line by line.
 
-The three modules are inter-dependent in a layered way: 
-the DSL module is built on top of the BDI interpreter, which in turn is built on top of the concurrency management module.
-The DSL module is separate from the BDI interpreter module as it implements one possible syntax of many for BDI MAS specification. 
-Other languages could be plugged in the same BDI interpreter, for instance, the Jason’s parser can be, in principle, plugged on top of JaKtA’s BDI interpreter, using the latter as engine. 
-Similarly, Scala developers may design a different internal DSL and plug it on top of the existing BDI interpreter, realising in shorter time a way to write BDI agents in Scala. 
+Beliefs and goals here are plain strings, but they can be any type: an
+[incarnation](./explanation/incarnations/index.md) decides what they are and how plans match them.
+The [Prolog incarnation](./explanation/incarnations/prolog/index.md) makes them Prolog terms, as in [Jason](https://jason-lang.github.io/).
 
----
+## Where to go next
 
-Source reference: [Blending BDI Agents with Object-Oriented and Functional Programming with JaKtA](https://link.springer.com/article/10.1007/s42979-024-03244-y)    
+- [**Tutorials**](./tutorials/index.mdx): add JaKtA to a project, then write agents in three short tutorials.
+- [**Showcase**](./showcase/blocksworld.md): run example multi-agent systems in your browser.
+- [**How-to guides**](./how-to/create-mas.md): recipes for specific tasks, such as
+  [porting a Jason agent](./how-to/prolog/port-jason.md).
+- [**Explanation**](./explanation/basic-concepts/bdi.mdx): the BDI model, incarnations, and how JaKtA runs agents.
+- [**Reference**](./reference/dsl.md): the DSL, the modules, and the API docs.
+
+Using `jakta-prolog-incarnation`? Its guides, explanations and reference have [their own section](./explanation/incarnations/prolog/index.md).
+
+:::info[Coming from JaKtA 0.x?]
+The 1.x DSL is not source-compatible with 0.x. See [JaKtA 0.x](/docs/jakta-0x) for the old version and how its
+concepts map to 1.x, and the [JaKtA 1.x redesign](./history/jakta-1-x.md) for the ideas behind it.
+:::

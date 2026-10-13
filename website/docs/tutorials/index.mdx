@@ -1,0 +1,111 @@
+---
+sidebar_position: 1
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Getting Started
+
+## Prerequisites
+
+* [Java 17+](https://adoptium.net/)
+* [Kotlin 2.4+](https://kotlinlang.org/docs/releases.html): the DSL relies on [context parameters](https://kotlinlang.org/docs/context-parameters.html)
+* [Gradle](https://docs.gradle.org/current/userguide/getting_started_eng.html)
+
+## Set up a project
+
+Create a Kotlin application with Gradle:
+
+```bash
+mkdir jakta-project
+cd jakta-project
+gradle init --type kotlin-application --dsl kotlin --use-defaults
+```
+
+Gradle creates the application in the `app` folder, with its code in `app/src/main/kotlin/org/example/App.kt`.
+Check that the Kotlin version in `gradle/libs.versions.toml` is 2.4 or later.
+
+JaKtA is published on [Maven Central](https://central.sonatype.com/namespace/it.unibo.jakta) under the group `it.unibo.jakta`.
+Add its three core modules to `app/build.gradle.kts`, together with [Kotlin coroutines](https://github.com/Kotlin/kotlinx.coroutines),
+on which agents run, and [Kermit](https://kermit.touchlab.co/), which controls the engine's logs:
+
+<Tabs>
+  <TabItem value="jvm" label="Kotlin/JVM" default>
+    ```kotlin
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        implementation("it.unibo.jakta:jakta-api:<VERSION>")
+        implementation("it.unibo.jakta:jakta-dsl:<VERSION>")
+        implementation("it.unibo.jakta:jakta-core:<VERSION>")
+        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0")
+        implementation("co.touchlab:kermit:2.2.0")
+    }
+    ```
+  </TabItem>
+  <TabItem value="kmp" label="Kotlin Multiplatform">
+    ```kotlin
+    repositories {
+        mavenCentral()
+    }
+
+    kotlin {
+        sourceSets {
+            commonMain.dependencies {
+                implementation("it.unibo.jakta:jakta-api:<VERSION>")
+                implementation("it.unibo.jakta:jakta-dsl:<VERSION>")
+                implementation("it.unibo.jakta:jakta-core:<VERSION>")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0")
+                implementation("co.touchlab:kermit:2.2.0")
+            }
+        }
+    }
+    ```
+    These modules support the JVM, JavaScript and native targets (Linux, Windows, macOS, iOS).
+    They are also published on [npm](https://www.npmjs.com/org/jakta) under the `@jakta` organization.
+  </TabItem>
+</Tabs>
+
+Replace `<VERSION>` with the latest version, from [Maven Central](https://central.sonatype.com/artifact/it.unibo.jakta/jakta-core)
+or the [release notes](/releases).
+
+`jakta-api` holds the contracts (agents, events, plans, nodes), `jakta-dsl` the DSL, and `jakta-core` the engine
+and the DSL entry points (`mas`, `node`, `agent`). See [Modules](../reference/modules.md) for the details.
+
+You are ready to [write your first agent](./hello-world.md).
+
+## Incarnations
+
+With `jakta-core` alone, beliefs and goals can be any Kotlin type, and plans match them with Kotlin code:
+the tutorials use plain strings and data classes.
+An [incarnation](../explanation/incarnations/index.md) fixes those types and extends the DSL with syntax for them.
+
+The [Prolog incarnation](../explanation/incarnations/prolog/index.md) makes beliefs and goals Prolog terms,
+matches plans by unification and adds KQML messaging, as in [Jason](https://jason-lang.github.io/).
+It brings `jakta-api` and `jakta-dsl` with it, so it only needs `jakta-core` next to it:
+
+```kotlin
+dependencies {
+    implementation("it.unibo.jakta:jakta-core:<VERSION>")
+    implementation("it.unibo.jakta:jakta-prolog-incarnation:<VERSION>")
+}
+```
+
+It runs on the JVM and JavaScript. To start right away, use the
+[Prolog incarnation template](https://github.com/jakta-bdi/jakta-prolog-incarnation-template), a project already set up.
+
+The [string incarnation](../explanation/incarnations/string.md) is the smallest one, and you can also
+[write your own](../how-to/custom-incarnation.md).
+
+## Next steps
+
+The three tutorials build on each other, with plain Kotlin types and no incarnation:
+
+1. [Basic: Hello world](./hello-world.md), a single agent with one goal and one plan;
+2. [Intermediate: Ping-pong agents](./ping-pong.md), two agents on two nodes exchanging messages;
+3. [Advanced: Thermostat](./thermostat.md), an agent perceiving and acting on an external environment that keeps changing.
+
+To see complete systems instead, try the [showcase](../showcase/blocksworld.md) in your browser, or run [more examples](../showcase/more-examples.md) from the JaKtA repository.

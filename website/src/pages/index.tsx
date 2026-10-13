@@ -5,6 +5,7 @@ import AttributionBox from '../components/AttributionBox/AttributionBox';
 import Layout from '@theme/Layout';
 import Hero from '../components/Hero/Hero';
 import FeaturesSection from '../components/FeaturesSection/FeaturesSection';
+import HelloWorldSection from '../components/HelloWorldSection/HelloWorldSection';
 import TeamSection from '../components/TeamSection/TeamSection';
 import AboutSection from '../components/AboutSection/AboutSection';
 import HomePageNavbar from '../components/HomePageNavbar/HomePageNavbar';
@@ -19,6 +20,7 @@ export default function Home() {
       <Hero />
       <main> 
         <FeaturesSection />
+        <HelloWorldSection />
         <TeamSection  />
         <AboutSection />
           <CallToAction />

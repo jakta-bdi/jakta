@@ -23,6 +23,11 @@ data class Block(val id: String)
 typealias Stacks = List<List<Block>>
 
 /**
+ * A move of [block] on top of [destination], or on the table if [destination] is null.
+ */
+data class Move(val block: Block, val destination: Block?)
+
+/**
  * Represents the Blocks World environment, which consists of stacks of blocks.
  *
  * @param initial the initial stacks of blocks.
@@ -36,6 +41,13 @@ class BlocksWorld(initial: Stacks) {
      */
     val state: StateFlow<Stacks> = mutableState.asStateFlow()
 
+    private val mutableMove = MutableStateFlow<Move?>(null)
+
+    /**
+     * The move in progress, while it takes [moveDelay], so that a UI can show the arm at work; null between moves.
+     */
+    val currentMove: StateFlow<Move?> = mutableMove.asStateFlow()
+
     /**
      * How long a single move of the agent takes, to make its work visible.
      */
@@ -46,8 +58,13 @@ class BlocksWorld(initial: Stacks) {
      * Returns the new state of the world.
      */
     suspend fun move(block: Block, destination: Block?): Stacks {
-        delay(moveDelay)
-        return mutableState.updateAndGet { it.moved(block, destination) }
+        mutableMove.value = Move(block, destination)
+        try {
+            delay(moveDelay)
+            return mutableState.updateAndGet { it.moved(block, destination) }
+        } finally {
+            mutableMove.value = null
+        }
     }
 
     /**

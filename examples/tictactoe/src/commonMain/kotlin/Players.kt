@@ -1,11 +1,13 @@
 @file:Suppress("StringLiteralDuplication", "LongMethod") // example code: DSL definitions read best in one place
 
 import it.unibo.jakta.agent.BaseAgentID
+import it.unibo.jakta.agent.achieve
 import it.unibo.jakta.dsl.agent.AgentBuilder
 import it.unibo.jakta.dsl.belief.PrologBelief
 import it.unibo.jakta.dsl.belief.inferenceRule
 import it.unibo.jakta.dsl.belief.matchingBelief
 import it.unibo.jakta.dsl.goal.PrologGoal
+import it.unibo.jakta.dsl.goal.goal
 import it.unibo.jakta.dsl.goal.initialGoal
 import it.unibo.jakta.dsl.goal.matchingGoal
 import it.unibo.jakta.dsl.mas.MasBuilder
@@ -42,6 +44,7 @@ private val directions = mapOf(
 private const val OPTIMAL_SIZE = 3
 
 private val join = Atom.of("join")
+private val moveGoal = Atom.of("move")
 private val empty = Atom.of("e")
 
 private fun cell(x: Term, y: Term, mark: Term): Struct = Struct.of("cell", x, y, mark)
@@ -73,33 +76,35 @@ private fun JaktaLogicProgrammingScope.lineWithTwoGaps(size: Int, move: Int, res
 private fun eq(left: Term, right: Term): Struct = Struct.of("=", left, right)
 
 /**
- * Creates the node of the game, with one player for each mark.
+ * Creates the node of the game, with an agent for each mark played by [Player.AGENT];
+ * the user plays the other marks through the returned environment.
  */
 @Suppress("LongParameterList") // game settings with defaults, kept flat for the callers
 fun MasBuilder<BaseNode<Any>, BaseNodeBuilder<Any, BaseNode<Any>>>.ticTacToeNode(
     board: Board,
     players: Map<Mark, Player>,
-    humanMoves: HumanMoves,
     thinkTime: () -> Duration,
     mistakeChance: () -> Double = { 0.0 },
     random: Random = Random.Default,
-) = node {
-    val game = TicTacToeEnvironment(board, node, humanMoves, thinkTime, mistakeChance, random)
-    for ((mark, player) in players) {
-        val name = if (player == Player.HUMAN) "human-${mark.symbol}" else "${mark.symbol}-agent"
-        agent<PrologBelief, PrologGoal>(BaseAgentID(name)) {
-            when (player) {
-                Player.AGENT -> agentPlayer(game, mark, board.state.value.size)
-                Player.HUMAN -> humanPlayer(game, mark)
+): TicTacToeEnvironment {
+    lateinit var game: TicTacToeEnvironment
+    node {
+        game = TicTacToeEnvironment(board, node, thinkTime, mistakeChance, random)
+        for ((mark, player) in players) {
+            if (player == Player.AGENT) {
+                agent<PrologBelief, PrologGoal>(BaseAgentID("${mark.symbol}-agent")) {
+                    agentPlayer(game, mark, board.state.value.size)
+                }
             }
         }
     }
+    return game
 }
 
 /**
- * What every player does: perceive the board and, if moving first, start the game.
+ * What every agent does: perceive the board, joining the game to see it a first time.
  */
-private fun AgentBuilder<PrologBelief, PrologGoal, Any>.commonBehaviour(mark: Mark) {
+private fun AgentBuilder<PrologBelief, PrologGoal, Any>.commonBehaviour() {
     embodiedAs { Any() }
     handlesPerceptionEvents {
         when (it) {
@@ -107,34 +112,15 @@ private fun AgentBuilder<PrologBelief, PrologGoal, Any>.commonBehaviour(mark: Ma
             else -> null
         }
     }
-    if (mark == Mark.X) {
-        hasInitialGoals { !initialGoal { join } }
-    }
-}
-
-/**
- * A player that waits for the human to click a cell whenever it is its turn.
- */
-private fun AgentBuilder<PrologBelief, PrologGoal, Any>.humanPlayer(game: TicTacToeSkills, mark: Mark) {
-    commonBehaviour(mark)
-    hasPlanLibrary {
-        prologPlan {
-            adding.goal { matchingGoal { join } } triggers { game.join() }
-        }
-        prologPlan {
-            adding.belief { matchingBelief { turn(mark) } } triggers {
-                val (x, y) = game.humanMove()
-                game.put(x, y, mark)
-            }
-        }
-    }
+    hasInitialGoals { !initialGoal { join } }
 }
 
 /**
  * A BDI player following the classic strategy for tic-tac-toe (Newell and Simon), which never loses on 3×3;
  * on larger boards it only completes lines, blocks them and takes good cells.
- * On its turn, the first applicable plan moves. Lines, threats and forks are recognised by rules, and both
- * rules and plans are generated in Kotlin for the board [size]. When the environment says it is `distracted`,
+ * On its turn, it thinks and then pursues the goal `move`, achieved by the first applicable plan.
+ * Lines, threats and forks are recognised by rules, and both rules and plans are generated in Kotlin
+ * for the board [size]. When the environment says it is `distracted`,
  * it plays a random cell instead.
  */
 private fun AgentBuilder<PrologBelief, PrologGoal, Any>.agentPlayer(game: TicTacToeSkills, mark: Mark, size: Int) {
@@ -142,7 +128,7 @@ private fun AgentBuilder<PrologBelief, PrologGoal, Any>.agentPlayer(game: TicTac
     val opponent = Atom.of(mark.other.symbol)
     val last = size - 1
     val corners = listOf(0 to 0, last to 0, 0 to last, last to last)
-    commonBehaviour(mark)
+    commonBehaviour()
     believes {
         for ((direction, step) in directions) {
             val (dx, dy) = step
@@ -179,14 +165,20 @@ private fun AgentBuilder<PrologBelief, PrologGoal, Any>.agentPlayer(game: TicTac
         prologPlan {
             adding.goal { matchingGoal { join } } triggers { game.join() }
         }
+        // think before choosing the move, which also lets the UI show the opponent's last move meanwhile
+        prologPlan {
+            adding.belief { matchingBelief { turn(mark) } } triggers {
+                game.think()
+                agent.achieve(goal { moveGoal })
+            }
+        }
 
-        /** A plan for our turn that plays the cell (X, Y) found by [guard], explaining why. */
+        /** A plan to move that plays the cell (X, Y) found by [guard], explaining why. */
         fun move(why: String, guard: JaktaLogicProgrammingScope.() -> Struct) = prologPlan {
-            adding.belief { matchingBelief { turn(mark) } } onlyWhen {
+            adding.goal { matchingGoal { moveGoal } } onlyWhen {
                 satisfies(guard)
             } triggers {
                 agent.print(why, ": playing (", X, ", ", Y, ")")
-                game.think()
                 game.put(X.value(), Y.value(), mark)
             }
         }

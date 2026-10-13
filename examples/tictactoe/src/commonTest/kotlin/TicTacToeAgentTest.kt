@@ -26,13 +26,13 @@ class TicTacToeAgentTest {
     )
 
     /**
-     * Lets the X agent move once from [start] (O is a human who never clicks) and returns the board after it.
+     * Lets the X agent move once from [start] (O is left to a user who never plays) and returns the board after it.
      */
     private fun firstMoveOfX(start: BoardState, check: (BoardState) -> Unit) = runTest {
         val board = Board(start)
         val game = launch {
             mas(NodeBuilders.baseNode()) {
-                ticTacToeNode(board, mapOf(X to Player.AGENT, O to Player.HUMAN), HumanMoves(), thinkTime = {
+                ticTacToeNode(board, mapOf(X to Player.AGENT, O to Player.HUMAN), thinkTime = {
                     Duration.ZERO
                 })
             }.run(CoroutineNodeRunner(SharedMemoryNetwork()))
@@ -53,10 +53,24 @@ class TicTacToeAgentTest {
     }
 
     @Test
+    fun agentAnswersTheUsersMove() = runTest {
+        val board = Board(BoardState(3))
+        lateinit var game: TicTacToeEnvironment
+        val system = mas(NodeBuilders.baseNode()) {
+            game = ticTacToeNode(board, mapOf(X to Player.HUMAN, O to Player.AGENT), thinkTime = { Duration.ZERO })
+        }
+        val run = launch { system.run(CoroutineNodeRunner(SharedMemoryNetwork())) }
+        game.put(1, 1, X)
+        val answered = board.state.first { state -> state.cells.count { it == O } == 1 }
+        run.cancel()
+        assertEquals(X, answered[1, 1])
+    }
+
+    @Test
     fun twoAgentsPlayUntilTheGameIsOver() = runTest {
         val board = Board(BoardState(3))
         mas(NodeBuilders.baseNode()) {
-            ticTacToeNode(board, mapOf(X to Player.AGENT, O to Player.AGENT), HumanMoves(), thinkTime = {
+            ticTacToeNode(board, mapOf(X to Player.AGENT, O to Player.AGENT), thinkTime = {
                 Duration.ZERO
             })
         }.run(CoroutineNodeRunner(SharedMemoryNetwork()))

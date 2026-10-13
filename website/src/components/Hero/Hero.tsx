@@ -20,7 +20,7 @@ export default function Hero() {
           Multi-paradigm and multi-platform by design.
         </p>
         <div className={styles.heroButtons}>
-          <Link className={styles.primaryBtn} to="/docs/getting-started/">
+          <Link className={styles.primaryBtn} to="/docs/tutorials/">
             Get Started
           </Link>
           <Link className={styles.secondaryBtn} to="/docs/intro">
