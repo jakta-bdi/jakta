@@ -30,7 +30,7 @@ or a **context** value, which is then available to the guard and body as `contex
 
 ```kotlin
 adding.belief {
-    takeIf { it.first == "Ping!" }
+    takeIf { it.text == "Ping!" }
 } triggers {
     val (text, sender) = context
     // ...

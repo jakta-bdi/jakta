@@ -13,27 +13,27 @@ import it.unibo.jakta.skills.MessagingSkill
 import it.unibo.jakta.skills.sendTo
 import kotlinx.coroutines.runBlocking
 
-private typealias Message = Pair<String, AgentID>
+private data class ToldBelief(val text: String, val sender: AgentID)
 
 private val alice = BaseAgentID("Alice")
 private val bob = BaseAgentID("Bob")
 
-private fun AgentBuilder<Message, String, Any>.receivesTextMessages() {
+private fun AgentBuilder<ToldBelief, String, Any>.receivesTextMessages() {
     embodiedAs { Any() }
     handlesMessageEvents { message ->
         when (val payload = message.payload) {
-            is String -> AgentUpdate.Belief(setOf(payload to message.sender), emptySet())
+            is String -> AgentUpdate.Belief(setOf(ToldBelief(payload, message.sender)), emptySet())
             else -> null
         }
     }
 }
 
-private val ponger = agent<Message, String, Any>(bob) {
+private val ponger = agent<ToldBelief, String, Any>(bob) {
     receivesTextMessages()
     context(MessagingSkill(node)) {
         hasPlanLibrary {
             adding.belief {
-                takeIf { it.first == "Ping!" }
+                takeIf { it.text == "Ping!" }
             } triggers {
                 val (text, sender) = context
                 agent.print("Received \"$text\" from ${sender.displayName}")
@@ -55,7 +55,7 @@ fun main(): Unit = runBlocking {
         }
         node {
             context(MessagingSkill(node)) {
-                agent<Message, String>(alice) {
+                agent<ToldBelief, String>(alice) {
                     receivesTextMessages()
                     hasInitialGoals {
                         !"sendPing"
@@ -67,7 +67,7 @@ fun main(): Unit = runBlocking {
                             agent.sendTo(bob, "Ping!")
                         }
                         adding.belief {
-                            takeIf { it.first == "Pong!" }
+                            takeIf { it.text == "Pong!" }
                         } triggers {
                             agent.print("Got the pong, stopping.")
                             node.terminateNode()

@@ -13,12 +13,15 @@ This tutorial builds a two-agent *ping-pong* system. Along the way it shows how 
 - react to belief additions with plans;
 - give agents a [skill](../explanation/basic-concepts/skills.md) — here, the ability to send messages.
 
-It only needs `jakta-core`. The complete program is the [`ping-pong`](https://github.com/jakta-bdi/jakta/tree/main/examples/ping-pong) example; run it with `./gradlew :examples:ping-pong:run`.
+It runs in the project from [Getting Started](./index.mdx): put the code in `App.kt`, as in [Hello world](./hello-world.md),
+and run it with `./gradlew run`. The complete program is also the
+[`ping-pong`](https://github.com/jakta-bdi/jakta/tree/main/examples/ping-pong) example in the JaKtA repository.
 
 ## Beliefs and goals are just types
 
 The engine is generic over the belief and goal types.
-Here goals are `String`s and a belief is a received message: its text and its sender.
+Here goals are `String`s, and a belief is a `ToldBelief`: the text another agent told, and who told it.
+It is a type of your own, not the message itself: the agent decides which beliefs it gets from a message.
 
 <details>
 <summary>Imports</summary>
@@ -43,7 +46,7 @@ import kotlinx.coroutines.runBlocking
 </details>
 
 ```kotlin
-private typealias Message = Pair<String, AgentID>
+private data class ToldBelief(val text: String, val sender: AgentID)
 
 private val alice = BaseAgentID("Alice")
 private val bob = BaseAgentID("Bob")
@@ -56,18 +59,18 @@ own state with `handlesMessageEvents`: return an `AgentUpdate` to accept it, or 
 Both agents behave in the same way, so let's write it once as an extension of the agent builder:
 
 ```kotlin
-private fun AgentBuilder<Message, String, Any>.receivesTextMessages() {
+private fun AgentBuilder<ToldBelief, String, Any>.receivesTextMessages() {
     embodiedAs { Any() }
     handlesMessageEvents { message ->
         when (val payload = message.payload) {
-            is String -> AgentUpdate.Belief(setOf(payload to message.sender), emptySet())
+            is String -> AgentUpdate.Belief(setOf(ToldBelief(payload, message.sender)), emptySet())
             else -> null
         }
     }
 }
 ```
 
-`AgentUpdate.Belief(additions, removals)` adds the belief `("Ping!", sender)`, which in turn generates
+`AgentUpdate.Belief(additions, removals)` adds the belief `ToldBelief("Ping!", sender)`, which in turn generates
 a belief-addition event that plans can react to. Perceptions work the same way through `handlesPerceptionEvents`.
 
 ## A reusable agent
@@ -76,12 +79,12 @@ Bob only answers pings, so he is defined once at top level with `agent(id) { }` 
 The block runs for the node the agent joins, so `node` is available to give him the messaging skill:
 
 ```kotlin
-private val ponger = agent<Message, String, Any>(bob) {
+private val ponger = agent<ToldBelief, String, Any>(bob) {
     receivesTextMessages()
     context(MessagingSkill(node)) {
         hasPlanLibrary {
             adding.belief {
-                takeIf { it.first == "Ping!" }
+                takeIf { it.text == "Ping!" }
             } triggers {
                 val (text, sender) = context
                 agent.print("Received \"$text\" from ${sender.displayName}")
@@ -107,7 +110,7 @@ fun main(): Unit = runBlocking {
         }
         node {
             context(MessagingSkill(node)) {
-                agent<Message, String>(alice) {
+                agent<ToldBelief, String>(alice) {
                     receivesTextMessages()
                     hasInitialGoals {
                         !"sendPing"
@@ -119,7 +122,7 @@ fun main(): Unit = runBlocking {
                             agent.sendTo(bob, "Ping!")
                         }
                         adding.belief {
-                            takeIf { it.first == "Pong!" }
+                            takeIf { it.text == "Pong!" }
                         } triggers {
                             agent.print("Got the pong, stopping.")
                             node.terminateNode()

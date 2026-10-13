@@ -16,7 +16,7 @@ See [Beliefs](../explanation/basic-concepts/beliefs.md), [Goals](../explanation/
 [Plans](../explanation/basic-concepts/plans.md).
 
 ```kotlin
-private val ponger = agent<Message, String, Any>(BaseAgentID("Bob")) {
+private val ponger = agent<ToldBelief, String, Any>(BaseAgentID("Bob")) {
     embodiedAs { Any() }
     hasPlanLibrary { /* ... */ }
 }
@@ -33,7 +33,7 @@ mas(NodeBuilders.baseNode()) {
         withAgents(ponger)
     }
     node {
-        agent<Message, String>(BaseAgentID("Alice")) { /* ... */ }
+        agent<ToldBelief, String>(BaseAgentID("Alice")) { /* ... */ }
     }
 }
 ```
@@ -56,7 +56,7 @@ Wrap agents, or plans, in `context(SomeSkill(node)) { ... }`. See [Skills](../ex
 ```kotlin
 node {
     context(MessagingSkill(node)) {
-        agent<Message, String>(BaseAgentID("Alice")) { /* plans can call agent.sendTo(...) */ }
+        agent<ToldBelief, String>(BaseAgentID("Alice")) { /* plans can call agent.sendTo(...) */ }
     }
 }
 ```

@@ -41,12 +41,13 @@ beliefs, which then trigger `adding.belief { }` plans — or returns `null` to i
 ```kotlin
 handlesMessageEvents { message ->
     when (val payload = message.payload) {
-        is String -> AgentUpdate.Belief(setOf(payload to message.sender), emptySet())
+        is String -> AgentUpdate.Belief(setOf(ToldBelief(payload, message.sender)), emptySet())
         else -> null
     }
 }
 ```
 
+Here `ToldBelief(text, sender)` is a data class of the agent's own: beliefs need not be messages.
 `AgentUpdate.Goal(additions, removals)` can be returned instead, to accept a request as a new goal.
 
 The [intermediate tutorial](../tutorials/ping-pong.md) builds a full ping-pong example with these primitives.
