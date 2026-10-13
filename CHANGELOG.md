@@ -1,3 +1,29 @@
+## [1.1.28](https://github.com/jakta-bdi/jakta/compare/1.1.27...1.1.28) (2026-10-13)
+
+### Dependency updates
+
+* **core-deps:** update dependency com.github.ben-manes.caffeine:caffeine to v3.3.1 ([#1005](https://github.com/jakta-bdi/jakta/issues/1005)) ([77bcaa8](https://github.com/jakta-bdi/jakta/commit/77bcaa8f0929a9944de0242abc4042a339fc31ff))
+* **deps:** update dependency org.danilopianini.publish-on-central to v9.2.14 ([#1000](https://github.com/jakta-bdi/jakta/issues/1000)) ([7fe5269](https://github.com/jakta-bdi/jakta/commit/7fe5269345e336a4120ec17e19ab6a88f45b0849))
+* **deps:** update plugin gitsemver to v7.0.25 ([#1002](https://github.com/jakta-bdi/jakta/issues/1002)) ([3fafaf6](https://github.com/jakta-bdi/jakta/commit/3fafaf69c300928a5c424401fc2217f30f50a54e))
+* **deps:** update plugin multijvmtesting to v4.5.10 ([#1001](https://github.com/jakta-bdi/jakta/issues/1001)) ([4578a03](https://github.com/jakta-bdi/jakta/commit/4578a0348e10a2a25ca9f005d777563198681f3a))
+
+## [1.1.27](https://github.com/jakta-bdi/jakta/compare/1.1.26...1.1.27) (2026-10-08)
+
+### Dependency updates
+
+* **core-deps:** update kotlin monorepo to v2.4.21 ([#998](https://github.com/jakta-bdi/jakta/issues/998)) ([272ba61](https://github.com/jakta-bdi/jakta/commit/272ba61abb2d7047d606c25f57a9c3357bbe34ab))
+* **deps:** update dependency org.danilopianini.publish-on-central to v9.2.13 ([#994](https://github.com/jakta-bdi/jakta/issues/994)) ([95124eb](https://github.com/jakta-bdi/jakta/commit/95124eb23023ab09c6e1cc99a1c0201025a1d080))
+* **deps:** update gradle to v9.8.1 ([#993](https://github.com/jakta-bdi/jakta/issues/993)) ([ab9c4ff](https://github.com/jakta-bdi/jakta/commit/ab9c4ffd8f75b2cbb4e0e6f36c891e808b519f3a))
+* **deps:** update plugin kotlin-qa to v1.10.1 ([#996](https://github.com/jakta-bdi/jakta/issues/996)) ([aa63b89](https://github.com/jakta-bdi/jakta/commit/aa63b89d7ea017fdeeba786008254578af3fff45))
+* **deps:** update plugin multijvmtesting to v4.5.8 ([#991](https://github.com/jakta-bdi/jakta/issues/991)) ([de0a630](https://github.com/jakta-bdi/jakta/commit/de0a63026a6ee9ae7fd5f8b71150f9b0162059cc))
+* **deps:** update plugin org.danilopianini.gradle-pre-commit-git-hooks to v2.1.26 ([#995](https://github.com/jakta-bdi/jakta/issues/995)) ([d283718](https://github.com/jakta-bdi/jakta/commit/d2837180e13379cb7c5363d5e385bae3a810cc9f))
+
+## [1.1.26](https://github.com/jakta-bdi/jakta/compare/1.1.25...1.1.26) (2026-10-01)
+
+### Bug Fixes
+
+* **prolog-incarnation:** classic solver bundle issue and interactive Compose Multiplatform examples (blocksworld, tic-tac-toe, cleaning robots) and console BDI demos ([#951](https://github.com/jakta-bdi/jakta/issues/951)) ([c6279fb](https://github.com/jakta-bdi/jakta/commit/c6279fbcc5b4a6ba7abe80a658169f72bdbc2270))
+
 ## [1.1.25](https://github.com/jakta-bdi/jakta/compare/1.1.24...1.1.25) (2026-10-01)
 
 ### Bug Fixes
