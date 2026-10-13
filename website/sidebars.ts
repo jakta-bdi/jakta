@@ -6,12 +6,12 @@ const sidebars: SidebarsConfig = {
   // Diátaxis sections, ordered as a newcomer reads: tutorials and the showcase first, then guides, concepts, reference.
   docSidebar: [
     { type: 'doc', id: 'intro' },
+    { type: 'doc', id: 'tutorials/index', label: 'Getting Started' },
     {
       type: 'category',
       label: 'Tutorials',
       collapsed: false,
       items: [
-        { type: 'doc', id: 'tutorials/index', label: 'Getting Started' },
         'tutorials/hello-world',
         'tutorials/ping-pong',
         'tutorials/thermostat',
