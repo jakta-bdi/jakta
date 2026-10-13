@@ -55,6 +55,9 @@ export default function HelloWorldSection() {
           <Link className="button button--secondary" to="/docs/tutorials/quick-start">
             Run the examples
           </Link>
+          <Link className="button button--secondary" to="/docs/showcase/blocksworld">
+            Try the showcase in your browser
+          </Link>
         </div>
       </div>
       <div className={styles.helloCode}>

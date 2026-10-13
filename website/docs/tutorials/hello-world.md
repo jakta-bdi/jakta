@@ -5,7 +5,8 @@ sidebar_position: 3
 # Basic: Hello world
 
 This is the [`hello-world`](https://github.com/jakta-bdi/jakta/tree/main/examples/hello-world) example.
-It only needs `jakta-core`: beliefs and goals are plain strings, matched with ordinary Kotlin code.
+It uses no incarnation, so it depends on `jakta-core`, `jakta-dsl` and `jakta-api`: beliefs and goals are plain strings,
+matched with ordinary Kotlin code.
 
 <details>
 <summary>Imports</summary>

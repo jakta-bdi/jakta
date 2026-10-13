@@ -24,8 +24,11 @@ and on [npm](https://www.npmjs.com/org/jakta) under the `@jakta` organization.
 
 A JaKtA project needs **two** dependencies:
 - `jakta-core`, which contains the engine and the DSL entry points (`mas`, `node`, `agent`, ...), and
-- (optionally) one [incarnation](../explanation/incarnations/index.md), which fixes how beliefs and goals are represented.
+- one [incarnation](../explanation/incarnations/index.md), which fixes how beliefs and goals are represented.
   If in doubt, start with `jakta-prolog-incarnation`.
+
+The incarnation brings in `jakta-api` and `jakta-dsl`. To use plain Kotlin types without an incarnation,
+as the [tutorials](./hello-world.md) do, depend on `jakta-api` and `jakta-dsl` directly instead.
 
 ## Setup your JaKtA project
 
