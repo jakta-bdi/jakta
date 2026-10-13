@@ -26,9 +26,11 @@ data class RoomBelief(val temperature: Double, val target: Double, val mode: Mod
 private fun Double.roundedToTenths() = (this * 10).roundToInt() / 10.0
 
 /**
- * A thermostat keeping the room within [TOLERANCE] degrees of its target, heating or cooling it with [hvac].
+ * A thermostat keeping the room within [TOLERANCE] degrees of its target, heating or cooling it with the [Hvac]
+ * its node provides.
  */
-fun thermostat(hvac: Hvac) = agent<RoomBelief, String, Any>(BaseAgentID("thermostat")) {
+context(hvac: Hvac)
+fun thermostat() = agent<RoomBelief, String, Any>(BaseAgentID("thermostat")) {
     embodiedAs { Any() }
     handlesPerceptionEvents { perception ->
         when (perception) {
@@ -78,7 +80,9 @@ fun thermostat(hvac: Hvac) = agent<RoomBelief, String, Any>(BaseAgentID("thermos
  */
 suspend fun runThermostat(room: Room, stepTime: Duration): Unit = coroutineScope {
     val home = node(NodeBuilders.baseNode()) {
-        withAgents(thermostat(Hvac(room)))
+        context(Hvac(room)) {
+            withAgents(thermostat())
+        }
     }
     launch { room.simulate(home, stepTime) }
     mas(NodeBuilders.baseNode()) {

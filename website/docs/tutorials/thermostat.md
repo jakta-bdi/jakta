@@ -15,7 +15,7 @@ make the day colder or warmer at any time. Along the way it shows how to:
 - let agents **act** on it through a skill;
 - choose between plans with **guards** over the agent's beliefs.
 
-Like the previous tutorials it only needs `jakta-core`: beliefs are plain Kotlin types, no Prolog involved.
+Like the previous tutorials it uses no incarnation: beliefs are plain Kotlin types, no Prolog involved.
 The complete program is the [`thermostat`](https://github.com/jakta-bdi/jakta/tree/main/examples/thermostat) example,
 and it runs right here in your browser:
 
@@ -120,8 +120,8 @@ class Hvac(private val room: Room) {
 }
 ```
 
-A skill is an ordinary object. The [ping-pong tutorial](./ping-pong.md) gave agents `MessagingSkill` through a
-`context(...)` block; a skill used by a single agent can also simply be passed to it, as below.
+A skill is an ordinary object. As in the [ping-pong tutorial](./ping-pong.md), the agent states that it needs the
+skill with `context(hvac: Hvac)`, and the node it runs on provides it (see [Run it](#6-run-it)).
 See [Skills](../explanation/basic-concepts/skills.md).
 
 :::tip[From an emulated room to real devices]
@@ -168,7 +168,8 @@ private fun Double.roundedToTenths() = (this * 10).roundToInt() / 10.0
 old belief with the new one:
 
 ```kotlin
-fun thermostat(hvac: Hvac) = agent<RoomBelief, String, Any>(BaseAgentID("thermostat")) {
+context(hvac: Hvac)
+fun thermostat() = agent<RoomBelief, String, Any>(BaseAgentID("thermostat")) {
     embodiedAs { Any() }
     handlesPerceptionEvents { perception ->
         when (perception) {
@@ -241,7 +242,9 @@ The room and the agent run side by side: `simulate` drives the room, the MAS run
 ```kotlin
 suspend fun runThermostat(room: Room, stepTime: Duration): Unit = coroutineScope {
     val home = node(NodeBuilders.baseNode()) {
-        withAgents(thermostat(Hvac(room)))
+        context(Hvac(room)) {
+            withAgents(thermostat())
+        }
     }
     launch { room.simulate(home, stepTime) }
     mas(NodeBuilders.baseNode()) {

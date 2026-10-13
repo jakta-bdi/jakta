@@ -35,7 +35,9 @@ To get the node from outside the DSL, build it on its own and add it to the MAS 
 
 ```kotlin
 val home = node(NodeBuilders.baseNode()) {
-    withAgents(thermostat(Hvac(room)))
+    context(Hvac(room)) {
+        withAgents(thermostat())
+    }
 }
 launch { room.simulate(home, stepTime) }
 mas(NodeBuilders.baseNode()) { withNodes(home) }.run(CoroutineNodeRunner(SharedMemoryNetwork()))
@@ -100,9 +102,9 @@ class Hvac(private val room: Room) {
 }
 ```
 
-Pass it to the agents that use it (`thermostat(Hvac(room))`), or make it available to every agent in a block with
-`context(Hvac(room)) { ... }` plus a property such as
-`context(hvac: Hvac) val PlanScope<*, *, *>.hvac get() = hvac`, the way `MessagingSkill` provides `agent.sendTo(...)`.
+The node provides it to its agents with `context(Hvac(room)) { ... }`, and the agent states that it needs it as a
+context parameter, `context(hvac: Hvac) fun thermostat() = agent { ... }`, so that its plans can call `hvac.heat()`.
+See [Skills](../explanation/basic-concepts/skills.md#skills-are-node-level-abilities).
 
 ## With the Prolog incarnation
 
