@@ -27,19 +27,61 @@ For agents with a custom body, write a skill for your node type (see [Give agent
 
 Plan bodies can also always reach the node directly (`node.terminateNode()`, `node.publishEvent(...)`).
 
-## Giving skills to agents
+## Skills are node-level abilities
 
-Wrap agent (or plan) definitions in a `context(...)` block. Every agent defined inside it can use the skill:
+A skill acts on the world through a node: `MessagingSkill` delivers messages through the node, `NodeTerminationSkill`
+stops it, and a custom skill such as the Blocks World one below changes the world the node hosts and reports the
+outcome as a perception on the node. That is why skills are built from a node (the `Skill` base class holds one).
+
+JaKtA therefore encourages you to see a skill as a **requirement** of an agent, which the **node** executing the agent
+satisfies. The agent states what it needs to be able to do; the node decides how it is done. The same agent can then
+run on nodes that provide the skill differently, for instance a simulated world in tests and the real one in
+production, without changing its definition.
+
+### Giving skills at the node level
+
+Wrap the agents of a node in a `context(...)` block. Every agent defined or added inside it can use the skill:
 
 ```kotlin
 node {
     context(MessagingSkill(node)) {
-        agent(alice) {
+        withAgents(ponger())
+        agent<ToldBelief, String>(alice) {
             // plans here can call agent.sendTo(...)
         }
     }
 }
 ```
+
+A reusable agent states the skills it requires as context parameters of the function that defines it:
+
+```kotlin
+context(_: MessagingSkill)
+fun ponger() = agent<ToldBelief, String, Any>(bob) {
+    // plans here can call agent.sendTo(...)
+}
+```
+
+The compiler checks the requirement: `withAgents(ponger())` only compiles where a `MessagingSkill` is in scope,
+so an agent cannot be added to a node that does not provide what it needs.
+The [ping-pong tutorial](../../tutorials/ping-pong.md) builds a complete example this way.
+
+### Agent-specific skills
+
+An agent can also give a skill to itself, since `node` is available inside `agent { }`, or to only some of its plans:
+
+```kotlin
+agent<ToldBelief, String, Any>(bob) {
+    context(MessagingSkill(node)) {
+        hasPlanLibrary {
+            // only these plans can call agent.sendTo(...)
+        }
+    }
+}
+```
+
+This works, but the agent then decides on its own how the skill is implemented, and it can no longer be reused on a
+node that provides the skill differently. Prefer stating the requirement and letting the node satisfy it.
 
 ## Writing your own skill
 
