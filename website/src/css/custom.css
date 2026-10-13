@@ -88,3 +88,10 @@ html {
     max-width: 75%;
   }
 }
+
+/* Sets the Prolog incarnation docs apart from the main sections in the sidebar */
+.sidebar-separator {
+  margin: 0.75rem 0.5rem;
+  border: 0;
+  border-top: 1px solid var(--ifm-toc-border-color);
+}

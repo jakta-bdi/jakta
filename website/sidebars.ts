@@ -33,16 +33,6 @@ const sidebars: SidebarsConfig = {
         'how-to/wait-for-events',
         'how-to/runtime-agents',
         'how-to/custom-incarnation',
-        {
-          type: 'category',
-          label: 'Prolog incarnation',
-          items: [
-            'how-to/prolog/guards-and-rules',
-            'how-to/prolog/perceptions',
-            'how-to/prolog/kqml',
-            'how-to/prolog/port-jason',
-          ],
-        },
         'how-to/alchemist',
       ],
     },
@@ -62,18 +52,6 @@ const sidebars: SidebarsConfig = {
           label: 'Incarnations',
           link: { type: 'doc', id: 'explanation/incarnations/index' },
           items: [
-            {
-              type: 'category',
-              label: 'Prolog incarnation',
-              link: { type: 'doc', id: 'explanation/incarnations/prolog/index' },
-              items: [
-                'explanation/incarnations/prolog/beliefs-and-goals',
-                'explanation/incarnations/prolog/prolog-plans',
-                'explanation/incarnations/prolog/kqml',
-                'explanation/incarnations/prolog/2p-kt',
-                'explanation/incarnations/prolog/caveats',
-              ],
-            },
             'explanation/incarnations/string',
             'explanation/incarnations/alchemist',
           ],
@@ -87,7 +65,6 @@ const sidebars: SidebarsConfig = {
       items: [
         'reference/dsl',
         'reference/modules',
-        'reference/prolog-incarnation',
         'reference/string-incarnation',
         {
           type: 'category',
@@ -104,6 +81,37 @@ const sidebars: SidebarsConfig = {
             { type: 'link', label: 'Older versions (javadoc.io)', href: 'https://javadoc.io/doc/it.unibo.jakta' },
           ],
         },
+      ],
+    },
+    // The Prolog incarnation has its own Diátaxis sections, set apart for jakta-prolog-incarnation users.
+    { type: 'html', value: '<hr class="sidebar-separator" />' },
+    {
+      type: 'category',
+      label: 'Prolog Incarnation',
+      link: { type: 'doc', id: 'explanation/incarnations/prolog/index' },
+      items: [
+        {
+          type: 'category',
+          label: 'How-to Guides',
+          items: [
+            'how-to/prolog/guards-and-rules',
+            'how-to/prolog/perceptions',
+            'how-to/prolog/kqml',
+            'how-to/prolog/port-jason',
+          ],
+        },
+        {
+          type: 'category',
+          label: 'Explanation',
+          items: [
+            'explanation/incarnations/prolog/beliefs-and-goals',
+            'explanation/incarnations/prolog/prolog-plans',
+            'explanation/incarnations/prolog/kqml',
+            'explanation/incarnations/prolog/2p-kt',
+            'explanation/incarnations/prolog/caveats',
+          ],
+        },
+        { type: 'doc', id: 'reference/prolog-incarnation', label: 'Reference' },
       ],
     },
   ],
