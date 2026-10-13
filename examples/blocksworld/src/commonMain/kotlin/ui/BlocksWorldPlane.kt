@@ -189,6 +189,9 @@ fun BlocksWorldPlane(
     var armRestColumn by remember { mutableStateOf<Int?>(null) }
     var armFromColumn by remember { mutableStateOf<Int?>(null) }
     val progress = remember { Animatable(1f) }
+
+    // the move the progress refers to: until its animation starts, a new move is drawn at its beginning
+    var animatedMove by remember { mutableStateOf<Move?>(null) }
     val activeMove = move?.takeUnless { it.isDoneIn(stacks) }
     val sourceStack = activeMove?.let { m -> stacks.firstOrNull { m.block in it } }
     val destinationStack = activeMove?.destination?.let { d -> stacks.firstOrNull { d in it } }
@@ -206,6 +209,7 @@ fun BlocksWorldPlane(
         if (move != null) {
             armFromColumn = armRestColumn
             progress.snapTo(0f)
+            animatedMove = move
             progress.animateTo(
                 1f,
                 tween((moveDuration.inWholeMilliseconds * ARM_SHARE_OF_DELAY).toInt(), easing = LinearEasing),
@@ -288,8 +292,9 @@ fun BlocksWorldPlane(
             } else {
                 val pick = layout.blockRect(columns.getValue(sourceStack.first()), sourceStack.lastIndex)
                 val drop = layout.blockRect(destinationColumn, destinationStack?.size ?: 0)
-                val path = ArmPath(armFromColumn?.let(layout::columnX) ?: restX, pick, drop, layout.armUpY)
-                val pose = path.poseAt(progress.value)
+                val started = animatedMove == activeMove
+                val fromX = armFromColumn?.takeIf { started }?.let(layout::columnX) ?: restX
+                val pose = ArmPath(fromX, pick, drop, layout.armUpY).poseAt(if (started) progress.value else 0f)
                 val carried =
                     Rect(Offset(pose.x - layout.blockSize / 2, pose.gripperY), Size(layout.blockSize, layout.blockSize))
                 drawBlock(
