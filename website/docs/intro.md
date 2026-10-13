@@ -41,11 +41,12 @@ The [Prolog incarnation](./explanation/incarnations/prolog/index.md) makes them 
 
 ## Where to go next
 
-- [**Get started**](./tutorials/index.mdx): add JaKtA to a project, then write agents in three short tutorials.
+- [**Tutorials**](./tutorials/index.mdx): add JaKtA to a project, then write agents in three short tutorials.
 - [**Showcase**](./showcase/blocksworld.md): run example multi-agent systems in your browser.
-- [**Concepts**](./explanation/basic-concepts/bdi.mdx): the BDI model, and how JaKtA runs agents.
-- [**Prolog incarnation**](./explanation/incarnations/prolog/index.md): for agents written with logic, and for
-  [porting Jason agents](./how-to/prolog/port-jason.md).
+- [**How-to guides**](./how-to/create-mas.md): recipes for specific tasks, such as
+  [porting a Jason agent](./how-to/prolog/port-jason.md).
+- [**Explanation**](./explanation/basic-concepts/bdi.mdx): the BDI model, incarnations, and how JaKtA runs agents.
+- [**Reference**](./reference/dsl.md): the DSL, the modules, and the API docs.
 
 :::info[Coming from JaKtA 0.x?]
 The 1.x DSL is not source-compatible with 0.x. See [JaKtA 0.x](/docs/jakta-0x) for the old version and how its

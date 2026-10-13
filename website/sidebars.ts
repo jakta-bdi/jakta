@@ -3,12 +3,12 @@ import type {SidebarsConfig} from '@docusaurus/plugin-content-docs';
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 const sidebars: SidebarsConfig = {
-  // Ordered as a newcomer reads: what JaKtA is, a first agent, what it can do, then the concepts.
+  // Diátaxis sections, ordered as a newcomer reads: tutorials and the showcase first, then guides, concepts, reference.
   docSidebar: [
     { type: 'doc', id: 'intro' },
     {
       type: 'category',
-      label: 'Get Started',
+      label: 'Tutorials',
       collapsed: false,
       link: { type: 'doc', id: 'tutorials/index' },
       items: [
@@ -25,7 +25,30 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
-      label: 'Concepts',
+      label: 'How-to Guides',
+      items: [
+        'how-to/create-mas',
+        'how-to/connect-environment',
+        'how-to/custom-body',
+        'how-to/wait-for-events',
+        'how-to/runtime-agents',
+        'how-to/custom-incarnation',
+        {
+          type: 'category',
+          label: 'Prolog incarnation',
+          items: [
+            'how-to/prolog/guards-and-rules',
+            'how-to/prolog/perceptions',
+            'how-to/prolog/kqml',
+            'how-to/prolog/port-jason',
+          ],
+        },
+        'how-to/alchemist',
+      ],
+    },
+    {
+      type: 'category',
+      label: 'Explanation',
       items: [
         'explanation/basic-concepts/bdi',
         'explanation/basic-concepts/beliefs',
@@ -34,47 +57,28 @@ const sidebars: SidebarsConfig = {
         { type: 'doc', id: 'explanation/basic-concepts/skills', label: 'Skills' },
         'explanation/nodes',
         'explanation/communication',
-        { type: 'doc', id: 'explanation/incarnations/index', label: 'Incarnations' },
+        {
+          type: 'category',
+          label: 'Incarnations',
+          link: { type: 'doc', id: 'explanation/incarnations/index' },
+          items: [
+            {
+              type: 'category',
+              label: 'Prolog incarnation',
+              link: { type: 'doc', id: 'explanation/incarnations/prolog/index' },
+              items: [
+                'explanation/incarnations/prolog/beliefs-and-goals',
+                'explanation/incarnations/prolog/prolog-plans',
+                'explanation/incarnations/prolog/kqml',
+                'explanation/incarnations/prolog/2p-kt',
+                'explanation/incarnations/prolog/caveats',
+              ],
+            },
+            'explanation/incarnations/string',
+            'explanation/incarnations/alchemist',
+          ],
+        },
         { type: 'doc', id: 'explanation/execution-model', label: 'Under the hood: execution model' },
-      ],
-    },
-    {
-      type: 'category',
-      label: 'Guides',
-      items: [
-        'how-to/create-mas',
-        'how-to/connect-environment',
-        'how-to/custom-body',
-        'how-to/wait-for-events',
-        'how-to/runtime-agents',
-        'how-to/custom-incarnation',
-      ],
-    },
-    {
-      type: 'category',
-      label: 'Prolog Incarnation',
-      link: { type: 'doc', id: 'explanation/incarnations/prolog/index' },
-      items: [
-        'explanation/incarnations/prolog/beliefs-and-goals',
-        'explanation/incarnations/prolog/prolog-plans',
-        'how-to/prolog/guards-and-rules',
-        'how-to/prolog/perceptions',
-        'explanation/incarnations/prolog/kqml',
-        'how-to/prolog/kqml',
-        'how-to/prolog/port-jason',
-        'explanation/incarnations/prolog/2p-kt',
-        'explanation/incarnations/prolog/caveats',
-        { type: 'doc', id: 'reference/prolog-incarnation', label: 'Reference' },
-      ],
-    },
-    {
-      type: 'category',
-      label: 'Other Incarnations',
-      items: [
-        'explanation/incarnations/string',
-        { type: 'doc', id: 'reference/string-incarnation', label: 'String Incarnation Reference' },
-        'explanation/incarnations/alchemist',
-        'how-to/alchemist',
       ],
     },
     {
@@ -83,6 +87,8 @@ const sidebars: SidebarsConfig = {
       items: [
         'reference/dsl',
         'reference/modules',
+        'reference/prolog-incarnation',
+        'reference/string-incarnation',
         {
           type: 'category',
           label: 'API',
