@@ -67,29 +67,24 @@ class Room(initial: RoomState) {
     }
 }
 
-/** A reading of the thermometer: the room is at [degrees]. */
-data class TemperatureReading(val degrees: Double) : Perception
-
-/** The thermostat's dial was set to keep the room at [degrees]. */
-data class TargetSet(val degrees: Double) : Perception
-
-/** The heating and cooling system switched to [mode]. */
-data class ModeChanged(val mode: Mode) : Perception
+/**
+ * What the thermostat perceives: the readings of its display.
+ *
+ * @property temperature the temperature of the room.
+ * @property target the temperature to keep.
+ * @property mode what the heating and cooling system is doing.
+ */
+data class RoomReading(val temperature: Double, val target: Double, val mode: Mode) : Perception
 
 /**
- * Lets time pass in the [room], one step every [stepTime], and streams what its devices sense to the agents of [node]:
- * the thermometer reads the temperature at every step, the dial and the heating and cooling system report changes.
+ * Lets time pass in the [room], one step every [stepTime], and shows each new state to the agents of [node].
  */
 suspend fun Room.simulate(node: Node<*>, stepTime: Duration) {
-    var last: RoomState? = null
     while (true) {
         delay(stepTime)
         step()
-        val now = state.value
-        if (now.target != last?.target) node.publishEvent(TargetSet(now.target))
-        if (now.mode != last?.mode) node.publishEvent(ModeChanged(now.mode))
-        node.publishEvent(TemperatureReading(now.temperature))
-        last = now
+        val state = state.value
+        node.publishEvent(RoomReading(state.temperature, state.target, state.mode))
     }
 }
 

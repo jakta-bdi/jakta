@@ -18,7 +18,7 @@ walked through in the [thermostat tutorial](../tutorials/thermostat.md).
 Any class implementing `AgentEvent.External.Perception` (from `it.unibo.jakta.event`):
 
 ```kotlin
-data class TemperatureReading(val degrees: Double) : Perception
+data class RoomReading(val temperature: Double, val target: Double, val mode: Mode) : Perception
 ```
 
 Keep perceptions separate from the belief type: each agent decides what a perception means to it.
@@ -28,7 +28,7 @@ Keep perceptions separate from the belief type: each agent decides what a percep
 Anything holding the node can publish, e.g. the external environment's own loop:
 
 ```kotlin
-node.publishEvent(TemperatureReading(state.value.temperature))
+node.publishEvent(RoomReading(state.temperature, state.target, state.mode))
 ```
 
 To get the node from outside the DSL, build it on its own and add it to the MAS with `withNodes`:
@@ -61,19 +61,19 @@ Return an `AgentUpdate.Belief(additions, removals)` from `handlesPerceptionEvent
 
 ```kotlin
 handlesPerceptionEvents { perception ->
-    val room = beliefs.single()
-    val updated = when (perception) {
-        is TemperatureReading -> room.copy(temperature = perception.degrees)
-        is TargetSet -> room.copy(target = perception.degrees)
-        else -> room
+    when (perception) {
+        is RoomReading -> {
+            val belief = RoomBelief(perception.temperature, perception.target, perception.mode)
+            if (belief in beliefs) null else AgentUpdate.Belief(setOf(belief), beliefs.toSet())
+        }
+
+        else -> null
     }
-    if (updated == room) null else AgentUpdate.Belief(setOf(updated), setOf(room))
 }
 ```
 
-Beliefs can be objects of your own type: here each perception updates a field of the agent's `RoomBelief`, and the
-update replaces the old object with the new one. Returning `null` when nothing changed generates events only when
-something did.
+Replacing the old belief with the new one keeps the belief base up to date, and ignoring a reading equal to the
+current belief generates events only when something changed.
 
 ## React to them
 

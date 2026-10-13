@@ -30,19 +30,15 @@ private fun Double.roundedToTenths() = (this * 10).roundToInt() / 10.0
  */
 fun thermostat(hvac: Hvac) = agent<RoomBelief, String, Any>(BaseAgentID("thermostat")) {
     embodiedAs { Any() }
-    believes {
-        // no temperature read yet: NaN fails every comparison, so no plan applies until the first reading
-        +RoomBelief(temperature = Double.NaN, target = 20.0, mode = Mode.OFF)
-    }
     handlesPerceptionEvents { perception ->
-        val room = beliefs.single()
-        val updated = when (perception) {
-            is TemperatureReading -> room.copy(temperature = perception.degrees.roundedToTenths())
-            is TargetSet -> room.copy(target = perception.degrees)
-            is ModeChanged -> room.copy(mode = perception.mode)
-            else -> room
+        when (perception) {
+            is RoomReading -> {
+                val belief = RoomBelief(perception.temperature.roundedToTenths(), perception.target, perception.mode)
+                if (belief in beliefs) null else AgentUpdate.Belief(setOf(belief), beliefs.toSet())
+            }
+
+            else -> null
         }
-        if (updated == room) null else AgentUpdate.Belief(setOf(updated), setOf(room))
     }
     hasPlanLibrary {
         adding.belief {

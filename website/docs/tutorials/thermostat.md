@@ -28,7 +28,7 @@ and it runs right here in your browser:
 
 ```mermaid
 flowchart LR
-    room[(Room)] -- "TemperatureReading, TargetSet, ModeChanged" --> handler[handlesPerceptionEvents]
+    room[(Room)] -- "RoomReading, every step" --> handler[handlesPerceptionEvents]
     handler -- "AgentUpdate.Belief" --> beliefs[(Beliefs)]
     beliefs -- "Temperature added" --> plans[Plans]
     plans -- "hvac.heat() / cool() / off()" --> room
@@ -89,34 +89,24 @@ the agent likes it or not.
 
 ## 2. Perceive it
 
-A **perception** is any class implementing `AgentEvent.External.Perception`. The room has three devices, and each
-one streams what it senses as a perception of its own, as real sensors would: the thermometer reads the temperature,
-the dial reports the target it is set to, and the heating and cooling system reports when it switches.
+A **perception** is any class implementing `AgentEvent.External.Perception`. The thermostat perceives what its
+display shows:
 
 ```kotlin
-data class TemperatureReading(val degrees: Double) : Perception
-
-data class TargetSet(val degrees: Double) : Perception
-
-data class ModeChanged(val mode: Mode) : Perception
+data class RoomReading(val temperature: Double, val target: Double, val mode: Mode) : Perception
 
 suspend fun Room.simulate(node: Node<*>, stepTime: Duration) {
-    var last: RoomState? = null
     while (true) {
         delay(stepTime)
         step()
-        val now = state.value
-        if (now.target != last?.target) node.publishEvent(TargetSet(now.target))
-        if (now.mode != last?.mode) node.publishEvent(ModeChanged(now.mode))
-        node.publishEvent(TemperatureReading(now.temperature))
-        last = now
+        val state = state.value
+        node.publishEvent(RoomReading(state.temperature, state.target, state.mode))
     }
 }
 ```
 
-`simulate` lets time pass and publishes the perceptions on the node: every agent of the node receives them.
-The thermometer reads the temperature at every step, while the dial and the system speak only when they change,
-and once at the start. The agent never polls the room; the room tells it what changed.
+`simulate` lets time pass and, after every step, publishes a reading on the node: every agent of the node receives
+it. The agent never polls the room; the room tells it what changed.
 
 ## 3. Act on it
 
@@ -137,14 +127,13 @@ See [Skills](../explanation/basic-concepts/skills.md).
 :::tip[From an emulated room to real devices]
 The room here is an emulated external system, so the tutorial runs anywhere, even in the browser. The same structure connects agents
 to any external system, such as real sensors and actuators: a loop reading a real thermometer publishes the
-`TemperatureReading`s instead of `simulate`, and `Hvac` switches a real heating and cooling system instead of changing `Room`.
+`RoomReading`s instead of `simulate`, and `Hvac` switches a real heating and cooling system instead of changing `Room`.
 The agent does not change: it still perceives readings and acts through the skill.
 :::
 
 ## 4. Turn perceptions into beliefs
 
-The agent decides what a perception means to it. Whatever the device, it updates a single belief about the room,
-an object of your own type:
+The agent decides what a perception means to it. Its belief about the room is a single data class:
 
 <details>
 <summary>Imports of <code>Thermostat.kt</code></summary>
@@ -175,35 +164,29 @@ data class RoomBelief(val temperature: Double, val target: Double, val mode: Mod
 private fun Double.roundedToTenths() = (this * 10).roundToInt() / 10.0
 ```
 
-The agent starts believing it knows nothing about the temperature yet. `handlesPerceptionEvents` then copies the
-current belief with the field each perception tells about, and returns an `AgentUpdate.Belief(additions, removals)`
-that replaces the old belief with the new one:
+`handlesPerceptionEvents` turns each reading into an `AgentUpdate.Belief(additions, removals)`, which replaces the
+old belief with the new one:
 
 ```kotlin
 fun thermostat(hvac: Hvac) = agent<RoomBelief, String, Any>(BaseAgentID("thermostat")) {
     embodiedAs { Any() }
-    believes {
-        // no temperature read yet: NaN fails every comparison, so no plan applies until the first reading
-        +RoomBelief(temperature = Double.NaN, target = 20.0, mode = Mode.OFF)
-    }
     handlesPerceptionEvents { perception ->
-        val room = beliefs.single()
-        val updated = when (perception) {
-            is TemperatureReading -> room.copy(temperature = perception.degrees.roundedToTenths())
-            is TargetSet -> room.copy(target = perception.degrees)
-            is ModeChanged -> room.copy(mode = perception.mode)
-            else -> room
+        when (perception) {
+            is RoomReading -> {
+                val belief = RoomBelief(perception.temperature.roundedToTenths(), perception.target, perception.mode)
+                if (belief in beliefs) null else AgentUpdate.Belief(setOf(belief), beliefs.toSet())
+            }
+
+            else -> null
         }
-        if (updated == room) null else AgentUpdate.Belief(setOf(updated), setOf(room))
     }
     // the plans, below
 }
 ```
 
 The agent holds one belief about the room at a time, and each change generates one *belief addition* event, for the
-new `RoomBelief`. A perception that changes nothing is ignored: rounding to tenths of a degree keeps the agent from
-reacting to differences no thermostat would display. Until the first reading the temperature is `NaN`, which fails
-every comparison in the plans below, so the agent does nothing before it knows the temperature.
+new `RoomBelief`. A reading equal to the current belief is ignored: rounding to tenths of a degree keeps the agent
+from reacting to differences no thermostat would display.
 
 ## 5. Choose what to do with guards
 
@@ -279,8 +262,8 @@ what the thermostat prints.
 - Drag the room temperature below the target: the agent starts heating; above it, cooling.
 - Set the outside to -10 °C: the heating cannot keep up, and the agent keeps heating at full power.
 - Add a `Mode.ECO` with less power, and a plan that uses it when the temperature is only slightly low.
-- Add a second room with its own thermostat on the same node: both receive every perception, so give the
-  perceptions a room name and let each agent ignore the other room's.
+- Add a second room with its own thermostat on the same node: both receive every reading, so give `RoomReading` a
+  room name and let each agent ignore the other room's readings.
 
 ## Going further
 
