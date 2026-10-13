@@ -52,6 +52,7 @@ import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
@@ -325,6 +326,49 @@ class TestKQMLMessaging {
 
         run(aliceNode, receiver(bob), receiver(carol))
         assertEquals(setOf(bob to alice, carol to alice), adopted)
+    }
+
+    @Test
+    fun `test achieve triggers a plan without annotations`() = runTest {
+        var achieved = false
+        val aliceNode = masNode(alice) {
+            plans { node ->
+                context(MessagingSkill(node)) {
+                    prologPlan {
+                        adding.goal {
+                            matchingGoal { startGoal }
+                        } triggers {
+                            agent.delegateAchieveTo(bob, goal { delegatedGoal })
+                            node.terminateNode()
+                        }
+                    }
+                }
+            }
+        }
+
+        val bobNode = masNode(bob) {
+            plans { node ->
+                prologPlan {
+                    adding.goal {
+                        matchingGoal { startGoal }
+                    } triggers {
+                        delay(10.seconds)
+                        node.terminateNode()
+                    }
+                }
+                prologPlan {
+                    adding.goal {
+                        matchingGoal { delegatedGoal }
+                    } triggers {
+                        achieved = true
+                        node.terminateNode()
+                    }
+                }
+            }
+        }
+
+        run(aliceNode, bobNode)
+        assertTrue(achieved, "A delegated goal must trigger a plan whose trigger has no annotations")
     }
 
     // TODO this is currently failing as the dropping of goals is not correctly implemented
