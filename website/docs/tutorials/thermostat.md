@@ -124,6 +124,13 @@ A skill is an ordinary object. The [ping-pong tutorial](./ping-pong.md) gave age
 `context(...)` block; a skill used by a single agent can also simply be passed to it, as below.
 See [Skills](../explanation/basic-concepts/skills.md).
 
+:::tip[From a simulation to real devices]
+The room here is a simulation, so the tutorial runs anywhere, even in the browser. The same structure connects agents
+to any external system, such as real sensors and actuators: a loop reading a real thermometer publishes the
+`RoomReading`s instead of `simulate`, and `Hvac` switches a real heating and cooling system instead of changing `Room`.
+The agent does not change: it still perceives readings and acts through the skill.
+:::
+
 ## 4. Turn perceptions into beliefs
 
 The agent decides what a perception means to it. Its beliefs are a small sealed hierarchy:
