@@ -9,9 +9,9 @@ import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.core.Term
 import it.unibo.tuprolog.solve.Solution
 import it.unibo.tuprolog.solve.Solver
-import it.unibo.tuprolog.solve.classic.ClassicSolverFactory
 import it.unibo.tuprolog.solve.flags.TrackVariables
 import it.unibo.tuprolog.solve.flags.Unknown
+import it.unibo.tuprolog.solve.prolog.PrologSolverFactory
 import it.unibo.tuprolog.unify.AbstractUnificator
 
 /**
@@ -122,7 +122,7 @@ object JaktaSolver {
      * Factory method to create a new solver instance with a loaded theory.
      */
     // referenced directly: the by-name lookup behind Solver.prolog fails in bundled JS apps (webpack)
-    fun get(theory: Iterable<Clause>): Solver = ClassicSolverFactory
+    fun get(theory: Iterable<Clause>): Solver = PrologSolverFactory
         .newBuilder()
         .unificator(annotationUnificator)
         .staticKb(theory)
