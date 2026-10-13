@@ -1,3 +1,12 @@
+## [1.1.28](https://github.com/jakta-bdi/jakta/compare/1.1.27...1.1.28) (2026-10-13)
+
+### Dependency updates
+
+* **core-deps:** update dependency com.github.ben-manes.caffeine:caffeine to v3.3.1 ([#1005](https://github.com/jakta-bdi/jakta/issues/1005)) ([77bcaa8](https://github.com/jakta-bdi/jakta/commit/77bcaa8f0929a9944de0242abc4042a339fc31ff))
+* **deps:** update dependency org.danilopianini.publish-on-central to v9.2.14 ([#1000](https://github.com/jakta-bdi/jakta/issues/1000)) ([7fe5269](https://github.com/jakta-bdi/jakta/commit/7fe5269345e336a4120ec17e19ab6a88f45b0849))
+* **deps:** update plugin gitsemver to v7.0.25 ([#1002](https://github.com/jakta-bdi/jakta/issues/1002)) ([3fafaf6](https://github.com/jakta-bdi/jakta/commit/3fafaf69c300928a5c424401fc2217f30f50a54e))
+* **deps:** update plugin multijvmtesting to v4.5.10 ([#1001](https://github.com/jakta-bdi/jakta/issues/1001)) ([4578a03](https://github.com/jakta-bdi/jakta/commit/4578a0348e10a2a25ca9f005d777563198681f3a))
+
 ## [1.1.27](https://github.com/jakta-bdi/jakta/compare/1.1.26...1.1.27) (2026-10-08)
 
 ### Dependency updates
