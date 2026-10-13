@@ -10,8 +10,8 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: 'Tutorials',
       collapsed: false,
-      link: { type: 'doc', id: 'tutorials/index' },
       items: [
+        { type: 'doc', id: 'tutorials/index', label: 'Getting Started' },
         'tutorials/hello-world',
         'tutorials/ping-pong',
         'tutorials/thermostat',
