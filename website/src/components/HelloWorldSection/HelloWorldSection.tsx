@@ -52,9 +52,6 @@ export default function HelloWorldSection() {
           <Link className="button button--primary" to="/docs/tutorials/hello-world">
             Walk through the example
           </Link>
-          <Link className="button button--secondary" to="/docs/tutorials/quick-start">
-            Run the examples
-          </Link>
           <Link className="button button--secondary" to="/docs/showcase/blocksworld">
             Try the showcase in your browser
           </Link>

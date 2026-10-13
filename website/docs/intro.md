@@ -4,7 +4,7 @@ sidebar_position: 1
 
 # What is JaKtA?
 
-JaKtA is a [BDI](https://cdn.aaai.org/ICMAS/1995/ICMAS95-042.pdf) agent-oriented programming framework
+JaKtA is a [BDI](./explanation/basic-concepts/bdi.mdx) agent-oriented programming framework
 for [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform.html).
 Agents have **beliefs** about the world, **goals** to achieve, and **plans** that say how to achieve them.
 You write all three with a Kotlin DSL, and plan bodies are ordinary `suspend` Kotlin code:
