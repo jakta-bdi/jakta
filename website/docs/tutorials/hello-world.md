@@ -4,9 +4,11 @@ sidebar_position: 3
 
 # Basic: Hello world
 
-This is the [`hello-world`](https://github.com/jakta-bdi/jakta/tree/main/examples/hello-world) example.
-It uses no incarnation, so it depends on `jakta-core`, `jakta-dsl` and `jakta-api`: beliefs and goals are plain strings,
-matched with ordinary Kotlin code.
+Your first agent says hello and stops. Beliefs and goals are plain strings, matched with ordinary Kotlin code,
+so the project from [Getting Started](./index.mdx) has everything it needs.
+
+Replace the content of `app/src/main/kotlin/org/example/App.kt` with the code below, keeping its first line,
+`package org.example`, and delete the generated test, `app/src/test/kotlin/org/example/AppTest.kt`.
 
 <details>
 <summary>Imports</summary>
@@ -94,10 +96,19 @@ mas(NodeBuilders.baseNode()) {
 }.run(CoroutineNodeRunner(SharedMemoryNetwork()))
 ```
 
-Run it with:
+Run it from the project folder:
 
 ```bash
-./gradlew :examples:hello-world:run
+./gradlew run
 ```
+
+The agent prints its message through the logger, with its id:
+
+```text
+Assert: (Agent-1caa7468-e043-462f-ad5b-799f3f7591d2) Hello, world!
+```
+
+The same code is the [`hello-world`](https://github.com/jakta-bdi/jakta/tree/main/examples/hello-world) example in the
+JaKtA repository, where it runs with `./gradlew :examples:hello-world:run`.
 
 Next: learn about [beliefs](../explanation/basic-concepts/beliefs.md), or continue with [Intermediate: Ping-pong agents](./ping-pong.md).
