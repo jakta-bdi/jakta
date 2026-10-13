@@ -37,7 +37,7 @@ the node the agent lives in. The [Hello world tutorial](./tutorials/hello-world.
 
 Beliefs and goals here are plain strings, but they can be any type: an
 [incarnation](./explanation/incarnations/index.md) decides what they are and how plans match them.
-The [Prolog incarnation](./explanation/incarnations/prolog/index.md) makes them Prolog terms, as in Jason.
+The [Prolog incarnation](./explanation/incarnations/prolog/index.md) makes them Prolog terms, as in [Jason](https://jason-lang.github.io/).
 
 ## Where to go next
 
@@ -54,7 +54,3 @@ Using `jakta-prolog-incarnation`? Its guides, explanations and reference have [t
 The 1.x DSL is not source-compatible with 0.x. See [JaKtA 0.x](/docs/jakta-0x) for the old version and how its
 concepts map to 1.x, and the [JaKtA 1.x redesign](./history/jakta-1-x.md) for the ideas behind it.
 :::
-
----
-
-Source reference: [Blending BDI Agents with Object-Oriented and Functional Programming with JaKtA](https://link.springer.com/article/10.1007/s42979-024-03244-y)
