@@ -44,23 +44,23 @@ fun thermostat() = agent<RoomBelief, String, Any>(BaseAgentID("thermostat")) {
     }
     hasPlanLibrary {
         adding.belief {
-            this
+            takeIf { it.temperature < it.target - TOLERANCE }
         } onlyWhen {
-            context.takeIf { it.temperature < it.target - TOLERANCE && it.mode != Mode.HEATING }
+            context.takeIf { it.mode != Mode.HEATING }
         } triggers {
             agent.print("It's ${context.temperature}°C, heating up to ${context.target}°C")
             hvac.heat()
         }
         adding.belief {
-            this
+            takeIf { it.temperature > it.target + TOLERANCE }
         } onlyWhen {
-            context.takeIf { it.temperature > it.target + TOLERANCE && it.mode != Mode.COOLING }
+            context.takeIf { it.mode != Mode.COOLING }
         } triggers {
             agent.print("It's ${context.temperature}°C, cooling down to ${context.target}°C")
             hvac.cool()
         }
         adding.belief {
-            this
+            takeIf { it.mode != Mode.OFF }
         } onlyWhen {
             val reached = when (context.mode) {
                 Mode.HEATING -> context.temperature >= context.target

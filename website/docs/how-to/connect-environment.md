@@ -83,9 +83,9 @@ A belief addition triggers the plans whose trigger accepts the new belief and wh
 
 ```kotlin
 adding.belief {
-    this
+    takeIf { it.temperature < it.target - TOLERANCE }
 } onlyWhen {
-    context.takeIf { it.temperature < it.target - TOLERANCE }
+    context.takeIf { it.mode != Mode.HEATING }
 } triggers {
     hvac.heat()
 }

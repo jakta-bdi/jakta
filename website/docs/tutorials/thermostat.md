@@ -191,29 +191,30 @@ from reacting to differences no thermostat would display.
 
 ## 5. Choose what to do with guards
 
-The agent has no goals: it is purely reactive. Every new `RoomBelief` triggers three plans, and their
-**guards** — `onlyWhen { }`, which sees the trigger's `context` and the agent's `beliefs` — decide which one applies:
+The agent has no goals: it is purely reactive. Each new `RoomBelief` is offered to three plans. A plan's **trigger**
+decides whether the plan is relevant to the new belief, and its **guard** — `onlyWhen { }`, which sees the trigger's
+`context` and the agent's `beliefs` — whether it applies right now:
 
 ```kotlin
 hasPlanLibrary {
     adding.belief {
-        this
+        takeIf { it.temperature < it.target - TOLERANCE }
     } onlyWhen {
-        context.takeIf { it.temperature < it.target - TOLERANCE && it.mode != Mode.HEATING }
+        context.takeIf { it.mode != Mode.HEATING }
     } triggers {
         agent.print("It's ${context.temperature}°C, heating up to ${context.target}°C")
         hvac.heat()
     }
     adding.belief {
-        this
+        takeIf { it.temperature > it.target + TOLERANCE }
     } onlyWhen {
-        context.takeIf { it.temperature > it.target + TOLERANCE && it.mode != Mode.COOLING }
+        context.takeIf { it.mode != Mode.COOLING }
     } triggers {
         agent.print("It's ${context.temperature}°C, cooling down to ${context.target}°C")
         hvac.cool()
     }
     adding.belief {
-        this
+        takeIf { it.mode != Mode.OFF }
     } onlyWhen {
         val reached = when (context.mode) {
             Mode.HEATING -> context.temperature >= context.target
@@ -228,10 +229,13 @@ hasPlanLibrary {
 }
 ```
 
-- The **trigger** `this` makes a plan relevant to every new belief about the room, and passes it on as the plan's
-  `context`: changing the target alone is enough to make the thermostat react.
-- The **guard** returns the context when the plan is applicable in the current situation, or `null` otherwise.
-  When no guard holds, nothing happens: the temperature is fine, or the system is already doing the right thing.
+- The **trigger** says what situation the plan is about: `takeIf { it.temperature < it.target - TOLERANCE }` makes
+  the heating plan relevant when the room is too cold, and passes the belief on as the plan's `context`.
+  Changing the target alone is enough to make a plan relevant.
+- The **guard** says whether the plan applies right now: heating starts only if the system is not heating already.
+  It returns the context when the plan is applicable, or `null` otherwise.
+  When no plan is both relevant and applicable, nothing happens: the temperature is fine, or the system is already
+  doing the right thing.
 - Heating starts below `target - TOLERANCE` but stops only at the target, so the thermostat does not switch on and
   off at every tenth of a degree.
 
