@@ -173,6 +173,5 @@ A few things to notice:
 
 - The Prolog incarnation ships [KQML messaging](../explanation/incarnations/prolog/kqml.md):
   `tell`, `achieve`, `askOne`, ... with `[source(X)]` annotations on received beliefs.
-- The [Blocks World showcase](../showcase/blocksworld.md) shows an agent planning recursively with Prolog rules.
 
 Next: [Advanced: Thermostat](./thermostat.md), an agent interacting with an external environment.
