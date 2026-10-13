@@ -87,6 +87,13 @@ At each `step` the room drifts towards the outside temperature, and the system a
 The state is a `StateFlow`, so the UI can observe it, and the sliders call the setters: the room changes whether
 the agent likes it or not.
 
+:::tip[From an emulated room to real devices]
+The room here is an emulated external system, so the tutorial runs anywhere, even in the browser. The same structure
+connects agents to any external system, such as real sensors and actuators: the next steps publish what the room
+senses as perceptions, and act on it through a skill. With a real room, the perceptions would come from a real
+thermometer and the skill would switch a real heating and cooling system, while the agent stays the same.
+:::
+
 ## 2. Perceive it
 
 A **perception** is any class implementing `AgentEvent.External.Perception`. The thermostat perceives what its
@@ -123,13 +130,6 @@ class Hvac(private val room: Room) {
 A skill is an ordinary object. As in the [ping-pong tutorial](./ping-pong.md), the agent states that it needs the
 skill with `context(hvac: Hvac)`, and the node it runs on provides it (see [Run it](#6-run-it)).
 See [Skills](../explanation/basic-concepts/skills.md).
-
-:::tip[From an emulated room to real devices]
-The room here is an emulated external system, so the tutorial runs anywhere, even in the browser. The same structure connects agents
-to any external system, such as real sensors and actuators: a loop reading a real thermometer publishes the
-`RoomReading`s instead of `simulate`, and `Hvac` switches a real heating and cooling system instead of changing `Room`.
-The agent does not change: it still perceives readings and acts through the skill.
-:::
 
 ## 4. Turn perceptions into beliefs
 
