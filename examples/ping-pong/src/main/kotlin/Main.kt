@@ -28,18 +28,17 @@ private fun AgentBuilder<ToldBelief, String, Any>.receivesTextMessages() {
     }
 }
 
-private val ponger = agent<ToldBelief, String, Any>(bob) {
+context(_: MessagingSkill)
+private fun ponger() = agent<ToldBelief, String, Any>(bob) {
     receivesTextMessages()
-    context(MessagingSkill(node)) {
-        hasPlanLibrary {
-            adding.belief {
-                takeIf { it.text == "Ping!" }
-            } triggers {
-                val (text, sender) = context
-                agent.print("Received \"$text\" from ${sender.displayName}")
-                agent.sendTo(sender, "Pong!")
-                node.terminateNode()
-            }
+    hasPlanLibrary {
+        adding.belief {
+            takeIf { it.text == "Ping!" }
+        } triggers {
+            val (text, sender) = context
+            agent.print("Received \"$text\" from ${sender.displayName}")
+            agent.sendTo(sender, "Pong!")
+            node.terminateNode()
         }
     }
 }
@@ -51,7 +50,9 @@ fun main(): Unit = runBlocking {
     Logger.setMinSeverity(Severity.Assert)
     mas(NodeBuilders.baseNode()) {
         node {
-            withAgents(ponger)
+            context(MessagingSkill(node)) {
+                withAgents(ponger())
+            }
         }
         node {
             context(MessagingSkill(node)) {

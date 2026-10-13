@@ -76,21 +76,22 @@ a belief-addition event that plans can react to. Perceptions work the same way t
 ## A reusable agent
 
 Bob only answers pings, so he is defined once at top level with `agent(id) { }` and can be added to any node.
-The block runs for the node the agent joins, so `node` is available to give him the messaging skill:
+To answer he needs the messaging skill, which sends messages through the node hosting him. So Bob does not create it:
+`ponger()` asks for it as a [context parameter](https://kotlinlang.org/docs/context-parameters.html),
+and the node he is added to provides it:
 
 ```kotlin
-private val ponger = agent<ToldBelief, String, Any>(bob) {
+context(_: MessagingSkill)
+private fun ponger() = agent<ToldBelief, String, Any>(bob) {
     receivesTextMessages()
-    context(MessagingSkill(node)) {
-        hasPlanLibrary {
-            adding.belief {
-                takeIf { it.text == "Ping!" }
-            } triggers {
-                val (text, sender) = context
-                agent.print("Received \"$text\" from ${sender.displayName}")
-                agent.sendTo(sender, "Pong!")
-                node.terminateNode()
-            }
+    hasPlanLibrary {
+        adding.belief {
+            takeIf { it.text == "Ping!" }
+        } triggers {
+            val (text, sender) = context
+            agent.print("Received \"$text\" from ${sender.displayName}")
+            agent.sendTo(sender, "Pong!")
+            node.terminateNode()
         }
     }
 }
@@ -99,14 +100,16 @@ private val ponger = agent<ToldBelief, String, Any>(bob) {
 ## Two nodes
 
 Alice is defined inline, directly on her node, and Bob lives on another node, added with `withAgents`.
-Messages cross nodes, so the program does not change if both agents share a node instead:
+Each node gives its agents a `MessagingSkill` of its own, and messages cross nodes, so Alice reaches Bob on his node:
 
 ```kotlin
 fun main(): Unit = runBlocking {
     Logger.setMinSeverity(Severity.Assert)
     mas(NodeBuilders.baseNode()) {
         node {
-            withAgents(ponger)
+            context(MessagingSkill(node)) {
+                withAgents(ponger())
+            }
         }
         node {
             context(MessagingSkill(node)) {
@@ -150,8 +153,9 @@ A few things to notice:
   so Bob can destructure it to find out who sent the ping.
   Incarnations provide richer matching: in the [Prolog incarnation](../explanation/incarnations/prolog/index.md)
   the context is the substitution produced by unification.
-- **Skills are context parameters.** `context(MessagingSkill(node)) { ... }` makes the messaging skill available
-  to every agent, or plan, defined inside the block, and `agent.sendTo(...)` only compiles there.
+- **Skills are given by the node.** `context(MessagingSkill(node)) { ... }` makes the messaging skill available
+  to every agent defined or added inside the block, and `agent.sendTo(...)` only compiles there.
+  A reusable agent like Bob declares the skills it needs with `context(...)`, and the node hosting it provides them.
   See [Skills](../explanation/basic-concepts/skills.md) to write your own.
 - **Each node stops on its own.** Bob and Alice each call `node.terminateNode()`, and `runLocally()` returns
   when every node has terminated.

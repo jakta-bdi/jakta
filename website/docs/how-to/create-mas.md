@@ -12,13 +12,15 @@ run it with `./gradlew :examples:ping-pong:run`.
 ## Define a reusable agent
 
 The top-level `agent<Belief, Goal, Body>(id) { ... }` returns a factory, which can be added to any node.
+A function returning it can ask for the [skills](#give-agents-skills) the agent needs as context parameters.
 See [Beliefs](../explanation/basic-concepts/beliefs.md), [Goals](../explanation/basic-concepts/goals.md) and
 [Plans](../explanation/basic-concepts/plans.md).
 
 ```kotlin
-private val ponger = agent<ToldBelief, String, Any>(BaseAgentID("Bob")) {
+context(_: MessagingSkill)
+private fun ponger() = agent<ToldBelief, String, Any>(BaseAgentID("Bob")) {
     embodiedAs { Any() }
-    hasPlanLibrary { /* ... */ }
+    hasPlanLibrary { /* plans can call agent.sendTo(...) */ }
 }
 ```
 
@@ -30,7 +32,9 @@ inline with `agent(id) { ... }`. See [Nodes and environment](../explanation/node
 ```kotlin
 mas(NodeBuilders.baseNode()) {
     node {
-        withAgents(ponger)
+        context(MessagingSkill(node)) {
+            withAgents(ponger())
+        }
     }
     node {
         agent<ToldBelief, String>(BaseAgentID("Alice")) { /* ... */ }
@@ -42,7 +46,9 @@ Nodes can also be built on their own, and combined with `withNodes(...)`:
 
 ```kotlin
 val home = node(NodeBuilders.baseNode()) {
-    withAgents(ponger)
+    context(MessagingSkill(node)) {
+        withAgents(ponger())
+    }
 }
 mas(NodeBuilders.baseNode()) {
     withNodes(home)
@@ -51,11 +57,14 @@ mas(NodeBuilders.baseNode()) {
 
 ## Give agents skills
 
-Wrap agents, or plans, in `context(SomeSkill(node)) { ... }`. See [Skills](../explanation/basic-concepts/skills.md).
+Skills are given at the node level: wrap the agents of a node in `context(SomeSkill(node)) { ... }`, both those
+defined inline and those added with `withAgents`. A reusable agent asks for the skills it needs as context parameters,
+like `ponger()` above. See [Skills](../explanation/basic-concepts/skills.md).
 
 ```kotlin
 node {
     context(MessagingSkill(node)) {
+        withAgents(ponger())
         agent<ToldBelief, String>(BaseAgentID("Alice")) { /* plans can call agent.sendTo(...) */ }
     }
 }
