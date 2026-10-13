@@ -99,6 +99,16 @@ private fun ponger() = agent<ToldBelief, String, Any>(bob) {
 
 ## Two nodes
 
+A node is a part of the MAS that lives on its own: it hosts its agents, gives them their environment and skills,
+and runs and stops independently of the other nodes. Nodes stand for logically different devices, such as a robot,
+a server or a phone, each running several agents of the same MAS. Here every node runs in the same process
+(`runLocally()` connects them through shared memory), but agents on different nodes still interact only by
+messages, as they would across a network. See [Nodes and Environment](../explanation/nodes.md).
+
+Alice and Bob live on separate nodes, so each of them can stop when done: `node.terminateNode()` stops only the
+node of the agent calling it. On a shared node, Bob stopping after his answer would stop Alice too, before she
+gets the pong.
+
 Alice is defined inline, directly on her node, and Bob lives on another node, added with `withAgents`.
 Each node gives its agents a `MessagingSkill` of its own, and messages cross nodes, so Alice reaches Bob on his node:
 
@@ -157,8 +167,7 @@ A few things to notice:
   to every agent defined or added inside the block, and `agent.sendTo(...)` only compiles there.
   A reusable agent like Bob declares the skills it needs with `context(...)`, and the node hosting it provides them.
   See [Skills](../explanation/basic-concepts/skills.md) to write your own.
-- **Each node stops on its own.** Bob and Alice each call `node.terminateNode()`, and `runLocally()` returns
-  when every node has terminated.
+- **The MAS ends with its last node.** `runLocally()` returns when every node has terminated.
 
 ## Going further
 
