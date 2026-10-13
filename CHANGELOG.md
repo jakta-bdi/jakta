@@ -1,3 +1,10 @@
+## [1.1.29](https://github.com/jakta-bdi/jakta/compare/1.1.28...1.1.29) (2026-10-13)
+
+### Bug Fixes
+
+* **prolog:** make askAllTo send an AskAll performative ([#975](https://github.com/jakta-bdi/jakta/issues/975)) ([73faf86](https://github.com/jakta-bdi/jakta/commit/73faf86c1ceae1f8d3b600e266681e2329b529eb))
+* **prolog:** match goal annotations like belief annotations ([#976](https://github.com/jakta-bdi/jakta/issues/976)) ([fdf66a9](https://github.com/jakta-bdi/jakta/commit/fdf66a91e478b072bd77c51fd2957b3ffcb203cf)), closes [tuProlog/2p-kt#926](https://github.com/tuProlog/2p-kt/issues/926)
+
 ## [1.1.28](https://github.com/jakta-bdi/jakta/compare/1.1.27...1.1.28) (2026-10-13)
 
 ### Dependency updates
