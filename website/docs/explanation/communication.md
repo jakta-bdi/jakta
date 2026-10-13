@@ -61,4 +61,4 @@ see [KQML messaging](./incarnations/prolog/kqml.md).
 ## Indirect communication
 
 Agents can also coordinate *indirectly* (stigmergy) by acting on a shared world model through a
-[skill](./basic-concepts/skills.md) and perceiving its changes — see [Nodes and environment](./nodes.md#perceptions).
+[skill](./basic-concepts/skills.md) and perceiving its changes — see [Nodes](./nodes.md#perceptions).

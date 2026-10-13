@@ -4,7 +4,7 @@ sidebar_position: 3
 
 # Turn perceptions into Prolog facts
 
-A perception is a plain Kotlin object (see [Connect agents to an environment](../connect-environment.md)).
+A perception is a plain Kotlin object (see [Connect agents to an external environment](../connect-environment.md)).
 A Prolog agent turns it into facts in `handlesPerceptionEvents`. The snippets come from the
 [`vacuum-world`](https://github.com/jakta-bdi/jakta/tree/main/examples/vacuum-world) example.
 

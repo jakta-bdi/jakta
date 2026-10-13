@@ -135,7 +135,7 @@ context(BlocksWorldSkillsImpl(world, node)) {
 
 Skills that change the world should report the outcome back as a **perception**
 (`node.publishEvent(...)`), which each agent turns into beliefs with `handlesPerceptionEvents` —
-see [Nodes and environment](../nodes.md).
+see [Nodes](../nodes.md).
 
 For a skill that depends on the agent's body, see
 [`TestSpatialRobot`](https://github.com/jakta-bdi/jakta/blob/main/jakta-core/src/commonTest/kotlin/it/unibo/jakta/dsl/examples/TestSpatialRobot.kt),

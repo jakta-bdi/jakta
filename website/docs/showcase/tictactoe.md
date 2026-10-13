@@ -11,7 +11,7 @@ The [tictactoe example](https://github.com/jakta-bdi/jakta/tree/main/examples/ti
 reasons on the board with Prolog rules. The rules and plans are written by Kotlin code for the board size you
 choose, so the same agent definition plays 3×3, 4×4 and 5×5.
 
-Play against the agent by clicking a cell on your turn: your move goes to the environment, which shows the new board
+Play against the agent by clicking a cell on your turn: your move goes to the game, which shows the new board
 to the agent. Lower the difficulty to make the agent sometimes distracted, so that it plays a random cell.
 
 It runs below, right in your browser: the *agent trace* on the right shows what the agents print while they reason.
@@ -169,7 +169,7 @@ The result is a different agent for each board:
 
 ## How the agent plays
 
-- **Perceptions become beliefs.** After every move the environment publishes the board, and the agent turns it into
+- **Perceptions become beliefs.** After every move the game publishes the board, and the agent turns it into
   `cell(X, Y, Mark)` beliefs (`e` for an empty cell), `turn(Mark)` for whose turn it is, and `distracted(Mark)` when
   the difficulty makes it play at random. Only what changed is added or removed (`handleBoardPerception` in
   [`TicTacToeSkills.kt`](https://github.com/jakta-bdi/jakta/blob/main/examples/tictactoe/src/commonMain/kotlin/TicTacToeSkills.kt)),
@@ -179,8 +179,8 @@ The result is a different agent for each board:
   [first one in the library](../explanation/execution-model.md#plan-selection) is chosen. The plans are added in the
   priority order of the classic strategy by Newell and Simon: win, block, fork, block a fork, centre, opposite corner,
   corner, anything. Adding a rule to the strategy is adding a plan in the right place.
-- **The environment is the referee.** It applies moves, publishes the new board to every player and stops the node
-  when somebody wins or the board is full. You play through the same environment: a click puts your mark, and the
+- **The game is the referee.** It applies moves, publishes the new board to every player and stops the node
+  when somebody wins or the board is full. You play through the same game: a click puts your mark, and the
   agent perceives it like any other move.
 
 :::note

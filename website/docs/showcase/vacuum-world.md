@@ -26,9 +26,9 @@ It runs below, right in your browser: the *agent trace* on the right shows what 
 ## Why it matters
 
 Most examples run until their goal is achieved. This agent has no final state: it lives in a **dynamic
-environment** that changes while it acts, and it only knows the world through the **body** it is embodied in.
+external environment** that changes while it acts, and it only knows the world through the **body** it is embodied in.
 
-### An agent in a dynamic environment
+### An agent in a dynamic external environment
 
 Dust appears by itself after each action, and the user adds or removes it at any time. The robot does not plan a
 path in advance: its main goal, `vacuum`, is achieved by one step at a time, chosen from what it perceives *now*,
@@ -125,7 +125,7 @@ check that it finds and cleans all the dust, and that it goes back to the dust i
 
 ### Embodiment
 
-The environment and the robot are kept apart. `VacuumWorld` only holds what is out there: the map, the dust and the
+The external environment and the robot are kept apart. `VacuumWorld` only holds what is out there: the map, the dust and the
 time. The robot's position, its facing and how much it cleaned belong to its **body**:
 
 ```kotlin

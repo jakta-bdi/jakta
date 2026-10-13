@@ -10,7 +10,7 @@ This tutorial builds a thermostat agent that keeps a room at a target temperatur
 it loses heat towards the outside, and you can open the window (drag the room temperature), change the target, or
 make the day colder or warmer at any time. Along the way it shows how to:
 
-- model an **environment** in plain Kotlin, with its own dynamics;
+- model an **external environment** in plain Kotlin, with its own dynamics;
 - let agents **perceive** it, turning perceptions into beliefs;
 - let agents **act** on it through a skill;
 - choose between plans with **guards** over the agent's beliefs.
@@ -35,9 +35,9 @@ flowchart LR
     you((You)) -- sliders --> room
 ```
 
-## 1. Model the environment
+## 1. Model the external environment
 
-JaKtA has no environment class to extend: the environment is your own Kotlin model. The room has a temperature,
+JaKtA has no environment class to extend: the external environment is your own Kotlin model. The room has a temperature,
 the target set on the thermostat, the temperature outside, and a heating and cooling system:
 
 <details>
@@ -106,11 +106,11 @@ suspend fun Room.simulate(node: Node<*>, stepTime: Duration) {
 ```
 
 `simulate` lets time pass and, after every step, publishes a reading on the node: every agent of the node receives
-it. The agent never polls the room; the environment tells it what changed.
+it. The agent never polls the room; the room tells it what changed.
 
 ## 3. Act on it
 
-What an agent can do on the environment is a **skill**: here, switching the heating and cooling system.
+What an agent can do on the external environment is a **skill**: here, switching the heating and cooling system.
 
 ```kotlin
 class Hvac(private val room: Room) {
@@ -241,7 +241,7 @@ hasPlanLibrary {
 
 ## 6. Run it
 
-The room and the agent run side by side: `simulate` drives the environment, the MAS runs the agent.
+The room and the agent run side by side: `simulate` drives the room, the MAS runs the agent.
 
 ```kotlin
 suspend fun runThermostat(room: Room, stepTime: Duration): Unit = coroutineScope {
@@ -272,7 +272,7 @@ what the thermostat prints.
 
 ## Going further
 
-- [Connect agents to an environment](../how-to/connect-environment.md) and [Give agents a body](../how-to/custom-body.md)
+- [Connect agents to an external environment](../how-to/connect-environment.md) and [Give agents a body](../how-to/custom-body.md)
   collect the patterns of this tutorial.
 - The [showcase](../showcase/vacuum-world.md) runs larger agents written with the
   [Prolog incarnation](../explanation/incarnations/prolog/index.md), where beliefs are logic terms and plans

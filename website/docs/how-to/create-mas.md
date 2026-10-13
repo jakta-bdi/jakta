@@ -27,7 +27,7 @@ private fun ponger() = agent<ToldBelief, String, Any>(BaseAgentID("Bob")) {
 ## Group agents in nodes
 
 Each `node { }` block inside `mas { }` is a node. Add reusable agents with `withAgents(...)`, or define agents
-inline with `agent(id) { ... }`. See [Nodes and environment](../explanation/nodes.md).
+inline with `agent(id) { ... }`. See [Nodes](../explanation/nodes.md).
 
 ```kotlin
 mas(NodeBuilders.baseNode()) {
@@ -109,7 +109,7 @@ Logger.setMinSeverity(Severity.Assert)
 
 ## Next steps
 
-- [Connect agents to an environment](./connect-environment.md)
+- [Connect agents to an external environment](./connect-environment.md)
 - [Give agents a body](./custom-body.md)
 - [Add and remove agents at runtime](./runtime-agents.md)
 - [Wait for events and use time](./wait-for-events.md)

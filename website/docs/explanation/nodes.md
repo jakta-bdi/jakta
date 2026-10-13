@@ -2,10 +2,10 @@
 sidebar_position: 3
 ---
 
-# Nodes and Environment
+# Nodes
 
 A JaKtA multi-agent system is made of **nodes**, and each node hosts a set of **agents**.
-The node is the agents' environment: it delivers perceptions and messages to them, and it is where agents are
+The node is where agents live: it delivers perceptions and messages to them, and it is where agents are
 added, removed and terminated.
 
 ```kotlin
@@ -36,13 +36,13 @@ Nodes can also be defined on their own with `node(NodeBuilders.baseNode()) { ...
 
 Each agent has a **body**, its representation inside the node, created with `embodiedAs { id -> ... }`.
 The body type is the third type parameter of `agent<Belief, Goal, Body>` and of `NodeBuilders.baseNode<Body>()`.
-Agents that do not need a body use `Any`. A body can carry state the environment cares about — a position,
+Agents that do not need a body use `Any`. A body can carry state the external environment cares about — a position,
 a battery level — and skills can use it
 (see [`TestSpatialRobot`](https://github.com/jakta-bdi/jakta/blob/main/jakta-core/src/commonTest/kotlin/it/unibo/jakta/dsl/examples/TestSpatialRobot.kt)).
 
 ## Perceptions
 
-There is no shared environment object that agents query. Instead, whatever models the world publishes
+Agents do not query the external environment directly. Instead, whatever models it publishes
 **perception events** on the node, and each agent turns them into its own beliefs:
 
 ```kotlin

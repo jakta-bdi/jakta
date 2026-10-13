@@ -103,7 +103,7 @@ A node is a part of the MAS that lives on its own: it hosts its agents, delivers
 gives them their skills, and runs and stops independently of the other nodes. Nodes stand for logically different devices, such as a robot,
 a server or a phone, each running several agents of the same MAS. Here every node runs in the same process
 (`runLocally()` connects them through shared memory), but agents on different nodes still interact only by
-messages, as they would across a network. See [Nodes and Environment](../explanation/nodes.md).
+messages, as they would across a network. See [Nodes](../explanation/nodes.md).
 
 Alice and Bob live on separate nodes, so each of them can stop when done: `node.terminateNode()` stops only the
 node of the agent calling it. On a shared node, Bob stopping after his answer would stop Alice too, before she

@@ -2,12 +2,12 @@
 sidebar_position: 2
 ---
 
-# Connect agents to an environment
+# Connect agents to an external environment
 
-JaKtA has no built-in environment class: the environment is **your** Kotlin model of the world.
+JaKtA has no environment class: the external environment is **your** Kotlin model of the world.
 Agents are connected to it in two directions:
 
-- **perceiving**: the environment publishes **perceptions** on the node, and each agent turns them into beliefs;
+- **perceiving**: the external environment publishes **perceptions** on the node, and each agent turns them into beliefs;
 - **acting**: a [skill](../explanation/basic-concepts/skills.md) exposes the operations agents can perform on it.
 
 The snippets come from the [`thermostat`](https://github.com/jakta-bdi/jakta/tree/main/examples/thermostat) example,
@@ -25,7 +25,7 @@ Keep perceptions separate from the belief type: each agent decides what a percep
 
 ## Publish it
 
-Anything holding the node can publish, e.g. the environment's own loop:
+Anything holding the node can publish, e.g. the external environment's own loop:
 
 ```kotlin
 node.publishEvent(RoomReading(state.temperature, state.target, state.mode))
@@ -91,7 +91,7 @@ adding.belief {
 
 ## Act through a skill
 
-A skill is an ordinary object wrapping the operations on the environment:
+A skill is an ordinary object wrapping the operations on the external environment:
 
 ```kotlin
 class Hvac(private val room: Room) {

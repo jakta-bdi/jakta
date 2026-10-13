@@ -4,7 +4,7 @@ sidebar_position: 3
 
 # Give agents a body
 
-Every agent has a **body**: its representation inside the node, through which it is situated in the environment.
+Every agent has a **body**: its representation inside the node, through which it is situated in the external environment.
 The body owns what belongs to the agent in the world, such as its position, and its sensors and actuators.
 Skills act through it, and perceptions can be delivered to specific bodies only.
 Agents that don't need one use `Any`.
@@ -16,7 +16,7 @@ which you can also [try in the browser](../showcase/vacuum-world.md).
 
 ## Define the body type
 
-The body keeps the robot's own state, separate from the environment it is placed in:
+The body keeps the robot's own state, separate from the external environment it is placed in:
 
 ```kotlin
 data class RobotState(val position: Pos, val facing: Direction, val cleaned: Int = 0)
