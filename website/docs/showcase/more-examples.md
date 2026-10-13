@@ -1,11 +1,11 @@
 ---
-sidebar_position: 2
+sidebar_position: 4
 ---
 
-# Quickstart
+# More Examples
 
-The JaKtA repository ships runnable examples in the [`examples`](https://github.com/jakta-bdi/jakta/tree/main/examples) folder.
-Clone it and run them with Gradle:
+Besides the showcase, the JaKtA repository ships runnable examples in the
+[`examples`](https://github.com/jakta-bdi/jakta/tree/main/examples) folder. Clone it and run them with Gradle:
 
 ```bash
 git clone https://github.com/jakta-bdi/jakta.git
@@ -17,10 +17,10 @@ cd jakta
 
 | Example | Command | What it shows |
 |---|---|---|
-| [`hello-world`](https://github.com/jakta-bdi/jakta/tree/main/examples/hello-world) | `./gradlew :examples:hello-world:run` | A single agent with one goal and one plan that prints a message and stops the node, using `jakta-core` only. Walked through in [Hello world](./hello-world.md). |
-| [`ping-pong`](https://github.com/jakta-bdi/jakta/tree/main/examples/ping-pong) | `./gradlew :examples:ping-pong:run` | Two agents on two nodes, one reusable and one inline, exchanging messages turned into beliefs, with plain Kotlin types. Built in the [intermediate tutorial](./ping-pong.md); the program of [Create a MAS](../how-to/create-mas.md). |
-| [`thermostat`](https://github.com/jakta-bdi/jakta/tree/main/examples/thermostat) | desktop: `./gradlew :examples:thermostat:run`<br/>browser: `./gradlew :examples:thermostat:jsBrowserDevelopmentRun` | A thermostat keeping a changing room at its target temperature: an environment with its own dynamics, perceptions, a skill, and plans chosen by guards, with plain Kotlin types and a Compose Multiplatform UI. Built in the [advanced tutorial](./thermostat.md). |
-| [`blocksworld`](https://github.com/jakta-bdi/jakta/tree/main/examples/blocksworld) | desktop: `./gradlew :examples:blocksworld:run`<br/>browser: `./gradlew :examples:blocksworld:jsBrowserDevelopmentRun` | The classic blocks-world planner (ported from Jason) with a Compose Multiplatform UI: Prolog inference rules, guards, recursive sub-goals, custom [skills](../explanation/basic-concepts/skills.md) and perceptions. Explained in the [Blocks World showcase](../showcase/blocksworld.md). |
+| [`hello-world`](https://github.com/jakta-bdi/jakta/tree/main/examples/hello-world) | `./gradlew :examples:hello-world:run` | A single agent with one goal and one plan that prints a message and stops the node, using `jakta-core` only. Walked through in [Hello world](../tutorials/hello-world.md). |
+| [`ping-pong`](https://github.com/jakta-bdi/jakta/tree/main/examples/ping-pong) | `./gradlew :examples:ping-pong:run` | Two agents on two nodes, one reusable and one inline, exchanging messages turned into beliefs, with plain Kotlin types. Built in the [intermediate tutorial](../tutorials/ping-pong.md); the program of [Create a MAS](../how-to/create-mas.md). |
+| [`thermostat`](https://github.com/jakta-bdi/jakta/tree/main/examples/thermostat) | desktop: `./gradlew :examples:thermostat:run`<br/>browser: `./gradlew :examples:thermostat:jsBrowserDevelopmentRun` | A thermostat keeping a changing room at its target temperature: an environment with its own dynamics, perceptions, a skill, and plans chosen by guards, with plain Kotlin types and a Compose Multiplatform UI. Built in the [advanced tutorial](../tutorials/thermostat.md). |
+| [`blocksworld`](https://github.com/jakta-bdi/jakta/tree/main/examples/blocksworld) | desktop: `./gradlew :examples:blocksworld:run`<br/>browser: `./gradlew :examples:blocksworld:jsBrowserDevelopmentRun` | The classic blocks-world planner (ported from Jason) with a Compose Multiplatform UI: Prolog inference rules, guards, recursive sub-goals, custom [skills](../explanation/basic-concepts/skills.md) and perceptions. Explained in the [Blocks World showcase](./blocksworld.md). |
 | [`tictactoe`](https://github.com/jakta-bdi/jakta/tree/main/examples/tictactoe) | desktop: `./gradlew :examples:tictactoe:run`<br/>browser: `./gradlew :examples:tictactoe:jsBrowserDevelopmentRun` | A tic-tac-toe player whose Prolog rules and plans are generated in Kotlin for any board size; it never loses on 3×3. |
 | [`vacuum-world`](https://github.com/jakta-bdi/jakta/tree/main/examples/vacuum-world) | desktop: `./gradlew :examples:vacuum-world:run`<br/>browser: `./gradlew :examples:vacuum-world:jsBrowserDevelopmentRun` | A robot that keeps a map clean forever, in the style of the EIS Vacuum World: reacting to percepts, and a rule-based memory of the visited squares. |
 | [`failure-handling`](https://github.com/jakta-bdi/jakta/tree/main/examples/failure-handling) | `./gradlew :examples:failure-handling:run` | A failure plan recovering a goal that failed two levels below, with the Prolog incarnation. |

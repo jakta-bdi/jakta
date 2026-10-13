@@ -15,13 +15,12 @@ const sidebars: SidebarsConfig = {
         'tutorials/hello-world',
         'tutorials/ping-pong',
         'tutorials/thermostat',
-        { type: 'doc', id: 'tutorials/quick-start', label: 'Run the examples' },
       ],
     },
     {
       type: 'category',
       label: 'Showcase',
-      items: ['showcase/blocksworld', 'showcase/tictactoe', 'showcase/vacuum-world'],
+      items: ['showcase/blocksworld', 'showcase/tictactoe', 'showcase/vacuum-world', 'showcase/more-examples'],
     },
     {
       type: 'category',
