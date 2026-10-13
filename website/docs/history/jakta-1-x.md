@@ -9,6 +9,14 @@ Starting from version 1.0.0 JaKtA was rewritten from the ground up. The BDI mode
 but the engine, DSL, and module structure were redesigned for Kotlin Multiplatform and more flexible
 agent systems.
 
+JaKtA has its own BDI execution engine instead of reusing an existing one, because of two design goals:
+
+1. to explore paradigm blending of AOP – and in particular BDI – with mainstream programming languages, and
+2. to support modularity and pluggability of any aspect involving the execution of BDI systems—there including reasoning capabilities, message passing mechanisms, concurrency models, and the like.
+
+The DSL is separate from the engine, since it implements one possible syntax of many for BDI MAS specification:
+other languages could be plugged on top of the same engine.
+
 ## What's new in JaKtA 1.x
 
 - **Kotlin Multiplatform**: the core libraries run on the JVM, in JavaScript (browser and Node.js, also published on npm) and natively.

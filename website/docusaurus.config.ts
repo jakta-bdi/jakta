@@ -201,6 +201,27 @@ const config: Config = {
               label: 'Getting Started',
               to: '/docs/tutorials',
             },
+            {
+              label: 'Showcase',
+              to: '/docs/showcase/blocksworld',
+            },
+          ],
+        },
+        {
+          title: 'History',
+          items: [
+            {
+              label: 'JaKtA 1.x redesign',
+              to: '/docs/history/jakta-1-x',
+            },
+            {
+              label: 'JaKtA 0.x (deprecated)',
+              to: '/docs/jakta-0x',
+            },
+            {
+              label: 'Jason-like Kotlin Agents',
+              to: '/docs/history/jakta-and-jason',
+            },
           ],
         },
         {
