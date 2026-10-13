@@ -99,8 +99,8 @@ private fun ponger() = agent<ToldBelief, String, Any>(bob) {
 
 ## Two nodes
 
-A node is a part of the MAS that lives on its own: it hosts its agents, gives them their environment and skills,
-and runs and stops independently of the other nodes. Nodes stand for logically different devices, such as a robot,
+A node is a part of the MAS that lives on its own: it hosts its agents, delivers their perceptions and messages,
+gives them their skills, and runs and stops independently of the other nodes. Nodes stand for logically different devices, such as a robot,
 a server or a phone, each running several agents of the same MAS. Here every node runs in the same process
 (`runLocally()` connects them through shared memory), but agents on different nodes still interact only by
 messages, as they would across a network. See [Nodes and Environment](../explanation/nodes.md).
