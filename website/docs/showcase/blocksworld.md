@@ -7,9 +7,19 @@ sidebar_position: 1
 
 import ExampleApp from '@site/src/components/ExampleApp/ExampleApp';
 
-The [blocksworld example](https://github.com/jakta-bdi/jakta/tree/main/examples/blocksworld) is the classic
-blocks-world planner, ported from the Jason agent of the same name: an agent rearranges stacks of blocks until they
-match a goal configuration.
+The blocks world is one of the best-known problems of artificial intelligence. A few blocks lie on a table, some
+stacked on others, and a robot arm moves one block at a time: a block with nothing on top of it, onto the table or
+onto another such block. The task is to rearrange the blocks into a goal configuration, made of one or more towers,
+each with its blocks in a given order.
+
+It has been a standard problem for automated planning since the early 1970s, from Terry Winograd's SHRDLU to the
+*Sussman anomaly*, where achieving one part of the goal undoes another. Classic planners solve it by searching,
+before acting, for a sequence of moves that leads to the goal.
+
+The [blocksworld example](https://github.com/jakta-bdi/jakta/tree/main/examples/blocksworld) solves it with a BDI
+agent instead. The goal asks for several towers, and the agent builds them one after the other: it completes the
+first tower, from the bottom up, then moves on to the next, choosing each move from what it believes about the world
+at that moment.
 
 Drag the blocks to set the goal (shown first) and the starting world, then let the agent work.
 It stops by itself when it is done, or gives up through a failure plan.
