@@ -63,8 +63,8 @@ Return an `AgentUpdate.Belief(additions, removals)` from `handlesPerceptionEvent
 handlesPerceptionEvents { perception ->
     when (perception) {
         is RoomReading -> {
-            val readings = setOf(Temperature(perception.temperature), Target(perception.target), Running(perception.mode))
-            AgentUpdate.Belief(readings - beliefs.toSet(), beliefs.toSet() - readings)
+            val belief = RoomBelief(perception.temperature, perception.target, perception.mode)
+            if (belief in beliefs) null else AgentUpdate.Belief(setOf(belief), beliefs.toSet())
         }
 
         else -> null
@@ -72,8 +72,8 @@ handlesPerceptionEvents { perception ->
 }
 ```
 
-Adding only what is new and removing only what is stale keeps the belief base up to date, and generates events only
-for what changed.
+Replacing the old belief with the new one keeps the belief base up to date, and ignoring a reading equal to the
+current belief generates events only when something changed.
 
 ## React to them
 
@@ -81,9 +81,9 @@ A belief addition triggers the plans whose trigger accepts the new belief and wh
 
 ```kotlin
 adding.belief {
-    this as? Temperature
+    this
 } onlyWhen {
-    context.takeIf { it.degrees < beliefs.target - TOLERANCE }
+    context.takeIf { it.temperature < it.target - TOLERANCE }
 } triggers {
     hvac.heat()
 }

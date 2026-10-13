@@ -133,7 +133,7 @@ The agent does not change: it still perceives readings and acts through the skil
 
 ## 4. Turn perceptions into beliefs
 
-The agent decides what a perception means to it. Its beliefs are a small sealed hierarchy:
+The agent decides what a perception means to it. Its belief about the room is a single data class:
 
 <details>
 <summary>Imports of <code>Thermostat.kt</code></summary>
@@ -159,21 +159,13 @@ import kotlinx.coroutines.launch
 ```kotlin
 private const val TOLERANCE = 0.5
 
-sealed interface RoomBelief
-
-data class Temperature(val degrees: Double) : RoomBelief
-
-data class Target(val degrees: Double) : RoomBelief
-
-data class Running(val mode: Mode) : RoomBelief
-
-private val Collection<RoomBelief>.target get() = filterIsInstance<Target>().single().degrees
-private val Collection<RoomBelief>.mode get() = filterIsInstance<Running>().single().mode
+data class RoomBelief(val temperature: Double, val target: Double, val mode: Mode)
 
 private fun Double.roundedToTenths() = (this * 10).roundToInt() / 10.0
 ```
 
-`handlesPerceptionEvents` turns each reading into an `AgentUpdate.Belief(additions, removals)`:
+`handlesPerceptionEvents` turns each reading into an `AgentUpdate.Belief(additions, removals)`, which replaces the
+old belief with the new one:
 
 ```kotlin
 fun thermostat(hvac: Hvac) = agent<RoomBelief, String, Any>(BaseAgentID("thermostat")) {
@@ -181,12 +173,8 @@ fun thermostat(hvac: Hvac) = agent<RoomBelief, String, Any>(BaseAgentID("thermos
     handlesPerceptionEvents { perception ->
         when (perception) {
             is RoomReading -> {
-                val readings = setOf(
-                    Temperature(perception.temperature.roundedToTenths()),
-                    Target(perception.target),
-                    Running(perception.mode),
-                )
-                AgentUpdate.Belief(readings - beliefs.toSet(), beliefs.toSet() - readings)
+                val belief = RoomBelief(perception.temperature.roundedToTenths(), perception.target, perception.mode)
+                if (belief in beliefs) null else AgentUpdate.Belief(setOf(belief), beliefs.toSet())
             }
 
             else -> null
@@ -196,51 +184,51 @@ fun thermostat(hvac: Hvac) = agent<RoomBelief, String, Any>(BaseAgentID("thermos
 }
 ```
 
-Only what changed is added or removed: a reading with the same target and mode only replaces the temperature, and
-generates a single *belief addition* event, for the new `Temperature`. Rounding to tenths of a degree keeps the
-agent from reacting to differences no thermostat would display.
+The agent holds one belief about the room at a time, and each change generates one *belief addition* event, for the
+new `RoomBelief`. A reading equal to the current belief is ignored: rounding to tenths of a degree keeps the agent
+from reacting to differences no thermostat would display.
 
 ## 5. Choose what to do with guards
 
-The agent has no goals: it is purely reactive. Every new `Temperature` belief triggers three plans, and their
-**guards** — `onlyWhen { }`, which sees the agent's `beliefs` and the trigger's `context` — decide which one applies:
+The agent has no goals: it is purely reactive. Every new `RoomBelief` triggers three plans, and their
+**guards** — `onlyWhen { }`, which sees the trigger's `context` and the agent's `beliefs` — decide which one applies:
 
 ```kotlin
 hasPlanLibrary {
     adding.belief {
-        this as? Temperature
+        this
     } onlyWhen {
-        context.takeIf { it.degrees < beliefs.target - TOLERANCE && beliefs.mode != Mode.HEATING }
+        context.takeIf { it.temperature < it.target - TOLERANCE && it.mode != Mode.HEATING }
     } triggers {
-        agent.print("It's ${context.degrees}°C, heating up to ${agent.beliefs.target}°C")
+        agent.print("It's ${context.temperature}°C, heating up to ${context.target}°C")
         hvac.heat()
     }
     adding.belief {
-        this as? Temperature
+        this
     } onlyWhen {
-        context.takeIf { it.degrees > beliefs.target + TOLERANCE && beliefs.mode != Mode.COOLING }
+        context.takeIf { it.temperature > it.target + TOLERANCE && it.mode != Mode.COOLING }
     } triggers {
-        agent.print("It's ${context.degrees}°C, cooling down to ${agent.beliefs.target}°C")
+        agent.print("It's ${context.temperature}°C, cooling down to ${context.target}°C")
         hvac.cool()
     }
     adding.belief {
-        this as? Temperature
+        this
     } onlyWhen {
-        val reached = when (beliefs.mode) {
-            Mode.HEATING -> context.degrees >= beliefs.target
-            Mode.COOLING -> context.degrees <= beliefs.target
+        val reached = when (context.mode) {
+            Mode.HEATING -> context.temperature >= context.target
+            Mode.COOLING -> context.temperature <= context.target
             Mode.OFF -> false
         }
         context.takeIf { reached }
     } triggers {
-        agent.print("It's ${context.degrees}°C, switching off")
+        agent.print("It's ${context.temperature}°C, switching off")
         hvac.off()
     }
 }
 ```
 
-- The **trigger** `this as? Temperature` makes a plan relevant to temperature changes, and passes the new
-  temperature on as the plan's `context`.
+- The **trigger** `this` makes a plan relevant to every new belief about the room, and passes it on as the plan's
+  `context`: changing the target alone is enough to make the thermostat react.
 - The **guard** returns the context when the plan is applicable in the current situation, or `null` otherwise.
   When no guard holds, nothing happens: the temperature is fine, or the system is already doing the right thing.
 - Heating starts below `target - TOLERANCE` but stops only at the target, so the thermostat does not switch on and

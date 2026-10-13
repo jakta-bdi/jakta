@@ -18,21 +18,10 @@ import kotlinx.coroutines.launch
 private const val TOLERANCE = 0.5
 
 /**
- * What the thermostat believes about the room.
+ * What the thermostat believes about the room: its [temperature], the [target] to keep,
+ * and the [mode] of the heating and cooling system.
  */
-sealed interface RoomBelief
-
-/** The temperature of the room, in [degrees]. */
-data class Temperature(val degrees: Double) : RoomBelief
-
-/** The temperature to keep, in [degrees]. */
-data class Target(val degrees: Double) : RoomBelief
-
-/** The [mode] of the heating and cooling system. */
-data class Running(val mode: Mode) : RoomBelief
-
-private val Collection<RoomBelief>.target get() = filterIsInstance<Target>().single().degrees
-private val Collection<RoomBelief>.mode get() = filterIsInstance<Running>().single().mode
+data class RoomBelief(val temperature: Double, val target: Double, val mode: Mode)
 
 private fun Double.roundedToTenths() = (this * 10).roundToInt() / 10.0
 
@@ -44,12 +33,8 @@ fun thermostat(hvac: Hvac) = agent<RoomBelief, String, Any>(BaseAgentID("thermos
     handlesPerceptionEvents { perception ->
         when (perception) {
             is RoomReading -> {
-                val readings = setOf(
-                    Temperature(perception.temperature.roundedToTenths()),
-                    Target(perception.target),
-                    Running(perception.mode),
-                )
-                AgentUpdate.Belief(readings - beliefs.toSet(), beliefs.toSet() - readings)
+                val belief = RoomBelief(perception.temperature.roundedToTenths(), perception.target, perception.mode)
+                if (belief in beliefs) null else AgentUpdate.Belief(setOf(belief), beliefs.toSet())
             }
 
             else -> null
@@ -57,32 +42,32 @@ fun thermostat(hvac: Hvac) = agent<RoomBelief, String, Any>(BaseAgentID("thermos
     }
     hasPlanLibrary {
         adding.belief {
-            this as? Temperature
+            this
         } onlyWhen {
-            context.takeIf { it.degrees < beliefs.target - TOLERANCE && beliefs.mode != Mode.HEATING }
+            context.takeIf { it.temperature < it.target - TOLERANCE && it.mode != Mode.HEATING }
         } triggers {
-            agent.print("It's ${context.degrees}°C, heating up to ${agent.beliefs.target}°C")
+            agent.print("It's ${context.temperature}°C, heating up to ${context.target}°C")
             hvac.heat()
         }
         adding.belief {
-            this as? Temperature
+            this
         } onlyWhen {
-            context.takeIf { it.degrees > beliefs.target + TOLERANCE && beliefs.mode != Mode.COOLING }
+            context.takeIf { it.temperature > it.target + TOLERANCE && it.mode != Mode.COOLING }
         } triggers {
-            agent.print("It's ${context.degrees}°C, cooling down to ${agent.beliefs.target}°C")
+            agent.print("It's ${context.temperature}°C, cooling down to ${context.target}°C")
             hvac.cool()
         }
         adding.belief {
-            this as? Temperature
+            this
         } onlyWhen {
-            val reached = when (beliefs.mode) {
-                Mode.HEATING -> context.degrees >= beliefs.target
-                Mode.COOLING -> context.degrees <= beliefs.target
+            val reached = when (context.mode) {
+                Mode.HEATING -> context.temperature >= context.target
+                Mode.COOLING -> context.temperature <= context.target
                 Mode.OFF -> false
             }
             context.takeIf { reached }
         } triggers {
-            agent.print("It's ${context.degrees}°C, switching off")
+            agent.print("It's ${context.temperature}°C, switching off")
             hvac.off()
         }
     }
