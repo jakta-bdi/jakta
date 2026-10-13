@@ -46,6 +46,7 @@ private val GOAL_BACKGROUND = Color(0xFFE8F5E9)
 fun BlocksWorldApp(app: BlocksWorldAppState) {
     val scope = rememberCoroutineScope()
     val worldState by app.world.state.collectAsState()
+    val currentMove by app.world.currentMove.collectAsState()
     val goalReached = worldState.sameTowersAs(app.goal)
     val editable = !app.isRunning
 
@@ -112,6 +113,9 @@ fun BlocksWorldApp(app: BlocksWorldAppState) {
                     BlocksWorldPlane(
                         stacks = worldState,
                         onMove = if (editable) app::moveInWorld else null,
+                        withArm = true,
+                        move = currentMove,
+                        moveDuration = app.moveDelay,
                     )
                 }
             }

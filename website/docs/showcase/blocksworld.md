@@ -20,7 +20,8 @@ agent instead. The goal asks for several towers, and the agent builds them one a
 first tower, from the bottom up, then moves on to the next, choosing each move from what it believes about the world
 at that moment.
 
-Drag the blocks to set the goal (shown first) and the starting world, then let the agent work.
+Drag the blocks to set the goal (shown first) and the starting world, then press Play: a robot arm on the ceiling
+moves the blocks as the agent decides.
 It stops by itself when it is done, or gives up through a failure plan.
 
 It runs below, right in your browser: the *agent trace* on the right shows what the agents print while they reason.
