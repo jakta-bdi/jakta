@@ -60,8 +60,11 @@ allprojects {
     }
 
     publishOnCentral {
-        repoOwner = "JaKtA"
+        repoOwner = "jakta-bdi"
         projectLongName = "jakta"
+        // Monorepo: every module points to the root repository, not to github.com/<owner>/<module>
+        projectUrl = "https://github.com/jakta-bdi/${rootProject.name}"
+        scmConnection = "scm:git:https://github.com/jakta-bdi/${rootProject.name}"
         projectDescription = "BDI agents in Kotlin"
         licenseName = "Apache License 2.0"
         licenseUrl = "https://opensource.org/license/Apache-2.0/"
