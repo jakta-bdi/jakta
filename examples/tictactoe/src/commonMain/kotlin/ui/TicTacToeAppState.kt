@@ -38,13 +38,13 @@ val BOARD_SIZES = 3..5
 @Suppress("MagicNumber")
 enum class Difficulty(val mistakeChance: Double) {
     /** Makes many mistakes. */
-    EASY(0.5),
+    CLUMSY(0.5),
 
     /** Makes a mistake now and then. */
-    MEDIUM(0.2),
+    DISTRACTED(0.2),
 
     /** Never makes mistakes: on 3×3, the best you can get is a draw. */
-    UNBEATABLE(0.0),
+    FOCUSED(0.0),
 }
 
 /**
@@ -79,7 +79,7 @@ class TicTacToeAppState(private val agentDispatcher: CoroutineDispatcher = Dispa
     /**
      * How often agents make mistakes; it can be changed during a game.
      */
-    var difficulty by mutableStateOf(Difficulty.MEDIUM)
+    var difficulty by mutableStateOf(Difficulty.DISTRACTED)
 
     /**
      * How long agents think before each move.

@@ -18,10 +18,10 @@ import model.Mark.X
 class TicTacToeAgentTest {
 
     /**
-     * Builds a 3×3 board from rows like "xx.", where '.' is an empty cell.
+     * Builds a square board from rows like "xx.", where '.' is an empty cell.
      */
     private fun board(vararg rows: String) = BoardState(
-        size = 3,
+        size = rows.size,
         cells = rows.flatMap { row -> row.map { Mark.entries.firstOrNull { m -> m.symbol == it.toString() } } },
     )
 
@@ -50,6 +50,30 @@ class TicTacToeAgentTest {
     @Test
     fun agentBlocksTheOpponentsLine() = firstMoveOfX(board("x..", "oo.", "..x")) {
         assertEquals(X, it[2, 1])
+    }
+
+    /**
+     * The empty cells where [mark] would complete a line.
+     */
+    private fun BoardState.winningCells(mark: Mark) = cells.indices.filter { i ->
+        cells[i] == null && copy(cells = cells.toMutableList().also { it[i] = mark }).winner == mark
+    }
+
+    @Test
+    fun largerBoardsAreWonWithOneMarkLessThanTheirSize() {
+        assertEquals(X, board("xxx.", "oo..", "....", "o...").winner)
+        assertEquals(X, board("xxxx.", "oo...", ".....", "o....", "o....").winner)
+        assertEquals(null, board("xx.", "oo.", "...").winner)
+    }
+
+    @Test
+    fun agentForksOnALargerBoard() = firstMoveOfX(board("....", ".x..", "....", "...o")) {
+        assertTrue(it.winningCells(X).size >= 2, "X should threaten two lines after its move")
+    }
+
+    @Test
+    fun agentBlocksAForkOnALargerBoard() = firstMoveOfX(board("...x", "o..o", "....", "...x")) {
+        assertEquals(X, it[0, 2])
     }
 
     @Test
