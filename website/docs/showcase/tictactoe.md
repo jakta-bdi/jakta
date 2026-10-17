@@ -9,10 +9,12 @@ import ExampleApp from '@site/src/components/ExampleApp/ExampleApp';
 
 The [tictactoe example](https://github.com/jakta-bdi/jakta/tree/main/examples/tictactoe) is a BDI player that
 reasons on the board with Prolog rules. The rules and plans are written by Kotlin code for the board size you
-choose, so the same agent definition plays 3×3, 4×4 and 5×5.
+choose, so the same agent definition plays 3×3, 4×4 and 5×5. On the larger boards a line one cell shorter than the
+board wins: three in a row on 4×4, four on 5×5.
 
 Play against the agent by clicking a cell on your turn: your move goes to the game, which shows the new board
-to the agent. Lower the difficulty to make the agent sometimes distracted, so that it plays a random cell.
+to the agent. The difficulty sets how often the agent plays a random cell instead of its best move: often when
+*clumsy*, now and then when *distracted*, never when *focused*.
 
 It runs below, right in your browser: the *agent trace* on the right shows what the agents print while they reason.
 
@@ -23,30 +25,31 @@ It runs below, right in your browser: the *agent trace* on the right shows what 
 ./gradlew :examples:tictactoe:jsBrowserDevelopmentRun # browser
 ```
 
-## Why it matters: Kotlin writes the Prolog
+## Why it matters: configuring the agent
 
-In Jason, an agent is a fixed `.asl` file. To play on a 4×4 board you would write another one, or encode the board
-size in rules that loop over it at run time. In JaKtA the agent is defined by ordinary Kotlin code, which runs
-**once, when the agent is built**: Kotlin loops, conditions and functions decide which Prolog rules and plans the
-agent gets. Prolog then does what it is good at, matching patterns on the board while the agent plays.
+Typically you would need to encode all rules manually when programming an agent. To play on a 4×4 board you would
+write them all again, or encode the board size in rules that loop over it at run time. In JaKtA the agent is
+configured by ordinary Kotlin code, which runs **once, when the agent is built**: loops, conditions and functions
+decide which rules and plans the agent gets. The rules then do what they are good at, matching patterns on the
+board while the agent plays.
 
-This is *paradigm blending*: the logic stays declarative, and the program that writes it is plain Kotlin,
+This is *paradigm blending*: the logic stays declarative, and it is configured with plain Kotlin,
 with types, functions and tests. The [2P-Kt DSL](../explanation/incarnations/prolog/2p-kt.md) makes the step
 direct: a Kotlin expression like `cell(X, Y, empty)` *is* a Prolog term.
 
 ### Patterns as Kotlin functions
 
-A line is a Prolog list of `cell(X, Y, Mark)` terms. Kotlin functions build the patterns the agent looks for,
-for any board size:
+A line is a Prolog list of `cell(X, Y, Mark)` terms, as long as needed to win. Kotlin functions build the patterns
+the agent looks for, for any winning length:
 
 ```kotlin
 private fun cell(x: Term, y: Term, mark: Term): Struct = Struct.of("cell", x, y, mark)
 
 /**
- * A line of [size] cells holding [owner]'s mark except for the empty cell `cell(X, Y, e)` at [gap].
+ * A line of [length] cells holding [owner]'s mark except for the empty cell `cell(X, Y, e)` at [gap].
  */
-private fun JaktaLogicProgrammingScope.lineWithGap(size: Int, gap: Int, owner: Term): Struct = "aligned"(
-    logicListOf((0 until size).map { if (it == gap) cell(X, Y, empty) else cell(`_`, `_`, owner) }),
+private fun JaktaLogicProgrammingScope.lineWithGap(length: Int, gap: Int, owner: Term): Struct = "aligned"(
+    logicListOf((0 until length).map { if (it == gap) cell(X, Y, empty) else cell(`_`, `_`, owner) }),
 )
 ```
 
@@ -57,63 +60,27 @@ aligned([cell(_, _, x), cell(_, _, x), cell(X, Y, e)])
 ```
 
 a line where X has two marks and the third cell is free: solving it binds `X` and `Y` to the winning cell.
-On 4×4, `lineWithGap(4, 3, me)` gives a four-cell pattern instead, with no change to the agent.
+On 5×5, `lineWithGap(4, 3, me)` gives a four-cell pattern instead, with no change to the agent.
 
 ### Rules generated in loops
 
-What `aligned` means comes from a loop over the four directions, each a step along columns and rows:
+What `aligned` means comes from a loop over the lines of the board. The game model already lists every run of
+cells along a row, column or diagonal that is long enough to win (`BoardState.lines`, which the game also uses to
+find the winner), and each line becomes one rule.
+Threats and forks are then built on top of `aligned`, with more loops. Here `board` is the game's `BoardState` and
+`length` its winning length:
 
 ```kotlin
-private val directions = mapOf(
-    "horizontal" to (1 to 0),
-    "vertical" to (0 to 1),
-    "diagonal" to (1 to 1),
-    "antidiagonal" to (1 to -1),
-)
-
 believes {
-    for ((direction, step) in directions) {
-        val (dx, dy) = step
-        // a line of one cell, or a cell followed by the rest of the line, one step further
-        +inferenceRule { direction(logicListOf(cell(X, Y, S))) impliedBy cell(X, Y, S) }
-        +inferenceRule {
-            direction(logicList(cell(A, B, C), cell(X, Y, S), tail = T)) impliedBy (
-                cell(A, B, C) and
-                    (X `is` (A + dx)) and
-                    (Y `is` (B + dy)) and
-                    cell(X, Y, S) and
-                    direction(logicList(cell(X, Y, S), tail = T))
-                )
-        }
-        +inferenceRule { "aligned"(L) impliedBy direction(L) }
+    // aligned([cell(X1, Y1, S1), ...]): one rule for each line of the board, as long as needed to win
+    for (line in board.lines) {
+        val cells = line.mapIndexed { i, (x, y) -> cell(Integer.of(x), Integer.of(y), Var.of("S$i")) }
+        +inferenceRule { "aligned"(logicListOf(cells)) impliedBy cells.reduce<Struct, Struct> { a, b -> a and b } }
     }
-    // ...
-}
-```
-
-For `"horizontal"`, the second rule is the Prolog clause
-
-```prolog
-horizontal([cell(A, B, C), cell(X, Y, S) | T]) :-
-    cell(A, B, C), X is A + 1, Y is B + 0, cell(X, Y, S), horizontal([cell(X, Y, S) | T]).
-```
-
-The Kotlin `step` values end up as the constants `1` and `0`: the four directions are four copies of the same rule,
-written once.
-
-### Configuration that depends on the board
-
-Kotlin conditions decide which parts of the strategy the agent has at all. Forks — a move that threatens two lines
-at once — are what make the strategy unbeatable on 3×3, but on larger boards they are not enough to be optimal, and
-they are slow to compute. So the threat and fork rules are only generated for 3×3:
-
-```kotlin
-// the fork strategy is optimal on 3×3; on larger boards it is not, and too slow to be worth it
-if (size == OPTIMAL_SIZE) {
     // threat(X, Y, M, A, B): if M plays (X, Y), it threatens to complete a line at (A, B)
-    for (move in 0 until size) {
-        for (rest in (0 until size) - move) {
-            +inferenceRule { "threat"(X, Y, M, A, B) impliedBy lineWithTwoGaps(size, move, rest) }
+    for (move in 0 until length) {
+        for (rest in (0 until length) - move) {
+            +inferenceRule { "threat"(X, Y, M, A, B) impliedBy lineWithTwoGaps(length, move, rest) }
         }
     }
     // fork(X, Y, M): if M plays (X, Y), it threatens two lines at once, and cannot be stopped
@@ -124,6 +91,16 @@ if (size == OPTIMAL_SIZE) {
     }
 }
 ```
+
+On 3×3, the rule for the first row is the Prolog clause
+
+```prolog
+aligned([cell(0, 0, S0), cell(1, 0, S1), cell(2, 0, S2)]) :- cell(0, 0, S0), cell(1, 0, S1), cell(2, 0, S2).
+```
+
+The coordinates are fixed when the agent is built, so solving `aligned` only looks up beliefs, with no arithmetic
+or recursion at run time. This keeps the search for forks fast even on 5×5, where the agent must spot the
+opponent's crossing lines before they become two threats at once.
 
 The plan library is generated the same way. One local function makes a plan for the goal `move` out of a Prolog
 guard; loops and conditions call it:
@@ -140,16 +117,14 @@ fun move(why: String, guard: JaktaLogicProgrammingScope.() -> Struct) = prologPl
 }
 
 move("Oops, I got distracted") { "distracted"(me) and cell(X, Y, empty) }
-for (gap in 0 until size) move("I can complete a line and win") { lineWithGap(size, gap, me) }
-for (gap in 0 until size) {
+for (gap in 0 until length) move("I can complete a line and win") { lineWithGap(length, gap, me) }
+for (gap in 0 until length) {
     move("The opponent could complete a line, blocking") {
-        lineWithGap(size, gap, opponent)
+        lineWithGap(length, gap, opponent)
     }
 }
-if (size == OPTIMAL_SIZE) {
-    move("Creating a fork") { "fork"(X, Y, me) }
-    // ... blocking the opponent's forks
-}
+move("Creating a fork") { "fork"(X, Y, me) }
+// ... blocking the opponent's forks
 if (size % 2 == 1) {
     val centre = Integer.of(size / 2)
     move("Taking the centre") { eq(X, centre) and eq(Y, centre) and cell(X, Y, empty) }
@@ -163,9 +138,9 @@ The result is a different agent for each board:
 
 | Board | Inference rules | Plans for `move` | Differences |
 |---|---|---|---|
-| 3×3 | 19 | 21 | lines of 3, threat and fork rules, four fork plans, centre |
-| 4×4 | 12 | 18 | lines of 4, no forks, no centre |
-| 5×5 | 12 | 21 | lines of 5, no forks, centre |
+| 3×3 | 15 | 21 | 8 lines of 3, centre |
+| 4×4 | 31 | 20 | 24 lines of 3, no centre |
+| 5×5 | 41 | 23 | 28 lines of 4, centre |
 
 ## How the agent plays
 
@@ -186,7 +161,9 @@ The result is a different agent for each board:
 :::note
 The strategy never loses on 3×3, and this is tested:
 [`TicTacToeOptimalityTest`](https://github.com/jakta-bdi/jakta/blob/main/examples/tictactoe/src/desktopTest/kotlin/TicTacToeOptimalityTest.kt)
-plays the agent, as X and as O, against every possible sequence of opponent moves.
+plays the agent, as X and as O, against every possible sequence of opponent moves. On the larger boards the same
+plans make a strong opponent, though not an unbeatable one. With perfect play the first player wins on 4×4
+(two marks side by side in an empty row already threaten both ends), and 5×5 is a draw.
 :::
 
 ## Learn more
