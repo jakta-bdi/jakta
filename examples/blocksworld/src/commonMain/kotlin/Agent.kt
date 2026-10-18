@@ -15,6 +15,7 @@ import it.unibo.jakta.dsl.plan.satisfies
 import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.logic.JaktaLogicProgrammingScope.Companion.prologPlan
 import it.unibo.jakta.node.BaseNode
+import it.unibo.jakta.node.Node
 import it.unibo.jakta.print
 import it.unibo.jakta.value
 import it.unibo.tuprolog.core.Atom
@@ -26,13 +27,22 @@ import it.unibo.tuprolog.core.toAtom
 import model.BlocksWorld
 
 /**
- * Creates a node of the blocksworld MAS with one agent.
+ * Creates a node of the blocksworld MAS with one agent, acting on the in-memory [world].
  */
 fun MasBuilder<BaseNode<Any>, BaseNodeBuilder<Any, BaseNode<Any>>>.blocksWorldNode(
     world: BlocksWorld,
     desiredWorldState: PrologGoal,
+) = blocksWorldNode(desiredWorldState) { BlocksWorldSkillsImpl(world, it) }
+
+/**
+ * Creates a node of the blocksworld MAS with one agent, acting through the [skills] built for its node,
+ * e.g. on a simulated robot instead of an in-memory world.
+ */
+fun MasBuilder<BaseNode<Any>, BaseNodeBuilder<Any, BaseNode<Any>>>.blocksWorldNode(
+    desiredWorldState: PrologGoal,
+    skills: (Node<*>) -> BlocksWorldSkills,
 ) = node {
-    context(BlocksWorldSkillsImpl(world, node)) {
+    context(skills(node)) {
         agent<PrologBelief, PrologGoal>(BaseAgentID("BlocksWorldAgent")) {
             val start = "start".toAtom()
             val table = "table".toAtom()

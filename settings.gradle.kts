@@ -48,3 +48,6 @@ include(
     "examples:ui-common",
     "examples:vacuum-world",
 )
+
+// Webots' Java API is not on Maven: the example builds only where Webots is installed
+if (System.getenv("WEBOTS_HOME") != null) include("examples:webots-blocksworld")
