@@ -45,7 +45,11 @@ fun KotlinDependencyHandler.jakta(project: String): ProjectDependency = project(
 fun DependencyHandler.jakta(project: String) = project(":jakta-$project")
 
 @OptIn(ExperimentalKotlinGradlePluginApi::class)
-fun Project.configureKotlinMultiplatform(includeNative: Boolean = true, targetJvm: JvmTarget = JvmTarget.JVM_1_8) {
+fun Project.configureKotlinMultiplatform(
+    includeNative: Boolean = true,
+    targetJvm: JvmTarget = JvmTarget.JVM_1_8,
+    publishNpm: Boolean = false,
+) {
     with(extensions.getByType<KotlinMultiplatformExtension>()) {
         jvm {
             compilerOptions {
@@ -83,6 +87,11 @@ fun Project.configureKotlinMultiplatform(includeNative: Boolean = true, targetJv
                 }
             }
             binaries.library()
+            // ES modules export the @JsExport-ed API flat (instead of nested under the package namespace).
+            useEsModules()
+            generateTypeScriptDefinitions()
+            // Exports Long as bigint: needed for the TypeScript definitions of 2p-kt's kt-math.
+            compilerOptions { freeCompilerArgs.add("-Xes-long-as-bigint") }
         }
         applyDefaultHierarchyTemplate()
         if (includeNative) {
@@ -120,7 +129,8 @@ fun Project.configureKotlinMultiplatform(includeNative: Boolean = true, targetJv
         }
 
     }
-    configureNpmPublishing()
+    // Only modules with a JS-friendly API are worth an npm package.
+    if (publishNpm) configureNpmPublishing()
 }
 
 private fun Project.configureNpmPublishing() {
