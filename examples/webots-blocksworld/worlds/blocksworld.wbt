@@ -3,12 +3,12 @@
 # The robot's controller runs outside Webots: ./gradlew :examples:webots-blocksworld:run
 # Adapted from projects/samples/contests/tower_of_hanoi/worlds/tower_of_hanoi.wbt (Apache 2.0, Cyberbotics).
 
-EXTERNPROTO "webots://projects/objects/backgrounds/protos/TexturedBackground.proto"
-EXTERNPROTO "webots://projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
-EXTERNPROTO "webots://projects/objects/floors/protos/Floor.proto"
-EXTERNPROTO "webots://projects/objects/solids/protos/SolidBox.proto"
-EXTERNPROTO "webots://projects/robots/kuka/youbot/protos/KukaBox.proto"
-EXTERNPROTO "webots://projects/robots/kuka/youbot/protos/Youbot.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/floors/protos/Floor.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/solids/protos/SolidBox.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/robots/kuka/youbot/protos/KukaBox.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/robots/kuka/youbot/protos/Youbot.proto"
 
 WorldInfo {
   info [

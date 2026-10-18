@@ -11,6 +11,7 @@ The agent perceives the stacks where the boxes physically are, so if a box falls
    Gradle includes this example only when `WEBOTS_HOME` is set, as the Webots Java API is not on Maven.
 2. Open the world: `$WEBOTS_HOME/webots examples/webots-blocksworld/worlds/blocksworld.wbt`.
    The youBot's controller is `<extern>`: the simulation waits for it.
+   The first time, Webots downloads the robot and the textures from GitHub, then caches them.
 3. Run the controller: `./gradlew :examples:webots-blocksworld:run`.
    The agent builds the tower `A,B,C`, with `A` at the bottom; pass other towers as arguments, e.g.
    `./gradlew :examples:webots-blocksworld:run --args="C,A B"`.

@@ -2,8 +2,9 @@ import com.cyberbotics.webots.controller.Motor
 import com.cyberbotics.webots.controller.Supervisor
 import kotlin.math.PI
 import kotlin.math.acos
-import kotlin.math.asin
 import kotlin.math.atan
+import kotlin.math.atan2
+import kotlin.math.hypot
 import kotlin.math.sqrt
 
 // Calibration knobs, from the Tower of Hanoi contest controller of Webots (hanoi.c), tune them on the real world.
@@ -18,11 +19,11 @@ private const val ARM2_VELOCITY = 0.5
 private const val FINGERS_VELOCITY = 0.03
 private const val SETTLE_TIME = 0.2
 
-/** Forward distance between the first arm joint and the slots. */
+/** Forward distance between the second arm joint, with the arm facing forward, and the slots. */
 const val ARM_REACH = 0.2
 
-/** hanoi.c scales the lateral offsets by 0.9, "a small offset that I cannot explain". */
-private const val LATERAL_SCALE = 0.9
+/** The second arm joint is this far ahead of the axis of the first; hanoi.c approximates it scaling x by 0.9. */
+private const val ARM2_OFFSET = 0.033
 
 private const val ARM1_LENGTH = 0.253
 private const val ARM2_LENGTH = 0.155
@@ -73,7 +74,7 @@ class YouBot(val supervisor: Supervisor = Supervisor()) {
      * releases the box held there.
      */
     fun gripBox(lateral: Double, level: Int, grip: Boolean) {
-        val x = LATERAL_SCALE * lateral
+        val x = -lateral // arm_ik measures x to the right
         val z = SAFETY_MARGIN + PLATFORM_HEIGHT + (level + 1) * BOX_SIZE + if (grip) 0.0 else SAFETY_MARGIN
         inverseKinematics(x, ARM_REACH, HOVER_HEIGHT)
         if (grip) fingers.setPosition(GRIPPER_MAX)
@@ -95,15 +96,15 @@ class YouBot(val supervisor: Supervisor = Supervisor()) {
     }
 
     /**
-     * Points the gripper downwards at [x] to the left, [y] ahead of the first arm joint and [z] high (arm_ik).
+     * Points the gripper downwards at [x] to the right, [y] ahead of the second arm joint and [z] high (arm_ik).
      */
     private fun inverseKinematics(x: Double, y: Double, z: Double) {
-        val y1 = sqrt(x * x + y * y)
+        val y1 = hypot(x, y + ARM2_OFFSET) - ARM2_OFFSET
         val z1 = z + ARM4_LENGTH + ARM5_LENGTH - ARM1_LENGTH
         val a = ARM2_LENGTH
         val b = ARM3_LENGTH
         val c = sqrt(y1 * y1 + z1 * z1)
-        val alpha = -asin(x / y1)
+        val alpha = -atan2(x, y + ARM2_OFFSET)
         val beta = -(PI / 2 - acos((a * a + c * c - b * b) / (2 * a * c)) - atan(z1 / y1))
         val gamma = -(PI - acos((a * a + b * b - c * c) / (2 * a * b)))
         val delta = -(PI + beta + gamma)
