@@ -28,10 +28,12 @@ This document covers:
   - It steps the simulation, runs the arm motions the agent asks for, and perceives the world between them.
   - The agent runs on the usual `CoroutineNodeRunner`. A `move` suspends until the motion ends, about 15 s of
     simulated time.
-- **Not yet run against a live Webots.**
-  - Compiled against the R2025a `Controller.jar`. The JNI libraries load, and the controller connects to an `ipc://`
-    URL (and gives up after 50 s with no Webots running).
-  - The world, the arm calibration and the grips still need to be tried in Webots; see *Limitations*.
+- **It works in Webots R2025a.** The agent reached every goal tried, from the same start (`C` on `A`, `B` alone):
+  - `A,B,C`, twice: 3 moves;
+  - `B,C,A`: 2 moves;
+  - `C,A B`: 2 moves.
+  - `move` checks where each box landed, so every move was verified physically.
+  - Calibration took two fixes to the port of `hanoi.c`; see *Calibration*.
 
 ## Webots in short
 
@@ -140,6 +142,25 @@ suspend fun <T> run(block: YouBot.() -> T): T // queues block, suspends until it
 `settings.gradle.kts` includes the module only when `WEBOTS_HOME` is set. CI and machines without Webots never see it,
 because `Controller.jar` is not on Maven. The flip side is that CI never compiles it.
 
+### Calibration
+
+The calibration ran from a temporary controller, not committed. It moved the arm directly, logged the box poses, and
+saved views of the scene with the supervisor's `exportImage`.
+
+- **The lateral sign.** `arm_ik` measures `x` to the robot's right: a positive `x` turns joint `arm1` clockwise seen
+  from above. The first run picked from the mirrored slot. `gripBox` now takes metres to the left, like the world's
+  `y`, and negates them.
+- **`hanoi.c`'s unexplained 0.9.** `hanoi.c` scales lateral offsets by 0.9, "a small offset that I cannot explain". It
+  approximates the 0.033 m between the axis of joint `arm1` and joint `arm2` (`Youbot.proto`), which `arm_ik` ignores.
+  - With the scale, a box landed 5 mm off its slot.
+  - The port now computes the rotation and the reach from the `arm1` axis, and boxes land within 3 mm.
+- **PROTO URLs.** Some installs, e.g. the Arch `webots-bin` package, ship without the PROTO files and resolve
+  `webots://` URLs to missing local paths. The world uses `https://raw.githubusercontent.com/cyberbotics/webots/R2025a/`
+  URLs, which work everywhere; Webots caches what it downloads.
+
+The rest of `hanoi.c` worked as is: the hover height, the descent speed, the gripper gap, and the friction of the
+`box` contact material. Fingers closing along the arm grip a box 1 cm from its neighbours without touching them.
+
 ### Run it
 
 ```bash
@@ -150,13 +171,8 @@ $WEBOTS_HOME/webots examples/webots-blocksworld/worlds/blocksworld.wbt &
 
 ## Limitations
 
-- **Untested in Webots.** The physical part has not run yet:
-  - the world file;
-  - the arm port and its calibration;
-  - grips on 5 cm boxes 1 cm apart. `hanoi.c` does this with fingers closing along the arm.
-  - Expect a calibration pass.
-  - The sign of the lateral offset is derived from Webots' axes convention (x forward, y left), not observed. If the arm
-    picks the mirrored slot, flip the signs in `SLOTS`.
+- **Disturbances are untested.** The tested runs had no disturbance, so the perceptions published while the arm is idle
+  carried nothing new. Moving a box by hand in the Webots GUI mid-run should update the beliefs; it has not been tried.
 - **Failures end the run.** When a box falls, `move` fails, the failure climbs to `start`, and the agent gives up.
   - The Blocks World plans have no recovery: they were written for a world where moves always succeed.
   - A failure plan that re-adopts the goal from the new beliefs would show replanning; see open question 3.
