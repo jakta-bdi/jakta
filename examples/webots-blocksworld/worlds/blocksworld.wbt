@@ -1,0 +1,96 @@
+#VRML_SIM R2025a utf8
+# The youBot stays at the origin facing x; the boxes stand on four slots of the platform ahead of it, 0.06 m apart.
+# The robot's controller runs outside Webots: ./gradlew :examples:webots-blocksworld:run
+# Adapted from projects/samples/contests/tower_of_hanoi/worlds/tower_of_hanoi.wbt (Apache 2.0, Cyberbotics).
+
+EXTERNPROTO "webots://projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "webots://projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "webots://projects/objects/floors/protos/Floor.proto"
+EXTERNPROTO "webots://projects/objects/solids/protos/SolidBox.proto"
+EXTERNPROTO "webots://projects/robots/kuka/youbot/protos/KukaBox.proto"
+EXTERNPROTO "webots://projects/robots/kuka/youbot/protos/Youbot.proto"
+
+WorldInfo {
+  info [
+    "A JaKtA agent stacks boxes with a KUKA youBot"
+  ]
+  title "JaKtA Blocks World"
+  basicTimeStep 16
+  contactProperties [
+    ContactProperties {
+      material2 "box"
+      coulombFriction [
+        10
+      ]
+    }
+    ContactProperties {
+      material1 "InteriorWheelMat"
+      coulombFriction [
+        0, 2, 0
+      ]
+      frictionRotation -0.785398 0
+      bounce 0
+      forceDependentSlip [
+        10, 0
+      ]
+    }
+    ContactProperties {
+      material1 "ExteriorWheelMat"
+      coulombFriction [
+        0, 2, 0
+      ]
+      frictionRotation 0.785398 0
+      bounce 0
+      forceDependentSlip [
+        10, 0
+      ]
+    }
+  ]
+}
+Viewpoint {
+  orientation -0.2530 0.0950 0.9628 2.4474
+  position 1.1 -0.7 0.65
+}
+TexturedBackground {
+}
+TexturedBackgroundLight {
+}
+Floor {
+  size 3 3
+}
+SolidBox {
+  translation 0.389 0 0.005
+  name "platform"
+  size 0.1 0.3 0.01
+  appearance PBRAppearance {
+    baseColor 0.8 0.8 0.8
+    roughness 0.5
+    metalness 0
+  }
+}
+DEF A KukaBox {
+  translation 0.389 0.09 0.035
+  name "A"
+  color 0.9 0.1 0.1
+  size 0.05 0.05 0.05
+  contactMaterial "box"
+}
+DEF C KukaBox {
+  translation 0.389 0.09 0.085
+  name "C"
+  color 0.1 0.3 0.9
+  size 0.05 0.05 0.05
+  contactMaterial "box"
+}
+DEF B KukaBox {
+  translation 0.389 0.03 0.035
+  name "B"
+  color 0.1 0.8 0.1
+  size 0.05 0.05 0.05
+  contactMaterial "box"
+}
+Youbot {
+  translation 0 0 0.102838
+  controller "<extern>"
+  supervisor TRUE
+}

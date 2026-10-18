@@ -4,6 +4,7 @@
 |---|---|---|
 | `hello-world` | The smallest agent: one goal, one plan | `./gradlew :examples:hello-world:run` |
 | `blocksworld` | Recursive goals and plan selection by context; drag blocks to set the world and the goal | desktop: `./gradlew :examples:blocksworld:run`<br>web: `./gradlew :examples:blocksworld:jsBrowserDevelopmentRun` |
+| `webots-blocksworld` | The Blocks World agent stacks boxes with a youBot arm in the Webots physics simulator; needs Webots and `WEBOTS_HOME` | open `worlds/blocksworld.wbt` in Webots, then `./gradlew :examples:webots-blocksworld:run` |
 | `tictactoe` | Rules and plans generated in Kotlin for any board size; a strategy that never loses on 3×3; a human player that is an agent too | desktop: `./gradlew :examples:tictactoe:run`<br>web: `./gradlew :examples:tictactoe:jsBrowserDevelopmentRun` |
 | `vacuum-world` | A robot that keeps a map clean forever, in the style of the EIS Vacuum World: reacting to percepts, and a rule-based memory of visited cells to explore; dust respawns or is dropped by clicking | desktop: `./gradlew :examples:vacuum-world:run`<br>web: `./gradlew :examples:vacuum-world:jsBrowserDevelopmentRun` |
 | `failure-handling` | A failure plan recovering a goal that failed two levels below | `./gradlew :examples:failure-handling:run` |
