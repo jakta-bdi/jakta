@@ -25,7 +25,15 @@ It runs below, right in your browser: the *agent trace* on the right shows what 
 ./gradlew :examples:tictactoe:jsBrowserDevelopmentRun # browser
 ```
 
-## Why it matters: configuring the agent
+## Why it matters
+
+The agent reasons **declaratively**: Prolog rules match patterns on the board, such as a line it can complete or
+two lines it can threaten at once, and the order of its plans is its strategy. Yet nobody wrote those rules for a
+given board: Kotlin code **generates** them when the agent is built, for the board it will play on. This is
+*paradigm blending*: the logic stays declarative, and it is configured with plain Kotlin, with types, functions and
+tests.
+
+### Configuring the agent
 
 Typically you would need to encode all rules manually when programming an agent. To play on a 4×4 board you would
 write them all again, or encode the board size in rules that loop over it at run time. In JaKtA the agent is
@@ -33,11 +41,10 @@ configured by ordinary Kotlin code, which runs **once, when the agent is built**
 decide which rules and plans the agent gets. The rules then do what they are good at, matching patterns on the
 board while the agent plays.
 
-This is *paradigm blending*: the logic stays declarative, and it is configured with plain Kotlin,
-with types, functions and tests. The [2P-Kt DSL](../explanation/incarnations/prolog/2p-kt.md) makes the step
-direct: a Kotlin expression like `cell(X, Y, empty)` *is* a Prolog term.
+The [2P-Kt DSL](../explanation/incarnations/prolog/2p-kt.md) makes the step direct: a Kotlin expression like
+`cell(X, Y, empty)` *is* a Prolog term.
 
-### Patterns as Kotlin functions
+#### Patterns as Kotlin functions
 
 A line is a Prolog list of `cell(X, Y, Mark)` terms, as long as needed to win. Kotlin functions build the patterns
 the agent looks for, for any winning length:
@@ -62,7 +69,7 @@ aligned([cell(_, _, x), cell(_, _, x), cell(X, Y, e)])
 a line where X has two marks and the third cell is free: solving it binds `X` and `Y` to the winning cell.
 On 5×5, `lineWithGap(4, 3, me)` gives a four-cell pattern instead, with no change to the agent.
 
-### Rules generated in loops
+#### Rules generated in loops
 
 What `aligned` means comes from a loop over the lines of the board. The game model already lists every run of
 cells along a row, column or diagonal that is long enough to win (`BoardState.lines`, which the game also uses to
@@ -157,14 +164,6 @@ The result is a different agent for each board:
 - **The game is the referee.** It applies moves, publishes the new board to every player and stops the node
   when somebody wins or the board is full. You play through the same game: a click puts your mark, and the
   agent perceives it like any other move.
-
-:::note
-The strategy never loses on 3×3, and this is tested:
-[`TicTacToeOptimalityTest`](https://github.com/jakta-bdi/jakta/blob/main/examples/tictactoe/src/desktopTest/kotlin/TicTacToeOptimalityTest.kt)
-plays the agent, as X and as O, against every possible sequence of opponent moves. On the larger boards the same
-plans make a strong opponent, though not an unbeatable one. With perfect play the first player wins on 4×4
-(two marks side by side in an empty row already threaten both ends), and 5×5 is a draw.
-:::
 
 ## Learn more
 
