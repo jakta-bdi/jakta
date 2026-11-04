@@ -45,6 +45,7 @@ include(
     "examples:contract-net",
     "examples:failure-handling",
     "examples:hello-world",
+    "examples:mind-inspector",
     "examples:tictactoe",
     "examples:ui-common",
     "examples:vacuum-world",
