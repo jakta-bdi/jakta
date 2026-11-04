@@ -48,6 +48,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -170,7 +171,14 @@ private fun OrdersPanel(
         Text("Order a dish", style = MaterialTheme.typography.subtitle2)
         Dish.entries.forEach { dish ->
             OutlinedButton(onClick = { onOrder(dish) }, modifier = Modifier.fillMaxWidth()) {
-                Text("${dish.label()}  (${dish.station.label()}, ${dish.cookingTime.inWholeSeconds} s)")
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(dish.label(), fontWeight = FontWeight.Bold)
+                    Text(
+                        "${dish.station.label().lowercase()}, ${dish.cookingTime.inWholeSeconds} s",
+                        fontSize = 11.sp,
+                        color = Color.Gray,
+                    )
+                }
             }
         }
         Divider()
@@ -270,7 +278,7 @@ private fun KitchenFloor(state: KitchenState, colour: Color, walkMillis: Long, o
     BoxWithConstraints(modifier = Modifier.aspectRatio(1.7f)) {
         val width = maxWidth
         val height = maxHeight
-        Canvas(modifier = Modifier.fillMaxSize()) {
+        Canvas(modifier = Modifier.fillMaxSize().clipToBounds()) {
             // floor tiles and walls
             val tile = size.height / 8
             var y = 0f
@@ -454,7 +462,7 @@ private fun MessageLogPanel(messages: List<LoggedMessage>, modifier: Modifier = 
             items(messages) { message ->
                 Row {
                     Text(
-                        "${message.sender} → ${message.receivers.joinToString()}: ",
+                        "${message.sender} -> ${message.receivers.joinToString()}: ",
                         fontFamily = FontFamily.Monospace,
                         fontSize = 12.sp,
                         color = Color(0xFF616161),

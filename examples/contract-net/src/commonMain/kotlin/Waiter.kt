@@ -53,7 +53,8 @@ fun waiter(id: AgentID, restaurant: Restaurant) = with(board) {
         embodiedAs { restaurant }
         handlesPerceptionEvents { if (it is OrderPerception) handleOrderPerception(it) else null }
         handlesMessageEvents { message ->
-            (message.payload as? KQMLPayload)?.let { payload ->
+            // a broadcast also reaches its sender: the waiter ignores its own calls for proposals
+            (message.payload as? KQMLPayload)?.takeIf { message.sender != id }?.let { payload ->
                 val (performative, content) = payload.describe()
                 restaurant.log(message.sender.displayName, "waiter", performative, content)
                 handleKQMLPayload(payload, message.sender)

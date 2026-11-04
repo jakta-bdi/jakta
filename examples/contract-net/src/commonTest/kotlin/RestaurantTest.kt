@@ -95,6 +95,7 @@ class RestaurantTest {
             repeat(3) { restaurant.order(Dish.STEAK) }
             // dara is the fastest, then bruno: each order makes the next bid of its chef later
             assertEquals(listOf("dara", "bruno", "ada"), (1..3).map { chefOf(it) })
+            assertEquals(emptyList(), restaurant.messages.value.filter { it.sender in it.receivers })
         }
     }
 

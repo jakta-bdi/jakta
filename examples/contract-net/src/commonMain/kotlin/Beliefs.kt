@@ -89,9 +89,10 @@ internal fun Collection<PrologBelief>.tickets(functor: String): List<Ticket> =
  * How long until the chef could have [dish] ready: the dishes of the tickets the chef took, and then this one,
  * at the chef's speed.
  */
-internal fun Collection<PrologBelief>.readyIn(dish: Dish): Duration =
-    (tickets("ticket").fold(Duration.ZERO) { time, ticket -> time + ticket.dish.cookingTime } + dish.cookingTime) /
-        speed()
+internal fun Collection<PrologBelief>.readyIn(dish: Dish): Duration {
+    val work = tickets("ticket").fold(dish.cookingTime) { time, ticket -> time + ticket.dish.cookingTime } / speed()
+    return (work.inWholeMilliseconds / TENTH_MILLIS * TENTH_MILLIS).milliseconds
+}
 
 private fun Collection<PrologBelief>.introductions() = filter { it.head.functor == "introduction" }
 
