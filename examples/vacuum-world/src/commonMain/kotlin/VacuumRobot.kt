@@ -50,7 +50,7 @@ fun MasBuilder<BaseNode<Any>, BaseNodeBuilder<Any, BaseNode<Any>>>.vacuumNode(
 
     agent<PrologBelief, PrologGoal>(BaseAgentID("vacuum")) {
         embodiedAs { Any() }
-        handlesPerceptionEvents { if (it is VacuumPerception) handleVacuumPerception(it, beliefs) else null }
+        handlesPerceptionEvents { if (it is VacuumPerception) handleVacuumPerception(it) else null }
         believes {
             // how squares relative to the robot map to directions, and directions to steps on the grid
             for (direction in Direction.entries) {

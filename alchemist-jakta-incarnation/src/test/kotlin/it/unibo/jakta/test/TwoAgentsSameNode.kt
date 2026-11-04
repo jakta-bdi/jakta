@@ -29,7 +29,7 @@ fun <Goal : Any> BaseNodeBuilder<Any, JaktaForAlchemistNode<Any>>.messageEnabled
         embodiedAs { Any() }
         handlesMessageEvents { message ->
             when (message.payload) {
-                is String -> AgentUpdate.Belief(setOf(Pair(message.payload, message.sender)), emptySet())
+                is String -> AgentUpdate.Believe(Pair(message.payload, message.sender))
                 else -> null
             }
         }

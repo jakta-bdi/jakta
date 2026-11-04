@@ -30,7 +30,7 @@ class TestAgentEntryPoint {
         embodiedAs { Any() }
         handlesMessageEvents {
             when (it.payload) {
-                is String -> AgentUpdate.Goal(setOf("greet"))
+                is String -> AgentUpdate.Adopt("greet")
                 else -> null
             }
         }

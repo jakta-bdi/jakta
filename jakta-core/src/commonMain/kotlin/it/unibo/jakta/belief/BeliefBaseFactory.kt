@@ -19,10 +19,12 @@ object BeliefBaseFactory {
      * Creates a [BeliefBase] initialized with the given initial [beliefs].
      * @param[internalInbox] the channel to send internal belief events to the agent.
      * @param[beliefs] the initial beliefs to populate the belief base with.
+     * @param[revision] how beliefs are revised when added or removed, the initial ones included.
      * @return the created BeliefBase.
      */
     fun <Belief : Any> of(
         internalInbox: EventInbox<AgentEvent.Internal.Belief<Belief>>,
         beliefs: Iterable<Belief>,
-    ): BeliefBase<Belief> = BeliefBaseImpl(internalInbox, beliefs)
+        revision: BeliefRevision<Belief> = BeliefRevision.plain(),
+    ): BeliefBase<Belief> = BeliefBaseImpl(internalInbox, beliefs, revision)
 }
