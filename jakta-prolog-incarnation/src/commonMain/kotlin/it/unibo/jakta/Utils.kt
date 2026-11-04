@@ -3,6 +3,7 @@ package it.unibo.jakta
 import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.agent.MutableAgentState
 import it.unibo.jakta.dsl.belief.PrologBelief
+import it.unibo.jakta.dsl.belief.annotatedBeliefsByDefault
 import it.unibo.jakta.dsl.goal.PrologGoal
 import it.unibo.jakta.logic.MutableSubstitutionPlanContext
 import it.unibo.tuprolog.core.Atom
@@ -53,6 +54,7 @@ val self = Atom.of("self")
  * Extension method to tag terms with JaKtA annotations.
  */
 fun <T : Term> T.tag(vararg annotation: Struct): T {
+    annotatedBeliefsByDefault()
     val previousAnnotations = this.getTag<Set<Struct>>(JAKTA_ANNOTATIONS_TAG)
     val struct = this.setTag(
         JAKTA_ANNOTATIONS_TAG,

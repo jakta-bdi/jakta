@@ -4,7 +4,6 @@ import it.unibo.jakta.JAKTA_ANNOTATIONS_TAG
 import it.unibo.jakta.agent.MutableAgentState
 import it.unibo.jakta.belief.BeliefRevision
 import it.unibo.jakta.belief.BeliefRevision.Revision
-import it.unibo.jakta.dsl.agent.AgentBuilder
 import it.unibo.jakta.event.AgentUpdate
 import it.unibo.jakta.self
 import it.unibo.jakta.source
@@ -25,6 +24,7 @@ val PrologBelief.annotations: Set<Struct>
  * The same belief, with exactly [annotations].
  */
 fun PrologBelief.withAnnotations(annotations: Set<Struct>): PrologBelief {
+    annotatedBeliefsByDefault()
     val annotated = head.setTag(JAKTA_ANNOTATIONS_TAG, annotations)
     return if (isFact) Fact.of(annotated) else Rule.of(annotated, body)
 }
@@ -114,12 +114,17 @@ object AnnotatedBeliefRevision : BeliefRevision<PrologBelief> {
         ) { held, stored -> held.filter { it != stored } + stored }
 }
 
+private val annotatedRevisionRegistration = lazy {
+    BeliefRevision.registerDefault({ it is Rule }, AnnotatedBeliefRevision)
+}
+
 /**
- * Revises the agent's beliefs with [AnnotatedBeliefRevision]: beliefs told by several agents, or believed by the
- * agent itself too, are a single belief with all their sources.
+ * Makes [AnnotatedBeliefRevision] the default revision of Prolog beliefs, once and from the first annotation on:
+ * before it, every belief is the agent's own, `[source(self)]`, and [BeliefRevision.plain] revises them the same way.
  */
-fun <Goal : Any, Body : Any> AgentBuilder<PrologBelief, Goal, Body>.usesAnnotatedBeliefs() =
-    revisesBeliefsWith(AnnotatedBeliefRevision)
+internal fun annotatedBeliefsByDefault() {
+    annotatedRevisionRegistration.value
+}
 
 /**
  * The beliefs matching any of [queries] are now [beliefs], whatever their sources: an authoritative observation,

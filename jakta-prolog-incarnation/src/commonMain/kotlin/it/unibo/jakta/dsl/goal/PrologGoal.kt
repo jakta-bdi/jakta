@@ -4,6 +4,7 @@ import it.unibo.jakta.dsl.JaktaDSL
 import it.unibo.jakta.logic.JaktaLogicProgrammingScope
 import it.unibo.jakta.logic.MutableSubstitutionPlanContext
 import it.unibo.jakta.logic.annotatedMguWith
+import it.unibo.jakta.logic.applyWithAnnotations
 import it.unibo.jakta.logic.requireGround
 import it.unibo.jakta.logic.requirePredicate
 import it.unibo.tuprolog.core.Struct
@@ -50,7 +51,7 @@ fun initialGoal(block: JaktaLogicProgrammingScope.() -> Struct): PrologGoal =
  */
 context(scope: JaktaLogicProgrammingScope, planContext: MutableSubstitutionPlanContext)
 fun goal(block: JaktaLogicProgrammingScope.() -> Struct): PrologGoal =
-    (scope.block().apply(planContext.substitution) as Struct).also { struct ->
+    (scope.block().applyWithAnnotations(planContext.substitution) as Struct).also { struct ->
         requirePredicate(struct) { "Goal must be a predicate, but got $it" }
         requireGround(struct) { "Goal must be ground, but got $it" }
     }

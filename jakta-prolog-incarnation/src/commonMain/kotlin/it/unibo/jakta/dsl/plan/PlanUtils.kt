@@ -5,6 +5,7 @@ import it.unibo.jakta.dsl.belief.PrologBelief
 import it.unibo.jakta.dsl.goal.PrologGoal
 import it.unibo.jakta.logic.JaktaLogicProgrammingScope
 import it.unibo.jakta.logic.MutableSubstitutionPlanContext
+import it.unibo.jakta.logic.applyWithAnnotations
 import it.unibo.jakta.logic.unifiesWith
 import it.unibo.jakta.plan.GuardScope
 import it.unibo.jakta.plan.PlanScope
@@ -26,7 +27,7 @@ fun GuardScope<PrologBelief, MutableSubstitutionPlanContext>.satisfies(
     block: JaktaLogicProgrammingScope.() -> Struct,
 ): MutableSubstitutionPlanContext? {
     val guard = scope.block()
-    val substitutedGuard = guard.apply(this.context.substitution).castToStruct()
+    val substitutedGuard = guard.applyWithAnnotations(this.context.substitution).castToStruct()
     return when (val solution = this.beliefs.unifiesWith(substitutedGuard)) {
         is Solution.Yes -> {
             this.context += solution.substitution
@@ -48,7 +49,7 @@ context(logicScope: JaktaLogicProgrammingScope)
 fun PlanScope<PrologBelief, PrologGoal, MutableSubstitutionPlanContext>.testQuery(
     block: JaktaLogicProgrammingScope.() -> Struct,
 ) {
-    val query = logicScope.block().apply(this.context.substitution).castToStruct()
+    val query = logicScope.block().applyWithAnnotations(this.context.substitution).castToStruct()
     when (val solution = this.agent.beliefs.unifiesWith(query)) {
         is Solution.Yes -> {
             this.context += solution.substitution
