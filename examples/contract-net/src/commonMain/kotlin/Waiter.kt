@@ -14,7 +14,6 @@ import it.unibo.jakta.dsl.goal.matchingGoal
 import it.unibo.jakta.dsl.plan.satisfies
 import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.event.AgentEvent
-import it.unibo.jakta.get
 import it.unibo.jakta.kqml.KQMLPayload
 import it.unibo.jakta.kqml.broadcastTell
 import it.unibo.jakta.kqml.handleKQMLPayload
@@ -22,7 +21,6 @@ import it.unibo.jakta.kqml.tellTo
 import it.unibo.jakta.logic.JaktaLogicProgrammingScope.Companion.prologPlan
 import it.unibo.jakta.print
 import it.unibo.jakta.skills.MessagingSkill
-import it.unibo.jakta.source
 import it.unibo.jakta.value
 import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.Struct
@@ -48,10 +46,10 @@ private val waitTables = Atom.of("wait_tables")
  *
  * It calls for proposals with `cfp(Id, D)` to every chef, waits until all the chefs that introduced themselves
  * answered, or until the [DEADLINE], then accepts the soonest proposal with `accept_proposal(Id)` and rejects the
- * others with `reject_proposal(Id)`, remembering `assigned(Id, D, S)`. An order nobody proposed for is ordered again
- * after a [RETRY_PAUSE], and so is an order whose chef tells `failure(Id)`, or does not tell `done(Id)` in the time
- * it promised, with some [GRACE]: then the waiter tells it `cancel(Id)`. Every message it receives is logged in the
- * [restaurant].
+ * others with `reject_proposal(Id)`, remembering `assigned(Id, D, C)`, where C is the chef. An order nobody proposed
+ * for is ordered again after a [RETRY_PAUSE], and so is an order whose chef tells `failure(Id, C)`, or does not tell
+ * `done(Id, C)` in the time it promised, with some [GRACE]: then the waiter tells it `cancel(Id)`. Every message it
+ * receives is logged in the [restaurant].
  */
 context(board: WaiterSkill, messaging: MessagingSkill)
 fun waiter(id: AgentID, restaurant: Restaurant) = with(board) {
@@ -71,9 +69,9 @@ fun waiter(id: AgentID, restaurant: Restaurant) = with(board) {
             +inferenceRule {
                 "next_order"(I, D) impliedBy ("order"(I, D) and not("order"(J, `_`) and Struct.of("<", J, I)))
             }
-            // best(I, T): T is the soonest a chef proposed to have the order I ready
+            // best(I, T, C): the chef C proposed to have the order I ready the soonest, in T
             +inferenceRule {
-                "best"(I, T) impliedBy ("propose"(I, T) and not("propose"(I, U) and Struct.of("<", U, T)))
+                "best"(I, T, C) impliedBy ("propose"(I, T, C) and not("propose"(I, U, `_`) and Struct.of("<", U, T)))
             }
         }
         hasInitialGoals { !initialGoal { start } }
@@ -107,17 +105,15 @@ fun waiter(id: AgentID, restaurant: Restaurant) = with(board) {
 
             // the soonest proposal wins, and the others lose
             prologPlan {
-                adding.goal { matchingGoal { "award"(I, D) } } onlyWhen { satisfies { "best"(I, T) } } triggers {
-                    val winner = agent.beliefs.proposerOf(I.value(), T.value())
-                    val chef = agent.beliefs.chefFrom(winner)
-                    val source = Atom.of(winner)
-                    agent.print("Order ", I, " goes to ${chef.displayName}, ready in ", T, " s")
-                    agent.believe(belief { "assigned"(I, D, source) })
-                    agent.tellTo(chef, belief { "accept_proposal"(I) })
-                    agent.alsoAchieve(goal { "watch"(I, D, source, T) })
+                adding.goal { matchingGoal { "award"(I, D) } } onlyWhen { satisfies { "best"(I, T, C) } } triggers {
+                    val winner: String = C.value()
+                    agent.print("Order ", I, " goes to ", C, ", ready in ", T, " s")
+                    agent.believe(belief { "assigned"(I, D, C) })
+                    agent.tellTo(chefNamed(winner), belief { "accept_proposal"(I) })
+                    agent.alsoAchieve(goal { "watch"(I, D, C, T) })
                     agent.beliefs.proposersOf(I.value()).filter { it != winner }
-                        .forEach { agent.tellTo(agent.beliefs.chefFrom(it), belief { "reject_proposal"(I) }) }
-                    agent.track(I.value(), OrderStatus.Assigned(chef.displayName, T.value<Double>().seconds))
+                        .forEach { agent.tellTo(chefNamed(it), belief { "reject_proposal"(I) }) }
+                    agent.track(I.value(), OrderStatus.Assigned(winner, T.value<Double>().seconds))
                 }
             }
             // nobody proposed: the customer orders it again in a while
@@ -137,46 +133,45 @@ fun waiter(id: AgentID, restaurant: Restaurant) = with(board) {
 
             // a promise not kept: the chef is offline, or too slow, and the order is taken back
             prologPlan {
-                adding.goal { matchingGoal { "watch"(I, D, S, T) } } triggers {
+                adding.goal { matchingGoal { "watch"(I, D, C, T) } } triggers {
                     val deadline = agent.realTime(T.value<Double>().seconds * GRACE)
                     val answer = agent.wait({ event -> event.takeIf { it.isOutcomeOf(I.value()) } }, deadline)
-                    if (answer == null && belief { "assigned"(I, D, S) } in agent.beliefs) {
-                        val chef = agent.beliefs.chefFrom(S.value())
-                        agent.forget(belief { "assigned"(I, D, S) })
-                        agent.print("${chef.displayName} is late with order ", I, ": I take it back")
-                        agent.tellTo(chef, belief { "cancel"(I) })
+                    if (answer == null && belief { "assigned"(I, D, C) } in agent.beliefs) {
+                        agent.forget(belief { "assigned"(I, D, C) })
+                        agent.print(C, " is late with order ", I, ": I take it back")
+                        agent.tellTo(chefNamed(C.value()), belief { "cancel"(I) })
                         agent.believe(belief { "order"(I, D) })
                     }
                 }
             }
 
             prologPlan {
-                adding.belief { matchingBelief { "done"(I)[source(S)] } } onlyWhen {
-                    satisfies { "assigned"(I, D, S) }
+                adding.belief { matchingBelief { "done"(I, C) } } onlyWhen {
+                    satisfies { "assigned"(I, D, C) }
                 } triggers {
                     agent.forgetAll("done", I.value())
-                    agent.forget(belief { "assigned"(I, D, S) })
-                    agent.track(I.value(), OrderStatus.Served(agent.beliefs.chefFrom(S.value()).displayName))
+                    agent.forget(belief { "assigned"(I, D, C) })
+                    agent.track(I.value(), OrderStatus.Served(C.value()))
                 }
             }
             prologPlan {
-                adding.belief { matchingBelief { "failure"(I)[source(S)] } } onlyWhen {
-                    satisfies { "assigned"(I, D, S) }
+                adding.belief { matchingBelief { "failure"(I, C) } } onlyWhen {
+                    satisfies { "assigned"(I, D, C) }
                 } triggers {
                     agent.forgetAll("failure", I.value())
-                    agent.forget(belief { "assigned"(I, D, S) })
-                    agent.print(agent.beliefs.chefFrom(S.value()).displayName, " gave order ", I, " back")
+                    agent.forget(belief { "assigned"(I, D, C) })
+                    agent.print(C, " gave order ", I, " back")
                     agent.believe(belief { "order"(I, D) })
                 }
             }
             // too late: the order was taken back from that chef
             prologPlan {
-                adding.belief { matchingBelief { "done"(I)[source(S)] } } triggers {
+                adding.belief { matchingBelief { "done"(I, C) } } triggers {
                     agent.forgetAll("done", I.value())
                 }
             }
             prologPlan {
-                adding.belief { matchingBelief { "failure"(I)[source(S)] } } triggers {
+                adding.belief { matchingBelief { "failure"(I, C) } } triggers {
                     agent.forgetAll("failure", I.value())
                 }
             }

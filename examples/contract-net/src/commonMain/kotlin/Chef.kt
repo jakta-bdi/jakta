@@ -12,14 +12,12 @@ import it.unibo.jakta.dsl.goal.initialGoal
 import it.unibo.jakta.dsl.goal.matchingGoal
 import it.unibo.jakta.dsl.plan.satisfies
 import it.unibo.jakta.dsl.plan.triggers
-import it.unibo.jakta.get
 import it.unibo.jakta.kqml.KQMLPayload
 import it.unibo.jakta.kqml.handleKQMLPayload
 import it.unibo.jakta.kqml.tellTo
 import it.unibo.jakta.logic.JaktaLogicProgrammingScope.Companion.prologPlan
 import it.unibo.jakta.print
 import it.unibo.jakta.skills.MessagingSkill
-import it.unibo.jakta.source
 import it.unibo.jakta.value
 import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.Struct
@@ -35,9 +33,10 @@ private val napping = Atom.of("napping")
  * A chef, embodied in its [kitchen], who bids for the orders the [waiter] calls for, and cooks the ones it wins.
  *
  * The chef introduces itself to the waiter, then answers each call for proposals `cfp(Id, D)`: it proposes
- * `propose(Id, T)` if its kitchen has the station of the dish, where T is how long until it would be ready, and refuses
- * with `refuse(Id)` otherwise. It keeps cooking the orders it won, the oldest first, and tells the waiter `done(Id)`
- * when it served one, or `failure(Id)` when its kitchen lost the station it needs; it drops an order the waiter takes
+ * `propose(Id, T, C)` if its kitchen has the station of the dish, where T is how long until it would be ready, and
+ * refuses with `refuse(Id, C)` otherwise, signing with its name C. It keeps cooking the orders it won, the oldest
+ * first, and tells the waiter `done(Id, C)` when it served one, or `failure(Id, C)` when its kitchen lost the station
+ * it needs; it drops an order the waiter takes
  * back with `cancel(Id)`. Napping, the chef is offline: the messages sent to it are lost. Back online, it introduces
  * itself again and gives back all its orders, as it cannot know which ones the waiter took back meanwhile.
  * Every message sent to it is logged in the [restaurant].
@@ -77,7 +76,7 @@ fun chef(id: AgentID, kitchen: Kitchen, waiter: AgentID, restaurant: Restaurant)
 
             // a call for proposals
             prologPlan {
-                adding.belief { matchingBelief { "cfp"(I, D)[source(W)] } } onlyWhen {
+                adding.belief { matchingBelief { "cfp"(I, D) } } onlyWhen {
                     satisfies { "needs"(D, S) and "station"(S) }
                 } triggers {
                     val order: Int = I.value()
@@ -86,22 +85,22 @@ fun chef(id: AgentID, kitchen: Kitchen, waiter: AgentID, restaurant: Restaurant)
                     agent.forgetAll("cfp", order)
                     agent.believe(belief { "proposal"(I, D) })
                     agent.print("I can have the ${dish.name.lowercase()} of order $order ready in $readyIn")
-                    agent.tellTo(waiter, proposeBelief(order, readyIn))
+                    agent.tellTo(waiter, proposeBelief(order, readyIn, kitchen.chef))
                 }
             }
             prologPlan {
-                adding.belief { matchingBelief { "cfp"(I, D)[source(W)] } } onlyWhen {
+                adding.belief { matchingBelief { "cfp"(I, D) } } onlyWhen {
                     satisfies { "needs"(D, S) }
                 } triggers {
                     agent.forgetAll("cfp", I.value())
                     agent.print("I have no ", S, " for order ", I)
-                    agent.tellTo(waiter, belief { "refuse"(I) })
+                    agent.tellTo(waiter, answerBelief("refuse", I.value(), kitchen.chef))
                 }
             }
 
             // the waiter's answer to a proposal
             prologPlan {
-                adding.belief { matchingBelief { "accept_proposal"(I)[source(W)] } } onlyWhen {
+                adding.belief { matchingBelief { "accept_proposal"(I) } } onlyWhen {
                     satisfies { "proposal"(I, D) }
                 } triggers {
                     agent.forgetAll("accept_proposal", I.value())
@@ -111,7 +110,7 @@ fun chef(id: AgentID, kitchen: Kitchen, waiter: AgentID, restaurant: Restaurant)
                 }
             }
             prologPlan {
-                adding.belief { matchingBelief { "reject_proposal"(I)[source(W)] } } triggers {
+                adding.belief { matchingBelief { "reject_proposal"(I) } } triggers {
                     agent.forgetAll("reject_proposal", I.value())
                     agent.forgetAll("proposal", I.value())
                 }
@@ -119,7 +118,7 @@ fun chef(id: AgentID, kitchen: Kitchen, waiter: AgentID, restaurant: Restaurant)
 
             // the waiter took the order back, as the chef was late
             prologPlan {
-                adding.belief { matchingBelief { "cancel"(I)[source(W)] } } triggers {
+                adding.belief { matchingBelief { "cancel"(I) } } triggers {
                     agent.forgetAll("cancel", I.value())
                     agent.forgetAll("ticket", I.value())
                     agent.unpin(I.value())
@@ -132,7 +131,7 @@ fun chef(id: AgentID, kitchen: Kitchen, waiter: AgentID, restaurant: Restaurant)
                 removing.belief { matchingBelief { napping } } triggers {
                     agent.print("I'm back! I give back my orders: the waiter may have taken them back")
                     agent.introduce(kitchen.chef, waiter)
-                    agent.beliefs.tickets().forEach { agent.giveBack(it, waiter) }
+                    agent.beliefs.tickets().forEach { agent.giveBack(it, kitchen.chef, waiter) }
                 }
             }
 
@@ -148,7 +147,7 @@ fun chef(id: AgentID, kitchen: Kitchen, waiter: AgentID, restaurant: Restaurant)
                 adding.goal { matchingGoal { work } } onlyWhen { satisfies { "lost"(I, D) } } triggers {
                     val ticket = Ticket(I.value(), dishNamed(D.value()))
                     agent.print("I can't cook order ${ticket.id} without a ${ticket.dish.station.toAtom()}")
-                    agent.giveBack(ticket, waiter)
+                    agent.giveBack(ticket, kitchen.chef, waiter)
                     agent.alsoAchieve(goal { work })
                 }
             }
@@ -161,9 +160,9 @@ fun chef(id: AgentID, kitchen: Kitchen, waiter: AgentID, restaurant: Restaurant)
                         agent.walkTo(null)
                         agent.serve(ticket.id)
                         agent.print("Order ${ticket.id} served!")
-                        agent.tellTo(waiter, belief { "done"(I) })
+                        agent.tellTo(waiter, answerBelief("done", ticket.id, kitchen.chef))
                     } else {
-                        agent.giveBack(ticket, waiter)
+                        agent.giveBack(ticket, kitchen.chef, waiter)
                     }
                     agent.alsoAchieve(goal { work })
                 }
@@ -182,12 +181,12 @@ fun chef(id: AgentID, kitchen: Kitchen, waiter: AgentID, restaurant: Restaurant)
 context(messaging: MessagingSkill)
 private fun RestaurantAgent.introduce(name: String, waiter: AgentID) = tellTo(waiter, introductionBelief(name))
 
-/** Gives the order of [ticket] back to the [waiter], if the chef still has it, telling `failure(Id)`. */
+/** Gives the order of [ticket] back to the [waiter], if the chef named [chef] still has it: `failure(Id, C)`. */
 context(kitchens: KitchenSkill, messaging: MessagingSkill)
-private fun RestaurantAgent.giveBack(ticket: Ticket, waiter: AgentID) {
+private fun RestaurantAgent.giveBack(ticket: Ticket, chef: String, waiter: AgentID) {
     if (ticket.belief("ticket") !in beliefs) return
     forget(ticket.belief("ticket"))
     with(kitchens) { unpin(ticket.id) }
     print("I give order ${ticket.id} back")
-    tellTo(waiter, orderBelief("failure", ticket.id))
+    tellTo(waiter, answerBelief("failure", ticket.id, chef))
 }

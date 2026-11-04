@@ -42,7 +42,7 @@ It runs below, right in your browser.
 The other showcases are about one agent reasoning on its world. Here the interesting part happens **between** agents:
 no one tells the chefs what to cook, and the waiter knows nothing of their kitchens. They agree on who cooks what by
 following a **protocol**, a conversation of [KQML](../explanation/incarnations/prolog/kqml.md) messages, and what one
-agent tells another becomes a **belief annotated with its source**, so the waiter knows who said what. By bidding the
+agent tells another becomes one of its **beliefs**, which its plans react to. By bidding the
 time they need, the chefs **balance the load** among themselves, without anyone planning it. And the protocol copes
 **when things go wrong**: the waiter does not wait forever for a chef that does not answer, a chef that can no longer
 keep a promise gives the order back, and the waiter takes it back from one that went offline.
@@ -61,22 +61,22 @@ sequenceDiagram
   W->>A: cfp(3, steak)
   W->>B: cfp(3, steak)
   W->>C: cfp(3, steak)
-  A->>W: propose(3, 11.2)
-  B->>W: propose(3, 5.6)
-  C->>W: refuse(3)
+  A->>W: propose(3, 11.2, ada)
+  B->>W: propose(3, 5.6, bruno)
+  C->>W: refuse(3, chen)
   Note over W: everyone answered:<br/>bruno is the soonest
   W->>B: accept_proposal(3)
   W->>A: reject_proposal(3)
   Note over B: cooks the steak
-  B->>W: done(3)
+  B->>W: done(3, bruno)
 ```
 
 - The waiter calls for proposals, `cfp(Id, D)`, with a broadcast to every other agent.
-- A chef whose kitchen has the station of the dish proposes `propose(Id, T)`, where `T` is how many seconds until it
-  would be ready; a chef without it refuses with `refuse(Id)`.
+- A chef whose kitchen has the station of the dish proposes `propose(Id, T, C)`, where `T` is how many seconds until
+  it would be ready, and `C` its name; a chef without it refuses with `refuse(Id, C)`.
 - The waiter accepts the soonest proposal with `accept_proposal(Id)`, and rejects the others with
   `reject_proposal(Id)`.
-- The chef that won the order cooks it, serves it at the pass, and tells `done(Id)`.
+- The chef that won the order cooks it, serves it at the pass, and tells `done(Id, C)`.
 
 Every message is a `tell`: it adds a belief to the receiver, and the receiver's plans react to it. So the protocol is
 written as plans, one for each message an agent can receive. This is a chef's, for a call for proposals it can
@@ -84,7 +84,7 @@ cook:
 
 ```kotlin
 prologPlan {
-    adding.belief { matchingBelief { "cfp"(I, D)[source(W)] } } onlyWhen {
+    adding.belief { matchingBelief { "cfp"(I, D) } } onlyWhen {
         satisfies { "needs"(D, S) and "station"(S) }
     } triggers {
         val order: Int = I.value()
@@ -93,7 +93,7 @@ prologPlan {
         agent.forgetAll("cfp", order)
         agent.believe(belief { "proposal"(I, D) })
         agent.print("I can have the ${dish.name.lowercase()} of order $order ready in $readyIn")
-        agent.tellTo(waiter, proposeBelief(order, readyIn))
+        agent.tellTo(waiter, proposeBelief(order, readyIn, kitchen.chef))
     }
 }
 ```
@@ -104,13 +104,13 @@ the station, and refuses. The chef also remembers its `proposal(Id, D)`, to know
 answer comes, and forgets the call: it handled it.
 
 Before any order, each chef introduces itself to the waiter with `introduction(participant, N)`, telling its name. That
-is how the waiter knows how many chefs to wait for, and how to call them.
+is how the waiter knows how many chefs to wait for, and how to call them. Every answer of a chef is signed with that
+name, so the waiter knows who said what.
 
-### Beliefs with a source
+### Decisions as Prolog rules
 
-What an agent is told is annotated with who told it: a chef's proposal is the waiter's belief
-`propose(3, 5.6)[source(S)]`, where `S` is the chef's ID. The waiter's decisions are Prolog rules over these beliefs:
-`next_order` is the oldest order waiting, and `best` the soonest proposal for an order:
+The waiter's decisions are Prolog rules over its beliefs: `next_order` is the oldest order waiting, and `best` the
+chef with the soonest proposal for an order:
 
 ```kotlin
 believes {
@@ -118,9 +118,9 @@ believes {
     +inferenceRule {
         "next_order"(I, D) impliedBy ("order"(I, D) and not("order"(J, `_`) and Struct.of("<", J, I)))
     }
-    // best(I, T): T is the soonest a chef proposed to have the order I ready
+    // best(I, T, C): the chef C proposed to have the order I ready the soonest, in T
     +inferenceRule {
-        "best"(I, T) impliedBy ("propose"(I, T) and not("propose"(I, U) and Struct.of("<", U, T)))
+        "best"(I, T, C) impliedBy ("propose"(I, T, C) and not("propose"(I, U, `_`) and Struct.of("<", U, T)))
     }
 }
 ```
@@ -129,26 +129,20 @@ Once the answers are in, the waiter awards the order with the plan whose guard f
 
 ```kotlin
 prologPlan {
-    adding.goal { matchingGoal { "award"(I, D) } } onlyWhen { satisfies { "best"(I, T) } } triggers {
-        val winner = agent.beliefs.proposerOf(I.value(), T.value())
-        val chef = agent.beliefs.chefFrom(winner)
-        val source = Atom.of(winner)
-        agent.print("Order ", I, " goes to ${chef.displayName}, ready in ", T, " s")
-        agent.believe(belief { "assigned"(I, D, source) })
-        agent.tellTo(chef, belief { "accept_proposal"(I) })
-        agent.alsoAchieve(goal { "watch"(I, D, source, T) })
+    adding.goal { matchingGoal { "award"(I, D) } } onlyWhen { satisfies { "best"(I, T, C) } } triggers {
+        val winner: String = C.value()
+        agent.print("Order ", I, " goes to ", C, ", ready in ", T, " s")
+        agent.believe(belief { "assigned"(I, D, C) })
+        agent.tellTo(chefNamed(winner), belief { "accept_proposal"(I) })
+        agent.alsoAchieve(goal { "watch"(I, D, C, T) })
         agent.beliefs.proposersOf(I.value()).filter { it != winner }
-            .forEach { agent.tellTo(agent.beliefs.chefFrom(it), belief { "reject_proposal"(I) }) }
-        agent.track(I.value(), OrderStatus.Assigned(chef.displayName, T.value<Double>().seconds))
+            .forEach { agent.tellTo(chefNamed(it), belief { "reject_proposal"(I) }) }
+        agent.track(I.value(), OrderStatus.Assigned(winner, T.value<Double>().seconds))
     }
 }
 ```
 
-Guards and rules see what a belief says, not who said it, so `proposerOf` reads the source of the winning proposal
-([`Beliefs.kt`](https://github.com/jakta-bdi/jakta/blob/main/examples/contract-net/src/commonMain/kotlin/Beliefs.kt)),
-and `chefFrom` turns it back into the chef's ID, with the name the chef gave in its `introduction`. In a trigger,
-instead, `[source(S)]` binds the sender like any other variable: the waiter's plans for `done` and `failure` use it to
-tell which chef answered. A second plan for `award`, with no guard, handles an order nobody proposed for.
+A second plan for `award`, with no guard, handles an order nobody proposed for.
 
 ### Load balancing emerges
 
@@ -181,7 +175,7 @@ for each:
 | You | The protocol |
 |---|---|
 | send a chef to nap | it is offline: the waiter decides at a **deadline**, without it |
-| switch off a station a chef needs | the chef **gives the order back** with `failure(Id)` |
+| switch off a station a chef needs | the chef **gives the order back** with `failure(Id, C)` |
 | leave a chef with orders asleep | the waiter **takes them back** with `cancel(Id)`, when its promises run out |
 | wake a chef up | it introduces itself again, and **gives back** all its orders |
 | order a dish no kitchen can cook now | the waiter asks again after a pause |
@@ -230,9 +224,9 @@ orders are lost:
 +inferenceRule { "lost"(I, D) impliedBy ("ticket"(I, D) and "needs"(D, S) and not("station"(S))) }
 ```
 
-Before cooking its next order, the chef gives the lost ones back, telling `failure(Id)`. Turning the station off in
+Before cooking its next order, the chef gives the lost ones back, telling `failure(Id, C)`. Turning the station off in
 the middle of cooking stops the cooking too, and the chef gives that order back the same way. The waiter remembered
-the order as `assigned(Id, D, S)`, with the chef it gave it to: on a `failure` from that chef it believes
+the order as `assigned(Id, D, C)`, with the chef it gave it to: on a `failure` from that chef it believes
 `order(Id, D)` again, and the order goes back into its loop, for a new round.
 
 #### Taking an order back
@@ -243,14 +237,13 @@ promised:
 
 ```kotlin
 prologPlan {
-    adding.goal { matchingGoal { "watch"(I, D, S, T) } } triggers {
+    adding.goal { matchingGoal { "watch"(I, D, C, T) } } triggers {
         val deadline = agent.realTime(T.value<Double>().seconds * GRACE)
         val answer = agent.wait({ event -> event.takeIf { it.isOutcomeOf(I.value()) } }, deadline)
-        if (answer == null && belief { "assigned"(I, D, S) } in agent.beliefs) {
-            val chef = agent.beliefs.chefFrom(S.value())
-            agent.forget(belief { "assigned"(I, D, S) })
-            agent.print("${chef.displayName} is late with order ", I, ": I take it back")
-            agent.tellTo(chef, belief { "cancel"(I) })
+        if (answer == null && belief { "assigned"(I, D, C) } in agent.beliefs) {
+            agent.forget(belief { "assigned"(I, D, C) })
+            agent.print(C, " is late with order ", I, ": I take it back")
+            agent.tellTo(chefNamed(C.value()), belief { "cancel"(I) })
             agent.believe(belief { "order"(I, D) })
         }
     }
@@ -278,7 +271,7 @@ prologPlan {
 }
 ```
 
-The waiter orders again those it still had assigned to that chef, and ignores the others: `assigned(Id, D, S)` names
+The waiter orders again those it still had assigned to that chef, and ignores the others: `assigned(Id, D, C)` names
 the chef, so a `failure`, or a late `done`, only counts from the chef that still has the order.
 
 ### The whole protocol
@@ -299,23 +292,23 @@ sequenceDiagram
     W->>A: cfp(3, steak)
     W->>B: cfp(3, steak)
     alt ada has a grill
-      A->>W: propose(3, 5.6)
+      A->>W: propose(3, 5.6, ada)
     else ada has no grill, or it is off
-      A->>W: refuse(3)
+      A->>W: refuse(3, ada)
     else ada is napping
       Note over A: offline: the cfp is lost, no answer
     end
-    B->>W: propose(3, 11.2)
+    B->>W: propose(3, 11.2, bruno)
     Note over W: everyone answered, or the deadline passed
     alt somebody proposed
       W->>A: accept_proposal(3)
       W->>B: reject_proposal(3)
       Note over W: watches ada's promise: 5.6 s × 1.5
       alt ada cooks it in time
-        A->>W: done(3)
+        A->>W: done(3, ada)
         Note over W: served
       else the grill is switched off
-        A->>W: failure(3)
+        A->>W: failure(3, ada)
         Note over W: order(3, steak) again
       else the promise runs out: ada is asleep, or late
         W->>A: cancel(3)
@@ -328,7 +321,7 @@ sequenceDiagram
   end
   opt ada wakes up from a nap
     A->>W: introduction(participant, ada)
-    A->>W: failure(Id), for every order on its rail
+    A->>W: failure(Id, ada), for every order on its rail
     Note over W: takes back the orders still assigned to ada,<br/>ignores those it already took back
   end
 ```

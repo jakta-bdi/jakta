@@ -49,6 +49,15 @@ class RestaurantTest {
     private suspend fun servedBy(id: Int): String =
         (statusOf(id) { it is OrderStatus.Served } as OrderStatus.Served).chef
 
+    /** Orders a steak, and returns the kitchen of the chef that took it, once cooking, and the other one. */
+    private suspend fun steakOnTheGrill(kitchens: List<Kitchen>): Pair<Kitchen, Kitchen> {
+        restaurant.order(Dish.STEAK)
+        val chef = chefOf(1)
+        val (winner, other) = kitchens.sortedByDescending { it.chef == chef }
+        winner.state.first { it.cooking != null }
+        return winner to other
+    }
+
     @Test
     fun theSoonestChefGetsTheOrder() = runTest {
         open(backgroundScope, hire("ada", "bruno")) {
@@ -81,14 +90,23 @@ class RestaurantTest {
         }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class) // currentTime
+    @Test
+    fun equalAnswersFromDifferentChefsAreAllCounted() = runTest {
+        open(backgroundScope, hire("ada", "bruno", "chen", "dara")) {
+            // ada and chen, idle, bid the same for a cake, and bruno and dara both refuse: everyone answered
+            val ordered = currentTime
+            restaurant.order(Dish.CAKE)
+            chefOf(1)
+            assertTrue(currentTime - ordered < DEADLINE.inWholeMilliseconds, "Waited for the deadline")
+        }
+    }
+
     @Test
     fun aChefLosingTheStationGivesTheOrderBackAndAnotherCooksIt() = runTest {
         val kitchens = hire("ada", "bruno")
         open(backgroundScope, kitchens) {
-            restaurant.order(Dish.STEAK)
-            val chef = chefOf(1)
-            val (winner, other) = kitchens.sortedByDescending { it.chef == chef }
-            winner.state.first { it.cooking != null }
+            val (winner, other) = steakOnTheGrill(kitchens)
             winner.toggleStation(Station.GRILL)
             assertEquals(other.chef, servedBy(1))
             assertTrue(restaurant.messages.value.any { it.performative == "failure" && it.sender == winner.chef })
@@ -120,10 +138,7 @@ class RestaurantTest {
     fun theWaiterTakesBackTheOrdersOfAChefThatFellAsleep() = runTest {
         val kitchens = hire("ada", "bruno")
         open(backgroundScope, kitchens) {
-            restaurant.order(Dish.STEAK)
-            val chef = chefOf(1)
-            val (winner, other) = kitchens.sortedByDescending { it.chef == chef }
-            winner.state.first { it.cooking != null }
+            val (winner, other) = steakOnTheGrill(kitchens)
             winner.toggleNap()
             // the winner does not serve the steak in time: the waiter cancels it, and the other chef cooks it
             assertEquals(other.chef, servedBy(1))
@@ -140,10 +155,7 @@ class RestaurantTest {
     fun aChefBackOnlineGivesBackItsOrdersAndTheyAreCookedAnyway() = runTest {
         val kitchens = hire("ada", "bruno")
         open(backgroundScope, kitchens) {
-            restaurant.order(Dish.STEAK)
-            val chef = chefOf(1)
-            val (winner, other) = kitchens.sortedByDescending { it.chef == chef }
-            winner.state.first { it.cooking != null }
+            val (winner, other) = steakOnTheGrill(kitchens)
             winner.toggleNap()
             restaurant.order(Dish.STEAK)
             assertEquals(other.chef, chefOf(2))

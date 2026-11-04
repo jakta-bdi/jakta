@@ -31,7 +31,7 @@ suspend fun runRestaurant(restaurant: Restaurant, kitchens: List<Kitchen>): Unit
     val kitchenNodes = kitchens.map { kitchen ->
         val node = node(NodeBuilders.baseNode<Any>()) {
             context(MessagingSkill(node), KitchenSkill(node)) {
-                withAgents(chef(BaseAgentID(kitchen.chef), kitchen, waiterId, restaurant))
+                withAgents(chef(chefNamed(kitchen.chef), kitchen, waiterId, restaurant))
             }
         }
         launch {

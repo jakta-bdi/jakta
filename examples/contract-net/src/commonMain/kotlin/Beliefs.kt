@@ -1,4 +1,3 @@
-import it.unibo.jakta.JAKTA_ANNOTATIONS_TAG
 import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.agent.BaseAgentID
 import it.unibo.jakta.dsl.belief.PrologBelief
@@ -47,9 +46,16 @@ internal fun orderBelief(functor: String, id: Int, dish: Dish? = null): PrologBe
 /** The belief `functor(Id, D)` about the order of this ticket, such as `ticket(3, steak)`. */
 internal fun Ticket.belief(functor: String): PrologBelief = orderBelief(functor, id, dish)
 
-/** The belief `propose(Id, T)`: the dish of the order [id] can be ready in [readyIn], T in seconds. */
-internal fun proposeBelief(id: Int, readyIn: Duration): PrologBelief =
-    Fact.of(Struct.of("propose", Integer.of(id), Real.of(readyIn.toSecondsText())))
+/**
+ * The belief `propose(Id, T, C)`: the chef named [chef] can have the dish of the order [id] ready in [readyIn],
+ * T in seconds.
+ */
+internal fun proposeBelief(id: Int, readyIn: Duration, chef: String): PrologBelief =
+    Fact.of(Struct.of("propose", Integer.of(id), Real.of(readyIn.toSecondsText()), Atom.of(chef)))
+
+/** A chef's answer `functor(Id, C)` about the order [id], signed with its name [chef]: such as `done(3, ada)`. */
+internal fun answerBelief(functor: String, id: Int, chef: String): PrologBelief =
+    Fact.of(Struct.of(functor, Integer.of(id), Atom.of(chef)))
 
 /** The duration in seconds, to the tenth, such as `3.3`. */
 private fun Duration.toSecondsText(): String = "${inWholeMilliseconds / TENTH_MILLIS / TENTHS.toDouble()}"
@@ -85,30 +91,19 @@ internal fun introductionBelief(name: String): PrologBelief =
 
 private fun Collection<PrologBelief>.introductions() = filter { it.head.functor == "introduction" }
 
-/** How many chefs introduced themselves as participants, from `introduction(participant, N)[source(S)]`. */
+/** How many chefs introduced themselves as participants, from `introduction(participant, C)`. */
 internal fun Collection<PrologBelief>.participants(): Int = introductions().size
 
-/**
- * The chef that is the agent [source], as it introduced itself with `introduction(participant, N)[source(S)]`:
- * its ID, to send it messages, holds its name N.
- */
-internal fun Collection<PrologBelief>.chefFrom(source: String): AgentID =
-    BaseAgentID(introductions().single { it.head.source() == source }.head[1].toString(), id = source)
+/** The chef named [name]: a chef's ID is its name, so that the waiter can call it by the name it signs with. */
+internal fun chefNamed(name: String): AgentID = BaseAgentID(name, id = name)
 
-/** The answers to the call for proposals of the order [id]: `propose(Id, T)` and `refuse(Id)`. */
+/** The answers to the call for proposals of the order [id]: `propose(Id, T, C)` and `refuse(Id, C)`. */
 internal fun Collection<PrologBelief>.answersTo(id: Int): List<PrologBelief> =
     about("propose", id) + about("refuse", id)
 
-/** The first agent that proposed [readyIn] for the order [id], from `propose(Id, T)[source(S)]`. */
-internal fun Collection<PrologBelief>.proposerOf(id: Int, readyIn: Term): String =
-    about("propose", id).first { it.head[1] == readyIn }.head.source()
-
-/** The agents that proposed for the order [id], from `propose(Id, T)[source(S)]`. */
-internal fun Collection<PrologBelief>.proposersOf(id: Int): List<String> = about("propose", id).map { it.head.source() }
-
-/** The agent this belief comes from, as its `source(S)` annotation says. */
-internal fun Struct.source(): String =
-    (checkNotNull(getTag<Set<Struct>>(JAKTA_ANNOTATIONS_TAG)?.single { it.functor == "source" })[0] as Atom).value
+/** The chefs that proposed for the order [id], from `propose(Id, T, C)`. */
+internal fun Collection<PrologBelief>.proposersOf(id: Int): List<String> =
+    about("propose", id).map { it.head[2].toString() }
 
 /** The kind of a KQML message and what it says, such as `cfp` and `cfp(3, steak)`, for the message log. */
 internal fun KQMLPayload.describe(): Pair<String, String> = when (this) {
