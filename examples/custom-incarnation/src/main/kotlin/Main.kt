@@ -1,5 +1,6 @@
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
+import it.unibo.jakta.agent.achieve
 import it.unibo.jakta.dsl.agent
 import it.unibo.jakta.dsl.mas
 import it.unibo.jakta.dsl.mas.runLocally
@@ -8,47 +9,55 @@ import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.plan.GuardScope
 import kotlinx.coroutines.runBlocking
 
-private data class Entry(val key: String, val value: Any)
+private fun Int.even(): Int? = takeIf { it > 0 && it % 2 == 0 }
 
-private data class Task(val action: String, val target: String)
+private fun Int.odd(): Int? = takeIf { it > 0 && it % 2 == 1 }
 
-private fun Task.targetOf(action: String): String? = target.takeIf { this.action == action }
+private fun GuardScope<Int, Int>.explored(): Int? = context.takeIf { it in beliefs }
 
-private inline fun <reified V> GuardScope<Entry, *>.valueOf(key: String): V? =
-    beliefs.firstOrNull { it.key == key }?.value as? V
+private fun GuardScope<Int, Int>.unexplored(): Int? = context.takeIf { it !in beliefs }
 
-private val greeter = agent<Entry, Task, Any> {
+private val collatz = agent<Int, Int, Any> {
     embodiedAs { Any() }
-    believes {
-        +Entry("friends", setOf("bob"))
-    }
     hasInitialGoals {
-        !Task("greet", "bob")
-        !Task("greet", "eve")
+        !10
     }
     hasPlanLibrary {
         adding.goal {
-            targetOf("greet")
+            takeIf { it > 0 }
         } onlyWhen {
-            context.takeIf { it in valueOf<Set<String>>("friends").orEmpty() }
+            explored()
         } triggers {
-            agent.print("Hello, $context!")
-        }
-        failing.goal {
-            targetOf("greet")
-        } triggers {
-            agent.print("I don't greet strangers like $context")
+            agent.print("Back to $context: the sequence loops, as the conjecture says")
             node.terminateNode()
+        }
+        adding.goal {
+            even()
+        } onlyWhen {
+            unexplored()
+        } triggers {
+            agent.believe(context)
+            agent.print("$context is even: halving it")
+            agent.achieve(context / 2)
+        }
+        adding.goal {
+            odd()
+        } onlyWhen {
+            unexplored()
+        } triggers {
+            agent.believe(context)
+            agent.print("$context is odd: tripling it and adding one")
+            agent.achieve(3 * context + 1)
         }
     }
 }
 
 /**
- * Runs the greeter.
+ * Runs the Collatz agent.
  */
 fun main(): Unit = runBlocking {
     Logger.setMinSeverity(Severity.Assert)
     mas(NodeBuilders.baseNode()) {
-        node { withAgents(greeter) }
+        node { withAgents(collatz) }
     }.runLocally()
 }

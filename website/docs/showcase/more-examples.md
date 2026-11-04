@@ -29,7 +29,7 @@ and also run in the browser with `./gradlew :examples:<name>:jsBrowserDevelopmen
 | [`contract-net`](https://github.com/jakta-bdi/jakta/tree/main/examples/contract-net) | KQML messaging with `askOne`, delegating an `achieve`, and `tell`. See [Ask and answer with KQML](../how-to/prolog/kqml.md) and [KQML Messaging](../explanation/incarnations/prolog/kqml.md). |
 | [`runtime-agents`](https://github.com/jakta-bdi/jakta/tree/main/examples/runtime-agents) | Adding and removing agents while the MAS runs. See [Add and remove agents at runtime](../how-to/runtime-agents.md). |
 | [`wait-for-events`](https://github.com/jakta-bdi/jakta/tree/main/examples/wait-for-events) | Waiting for events, delays and concurrent intentions. See [Wait for events and use time](../how-to/wait-for-events.md). |
-| [`custom-incarnation`](https://github.com/jakta-bdi/jakta/tree/main/examples/custom-incarnation) | Beliefs as entries of a key-value memory and goals as tasks, with trigger and guard helpers. See [Write your own incarnation](../how-to/custom-incarnation.md). |
+| [`custom-incarnation`](https://github.com/jakta-bdi/jakta/tree/main/examples/custom-incarnation) | Plain numbers as beliefs and goals: an agent following the Collatz sequence until it loops. See [Write your own incarnation](../how-to/custom-incarnation.md). |
 | [`failure-handling`](https://github.com/jakta-bdi/jakta/tree/main/examples/failure-handling) | A failure plan recovering a goal that failed two levels below, with the Prolog incarnation. |
 
 </div>
