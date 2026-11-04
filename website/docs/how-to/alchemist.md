@@ -8,6 +8,9 @@ The `alchemist-jakta-incarnation` module runs JaKtA nodes as devices of an
 [Alchemist](https://alchemistsimulator.github.io/) simulation: each Alchemist node hosts a JaKtA node,
 agents run in simulated time, and messages travel over Alchemist's network model.
 It requires Java 17+.
+The complete program is the [`alchemist-ping-pong`](https://github.com/jakta-bdi/jakta/tree/main/examples/alchemist-ping-pong)
+example, where Alice and Bob play ping-pong from two devices; run it with `./gradlew :examples:alchemist-ping-pong:run`
+to watch it in Alchemist's viewer.
 
 ## Dependencies
 
@@ -77,11 +80,16 @@ deployments:
 Then run it as any Alchemist simulation, e.g. programmatically:
 
 ```kotlin
-val simulation = LoadAlchemist.from(yamlUrl).getDefault<Any, Nothing>()
+val simulation = LoadAlchemist.from(yamlUrl).getDefault<Any, Euclidean2DPosition>()
 simulation.play()
 simulation.run()
 ```
 
-Complete, runnable scenarios — two agents on the same device, and two agents on two devices communicating over the
-network — are in the module tests:
-[`alchemist-jakta-incarnation/src/test`](https://github.com/jakta-bdi/jakta/tree/main/alchemist-jakta-incarnation/src/test).
+To watch it, add Alchemist's viewer (`it.unibo.alchemist:alchemist-swingui`, at Alchemist's version) and attach it to
+the simulation before running it:
+
+```kotlin
+val viewer = SwingGUI<Any, Euclidean2DPosition>(simulation.environment)
+viewer.isRealTime = true
+simulation.addOutputMonitor(viewer)
+```

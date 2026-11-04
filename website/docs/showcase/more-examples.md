@@ -30,6 +30,7 @@ and also run in the browser with `./gradlew :examples:<name>:jsBrowserDevelopmen
 | [`runtime-agents`](https://github.com/jakta-bdi/jakta/tree/main/examples/runtime-agents) | Adding and removing agents while the MAS runs. See [Add and remove agents at runtime](../how-to/runtime-agents.md). |
 | [`sub-goals`](https://github.com/jakta-bdi/jakta/tree/main/examples/sub-goals) | A barista achieving sub-goals, getting their results, starting a concurrent intention and recovering from a failed sub-goal. See [Achieve sub-goals and recover from failures](../how-to/sub-goals.md). |
 | [`wait-for-events`](https://github.com/jakta-bdi/jakta/tree/main/examples/wait-for-events) | Waiting for an event, with a timeout, while another intention makes it happen. See [Wait for events and use time](../how-to/wait-for-events.md). |
+| [`alchemist-ping-pong`](https://github.com/jakta-bdi/jakta/tree/main/examples/alchemist-ping-pong) | Alice and Bob playing ping-pong from two devices of an [Alchemist](https://alchemistsimulator.github.io/) simulation, in simulated time, shown in Alchemist's viewer. See [Simulate a MAS with Alchemist](../how-to/alchemist.md). |
 | [`custom-incarnation`](https://github.com/jakta-bdi/jakta/tree/main/examples/custom-incarnation) | Plain numbers as beliefs and goals: an agent following the Collatz sequence until it loops, and a prime sieve. See [Write your own incarnation](../how-to/custom-incarnation.md). |
 
 </div>

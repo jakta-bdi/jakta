@@ -42,6 +42,7 @@ include(
     "jakta-prolog-incarnation",
     "examples:blocksworld",
     "examples:contract-net",
+    "examples:alchemist-ping-pong",
     "examples:custom-incarnation",
     "examples:hello-world",
     "examples:ping-pong",
