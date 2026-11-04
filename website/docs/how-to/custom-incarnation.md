@@ -9,6 +9,8 @@ An [incarnation](../explanation/incarnations/index.md) is just that choice, plus
 triggers and guards pleasant to write. This guide builds a tiny one where beliefs and goals are plain `Int`s:
 an agent that follows the [Collatz sequence](https://en.wikipedia.org/wiki/Collatz_conjecture) of a number, halving
 it when it is even and tripling it and adding one when it is odd, until it gets back to a number it has already seen.
+The [`custom-incarnation`](https://github.com/jakta-bdi/jakta/tree/main/examples/custom-incarnation) example also
+has a second agent with numbers as beliefs and goals, a prime sieve whose belief base is the primes it found so far.
 The complete program is the [`custom-incarnation`](https://github.com/jakta-bdi/jakta/tree/main/examples/custom-incarnation) example; run it with `./gradlew :examples:custom-incarnation:run`.
 
 ## 1. Choose the representation
@@ -16,10 +18,10 @@ The complete program is the [`custom-incarnation`](https://github.com/jakta-bdi/
 A goal is a number to explore, and a belief is a number already explored:
 
 ```kotlin
-private val collatz = agent<Int, Int, Any> {
+fun collatz(start: Int) = agent<Int, Int, Any> {
     embodiedAs { Any() }
     hasInitialGoals {
-        !10
+        !start
     }
     // ...
 }
