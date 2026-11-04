@@ -135,7 +135,8 @@ class TestAnnotationsInSolver {
 
     @Test
     fun `rules calling built-ins keep the bindings of their head`() {
-        // with 2p-kt's default unificator, X \= Y loses the bindings of sibling(X, Y)
+        // without tracking variables, the solver loses the bindings of sibling(X, Y) before X \= Y, and of next(X, Y)
+        // before Y is X + 1
         val family = listOf(
             initialBelief { "parent"("alice", "bob") },
             initialBelief { "parent"("alice", "charlie") },
@@ -145,6 +146,11 @@ class TestAnnotationsInSolver {
             listOf(mapOf("X" to "bob", "Y" to "charlie"), mapOf("X" to "charlie", "Y" to "bob")),
             family.solve { "sibling"(X, Y) },
         )
+        val counting = listOf(
+            initialBelief { "at"(1) },
+            inferenceRule { "next"(X, Y) impliedBy ("at"(X) and (Y `is` (X + 1))) },
+        )
+        assertEquals(listOf(mapOf("X" to "1", "Y" to "2")), counting.solve { "next"(X, Y) })
         assertEquals(
             listOf(mapOf("L" to "[alice, bob]")),
             facts.solve { "findall"(S, "propose"(1, `_`)[source(S)], L) },

@@ -18,6 +18,7 @@ import it.unibo.tuprolog.solve.Signature
 import it.unibo.tuprolog.solve.Solution
 import it.unibo.tuprolog.solve.Solver
 import it.unibo.tuprolog.solve.classic.ClassicSolverFactory
+import it.unibo.tuprolog.solve.flags.TrackVariables
 import it.unibo.tuprolog.solve.flags.Unknown
 import it.unibo.tuprolog.unify.AbstractUnificator
 import it.unibo.tuprolog.utils.setTag
@@ -64,11 +65,8 @@ private val controlArguments: Map<Signature, List<Int>> = mapOf(
     Signature("forall", 2) to listOf(0, 1),
 )
 
-/*
- * The stored term first. With 2p-kt's default unificator (2.0.9 and 3.0.1), a rule whose body calls a built-in, such
- * as `s(X, Y) :- p(Z, X), p(Z, Y), X \= Y`, loses the bindings of its head; and binding the clause's fresh variables to
- * the query's terms keeps the substitutions short, which makes solving about twice as fast.
- */
+// the stored term first: binding the clause's fresh variables to the query's terms keeps the substitutions short,
+// which makes solving about twice as fast
 private val storedFirst = object : AbstractUnificator() {
     override fun checkTermsEquality(first: Term, second: Term): Boolean = first == second
 
@@ -82,6 +80,8 @@ private fun solverOf(theory: Iterable<Clause>): Solver = ClassicSolverFactory
     .unificator(storedFirst)
     .staticKb(theory)
     .flag(Unknown, Unknown.FAIL)
+    // without it, a rule loses the bindings of its head before a built-in in its body, as `is` or `\=`
+    .flag(TrackVariables) { ON }
     .build()
 
 private val libraries by lazy { solverOf(emptyList()).libraries }
