@@ -116,7 +116,9 @@ internal class BaseMutableAgentState<Belief : Any, Goal : Any>(
 
     override suspend fun <T : Any> wait(eventFilter: (AgentEvent) -> T?, timeout: Duration?): T? {
         val deferred = CompletableDeferred<T>()
-        this.waitEventFilters[eventFilter] = deferred
+        // each wait gets a key of its own: two waits on the same filter must not replace each other
+        val key: (AgentEvent) -> T? = { eventFilter(it) }
+        this.waitEventFilters[key] = deferred
 
         return try {
             if (timeout != null) {
@@ -127,7 +129,7 @@ internal class BaseMutableAgentState<Belief : Any, Goal : Any>(
                 deferred.await()
             }
         } finally {
-            waitEventFilters.remove(eventFilter)
+            waitEventFilters.remove(key)
         }
     }
 }
