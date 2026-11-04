@@ -4,7 +4,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 
-examples=(blocksworld thermostat tictactoe vacuum-world)
+examples=(blocksworld contract-net thermostat tictactoe vacuum-world)
 
 ./gradlew $(printf ':examples:%s:jsBrowserDistribution ' "${examples[@]}")
 

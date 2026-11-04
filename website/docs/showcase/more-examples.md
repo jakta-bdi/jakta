@@ -1,5 +1,5 @@
 ---
-sidebar_position: 4
+sidebar_position: 5
 ---
 
 # All the examples
@@ -26,7 +26,7 @@ and also run in the browser with `./gradlew :examples:<name>:jsBrowserDevelopmen
 | [`blocksworld`](https://github.com/jakta-bdi/jakta/tree/main/examples/blocksworld) (with UI) | An agent building towers of blocks with Prolog inference rules, recursive sub-goals and custom skills. See [Blocks World](./blocksworld.md), [Skills](../explanation/basic-concepts/skills.md) and [Beliefs](../explanation/basic-concepts/beliefs.md). |
 | [`tictactoe`](https://github.com/jakta-bdi/jakta/tree/main/examples/tictactoe) (with UI) | A tic-tac-toe player whose Prolog rules and plans are generated in Kotlin for any board size. See [Tic-tac-toe](./tictactoe.md) and [Turn perceptions into Prolog facts](../how-to/prolog/perceptions.md). |
 | [`vacuum-world`](https://github.com/jakta-bdi/jakta/tree/main/examples/vacuum-world) (with UI) | One to four embodied robots that keep a map clean forever. See [Vacuum World](./vacuum-world.md), [Give agents a body](../how-to/custom-body.md) and [Turn perceptions into Prolog facts](../how-to/prolog/perceptions.md). |
-| [`contract-net`](https://github.com/jakta-bdi/jakta/tree/main/examples/contract-net) | KQML messaging with `askOne`, delegating an `achieve`, and `tell`. See [Ask and answer with KQML](../how-to/prolog/kqml.md) and [KQML Messaging](../explanation/incarnations/prolog/kqml.md). |
+| [`contract-net`](https://github.com/jakta-bdi/jakta/tree/main/examples/contract-net) (with UI) | A waiter giving each order to the chef that can cook it the soonest, with a contract net of KQML messages among agents on their own nodes. See [Contract Net](./contract-net.md) and [KQML Messaging](../explanation/incarnations/prolog/kqml.md). |
 | [`runtime-agents`](https://github.com/jakta-bdi/jakta/tree/main/examples/runtime-agents) | Adding and removing agents while the MAS runs. See [Add and remove agents at runtime](../how-to/runtime-agents.md). |
 | [`sub-goals`](https://github.com/jakta-bdi/jakta/tree/main/examples/sub-goals) | A barista achieving sub-goals, getting their results, starting a concurrent intention and recovering from a failed sub-goal. See [Achieve sub-goals](../how-to/sub-goals.md). |
 | [`wait-for-events`](https://github.com/jakta-bdi/jakta/tree/main/examples/wait-for-events) | Waiting for an event, with a timeout, while another intention makes it happen. See [Wait for events and use time](../how-to/wait-for-events.md). |

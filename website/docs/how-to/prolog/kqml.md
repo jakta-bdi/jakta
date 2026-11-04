@@ -6,8 +6,7 @@ sidebar_position: 2
 
 Prolog agents exchange beliefs, goals and questions with Jason-style KQML performatives, all in
 `it.unibo.jakta.kqml`. See [KQML messaging](../../explanation/incarnations/prolog/kqml.md) for what each performative
-means, and the [`contract-net`](https://github.com/jakta-bdi/jakta/tree/main/examples/contract-net) example for a
-complete program (`./gradlew :examples:contract-net:run`).
+means, and the [Contract Net](../../showcase/contract-net.md) showcase for a complete protocol built on `tell`.
 
 ## Receive KQML messages
 
