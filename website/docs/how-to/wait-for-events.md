@@ -27,12 +27,14 @@ In [Alchemist simulations](./alchemist.md), `delay` advances in **simulated** ti
 
 `agent.wait(filter, timeout)` suspends the intention until the agent receives an event for which `filter` returns
 a non-null value, and returns that value; after `timeout`, it returns `null`.
+The filter is called on each event the agent handles while the intention waits: returning `null` means
+"not this one", and the intention keeps waiting for the next event.
 The filter sees every event the agent handles: belief and goal events (`AgentEvent.Internal`), as well as incoming
 messages and perceptions (`AgentEvent.External`).
 
 ```kotlin
 private fun beliefAdded(expected: String): (AgentEvent) -> String? = { event ->
-    (event as? AgentEvent.Internal.Belief.Add<*>)?.belief?.takeIf { it == expected } as String?
+    ((event as? AgentEvent.Internal.Belief.Add<*>)?.belief as? String)?.takeIf { it == expected }
 }
 ```
 

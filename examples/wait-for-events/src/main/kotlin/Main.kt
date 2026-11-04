@@ -11,7 +11,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 
 private fun beliefAdded(expected: String): (AgentEvent) -> String? = { event ->
-    (event as? AgentEvent.Internal.Belief.Add<*>)?.belief?.takeIf { it == expected } as String?
+    ((event as? AgentEvent.Internal.Belief.Add<*>)?.belief as? String)?.takeIf { it == expected }
 }
 
 /**
