@@ -281,18 +281,54 @@ prologPlan {
 The waiter orders again those it still had assigned to that chef, and ignores the others: `assigned(Id, D, S)` names
 the chef, so a `failure`, or a late `done`, only counts from the chef that still has the order.
 
-### An order's life
+### The whole protocol
 
-Every path an order can take, from the customer to the pass:
+Every message the agents exchange, with each way an order can go wrong, for an order of a steak with Ada and Bruno
+in the kitchens:
 
 ```mermaid
-stateDiagram-v2
-  [*] --> New: the customer orders
-  New --> Asking: cfp to every chef
-  Asking --> Assigned: accept_proposal to the soonest
-  Asking --> Retrying: nobody proposed by the deadline
-  Retrying --> Asking: after a pause
-  Assigned --> Served: done
-  Assigned --> Asking: failure from the chef, or cancel when its promise runs out
-  Served --> [*]
+sequenceDiagram
+  actor Y as you
+  participant W as waiter
+  participant A as ada
+  participant B as bruno
+  A->>W: introduction(participant, ada)
+  B->>W: introduction(participant, bruno)
+  Y->>W: order(3, steak)
+  loop until the steak is served
+    W->>A: cfp(3, steak)
+    W->>B: cfp(3, steak)
+    alt ada has a grill
+      A->>W: propose(3, 5.6)
+    else ada has no grill, or it is off
+      A->>W: refuse(3)
+    else ada is napping
+      Note over A: offline: the cfp is lost, no answer
+    end
+    B->>W: propose(3, 11.2)
+    Note over W: everyone answered, or the deadline passed
+    alt somebody proposed
+      W->>A: accept_proposal(3)
+      W->>B: reject_proposal(3)
+      Note over W: watches ada's promise: 5.6 s × 1.5
+      alt ada cooks it in time
+        A->>W: done(3)
+        Note over W: served
+      else the grill is switched off
+        A->>W: failure(3)
+        Note over W: order(3, steak) again
+      else the promise runs out: ada is asleep, or late
+        W->>A: cancel(3)
+        Note over W: order(3, steak) again
+        Note over A: drops the order if awake,<br/>never hears of it if asleep
+      end
+    else nobody proposed
+      Note over W: order(3, steak) again, after a pause
+    end
+  end
+  opt ada wakes up from a nap
+    A->>W: introduction(participant, ada)
+    A->>W: failure(Id), for every order on its rail
+    Note over W: takes back the orders still assigned to ada,<br/>ignores those it already took back
+  end
 ```
