@@ -7,11 +7,15 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.rememberWindowState
 
 /**
- * A desktop window showing the [MindInspectorView] of [inspector], to open next to an application's own windows.
+ * A desktop window showing the [MindInspectorView] of the [inspectors], to open next to an application's own windows.
  */
 @Composable
-fun MindInspectorWindow(inspector: MindInspector, onCloseRequest: () -> Unit, title: String = "JaKtA Mind Inspector") {
+fun MindInspectorWindow(
+    vararg inspectors: MindInspector,
+    onCloseRequest: () -> Unit,
+    title: String = "JaKtA Mind Inspector",
+) {
     Window(onCloseRequest, rememberWindowState(width = 1200.dp, height = 800.dp), title = title) {
-        MaterialTheme { MindInspectorView(inspector) }
+        MaterialTheme { MindInspectorView(*inspectors) }
     }
 }

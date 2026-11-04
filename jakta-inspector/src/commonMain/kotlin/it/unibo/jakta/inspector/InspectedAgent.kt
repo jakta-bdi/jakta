@@ -49,7 +49,7 @@ enum class EventKind {
 /**
  * What an agent had in mind right after it handled an event.
  *
- * @property time when the event was handled, since the inspector started.
+ * @property time when the event was handled, on the inspector's clock.
  * @property kind the kind of event.
  * @property event the event, such as `+!goal` or `-belief`.
  * @property beliefs the beliefs of the agent.

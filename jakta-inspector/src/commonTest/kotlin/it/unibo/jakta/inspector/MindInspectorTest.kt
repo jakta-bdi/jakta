@@ -6,6 +6,8 @@ import it.unibo.jakta.dsl.mas
 import it.unibo.jakta.dsl.node.NodeBuilders
 import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.event.AgentUpdate
+import it.unibo.jakta.node.CoroutineNodeRunner
+import it.unibo.jakta.node.SharedMemoryNetwork
 import it.unibo.jakta.skills.MessagingSkill
 import it.unibo.jakta.skills.sendTo
 import kotlin.test.Test
@@ -14,6 +16,7 @@ import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.TestResult
 import kotlinx.coroutines.test.runTest
@@ -84,6 +87,40 @@ class MindInspectorTest {
             messages,
         )
         assertEquals("string", inspector.messages.value.first().kind)
+    }
+
+    @Test
+    fun usesItsClockAndLogsUntappedMessagesWhenHandled(): TestResult = runTest {
+        // as in a simulation: the inspector only observes the agents, on the simulation's clock
+        val inspector = MindInspector("simulated", clock = { 42.seconds })
+        mas(NodeBuilders.baseNode()) {
+            node {
+                context(MessagingSkill(node)) {
+                    agent<String, String>(alice) {
+                        embodiedAs { Any() }
+                        hasInitialGoals { !"start" }
+                        hasPlanLibrary {
+                            adding.goal { takeIf { it == "start" } } triggers { agent.sendTo(bob, "ping") }
+                        }
+                    }
+                    agent<String, String>(bob) {
+                        embodiedAs { Any() }
+                        handlesMessageEvents { AgentUpdate.Belief(setOf(it.payload.toString())) }
+                        hasPlanLibrary {
+                            adding.belief { takeIf { it == "ping" } } triggers { node.terminateNode() }
+                        }
+                    }
+                }
+            }
+        }.run(CoroutineNodeRunner(SharedMemoryNetwork(), inspector))
+
+        assertEquals("simulated", inspector.name)
+        assertTrue(inspector.agents.value.flatMap { it.history.value }.all { it.time == 42.seconds })
+        val message = inspector.messages.value.single()
+        assertEquals(
+            Triple("ping", listOf(bob), 42.seconds),
+            Triple(message.message.payload, message.receivers, message.time),
+        )
     }
 
     @Test

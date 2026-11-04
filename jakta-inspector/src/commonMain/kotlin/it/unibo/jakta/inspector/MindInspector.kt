@@ -28,16 +28,22 @@ private const val DEFAULT_MESSAGE_LOG_SIZE = 1000
  * share ([tap]). Each agent records a snapshot of its mind after every event it handles, in its own loop: the
  * snapshot copies the collections, not the beliefs, which should be immutable to be shown as they were.
  *
+ * One inspector records one run: to compare several runs, such as the same MAS on coroutines and in a simulation,
+ * give each its own inspector, and show them together in a [MindInspectorView], one tab each.
+ *
+ * @property name the name of the run, on its tab.
+ * @param clock the time of the run: by default the time since the inspector was created; a simulation passes its own.
  * @param historySize how many snapshots each agent keeps, dropping the oldest ones.
  * @param messageLogSize how many messages are kept, dropping the oldest ones.
  * @param messageKind the kind of a message from its payload, which colours it (by default its class name).
  */
 class MindInspector(
+    val name: String = "MAS",
+    private val clock: () -> Duration = sinceNow(),
     private val historySize: Int = DEFAULT_HISTORY_SIZE,
     private val messageLogSize: Int = DEFAULT_MESSAGE_LOG_SIZE,
     private val messageKind: (Any) -> String = { it::class.simpleName?.lowercase() ?: "message" },
 ) : AgentLifecycleObserver {
-    private val start = TimeSource.Monotonic.markNow()
     private val mutableAgents = MutableStateFlow<List<InspectedAgent>>(emptyList())
     private val mutableMessages = MutableStateFlow<List<InspectedMessage>>(emptyList())
 
@@ -75,13 +81,13 @@ class MindInspector(
     ): CoroutineNodeRunner<Body, N> = CoroutineNodeRunner(tap(network), this)
 
     override fun onEventHandled(agent: ExecutableAgent<*, *>, event: AgentEvent) {
-        val time = start.elapsedNow()
+        val time = clock()
         agentFor(agent.id, node = null).record(agent, event, time)
         if (event is Message<*>) received(event, agent.id, time)
     }
 
     private fun observe(event: SystemEvent) {
-        val time = start.elapsedNow()
+        val time = clock()
         when (event) {
             is SystemEvent.AgentAddition<*, *> ->
                 agentFor(event.executableAgent.id, event.nodeID).recordCreation(event.executableAgent, time)
@@ -119,10 +125,15 @@ class MindInspector(
     }
 }
 
+private fun sinceNow(): () -> Duration {
+    val start = TimeSource.Monotonic.markNow()
+    return { start.elapsedNow() }
+}
+
 /**
  * A message sent by an agent.
  *
- * @property time when it was sent, since the inspector started.
+ * @property time when it was sent, on the inspector's clock.
  * @property message the message, with its sender and payload.
  * @property kind the kind of message, such as `tell`, which colours it.
  * @property receivers the agents that handled it so far: none if it was lost or is still on its way.

@@ -2,15 +2,20 @@
 
 package it.unibo.jakta.inspector
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,68 +23,106 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.Checkbox
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedButton
+import androidx.compose.material.Tab
+import androidx.compose.material.TabRow
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import it.unibo.jakta.agent.AgentID
 import kotlin.time.Duration
 
 /**
- * Shows what the agents seen by [inspector] have in mind, and the messages they exchange.
+ * Shows what the agents seen by the [inspectors] have in mind, and the messages they exchange: one tab for each
+ * inspector, when there are more.
  *
  * Pick an agent on the left to see its beliefs, intentions and plans after the event selected in its history:
- * the view follows the newest event until you step back, and the message log then stops at that moment too.
+ * the view follows the newest event until you step back, and the interaction flow then stops at that moment too.
+ * Click a message to see the mind of the agent that received it, when it did.
  */
 @Composable
-fun MindInspectorView(inspector: MindInspector, modifier: Modifier = Modifier) {
+fun MindInspectorView(vararg inspectors: MindInspector, modifier: Modifier = Modifier) {
+    require(inspectors.isNotEmpty()) { "The mind inspector view needs an inspector to show" }
+    var tab by remember { mutableStateOf(0) }
+    Column(modifier.fillMaxSize().background(Color.White)) {
+        if (inspectors.size > 1) {
+            TabRow(tab, backgroundColor = Color.White) {
+                inspectors.forEachIndexed { index, inspector ->
+                    Tab(tab == index, { tab = index }, text = { Text(inspector.name) })
+                }
+            }
+        }
+        val inspector = inspectors[tab.coerceAtMost(inspectors.lastIndex)]
+        key(inspector) { RunView(inspector, Modifier.weight(1f)) }
+    }
+}
+
+// a request to show the mind of [agent] when it received a message sent at [time], or when it sent one nobody got
+private class Jump(val agent: AgentID, val time: Duration, val received: Boolean)
+
+@Composable
+private fun RunView(inspector: MindInspector, modifier: Modifier) {
     val agents by inspector.agents.collectAsState()
     val messages by inspector.messages.collectAsState()
     var selectedId by remember { mutableStateOf<AgentID?>(null) }
     val selected = agents.find { it.id == selectedId } ?: agents.firstOrNull()
     var until by remember { mutableStateOf<Duration?>(null) }
     var onlySelected by remember { mutableStateOf(false) }
+    var jump by remember { mutableStateOf<Jump?>(null) }
 
-    Column(modifier.fillMaxSize().background(Color.White)) {
-        Row(Modifier.weight(0.65f).fillMaxWidth()) {
+    Column(modifier.fillMaxSize()) {
+        Row(Modifier.weight(0.6f).fillMaxWidth()) {
             AgentList(agents, selected, { selectedId = it.id }, Modifier.width(200.dp).fillMaxHeight())
             Divider(Modifier.fillMaxHeight().width(1.dp))
             if (selected == null) {
                 Text("No agent yet", Modifier.padding(16.dp), color = Color.Gray)
             } else {
-                MindPanel(selected, onMoment = { until = it }, modifier = Modifier.weight(1f))
+                MindPanel(selected, jump, onMoment = { until = it }, modifier = Modifier.weight(1f))
             }
         }
         Divider()
         val moment = until
-        val shown = messages.filter { message ->
-            val involved = selected == null || selected.id == message.message.sender || selected.id in message.receivers
-            (moment == null || message.time <= moment) && (!onlySelected || involved)
-        }
-        Column(Modifier.weight(0.35f).fillMaxWidth().padding(8.dp)) {
+        val arrows = messages
+            .filter { moment == null || it.time <= moment }
+            .flatMap { message -> message.receivers.ifEmpty { listOf(null) }.map { Arrow(message, it) } }
+            .filter { !onlySelected || selected == null || selected.id == it.from || selected.id == it.to }
+        Column(Modifier.weight(0.4f).fillMaxWidth().padding(8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Title(if (moment == null) "Messages" else "Messages until ${moment.label()}")
+                Title(if (moment == null) "Interaction flow" else "Interaction flow until ${moment.label()}")
                 Spacer(Modifier.weight(1f))
                 Checkbox(onlySelected, { onlySelected = it })
                 Text("only ${selected?.id?.displayName ?: "the selected agent"}'s", fontSize = 12.sp)
             }
-            MessageLog(shown)
+            val lanes = (agents.groupBy { it.node }.values.flatten().map { it.id } + messages.map { it.message.sender })
+                .distinct()
+            InteractionFlow(lanes, arrows, selected?.id) { arrow ->
+                val agent = arrow.to ?: arrow.from
+                selectedId = agent
+                jump = Jump(agent, arrow.message.time, received = arrow.to != null)
+            }
         }
     }
 }
@@ -111,7 +154,7 @@ private fun AgentList(
 }
 
 @Composable
-private fun MindPanel(agent: InspectedAgent, onMoment: (Duration?) -> Unit, modifier: Modifier) {
+private fun MindPanel(agent: InspectedAgent, jump: Jump?, onMoment: (Duration?) -> Unit, modifier: Modifier) {
     val history by agent.history.collectAsState()
     var showSteps by remember { mutableStateOf(false) }
     // null follows the newest snapshot
@@ -120,6 +163,15 @@ private fun MindPanel(agent: InspectedAgent, onMoment: (Duration?) -> Unit, modi
     val index = cursor?.coerceIn(0, visible.lastIndex) ?: visible.lastIndex
     val snapshot = visible.getOrNull(index)
     LaunchedEffect(cursor, snapshot) { onMoment(if (cursor == null) null else snapshot?.time) }
+    LaunchedEffect(jump) {
+        if (jump?.agent != agent.id) return@LaunchedEffect
+        val target = if (jump.received) {
+            visible.indexOfFirst { it.time >= jump.time && it.kind == EventKind.MESSAGE }
+        } else {
+            visible.indexOfLast { it.time <= jump.time }
+        }
+        if (target >= 0) cursor = target
+    }
 
     Column(modifier.fillMaxHeight().padding(8.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -184,31 +236,121 @@ private fun MindPanel(agent: InspectedAgent, onMoment: (Duration?) -> Unit, modi
     }
 }
 
+// one arrow of the interaction flow: a message to one of its receivers, or to nobody yet
+private class Arrow(val message: InspectedMessage, val to: AgentID?) {
+    val from: AgentID get() = message.message.sender
+}
+
+private val laneWidth = 150.dp
+private val timeWidth = 80.dp
+private val rowHeight = 30.dp
+
+/**
+ * A sequence diagram of the [arrows], one lifeline for each of the [lanes]: a message nobody handled (yet) ends in a
+ * cross, a message to oneself loops back.
+ */
 @Composable
-private fun MessageLog(messages: List<InspectedMessage>) {
+private fun InteractionFlow(lanes: List<AgentID>, arrows: List<Arrow>, selected: AgentID?, onClick: (Arrow) -> Unit) {
     val listState = rememberLazyListState()
-    FollowIndex(listState, messages.lastIndex)
-    LazyColumn(state = listState) {
-        items(messages) { message ->
-            val lost = message.receivers.isEmpty()
-            Row {
-                Mono(message.time.label().padStart(10) + "  ", Color.Gray)
-                Mono(
-                    "${message.message.sender.displayName} -> " +
-                        (if (lost) "nobody yet" else message.receivers.joinToString { it.displayName }) + ": ",
-                    Color(0xFF616161),
-                )
+    FollowIndex(listState, arrows.lastIndex)
+    val width = timeWidth + laneWidth * lanes.size
+    Column(Modifier.horizontalScroll(rememberScrollState())) {
+        Row(Modifier.width(width)) {
+            Spacer(Modifier.width(timeWidth))
+            lanes.forEach { id ->
                 Text(
-                    "[${message.kind}] ${message.message.payload}",
-                    fontFamily = FontFamily.Monospace,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = if (lost) Color(0xFFBDBDBD) else kindColour(message.kind),
-                    textDecoration = if (lost) TextDecoration.LineThrough else null,
+                    id.displayName,
+                    Modifier.width(laneWidth),
+                    textAlign = TextAlign.Center,
+                    fontWeight = if (id == selected) FontWeight.Bold else FontWeight.Normal,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
         }
+        LazyColumn(Modifier.width(width).weight(1f), state = listState) {
+            items(arrows) { arrow -> ArrowRow(lanes, arrow) { onClick(arrow) } }
+        }
     }
+}
+
+@Composable
+private fun ArrowRow(lanes: List<AgentID>, arrow: Arrow, onClick: () -> Unit) {
+    val from = lanes.indexOf(arrow.from)
+    val to = arrow.to?.let(lanes::indexOf)?.takeIf { it >= 0 }
+    val lost = arrow.to == null
+    val colour = kindColour(arrow.message.kind).let { if (lost) it.copy(alpha = 0.5f) else it }
+    val payload = arrow.message.message.payload.toString()
+    val label = if (payload.startsWith(
+            arrow.message.kind,
+            ignoreCase = true,
+        )
+    ) {
+        payload
+    } else {
+        "${arrow.message.kind}: $payload"
+    }
+    // the label sits above the arrow, between the lifelines it joins (or next to the sender's)
+    val left = minOf(from, to ?: from)
+    val span = if (to == null || to == from) 1 else maxOf(from, to) - left
+    Row(Modifier.height(rowHeight).clickable(onClick = onClick), verticalAlignment = Alignment.CenterVertically) {
+        Text(arrow.message.time.label(), Modifier.width(timeWidth), fontSize = 11.sp, color = Color.Gray)
+        Box(Modifier.width(laneWidth * lanes.size).fillMaxHeight()) {
+            Canvas(Modifier.matchParentSize()) { drawArrow(lanes.size, from, to, lost, colour) }
+            Text(
+                label,
+                Modifier.offset(
+                    x = laneWidth * left + laneWidth / 2,
+                ).width(laneWidth * span).padding(horizontal = 6.dp),
+                fontFamily = FontFamily.Monospace,
+                fontSize = 11.sp,
+                color = colour,
+                textAlign = TextAlign.Center,
+                textDecoration = if (lost) TextDecoration.LineThrough else null,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+    }
+}
+
+private fun DrawScope.drawArrow(lanes: Int, from: Int, to: Int?, lost: Boolean, colour: Color) {
+    val lane = laneWidth.toPx()
+    fun centre(index: Int) = lane * index + lane / 2
+    repeat(lanes) { drawLine(Color(0xFFE0E0E0), Offset(centre(it), 0f), Offset(centre(it), size.height), 2f) }
+    val y = size.height * 0.75f
+    val start = Offset(centre(from), y)
+    val head = 7.dp.toPx()
+    when {
+        lost -> {
+            val end = Offset(start.x + lane * 0.6f, y)
+            drawLine(colour, start, end, 2f, pathEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 4f)))
+            drawLine(colour, end + Offset(-head / 2, -head / 2), end + Offset(head / 2, head / 2), 2f)
+            drawLine(colour, end + Offset(-head / 2, head / 2), end + Offset(head / 2, -head / 2), 2f)
+        }
+
+        to == null || to == from -> {
+            // to oneself: out to the right and back
+            val out = lane * 0.3f
+            val top = Offset(start.x, y - head)
+            drawLine(colour, top, top + Offset(out, 0f), 2f)
+            drawLine(colour, top + Offset(out, 0f), start + Offset(out, 0f), 2f)
+            drawLine(colour, start + Offset(out, 0f), start, 2f)
+            drawHead(start, -1f, head, colour)
+        }
+
+        else -> {
+            val end = Offset(centre(to), y)
+            drawLine(colour, start, end, 2f)
+            drawHead(end, if (to > from) 1f else -1f, head, colour)
+        }
+    }
+}
+
+// an arrow head at [tip], pointing right when [direction] is 1, left when -1
+private fun DrawScope.drawHead(tip: Offset, direction: Float, size: Float, colour: Color) {
+    drawLine(colour, tip, tip + Offset(-direction * size, -size / 2), 2f)
+    drawLine(colour, tip, tip + Offset(-direction * size, size / 2), 2f)
 }
 
 @Composable
