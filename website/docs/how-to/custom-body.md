@@ -11,7 +11,8 @@ Agents that don't need one use `Any`.
 
 The snippets below come from the robot of the
 [`vacuum-world`](https://github.com/jakta-bdi/jakta/tree/main/examples/vacuum-world) example
-([`VacuumBody.kt`](https://github.com/jakta-bdi/jakta/blob/main/examples/vacuum-world/src/commonMain/kotlin/VacuumBody.kt)),
+([`VacuumBody.kt`](https://github.com/jakta-bdi/jakta/blob/main/examples/vacuum-world/src/commonMain/kotlin/VacuumBody.kt), [`VacuumPerception.kt`](https://github.com/jakta-bdi/jakta/blob/main/examples/vacuum-world/src/commonMain/kotlin/VacuumPerception.kt)
+and [`VacuumSkill.kt`](https://github.com/jakta-bdi/jakta/blob/main/examples/vacuum-world/src/commonMain/kotlin/VacuumSkill.kt)),
 which you can also [try in the browser](../showcase/vacuum-world.md).
 
 ## Define the body type
@@ -21,8 +22,9 @@ The body keeps the robot's own state, separate from the external environment it 
 ```kotlin
 data class RobotState(val position: Pos, val facing: Direction, val cleaned: Int = 0)
 
-class VacuumBody(val world: VacuumWorld, start: Pos = ROBOT_START) {
-    private val mutableState = MutableStateFlow(RobotState(start, Direction.EAST))
+class VacuumBody(private val world: VacuumWorld, start: Pos, facing: Direction) {
+    private val mutableState = MutableStateFlow(RobotState(start, facing))
+    private val busy = Mutex()
     val state: StateFlow<RobotState> = mutableState.asStateFlow()
     // ...
 }
@@ -32,49 +34,42 @@ Exposing the state as a `StateFlow` lets a UI draw the robot from its body.
 
 ## Give it actuators
 
-Actions change the body, and the world only where the robot affects it:
+Actions change the body, and the world only where the robot affects it. In the example an action takes time: it is
+a `suspend` function that returns when the robot is done, and a mutex makes the body safe to share, as two actions
+never overlap:
 
 ```kotlin
-fun forward() = mutableState.update { robot ->
-    val ahead = robot.cellOf(Square.FORWARD)
-    if (world.state.value.contentAt(ahead) == Content.OBSTACLE) robot else robot.copy(position = ahead)
-}
-
-fun clean() {
-    if (world.removeDust(state.value.position)) mutableState.update { it.copy(cleaned = it.cleaned + 1) }
+suspend fun clean() = busy.withLock {
+    world.passTime(TIME_TO_CLEAN) // a delay, scaled by the world's speed
+    val removed = world.removeDust(state.value.position)
+    mutableState.update { it.copy(cleaned = it.cleaned + if (removed) 1 else 0) }
 }
 ```
+
+A simpler body can just change its state at once, as soon as it is asked.
 
 ## Give it sensors
 
 A perception is what the sensors read, not the whole world:
 
 ```kotlin
-data class VacuumPerception(
-    val location: Pos,
-    val facing: Direction,
-    val time: Int,
-    val squares: Map<Square, Content>,
-) : Perception
-
-fun sense(): VacuumPerception {
-    val robot = state.value
-    val world = world.state.value
-    val squares = Square.entries.associateWith { world.contentAt(robot.cellOf(it)) }
-    return VacuumPerception(robot.position, robot.facing, world.time, squares)
-}
+data class VacuumPerception(val position: Pos, val facing: Direction, val squares: Map<Square, Content>) : Perception
 ```
+
+`sense()` reads it from the robot's state and the cells around it.
 
 ## Use it in the node and in the agent
 
 The body type is fixed by the node builder, and `embodiedAs` gives the agent its body:
 
 ```kotlin
-mas(NodeBuilders.baseNode<VacuumBody>()) {
-    node {
-        agent<PrologBelief, PrologGoal>(BaseAgentID("vacuum")) {
-            embodiedAs { body }
-            // ...
+node(NodeBuilders.baseNode<VacuumBody>()) {
+    with(VacuumSkill(node)) {
+        bodies.forEachIndexed { index, body ->
+            agent<PrologBelief, PrologGoal>(BaseAgentID(RobotColour.entries[index].name.lowercase())) {
+                embodiedAs { body }
+                // ...
+            }
         }
     }
 }
@@ -85,30 +80,42 @@ mas(NodeBuilders.baseNode<VacuumBody>()) {
 
 ## Act through the body with a skill
 
-A skill finds the body of the acting agent, acts through it, and delivers what the robot senses afterwards only to
-that body, using the body filter of `publishEvent`. Simplified from the example, which also lets dust appear:
+A skill finds the body of the acting agent and acts through it. Here each action, once the body is done, publishes
+what the robot sees then on the node, delivering it only to that body with the body filter of `publishEvent`, and
+waits until the agent received it, so that the plan goes on with what the robot sees once the action is over:
 
 ```kotlin
-class VacuumSkill(node: Node<VacuumBody>, private val stepTime: () -> Duration) : Skill<VacuumBody>(node) {
-    private val Agent.body get() = node.agents.getValue(id)
+// the type of `agent` in a plan body
+typealias VacuumAgent = MutableAgentState<PrologBelief, PrologGoal>
 
-    fun Agent.look() {
+class VacuumSkill(node: Node<VacuumBody>) : Skill<VacuumBody>(node) {
+    private val VacuumAgent.body get() = node.agents.getValue(id)
+
+    suspend fun VacuumAgent.clean() {
+        body.clean()
+        report()
+    }
+
+    suspend fun VacuumAgent.switchOn() = report()
+
+    private suspend fun VacuumAgent.report() {
         val body = body
-        node.publishEvent(body.sense()) { it === body }
+        val reading = body.sense()
+        node.publishEvent(reading) { it === body }
+        wait({ event: AgentEvent -> event.takeIf { it === reading } })
     }
-
-    suspend fun Agent.forward() {
-        delay(stepTime())
-        body.forward()
-        look()
-    }
+    // forward(), turnLeft() and turnRight() alike
 }
 ```
 
-`with(VacuumSkill(node, stepTime)) { agent(...) { ... } }` brings the actions into scope, so that plans can call
-`agent.look()` and `agent.forward()`.
+In this example the robot perceives only at the end of its actions, and its first plan calls `switchOn` to get a
+first reading. A body whose sensors work on their own can instead publish a reading whenever it changes, from a
+coroutine that runs beside the node; a perception published before its agent joins the node is lost.
+
+`with(VacuumSkill(node)) { agent(...) { ... } }` brings the actions into scope, so that plans can call
+`agent.switchOn()` and `agent.clean()`.
 To use a skill as a context parameter instead, as `MessagingSkill` is, add top-level functions such as
-`context(skill: VacuumSkill) suspend fun Agent.forward() = with(skill) { forward() }`.
+`context(skill: VacuumSkill) suspend fun VacuumAgent.clean() = with(skill) { clean() }`.
 
 ## Turn readings into beliefs
 
@@ -118,7 +125,7 @@ To use a skill as a context parameter instead, as `MessagingSkill` is, add top-l
 handlesPerceptionEvents { if (it is VacuumPerception) handleVacuumPerception(it, beliefs) else null }
 ```
 
-Here `handleVacuumPerception` turns the reading into `location/2`, `direction/1`, `time/1` and `square/2` facts,
+Here `handleVacuumPerception` turns the reading into `position/2`, `facing/1` and `square/2` facts,
 plus the `dust_at/2` memory of the dust seen, and returns an `AgentUpdate.Belief` with only what changed
 (see [Turn perceptions into Prolog facts](./prolog/perceptions.md)).
 
