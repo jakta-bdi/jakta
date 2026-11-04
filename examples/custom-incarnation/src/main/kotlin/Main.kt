@@ -8,38 +8,36 @@ import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.plan.GuardScope
 import kotlinx.coroutines.runBlocking
 
-private data class Fact(val name: String, val args: List<Any>) {
-    override fun toString() = "$name(${args.joinToString()})"
-}
+private data class Entry(val key: String, val value: Any)
 
-private fun fact(name: String, vararg args: Any) = Fact(name, args.toList())
+private data class Task(val action: String, val target: String)
 
-private fun Fact.matches(name: String, arity: Int): List<Any>? = args.takeIf { this.name == name && args.size == arity }
+private fun Task.targetOf(action: String): String? = target.takeIf { this.action == action }
 
-private fun <Context : Any> GuardScope<Fact, Context>.believes(belief: Fact): Context? =
-    context.takeIf { belief in beliefs }
+private inline fun <reified V> GuardScope<Entry, *>.valueOf(key: String): V? =
+    beliefs.firstOrNull { it.key == key }?.value as? V
 
-private val greeter = agent<Fact, Fact, Any> {
+private val greeter = agent<Entry, Task, Any> {
     embodiedAs { Any() }
     believes {
-        +fact("friend", "bob")
+        +Entry("friends", setOf("bob"))
     }
     hasInitialGoals {
-        !fact("greet", "bob")
-        !fact("greet", "eve")
+        !Task("greet", "bob")
+        !Task("greet", "eve")
     }
     hasPlanLibrary {
         adding.goal {
-            matches("greet", 1)
+            targetOf("greet")
         } onlyWhen {
-            believes(fact("friend", context[0]))
+            context.takeIf { it in valueOf<Set<String>>("friends").orEmpty() }
         } triggers {
-            agent.print("Hello, ${context[0]}!")
+            agent.print("Hello, $context!")
         }
         failing.goal {
-            matches("greet", 1)
+            targetOf("greet")
         } triggers {
-            agent.print("I don't greet strangers like ${context[0]}")
+            agent.print("I don't greet strangers like $context")
             node.terminateNode()
         }
     }

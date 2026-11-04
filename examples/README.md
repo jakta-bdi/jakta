@@ -12,7 +12,7 @@
 | `contract-net` | KQML messaging: `askOne`, delegating an `achieve`, `tell` | `./gradlew :examples:contract-net:run` |
 | `runtime-agents` | Adding and removing agents while the MAS runs | `./gradlew :examples:runtime-agents:run` |
 | `wait-for-events` | Waiting for events, delays and concurrent intentions | `./gradlew :examples:wait-for-events:run` |
-| `custom-incarnation` | Beliefs and goals as your own types, with trigger and guard helpers | `./gradlew :examples:custom-incarnation:run` |
+| `custom-incarnation` | Beliefs as a key-value memory and goals as tasks, with trigger and guard helpers | `./gradlew :examples:custom-incarnation:run` |
 
 The UI examples use Compose Multiplatform and show an *agent trace* with what agents print while they reason.
 They run in the browser through Kotlin/JS: tuProlog does not support WebAssembly yet.
