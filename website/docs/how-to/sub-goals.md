@@ -2,10 +2,11 @@
 sidebar_position: 5
 ---
 
-# Achieve sub-goals
+# Achieve sub-goals and recover from failures
 
 A plan can pursue other goals: wait for a **sub-goal** within its own intention, get the result of the plan that
-achieved it, or start a **concurrent intention** and carry on. This guide follows a barista serving two orders.
+achieved it, or start a **concurrent intention** and carry on; and when a sub-goal fails, a **failure plan** can
+recover from it. This guide follows a barista serving two orders.
 The complete program is the [`sub-goals`](https://github.com/jakta-bdi/jakta/tree/main/examples/sub-goals) example;
 run it with `./gradlew :examples:sub-goals:run`.
 

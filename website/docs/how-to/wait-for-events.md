@@ -59,4 +59,4 @@ sequenceDiagram
     W->>W: terminateNode()
 ```
 
-To start intentions from a plan, or to wait for a sub-goal, see [Achieve sub-goals](./sub-goals.md).
+To start intentions from a plan, or to wait for a sub-goal, see [Achieve sub-goals and recover from failures](./sub-goals.md).
