@@ -21,6 +21,7 @@ kotlinMultiplatform {
     sourceSets {
         commonMain.dependencies {
             implementation(libs.bundles.compose)
+            implementation("org.jetbrains.compose.components:components-resources:${libs.versions.compose.get()}")
             implementation(libs.kermit)
 
             implementation(jakta("core"))
@@ -43,3 +44,9 @@ compose.desktop {
         mainClass = "MainKt"
     }
 }
+
+// the code Compose generates to load the bundled emoji font is not ours to lint
+tasks.withType<org.jlleitschuh.gradle.ktlint.tasks.BaseKtLintCheckTask>().configureEach {
+    exclude { "generated" in it.file.path }
+}
+tasks.withType<dev.detekt.gradle.Detekt>().configureEach { exclude { "generated" in it.file.path } }
