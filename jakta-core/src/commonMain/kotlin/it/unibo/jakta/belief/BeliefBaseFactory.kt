@@ -25,6 +25,6 @@ object BeliefBaseFactory {
     fun <Belief : Any> of(
         internalInbox: EventInbox<AgentEvent.Internal.Belief<Belief>>,
         beliefs: Iterable<Belief>,
-        revision: BeliefRevision<Belief> = BeliefRevision.plain(),
+        revision: BeliefRevision<Belief> = BeliefRevision.default(),
     ): BeliefBase<Belief> = BeliefBaseImpl(internalInbox, beliefs, revision)
 }

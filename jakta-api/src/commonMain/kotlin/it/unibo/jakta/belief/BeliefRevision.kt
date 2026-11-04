@@ -3,8 +3,9 @@ package it.unibo.jakta.belief
 /**
  * The belief revision function of an agent, as Jason's `brf`: it decides how each requested change to the beliefs
  * — believing, forgetting, or replacing those in a scope — changes the belief base, and which belief events it raises.
- * The default, [plain], treats beliefs as a set; other revisions can, for instance, merge the sources of equal beliefs,
- * keep a single value for some beliefs, or keep the beliefs consistent.
+ * The [default] one treats beliefs as a set ([plain]), unless an incarnation registered another one for its beliefs;
+ * other revisions can, for instance, merge the sources of equal beliefs, keep a single value for some beliefs, or keep
+ * the beliefs consistent.
  *
  * @param Belief The type representing the agent's *beliefs*.
  */
@@ -63,11 +64,35 @@ interface BeliefRevision<Belief : Any> {
      * Factory methods for [BeliefRevision].
      */
     companion object {
+        @kotlin.concurrent.Volatile
+        private var defaults: List<Pair<(Any) -> Boolean, BeliefRevision<*>>> = emptyList()
+
         /**
-         * The default revision, treating the beliefs as a set: a belief is added if no equal belief is held,
+         * The revision treating the beliefs as a set: a belief is added if no equal belief is held,
          * and removed if an equal belief is held, raising the corresponding event; otherwise nothing changes.
          */
         fun <Belief : Any> plain(): BeliefRevision<Belief> = PlainBeliefRevision()
+
+        /**
+         * The default revision of an agent: each change goes to the revision registered with [registerDefault] for
+         * the beliefs it involves, if any, and to [plain] otherwise.
+         */
+        fun <Belief : Any> default(): BeliefRevision<Belief> = DefaultBeliefRevision()
+
+        /**
+         * Makes [revision] the default one for the beliefs that [accepts], as an incarnation does for its beliefs:
+         * the Prolog incarnation, for instance, merges the sources of equal beliefs. The first registered revision
+         * that accepts a belief revises it.
+         */
+        fun registerDefault(accepts: (Any) -> Boolean, revision: BeliefRevision<*>) {
+            defaults = defaults + (accepts to revision)
+        }
+
+        @Suppress("UNCHECKED_CAST")
+        internal fun <Belief : Any> defaultFor(belief: Belief?): BeliefRevision<Belief> {
+            val registered = belief?.let { defaults.firstOrNull { (accepts, _) -> accepts(belief) }?.second }
+            return (registered ?: PlainBeliefRevision<Belief>()) as BeliefRevision<Belief>
+        }
     }
 }
 
@@ -81,4 +106,16 @@ private class PlainBeliefRevision<Belief : Any> : BeliefRevision<Belief> {
         in beliefs -> BeliefRevision.Revision(dropped = listOf(belief), removed = listOf(belief))
         else -> BeliefRevision.Revision()
     }
+}
+
+private class DefaultBeliefRevision<Belief : Any> : BeliefRevision<Belief> {
+    override fun add(beliefs: Collection<Belief>, belief: Belief) =
+        BeliefRevision.defaultFor(belief).add(beliefs, belief)
+
+    override fun remove(beliefs: Collection<Belief>, belief: Belief) =
+        BeliefRevision.defaultFor(belief).remove(beliefs, belief)
+
+    override fun replace(beliefs: Collection<Belief>, scope: (Belief) -> Boolean, replacements: List<Belief>) =
+        BeliefRevision.defaultFor(replacements.firstOrNull() ?: beliefs.firstOrNull())
+            .replace(beliefs, scope, replacements)
 }

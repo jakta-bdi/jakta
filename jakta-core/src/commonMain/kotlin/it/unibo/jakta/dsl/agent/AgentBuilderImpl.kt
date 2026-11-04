@@ -29,7 +29,7 @@ class AgentBuilderImpl<Belief : Any, Goal : Any, Body : Any>(
 
     private var bodyFactory: (AgentID) -> Body by Delegates.notNull()
 
-    private var beliefRevision: BeliefRevision<Belief> = BeliefRevision.plain()
+    private var beliefRevision: BeliefRevision<Belief> = BeliefRevision.default()
 
     // By default, all messages are discarded.
     private var messageHandler: AgentState<Belief, Goal>.(Message<*>) -> AgentUpdate<*>? = { null }
