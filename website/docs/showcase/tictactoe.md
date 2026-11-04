@@ -12,11 +12,18 @@ reasons on the board with Prolog rules. The rules and plans are written by Kotli
 choose, so the same agent definition plays 3×3, 4×4 and 5×5. On the larger boards a line one cell shorter than the
 board wins: three in a row on 4×4, four on 5×5.
 
-Play against the agent by clicking a cell on your turn: your move goes to the game, which shows the new board
-to the agent. The difficulty sets how often the agent plays a random cell instead of its best move: often when
-*clumsy*, now and then when *distracted*, never when *focused*.
+It runs below, right in your browser.
 
-It runs below, right in your browser: the *agent trace* on the right shows what the agents print while they reason.
+:::tip[How to use it]
+- Press **New game**. The agent plays X and you play O: click **X** or **O** to switch who plays each side, also to
+  watch two agents play each other.
+- On your turn, click a cell: your move goes to the game, which shows the new board to the agent.
+- **Difficulty** sets how often the agent plays a random cell instead of its best move: often when *clumsy*, now and
+  then when *distracted*, never when *focused*.
+- **Size** chooses the board: 3×3, 4×4 or 5×5.
+- **Agents think** sets how long an agent waits before moving.
+- The *agent trace* on the right shows what the agents print while they reason.
+:::
 
 <ExampleApp name="tictactoe" title="Tic-tac-toe" />
 

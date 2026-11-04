@@ -20,11 +20,17 @@ agent instead. The goal asks for several towers, and the agent builds them one a
 first tower, from the bottom up, then moves on to the next, choosing each move from what it believes about the world
 at that moment.
 
-Drag the blocks to set the goal (shown first) and the starting world, then press Play: a robot arm on the ceiling
-moves the blocks as the agent decides.
-It stops by itself when it is done, or gives up through a failure plan.
+It runs below, right in your browser.
 
-It runs below, right in your browser: the *agent trace* on the right shows what the agents print while they reason.
+:::tip[How to use it]
+- Choose how many blocks to use with **Blocks − / +**.
+- Drag the blocks in the **Goal** panel to set the towers to build, or press its **Shuffle**; drag the blocks in the
+  **World** panel to set where they start.
+- Press **Play**: a robot arm on the ceiling moves the blocks as the agent decides. It stops by itself when it is
+  done, or gives up through a failure plan. Press the **World**'s **Shuffle** while it works to upset its plans.
+- **Move delay** sets how long each move takes.
+- The *agent trace* on the right shows what the agent prints while it reasons.
+:::
 
 <ExampleApp name="blocksworld" title="Blocks World" />
 

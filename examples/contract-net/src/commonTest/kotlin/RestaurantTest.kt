@@ -50,15 +50,16 @@ class RestaurantTest {
         (statusOf(id) { it is OrderStatus.Served } as OrderStatus.Served).chef
 
     @Test
-    fun theSoonestChefGetsTheOrderAndTiesGoByName() = runTest {
+    fun theSoonestChefGetsTheOrder() = runTest {
         open(backgroundScope, hire("ada", "bruno")) {
-            // both idle, both with a stove: a tie, and ada comes first
+            // both idle, both with a stove: either can have it
             restaurant.order(Dish.SOUP)
-            assertEquals("ada", chefOf(1))
-            // ada has the soup to cook: bruno has the steak ready sooner
+            val first = chefOf(1)
+            // the one with the soup to cook needs longer: the other has the steak ready sooner
             restaurant.order(Dish.STEAK)
-            assertEquals("bruno", chefOf(2))
-            assertEquals("bruno", servedBy(2))
+            val second = chefOf(2)
+            assertEquals(setOf("ada", "bruno"), setOf(first, second))
+            assertEquals(second, servedBy(2))
         }
     }
 
@@ -81,14 +82,15 @@ class RestaurantTest {
 
     @Test
     fun aChefLosingTheStationGivesTheOrderBackAndAnotherCooksIt() = runTest {
-        val (ada, bruno) = hire("ada", "bruno")
-        open(backgroundScope, listOf(ada, bruno)) {
+        val kitchens = hire("ada", "bruno")
+        open(backgroundScope, kitchens) {
             restaurant.order(Dish.STEAK)
-            assertEquals("ada", chefOf(1))
-            ada.state.first { it.cooking != null }
-            ada.toggleStation(Station.GRILL)
-            assertEquals("bruno", servedBy(1))
-            assertTrue(restaurant.messages.value.any { it.performative == "failure" && it.sender == "ada" })
+            val chef = chefOf(1)
+            val (winner, other) = kitchens.sortedByDescending { it.chef == chef }
+            winner.state.first { it.cooking != null }
+            winner.toggleStation(Station.GRILL)
+            assertEquals(other.chef, servedBy(1))
+            assertTrue(restaurant.messages.value.any { it.performative == "failure" && it.sender == winner.chef })
         }
     }
 
@@ -97,7 +99,7 @@ class RestaurantTest {
         open(backgroundScope, hire("ada", "bruno", "dara")) {
             repeat(3) { restaurant.order(Dish.STEAK) }
             // each order makes the next bid of its chef later: the steaks go to a different grill each
-            assertEquals(listOf("ada", "bruno", "dara"), (1..3).map { chefOf(it) })
+            assertEquals(setOf("ada", "bruno", "dara"), (1..3).map { chefOf(it) }.toSet())
             assertEquals(emptyList(), restaurant.messages.value.filter { it.sender in it.receivers })
         }
     }
@@ -115,16 +117,17 @@ class RestaurantTest {
 
     @Test
     fun theWaiterTakesBackTheOrdersOfAChefThatFellAsleep() = runTest {
-        val (ada, bruno) = hire("ada", "bruno")
-        open(backgroundScope, listOf(ada, bruno)) {
+        val kitchens = hire("ada", "bruno")
+        open(backgroundScope, kitchens) {
             restaurant.order(Dish.STEAK)
-            assertEquals("ada", chefOf(1))
-            ada.state.first { it.cooking != null }
-            ada.toggleNap()
-            // ada does not serve the steak in the time it promised: the waiter cancels it, and bruno cooks it
-            assertEquals("bruno", servedBy(1))
-            assertTrue(restaurant.messages.value.any { it.performative == "cancel" && "ada" in it.receivers })
-            assertEquals(emptyList(), ada.state.value.rail)
+            val chef = chefOf(1)
+            val (winner, other) = kitchens.sortedByDescending { it.chef == chef }
+            winner.state.first { it.cooking != null }
+            winner.toggleNap()
+            // the winner does not serve the steak in time: the waiter cancels it, and the other chef cooks it
+            assertEquals(other.chef, servedBy(1))
+            assertTrue(restaurant.messages.value.any { it.performative == "cancel" && winner.chef in it.receivers })
+            assertEquals(emptyList(), winner.state.value.rail)
         }
     }
 

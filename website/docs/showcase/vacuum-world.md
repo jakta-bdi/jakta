@@ -16,10 +16,15 @@ and what the six squares it sees hold (here, left, forward-left, forward, forwar
 turning, moving forward and cleaning. Actions take time, and the world runs on its own clock, getting new dust
 every second.
 
-Choose how many robots to use, press *Start* and watch them work. You can change the speed and how often dust
-appears, and click a square to drop or remove some, also while the robots work.
+It runs below, right in your browser.
 
-It runs below, right in your browser: the *agent trace* on the right shows what the agents print while they reason.
+:::tip[How to use it]
+- Choose how many **Robots** to use, from one to four, and press **Start**; **Stop** pauses them, and **Reset**
+  restores the map with fresh dust.
+- Click a square to drop or remove dust, also while the robots work.
+- **Speed** sets how fast the world and the robots go, and **New dust** how often dust appears by itself.
+- The *agent trace* on the right shows what the agents print while they reason.
+:::
 
 <ExampleApp name="vacuum-world" title="Vacuum World" />
 

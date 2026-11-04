@@ -17,9 +17,17 @@ have it ready the soonest. Every dish is cooked at one station (salad at the cho
 on the stove, pizza in the oven), and no kitchen has them all. Chefs walk between their stations and the pass, where dishes are
 served.
 
-Choose how many chefs to hire, open the restaurant, and order some dishes. You can switch a kitchen's stations on and
-off by clicking them, and send a chef to nap, also while they work. The *messages* panel shows what the agents tell
-each other, and the *agent trace* what they print while they reason.
+It runs below, right in your browser.
+
+:::tip[How to use it]
+- Choose how many **Chefs** to hire, from one to four, and press **Open the restaurant**; **Reset** closes it.
+- Press a dish under **Order a dish** to order it, as many times as you like.
+- Click a station in a kitchen to switch it off or on, also while the chef works.
+- Press **Nap** on a chef's card to send the chef to sleep, and **Wake up** to bring it back.
+- **Speed** sets how fast the restaurant's clock goes.
+- The *messages* panel shows what the agents tell each other, and the *agent trace* what they print while they
+  reason.
+:::
 
 <ExampleApp name="contract-net" title="Contract Net" />
 
@@ -111,10 +119,7 @@ and picks the soonest:
 val bids = beliefs.bidsFor(order.id)
 beliefs.answersTo(order.id).forEach(::forget)
 
-// the soonest; on a tie, the chef with fewer orders, then by name
-val best = bids.minWithOrNull(
-    compareBy({ it.readyIn }, { beliefs.ordersOf(it.source) }, { beliefs.chefFrom(it.source).displayName }),
-)
+val best = bids.minByOrNull { it.readyIn }
 if (best == null) {
     print("Nobody can cook order ${order.id} now: I'll ask again soon")
     track(order.id, OrderStatus.Retrying)
@@ -147,11 +152,11 @@ internal fun Collection<PrologBelief>.readyIn(dish: Dish): Duration {
 }
 ```
 
-Order three steaks in a row, with Ada, Bruno and Dara in the kitchens: they all have a grill. The first goes to Ada,
-as all three bid the same and the waiter breaks ties by name; for the second, Ada would need twice as long, and it
-goes to Bruno; the third to Dara. The orders spread over the kitchens with a grill, yet no rule says to spread them:
-each chef only says how busy it is, and the waiter only picks the soonest. All the chefs work at the same pace, so the
-soonest is simply the least busy; a tie goes to the chef with fewer orders, then by name.
+Order three steaks in a row, with Ada, Bruno and Dara in the kitchens: they all have a grill. All three are free and
+bid the same for the first, which goes to the first to answer; that chef would now need twice as long, so the second
+goes to one of the others, and the third to the last one. The orders spread over the kitchens with a grill, yet no
+rule says to spread them: each chef only says how busy it is, and the waiter only picks the soonest. All the chefs
+work at the same pace, so the soonest is simply the least busy.
 
 For this to work, a chef must bid knowing the orders it already won. So the waiter runs **one auction at a time**,
 the oldest order first, in an endless loop like the chefs' (see below): the answer to an auction reaches each chef

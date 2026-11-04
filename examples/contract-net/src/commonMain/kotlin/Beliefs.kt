@@ -61,10 +61,6 @@ internal fun Ticket.assignedTo(source: String): PrologBelief =
 internal fun Ticket.watchGoal(readyIn: Duration): PrologGoal =
     Struct.of("watch", Integer.of(id), dish.toAtom(), Real.of(readyIn.toSecondsText()))
 
-/** How many orders the agent [source] has, from `assigned(Id, D, S)`. */
-internal fun Collection<PrologBelief>.ordersOf(source: String): Int =
-    count { it.head.functor == "assigned" && (it.head[2] as Atom).value == source }
-
 /** The agent the order [id] was given to, from `assigned(Id, D, S)`, if it still has it. */
 internal fun Collection<PrologBelief>.assignee(id: Int): String? =
     (about("assigned", id).singleOrNull()?.head?.get(2) as Atom?)?.value

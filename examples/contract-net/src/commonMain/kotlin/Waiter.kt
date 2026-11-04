@@ -162,10 +162,7 @@ private suspend fun RestaurantAgent.auction(order: Ticket) = with(board) {
     val bids = beliefs.bidsFor(order.id)
     beliefs.answersTo(order.id).forEach(::forget)
 
-    // the soonest; on a tie, the chef with fewer orders, then by name
-    val best = bids.minWithOrNull(
-        compareBy({ it.readyIn }, { beliefs.ordersOf(it.source) }, { beliefs.chefFrom(it.source).displayName }),
-    )
+    val best = bids.minByOrNull { it.readyIn }
     if (best == null) {
         print("Nobody can cook order ${order.id} now: I'll ask again soon")
         track(order.id, OrderStatus.Retrying)
