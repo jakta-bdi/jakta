@@ -499,6 +499,7 @@ private fun performativeColour(performative: String): Color = when (performative
     "reject_proposal" -> Color(0xFF757575)
     "done" -> Color(0xFF6A1B9A)
     "failure" -> Color(0xFFC62828)
+    "cancel" -> Color(0xFFAD1457)
     else -> Color(0xFF424242)
 }
 

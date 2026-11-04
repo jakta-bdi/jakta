@@ -38,7 +38,8 @@ private val participant = Atom.of("participant")
  * The chef introduces itself to the waiter, then answers each call for proposals `cfp(Id, D)`: it proposes
  * `propose(Id, T)` if its kitchen has the station of the dish, where T is how long until it would be ready, and refuses
  * with `refuse(Id)` otherwise; asleep, it does not answer at all. It keeps cooking the orders it won, the oldest first,
- * and tells the waiter `done(Id)` when it served one, or `failure(Id)` when its kitchen lost the station it needs.
+ * and tells the waiter `done(Id)` when it served one, or `failure(Id)` when its kitchen lost the station it needs; it
+ * drops an order the waiter takes back with `cancel(Id)`.
  * Every message it receives is logged in the [restaurant].
  */
 context(kitchens: KitchenSkill, messaging: MessagingSkill)
@@ -114,6 +115,16 @@ fun chef(id: AgentID, kitchen: Kitchen, waiter: AgentID, restaurant: Restaurant)
                 adding.belief { matchingBelief { "reject_proposal"(I)[source(W)] } } triggers {
                     agent.forgetAll("reject_proposal", I.value())
                     agent.forgetAll("proposal", I.value())
+                }
+            }
+
+            // the waiter took the order back, as the chef was late
+            prologPlan {
+                adding.belief { matchingBelief { "cancel"(I)[source(W)] } } triggers {
+                    agent.forgetAll("cancel", I.value())
+                    agent.forgetAll("ticket", I.value())
+                    agent.unpin(I.value())
+                    agent.print("The waiter took order ", I, " back")
                 }
             }
 

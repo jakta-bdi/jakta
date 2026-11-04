@@ -37,7 +37,7 @@ agent runs on **its own node**, as if each worked on its own machine. The waiter
 **does not wait forever**: a chef that does not answer is simply left out. What the others tell becomes **beliefs
 annotated with their source**, so the waiter knows who said what. And by bidding the time they need, the chefs
 **balance the load** among themselves, without anyone planning it. When a chef can no longer keep a promise, the
-protocol has a way to **give the order back**.
+protocol has a way to **give the order back**, and when a chef breaks one without a word, the waiter **takes it back**.
 
 ### The protocol
 
@@ -69,6 +69,7 @@ sequenceDiagram
 - The waiter accepts the soonest proposal with `accept_proposal(Id)`, and rejects the others with
   `reject_proposal(Id)`.
 - The chef that won the order cooks it, serves it at the pass, and tells `done(Id)`.
+- If `done(Id)` does not come in the time the chef promised, the waiter takes the order back with `cancel(Id)`.
 
 Every message is a `tell`: it adds a belief to the receiver, and the receiver's plans react to it. So the protocol is
 written as plans, one for each message an agent can receive. This is a chef's, for a call for proposals it can
@@ -168,8 +169,9 @@ if (best == null) {
 } else {
     val chef = beliefs.chefFrom(best.source)
     print("Order ${order.id} goes to ${chef.displayName}, ready in ${best.readyIn}")
-    believe(order.belief("assigned"))
+    believe(order.assignedTo(best.source))
     tellTo(chef, orderBelief("accept_proposal", order.id))
+    alsoAchieve(order.watchGoal(best.readyIn))
     (bids - best).forEach { tellTo(beliefs.chefFrom(it.source), orderBelief("reject_proposal", order.id)) }
     track(order.id, OrderStatus.Assigned(chef.displayName, best.readyIn))
 }
@@ -181,11 +183,13 @@ and `failure` use it to tell which chef answered.
 
 ### Load balancing emerges
 
-A chef's bid is the time it needs to cook everything it already took, and then this dish, at its speed:
+A chef's bid is the time it needs for everything it already took, and then this dish, at its speed: for each dish,
+walking to the station, cooking it, and walking back to the pass:
 
 ```kotlin
 internal fun Collection<PrologBelief>.readyIn(dish: Dish): Duration {
-    val work = tickets("ticket").fold(dish.cookingTime) { time, ticket -> time + ticket.dish.cookingTime } / speed()
+    val dishes = tickets("ticket").map { it.dish } + dish
+    val work = dishes.fold(Duration.ZERO) { time, next -> time + WALK_TIME * 2 + next.cookingTime } / speed()
     return (work.inWholeMilliseconds / TENTH_MILLIS * TENTH_MILLIS).milliseconds
 }
 ```
@@ -214,9 +218,42 @@ prologPlan {
 }
 ```
 
-The waiter remembered the order as `assigned(Id, D)`: on a `failure` it believes `order(Id, D)` again, and the order
-goes back into its loop, for a new round. Turning the station off in the middle of cooking stops the cooking too: the
+The waiter remembered the order as `assigned(Id, D, S)`, with the chef it gave it to: on a `failure` from that chef
+it believes `order(Id, D)` again, and the order goes back into its loop, for a new round. Turning the station off in the middle of cooking stops the cooking too: the
 kitchen notices the missing station, `cook` returns `false`, and the chef gives the order back the same way.
+
+### Taking an order back
+
+A chef that falls asleep with orders on its rail cannot give them back: it does not even know it is late. The waiter
+does: the bid was a promise, and when it accepts one, it starts a concurrent intention that watches it, with some
+grace, half as long again as promised:
+
+```kotlin
+prologPlan {
+    adding.goal { matchingGoal { "watch"(I, D, T) } } triggers {
+        val order = Ticket(I.value(), dishNamed(D.value()))
+        val deadline = agent.realTime(T.value<Double>().seconds * GRACE)
+        val answer = agent.wait({ event -> event.takeIf { it.isOutcomeOf(order.id) } }, deadline)
+        val chef = agent.beliefs.assignee(order.id)?.let { agent.beliefs.chefFrom(it) }
+        if (answer == null && chef != null) {
+            agent.forgetAll("assigned", order.id)
+            agent.print("${chef.displayName} is late with order ${order.id}: I take it back")
+            agent.tellTo(chef, orderBelief("cancel", order.id))
+            agent.believe(order.belief("order"))
+        }
+    }
+}
+```
+
+If neither `done` nor `failure` arrives in time, the waiter tells the chef `cancel(Id)`, the message the initiator of
+a FIPA contract net uses to call a contract off, and the order goes back into its loop, like a failed one. The
+sleeping chef still hears it, as only its calls for proposals go unheard: it takes the ticket off its rail, and stops
+cooking it if it was on the stove. Send a chef with a few orders to nap: one after the other, they find another
+kitchen.
+
+For this to be fair, the bid must be honest: it counts the walking too, so an awake chef keeps its promises, and the
+grace covers the rest. A `done` that arrives too late is simply forgotten: `assigned(Id, D, S)` names the chef, so
+the waiter only accepts it from the chef that still has the order.
 
 ### Two endless loops
 

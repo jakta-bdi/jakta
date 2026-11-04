@@ -110,6 +110,21 @@ class RestaurantTest {
         }
     }
 
+    @Test
+    fun theWaiterTakesBackTheOrdersOfAChefThatFellAsleep() = runTest {
+        val (ada, bruno) = hire("ada", "bruno")
+        open(backgroundScope, listOf(ada, bruno)) {
+            restaurant.order(Dish.STEAK)
+            assertEquals("bruno", chefOf(1))
+            bruno.state.first { it.cooking != null }
+            bruno.toggleNap()
+            // bruno does not serve the steak in the time it promised: the waiter cancels it, and ada cooks it
+            assertEquals("ada", servedBy(1))
+            assertTrue(restaurant.messages.value.any { it.performative == "cancel" && "bruno" in it.receivers })
+            assertEquals(emptyList(), bruno.state.value.rail)
+        }
+    }
+
     private companion object {
         val TIMEOUT = 10.minutes
     }

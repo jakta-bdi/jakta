@@ -53,6 +53,18 @@ internal fun Ticket.goal(functor: String): PrologGoal = belief(functor).head
 /** The belief `functor(Id, D)` about the order of this ticket, such as `ticket(3, steak)`. */
 internal fun Ticket.belief(functor: String): PrologBelief = orderBelief(functor, id, dish)
 
+/** The belief `assigned(Id, D, S)`: the order of this ticket was given to the agent [source]. */
+internal fun Ticket.assignedTo(source: String): PrologBelief =
+    Fact.of(Struct.of("assigned", Integer.of(id), dish.toAtom(), Atom.of(source)))
+
+/** The goal `watch(Id, D, T)`: check that the order of this ticket is served in time, T seconds as promised. */
+internal fun Ticket.watchGoal(readyIn: Duration): PrologGoal =
+    Struct.of("watch", Integer.of(id), dish.toAtom(), Real.of(readyIn.toSecondsText()))
+
+/** The agent the order [id] was given to, from `assigned(Id, D, S)`, if it still has it. */
+internal fun Collection<PrologBelief>.assignee(id: Int): String? =
+    (about("assigned", id).singleOrNull()?.head?.get(2) as Atom?)?.value
+
 /** The belief `propose(Id, T)`: the dish of the order [id] can be ready in [readyIn], T in seconds. */
 internal fun proposeBelief(id: Int, readyIn: Duration): PrologBelief =
     Fact.of(Struct.of("propose", Integer.of(id), Real.of(readyIn.toSecondsText())))
@@ -87,10 +99,11 @@ internal fun Collection<PrologBelief>.tickets(functor: String): List<Ticket> =
 
 /**
  * How long until the chef could have [dish] ready: the dishes of the tickets the chef took, and then this one,
- * at the chef's speed.
+ * each walking to its station, cooking it and walking back to the pass, at the chef's speed.
  */
 internal fun Collection<PrologBelief>.readyIn(dish: Dish): Duration {
-    val work = tickets("ticket").fold(dish.cookingTime) { time, ticket -> time + ticket.dish.cookingTime } / speed()
+    val dishes = tickets("ticket").map { it.dish } + dish
+    val work = dishes.fold(Duration.ZERO) { time, next -> time + WALK_TIME * 2 + next.cookingTime } / speed()
     return (work.inWholeMilliseconds / TENTH_MILLIS * TENTH_MILLIS).milliseconds
 }
 
@@ -136,6 +149,14 @@ internal fun RestaurantAgent.forgetAll(functor: String, id: Int) = beliefs.about
 /** Whether this event is the removal of [belief]. */
 internal fun AgentEvent.isRemovalOf(belief: PrologBelief) =
     this is AgentEvent.Internal.Belief.Remove<*> && (this.belief as? PrologBelief)?.head == belief.head
+
+/** Whether this event is the addition of a belief `functor(Id, ...)` about the order [id]. */
+internal fun AgentEvent.isAdditionAbout(functor: String, id: Int) =
+    this is AgentEvent.Internal.Belief.Add<*> && (belief as? PrologBelief)?.let { listOf(it).about(functor, id) }
+        ?.isNotEmpty() == true
+
+/** Whether this event is the outcome of the order [id], as its chef tells it: `done(Id)` or `failure(Id)`. */
+internal fun AgentEvent.isOutcomeOf(id: Int) = isAdditionAbout("done", id) || isAdditionAbout("failure", id)
 
 /** Whether this event is the addition of a belief `functor(...)`. */
 internal fun AgentEvent.isAdditionOf(functor: String) =

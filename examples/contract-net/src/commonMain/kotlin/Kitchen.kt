@@ -82,7 +82,7 @@ class Kitchen(val chef: String, val speed: Double, stations: Set<Station>, priva
 
     /**
      * Cooks the dish of [ticket] at its station, where the chef must stand, and returns whether it is ready:
-     * not if the station was switched off meanwhile.
+     * not if the station was switched off meanwhile, or the ticket taken off the rail.
      */
     suspend fun cook(ticket: Ticket): Boolean = busy.withLock {
         val station = ticket.dish.station
@@ -90,7 +90,7 @@ class Kitchen(val chef: String, val speed: Double, stations: Set<Station>, priva
         try {
             work(ticket.dish.cookingTime) { done ->
                 mutableState.update { it.copy(progress = done) }
-                station in state.value.stations && state.value.chefAt == station
+                station in state.value.stations && state.value.chefAt == station && ticket in state.value.rail
             }
         } finally {
             mutableState.update { it.copy(cooking = null, progress = 0f) }

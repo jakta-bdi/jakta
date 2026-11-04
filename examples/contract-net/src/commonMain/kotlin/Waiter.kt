@@ -31,6 +31,9 @@ import model.Ticket
 /** How long the waiter waits for the chefs' answers to a call for proposals, on the restaurant's clock. */
 val DEADLINE = 1.5.seconds
 
+/** How much longer than promised the waiter waits for a dish, before taking the order back from its chef. */
+const val GRACE = 1.5
+
 /** How long the waiter waits before calling again for an order nobody could cook, on the restaurant's clock. */
 val RETRY_PAUSE = 3.seconds
 
@@ -43,8 +46,9 @@ private val waitTables = Atom.of("wait_tables")
  *
  * It calls for proposals with `cfp(Id, D)` to every chef, waits until all the chefs that introduced themselves
  * answered, or until the [DEADLINE], then accepts the soonest proposal with `accept_proposal(Id)` and rejects the
- * others with `reject_proposal(Id)`, remembering `assigned(Id, D)`. An order nobody proposed for is ordered again after
- * a [RETRY_PAUSE], and so is an order whose chef tells `failure(Id)`. Every message it receives is logged in the
+ * others with `reject_proposal(Id)`, remembering `assigned(Id, D, S)`. An order nobody proposed for is ordered again
+ * after a [RETRY_PAUSE], and so is an order whose chef tells `failure(Id)`, or does not tell `done(Id)` in the time
+ * it promised, with some [GRACE]: then the waiter tells it `cancel(Id)`. Every message it receives is logged in the
  * [restaurant].
  */
 context(board: WaiterSkill, messaging: MessagingSkill)
@@ -96,9 +100,25 @@ fun waiter(id: AgentID, restaurant: Restaurant) = with(board) {
                 }
             }
 
+            // a promise not kept: the chef is asleep, or too slow, and the order is taken back
+            prologPlan {
+                adding.goal { matchingGoal { "watch"(I, D, T) } } triggers {
+                    val order = Ticket(I.value(), dishNamed(D.value()))
+                    val deadline = agent.realTime(T.value<Double>().seconds * GRACE)
+                    val answer = agent.wait({ event -> event.takeIf { it.isOutcomeOf(order.id) } }, deadline)
+                    val chef = agent.beliefs.assignee(order.id)?.let { agent.beliefs.chefFrom(it) }
+                    if (answer == null && chef != null) {
+                        agent.forgetAll("assigned", order.id)
+                        agent.print("${chef.displayName} is late with order ${order.id}: I take it back")
+                        agent.tellTo(chef, orderBelief("cancel", order.id))
+                        agent.believe(order.belief("order"))
+                    }
+                }
+            }
+
             prologPlan {
                 adding.belief { matchingBelief { "done"(I)[source(S)] } } onlyWhen {
-                    satisfies { "assigned"(I, D) }
+                    satisfies { "assigned"(I, D, S) }
                 } triggers {
                     agent.forgetAll("done", I.value())
                     agent.forgetAll("assigned", I.value())
@@ -107,12 +127,23 @@ fun waiter(id: AgentID, restaurant: Restaurant) = with(board) {
             }
             prologPlan {
                 adding.belief { matchingBelief { "failure"(I)[source(S)] } } onlyWhen {
-                    satisfies { "assigned"(I, D) }
+                    satisfies { "assigned"(I, D, S) }
                 } triggers {
                     agent.forgetAll("failure", I.value())
                     agent.forgetAll("assigned", I.value())
                     agent.print(agent.beliefs.chefFrom(S.value()).displayName, " gave order ", I, " back")
                     agent.believe(belief { "order"(I, D) })
+                }
+            }
+            // too late: the order was taken back from that chef
+            prologPlan {
+                adding.belief { matchingBelief { "done"(I)[source(S)] } } triggers {
+                    agent.forgetAll("done", I.value())
+                }
+            }
+            prologPlan {
+                adding.belief { matchingBelief { "failure"(I)[source(S)] } } triggers {
+                    agent.forgetAll("failure", I.value())
                 }
             }
         }
@@ -139,8 +170,9 @@ private suspend fun RestaurantAgent.auction(order: Ticket) = with(board) {
     } else {
         val chef = beliefs.chefFrom(best.source)
         print("Order ${order.id} goes to ${chef.displayName}, ready in ${best.readyIn}")
-        believe(order.belief("assigned"))
+        believe(order.assignedTo(best.source))
         tellTo(chef, orderBelief("accept_proposal", order.id))
+        alsoAchieve(order.watchGoal(best.readyIn))
         (bids - best).forEach { tellTo(beliefs.chefFrom(it.source), orderBelief("reject_proposal", order.id)) }
         track(order.id, OrderStatus.Assigned(chef.displayName, best.readyIn))
     }
