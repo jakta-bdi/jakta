@@ -61,6 +61,10 @@ internal fun Ticket.assignedTo(source: String): PrologBelief =
 internal fun Ticket.watchGoal(readyIn: Duration): PrologGoal =
     Struct.of("watch", Integer.of(id), dish.toAtom(), Real.of(readyIn.toSecondsText()))
 
+/** How many orders the agent [source] has, from `assigned(Id, D, S)`. */
+internal fun Collection<PrologBelief>.ordersOf(source: String): Int =
+    count { it.head.functor == "assigned" && (it.head[2] as Atom).value == source }
+
 /** The agent the order [id] was given to, from `assigned(Id, D, S)`, if it still has it. */
 internal fun Collection<PrologBelief>.assignee(id: Int): String? =
     (about("assigned", id).singleOrNull()?.head?.get(2) as Atom?)?.value
@@ -87,10 +91,6 @@ internal fun Collection<PrologBelief>.about(functor: String, id: Int): List<Prol
 internal fun Collection<PrologBelief>.hasStation(station: Station): Boolean =
     any { it.head.functor == "station" && it.head[0] == station.toAtom() }
 
-/** How fast the chef works, from `speed(F)`. */
-internal fun Collection<PrologBelief>.speed(): Double =
-    (single { it.head.functor == "speed" }.head[0] as Numeric).decimalValue.toDouble()
-
 /** The orders of the beliefs `functor(Id, D)`, such as `ticket(Id, D)`, oldest first. */
 internal fun Collection<PrologBelief>.tickets(functor: String): List<Ticket> =
     filter { it.head.functor == functor && it.head.arity == 2 }
@@ -99,11 +99,11 @@ internal fun Collection<PrologBelief>.tickets(functor: String): List<Ticket> =
 
 /**
  * How long until the chef could have [dish] ready: the dishes of the tickets the chef took, and then this one,
- * each walking to its station, cooking it and walking back to the pass, at the chef's speed.
+ * each walking to its station, cooking it and walking back to the pass.
  */
 internal fun Collection<PrologBelief>.readyIn(dish: Dish): Duration {
     val dishes = tickets("ticket").map { it.dish } + dish
-    val work = dishes.fold(Duration.ZERO) { time, next -> time + WALK_TIME * 2 + next.cookingTime } / speed()
+    val work = dishes.fold(Duration.ZERO) { time, next -> time + WALK_TIME * 2 + next.cookingTime }
     return (work.inWholeMilliseconds / TENTH_MILLIS * TENTH_MILLIS).milliseconds
 }
 

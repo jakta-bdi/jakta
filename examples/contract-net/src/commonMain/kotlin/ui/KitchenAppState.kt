@@ -66,8 +66,7 @@ class KitchenAppState(private val agentDispatcher: CoroutineDispatcher = Dispatc
 
     private var job: Job? = null
 
-    private fun hireChefs(): List<Kitchen> =
-        CHEFS.take(chefCount).map { Kitchen(it.name, it.speed, it.stations, restaurant) }
+    private fun hireChefs(): List<Kitchen> = CHEFS.take(chefCount).map { Kitchen(it.name, it.stations, restaurant) }
 
     /**
      * Closes the restaurant and starts over, with no orders and the chefs' kitchens as at the start.

@@ -28,7 +28,7 @@ enum class Station {
 }
 
 /**
- * The dishes on the menu, each cooked at one [station] in [cookingTime], for a chef of speed 1.
+ * The dishes on the menu, each cooked at one [station] in [cookingTime].
  */
 @Suppress("MagicNumber")
 enum class Dish(val station: Station, val cookingTime: Duration) {
@@ -52,20 +52,18 @@ enum class Dish(val station: Station, val cookingTime: Duration) {
 data class Ticket(val id: Int, val dish: Dish)
 
 /**
- * A chef the restaurant can hire: its [name], how fast it works, and the [stations] of its kitchen at the start.
- *
- * @property speed how fast the chef works: 2 is twice as fast as the menu's cooking times.
+ * A chef the restaurant can hire: its [name], and the [stations] of its kitchen at the start.
  */
-data class ChefProfile(val name: String, val speed: Double, val stations: Set<Station>)
+data class ChefProfile(val name: String, val stations: Set<Station>)
 
 /**
- * The chefs, up to four: the more stations, the slower.
+ * The chefs, up to four, all working at the same pace: only their kitchens differ.
  */
 val CHEFS = listOf(
-    ChefProfile("ada", speed = 0.8, stations = Station.entries.toSet()),
-    ChefProfile("bruno", speed = 1.2, stations = setOf(Station.GRILL, Station.STOVE)),
-    ChefProfile("chen", speed = 1.0, stations = setOf(Station.CHOPPING_BOARD, Station.OVEN, Station.STOVE)),
-    ChefProfile("dara", speed = 1.4, stations = setOf(Station.CHOPPING_BOARD, Station.GRILL)),
+    ChefProfile("ada", stations = Station.entries.toSet()),
+    ChefProfile("bruno", stations = setOf(Station.GRILL, Station.STOVE)),
+    ChefProfile("chen", stations = setOf(Station.CHOPPING_BOARD, Station.OVEN, Station.STOVE)),
+    ChefProfile("dara", stations = setOf(Station.CHOPPING_BOARD, Station.GRILL)),
 )
 
 /**

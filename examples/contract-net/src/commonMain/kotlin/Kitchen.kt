@@ -11,7 +11,7 @@ import model.Restaurant
 import model.Station
 import model.Ticket
 
-/** How long the chef takes to walk from one spot of the kitchen to another, at speed 1. */
+/** How long the chef takes to walk from one spot of the kitchen to another. */
 val WALK_TIME = 0.8.seconds
 
 /** How often the kitchen moves on: a nap or a missing station is noticed within this time. */
@@ -43,11 +43,10 @@ data class KitchenState(
  * the chef's actions take time on the restaurant's clock, never overlap, and stop while the chef naps.
  *
  * @property chef the name of the chef.
- * @property speed how fast the chef works: 2 is twice as fast as the menu's cooking times.
  * @param stations the stations the kitchen has at the start.
  * @param restaurant the restaurant, whose clock the kitchen works on.
  */
-class Kitchen(val chef: String, val speed: Double, stations: Set<Station>, private val restaurant: Restaurant) {
+class Kitchen(val chef: String, stations: Set<Station>, private val restaurant: Restaurant) {
     private val mutableState = MutableStateFlow(KitchenState(stations))
     private val busy = Mutex()
 
@@ -106,7 +105,7 @@ class Kitchen(val chef: String, val speed: Double, stations: Set<Station>, priva
     fun sense(): KitchenPerception = state.value.let { KitchenPerception(it.stations, it.napping) }
 
     /**
-     * Spends [time] of work, at the chef's speed and not while napping, calling [going] with how much is done every
+     * Spends [time] of work, not while napping, calling [going] with how much is done every
      * tick: it stops early, returning `false`, as soon as [going] does.
      */
     private suspend fun work(time: Duration, going: (Float) -> Boolean): Boolean {
@@ -114,7 +113,7 @@ class Kitchen(val chef: String, val speed: Double, stations: Set<Station>, priva
         while (done < time) {
             restaurant.passTime(TICK)
             if (!state.value.napping) {
-                done += TICK * speed
+                done += TICK
                 if (!going((done / time).toFloat().coerceAtMost(1f))) return false
             }
         }

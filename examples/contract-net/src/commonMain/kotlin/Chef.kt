@@ -55,7 +55,6 @@ fun chef(id: AgentID, kitchen: Kitchen, waiter: AgentID, restaurant: Restaurant)
             }
         }
         believes {
-            +initialBelief { "speed"(kitchen.speed) }
             Dish.entries.forEach { +needsBelief(it) }
         }
         hasInitialGoals { !initialGoal { start } }

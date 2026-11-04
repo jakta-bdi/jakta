@@ -139,7 +139,7 @@ fun KitchenApp(app: KitchenAppState) {
                                 kitchen,
                                 kitchens[index],
                                 CHEF_COLOURS[index],
-                                walkMillis = app.restaurant.realTime(WALK_TIME / kitchen.speed).inWholeMilliseconds,
+                                walkMillis = app.restaurant.realTime(WALK_TIME).inWholeMilliseconds,
                                 modifier = Modifier.weight(1f).fillMaxHeight(),
                             )
                         }
@@ -227,7 +227,7 @@ private fun KitchenCard(kitchen: Kitchen, state: KitchenState, colour: Color, wa
                 style = MaterialTheme.typography.subtitle1,
             )
             Text(
-                "  ${kitchen.speed}x, served ${state.served}",
+                "  served ${state.served}",
                 fontSize = 12.sp,
                 maxLines = 1,
                 modifier = Modifier.weight(1f),

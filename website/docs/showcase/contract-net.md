@@ -14,8 +14,8 @@ following the contract net of [Jason](https://jason-lang.github.io/).
 
 Customers order dishes. A waiter takes each order and asks one to four chefs, each in their own kitchen, who can
 have it ready the soonest. Every dish is cooked at one station (salad at the chopping board, steak on the grill, soup
-on the stove, pizza in the oven), and no kitchen has them all. Chefs work at different speeds, and walk between their
-stations and the pass, where dishes are served.
+on the stove, pizza in the oven), and no kitchen has them all. Chefs walk between their stations and the pass, where dishes are
+served.
 
 Choose how many chefs to hire, open the restaurant, and order some dishes. You can switch a kitchen's stations on and
 off by clicking them, and send a chef to nap, also while they work. The *messages* panel shows what the agents tell
@@ -32,12 +32,12 @@ each other, and the *agent trace* what they print while they reason.
 
 The other showcases are about one agent reasoning on its world. Here the interesting part happens **between** agents:
 no one tells the chefs what to cook, and the waiter knows nothing of their kitchens. They agree on who cooks what by
-following a **protocol**, a conversation of [KQML](../explanation/incarnations/prolog/kqml.md) messages, and each
-agent runs on **its own node**, as if each worked on its own machine. The waiter decides with what it was told, and
-**does not wait forever**: a chef that does not answer is simply left out. What the others tell becomes **beliefs
-annotated with their source**, so the waiter knows who said what. And by bidding the time they need, the chefs
-**balance the load** among themselves, without anyone planning it. When a chef can no longer keep a promise, the
-protocol has a way to **give the order back**, and when a chef breaks one without a word, the waiter **takes it back**.
+following a **protocol**, a conversation of [KQML](../explanation/incarnations/prolog/kqml.md) messages, and what one
+agent tells another becomes a **belief annotated with its source**, so the waiter knows who said what. By bidding the
+time they need, the chefs **balance the load** among themselves, without anyone planning it. And the protocol copes
+**when things go wrong**: the waiter does not wait forever for a chef that does not answer, a chef that can no longer
+keep a promise gives the order back, and the waiter takes it back from one that breaks it without a word. Each agent
+runs on **its own node**, as if each worked on its own machine.
 
 ### The protocol
 
@@ -99,34 +99,77 @@ answer comes, and forgets the call: it handled it.
 Before any order, each chef introduces itself to the waiter with `introduction(participant, N)`, telling its name. That
 is how the waiter knows how many chefs to wait for, and how to call them.
 
-### Each agent on its own node
+### Beliefs with a source
 
-The waiter and each chef run on a node of their own
-([`RunRestaurant.kt`](https://github.com/jakta-bdi/jakta/blob/main/examples/contract-net/src/commonMain/kotlin/RunRestaurant.kt)),
-connected by a network:
+What an agent is told is annotated with who told it: a chef's proposal is the waiter's belief
+`propose(3, 3.3)[source(S)]`, where `S` is the chef's ID. The waiter collects the bids from these beliefs in plain
+Kotlin
+([`Beliefs.kt`](https://github.com/jakta-bdi/jakta/blob/main/examples/contract-net/src/commonMain/kotlin/Beliefs.kt)),
+and picks the soonest:
 
 ```kotlin
-val waiterId = BaseAgentID("waiter")
-val dining = node(NodeBuilders.baseNode<Any>()) {
-    context(MessagingSkill(node), WaiterSkill(node)) { withAgents(waiter(waiterId, restaurant)) }
+val bids = beliefs.bidsFor(order.id)
+beliefs.answersTo(order.id).forEach(::forget)
+
+// the soonest; on a tie, the chef with fewer orders, then by name
+val best = bids.minWithOrNull(
+    compareBy({ it.readyIn }, { beliefs.ordersOf(it.source) }, { beliefs.chefFrom(it.source).displayName }),
+)
+if (best == null) {
+    print("Nobody can cook order ${order.id} now: I'll ask again soon")
+    track(order.id, OrderStatus.Retrying)
+    alsoAchieve(order.goal("order_again"))
+} else {
+    val chef = beliefs.chefFrom(best.source)
+    print("Order ${order.id} goes to ${chef.displayName}, ready in ${best.readyIn}")
+    believe(order.assignedTo(best.source))
+    tellTo(chef, orderBelief("accept_proposal", order.id))
+    alsoAchieve(order.watchGoal(best.readyIn))
+    (bids - best).forEach { tellTo(beliefs.chefFrom(it.source), orderBelief("reject_proposal", order.id)) }
+    track(order.id, OrderStatus.Assigned(chef.displayName, best.readyIn))
 }
-val kitchenNodes = kitchens.map { kitchen ->
-    node(NodeBuilders.baseNode<Any>()) {
-        context(MessagingSkill(node), KitchenSkill(node)) {
-            withAgents(chef(BaseAgentID(kitchen.chef), kitchen, waiterId, restaurant))
-        }
-    }
-}
-mas(NodeBuilders.baseNode()) { withNodes(dining, *kitchenNodes.toTypedArray()) }
-    .run(CoroutineNodeRunner(SharedMemoryNetwork()))
 ```
 
-Messages reach agents on every node, perceptions only those of the node that publishes them: the waiter perceives
-the orders, and each chef only its own kitchen. The chefs know the waiter's ID from the start, to introduce themselves;
-the waiter learns about the chefs only from their messages. Nothing else is shared: the code of the agents would be
-the same on as many machines.
+The source is also how the waiter answers: `chefFrom` turns it back into the chef's ID, with the name the chef gave in
+its `introduction`. In plans, `[source(S)]` binds the sender like any other variable: the waiter's plans for `done`
+and `failure` use it to tell which chef answered.
 
-### A deadline instead of waiting forever
+### Load balancing emerges
+
+A chef's bid is the time it needs for everything it already took, and then this dish: for each dish, walking to the
+station, cooking it, and walking back to the pass:
+
+```kotlin
+internal fun Collection<PrologBelief>.readyIn(dish: Dish): Duration {
+    val dishes = tickets("ticket").map { it.dish } + dish
+    val work = dishes.fold(Duration.ZERO) { time, next -> time + WALK_TIME * 2 + next.cookingTime }
+    return (work.inWholeMilliseconds / TENTH_MILLIS * TENTH_MILLIS).milliseconds
+}
+```
+
+Order three steaks in a row, with Ada, Bruno and Dara in the kitchens: they all have a grill. The first goes to Ada,
+as all three bid the same and the waiter breaks ties by name; for the second, Ada would need twice as long, and it
+goes to Bruno; the third to Dara. The orders spread over the kitchens with a grill, yet no rule says to spread them:
+each chef only says how busy it is, and the waiter only picks the soonest. All the chefs work at the same pace, so the
+soonest is simply the least busy; a tie goes to the chef with fewer orders, then by name.
+
+For this to work, a chef must bid knowing the orders it already won. So the waiter runs **one auction at a time**,
+the oldest order first, in an endless loop like the chefs' (see below): the answer to an auction reaches each chef
+before the next call for proposals does.
+
+### When things go wrong
+
+Each control of the app, besides ordering, breaks the happy path in a different way, and the protocol has an answer
+for each:
+
+| You | The protocol |
+|---|---|
+| send a chef to nap before an order | the waiter decides at a **deadline**, without that chef |
+| switch off a station a chef needs | the chef **gives the order back** with `failure(Id)` |
+| send a chef with orders to nap | the waiter **takes them back** with `cancel(Id)` |
+| order a dish no kitchen can cook now | the waiter asks again after a pause |
+
+#### A deadline instead of waiting forever
 
 A napping chef does not hear the calls for proposals: its first plan for a `cfp` applies while it believes
 `napping`, and only forgets the call. The waiter cannot tell a sleeping chef from a slow one, so it waits for the
@@ -149,61 +192,7 @@ Send a chef to nap and order a dish: the order stays on *asking the chefs...* fo
 else. If nobody proposes, because nobody is awake or has the station, the order is ordered again after a pause, until
 someone can cook it.
 
-### Beliefs with a source
-
-What an agent is told is annotated with who told it: a chef's proposal is the waiter's belief
-`propose(3, 3.3)[source(S)]`, where `S` is the chef's ID. The waiter collects the bids from these beliefs in plain
-Kotlin
-([`Beliefs.kt`](https://github.com/jakta-bdi/jakta/blob/main/examples/contract-net/src/commonMain/kotlin/Beliefs.kt)),
-and picks the soonest:
-
-```kotlin
-val bids = beliefs.bidsFor(order.id)
-beliefs.answersTo(order.id).forEach(::forget)
-
-val best = bids.minByOrNull { it.readyIn }
-if (best == null) {
-    print("Nobody can cook order ${order.id} now: I'll ask again soon")
-    track(order.id, OrderStatus.Retrying)
-    alsoAchieve(order.goal("order_again"))
-} else {
-    val chef = beliefs.chefFrom(best.source)
-    print("Order ${order.id} goes to ${chef.displayName}, ready in ${best.readyIn}")
-    believe(order.assignedTo(best.source))
-    tellTo(chef, orderBelief("accept_proposal", order.id))
-    alsoAchieve(order.watchGoal(best.readyIn))
-    (bids - best).forEach { tellTo(beliefs.chefFrom(it.source), orderBelief("reject_proposal", order.id)) }
-    track(order.id, OrderStatus.Assigned(chef.displayName, best.readyIn))
-}
-```
-
-The source is also how the waiter answers: `chefFrom` turns it back into the chef's ID, with the name the chef gave in
-its `introduction`. In plans, `[source(S)]` binds the sender like any other variable: the waiter's plans for `done`
-and `failure` use it to tell which chef answered.
-
-### Load balancing emerges
-
-A chef's bid is the time it needs for everything it already took, and then this dish, at its speed: for each dish,
-walking to the station, cooking it, and walking back to the pass:
-
-```kotlin
-internal fun Collection<PrologBelief>.readyIn(dish: Dish): Duration {
-    val dishes = tickets("ticket").map { it.dish } + dish
-    val work = dishes.fold(Duration.ZERO) { time, next -> time + WALK_TIME * 2 + next.cookingTime } / speed()
-    return (work.inWholeMilliseconds / TENTH_MILLIS * TENTH_MILLIS).milliseconds
-}
-```
-
-Order three steaks in a row. Dara is the fastest at the grill and wins the first; for the second, Dara would need
-twice as long, and Bruno wins it; for the third, both have one steak to cook, and Ada, slow but idle, wins it. The
-orders spread over the kitchens with a grill, yet no rule says to spread them: each chef only says how busy it is, and
-the waiter only picks the soonest.
-
-For this to work, a chef must bid knowing the orders it already won. So the waiter runs **one auction at a time**,
-the oldest order first, in an endless loop like the chefs' (see below): the answer to an auction reaches each chef
-before the next call for proposals does.
-
-### Giving an order back
+#### Giving an order back
 
 Switch off a station while a chef has orders for it: the chef can no longer keep its promise. Its plan for the
 removal of a `station` belief gives those orders back, telling `failure(Id)`, the message the FIPA contract net uses
@@ -222,7 +211,7 @@ The waiter remembered the order as `assigned(Id, D, S)`, with the chef it gave i
 it believes `order(Id, D)` again, and the order goes back into its loop, for a new round. Turning the station off in the middle of cooking stops the cooking too: the
 kitchen notices the missing station, `cook` returns `false`, and the chef gives the order back the same way.
 
-### Taking an order back
+#### Taking an order back
 
 A chef that falls asleep with orders on its rail cannot give them back: it does not even know it is late. The waiter
 does: the bid was a promise, and when it accepts one, it starts a concurrent intention that watches it, with some
@@ -254,6 +243,33 @@ kitchen.
 For this to be fair, the bid must be honest: it counts the walking too, so an awake chef keeps its promises, and the
 grace covers the rest. A `done` that arrives too late is simply forgotten: `assigned(Id, D, S)` names the chef, so
 the waiter only accepts it from the chef that still has the order.
+
+### Each agent on its own node
+
+The waiter and each chef run on a node of their own
+([`RunRestaurant.kt`](https://github.com/jakta-bdi/jakta/blob/main/examples/contract-net/src/commonMain/kotlin/RunRestaurant.kt)),
+connected by a network:
+
+```kotlin
+val waiterId = BaseAgentID("waiter")
+val dining = node(NodeBuilders.baseNode<Any>()) {
+    context(MessagingSkill(node), WaiterSkill(node)) { withAgents(waiter(waiterId, restaurant)) }
+}
+val kitchenNodes = kitchens.map { kitchen ->
+    node(NodeBuilders.baseNode<Any>()) {
+        context(MessagingSkill(node), KitchenSkill(node)) {
+            withAgents(chef(BaseAgentID(kitchen.chef), kitchen, waiterId, restaurant))
+        }
+    }
+}
+mas(NodeBuilders.baseNode()) { withNodes(dining, *kitchenNodes.toTypedArray()) }
+    .run(CoroutineNodeRunner(SharedMemoryNetwork()))
+```
+
+Messages reach agents on every node, perceptions only those of the node that publishes them: the waiter perceives
+the orders, and each chef only its own kitchen. The chefs know the waiter's ID from the start, to introduce themselves;
+the waiter learns about the chefs only from their messages. Nothing else is shared: the code of the agents would be
+the same on as many machines.
 
 ### Two endless loops
 
