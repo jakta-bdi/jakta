@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -57,9 +58,13 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import it.unibo.jakta.contract_net.generated.resources.Res
+import it.unibo.jakta.contract_net.generated.resources.noto_emoji_dishes
 import kotlin.math.roundToInt
 import kotlin.time.Duration
 import model.Dish
@@ -67,6 +72,7 @@ import model.LoggedMessage
 import model.Order
 import model.OrderStatus
 import model.Station
+import org.jetbrains.compose.resources.Font
 
 private const val MIN_SPEED = 0.5f
 private const val MAX_SPEED = 3f
@@ -119,7 +125,7 @@ fun KitchenApp(app: KitchenAppState) {
             )
         }
         Text(
-            "Order dishes, click a station to switch it on or off, and send a chef to nap, also while they work.",
+            "Order dishes, click a station to switch it on or off, and send a chef to nap: asleep, it is offline.",
             modifier = Modifier.padding(horizontal = 12.dp),
         )
 
@@ -169,15 +175,26 @@ private fun OrdersPanel(
     }
     Column(modifier = modifier.padding(8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Text("Order a dish", style = MaterialTheme.typography.subtitle2)
-        Dish.entries.forEach { dish ->
-            OutlinedButton(onClick = { onOrder(dish) }, modifier = Modifier.fillMaxWidth()) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(dish.label(), fontWeight = FontWeight.Bold)
-                    Text(
-                        "${dish.station.label().lowercase()}, ${dish.cookingTime.inWholeSeconds} s",
-                        fontSize = 11.sp,
-                        color = Color.Gray,
-                    )
+        Dish.entries.chunked(2).forEach { pair ->
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                pair.forEach { dish ->
+                    OutlinedButton(
+                        onClick = { onOrder(dish) },
+                        contentPadding = PaddingValues(4.dp),
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                DishEmoji(dish, 16.sp)
+                                Text(" ${dish.label()}", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                            }
+                            Text(
+                                "${dish.station.shortLabel()} · ${dish.cookingTime.inWholeSeconds} s",
+                                fontSize = 10.sp,
+                                color = Color.Gray,
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -207,7 +224,11 @@ private fun OrderSlip(order: Order, cooking: Boolean) {
         modifier = Modifier.fillMaxWidth().background(colour.copy(alpha = 0.12f), RoundedCornerShape(4.dp))
             .border(1.dp, colour, RoundedCornerShape(4.dp)).padding(6.dp),
     ) {
-        Text("#${order.id} ${order.dish.label()}", fontWeight = FontWeight.Bold, modifier = Modifier.width(90.dp))
+        Row(modifier = Modifier.width(96.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text("#${order.id} ", fontWeight = FontWeight.Bold)
+            DishEmoji(order.dish, 14.sp)
+            Text(" ${order.dish.label()}", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+        }
         Text(text, color = colour, fontSize = 13.sp)
     }
 }
@@ -242,13 +263,18 @@ private fun KitchenCard(kitchen: Kitchen, state: KitchenState, colour: Color, wa
             if (state.rail.isEmpty()) Text("no tickets", fontSize = 13.sp, color = Color.Gray)
             state.rail.forEach { ticket ->
                 val current = ticket.id == state.cooking?.id
-                Text(
-                    "#${ticket.id} ${ticket.dish.label()}",
-                    fontSize = 12.sp,
-                    fontWeight = if (current) FontWeight.Bold else FontWeight.Normal,
+                Row(
                     modifier = Modifier.background(Color(0xFFFFF9C4), RoundedCornerShape(2.dp))
                         .border(1.dp, Color(0xFFFBC02D), RoundedCornerShape(2.dp)).padding(horizontal = 4.dp),
-                )
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        "#${ticket.id} ",
+                        fontSize = 12.sp,
+                        fontWeight = if (current) FontWeight.Bold else FontWeight.Normal,
+                    )
+                    DishEmoji(ticket.dish, 12.sp)
+                }
             }
         }
     }
@@ -334,7 +360,7 @@ private fun KitchenFloor(state: KitchenState, colour: Color, walkMillis: Long, o
         val chefSize = minOf(width, height) * 0.2f
         val x by animateDpAsState(width * spot.x - chefSize / 2, tween(walkMillis.toInt(), easing = LinearEasing))
         val y by animateDpAsState(height * spot.y - chefSize / 2, tween(walkMillis.toInt(), easing = LinearEasing))
-        Chef(colour, chefSize, state.napping, modifier = Modifier.offset(x, y))
+        Chef(colour, chefSize, state.napping, state.cooking?.dish, modifier = Modifier.offset(x, y))
     }
 }
 
@@ -424,10 +450,10 @@ private fun StationTile(station: Station, present: Boolean, progress: Float?, mo
     }
 }
 
-/** The chef seen from above: shoulders in the chef's colour, and a white hat. */
+/** The chef seen from above: shoulders in the chef's colour, a white hat, and the [dish] it cooks in a bubble. */
 @Suppress("MagicNumber")
 @Composable
-private fun Chef(colour: Color, size: Dp, napping: Boolean, modifier: Modifier) {
+private fun Chef(colour: Color, size: Dp, napping: Boolean, dish: Dish?, modifier: Modifier) {
     Box(modifier = modifier.size(size)) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             val r = this.size.minDimension / 2
@@ -438,6 +464,16 @@ private fun Chef(colour: Color, size: Dp, napping: Boolean, modifier: Modifier) 
             drawCircle(Color(0xFFEEEEEE), radius = r * 0.35f)
         }
         if (napping) Snoring(modifier = Modifier.offset(size * 0.6f, -size * 0.7f))
+        if (dish != null) {
+            Box(
+                modifier = Modifier.offset(size * 0.55f, -size * 0.45f).size(size * 0.75f)
+                    .background(Color.White, RoundedCornerShape(50))
+                    .border(1.dp, colour, RoundedCornerShape(50)),
+                contentAlignment = Alignment.Center,
+            ) {
+                DishEmoji(dish, (size.value * 0.42f).sp)
+            }
+        }
     }
 }
 
@@ -482,8 +518,12 @@ private fun MessageLogPanel(messages: List<LoggedMessage>, modifier: Modifier = 
                         fontFamily = FontFamily.Monospace,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
-                        color = performativeColour(message.performative),
+                        color = if (message.lost) Color(0xFFBDBDBD) else performativeColour(message.performative),
+                        textDecoration = if (message.lost) TextDecoration.LineThrough else null,
                     )
+                    if (message.lost) {
+                        Text(" (asleep)", fontFamily = FontFamily.Monospace, fontSize = 12.sp, color = Color.Gray)
+                    }
                 }
             }
         }
@@ -504,6 +544,26 @@ private fun performativeColour(performative: String): Color = when (performative
 }
 
 private fun Enum<*>.label(): String = name.lowercase().replace('_', ' ').replaceFirstChar { it.uppercase() }
+
+private fun Station.shortLabel(): String = if (this == Station.CHOPPING_BOARD) "board" else name.lowercase()
+
+/** The emoji of the dish. */
+private val Dish.emoji: String get() = when (this) {
+    Dish.SALAD -> "🥗"
+    Dish.STEAK -> "🥩"
+    Dish.BURGER -> "🍔"
+    Dish.SOUP -> "🍲"
+    Dish.PIZZA -> "🍕"
+    Dish.CAKE -> "🍰"
+}
+
+/**
+ * The emoji of [dish], drawn with the dish emoji of Noto Color Emoji bundled with the example, so that it looks the
+ * same on every platform and in every browser.
+ */
+@Composable
+private fun DishEmoji(dish: Dish, fontSize: TextUnit) =
+    Text(dish.emoji, fontFamily = FontFamily(Font(Res.font.noto_emoji_dishes)), fontSize = fontSize)
 
 @Suppress("MagicNumber")
 private fun Duration.format(): String = "${(inWholeMilliseconds / 100) / TENTHS} s"

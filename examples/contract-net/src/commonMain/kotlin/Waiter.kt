@@ -1,9 +1,11 @@
 @file:Suppress("LongMethod") // example code: DSL definitions read best in one place
 
 import it.unibo.jakta.agent.AgentID
+import it.unibo.jakta.agent.achieve
 import it.unibo.jakta.dsl.agent
 import it.unibo.jakta.dsl.belief.PrologBelief
 import it.unibo.jakta.dsl.belief.belief
+import it.unibo.jakta.dsl.belief.inferenceRule
 import it.unibo.jakta.dsl.belief.matchingBelief
 import it.unibo.jakta.dsl.goal.PrologGoal
 import it.unibo.jakta.dsl.goal.goal
@@ -23,10 +25,10 @@ import it.unibo.jakta.skills.MessagingSkill
 import it.unibo.jakta.source
 import it.unibo.jakta.value
 import it.unibo.tuprolog.core.Atom
+import it.unibo.tuprolog.core.Struct
 import kotlin.time.Duration.Companion.seconds
 import model.OrderStatus
 import model.Restaurant
-import model.Ticket
 
 /** How long the waiter waits for the chefs' answers to a call for proposals, on the restaurant's clock. */
 val DEADLINE = 1.5.seconds
@@ -64,6 +66,16 @@ fun waiter(id: AgentID, restaurant: Restaurant) = with(board) {
                 handleKQMLPayload(payload, message.sender)
             }
         }
+        believes {
+            // next_order(I, D): the order I, of the dish D, is the oldest one waiting
+            +inferenceRule {
+                "next_order"(I, D) impliedBy ("order"(I, D) and not("order"(J, `_`) and Struct.of("<", J, I)))
+            }
+            // best(I, T): T is the soonest a chef proposed to have the order I ready
+            +inferenceRule {
+                "best"(I, T) impliedBy ("propose"(I, T) and not("propose"(I, U) and Struct.of("<", U, T)))
+            }
+        }
         hasInitialGoals { !initialGoal { start } }
         hasPlanLibrary {
             prologPlan {
@@ -76,12 +88,13 @@ fun waiter(id: AgentID, restaurant: Restaurant) = with(board) {
 
             // the endless work loop: one order at a time, the oldest first, then again
             prologPlan {
-                adding.goal { matchingGoal { waitTables } } onlyWhen {
-                    context.takeIf { beliefs.tickets("order").isNotEmpty() }
-                } triggers {
-                    val order = agent.beliefs.tickets("order").first()
-                    agent.forget(order.belief("order"))
-                    agent.auction(order)
+                adding.goal { matchingGoal { waitTables } } onlyWhen { satisfies { "next_order"(I, D) } } triggers {
+                    agent.forget(belief { "order"(I, D) })
+                    agent.track(I.value(), OrderStatus.Asking)
+                    agent.broadcastTell(belief { "cfp"(I, D) })
+                    agent.awaitAnswers(I.value())
+                    agent.achieve(goal { "award"(I, D) })
+                    agent.beliefs.answersTo(I.value()).forEach(agent::forget)
                     agent.alsoAchieve(goal { waitTables })
                 }
             }
@@ -92,7 +105,29 @@ fun waiter(id: AgentID, restaurant: Restaurant) = with(board) {
                 }
             }
 
-            // nobody could cook it: the customer orders it again in a while
+            // the soonest proposal wins, and the others lose
+            prologPlan {
+                adding.goal { matchingGoal { "award"(I, D) } } onlyWhen { satisfies { "best"(I, T) } } triggers {
+                    val winner = agent.beliefs.proposerOf(I.value(), T.value())
+                    val chef = agent.beliefs.chefFrom(winner)
+                    val source = Atom.of(winner)
+                    agent.print("Order ", I, " goes to ${chef.displayName}, ready in ", T, " s")
+                    agent.believe(belief { "assigned"(I, D, source) })
+                    agent.tellTo(chef, belief { "accept_proposal"(I) })
+                    agent.alsoAchieve(goal { "watch"(I, D, source, T) })
+                    agent.beliefs.proposersOf(I.value()).filter { it != winner }
+                        .forEach { agent.tellTo(agent.beliefs.chefFrom(it), belief { "reject_proposal"(I) }) }
+                    agent.track(I.value(), OrderStatus.Assigned(chef.displayName, T.value<Double>().seconds))
+                }
+            }
+            // nobody proposed: the customer orders it again in a while
+            prologPlan {
+                adding.goal { matchingGoal { "award"(I, D) } } triggers {
+                    agent.print("Nobody can cook order ", I, " now: I'll ask again soon")
+                    agent.track(I.value(), OrderStatus.Retrying)
+                    agent.alsoAchieve(goal { "order_again"(I, D) })
+                }
+            }
             prologPlan {
                 adding.goal { matchingGoal { "order_again"(I, D) } } triggers {
                     agent.passTime(RETRY_PAUSE)
@@ -100,18 +135,17 @@ fun waiter(id: AgentID, restaurant: Restaurant) = with(board) {
                 }
             }
 
-            // a promise not kept: the chef is asleep, or too slow, and the order is taken back
+            // a promise not kept: the chef is offline, or too slow, and the order is taken back
             prologPlan {
-                adding.goal { matchingGoal { "watch"(I, D, T) } } triggers {
-                    val order = Ticket(I.value(), dishNamed(D.value()))
+                adding.goal { matchingGoal { "watch"(I, D, S, T) } } triggers {
                     val deadline = agent.realTime(T.value<Double>().seconds * GRACE)
-                    val answer = agent.wait({ event -> event.takeIf { it.isOutcomeOf(order.id) } }, deadline)
-                    val chef = agent.beliefs.assignee(order.id)?.let { agent.beliefs.chefFrom(it) }
-                    if (answer == null && chef != null) {
-                        agent.forgetAll("assigned", order.id)
-                        agent.print("${chef.displayName} is late with order ${order.id}: I take it back")
-                        agent.tellTo(chef, orderBelief("cancel", order.id))
-                        agent.believe(order.belief("order"))
+                    val answer = agent.wait({ event -> event.takeIf { it.isOutcomeOf(I.value()) } }, deadline)
+                    if (answer == null && belief { "assigned"(I, D, S) } in agent.beliefs) {
+                        val chef = agent.beliefs.chefFrom(S.value())
+                        agent.forget(belief { "assigned"(I, D, S) })
+                        agent.print("${chef.displayName} is late with order ", I, ": I take it back")
+                        agent.tellTo(chef, belief { "cancel"(I) })
+                        agent.believe(belief { "order"(I, D) })
                     }
                 }
             }
@@ -121,7 +155,7 @@ fun waiter(id: AgentID, restaurant: Restaurant) = with(board) {
                     satisfies { "assigned"(I, D, S) }
                 } triggers {
                     agent.forgetAll("done", I.value())
-                    agent.forgetAll("assigned", I.value())
+                    agent.forget(belief { "assigned"(I, D, S) })
                     agent.track(I.value(), OrderStatus.Served(agent.beliefs.chefFrom(S.value()).displayName))
                 }
             }
@@ -130,7 +164,7 @@ fun waiter(id: AgentID, restaurant: Restaurant) = with(board) {
                     satisfies { "assigned"(I, D, S) }
                 } triggers {
                     agent.forgetAll("failure", I.value())
-                    agent.forgetAll("assigned", I.value())
+                    agent.forget(belief { "assigned"(I, D, S) })
                     agent.print(agent.beliefs.chefFrom(S.value()).displayName, " gave order ", I, " back")
                     agent.believe(belief { "order"(I, D) })
                 }
@@ -147,34 +181,6 @@ fun waiter(id: AgentID, restaurant: Restaurant) = with(board) {
                 }
             }
         }
-    }
-}
-
-/**
- * Runs the contract net for [order]: calls for proposals, waits for the answers, and gives the order to the chef
- * that can have it ready the soonest, or orders it again later if nobody can.
- */
-context(board: WaiterSkill, messaging: MessagingSkill)
-private suspend fun RestaurantAgent.auction(order: Ticket) = with(board) {
-    track(order.id, OrderStatus.Asking)
-    broadcastTell(order.belief("cfp"))
-    awaitAnswers(order.id)
-    val bids = beliefs.bidsFor(order.id)
-    beliefs.answersTo(order.id).forEach(::forget)
-
-    val best = bids.minByOrNull { it.readyIn }
-    if (best == null) {
-        print("Nobody can cook order ${order.id} now: I'll ask again soon")
-        track(order.id, OrderStatus.Retrying)
-        alsoAchieve(order.goal("order_again"))
-    } else {
-        val chef = beliefs.chefFrom(best.source)
-        print("Order ${order.id} goes to ${chef.displayName}, ready in ${best.readyIn}")
-        believe(order.assignedTo(best.source))
-        tellTo(chef, orderBelief("accept_proposal", order.id))
-        alsoAchieve(order.watchGoal(best.readyIn))
-        (bids - best).forEach { tellTo(beliefs.chefFrom(it.source), orderBelief("reject_proposal", order.id)) }
-        track(order.id, OrderStatus.Assigned(chef.displayName, best.readyIn))
     }
 }
 
