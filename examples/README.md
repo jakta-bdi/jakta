@@ -11,7 +11,8 @@
 | `failure-handling` | A failure plan recovering a goal that failed two levels below | `./gradlew :examples:failure-handling:run` |
 | `contract-net` | KQML messaging: `askOne`, delegating an `achieve`, `tell` | `./gradlew :examples:contract-net:run` |
 | `runtime-agents` | Adding and removing agents while the MAS runs | `./gradlew :examples:runtime-agents:run` |
-| `wait-for-events` | Waiting for events, delays and concurrent intentions | `./gradlew :examples:wait-for-events:run` |
+| `sub-goals` | Sub-goals, their results, concurrent intentions and recovering from a failed sub-goal | `./gradlew :examples:sub-goals:run` |
+| `wait-for-events` | Waiting for an event with a timeout, and delays | `./gradlew :examples:wait-for-events:run` |
 | `custom-incarnation` | Plain numbers as beliefs and goals: a Collatz agent and a prime sieve | `./gradlew :examples:custom-incarnation:run` |
 
 The UI examples use Compose Multiplatform and show an *agent trace* with what agents print while they reason.

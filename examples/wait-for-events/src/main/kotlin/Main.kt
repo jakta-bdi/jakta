@@ -1,6 +1,5 @@
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
-import it.unibo.jakta.agent.achieve
 import it.unibo.jakta.dsl.mas
 import it.unibo.jakta.dsl.mas.runLocally
 import it.unibo.jakta.dsl.node.NodeBuilders
@@ -34,9 +33,6 @@ fun main(): Unit = runBlocking {
                         agent.print("Waiting for the parcel...")
                         val parcel = agent.wait(beliefAdded("parcel"), timeout = 5.seconds)
                         if (parcel != null) agent.print("Parcel received!") else agent.print("Gave up waiting")
-                        agent.alsoAchieve("celebrate")
-                        agent.achieve("tidyUp")
-                        agent.print("Tidied up")
                         node.terminateNode()
                     }
                     adding.goal {
@@ -44,16 +40,6 @@ fun main(): Unit = runBlocking {
                     } triggers {
                         delay(2.seconds)
                         agent.believe("parcel")
-                    }
-                    adding.goal {
-                        takeIf { it == "celebrate" }
-                    } triggers {
-                        agent.print("Celebrating, concurrently")
-                    }
-                    adding.goal {
-                        takeIf { it == "tidyUp" }
-                    } triggers {
-                        delay(1.seconds)
                     }
                 }
             }

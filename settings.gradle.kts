@@ -47,6 +47,7 @@ include(
     "examples:hello-world",
     "examples:ping-pong",
     "examples:runtime-agents",
+    "examples:sub-goals",
     "examples:thermostat",
     "examples:tictactoe",
     "examples:vacuum-world",

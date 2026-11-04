@@ -45,35 +45,18 @@ private fun beliefAdded(expected: String): (AgentEvent) -> String? = { event ->
 }
 ```
 
-## Start a concurrent intention
+## Put it together
 
-`agent.alsoAchieve(goal)` starts a **new** intention for the goal and returns immediately:
-
-```kotlin
-agent.alsoAchieve("celebrate")
-```
-
-Every initial goal, and every plan triggered by an event, also runs in its own intention.
-
-## Achieve a sub-goal
-
-`agent.achieve(goal)` (from `it.unibo.jakta.agent.achieve`) runs the sub-goal in the **current** intention,
-and returns when it is achieved:
-
-```kotlin
-agent.achieve("tidyUp")
-agent.print("Tidied up")
-```
+The two initial goals of the example run in two intentions: one waits for the parcel while the other delivers it.
 
 ```mermaid
 sequenceDiagram
     participant W as waitForDelivery intention
     participant D as deliver intention
-    participant C as celebrate intention
     W->>W: wait(parcel, 5s)
     D->>D: delay(2s)
     D->>W: believe("parcel")
-    W->>C: alsoAchieve("celebrate")
-    W->>W: achieve("tidyUp"), 1s
     W->>W: terminateNode()
 ```
+
+To start intentions from a plan, or to wait for a sub-goal, see [Achieve sub-goals](./sub-goals.md).

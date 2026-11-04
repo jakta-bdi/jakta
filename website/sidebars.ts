@@ -29,6 +29,7 @@ const sidebars: SidebarsConfig = {
         'how-to/create-mas',
         'how-to/connect-environment',
         'how-to/custom-body',
+        'how-to/sub-goals',
         'how-to/wait-for-events',
         'how-to/runtime-agents',
         'how-to/custom-incarnation',
