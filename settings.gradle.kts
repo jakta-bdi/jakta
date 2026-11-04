@@ -43,7 +43,6 @@ include(
     "examples:blocksworld",
     "examples:contract-net",
     "examples:custom-incarnation",
-    "examples:failure-handling",
     "examples:hello-world",
     "examples:ping-pong",
     "examples:runtime-agents",

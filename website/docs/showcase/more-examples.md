@@ -31,7 +31,6 @@ and also run in the browser with `./gradlew :examples:<name>:jsBrowserDevelopmen
 | [`sub-goals`](https://github.com/jakta-bdi/jakta/tree/main/examples/sub-goals) | A barista achieving sub-goals, getting their results, starting a concurrent intention and recovering from a failed sub-goal. See [Achieve sub-goals and recover from failures](../how-to/sub-goals.md). |
 | [`wait-for-events`](https://github.com/jakta-bdi/jakta/tree/main/examples/wait-for-events) | Waiting for an event, with a timeout, while another intention makes it happen. See [Wait for events and use time](../how-to/wait-for-events.md). |
 | [`custom-incarnation`](https://github.com/jakta-bdi/jakta/tree/main/examples/custom-incarnation) | Plain numbers as beliefs and goals: an agent following the Collatz sequence until it loops, and a prime sieve. See [Write your own incarnation](../how-to/custom-incarnation.md). |
-| [`failure-handling`](https://github.com/jakta-bdi/jakta/tree/main/examples/failure-handling) | A failure plan recovering a goal that failed two levels below, with the Prolog incarnation. |
 
 </div>
 
