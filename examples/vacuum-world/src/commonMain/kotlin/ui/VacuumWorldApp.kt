@@ -1,5 +1,6 @@
 package ui
 
+import RobotColour
 import RobotState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -35,15 +36,15 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
-import kotlin.time.Duration.Companion.milliseconds
-import model.Content
 import model.Direction
 import model.Pos
-import model.VacuumState
+import model.WorldState
 
-private const val MAX_STEP_TIME_MS = 1000f
-private const val MAX_DUST_CHANCE = 0.3f
+private const val MIN_SPEED = 0.5f
+private const val MAX_SPEED = 5f
+private const val MAX_DUST_CHANCE = 0.01f
 private const val PERCENT = 100
+private const val TENTHS = 10.0
 
 /**
  * The main Composable function for the Vacuum World application.
@@ -52,7 +53,7 @@ private const val PERCENT = 100
 fun VacuumWorldApp(app: VacuumWorldAppState) {
     val scope = rememberCoroutineScope()
     val world by app.world.state.collectAsState()
-    val robot by app.robot.state.collectAsState()
+    val robots = app.robots.map { it.state.collectAsState() }
 
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
@@ -66,24 +67,36 @@ fun VacuumWorldApp(app: VacuumWorldAppState) {
                 Button(onClick = { app.start(scope) }) { Text("Start") }
             }
             OutlinedButton(onClick = { app.reset() }) { Text("Reset") }
-            Text("Cleaned: ${robot.cleaned}   Dust left: ${world.dust.size}", modifier = Modifier.width(220.dp))
-            Text("Step: ${app.stepTime.inWholeMilliseconds} ms")
-            Slider(
-                value = app.stepTime.inWholeMilliseconds.toFloat(),
-                onValueChange = { app.stepTime = it.roundToInt().milliseconds },
-                valueRange = 0f..MAX_STEP_TIME_MS,
-                modifier = Modifier.width(160.dp),
+            Text(
+                "Cleaned: ${robots.sumOf { it.value.cleaned }}   Dust left: ${world.dust.size}",
+                modifier = Modifier.width(200.dp),
             )
-            Text("New dust: ${(app.dustChance * PERCENT).roundToInt()}% per step")
+            Text("Robots: ${app.robotCount}")
+            Slider(
+                value = app.robotCount.toFloat(),
+                onValueChange = { if (it.roundToInt() != app.robotCount) app.changeRobotCount(it.roundToInt()) },
+                valueRange = 1f..MAX_ROBOTS.toFloat(),
+                steps = MAX_ROBOTS - 2,
+                enabled = !app.isRunning,
+                modifier = Modifier.width(100.dp),
+            )
+            Text("Speed: ${(app.speed * TENTHS).roundToInt() / TENTHS}x")
+            Slider(
+                value = app.speed.toFloat(),
+                onValueChange = { app.speed = it.toDouble() },
+                valueRange = MIN_SPEED..MAX_SPEED,
+                modifier = Modifier.width(120.dp),
+            )
+            Text("New dust: ${(app.dustChance * PERCENT * TENTHS).roundToInt() / TENTHS}% per cell per second")
             Slider(
                 value = app.dustChance.toFloat(),
                 onValueChange = { app.dustChance = it.toDouble() },
                 valueRange = 0f..MAX_DUST_CHANCE,
-                modifier = Modifier.width(160.dp),
+                modifier = Modifier.width(120.dp),
             )
         }
         Text(
-            "Click a cell to drop or remove dust, even while the robot works.",
+            "Click a cell to drop or remove dust, even while the robots work.",
             modifier = Modifier.padding(horizontal = 12.dp),
         )
 
@@ -91,7 +104,7 @@ fun VacuumWorldApp(app: VacuumWorldAppState) {
 
         Row(modifier = Modifier.fillMaxSize()) {
             Box(modifier = Modifier.weight(1f).fillMaxHeight().padding(16.dp), contentAlignment = Alignment.Center) {
-                WorldGrid(world, robot, onClick = app::toggleDust)
+                WorldGrid(world, robots.map { it.value }, onClick = app::toggleDust)
             }
             AgentTracePanel(modifier = Modifier.width(420.dp).fillMaxHeight())
         }
@@ -100,7 +113,7 @@ fun VacuumWorldApp(app: VacuumWorldAppState) {
 
 @Suppress("MagicNumber")
 @Composable
-private fun WorldGrid(world: VacuumState, robot: RobotState, onClick: (Pos) -> Unit) {
+private fun WorldGrid(world: WorldState, robots: List<RobotState>, onClick: (Pos) -> Unit) {
     BoxWithConstraints(modifier = Modifier.aspectRatio(world.width.toFloat() / world.height)) {
         val cellSize = minOf(maxWidth / world.width, maxHeight / world.height)
         Column {
@@ -108,17 +121,18 @@ private fun WorldGrid(world: VacuumState, robot: RobotState, onClick: (Pos) -> U
                 Row {
                     for (x in 0 until world.width) {
                         val pos = Pos(x, y)
-                        val content = world.contentAt(pos)
                         Box(
                             modifier = Modifier
                                 .size(cellSize)
-                                .background(if (content == Content.OBSTACLE) Color(0xFF5D4037) else Color(0xFFF5F0E6))
+                                .background(if (world.isObstacle(pos)) Color(0xFF5D4037) else Color(0xFFF5F0E6))
                                 .border(0.5.dp, Color(0xFFD7CCC8))
                                 .clickable { onClick(pos) },
                             contentAlignment = Alignment.Center,
                         ) {
-                            if (content == Content.DUST) Dust(cellSize * 0.35f)
-                            if (pos == robot.position) Robot(robot.facing, cellSize)
+                            if (pos in world.dust) Dust(cellSize * 0.35f)
+                            robots.zip(RobotColour.entries).forEach { (robot, colour) ->
+                                if (pos == robot.position) Robot(robot.facing, Color(colour.argb), cellSize)
+                            }
                         }
                     }
                 }
@@ -135,9 +149,9 @@ private fun Dust(size: Dp) {
 
 @Suppress("MagicNumber")
 @Composable
-private fun Robot(facing: Direction, cellSize: Dp) {
+private fun Robot(facing: Direction, colour: Color, cellSize: Dp) {
     Canvas(modifier = Modifier.size(cellSize * 0.8f)) {
-        drawCircle(Color(0xDD3F51AA))
+        drawCircle(colour)
         // a triangle pointing where the robot faces
         val r = size.minDimension / 2
         val tip = Offset(center.x + facing.dx * r * 0.7f, center.y + facing.dy * r * 0.7f)

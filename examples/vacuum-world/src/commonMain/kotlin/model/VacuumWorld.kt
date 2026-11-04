@@ -1,139 +1,131 @@
 package model
 
 import kotlin.random.Random
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
 /**
- * A cell of the grid; (0, 0) is the top-left corner.
+ * Where a robot starts.
  *
- * @property x the column.
- * @property y the row.
+ * @property position the cell where it starts.
+ * @property facing where it faces at the start.
  */
-data class Pos(val x: Int, val y: Int) {
-    /**
-     * The next cell towards [direction].
-     */
-    operator fun plus(direction: Direction) = Pos(x + direction.dx, y + direction.dy)
-}
+data class Start(val position: Pos, val facing: Direction)
 
 /**
- * Where the robot can face.
- *
- * @property dx the column step when moving forward.
- * @property dy the row step when moving forward.
+ * Where up to four robots start on the default map, one per corner, each facing into the map.
  */
-enum class Direction(val dx: Int, val dy: Int) {
-    /** Up. */
-    NORTH(0, -1),
-
-    /** Right. */
-    EAST(1, 0),
-
-    /** Down. */
-    SOUTH(0, 1),
-
-    /** Left. */
-    WEST(-1, 0),
-    ;
-
-    /** The direction after turning left. */
-    val left: Direction get() = entries[(ordinal + entries.size - 1) % entries.size]
-
-    /** The direction after turning right. */
-    val right: Direction get() = entries[(ordinal + 1) % entries.size]
-}
+val ROBOT_STARTS = listOf(
+    Start(Pos(0, 0), Direction.EAST),
+    Start(Pos(11, 7), Direction.WEST),
+    Start(Pos(11, 0), Direction.WEST),
+    Start(Pos(0, 7), Direction.EAST),
+)
 
 /**
- * The squares the robot sees, relative to where it faces (as in the EIS Vacuum World).
- */
-enum class Square {
-    /** Where the robot is. */
-    HERE,
-
-    /** In front of the robot. */
-    FORWARD,
-
-    /** On the robot's left. */
-    LEFT,
-
-    /** On the robot's right. */
-    RIGHT,
-}
-
-/**
- * What a square holds; outside the map is an obstacle.
- */
-enum class Content {
-    /** A wall, or the edge of the map. */
-    OBSTACLE,
-
-    /** Dust to clean. */
-    DUST,
-
-    /** Nothing. */
-    EMPTY,
-}
-
-/**
- * Where the robot starts, in the top-left corner.
- */
-val ROBOT_START = Pos(0, 0)
-
-/**
- * A snapshot of the environment; the robot is not part of it, it lives in its body.
+ * A snapshot of the world. The robots' own state lives in their bodies: the world only knows which cells they
+ * take, to keep them apart.
  *
  * @property width the number of columns.
  * @property height the number of rows.
  * @property obstacles the walls.
  * @property dust the dusty cells.
- * @property time how many steps passed, one per robot action.
+ * @property robots the cells taken by robots: a moving robot takes both the cell it leaves and the next one.
+ * @property time how many seconds of the world's clock passed.
  */
-data class VacuumState(
+data class WorldState(
     val width: Int,
     val height: Int,
     val obstacles: Set<Pos>,
     val dust: Set<Pos> = emptySet(),
+    val robots: Set<Pos> = emptySet(),
     val time: Int = 0,
 ) {
+    /**
+     * Whether [pos] is an obstacle: a wall, or out of the map.
+     */
+    fun isObstacle(pos: Pos): Boolean = pos.x !in 0 until width || pos.y !in 0 until height || pos in obstacles
+
     /**
      * What [pos] holds.
      */
     fun contentAt(pos: Pos): Content = when {
-        pos.x !in 0 until width || pos.y !in 0 until height || pos in obstacles -> Content.OBSTACLE
+        isObstacle(pos) -> Content.OBSTACLE
+        pos in robots -> Content.ROBOT
         pos in dust -> Content.DUST
         else -> Content.EMPTY
     }
 
     /**
-     * The cells that are neither walls nor dusty.
+     * The cells with no obstacle, dust or robot.
      */
-    val freeCells: List<Pos> get() = (0 until height).flatMap { y ->
+    val emptyCells: List<Pos> get() = (0 until height).flatMap { y ->
         (0 until width).map { x -> Pos(x, y) }
     }.filter { contentAt(it) == Content.EMPTY }
 }
 
 /**
- * The environment the robot cleans: time passes as the robot acts, and dust appears by itself or where the user
- * clicks.
+ * The world the robots clean: it runs on its own clock, and dust appears by itself or where the user clicks,
+ * whatever the robots do.
  *
  * @param initial the initial state.
+ * @param speed how fast the world's clock runs: 1 is real time, 2 twice as fast.
+ * @param dustChance the probability that an empty cell gets new dust each second.
  * @param random where new dust appears.
  */
-class VacuumWorld(initial: VacuumState, private val random: Random = Random.Default) {
+class VacuumWorld(
+    initial: WorldState,
+    private val speed: () -> Double = { 1.0 },
+    private val dustChance: () -> Double = { 0.0 },
+    private val random: Random = Random.Default,
+) {
     private val mutableState = MutableStateFlow(initial)
 
     /**
-     * The current state of the environment.
+     * The current state of the world.
      */
-    val state: StateFlow<VacuumState> = mutableState.asStateFlow()
+    val state: StateFlow<WorldState> = mutableState.asStateFlow()
 
     /**
-     * Lets one step of time pass.
+     * Returns once [time] passed on the world's clock.
      */
-    fun tick() = mutableState.update { it.copy(time = it.time + 1) }
+    suspend fun passTime(time: Duration) = delay(time / speed())
+
+    /**
+     * Runs the world's clock until cancelled: every second, each empty cell gets new dust with [dustChance].
+     */
+    suspend fun simulate() {
+        while (true) {
+            passTime(1.seconds)
+            val chance = dustChance()
+            mutableState.update { world ->
+                val newDust = world.emptyCells.filter { random.nextDouble() < chance }
+                world.copy(time = world.time + 1, dust = world.dust + newDust)
+            }
+        }
+    }
+
+    /**
+     * Lets a robot take [pos], returning whether it could: not if it is an obstacle or another robot is there.
+     */
+    fun enter(pos: Pos): Boolean {
+        var entered = false
+        mutableState.update { world ->
+            entered = !world.isObstacle(pos) && pos !in world.robots
+            if (entered) world.copy(robots = world.robots + pos) else world
+        }
+        return entered
+    }
+
+    /**
+     * Frees [pos], as a robot leaves it.
+     */
+    fun leave(pos: Pos) = mutableState.update { it.copy(robots = it.robots - pos) }
 
     /**
      * Removes the dust at [pos], returning whether there was any.
@@ -148,29 +140,18 @@ class VacuumWorld(initial: VacuumState, private val random: Random = Random.Defa
     }
 
     /**
-     * With probability [chance], makes dust appear on a random free cell.
-     */
-    fun maybeSpawnDust(chance: Double) {
-        if (random.nextDouble() < chance) {
-            mutableState.update { world ->
-                world.freeCells.randomOrNull(random)?.let { world.copy(dust = world.dust + it) } ?: world
-            }
-        }
-    }
-
-    /**
      * Adds or removes dust at [pos], as the user clicks on the map.
      */
     fun toggleDust(pos: Pos) = mutableState.update { world ->
-        when (world.contentAt(pos)) {
-            Content.OBSTACLE -> world
-            Content.DUST -> world.copy(dust = world.dust - pos)
-            Content.EMPTY -> world.copy(dust = world.dust + pos)
+        when {
+            world.isObstacle(pos) -> world
+            pos in world.dust -> world.copy(dust = world.dust - pos)
+            else -> world.copy(dust = world.dust + pos)
         }
     }
 }
 
-private val defaultMap = listOf(
+private val defaultLayout = listOf(
     "............",
     "..##....#...",
     "..#.....#...",
@@ -182,10 +163,13 @@ private val defaultMap = listOf(
 )
 
 /**
- * The default map, with some dust scattered at random.
+ * The default map, with [dustCount] dusty cells scattered at random, away from where the robots start.
  */
-fun defaultWorld(dustCount: Int = 8, random: Random = Random.Default): VacuumState {
-    val obstacles = defaultMap.flatMapIndexed { y, row -> row.indices.filter { row[it] == '#' }.map { Pos(it, y) } }
-    val empty = VacuumState(width = defaultMap[0].length, height = defaultMap.size, obstacles = obstacles.toSet())
-    return empty.copy(dust = (empty.freeCells - ROBOT_START).shuffled(random).take(dustCount).toSet())
+fun defaultMap(dustCount: Int = 8, random: Random = Random.Default): WorldState {
+    val obstacles = defaultLayout.flatMapIndexed { y, row ->
+        row.indices.filter { row[it] == '#' }.map { Pos(it, y) }
+    }
+    val empty = WorldState(width = defaultLayout[0].length, height = defaultLayout.size, obstacles = obstacles.toSet())
+    val dust = (empty.emptyCells - ROBOT_STARTS.map { it.position }.toSet()).shuffled(random).take(dustCount)
+    return empty.copy(dust = dust.toSet())
 }
