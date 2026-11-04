@@ -16,6 +16,8 @@ cd jakta
 Replace `hello-world` with the name of any example below. The examples with a user interface use Compose Multiplatform
 and also run in the browser with `./gradlew :examples:<name>:jsBrowserDevelopmentRun`.
 
+<div className="examples-table">
+
 | Example | Description |
 |---|---|
 | [`hello-world`](https://github.com/jakta-bdi/jakta/tree/main/examples/hello-world) | A single agent with one goal and one plan that prints a message and stops the node. See [Basic: Hello world](../tutorials/hello-world.md). |
@@ -29,6 +31,8 @@ and also run in the browser with `./gradlew :examples:<name>:jsBrowserDevelopmen
 | [`wait-for-events`](https://github.com/jakta-bdi/jakta/tree/main/examples/wait-for-events) | Waiting for events, delays and concurrent intentions. See [Wait for events and use time](../how-to/wait-for-events.md). |
 | [`custom-incarnation`](https://github.com/jakta-bdi/jakta/tree/main/examples/custom-incarnation) | Beliefs as entries of a key-value memory and goals as tasks, with trigger and guard helpers. See [Write your own incarnation](../how-to/custom-incarnation.md). |
 | [`failure-handling`](https://github.com/jakta-bdi/jakta/tree/main/examples/failure-handling) | A failure plan recovering a goal that failed two levels below, with the Prolog incarnation. |
+
+</div>
 
 ## Dig deeper in the unit tests
 

@@ -95,3 +95,8 @@ html {
   border: 0;
   border-top: 1px solid var(--ifm-toc-border-color);
 }
+
+/* All the examples: keep each example name on one line */
+.examples-table td:first-child {
+  white-space: nowrap;
+}
