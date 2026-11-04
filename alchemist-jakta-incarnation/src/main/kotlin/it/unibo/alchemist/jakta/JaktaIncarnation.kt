@@ -18,6 +18,7 @@ import it.unibo.alchemist.model.molecules.SimpleMolecule
 import it.unibo.alchemist.model.nodes.GenericNode
 import it.unibo.alchemist.model.reactions.Event
 import it.unibo.alchemist.model.timedistributions.DiracComb
+import it.unibo.jakta.agent.AgentLifecycleObserver
 import it.unibo.jakta.node.JaktaForAlchemistNode
 import it.unibo.jakta.node.RuntimeNodes
 import kotlin.reflect.KCallable
@@ -121,6 +122,14 @@ class JaktaIncarnation<P : Position<P>> : Incarnation<Any?, P> {
      * Utilities for Jakta incarnation.
      */
     companion object {
+        /**
+         * Observes every agent of the simulations running in this JVM, for instance to inspect them: it is told about
+         * every event an agent handles, in simulated time. It is read at every event, so it can be set before or
+         * after loading a simulation. By default, it does nothing.
+         */
+        @Volatile
+        var agentObserver: AgentLifecycleObserver = AgentLifecycleObserver.None
+
         /**
          * Function that loads the value passed as entrypoint in the simulation from the classpath.
          * @param entrypoint the parameter specified in the simulation configuraiton.

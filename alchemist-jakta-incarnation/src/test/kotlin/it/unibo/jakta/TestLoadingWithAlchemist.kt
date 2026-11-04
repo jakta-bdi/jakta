@@ -3,11 +3,15 @@ package it.unibo.jakta
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import it.unibo.alchemist.boundary.LoadAlchemist
+import it.unibo.alchemist.jakta.JaktaIncarnation
 import it.unibo.alchemist.model.terminators.AfterTime
 import it.unibo.alchemist.model.times.DoubleTime
 import it.unibo.alchemist.util.ClassPathScanner
+import it.unibo.jakta.agent.AgentLifecycleObserver
+import it.unibo.jakta.event.AgentEvent
 import java.net.URL
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.fail
 
@@ -20,6 +24,20 @@ class TestLoadingWithAlchemist {
     @Test
     fun testCommunicationBetweenNodes() {
         loadAndRunYaml("two-agents-two-nodes")
+    }
+
+    @Test
+    fun testAgentObserverSeesEveryAgent() {
+        val messages = mutableListOf<Pair<String, Any?>>()
+        JaktaIncarnation.agentObserver = AgentLifecycleObserver { agent, event ->
+            if (event is AgentEvent.External.Message<*>) messages += agent.id.displayName to event.payload
+        }
+        try {
+            loadAndRunYaml("two-agents-two-nodes")
+        } finally {
+            JaktaIncarnation.agentObserver = AgentLifecycleObserver.None
+        }
+        assertEquals(listOf<Pair<String, Any?>>("Bob" to "Ping!", "Alice" to "Pong!"), messages)
     }
 
     private fun loadAndRunYaml(name: String) = ClassPathScanner
