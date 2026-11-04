@@ -38,11 +38,17 @@ enum class Dish(val station: Station, val cookingTime: Duration) {
     /** A steak. */
     STEAK(Station.GRILL, 4.seconds),
 
+    /** A burger. */
+    BURGER(Station.GRILL, 2.seconds),
+
     /** A soup. */
     SOUP(Station.STOVE, 5.seconds),
 
     /** A pizza. */
     PIZZA(Station.OVEN, 6.seconds),
+
+    /** A cake. */
+    CAKE(Station.OVEN, 8.seconds),
 }
 
 /**
@@ -98,8 +104,15 @@ data class Order(val id: Int, val dish: Dish, val status: OrderStatus = OrderSta
  * A message sent to several agents at once is one entry.
  *
  * @property performative the kind of message, such as `cfp` or `propose`.
+ * @property lost whether the receivers were offline, and never got it.
  */
-data class LoggedMessage(val sender: String, val receivers: List<String>, val performative: String, val content: String)
+data class LoggedMessage(
+    val sender: String,
+    val receivers: List<String>,
+    val performative: String,
+    val content: String,
+    val lost: Boolean = false,
+)
 
 private const val MAX_LOGGED_MESSAGES = 200
 
@@ -165,15 +178,18 @@ class Restaurant(private val speed: () -> Double = { 1.0 }) {
     }
 
     /**
-     * Logs that [sender] sent [content] to [receiver], joining it to the previous entry if it was the same message
-     * to another agent.
+     * Logs that [sender] sent [content] to [receiver], or that it was [lost] as the receiver was offline, joining it
+     * to the previous entry if it was the same message to another agent.
      */
-    fun log(sender: String, receiver: String, performative: String, content: String) = mutableMessages.update { log ->
-        val last = log.lastOrNull()
-        if (last != null && last.sender == sender && last.content == content && receiver !in last.receivers) {
-            log.dropLast(1) + last.copy(receivers = last.receivers + receiver)
-        } else {
-            (log + LoggedMessage(sender, listOf(receiver), performative, content)).takeLast(MAX_LOGGED_MESSAGES)
+    fun log(sender: String, receiver: String, performative: String, content: String, lost: Boolean = false) =
+        mutableMessages.update { log ->
+            val last = log.lastOrNull()
+            val same = last?.sender == sender && last.content == content && last.lost == lost
+            if (last != null && same && receiver !in last.receivers) {
+                log.dropLast(1) + last.copy(receivers = last.receivers + receiver)
+            } else {
+                val message = LoggedMessage(sender, listOf(receiver), performative, content, lost)
+                (log + message).takeLast(MAX_LOGGED_MESSAGES)
+            }
         }
-    }
 }

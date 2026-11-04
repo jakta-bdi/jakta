@@ -65,16 +65,17 @@ class RestaurantTest {
 
     @OptIn(ExperimentalCoroutinesApi::class) // currentTime
     @Test
-    fun aNappingChefDoesNotAnswerAndTheWaiterDecidesAtTheDeadline() = runTest {
+    fun aNappingChefIsOfflineAndTheWaiterDecidesAtTheDeadline() = runTest {
         val (ada, bruno) = hire("ada", "bruno")
-        bruno.toggleNap()
         open(backgroundScope, listOf(ada, bruno)) {
+            bruno.toggleNap()
             val ordered = currentTime
             restaurant.order(Dish.STEAK)
             assertEquals("ada", chefOf(1))
             assertTrue(currentTime - ordered >= DEADLINE.inWholeMilliseconds, "Decided before the deadline")
+            assertTrue(restaurant.messages.value.any { it.lost && it.performative == "cfp" && "bruno" in it.receivers })
             bruno.toggleNap()
-            // now bruno answers, and is the soonest: ada is still cooking the first steak
+            // bruno is back online, and the soonest: ada is still cooking the first steak
             restaurant.order(Dish.STEAK)
             assertEquals("bruno", chefOf(2))
         }
@@ -126,8 +127,45 @@ class RestaurantTest {
             winner.toggleNap()
             // the winner does not serve the steak in time: the waiter cancels it, and the other chef cooks it
             assertEquals(other.chef, servedBy(1))
-            assertTrue(restaurant.messages.value.any { it.performative == "cancel" && winner.chef in it.receivers })
-            assertEquals(emptyList(), winner.state.value.rail)
+            assertTrue(restaurant.messages.value.any { it.lost && it.performative == "cancel" })
+            // offline, the winner never got the cancel: back online, it gives the order back, and the waiter ignores it
+            winner.toggleNap()
+            winner.state.first { it.rail.isEmpty() }
+            restaurant.messages.first { log -> log.any { it.performative == "failure" && it.sender == winner.chef } }
+            assertEquals(other.chef, servedBy(1))
+        }
+    }
+
+    @Test
+    fun aChefBackOnlineGivesBackItsOrdersAndTheyAreCookedAnyway() = runTest {
+        val kitchens = hire("ada", "bruno")
+        open(backgroundScope, kitchens) {
+            restaurant.order(Dish.STEAK)
+            val chef = chefOf(1)
+            val (winner, other) = kitchens.sortedByDescending { it.chef == chef }
+            winner.state.first { it.cooking != null }
+            winner.toggleNap()
+            restaurant.order(Dish.STEAK)
+            assertEquals(other.chef, chefOf(2))
+            assertTrue(restaurant.messages.value.any { it.lost && winner.chef in it.receivers })
+            // back before its promise ran out, the winner gives the first steak back anyway, and it is ordered again
+            winner.toggleNap()
+            restaurant.messages.first { log -> log.any { it.performative == "failure" && it.sender == winner.chef } }
+            servedBy(1)
+            servedBy(2)
+        }
+    }
+
+    @Test
+    fun bidsCountTimeNotOrders() = runTest {
+        open(backgroundScope, hire("ada", "bruno")) {
+            // only ada has an oven; then bruno, idle, is sooner with both burgers
+            restaurant.order(Dish.CAKE)
+            repeat(2) { restaurant.order(Dish.BURGER) }
+            assertEquals(listOf("ada", "bruno", "bruno"), (1..3).map { chefOf(it) })
+            // one cake takes longer than two burgers: the steak goes to bruno
+            restaurant.order(Dish.STEAK)
+            assertEquals("bruno", chefOf(4))
         }
     }
 
