@@ -1,5 +1,5 @@
 ---
-sidebar_position: 4
+sidebar_position: 5
 ---
 
 # All the examples
@@ -26,7 +26,7 @@ and also run in the browser with `./gradlew :examples:<name>:jsBrowserDevelopmen
 | [`blocksworld`](https://github.com/jakta-bdi/jakta/tree/main/examples/blocksworld) (with UI) | An agent building towers of blocks with Prolog inference rules, recursive sub-goals and custom skills. See [Blocks World](./blocksworld.md), [Skills](../explanation/basic-concepts/skills.md) and [Beliefs](../explanation/basic-concepts/beliefs.md). |
 | [`tictactoe`](https://github.com/jakta-bdi/jakta/tree/main/examples/tictactoe) (with UI) | A tic-tac-toe player whose Prolog rules and plans are generated in Kotlin for any board size. See [Tic-tac-toe](./tictactoe.md) and [Turn perceptions into Prolog facts](../how-to/prolog/perceptions.md). |
 | [`vacuum-world`](https://github.com/jakta-bdi/jakta/tree/main/examples/vacuum-world) (with UI) | One to four embodied robots that keep a map clean forever. See [Vacuum World](./vacuum-world.md), [Give agents a body](../how-to/custom-body.md) and [Turn perceptions into Prolog facts](../how-to/prolog/perceptions.md). |
-| [`contract-net`](https://github.com/jakta-bdi/jakta/tree/main/examples/contract-net) | KQML messaging with `askOne`, delegating an `achieve`, and `tell`. See [Ask and answer with KQML](../how-to/prolog/kqml.md) and [KQML Messaging](../explanation/incarnations/prolog/kqml.md). |
+| [`contract-net`](https://github.com/jakta-bdi/jakta/tree/main/examples/contract-net) (with UI) | A waiter giving each order to the chef that can cook it the soonest, with a contract net of KQML messages among agents on their own nodes. See [Contract Net](./contract-net.md) and [KQML Messaging](../explanation/incarnations/prolog/kqml.md). |
 | [`runtime-agents`](https://github.com/jakta-bdi/jakta/tree/main/examples/runtime-agents) | Adding and removing agents while the MAS runs. See [Add and remove agents at runtime](../how-to/runtime-agents.md). |
 | [`wait-for-events`](https://github.com/jakta-bdi/jakta/tree/main/examples/wait-for-events) | Waiting for events, delays and concurrent intentions. See [Wait for events and use time](../how-to/wait-for-events.md). |
 | [`custom-incarnation`](https://github.com/jakta-bdi/jakta/tree/main/examples/custom-incarnation) | Beliefs as entries of a key-value memory and goals as tasks, with trigger and guard helpers. See [Write your own incarnation](../how-to/custom-incarnation.md). |

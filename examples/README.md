@@ -9,7 +9,7 @@
 | `tictactoe` | Rules and plans generated in Kotlin for any board size (n−1 in a row wins on 4×4 and 5×5); a strategy that never loses on 3×3; play against it or watch two agents | desktop: `./gradlew :examples:tictactoe:run`<br>web: `./gradlew :examples:tictactoe:jsBrowserDevelopmentRun` |
 | `vacuum-world` | One to four robots that keep a map clean forever: embodied robots, timed actions, a rule-based memory of visited cells and dust seen; the world gets new dust every second, or where you click | desktop: `./gradlew :examples:vacuum-world:run`<br>web: `./gradlew :examples:vacuum-world:jsBrowserDevelopmentRun` |
 | `failure-handling` | A failure plan recovering a goal that failed two levels below | `./gradlew :examples:failure-handling:run` |
-| `contract-net` | KQML messaging: `askOne`, delegating an `achieve`, `tell` | `./gradlew :examples:contract-net:run` |
+| `contract-net` | A contract net in a restaurant: a waiter gives each order to the chef that can cook it the soonest, with KQML messages among agents on their own nodes; order dishes, switch stations off and send chefs to nap while they work | desktop: `./gradlew :examples:contract-net:run`<br>web: `./gradlew :examples:contract-net:jsBrowserDevelopmentRun` |
 | `runtime-agents` | Adding and removing agents while the MAS runs | `./gradlew :examples:runtime-agents:run` |
 | `wait-for-events` | Waiting for events, delays and concurrent intentions | `./gradlew :examples:wait-for-events:run` |
 | `custom-incarnation` | Beliefs as a key-value memory and goals as tasks, with trigger and guard helpers | `./gradlew :examples:custom-incarnation:run` |

@@ -20,7 +20,7 @@ const sidebars: SidebarsConfig = {
     {
       type: 'category',
       label: 'Showcase',
-      items: ['showcase/blocksworld', 'showcase/tictactoe', 'showcase/vacuum-world', 'showcase/more-examples'],
+      items: ['showcase/blocksworld', 'showcase/tictactoe', 'showcase/vacuum-world', 'showcase/contract-net', 'showcase/more-examples'],
     },
     {
       type: 'category',

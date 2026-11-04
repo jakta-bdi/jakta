@@ -47,4 +47,5 @@ sequenceDiagram
 Both return `null` if no reply arrives before the timeout.
 
 See [Ask and answer with KQML](../../../how-to/prolog/kqml.md) for the code of each step, and the
-[`contract-net`](https://github.com/jakta-bdi/jakta/tree/main/examples/contract-net) example for a complete program.
+[Contract Net](../../../showcase/contract-net.md) showcase for a complete protocol, where agents on different nodes
+agree on who does what with `tell` messages.

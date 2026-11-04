@@ -37,7 +37,8 @@ can no longer see it keeps in its **beliefs**, used as a **working memory**: whe
 it could not clean yet. Its reasoning **blends paradigms**: Prolog rules choose where to explore, and plain Kotlin
 finds the way back to the dust it remembers.
 
-The robots share the world but not their minds: they do not communicate, and each only sees the others as obstacles
+The robots share the world but not their minds: they do not communicate (agents that do are in the
+[Contract Net](./contract-net.md)), and each only sees the others as obstacles
 that come and go.
 
 ### Embodiment in a simulated world

@@ -126,7 +126,7 @@ fun KitchenApp(app: KitchenAppState) {
         Divider(modifier = Modifier.padding(top = 8.dp))
 
         Row(modifier = Modifier.fillMaxSize()) {
-            OrdersPanel(orders, kitchens, onOrder = app::order, modifier = Modifier.width(250.dp).fillMaxHeight())
+            OrdersPanel(orders, kitchens, onOrder = app::order, modifier = Modifier.width(200.dp).fillMaxHeight())
             Column(
                 modifier = Modifier.weight(1f).fillMaxHeight().padding(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -148,7 +148,7 @@ fun KitchenApp(app: KitchenAppState) {
                 }
                 if (app.kitchens.size <= 2) Spacer(modifier = Modifier.weight(1f))
             }
-            Column(modifier = Modifier.width(400.dp).fillMaxHeight()) {
+            Column(modifier = Modifier.width(340.dp).fillMaxHeight()) {
                 MessageLogPanel(messages, modifier = Modifier.weight(1f).fillMaxWidth())
                 AgentTracePanel(modifier = Modifier.weight(1f).fillMaxWidth())
             }
@@ -226,7 +226,12 @@ private fun KitchenCard(kitchen: Kitchen, state: KitchenState, colour: Color, wa
                 fontWeight = FontWeight.Bold,
                 style = MaterialTheme.typography.subtitle1,
             )
-            Text("  speed ${kitchen.speed}x, served ${state.served}", fontSize = 13.sp, modifier = Modifier.weight(1f))
+            Text(
+                "  ${kitchen.speed}x, served ${state.served}",
+                fontSize = 12.sp,
+                maxLines = 1,
+                modifier = Modifier.weight(1f),
+            )
             OutlinedButton(onClick = kitchen::toggleNap) { Text(if (state.napping) "Wake up" else "Nap") }
         }
         Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
@@ -275,7 +280,7 @@ private fun standingSpot(station: Station?): Offset = when (station) {
 @Suppress("MagicNumber", "LongMethod")
 @Composable
 private fun KitchenFloor(state: KitchenState, colour: Color, walkMillis: Long, onStation: (Station) -> Unit) {
-    BoxWithConstraints(modifier = Modifier.aspectRatio(1.7f)) {
+    BoxWithConstraints(modifier = Modifier.aspectRatio(1.45f)) {
         val width = maxWidth
         val height = maxHeight
         Canvas(modifier = Modifier.fillMaxSize().clipToBounds()) {
@@ -306,7 +311,13 @@ private fun KitchenFloor(state: KitchenState, colour: Color, walkMillis: Long, o
                 .background(Color(0xFFB0BEC5), RoundedCornerShape(3.dp)).border(1.dp, Color(0xFF78909C)),
             contentAlignment = Alignment.Center,
         ) {
-            Text("PASS", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = Color(0xFF37474F))
+            Text(
+                "P\nA\nS\nS",
+                fontSize = 8.sp,
+                lineHeight = 9.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF37474F),
+            )
         }
         Station.entries.forEach { station ->
             val place = station.place()
@@ -393,7 +404,7 @@ private fun StationTile(station: Station, present: Boolean, progress: Float?, mo
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                station.label(),
+                if (station == Station.CHOPPING_BOARD) "Board" else station.label(),
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Bold,
                 fontStyle = if (present) FontStyle.Normal else FontStyle.Italic,
@@ -401,7 +412,6 @@ private fun StationTile(station: Station, present: Boolean, progress: Float?, mo
                 modifier = Modifier.background(Color(0x66000000).takeIf { present } ?: Color.Transparent)
                     .padding(horizontal = 3.dp),
             )
-            if (!present) Text("off", fontSize = 9.sp, color = Color(0xFF616161))
         }
         if (progress != null) {
             LinearProgressIndicator(
