@@ -3,6 +3,7 @@ package it.unibo.jakta.node
 import co.touchlab.kermit.Logger
 import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.agent.AgentLifecycle
+import it.unibo.jakta.agent.AgentLifecycleObserver
 import it.unibo.jakta.agent.BaseAgentLifecycle
 import it.unibo.jakta.agent.ExecutableAgent
 import it.unibo.jakta.event.SystemEvent
@@ -19,10 +20,19 @@ import kotlinx.coroutines.yield
  * A [NodeRunner] implementation that uses Kotlin coroutines
  * to manage the execution of agents within a node.
  * @param [connection] The [NodeNetwork] used for communication and event handling.
+ * @param [observer] The [AgentLifecycleObserver] told about every event the agents handle.
  * @param [Body] The type of the agent's body.
  * @param [N] The type of the executable node that this runner will manage.
  */
-class CoroutineNodeRunner<Body : Any, N : ExecutableNode<Body>>(val connection: NodeNetwork) : NodeRunner<N> {
+class CoroutineNodeRunner<Body : Any, N : ExecutableNode<Body>>(
+    val connection: NodeNetwork,
+    private val observer: AgentLifecycleObserver,
+) : NodeRunner<N> {
+
+    /**
+     * Creates a runner on [connection], with no observer.
+     */
+    constructor(connection: NodeNetwork) : this(connection, AgentLifecycleObserver.None)
 
     private val agents: MutableMap<AgentLifecycle<*, *>, Job> = mutableMapOf()
 
@@ -75,7 +85,7 @@ class CoroutineNodeRunner<Body : Any, N : ExecutableNode<Body>>(val connection: 
     }
 
     private fun CoroutineScope.startAgent(node: N, agent: ExecutableAgent<*, *>) {
-        val newAgent = BaseAgentLifecycle(agent)
+        val newAgent = BaseAgentLifecycle(agent, observer)
         val newJob = launch {
             while (isActive) {
                 newAgent.step()

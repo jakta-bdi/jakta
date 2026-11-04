@@ -8,6 +8,7 @@
 | `vacuum-world` | A robot that keeps a map clean forever, in the style of the EIS Vacuum World: reacting to percepts, and a rule-based memory of visited cells to explore; dust respawns or is dropped by clicking | desktop: `./gradlew :examples:vacuum-world:run`<br>web: `./gradlew :examples:vacuum-world:jsBrowserDevelopmentRun` |
 | `failure-handling` | A failure plan recovering a goal that failed two levels below | `./gradlew :examples:failure-handling:run` |
 | `contract-net` | KQML messaging: `askOne`, delegating an `achieve`, `tell` | `./gradlew :examples:contract-net:run` |
+| `mind-inspector` | The mind inspector on a small contract net over two nodes: beliefs, intentions and history of each agent, and the messages they exchange | desktop: `./gradlew :examples:mind-inspector:run`<br>web: `./gradlew :examples:mind-inspector:jsBrowserDevelopmentRun` |
 
 The UI examples use Compose Multiplatform and show an *agent trace* with what agents print while they reason.
 They run in the browser through Kotlin/JS: tuProlog does not support WebAssembly yet.

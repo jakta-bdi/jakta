@@ -1,5 +1,6 @@
 package it.unibo.alchemist.jakta.actions
 
+import it.unibo.alchemist.jakta.JaktaIncarnation
 import it.unibo.alchemist.jakta.properties.JaktaForAlchemistRuntime
 import it.unibo.alchemist.model.Action
 import it.unibo.alchemist.model.Context
@@ -24,7 +25,9 @@ class JaktaAgentAction<P : Position<P>>(
 
     override fun getContext(): Context = Context.LOCAL
 
-    private val agentLifecycle = BaseAgentLifecycle(agent)
+    private val agentLifecycle = BaseAgentLifecycle(agent) { observed, event ->
+        JaktaIncarnation.agentObserver.onEventHandled(observed, event)
+    }
 
     override fun cloneAction(node: AlchemistNode<Any?>, reaction: Reaction<Any?>): Action<Any?> = JaktaAgentAction(
         node,

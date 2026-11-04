@@ -21,9 +21,18 @@ import kotlinx.coroutines.launch
 /**
  * A base implementation of the [it.unibo.jakta.agent.AgentLifecycle] interface
  * that defines the core logic for handling agent events and executing plans.
+ * The [observer] is told about every event the agent handled.
  */
-class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent: ExecutableAgent<Belief, Goal>) :
-    AgentLifecycle<Belief, Goal> {
+class BaseAgentLifecycle<Belief : Any, Goal : Any>(
+    override val executableAgent: ExecutableAgent<Belief, Goal>,
+    private val observer: AgentLifecycleObserver,
+) : AgentLifecycle<Belief, Goal> {
+
+    /**
+     * Creates the lifecycle of [executableAgent], with no observer.
+     */
+    constructor(executableAgent: ExecutableAgent<Belief, Goal>) : this(executableAgent, AgentLifecycleObserver.None)
+
     private val log =
         Logger(
             Logger.config,
@@ -40,12 +49,14 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
         log.i { "received event: $event" }
         val scope = CoroutineScope(currentCoroutineContext() + agentJob)
         handleEvent(event, scope)
+        observer.onEventHandled(executableAgent, event)
     }
 
     override fun tryStep(dispatcher: CoroutineDispatcher) {
         executableAgent.events.tryNext()?.let {
             val scope = CoroutineScope(dispatcher + agentJob)
             handleEvent(it, scope)
+            observer.onEventHandled(executableAgent, it)
         }
     }
 
