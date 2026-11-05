@@ -5,7 +5,6 @@ import it.unibo.jakta.self
 import it.unibo.jakta.source
 import it.unibo.jakta.tag
 import it.unibo.tuprolog.core.Clause
-import it.unibo.tuprolog.core.Directive
 import it.unibo.tuprolog.core.Fact
 import it.unibo.tuprolog.core.List as PrologList
 import it.unibo.tuprolog.core.Rule
@@ -34,8 +33,9 @@ import it.unibo.tuprolog.utils.setTag
  *   matches a different annotation of the belief, with backtracking;
  * - a rule `h :- b` is `h'(..., annotations of h, or [source(self)]) :- b'`, its body rewritten as goals.
  *
- * Built-ins and library predicates, primitives or rules (such as `length/2`), are left as they are, unless the beliefs
- * define a predicate with the same signature.
+ * Only the predicates whose annotations matter are rewritten: those of a belief or a rule with annotations other than
+ * `source(self)`, and those of a goal with annotations, in the query or in a rule. The others, built-ins and library
+ * predicates included, are solved as they are, which gives the same solutions, faster.
  */
 
 private const val SELECT = "\$jakta_select"
@@ -65,13 +65,18 @@ private val controlArguments: Map<Signature, List<Int>> = mapOf(
     Signature("forall", 2) to listOf(0, 1),
 )
 
-// the stored term first: binding the clause's fresh variables to the query's terms keeps the substitutions short,
-// which makes solving about twice as fast
+/*
+ * Looking clauses up, the solver unifies whole clauses: only their heads matter, and unifying their bodies too makes
+ * solving about three times slower. The stored term goes first: binding the clause's fresh variables to the query's
+ * terms keeps the substitutions short, which makes solving about twice as fast.
+ */
 private val storedFirst = object : AbstractUnificator() {
     override fun checkTermsEquality(first: Term, second: Term): Boolean = first == second
 
+    private fun headOf(term: Term): Term = if (term is Rule) term.head else term
+
     override fun mgu(term1: Term, term2: Term, occurCheckEnabled: Boolean): Substitution =
-        super.mgu(term2, term1, occurCheckEnabled)
+        super.mgu(headOf(term2), headOf(term1), occurCheckEnabled)
 }
 
 // referenced directly: the by-name lookup behind Solver.prolog fails in bundled JS apps (webpack)
@@ -84,8 +89,6 @@ private fun solverOf(theory: Iterable<Clause>): Solver = ClassicSolverFactory
     .flag(TrackVariables) { ON }
     .build()
 
-private val libraries by lazy { solverOf(emptyList()).libraries }
-
 /** The annotations of this term, none if it has none. */
 internal val Term.rawAnnotations: Set<Struct>
     get() = getTag<Set<Struct>>(JAKTA_ANNOTATIONS_TAG).orEmpty()
@@ -94,20 +97,33 @@ private fun Struct.withLast(argument: Term): Struct = Struct.of(functor, args + 
 
 private fun Struct.signature() = Signature(functor, arity)
 
-private fun encodeGoal(term: Term, defined: Set<Signature>): Term {
+private val selfOnly = setOf(source(self))
+
+// the signatures of the terms with annotations in this term, at any depth
+private fun Term.annotatedSignatures(): Sequence<Signature> = when (this) {
+    is Struct -> args.asSequence().flatMap { it.annotatedSignatures() } +
+        if (rawAnnotations.isEmpty()) emptySequence() else sequenceOf(signature())
+
+    else -> emptySequence()
+}
+
+// the predicates whose annotations matter, which the solver must see with their annotations as last argument
+private fun annotatedPredicates(theory: Collection<Clause>, query: Struct): Set<Signature> = theory.flatMap { clause ->
+    val head = clause.head ?: return@flatMap emptyList()
+    val own = head.rawAnnotations.isEmpty() || head.rawAnnotations == selfOnly
+    listOfNotNull(head.signature().takeUnless { own }) + clause.body.annotatedSignatures()
+}.toSet() + query.annotatedSignatures()
+
+private fun encodeGoal(term: Term, annotated: Set<Signature>): Term {
     if (term !is Struct) return term
     val signature = term.signature()
     val control = controlArguments[signature]
     return when {
         control != null -> term.setArgs(
-            term.args.mapIndexed { i, argument -> if (i in control) encodeGoal(argument, defined) else argument },
+            term.args.mapIndexed { i, argument -> if (i in control) encodeGoal(argument, annotated) else argument },
         )
 
-        signature !in defined && (
-            term.isTruth || libraries.contains(
-                signature,
-            ) || libraries.hasProtected(signature)
-            ) -> term
+        signature !in annotated -> term
 
         term.rawAnnotations.isEmpty() -> term.withLast(Var.anonymous())
 
@@ -122,15 +138,13 @@ private fun encodeGoal(term: Term, defined: Set<Signature>): Term {
     }
 }
 
-private fun encodeClause(clause: Clause, defined: Set<Signature>): Clause = when (clause) {
-    is Directive -> clause
-
-    else -> {
-        val head = checkNotNull(clause.head)
-        val annotations = head.rawAnnotations.ifEmpty { setOf(source(self)) }
-        val encodedHead = head.withLast(PrologList.of(annotations))
-        if (clause is Fact) Fact.of(encodedHead) else Rule.of(encodedHead, encodeGoal(clause.body, defined))
+private fun encodeClause(clause: Clause, annotated: Set<Signature>): Clause {
+    val head = clause.head ?: return clause
+    val encodedHead = when (head.signature()) {
+        in annotated -> head.withLast(PrologList.of(head.rawAnnotations.ifEmpty { selfOnly }))
+        else -> head
     }
+    return if (clause is Fact) Fact.of(encodedHead) else Rule.of(encodedHead, encodeGoal(clause.body, annotated))
 }
 
 /** The variables of this term, those in its annotations included. */
@@ -162,10 +176,13 @@ fun Term.applyWithAnnotations(substitution: Substitution): Term = when {
  * those in its annotations included. Lazily, so that [solveOnce] stops at the first one.
  */
 private fun solve(theory: Collection<Clause>, query: Struct): Sequence<Solution> {
-    val defined = theory.mapNotNull { it.head?.signature() }.toSet()
+    val annotated = annotatedPredicates(theory, query)
     val variables = query.allVariables()
-    val solver = solverOf(theory.map { encodeClause(it, defined) } + selectClauses)
-    return solver.solve(encodeGoal(query, defined).castToStruct()).map { solution ->
+    val solver = when {
+        annotated.isEmpty() -> solverOf(theory)
+        else -> solverOf(theory.map { encodeClause(it, annotated) } + selectClauses)
+    }
+    return solver.solve(encodeGoal(query, annotated).castToStruct()).map { solution ->
         when (solution) {
             is Solution.Yes -> Solution.yes(
                 query,
