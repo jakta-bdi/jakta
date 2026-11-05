@@ -3,7 +3,6 @@ var publishCmd = `
 `
 var prepareCmd = `
 NEXT_RELEASE_VERSION=\${nextRelease.version} NEXT_RELEASE_TYPE=\${nextRelease.type} node scripts/generate-release-blog-post.mjs
-(cd website && node scripts/generate-publication-blog-posts.mjs) || true
 `
 
 var config = require('semantic-release-preconfigured-conventional-commits');
