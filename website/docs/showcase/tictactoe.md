@@ -147,7 +147,7 @@ if (size % 2 == 1) {
 ```
 
 The guard's solution binds `X` and `Y`, and the plan body reads them back in Kotlin with `X.value()`
-(see [Reading values in Kotlin](../explanation/incarnations/prolog/beliefs-and-goals.md#reading-values-in-kotlin)).
+(see [Reading values in Kotlin](../explanation/incarnations/prolog/2p-kt.md#reading-values-in-kotlin)).
 The result is a different agent for each board:
 
 | Board | Inference rules | Plans for `move` | Differences |
@@ -165,7 +165,7 @@ The result is a different agent for each board:
   so each move triggers just the new `turn` belief.
 - **Its turn is an event.** A plan reacts to `turn(me)`: it thinks for a while, then pursues the goal `move`.
 - **Plan order is the strategy.** Among the plans for `move` whose guard holds, the
-  [first one in the library](../explanation/execution-model.md#plan-selection) is chosen. The plans are added in the
+  [first one in the library](../explanation/basic-concepts/plans.md#plan-selection) is chosen. The plans are added in the
   priority order of the classic strategy by Newell and Simon: win, block, fork, block a fork, centre, opposite corner,
   corner, anything. Adding a rule to the strategy is adding a plan in the right place.
 - **The game is the referee.** It applies moves, publishes the new board to every player and stops the node
@@ -175,5 +175,5 @@ The result is a different agent for each board:
 ## Learn more
 
 - [Prolog incarnation](../explanation/incarnations/prolog/index.md), and [Prolog plans](../explanation/incarnations/prolog/prolog-plans.md)
-- [Plans](../explanation/basic-concepts/plans.md) and [plan selection](../explanation/execution-model.md#plan-selection)
+- [Plans](../explanation/basic-concepts/plans.md) and [plan selection](../explanation/basic-concepts/plans.md#plan-selection)
 - [Caveats](../explanation/incarnations/prolog/caveats.md): guards use the first solution, and performance

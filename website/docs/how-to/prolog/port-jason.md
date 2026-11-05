@@ -56,10 +56,10 @@ prologPlan {
 |---|---|
 | `!g` | `agent.achieve(goal { g })` |
 | `!!g` | `agent.alsoAchieve(goal { g })` |
-| `?q` | `testQuery { q }` (no test goals: see [guards and queries](./guards-and-rules.md#query-in-a-plan-body)) |
+| `?q` | `testQuery { q }` (see [why there are no test goals](../../explanation/basic-concepts/goals.md#why-there-are-no-test-goals)) |
 | `+b` / `-b` | `agent.believe(belief { b })` / `agent.forget(belief { b })` |
 | `.print(...)` | `agent.print(...)` |
-| environment actions | a [skill](../../explanation/basic-concepts/skills.md) |
+| environment actions | a [skill](../../explanation/interaction/acting.md) |
 
 ## Messages
 
@@ -80,6 +80,6 @@ Unlike Jason, questions need an answering plan: see [Ask and answer with KQML](.
 - **Bodies are Kotlin**: loops, conditionals and calls replace AgentSpeak body formulas.
 - **Agents live in nodes** and act through skills, not a Jason environment.
 - **A belief has a single source**: a belief told by two agents is kept once (see
-  [caveats](../../explanation/incarnations/prolog/caveats.md#a-belief-has-a-single-source)).
+  [caveats](../../explanation/incarnations/prolog/caveats.md#beliefs)).
 
 See [Jason-like Kotlin Agents](/blog/jakta-and-jason) for how JaKtA relates to Jason.

@@ -4,7 +4,7 @@ sidebar_label: Overview
 
 # Prolog Incarnation
 
-`jakta-prolog-incarnation` is the closest thing to Jason in JaKtA:
+`jakta-prolog-incarnation` keeps the AgentSpeak(L)-inspired notion of beliefs and goals as Jason implements it:
 
 - beliefs are Prolog **facts and rules**;
 - goals are Prolog **terms**;
@@ -48,9 +48,9 @@ agent<PrologBelief, PrologGoal, Any> {
 
 ## In this section
 
-- [2P-Kt integration and syntax](./2p-kt.md): what JaKtA takes from 2P-Kt, and a recap of its Kotlin DSL.
+- [2P-Kt integration and syntax](./2p-kt.md): what JaKtA takes from 2P-Kt, its Kotlin DSL, which term builder to use
+  where, annotations and sources, and reading values in Kotlin.
 - [Prolog plans](./prolog-plans.md): what `prologPlan { }` means and how variables flow through a plan.
-- [Beliefs, goals and annotations](./beliefs-and-goals.md): which function to use where, sources, and reading values.
 - [KQML messaging](./kqml.md): what Jason-style `tell`, `achieve`, `askOne`, ... mean between agents.
 - [Caveats](./caveats.md): the surprises to know about before you start.
 
