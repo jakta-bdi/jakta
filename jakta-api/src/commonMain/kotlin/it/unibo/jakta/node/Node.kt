@@ -49,6 +49,12 @@ interface Node<Body : Any> {
     fun terminateNode(error: Throwable? = null, nodeID: NodeID = this.id)
 
     /**
+     * Runs the [process] on this node, alongside its agents, e.g. to poll a sensor or to run an artifact.
+     * The node runner starts it on the dispatcher it runs the node with, and cancels it when the node terminates.
+     */
+    fun launchProcess(process: suspend () -> Unit)
+
+    /**
      * Retrieves the unique identifier of an agent in this node based on its body.
      * @param body The body of the agent for which to retrieve the identifier.
      */

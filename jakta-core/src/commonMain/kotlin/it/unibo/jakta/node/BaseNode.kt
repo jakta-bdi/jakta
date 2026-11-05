@@ -31,6 +31,13 @@ open class BaseNode<Body : Any> : ExecutableNode<Body> {
     override val systemEvents: EventStream<SystemEvent>
         get() = _systemEvents
 
+    private val _processes: EventQueue<suspend () -> Unit> = UnlimitedChannelQueue()
+
+    override val processes: EventStream<suspend () -> Unit>
+        get() = _processes
+
+    override fun launchProcess(process: suspend () -> Unit) = _processes.send(process)
+
     override fun addAgent(agentFactory: (Node<Body>) -> AgentSpecification<*, *, Body>, nodeID: NodeID) {
         val agentSpecification = agentFactory(this)
         val agent = BaseAgent(agentSpecification)
