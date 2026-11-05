@@ -1,6 +1,7 @@
 import it.unibo.jakta.dsl.belief.PrologBelief
 import it.unibo.jakta.dsl.belief.matchBelief
 import it.unibo.jakta.dsl.belief.newContextBeliefQuery
+import it.unibo.jakta.dsl.belief.replaceSelf
 import it.unibo.jakta.event.AgentEvent.External.Perception
 import it.unibo.jakta.event.AgentUpdate
 import it.unibo.jakta.node.Node
@@ -72,11 +73,8 @@ private val perceivedQueries = listOf(
  * and `square(S, C)` for S in here, forward, left, right, and C in obstacle, dust, empty.
  * Other beliefs, like the robot's memory of `visited(X, Y, T)`, are left alone.
  */
-fun handleVacuumPerception(event: VacuumPerception, beliefs: Collection<PrologBelief>): AgentUpdate<*> {
-    val old = beliefs.filter { belief -> perceivedQueries.any { belief.matchBelief(it) != null } }.toSet()
-    val new = event.world.toBeliefs()
-    return AgentUpdate.Belief(new - old, old - new)
-}
+fun handleVacuumPerception(event: VacuumPerception): AgentUpdate<*> =
+    replaceSelf(perceivedQueries, event.world.toBeliefs())
 
 private fun VacuumState.toBeliefs(): Set<PrologBelief> {
     fun atom(value: Enum<*>) = Atom.of(value.name.lowercase())

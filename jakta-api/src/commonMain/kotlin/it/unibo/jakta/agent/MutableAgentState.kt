@@ -80,6 +80,12 @@ interface MutableAgentState<Belief : Any, Goal : Any> :
     fun forget(belief: Belief)
 
     /**
+     * Makes the beliefs in [scope] become [beliefs], as Jason's `-+`: those in scope and not among [beliefs] are
+     * forgotten, and the new ones believed, through the agent's belief revision.
+     */
+    fun replace(scope: (Belief) -> Boolean, beliefs: List<Belief>)
+
+    /**
      * Logs a message to the agent's output.
      * @param[message] The message to be printed.
      */

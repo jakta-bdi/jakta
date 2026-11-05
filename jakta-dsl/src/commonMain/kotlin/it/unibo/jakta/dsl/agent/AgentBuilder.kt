@@ -3,6 +3,7 @@ package it.unibo.jakta.dsl.agent
 import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.agent.AgentSpecification
 import it.unibo.jakta.agent.AgentState
+import it.unibo.jakta.belief.BeliefRevision
 import it.unibo.jakta.dsl.JaktaDSL
 import it.unibo.jakta.dsl.plan.PlanLibraryBuilder
 import it.unibo.jakta.event.AgentEvent.External.Message
@@ -78,6 +79,12 @@ interface AgentBuilder<Belief : Any, Goal : Any, Body : Any> {
      * Define how an agent can be embodied in the node.
      */
     fun embodiedAs(bodyFactory: (AgentID) -> Body)
+
+    /**
+     * Defines how the agent revises its beliefs when one is added or removed, its initial beliefs included.
+     * By default, beliefs are a set ([BeliefRevision.plain]).
+     */
+    fun revisesBeliefsWith(revision: BeliefRevision<Belief>)
 
     /**
      * Builds and returns the agent instance.

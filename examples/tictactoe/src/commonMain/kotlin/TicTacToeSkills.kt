@@ -1,6 +1,7 @@
 import it.unibo.jakta.dsl.belief.PrologBelief
 import it.unibo.jakta.dsl.belief.matchBelief
 import it.unibo.jakta.dsl.belief.newContextBeliefQuery
+import it.unibo.jakta.dsl.belief.replaceSelf
 import it.unibo.jakta.event.AgentEvent.External.Perception
 import it.unibo.jakta.event.AgentUpdate
 import it.unibo.jakta.node.Node
@@ -124,12 +125,9 @@ private val distractedQuery = newContextBeliefQuery { "distracted"(X) }
  * Updates `cell(X, Y, Mark)`, `turn(Mark)` and `distracted(Mark)` beliefs, where empty cells are marked `e`.
  * Only what changed is added or removed, so each move triggers only the new `turn` belief.
  */
-fun handleBoardPerception(event: BoardPerception, beliefs: Collection<PrologBelief>): AgentUpdate<*> {
-    val queries = listOf(cellQuery, turnQuery, distractedQuery)
-    val old = beliefs.filter { belief -> queries.any { belief.matchBelief(it) != null } }.toSet()
+fun handleBoardPerception(event: BoardPerception): AgentUpdate<*> {
     val distracted = event.distracted.map { Fact.of(Struct.of("distracted", Atom.of(it.symbol))) }
-    val new = event.board.toBeliefs(event.random) + distracted
-    return AgentUpdate.Belief(new - old, old - new)
+    return replaceSelf(listOf(cellQuery, turnQuery, distractedQuery), event.board.toBeliefs(event.random) + distracted)
 }
 
 private fun BoardState.toBeliefs(random: Random): Set<PrologBelief> {
