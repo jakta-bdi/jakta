@@ -8,7 +8,7 @@ import it.unibo.jakta.event.EventInbox
 internal data class BeliefBaseImpl<Belief : Any>(
     private val events: EventInbox<AgentEvent.Internal.Belief<Belief>>,
     val initialBeliefs: Iterable<Belief> = emptyList(),
-    private val revision: BeliefRevision<Belief> = BeliefRevision.default(),
+    private val revision: BeliefRevision<Belief> = BeliefRevision.plain(),
     private val beliefs: MutableSet<Belief> = mutableSetOf(),
 ) : BeliefBase<Belief>,
     MutableSet<Belief> by beliefs {

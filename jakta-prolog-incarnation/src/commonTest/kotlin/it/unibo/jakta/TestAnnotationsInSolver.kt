@@ -1,6 +1,7 @@
 package it.unibo.jakta
 
 import it.unibo.jakta.belief.BeliefBaseFactory
+import it.unibo.jakta.dsl.belief.AnnotatedBeliefRevision
 import it.unibo.jakta.dsl.belief.belief
 import it.unibo.jakta.dsl.belief.inferenceRule
 import it.unibo.jakta.dsl.belief.initialBelief
@@ -120,10 +121,11 @@ class TestAnnotationsInSolver {
     }
 
     @Test
-    fun `a belief told by two agents is found with both sources`() {
+    fun `with annotated beliefs, a belief told by two agents is found with both sources`() {
         val beliefBase = BeliefBaseFactory.of(
             UnlimitedChannelQueue(),
             listOf(initialBelief { "refuse"(3)[source("bob")] }, initialBelief { "refuse"(3)[source("carol")] }),
+            AnnotatedBeliefRevision,
         )
         val beliefs = beliefBase.snapshot().toList()
         assertEquals(1, beliefs.size)

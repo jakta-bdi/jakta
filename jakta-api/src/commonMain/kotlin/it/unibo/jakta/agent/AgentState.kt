@@ -47,8 +47,8 @@ interface AgentState<Belief : Any, Goal : Any> {
     val messageHandler: AgentState<Belief, Goal>.(AgentEvent.External.Message<*>) -> AgentUpdate<*>?
 
     /**
-     * How the agent revises its beliefs when one is added or removed: by default, [BeliefRevision.default].
+     * How the agent revises its beliefs when one is added or removed; by default, they are a set.
      */
     val beliefRevision: BeliefRevision<Belief>
-        get() = BeliefRevision.default()
+        get() = BeliefRevision.plain()
 }

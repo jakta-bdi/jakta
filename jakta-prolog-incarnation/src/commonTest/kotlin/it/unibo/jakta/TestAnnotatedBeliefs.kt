@@ -5,7 +5,6 @@ import co.touchlab.kermit.Severity
 import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.agent.BaseAgentID
 import it.unibo.jakta.belief.BeliefBaseFactory
-import it.unibo.jakta.belief.BeliefRevision
 import it.unibo.jakta.dsl.belief.AnnotatedBeliefRevision
 import it.unibo.jakta.dsl.belief.PrologBelief
 import it.unibo.jakta.dsl.belief.annotations
@@ -17,6 +16,7 @@ import it.unibo.jakta.dsl.belief.replaceAll
 import it.unibo.jakta.dsl.belief.replaceFrom
 import it.unibo.jakta.dsl.belief.replaceSelf
 import it.unibo.jakta.dsl.belief.sourcesOf
+import it.unibo.jakta.dsl.belief.usesAnnotatedBeliefs
 import it.unibo.jakta.dsl.goal.initialGoal
 import it.unibo.jakta.dsl.goal.matchingGoal
 import it.unibo.jakta.dsl.mas
@@ -137,15 +137,8 @@ class TestAnnotatedBeliefs {
     }
 
     @Test
-    fun `by default, beliefs that differ only in their source are one belief with both sources`() {
+    fun `without annotated beliefs, beliefs that differ only in their source collapse`() {
         val beliefBase = BeliefBaseFactory.of(UnlimitedChannelQueue(), listOf(fromAlice, fromCarol))
-        assertEquals(sources("alice", "carol"), beliefBase.snapshot().single().annotations)
-    }
-
-    @Test
-    fun `with the plain revision, beliefs that differ only in their source collapse`() {
-        val beliefBase =
-            BeliefBaseFactory.of(UnlimitedChannelQueue(), listOf(fromAlice, fromCarol), BeliefRevision.plain())
         assertEquals(sources("alice"), beliefBase.snapshot().single().annotations)
     }
 
@@ -239,7 +232,7 @@ class TestAnnotatedBeliefs {
     }
 
     @Test
-    fun `with the plain revision, a perception replaces the agent's own beliefs only`() {
+    fun `without annotated beliefs, a perception replaces the agent's own beliefs only`() {
         val beliefBase = BeliefBaseFactory.of<PrologBelief>(
             UnlimitedChannelQueue(),
             listOf(
@@ -248,7 +241,6 @@ class TestAnnotatedBeliefs {
                     "ping"(2)[source("alice")]
                 },
             ),
-            BeliefRevision.plain(),
         )
         val replace = replaceSelf(listOf(pingQuery), listOf(initialBelief { "ping"(3) }))
         beliefBase.replace(replace.scope, replace.beliefs)
@@ -292,6 +284,7 @@ class TestAnnotatedBeliefs {
         val bobNode = node(NodeBuilders.baseNode()) {
             agent(bob) {
                 embodiedAs { Any() }
+                usesAnnotatedBeliefs()
                 handlesMessageEvents {
                     when (val payload = it.payload) {
                         is KQMLPayload -> handleKQMLPayload(payload, it.sender)
@@ -328,6 +321,7 @@ class TestAnnotatedBeliefs {
         val forgetful = node(NodeBuilders.baseNode()) {
             agent(alice) {
                 embodiedAs { Any() }
+                usesAnnotatedBeliefs()
                 believes {
                     +ping
                     +fromCarol
@@ -380,6 +374,7 @@ class TestAnnotatedBeliefs {
         val manager = node(NodeBuilders.baseNode()) {
             agent(alice) {
                 embodiedAs { Any() }
+                usesAnnotatedBeliefs()
                 handlesMessageEvents { message ->
                     (message.payload as? KQMLPayload)?.let { handleKQMLPayload(it, message.sender) }
                 }
