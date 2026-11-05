@@ -45,7 +45,7 @@ jobs:
         uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: 21
+          java-version: 23
 
       # API docs are built from the latest release tag, so /api always matches
       # the version on Maven Central rather than unreleased main.
