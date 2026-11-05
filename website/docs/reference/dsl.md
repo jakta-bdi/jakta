@@ -89,7 +89,13 @@ The handlers run with the agent's `AgentState` as receiver, so they can read `be
 Package `it.unibo.jakta.dsl.plan`. Inside `hasPlanLibrary { }` (a `PlanLibraryBuilder<B, G>`):
 
 ```kotlin
-adding.goal { /* G.() -> Ctx? */ } onlyWhen { /* GuardScope<B, Ctx>.() -> Ctx? */ } triggers { /* body */ }
+adding.goal {
+    // trigger: G.() -> Ctx?
+} onlyWhen {
+    // guard (optional): GuardScope<B, Ctx>.() -> Ctx?
+} triggers {
+    // body: suspend PlanScope<B, G, Ctx>.() -> PlanResult
+}
 ```
 
 ### Triggers
@@ -140,7 +146,7 @@ and the context is also available as a Kotlin context parameter. The value of it
 | `context: Ctx` | The context produced by the trigger and the guard. |
 | `node` | Not a member of `PlanScope`: it is the `node` of the enclosing builder (or the parameter of `plans { node -> }`), captured by the lambda. |
 
-Plus any [skill](../explanation/basic-concepts/skills.md) available in the enclosing `context(...)` blocks, reachable with
+Plus any [skill](../explanation/interaction/acting.md) available in the enclosing `context(...)` blocks, reachable with
 `contextOf<Skill>()` or through the skill's extension functions.
 
 ## Agent state

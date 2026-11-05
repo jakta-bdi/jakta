@@ -6,7 +6,8 @@ import type {SidebarItemConfig} from '@docusaurus/plugin-content-docs/src/sideba
 // Every category opens its first page when clicked, so that all of them behave the same.
 function category(label: string, items: SidebarItemConfig[], options: object = {}) {
   const first = items[0];
-  const id = typeof first === 'string' ? first : (first as {id: string}).id;
+  // A nested category as first item lends its own link.
+  const id = typeof first === 'string' ? first : (first as {id?: string; link?: {id: string}}).id ?? (first as {link: {id: string}}).link.id;
   return {type: 'category' as const, label, link: {type: 'doc' as const, id}, items, ...options};
 }
 
@@ -28,24 +29,25 @@ const sidebars: SidebarsConfig = {
         'how-to/alchemist',
     ]),
     category('Explanation', [
-        'explanation/basic-concepts/bdi',
-        'explanation/basic-concepts/beliefs',
-        'explanation/basic-concepts/goals',
-        'explanation/basic-concepts/plans',
-        { type: 'doc', id: 'explanation/basic-concepts/skills', label: 'Skills' },
-        'explanation/nodes',
-        'explanation/communication',
-        category('Incarnations', [
-          {type: 'doc', id: 'explanation/incarnations/index', label: 'Overview'},
-          'explanation/incarnations/string',
-          'explanation/incarnations/alchemist',
+        category('BDI', [
+          {type: 'doc', id: 'explanation/basic-concepts/bdi', label: 'Overview'},
+          'explanation/basic-concepts/beliefs',
+          'explanation/basic-concepts/goals',
+          'explanation/basic-concepts/plans',
         ]),
-        { type: 'doc', id: 'explanation/execution-model', label: 'Under the hood: execution model' },
+        category('Interaction', [
+          'explanation/interaction/embodiment',
+          'explanation/interaction/perception',
+          'explanation/interaction/acting',
+          'explanation/interaction/communication',
+        ]),
+        'explanation/nodes',
+        'explanation/incarnations/index',
+        { type: 'doc', id: 'explanation/execution-model', label: 'Under the hood: the reasoning cycle' },
     ]),
     category('Reference', [
         'reference/dsl',
         'reference/modules',
-        'reference/string-incarnation',
         'reference/jakta-0x',
         {
           type: 'category',
@@ -76,10 +78,9 @@ const sidebars: SidebarsConfig = {
         'how-to/prolog/port-jason',
       ]),
       category('Explanation', [
-        'explanation/incarnations/prolog/beliefs-and-goals',
+        'explanation/incarnations/prolog/2p-kt',
         'explanation/incarnations/prolog/prolog-plans',
         'explanation/incarnations/prolog/kqml',
-        'explanation/incarnations/prolog/2p-kt',
         'explanation/incarnations/prolog/caveats',
       ]),
       { type: 'doc', id: 'reference/prolog-incarnation', label: 'Reference' },

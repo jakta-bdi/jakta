@@ -28,7 +28,7 @@ writing BDI agents with the same syntax and tools as ordinary object-oriented an
   and test goals are replaced by guards.
 - **The engine is coroutine-based.** Each intention is a coroutine, see the
   [execution model](/docs/explanation/execution-model).
-- **Agents live in nodes**, not in a Jason-style environment, and act through [skills](/docs/explanation/basic-concepts/skills)
+- **Agents live in nodes**, not in a Jason-style environment, and act through [skills](/docs/explanation/interaction/acting)
   instead of environment actions.
 
 ## Jason is still an influence

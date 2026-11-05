@@ -1,14 +1,17 @@
 ---
-sidebar_position: 5
+title: The reasoning cycle
 ---
 
-# Execution Model
+# The reasoning cycle
 
-This page describes how the JaKtA engine (`jakta-core`) runs agents: the reasoning cycle, how intentions map to
-coroutines, and how nodes exchange events. Knowing it helps predict in which order things happen, and why plan bodies
-can freely suspend. All references are to files in
-[`jakta-core`](https://github.com/jakta-bdi/jakta/tree/main/jakta-core/src/commonMain/kotlin/it/unibo/jakta) and
-[`jakta-api`](https://github.com/jakta-bdi/jakta/tree/main/jakta-api/src/commonMain/kotlin/it/unibo/jakta).
+A BDI interpreter runs a **reasoning cycle**: it perceives, updates the beliefs, picks an event to handle, selects a
+plan for it, and advances one of the agent's intentions. In Jason, every iteration of the cycle executes one step of
+one intention, e.g. one action[^jason]. This page describes how JaKtA's engine (`jakta-core`) realises the cycle for
+a single agent: an event-driven loop over one queue, where intentions are coroutines and their steps are suspension
+points. Knowing it helps predict in which order things happen, and why plan bodies can freely suspend.
+File references are to [`jakta-core`](https://github.com/jakta-bdi/jakta/tree/main/jakta-core/src/commonMain/kotlin/it/unibo/jakta)
+and [`jakta-api`](https://github.com/jakta-bdi/jakta/tree/main/jakta-api/src/commonMain/kotlin/it/unibo/jakta);
+how nodes run their agents is described in [Nodes](./nodes.md#how-nodes-run).
 
 ## Overview
 
@@ -43,7 +46,7 @@ so the beliefs are up to date when the plan for the new goal is selected.
 When an agent is created, each initial goal is posted as if by `alsoAchieve`, i.e. each gets its own intention.
 Initial beliefs are loaded without generating events.
 
-## The reasoning cycle
+## Handling an event
 
 The node runner executes each agent in its own coroutine, looping on `BaseAgentLifecycle.step()`:
 wait for the next event, handle it, yield. Handling an event (`BaseAgentLifecycle.kt`) means:
@@ -53,39 +56,14 @@ wait for the next event, handle it, yield. Handling an event (`BaseAgentLifecycl
    - **External** (perception or message): call the agent's `handlesPerceptionEvents` / `handlesMessageEvents`
      handler. The resulting `AgentUpdate` is applied: beliefs are added/removed (which posts belief events),
      goals are posted as goal-addition/removal events. A `null` update ignores the event.
-   - **Belief or goal event**: select a plan and launch it (see below).
+   - **Belief or goal event**: select the first relevant and applicable plan (`selectPlan`, see
+     [Plan selection](./basic-concepts/plans.md#plan-selection)) and launch it. When the plan starts running, its
+     trigger and guard are evaluated once more to build the context passed to the body (`Plan.run`).
    - **Step**: resume one intention (see [Intentions](#intentions-are-coroutines)).
 
 The belief base (`BeliefBaseImpl.kt`) is a set: adding a belief it already has, or removing one it doesn't,
 changes nothing and posts no event. When an `AgentUpdate.Belief` contains the same belief in both
 additions and removals, it is ignored.
-
-## Plan selection
-
-For every belief or goal event, the engine filters the agent's plan library (`selectPlan` in `BaseAgentLifecycle.kt`):
-
-```mermaid
-flowchart LR
-  E[event] --> R{"relevant?<br/>right trigger kind and<br/>trigger returns a context"}
-  R -->|no| X[skip]
-  R -->|yes| A{"applicable?<br/>guard returns a context<br/>on current beliefs"}
-  A -->|no| X
-  A -->|yes| F[first applicable plan<br/>in library order]
-```
-
-- A plan is **relevant** if it is of the right kind (`adding.goal`, `failing.goal`, `removing.belief`, ...) and its
-  trigger returns a non-null context for the event's goal or belief.
-- It is **applicable** if its guard, evaluated on the current beliefs and that context, returns a non-null context.
-- The **first** applicable plan, in the order plans were added to the library, is selected.
-  Order your plans from the most specific to the most general (see the [Blocks World showcase](../showcase/blocksworld.md#plan-selection-by-context)).
-
-If no plan is selected:
-
-- for a **goal addition**, the goal **fails** (see [Failure](#failure-handling));
-- for a **belief event** or a goal removal, the event is just logged and dropped. Belief changes without a matching plan are normal.
-
-When the plan starts running, its trigger and guard are evaluated once more to build the context passed to the body
-(`Plan.run` in `jakta-api/.../plan/Plan.kt`).
 
 ## Intentions are coroutines
 
@@ -118,27 +96,28 @@ As a consequence:
   processing perceptions, messages and other intentions.
 - **Intentions interleave step by step.** Between two suspension points a plan body runs without interruption, and
   the agent's intentions never run in parallel with each other or with the reasoning cycle. Plan bodies can safely
-  read and change the agent state without synchronization.
-- **Blocking code blocks the agent.** Long computations or blocking I/O inside a plan body hold the agent's loop:
-  use suspending APIs, or move the work to another dispatcher with `withContext(...)`.
+  read and change the agent state without synchronization. Unlike Jason, whose reasoning cycle runs one step of a
+  plan, e.g. one action, per iteration, JaKtA has no notion of step other than the suspension points.
 
-`delay` keeps working, and works with virtual time in tests and in Alchemist, because `IntentionDispatcher` delegates
-delays to the dispatcher the agent runs on.
+:::warning[Blocking code blocks the agent]
+Long computations or blocking I/O inside a plan body hold the agent's loop: the agent stops reacting until they end.
+Use suspending APIs, or move the work to another dispatcher with `withContext(...)`.
+:::
 
-## `achieve` vs `alsoAchieve`
+<details>
+<summary>Why <code>delay</code> still works, also in virtual time</summary>
 
-```mermaid
-sequenceDiagram
-  participant P as plan (intention 1)
-  participant C as reasoning cycle
-  P->>C: achieve(g) - goal event bound to intention 1
-  Note over P: suspended, awaiting the result
-  C->>P: plan for g runs on intention 1
-  Note over P: when it completes, achieve returns its result
-  P->>C: alsoAchieve(h) - goal event, no intention
-  C-->>C: plan for h runs on a new intention 2
-  Note over P: continues immediately
-```
+`IntentionDispatcher` only takes over *resuming* continuations: it delegates delays to the dispatcher the agent runs
+on. So `delay` keeps working, and follows virtual time in tests and in Alchemist simulations.
+
+</details>
+
+## Goals travel as events
+
+[Sub-goals](./basic-concepts/goals.md#sub-goals) and [failures](./basic-concepts/goals.md#failure) need no dedicated
+machinery: a goal event can carry the intention it belongs to, and a completion to resolve with the plan's result.
+
+### `achieve` vs `alsoAchieve`
 
 - `agent.achieve(g)` / `achieveWithResult(g)` (`BaseMutableAgentState.kt`) posts a goal-addition event that carries
   the **current intention** and a completion. The selected plan runs **on the same intention**, and the caller
@@ -146,7 +125,7 @@ sequenceDiagram
 - `agent.alsoAchieve(g)` posts a goal-addition event with **no intention**: the selected plan runs on a
   **new intention**, concurrently with the caller, and nobody waits for its result.
 
-## Failure handling
+### Failure handling
 
 A goal addition fails when no plan is applicable, or when its plan throws an exception. Then (`handleFailure`):
 
@@ -156,46 +135,11 @@ A goal addition fails when no plan is applicable, or when its plan throws an exc
 3. if no failure plan is applicable, or the failure plan fails too, the completion is completed exceptionally:
    the waiting `achieve` throws, so the calling plan fails in turn, and the failure propagates up the chain of sub-goals.
 
-Goals posted with `alsoAchieve` or as initial goals have no completion: if they fail and no failure plan handles them,
-the failure is only logged.
+Goals posted with `alsoAchieve` or as initial goals have no completion, so their failures stop there.
 
-:::note
+:::info
 Removing a goal (e.g. with a KQML `unachieve`, or an `AgentUpdate.Goal` with removals) triggers `removing.goal { }`
 plans, but does not currently stop intentions already pursuing that goal.
 :::
 
-## Nodes, runners and networks
-
-A MAS (`BaseMasBuilder.kt`) runs each of its nodes concurrently with the given `NodeRunner`, and `run` returns when
-all nodes have terminated.
-
-`CoroutineNodeRunner` (`CoroutineNodeRunner.kt`) runs a node as follows:
-
-- it subscribes the node to a `NodeNetwork` and forwards the node's **system events** to it:
-  agent additions and removals, messages, shutdown requests;
-- it receives system events from the network, lets the node handle them, and reacts to them:
-  it starts a coroutine for every added agent, cancels removed agents, and stops the node on shutdown.
-
-`SharedMemoryNetwork` (`SharedMemoryNetwork.kt`) is an in-process network that broadcasts every system event to
-every subscribed node. The Alchemist incarnation provides its own node and dispatching on top of the simulator.
-
-Two kinds of events reach agents differently (`BaseNode.kt`):
-
-- **Perceptions** published with `node.publishEvent(...)` are delivered directly to the node's own agents whose body
-  passes the filter. They never leave the node.
-- **Messages** travel as system events through the network, so every node receives them and delivers them to its
-  local agents that pass the filter. This is how `sendTo` reaches agents on other nodes.
-
-`MessagingSkill.sendTo` addresses the receiver through its body: the filter selects the agent whose body
-maps back to the receiver's ID (`Node.getAgentIDfromBody`). Give each agent a distinct body instance
-(`embodiedAs { Any() }` does) so that bodies identify agents unambiguously.
-
-## Adding, removing and terminating
-
-- `node.addAgent(factory)` and the agents declared in `node { }` are posted as agent-addition system events.
-  Each agent starts once its node's runner receives the event.
-- `node.removeAgent(id)` posts a removal event: the runner cancels the agent's reasoning loop. Since intentions only
-  progress through Step events handled by that loop, none of them runs any further.
-- An agent whose loop crashes with an unexpected exception is removed from its node.
-- `node.terminateNode()` posts a shutdown event for the node. When the runner receives it, it closes the node's
-  subscription and cancels all the node's agents; the node's `run` then completes.
+[^jason]: Rafael H. Bordini, Jomi F. Hübner, Michael Wooldridge. [*Programming Multi-Agent Systems in AgentSpeak using Jason*](https://doi.org/10.1002/9780470061848). Wiley, 2007.

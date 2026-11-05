@@ -127,7 +127,7 @@ fun sense(): VacuumPerception {
 
 #### The robot's skill
 
-Plans never see the body: what a robot can do is its [skill](../explanation/basic-concepts/skills.md),
+Plans never see the body: what a robot can do is its [skill](../explanation/interaction/acting.md),
 [`VacuumSkill`](https://github.com/jakta-bdi/jakta/blob/main/examples/vacuum-world/src/commonMain/kotlin/VacuumSkill.kt). Its actions are extension functions on `VacuumAgent`, the type of `agent` in a plan body (an alias of
 `MutableAgentState<PrologBelief, PrologGoal>`, the agent with its Prolog beliefs and goals). They are declared inside
 the skill, so plans can call them only where the skill is in scope: the node defines the robots inside
@@ -426,7 +426,7 @@ it, one step at a time like every other plan.
 ## Learn more
 
 - [Give agents a body](../how-to/custom-body.md), step by step
-- [Bodies](../explanation/nodes.md#bodies) and [perceptions](../explanation/nodes.md#perceptions) in nodes
+- [Bodies](../explanation/interaction/embodiment.md) and [perceptions](../explanation/interaction/perception.md) in nodes
 - [`achieve` vs `alsoAchieve`](../explanation/execution-model.md#achieve-vs-alsoachieve), used to loop on the
   `vacuum` goal
 - [Prolog plans](../explanation/incarnations/prolog/prolog-plans.md) and inference rules in the

@@ -4,34 +4,48 @@ sidebar_position: 1
 
 # BDI
 
-The philosopher Michael Bratman described humans’ practical reasoning via the “beliefs, desires, intentions” framework, 
-as a way to explain future-directed decisionmaking. 
-Successively, the framework was formalised by means of modal logics, and then turned into an abstract semantic for computational agents:
-[AgentSpeak(L)](https://link.springer.com/chapter/10.1007/BFb0031845).
+The philosopher Michael Bratman described humans’ practical reasoning via the “beliefs, desires, intentions” framework,
+as a way to explain future-directed decision making[^bratman].
+Successively, the framework was formalised by means of modal logics[^rao-georgeff], and then turned into an abstract
+semantics for computational agents: AgentSpeak(L)[^agentspeak].
 
-Computational agents are autonomous entities situated into an **environment** they can perceive and affect; 
-they interact either directly or through the environment by means of stigmergy. 
-The classical implementation of BDI agents, based on the Procedural Reasoning System (PRS), 
+Computational agents are autonomous entities situated into an **environment** they can perceive and affect;
+they interact either directly, by exchanging [messages](../interaction/communication.md), or indirectly through the environment,
+by means of [stigmergy](https://en.wikipedia.org/wiki/Stigmergy).
+The classical implementation of BDI agents, based on the Procedural Reasoning System (PRS)[^prs],
 is characterized by four main abstractions, namely:
-- **Beliefs**: a set of facts and rules representing an agent’s epistemic memory, possibly describing its knowledge about the world, itself, and other agents;
-- **Desires**: a set of goals, representing (possibly partial) descriptions of desirable states of the world the agent is willing to achieve, test, or maintain;
+- **[Beliefs](./beliefs.md)**: a set of facts and rules representing an agent’s epistemic memory, possibly describing its knowledge about the world, itself, and other agents;
+- **Desires**: a set of [goals](./goals.md), representing (possibly partial) descriptions of desirable states of the world the agent is willing to achieve, test, or maintain;
 - **Intentions**: a set of tasks the agent is currently committed to, in order to satisfy some of its desires;
-- **Plans**: a set of recipes representing the agent’s procedural memory, hence encoding the know-how about achieving a given intention under certain conditions.
+- **[Plans](./plans.md)**: a set of recipes representing the agent’s procedural memory, hence encoding the know-how about achieving a given intention under certain conditions.
 
-Any instance of the aforementioned abstractions in a BDI agent may vary during its lifetime. 
-For instance, novel beliefs appear in the agents’ minds whenever they receive novel perceptions from their sensors, while stale beliefs simultaneously disappear.
+Any instance of the aforementioned abstractions in a BDI agent may vary during its lifetime. For instance:
+- novel **beliefs** appear in the agent’s mind whenever it receives novel perceptions from its sensors, while stale beliefs disappear;
+- novel **desires** arise when another agent asks for something, or when a plan needs a sub-goal to be accomplished, and they are dropped once achieved or failed;
+- novel **intentions** start whenever the agent commits to a desire by selecting a plan for it; an intention grows as its plan pursues sub-goals, and ends when its plan completes or fails.
 
-While carrying on an intention, agents may select one or more **plans** among those supporting the corresponding intention’s accomplishment. 
-Plans may involve the execution of one or more **actions** – possibly affecting the environment via actuators – or the accomplishment of further sub-goals, which may, in turn, require the execution of further plans as part of the same intention. 
-Finally, agents could even learn entirely new plans, either through reasoning or through information sharing with other agents.
+While carrying on an intention, agents may select one or more **plans** among those supporting the corresponding intention’s accomplishment.
+Plans may involve the execution of one or more **actions** – possibly affecting the environment via actuators, which in JaKtA are [skills](../interaction/acting.md) – or the accomplishment of further sub-goals, which may, in turn, require the execution of further plans as part of the same intention.
 
 <details>
-    <summary>
-        Concerning **intentions**
-    </summary>
+<summary>Why BDI implementations have goals instead of desires</summary>
 
-    Even though **Intentions** are first-citizen elements in BDI concepts, 
-    those are not explicitly represented in agents programs.
-    The purpose of "hiding" this structure is to exacerbate the agent's commitment on acting for reaching its goals.
+In Bratman’s theory, desires and goals are different things. Desires are whatever the agent would like to be true:
+they may be many, and even conflict with each other. Through **deliberation**, the agent picks a consistent subset of
+them to pursue, its goals, and commits to some of these by forming intentions.
+
+BDI implementations following PRS, AgentSpeak(L) included, have no explicit representation of desires: they only have
+goals. A goal is pursued as soon as it is added, by selecting an applicable plan for it, and that plan becomes (part of)
+an intention. Deliberation is thus left to the programmer, who decides *which* goals to add and *when*, and encodes in
+plan guards the conditions under which they are worth pursuing.
+
+JaKtA follows the same approach: what the agent wants is expressed as [goals](./goals.md), and intentions are never
+written in the program either. They are built by the engine at runtime, out of the plans selected for each goal, as
+described in the [execution model](../execution-model.md#intentions-are-coroutines).
 
 </details>
+
+[^bratman]: Michael E. Bratman. *Intention, Plans, and Practical Reason*. Harvard University Press, 1987.
+[^rao-georgeff]: Anand S. Rao, Michael P. Georgeff. [Modeling Rational Agents within a BDI-Architecture](https://dblp.org/rec/conf/kr/RaoG91). KR 1991, pp. 473–484.
+[^agentspeak]: Anand S. Rao. [AgentSpeak(L): BDI Agents Speak Out in a Logical Computable Language](https://link.springer.com/chapter/10.1007/BFb0031845). MAAMAW 1996, LNCS 1038, pp. 42–55.
+[^prs]: Michael P. Georgeff, Amy L. Lansky. [Reactive Reasoning and Planning](https://aaai.org/papers/00677-AAAI87-121-reactive-reasoning-and-planning/). AAAI 1987, pp. 677–682.

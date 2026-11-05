@@ -6,11 +6,21 @@ sidebar_position: 9
 
 The `alchemist-jakta-incarnation` module runs JaKtA nodes as devices of an
 [Alchemist](https://alchemistsimulator.github.io/) simulation: each Alchemist node hosts a JaKtA node,
-agents run in simulated time, and messages travel over Alchemist's network model.
-It requires Java 17+.
-The complete program is the [`alchemist-ping-pong`](https://github.com/jakta-bdi/jakta/tree/main/examples/alchemist-ping-pong)
-example, where Alice and Bob play ping-pong from two devices; run it with `./gradlew :examples:alchemist-ping-pong:run`
-to watch it in Alchemist's viewer.
+agents run in simulated time, and messages travel over Alchemist's network model. It is the way to evaluate a MAS at
+scale, in a reproducible way. It requires Java 17+.
+
+:::warning[Limitations]
+- The entry point is found by reflection: it must be public, and return the result of `device(...)`.
+- Agents cannot be removed from a node during a simulation yet.
+- Behaviour must be defined in JaKtA: Alchemist actions and conditions cannot be set from the YAML file, where only the
+  time distribution (a fixed rate) can be configured.
+:::
+
+:::info[Complete example]
+The [`alchemist-ping-pong`](https://github.com/jakta-bdi/jakta/tree/main/examples/alchemist-ping-pong) example has
+Alice and Bob play ping-pong from two devices: run it with `./gradlew :examples:alchemist-ping-pong:run` to watch it in
+Alchemist's viewer.
+:::
 
 ## Dependencies
 

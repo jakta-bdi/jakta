@@ -140,7 +140,7 @@ agent("name") {
 The standard library offered four internal actions: `print`, `fail` (fail the current plan and select another one),
 `stop` (stop the agent) and `pause(ms)`. There were no standard external actions.
 
-In 1.x, plan bodies are plain Kotlin and capabilities are [skills](../explanation/basic-concepts/skills.md).
+In 1.x, plan bodies are plain Kotlin and capabilities are [skills](../explanation/interaction/acting.md).
 
 ## Environment
 
@@ -207,7 +207,7 @@ In 1.x, the Prolog incarnation adds `untell`, `unachieve` and `askOne`, and anno
 | `beliefs { fact { } ; rule { } }` | `believes { +initialBelief { } ; +inferenceRule { } }` |
 | `goals { achieve(...) ; test(...) }` | `hasInitialGoals { !initialGoal { } }`; test goals are replaced by guards (`satisfies`) |
 | `+achieve(g) onlyIf { } then { }` | `adding.goal { matchingGoal { g } } onlyWhen { } triggers { }` |
-| `execute("print"(...))`, `actions { action(...) { } }` | Plain Kotlin in plan bodies, and [skills](../explanation/basic-concepts/skills.md) through context parameters |
+| `execute("print"(...))`, `actions { action(...) { } }` | Plain Kotlin in plan bodies, and [skills](../explanation/interaction/acting.md) through context parameters |
 | `environment { }`, `.fromPercept` beliefs | [Nodes](../explanation/nodes.md): perceptions published on the node, turned into beliefs by each agent |
 | Messages sent through environment actions | `MessagingSkill` and [KQML messaging](../explanation/incarnations/prolog/kqml.md) |
 | Custom concurrency models | A coroutine-based engine: each intention is a coroutine, see the [execution model](../explanation/execution-model.md) |

@@ -2,18 +2,45 @@
 sidebar_position: 2
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 # Beliefs
 
-Beliefs are a fundamental concept in the **Belief-Desire-Intention (BDI)** model: they are the agent's knowledge
-about the world, itself, and other agents. Beliefs change as the agent perceives, receives messages, or acts.
+Beliefs are a fundamental concept in the [BDI](./bdi.mdx) model: they are the agent's knowledge about the world,
+itself, and other agents. Beliefs change as the agent [perceives](../interaction/perception.md), receives
+[messages](../interaction/communication.md), or acts.
 
-The type of a belief is chosen by the [incarnation](../incarnations/index.md).
-The examples below use the **Prolog incarnation**, where a belief is a Prolog clause (`PrologBelief`, a
-[2P-Kt](https://tuprolog.github.io/2p-kt/) `Rule`): either a **fact** or an **inference rule**.
+A belief can be any Kotlin type: a string, a data class, an enum. Beliefs are compared with `equals`, so the belief
+base never holds the same belief twice. An [incarnation](../incarnations/index.md) can fix a richer type: with the
+Prolog incarnation, a belief is a Prolog fact or inference rule.
+
+:::tip
+The examples come in two flavours: plain **Kotlin** types, and the **Prolog** incarnation. Pick one tab, and every
+page keeps showing that one.
+:::
 
 ## Initial beliefs
 
-Initial beliefs are declared with `believes { }`, adding each belief with `+`:
+Initial beliefs are declared with `believes { }`, adding each belief with `+`.
+They can also be added one at a time with `addBelief(belief)` in the agent builder.
+
+<Tabs groupId="incarnation" queryString>
+  <TabItem value="kotlin" label="Kotlin" default>
+
+A barista who starts with some coffee beans, from the [sub-goals](../../how-to/sub-goals.md) example:
+
+```kotlin
+agent<String, Task> {
+    embodiedAs { Any() }
+    believes {
+        +"beans"
+    }
+}
+```
+
+  </TabItem>
+  <TabItem value="prolog" label="Prolog">
 
 ```kotlin
 agent<PrologBelief, PrologGoal, Any> {
@@ -26,19 +53,32 @@ agent<PrologBelief, PrologGoal, Any> {
 }
 ```
 
-- `initialBelief { }` creates a fact.
-- `inferenceRule { head impliedBy body }` creates a rule: `sibling(X, Y)` holds whenever its body can be proven.
+`initialBelief { }` creates a fact, and `inferenceRule { head impliedBy body }` a rule: `sibling(X, Y)` holds
+whenever its body can be proven. Inside these blocks you are in the
+[2P-Kt Prolog DSL](https://tuprolog.github.io/2p-kt/reference/prolog-dsl/): strings invoked like functions
+(`"parent"(...)`) build compound terms, and `X`, `Y`, `Z`, ... are logic variables.
 
-Inside these blocks you are in the 2P-Kt Prolog DSL: strings invoked like functions (`"parent"(...)`) build
-compound terms, and `X`, `Y`, `Z`, ... are logic variables. Check out the
-[2P-Kt documentation](https://tuprolog.github.io/2p-kt/reference/prolog-dsl/) for the full syntax.
-
-Beliefs can also be added one at a time with `addBelief(belief)` in the agent builder.
+  </TabItem>
+</Tabs>
 
 ## Updating beliefs from plans
 
-Plan bodies change beliefs with `agent.believe(...)` and `agent.forget(...)`.
-In a Prolog plan use `belief { }`: variables bound by the plan's trigger or guard are substituted in.
+Plan bodies change beliefs with `agent.believe(...)` and `agent.forget(...)`:
+
+<Tabs groupId="incarnation" queryString>
+  <TabItem value="kotlin" label="Kotlin" default>
+
+```kotlin
+adding.goal { this as? Grind } triggers {
+    agent.print("Grinding the beans")
+    agent.forget("beans")
+}
+```
+
+  </TabItem>
+  <TabItem value="prolog" label="Prolog">
+
+Build the belief with `belief { }`, so that the variables bound by the plan's trigger or guard are substituted in:
 
 ```kotlin
 prologPlan {
@@ -51,51 +91,53 @@ prologPlan {
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## Querying beliefs
 
-- In plan **guards**, `satisfies { query }` succeeds if the query can be proven from the current beliefs,
-  binding its variables. See [Plans](./plans.md#guards).
-- In plan **bodies**, `testQuery { query }` does the same and fails the plan if the query does not hold.
-- `agent.beliefs` gives direct access to the belief base, for instance `agent.beliefs.unifiesWith(query)`.
+Plan [guards](./plans.md#guards) read the current belief base as `beliefs`, and plan bodies as `agent.beliefs`.
 
-## Belief sources
+<Tabs groupId="incarnation" queryString>
+  <TabItem value="kotlin" label="Kotlin" default>
 
-Beliefs coming from other agents are annotated with their **source**, like in Jason.
-A belief received through [KQML messaging](../incarnations/prolog/kqml.md)
-can be matched with `[source(X)]`, binding `X` to the sender:
+The belief base is a collection, queried like any other: grinding is applicable only while there are beans.
 
 ```kotlin
-prologPlan {
-    adding.belief {
-        matchingBelief { "ping"(1)[source(X)] }
-    } triggers {
-        agent.print("Received a ping from ", X)
-    }
+adding.goal { this as? Grind } onlyWhen { context.takeIf { "beans" in beliefs } } triggers {
+    // ...
 }
 ```
 
-`source` and the `[...]` annotation operator are imported from `it.unibo.jakta` (`import it.unibo.jakta.source`,
-`import it.unibo.jakta.get`).
+  </TabItem>
+  <TabItem value="prolog" label="Prolog">
 
-## Perceptions
+Beliefs are queried by proving a goal against them, rules included, which binds the query's variables:
 
-Agents do not share a global belief base: what an agent perceives from its [node](../nodes.md)
-is converted into belief updates by the agent itself, with `handlesPerceptionEvents`:
+- in guards, `satisfies { query }` succeeds if the query can be proven;
+- in bodies, `testQuery { query }` does the same, and makes the plan [fail](./goals.md#failure) if it cannot;
+- `agent.beliefs.unifiesWith(query)` checks a single belief.
 
 ```kotlin
-handlesPerceptionEvents {
-    when (it) {
-        is BlocksWorldPerception -> handleBlocksWorldPerceptions(it, beliefs)
-        else -> null
-    }
+onlyWhen {
+    satisfies { "sibling"("bob", S) }
 }
 ```
 
-The handler returns an `AgentUpdate.Belief(additions, removals)` or `null` to ignore the perception.
-It can read the current `beliefs`, so it can replace stale perceived facts
-(see [`BlocksWorldSkills.kt`](https://github.com/jakta-bdi/jakta/blob/main/examples/blocksworld/src/commonMain/kotlin/BlocksWorldSkills.kt)).
+Beliefs told by other agents are also annotated with their **source**, as in Jason, and plans can match on it: see
+[Annotations and sources](../incarnations/prolog/2p-kt.md#annotations-and-sources).
+
+  </TabItem>
+</Tabs>
+
+## Perceptions and messages
+
+Agents do not share a global belief base: each agent turns what it perceives from its node into its own beliefs, with
+`handlesPerceptionEvents` (see [Perception](../interaction/perception.md)), and does the same with the messages it
+receives, with `handlesMessageEvents` (see [Receiving messages](../interaction/communication.md#the-receiver-decides-what-a-message-means)).
 
 ## Belief events
 
 Every change to the belief base generates an event that can trigger plans:
-`adding.belief { }` reacts to additions and `removing.belief { }` to removals. See [Plans](./plans.md).
+`adding.belief { }` reacts to additions and `removing.belief { }` to removals. See [Triggers](./plans.md#triggers).
+Adding a belief already present, or removing one that is not, changes nothing and triggers no plan.
