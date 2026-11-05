@@ -136,7 +136,7 @@ const config: Config = {
 
   themeConfig: {
     // Replace with your project's social card
-    image: 'img/jakta-social.png',
+    image: 'img/jakta-social.jpg',
     colorMode: {
       defaultMode: 'light',
       disableSwitch: false,
