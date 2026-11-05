@@ -30,7 +30,7 @@ import org.apache.commons.math3.random.RandomGenerator
  * Jakta incarnation for executing on Alchemist.
  */
 class JaktaIncarnation<P : Position<P>> : Incarnation<Any?, P> {
-    override fun getProperty(node: Node<Any?>, molecule: Molecule, property: String): Double =
+    override fun getProperty(node: Node<Any?>, molecule: Molecule, property: String?): Double =
         when (val concentration = node.getConcentration(molecule)) {
             is Number -> concentration.toDouble()
             is String -> concentration.toDoubleOrNull()
