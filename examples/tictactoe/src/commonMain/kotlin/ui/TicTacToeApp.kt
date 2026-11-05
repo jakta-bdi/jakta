@@ -65,18 +65,11 @@ fun TicTacToeApp(app: TicTacToeAppState) {
                     Text(difficulty.name.lowercase())
                 }
             }
-            Text("Size", modifier = Modifier.padding(start = 16.dp))
+            Text("Size · ${BoardState(app.size).winLength} in a row", modifier = Modifier.padding(start = 16.dp))
             for (size in BOARD_SIZES) {
                 val selected = size == app.size
                 OutlinedButton(onClick = { app.changeSize(size) }, enabled = !selected) { Text("$size×$size") }
             }
-            Text("Agents think: ${app.thinkTime.inWholeMilliseconds} ms", modifier = Modifier.padding(start = 16.dp))
-            Slider(
-                value = app.thinkTime.inWholeMilliseconds.toFloat(),
-                onValueChange = { app.thinkTime = it.roundToInt().milliseconds },
-                valueRange = 0f..MAX_THINK_TIME_MS,
-                modifier = Modifier.width(200.dp),
-            )
         }
 
         Divider()
@@ -89,6 +82,15 @@ fun TicTacToeApp(app: TicTacToeAppState) {
             ) {
                 Text(status(board, app), style = MaterialTheme.typography.h5)
                 BoardView(board, onClick = app::click, modifier = Modifier.weight(1f))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("Agents think: ${app.thinkTime.inWholeMilliseconds} ms")
+                    Slider(
+                        value = app.thinkTime.inWholeMilliseconds.toFloat(),
+                        onValueChange = { app.thinkTime = it.roundToInt().milliseconds },
+                        valueRange = 0f..MAX_THINK_TIME_MS,
+                        modifier = Modifier.width(240.dp).padding(start = 12.dp),
+                    )
+                }
             }
             AgentTracePanel(modifier = Modifier.width(420.dp).fillMaxHeight())
         }

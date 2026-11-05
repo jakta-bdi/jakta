@@ -3,7 +3,7 @@ slug: paper-dblp-conf-acsos-baiardi24
 title: "New Publication: Supporting Autonomic Computing via BDI Tooling"
 date: 2024-01-01
 authors: [anitvam]
-tags: [jakta, paper]
+tags: [paper]
 ---
 
 A new paper related to JaKtA has been published at IEEE International Conference on Autonomic Computing and Self-Organizing Systems, ACSOS 2024 - Companion, Aarhus, Denmark, September 16-20, 2024 (2024).

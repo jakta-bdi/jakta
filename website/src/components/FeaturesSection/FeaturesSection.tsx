@@ -4,7 +4,9 @@ import BlendingIconRaw from '@site/static/img/blending.svg';
 import MultiplatformIconRaw from '@site/static/img/multiplatform.svg';
 // Remove width/height attributes from SVGs by wrapping them
 function stripSizeProps(IconComponent: React.ComponentType<any>) {
-  return (props: any) => <IconComponent {...props} width={undefined} height={undefined} />;
+  return function StrippedIcon(props: any) {
+    return <IconComponent {...props} width={undefined} height={undefined} />;
+  };
 }
 
 const ConfigurationIcon = stripSizeProps(ConfigurationIconRaw);
@@ -22,7 +24,7 @@ function InfoCard() {
           JaKtA is an agent-oriented programming framework for building robust
           intelligent agents using the Belief-Desire-Intention (BDI) cognitive
           architecture.
-          It's implemented in <a target="_blank" href="https://kotlinlang.org/">Kotlin</a> and aims to simplify the development of complex agent-based systems by leveraging the language's modern features and concise syntax.
+          It&apos;s implemented in <a target="_blank" rel="noreferrer" href="https://kotlinlang.org/">Kotlin</a> and aims to simplify the development of complex agent-based systems by leveraging the language&apos;s modern features and concise syntax.
           Thanks to Kotlin multi-paradigm design, JaKtA agents seamlessly interoperate with Object-Oriented and Functional Programming, making BDI agents approachable for a wide range of developers.
           Kotlin multiplatform support also opens the door for JaKtA agents to run on various platforms, from servers to mobile devices.
         </p>
@@ -57,10 +59,10 @@ export default function FeaturesSection() {
         <p>Mix Functional and Object-Oriented programming within your MAS codebase</p>
       </FeatureCard>
       <FeatureCard Icon={MultiplatformIcon} title="Multi Platform">
-        <p>Write once, run on JVM, JS, Native, Android, and iOS</p>
+        <p>Write once, run on the JVM, in JavaScript (browser and Node.js), and natively on Linux, Windows, macOS and iOS</p>
       </FeatureCard>
       <FeatureCard Icon={ConfigurationIcon} title="Configurable">
-        <p>Control concurrency and knowledge representation models</p>
+        <p>Plug in the knowledge representation (Prolog, strings, or your own types) and the execution model, from coroutines to Alchemist simulations</p>
       </FeatureCard>
     </section>
   );
