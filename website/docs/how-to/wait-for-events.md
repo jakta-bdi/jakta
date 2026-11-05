@@ -23,7 +23,7 @@ Use `delay` from `kotlinx.coroutines`:
 ```
 
 :::tip
-In [Alchemist simulations](./alchemist.md), `delay` advances in **simulated** time.
+In [Alchemist simulations](./alchemist.md), `delay` and the timeouts of `wait` advance in **simulated** time.
 :::
 
 ## Wait for an event

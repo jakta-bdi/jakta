@@ -56,16 +56,19 @@ fun <P : Position<P>> JaktaForAlchemistRuntime<P>.entrypoint() = device(NodeBuil
 
 ## Use simulated time
 
-`delay` advances in simulated time, and `alchemistEnvironment` gives access to the Alchemist environment
-and simulation:
+`delay` advances in simulated time, where a time unit is a second, and so do timeouts: those of `agent.wait`, of the
+KQML asks, and `withTimeout`. `alchemistEnvironment` gives access to the Alchemist environment and simulation:
 
 ```kotlin
 } triggers {
     agent.print("Time: ${alchemistEnvironment.simulation.time}")
-    delay(5000.milliseconds)
+    delay(1500.milliseconds)
     agent.print("Time after delay: ${alchemistEnvironment.simulation.time}")
 }
 ```
+
+A delay or timeout ends at the first step of the device at or after its deadline, so the program's
+`time-distribution` (see below) sets their precision: with a rate of 10, steps are 0.1 time units apart.
 
 ## Configure the simulation
 
