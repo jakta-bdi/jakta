@@ -28,6 +28,20 @@
   gap: 0.75rem;
 }
 
+/* Negative of the primary button: purple text and border, no fill; a darker purple on hover. */
+.helloButtons .showcaseButton,
+.helloButtons .showcaseButton:hover {
+  --ifm-button-border-width: 2px;
+  --ifm-button-background-color: transparent;
+  --ifm-button-border-color: var(--ifm-color-primary);
+  --ifm-button-color: var(--ifm-color-primary);
+}
+
+.helloButtons .showcaseButton:hover {
+  --ifm-button-border-color: var(--ifm-color-primary-dark);
+  --ifm-button-color: var(--ifm-color-primary-dark);
+}
+
 @media (max-width: 996px) {
   .helloSection {
     width: calc(100% - 2rem);

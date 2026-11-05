@@ -52,7 +52,7 @@ export default function HelloWorldSection() {
           <Link className="button button--primary" to="/docs/tutorials/hello-world">
             Walk through the example
           </Link>
-          <Link className="button button--secondary" to="/docs/showcase/blocksworld">
+          <Link className={`button button--outline button--primary ${styles.showcaseButton}`} to="/docs/showcase/blocksworld">
             Try the showcase in your browser
           </Link>
         </div>
