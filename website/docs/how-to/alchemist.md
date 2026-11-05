@@ -67,8 +67,9 @@ KQML asks, and `withTimeout`. `alchemistEnvironment` gives access to the Alchemi
 }
 ```
 
-A delay or timeout ends at the first step of the device at or after its deadline, so the program's
-`time-distribution` (see below) sets their precision: with a rate of 10, steps are 0.1 time units apart.
+The program's `time-distribution` (see below) is how often the agent thinks: with a rate of 10, it takes a reasoning
+step every 0.1 time units. An agent only notices time passing when it thinks, so a delay or timeout ends at its first
+step at or after the deadline: with a rate of 1, a 1.5 s delay ends after 2 s.
 
 ## Configure the simulation
 
