@@ -1,0 +1,109 @@
+---
+sidebar_position: 9
+---
+
+# Simulate a MAS with Alchemist
+
+The `alchemist-jakta-incarnation` module runs JaKtA nodes as devices of an
+[Alchemist](https://alchemistsimulator.github.io/) simulation: each Alchemist node hosts a JaKtA node,
+agents run in simulated time, and messages travel over Alchemist's network model. It is the way to evaluate a MAS at
+scale, in a reproducible way. It requires Java 17+.
+
+:::warning[Limitations]
+- The entry point is found by reflection: it must be public, and return the result of `device(...)`.
+- Agents cannot be removed from a node during a simulation yet.
+- Behaviour must be defined in JaKtA: Alchemist actions and conditions cannot be set from the YAML file, where only the
+  time distribution (a fixed rate) can be configured.
+:::
+
+:::info[Complete example]
+The [`alchemist-ping-pong`](https://github.com/jakta-bdi/jakta/tree/main/examples/alchemist-ping-pong) example has
+Alice and Bob play ping-pong from two devices: run it with `./gradlew :examples:alchemist-ping-pong:run` to watch it in
+Alchemist's viewer.
+:::
+
+## Dependencies
+
+```kotlin
+dependencies {
+    implementation("it.unibo.jakta:alchemist-jakta-incarnation:<VERSION>")
+    implementation("it.unibo.jakta:jakta-core:<VERSION>")
+}
+```
+
+## Define the device
+
+An entry point is an extension function on `JaktaForAlchemistRuntime` that builds a device with
+`device(NodeBuilders.alchemistNode()) { node { ... } }`; agents are defined inside as usual.
+`device` and `alchemistNode` come from `it.unibo.jakta.dsl`, `JaktaForAlchemistRuntime` from
+`it.unibo.alchemist.jakta.properties`.
+
+```kotlin
+@file:JvmName("PingPong")
+
+package my.simulation
+
+fun <P : Position<P>> JaktaForAlchemistRuntime<P>.entrypoint() = device(NodeBuilders.alchemistNode()) {
+    node {
+        context(MessagingSkill(node)) {
+            agent(BaseAgentID("Alice")) {
+                // as in any other node
+            }
+        }
+    }
+}
+```
+
+## Use simulated time
+
+`delay` advances in simulated time, where a time unit is a second, and so do timeouts: those of `agent.wait`, of the
+KQML asks, and `withTimeout`. `alchemistEnvironment` gives access to the Alchemist environment and simulation:
+
+```kotlin
+} triggers {
+    agent.print("Time: ${alchemistEnvironment.simulation.time}")
+    delay(1500.milliseconds)
+    agent.print("Time after delay: ${alchemistEnvironment.simulation.time}")
+}
+```
+
+The program's `time-distribution` (see below) is how often the agent thinks: with a rate of 10, it takes a reasoning
+step every 0.1 time units. An agent only notices time passing when it thinks, so a delay or timeout ends at its first
+step at or after the deadline: with a rate of 1, a 1.5 s delay ends after 2 s.
+
+## Configure the simulation
+
+Select the `jakta` incarnation in the Alchemist YAML file, and point each program to the entry point
+(the JVM class name set by `@file:JvmName`, followed by the function name):
+
+```yaml
+incarnation: jakta
+
+network-model:
+  type: ConnectWithinDistance
+  parameters: [ 5 ]
+
+deployments:
+  - type: Point
+    parameters: [ 2, 2 ]
+    programs:
+      - program: my.simulation.PingPong.entrypoint
+        time-distribution: 1
+```
+
+Then run it as any Alchemist simulation, e.g. programmatically:
+
+```kotlin
+val simulation = LoadAlchemist.from(yamlUrl).getDefault<Any, Euclidean2DPosition>()
+simulation.play()
+simulation.run()
+```
+
+To watch it, add Alchemist's viewer (`it.unibo.alchemist:alchemist-swingui`, at Alchemist's version) and attach it to
+the simulation before running it:
+
+```kotlin
+val viewer = SwingGUI<Any, Euclidean2DPosition>(simulation.environment)
+viewer.isRealTime = true
+simulation.addOutputMonitor(viewer)
+```

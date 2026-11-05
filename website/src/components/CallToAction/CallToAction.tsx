@@ -3,7 +3,7 @@ import React from 'react';
 import styles from './CallToAction.module.css';
 import { Icon } from '@iconify/react';
 
-const CTA_URL = 'https://github.com/jakta-bdi';
+const CTA_URL = 'https://github.com/jakta-bdi/';
 
 export default function CallToAction() {
   return (
