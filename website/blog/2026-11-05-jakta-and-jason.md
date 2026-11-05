@@ -1,0 +1,39 @@
+---
+slug: jakta-and-jason
+title: "Jason-like Kotlin Agents: where JaKtA comes from"
+authors: [samubura]
+tags: [community]
+---
+
+JaKtA started as a new implementation of [Jason](https://jason-lang.github.io/), the interpreter for an extended
+version of [AgentSpeak(L)](https://link.springer.com/chapter/10.1007/BFb0031845), written in Kotlin.
+The name was originally an acronym for **Jason-like Kotlin Agents**. With 1.x it no longer is.
+
+<!-- truncate -->
+
+## JaKtA 0.x: Jason-like agents in Kotlin
+
+[JaKtA 0.x](/docs/jakta-0x) brought AgentSpeak-style agents into Kotlin, as an internal DSL instead of a separate
+language. It followed Jason closely: beliefs and goals were always Prolog terms, goals were either achievement or
+test goals, and agents acted on an environment through actions. The aim was to explore paradigm blending:
+writing BDI agents with the same syntax and tools as ordinary object-oriented and functional Kotlin code.
+
+## JaKtA 1.x: moving away from Jason
+
+[JaKtA 1.x](/blog/jakta-1-0) keeps the BDI model, but is no longer an AgentSpeak(L) implementation:
+
+- **Knowledge representation is generic.** Beliefs and goals are not tied to Prolog terms: an
+  [incarnation](/docs/explanation/incarnations) chooses them, and also defines how plan triggers and guards match.
+- **Plan bodies are Kotlin.** They are ordinary `suspend` functions instead of AgentSpeak body formulas,
+  and test goals are replaced by guards.
+- **The engine is coroutine-based.** Each intention is a coroutine, see the
+  [execution model](/docs/explanation/execution-model).
+- **Agents live in nodes**, not in a Jason-style environment, and act through [skills](/docs/explanation/basic-concepts/skills)
+  instead of environment actions.
+
+## Jason is still an influence
+
+The [Prolog incarnation](/docs/explanation/incarnations/prolog) supports belief sources and KQML messaging in the
+style of Jason, which makes [porting Jason programs](/docs/how-to/prolog/port-jason) straightforward
+(see the [Blocks World](/docs/showcase/blocksworld) showcase). But it is one incarnation among others, and today
+JaKtA is just a name rather than an acronym.

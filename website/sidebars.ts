@@ -46,6 +46,7 @@ const sidebars: SidebarsConfig = {
         'reference/dsl',
         'reference/modules',
         'reference/string-incarnation',
+        'reference/jakta-0x',
         {
           type: 'category',
           label: 'API',
@@ -83,9 +84,6 @@ const sidebars: SidebarsConfig = {
       ]),
       { type: 'doc', id: 'reference/prolog-incarnation', label: 'Reference' },
     ]),
-    // Where JaKtA comes from: the older versions and the relation to Jason.
-    { type: 'html', value: '<hr class="sidebar-separator" />' },
-    category('History', ['history/jakta-1-x', 'history/jakta-0x', 'history/jakta-and-jason']),
   ],
 };
 

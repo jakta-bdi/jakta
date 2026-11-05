@@ -82,4 +82,4 @@ Unlike Jason, questions need an answering plan: see [Ask and answer with KQML](.
 - **A belief has a single source**: a belief told by two agents is kept once (see
   [caveats](../../explanation/incarnations/prolog/caveats.md#a-belief-has-a-single-source)).
 
-See [Jason-like Kotlin Agents](../../history/jakta-and-jason.md) for how JaKtA relates to Jason.
+See [Jason-like Kotlin Agents](/blog/jakta-and-jason) for how JaKtA relates to Jason.

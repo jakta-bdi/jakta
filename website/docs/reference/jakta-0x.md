@@ -1,6 +1,6 @@
 ---
 sidebar_label: JaKtA 0.x (deprecated)
-sidebar_position: 2
+sidebar_position: 5
 slug: /jakta-0x
 ---
 
@@ -72,7 +72,7 @@ environment, or the name of the agent that sent it in a message. Plans selected 
 
 ## Goals
 
-Goals were either **achievement** goals, satisfied by running a plan, or **test** goals, answered first from the
+Goals were either **achievement** goals, satisfied by running a plan, or **test** goals, answered by querying the
 belief base. Initial goals were declared in the `goals { }` block:
 
 ```kotlin

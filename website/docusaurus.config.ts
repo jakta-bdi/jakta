@@ -54,7 +54,8 @@ const config: Config = {
         blogDescription: 'Release notes of every JaKtA version',
         blogSidebarTitle: 'All releases',
         blogSidebarCount: 'ALL',
-        postsPerPage: 20,
+        // One page, so that the sidebar entries are anchors on it (see src/theme/BlogSidebar).
+        postsPerPage: 'ALL',
         showReadingTime: false,
         onUntruncatedBlogPosts: 'ignore',
         feedOptions: {
@@ -109,8 +110,8 @@ const config: Config = {
         },
         blog: {
           showReadingTime: true,
-          blogSidebarTitle: 'Recent posts',
-          blogSidebarCount: 10,
+          // No sidebar: the post list is a card grid with a topic bar (see src/theme/BlogPostItems).
+          blogSidebarCount: 0,
           postsPerPage: 12,
           feedOptions: {
             type: ['rss', 'atom'],
@@ -205,22 +206,9 @@ const config: Config = {
               label: 'Showcase',
               to: '/docs/showcase/blocksworld',
             },
-          ],
-        },
-        {
-          title: 'History',
-          items: [
-            {
-              label: 'JaKtA 1.x redesign',
-              to: '/docs/history/jakta-1-x',
-            },
             {
               label: 'JaKtA 0.x (deprecated)',
               to: '/docs/jakta-0x',
-            },
-            {
-              label: 'Jason-like Kotlin Agents',
-              to: '/docs/history/jakta-and-jason',
             },
           ],
         },

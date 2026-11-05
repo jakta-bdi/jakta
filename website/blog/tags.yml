@@ -1,12 +1,7 @@
-jakta:
-  label: JaKtA
-  permalink: /jakta
-  description: General news about JaKtA
-
 community:
   label: Community
   permalink: /community
-  description: News about the JaKtA community and website
+  description: News about JaKtA and its community
 
 paper:
   label: Papers
