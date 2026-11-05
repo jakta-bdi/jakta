@@ -1,4 +1,5 @@
 import {themes as prismThemes} from 'prism-react-renderer';
+import tableCodeBreaks from './src/plugins/table-code-breaks.mjs';
 import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 
@@ -100,6 +101,8 @@ const config: Config = {
   },
   ],
 
+  clientModules: ['./src/clientModules/fitTables.js'],
+
   presets: [
     [
       'classic',
@@ -107,6 +110,7 @@ const config: Config = {
         docs: {
           sidebarPath: './sidebars.ts',
           editUrl: websiteURL,
+          rehypePlugins: [tableCodeBreaks],
         },
         blog: {
           showReadingTime: true,

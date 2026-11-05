@@ -100,3 +100,36 @@ html {
 .examples-table td:first-child {
   white-space: nowrap;
 }
+
+/* Tables always fit the content column: Infima makes them scrollable blocks, so wide ones overflow sideways.
+   As real tables at full width they wrap instead: prose between words, inline code at its punctuation (see
+   src/plugins/table-code-breaks.mjs). */
+.markdown table {
+  display: table;
+  width: 100%;
+}
+
+.markdown table th,
+.markdown table td {
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+.markdown table code {
+  white-space: normal;
+}
+
+/* Set by src/clientModules/fitTables.js on a table that would overflow: first smaller text, then any word may break. */
+.markdown table.table--compact {
+  font-size: 0.85rem;
+}
+
+.markdown table.table--compact th,
+.markdown table.table--compact td {
+  padding: 0.4rem 0.5rem;
+}
+
+.markdown table.table--squeeze th,
+.markdown table.table--squeeze td {
+  overflow-wrap: anywhere;
+}
