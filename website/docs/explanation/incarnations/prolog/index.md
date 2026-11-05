@@ -55,6 +55,7 @@ agent<PrologBelief, PrologGoal, Any> {
 - [Caveats](./caveats.md): the surprises to know about before you start.
 
 To get things done, see the Prolog how-to guides: [write guards and inference rules](../../../how-to/prolog/guards-and-rules.md),
+[define your Prolog vocabulary in Kotlin](../../../how-to/prolog/vocabulary.md),
 [ask and answer with KQML](../../../how-to/prolog/kqml.md), [turn perceptions into Prolog facts](../../../how-to/prolog/perceptions.md)
 and [port a Jason agent](../../../how-to/prolog/port-jason.md).
 For the full list of functions, see the [Prolog Incarnation Reference](../../../reference/prolog-incarnation.md).

@@ -73,6 +73,7 @@ const sidebars: SidebarsConfig = {
       {type: 'doc', id: 'explanation/incarnations/prolog/index', label: 'Overview'},
       category('How-to Guides', [
         'how-to/prolog/guards-and-rules',
+        'how-to/prolog/vocabulary',
         'how-to/prolog/perceptions',
         'how-to/prolog/kqml',
         'how-to/prolog/port-jason',
