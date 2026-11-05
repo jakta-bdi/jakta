@@ -11,7 +11,7 @@ This tutorial builds a two-agent *ping-pong* system. Along the way it shows how 
 - use your own Kotlin types as beliefs and goals, without any incarnation;
 - turn incoming messages into beliefs;
 - react to belief additions with plans;
-- give agents a [skill](../explanation/basic-concepts/skills.md) — here, the ability to send messages.
+- give agents a [skill](../explanation/interaction/acting.md) — here, the ability to send messages.
 
 It runs in the project from [Getting Started](./index.mdx): put the code in `App.kt`, as in [Hello world](./hello-world.md),
 and run it with `./gradlew run`. The complete program is also the
@@ -105,9 +105,11 @@ a server or a phone, each running several agents of the same MAS. Here every nod
 (`runLocally()` connects them through shared memory), but agents on different nodes still interact only by
 messages, as they would across a network. See [Nodes](../explanation/nodes.md).
 
+:::info[Why two nodes?]
 Alice and Bob live on separate nodes, so each of them can stop when done: `node.terminateNode()` stops only the
 node of the agent calling it. On a shared node, Bob stopping after his answer would stop Alice too, before she
 gets the pong.
+:::
 
 Alice is defined inline, directly on her node, and Bob lives on another node, added with `withAgents`.
 Each node gives its agents a `MessagingSkill` of its own, and messages cross nodes, so Alice reaches Bob on his node:
@@ -166,12 +168,12 @@ A few things to notice:
 - **Skills are given by the node.** `context(MessagingSkill(node)) { ... }` makes the messaging skill available
   to every agent defined or added inside the block, and `agent.sendTo(...)` only compiles there.
   A reusable agent like Bob declares the skills it needs with `context(...)`, and the node hosting it provides them.
-  See [Skills](../explanation/basic-concepts/skills.md) to write your own.
+  See [Skills](../explanation/interaction/acting.md) to write your own.
 - **The MAS ends with its last node.** `runLocally()` returns when every node has terminated.
 
-## Going further
-
-- The Prolog incarnation ships [KQML messaging](../explanation/incarnations/prolog/kqml.md):
-  `tell`, `achieve`, `askOne`, ... with `[source(X)]` annotations on received beliefs.
+:::tip[Going further]
+The Prolog incarnation ships [KQML messaging](../explanation/incarnations/prolog/kqml.md):
+`tell`, `achieve`, `askOne`, ... with `[source(X)]` annotations on received beliefs.
+:::
 
 Next: [Advanced: Thermostat](./thermostat.md), an agent interacting with an external environment.

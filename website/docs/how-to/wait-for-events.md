@@ -6,8 +6,11 @@ sidebar_position: 6
 
 Plan bodies are `suspend` functions running on coroutines, so an intention can pause, for some time or until
 something happens, without blocking the agent: its other intentions keep running meanwhile.
-The complete program is the [`wait-for-events`](https://github.com/jakta-bdi/jakta/tree/main/examples/wait-for-events)
-example; run it with `./gradlew :examples:wait-for-events:run`.
+
+:::info[Complete example]
+The [`wait-for-events`](https://github.com/jakta-bdi/jakta/tree/main/examples/wait-for-events) example; run it with
+`./gradlew :examples:wait-for-events:run`.
+:::
 
 ## Wait for some time
 

@@ -129,7 +129,7 @@ class Hvac(private val room: Room) {
 
 A skill is an ordinary object. As in the [ping-pong tutorial](./ping-pong.md), the agent states that it needs the
 skill with `context(hvac: Hvac)`, and the node it runs on provides it (see [Run it](#6-run-it)).
-See [Skills](../explanation/basic-concepts/skills.md).
+See [Skills](../explanation/interaction/acting.md).
 
 ## 4. Turn perceptions into beliefs
 
@@ -260,22 +260,27 @@ suspend fun runThermostat(room: Room, stepTime: Duration): Unit = coroutineScope
 The node is built on its own with `node(...)`, so that `simulate` can publish perceptions on it, and then added to
 the MAS with `withNodes`. Neither the room nor the agent ever stops: cancelling the coroutine stops both.
 
+<details>
+<summary>How the UI runs it</summary>
+
 The UI ([`ui/ThermostatApp.kt`](https://github.com/jakta-bdi/jakta/blob/main/examples/thermostat/src/commonMain/kotlin/ui/ThermostatApp.kt))
 starts it in a `LaunchedEffect` when it is shown, draws the room from `room.state`, and adds an *agent trace* of
 what the thermostat prints.
 
-## Things to try
+</details>
 
+:::tip[Things to try]
 - Drag the room temperature below the target: the agent starts heating; above it, cooling.
 - Set the outside to -10 °C: the heating cannot keep up, and the agent keeps heating at full power.
 - Add a `Mode.ECO` with less power, and a plan that uses it when the temperature is only slightly low.
 - Add a second room with its own thermostat on the same node: both receive every reading, so give `RoomReading` a
   room name and let each agent ignore the other room's readings.
+:::
 
-## Going further
-
+:::info[Going further]
 - [Connect agents to an external environment](../how-to/connect-environment.md) and [Give agents a body](../how-to/custom-body.md)
   collect the patterns of this tutorial.
 - The [showcase](../showcase/vacuum-world.md) runs larger agents written with the
   [Prolog incarnation](../explanation/incarnations/prolog/index.md), where beliefs are logic terms and plans
   are selected by unification.
+:::

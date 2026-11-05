@@ -48,7 +48,10 @@ The [Prolog incarnation](./explanation/incarnations/prolog/index.md) makes them 
 - [**Explanation**](./explanation/basic-concepts/bdi.mdx): the BDI model, incarnations, and how JaKtA runs agents.
 - [**Reference**](./reference/dsl.md): the DSL, the modules, and the API docs.
 
-Using `jakta-prolog-incarnation`? Its guides, explanations and reference have [their own section](./explanation/incarnations/prolog/index.md).
+:::info[Using the Prolog incarnation?]
+`jakta-prolog-incarnation` has [its own section](./explanation/incarnations/prolog/index.md), with its guides,
+explanations and reference.
+:::
 
 :::info[Coming from JaKtA 0.x?]
 The 1.x DSL is not source-compatible with 0.x. See [JaKtA 0.x](/docs/jakta-0x) for the old version and how its

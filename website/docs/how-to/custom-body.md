@@ -110,12 +110,22 @@ class VacuumSkill(node: Node<VacuumBody>) : Skill<VacuumBody>(node) {
 
 In this example the robot perceives only at the end of its actions, and its first plan calls `switchOn` to get a
 first reading. A body whose sensors work on their own can instead publish a reading whenever it changes, from a
-coroutine that runs beside the node; a perception published before its agent joins the node is lost.
+coroutine that runs beside the node.
+
+:::warning
+A perception published before its agent joins the node is lost.
+:::
 
 `with(VacuumSkill(node)) { agent(...) { ... } }` brings the actions into scope, so that plans can call
 `agent.switchOn()` and `agent.clean()`.
+
+<details>
+<summary>Using the skill as a context parameter</summary>
+
 To use a skill as a context parameter instead, as `MessagingSkill` is, add top-level functions such as
 `context(skill: VacuumSkill) suspend fun VacuumAgent.clean() = with(skill) { clean() }`.
+
+</details>
 
 ## Turn readings into beliefs
 
@@ -129,10 +139,10 @@ Here `handleVacuumPerception` turns the reading into `position/2`, `facing/1` an
 plus the `dust_at/2` memory of the dust seen, and returns an `AgentUpdate.Belief` with only what changed
 (see [Turn perceptions into Prolog facts](./prolog/perceptions.md)).
 
-:::note
+:::warning
 Built-in skills such as `MessagingSkill(node)` expect a `Node<Any>`. On a node with a custom body type, define your
 own skills against `Node<YourBody>`, as above.
 :::
 
-For an example with two skills (movement and battery recharging) sharing the same body, see
-[`TestSpatialRobot`](https://github.com/jakta-bdi/jakta/blob/main/jakta-core/src/commonTest/kotlin/it/unibo/jakta/dsl/examples/TestSpatialRobot.kt).
+The [Vacuum World showcase](../showcase/vacuum-world.md#why-the-split-matters) explains why the world, the body, the
+skill and the agent are kept apart.

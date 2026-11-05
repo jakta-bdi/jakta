@@ -9,9 +9,12 @@ An [incarnation](../explanation/incarnations/index.md) is just that choice, plus
 triggers and guards pleasant to write. This guide builds a tiny one where beliefs and goals are plain `Int`s:
 an agent that follows the [Collatz sequence](https://en.wikipedia.org/wiki/Collatz_conjecture) of a number, halving
 it when it is even and tripling it and adding one when it is odd, until it gets back to a number it has already seen.
-The complete program is the [`custom-incarnation`](https://github.com/jakta-bdi/jakta/tree/main/examples/custom-incarnation) example; run it with `./gradlew :examples:custom-incarnation:run`.
-It also has a second agent with numbers as beliefs and goals: a prime sieve, whose belief base is the primes it
-found so far.
+
+:::info[Complete example]
+The [`custom-incarnation`](https://github.com/jakta-bdi/jakta/tree/main/examples/custom-incarnation) example; run it
+with `./gradlew :examples:custom-incarnation:run`. It also has a second agent with numbers as beliefs and goals: a
+prime sieve, whose belief base is the primes it found so far.
+:::
 
 ## 1. Choose the representation
 
@@ -27,8 +30,10 @@ fun collatz(start: Int) = agent<Int, Int, Any> {
 }
 ```
 
+:::info
 Beliefs and goals are compared with `equals` (e.g. when a belief is removed), so any type with a meaningful
 `equals` fits: numbers, strings, data classes.
+:::
 
 ## 2. Write trigger helpers
 
@@ -121,5 +126,7 @@ kotlin {
 
 Applications using the incarnation will still declare `jakta-core` to access the DSL entry points (`mas`, `agent`, ...).
 
+:::tip
 For a richer example, with unification, logic variables in plans and message protocols, look at
 [`jakta-prolog-incarnation`](https://github.com/jakta-bdi/jakta/tree/main/jakta-prolog-incarnation).
+:::

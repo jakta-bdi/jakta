@@ -5,8 +5,11 @@ sidebar_position: 5
 # Add and remove agents at runtime
 
 Plan bodies (and skills) can add agents to their node and remove them while the MAS runs.
-The complete program is the [`runtime-agents`](https://github.com/jakta-bdi/jakta/tree/main/examples/runtime-agents)
-example; run it with `./gradlew :examples:runtime-agents:run`.
+
+:::info[Complete example]
+The [`runtime-agents`](https://github.com/jakta-bdi/jakta/tree/main/examples/runtime-agents) example; run it with
+`./gradlew :examples:runtime-agents:run`.
+:::
 
 ## Define the agent to add
 
@@ -39,8 +42,10 @@ From a plan body, pass the factory to `node.addAgent`:
 node.removeAgent(workerID)
 ```
 
+:::warning
 Both are requests handled by the node runner: the change shows up in `node.agents` shortly after the call,
 not immediately.
+:::
 
 ```mermaid
 sequenceDiagram

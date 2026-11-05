@@ -5,9 +5,12 @@ sidebar_position: 1
 # Create a JaKtA Multi-Agent System
 
 After [setting up your project](../tutorials/index.mdx), a MAS is defined and run from a `main` function.
+
+:::info[Complete example]
 The [`ping-pong`](https://github.com/jakta-bdi/jakta/tree/main/examples/ping-pong) example puts all the steps below
 together, two agents on two nodes, and [Intermediate: Ping-pong agents](../tutorials/ping-pong.md) walks through it;
 run it with `./gradlew :examples:ping-pong:run`.
+:::
 
 ## Define a reusable agent
 
@@ -59,7 +62,7 @@ mas(NodeBuilders.baseNode()) {
 
 Skills are given at the node level: wrap the agents of a node in `context(SomeSkill(node)) { ... }`, both those
 defined inline and those added with `withAgents`. A reusable agent asks for the skills it needs as context parameters,
-like `ponger()` above. See [Skills](../explanation/basic-concepts/skills.md).
+like `ponger()` above. See [Skills](../explanation/interaction/acting.md).
 
 ```kotlin
 node {

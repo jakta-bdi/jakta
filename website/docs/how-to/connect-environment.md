@@ -8,7 +8,7 @@ JaKtA has no environment class: the external environment is **your** Kotlin mode
 Agents are connected to it in two directions:
 
 - **perceiving**: the external environment publishes **perceptions** on the node, and each agent turns them into beliefs;
-- **acting**: a [skill](../explanation/basic-concepts/skills.md) exposes the operations agents can perform on it.
+- **acting**: a [skill](../explanation/interaction/acting.md) exposes the operations agents can perform on it.
 
 The snippets come from the [`thermostat`](https://github.com/jakta-bdi/jakta/tree/main/examples/thermostat) example,
 walked through in the [thermostat tutorial](../tutorials/thermostat.md).
@@ -21,7 +21,9 @@ Any class implementing `AgentEvent.External.Perception` (from `it.unibo.jakta.ev
 data class RoomReading(val temperature: Double, val target: Double, val mode: Mode) : Perception
 ```
 
+:::tip
 Keep perceptions separate from the belief type: each agent decides what a perception means to it.
+:::
 
 ## Publish it
 
@@ -54,8 +56,12 @@ node.publishEvent(reading) { body -> body === node.agents[agentId] }
 ```
 
 This is most useful with [custom bodies](./custom-body.md), e.g. to deliver a sensor reading only to the robot that
-made it. Perceptions only reach the agents of the node that publishes them; use
-[messages](../explanation/communication.md) to reach other nodes.
+made it.
+
+:::info
+Perceptions only reach the agents of the node that publishes them; use
+[messages](../explanation/interaction/communication.md) to reach other nodes.
+:::
 
 ## Turn perceptions into beliefs
 
@@ -104,9 +110,9 @@ class Hvac(private val room: Room) {
 
 The node provides it to its agents with `context(Hvac(room)) { ... }`, and the agent states that it needs it as a
 context parameter, `context(hvac: Hvac) fun thermostat() = agent { ... }`, so that its plans can call `hvac.heat()`.
-See [Skills](../explanation/basic-concepts/skills.md#skills-are-node-level-abilities).
+See [Skills](../explanation/interaction/acting.md#skills-are-given-by-the-node).
 
-## With the Prolog incarnation
-
+:::info[With the Prolog incarnation]
 The pattern is the same with Prolog beliefs: the perception handler builds Prolog facts and removes the stale ones.
 See [Turn perceptions into Prolog facts](./prolog/perceptions.md).
+:::

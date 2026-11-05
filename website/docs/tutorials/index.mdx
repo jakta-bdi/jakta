@@ -7,11 +7,11 @@ import TabItem from '@theme/TabItem';
 
 # Getting Started
 
-## Prerequisites
-
+:::info[Prerequisites]
 * [Java 17+](https://adoptium.net/)
 * [Kotlin 2.4+](https://kotlinlang.org/docs/releases.html): the DSL relies on [context parameters](https://kotlinlang.org/docs/context-parameters.html)
 * [Gradle](https://docs.gradle.org/current/userguide/getting_started_eng.html)
+:::
 
 ## Set up a project
 
@@ -24,7 +24,10 @@ gradle init --type kotlin-application --dsl kotlin --use-defaults
 ```
 
 Gradle creates the application in the `app` folder, with its code in `app/src/main/kotlin/org/example/App.kt`.
-Check that the Kotlin version in `gradle/libs.versions.toml` is 2.4 or later.
+
+:::warning
+Check that the Kotlin version in `gradle/libs.versions.toml` is 2.4 or later: older versions cannot compile the DSL.
+:::
 
 JaKtA is published on [Maven Central](https://central.sonatype.com/namespace/it.unibo.jakta) under the group `it.unibo.jakta`.
 Add its three core modules to `app/build.gradle.kts`, together with [Kotlin coroutines](https://github.com/Kotlin/kotlinx.coroutines),
@@ -72,8 +75,13 @@ on which agents run, and [Kermit](https://kermit.touchlab.co/), which controls t
 Replace `<VERSION>` with the latest version, from [Maven Central](https://central.sonatype.com/artifact/it.unibo.jakta/jakta-core)
 or the [release notes](/releases).
 
+<details>
+<summary>What the three modules contain</summary>
+
 `jakta-api` holds the contracts (agents, events, plans, nodes), `jakta-dsl` the DSL, and `jakta-core` the engine
 and the DSL entry points (`mas`, `node`, `agent`). See [Modules](../reference/modules.md) for the details.
+
+</details>
 
 You are ready to [write your first agent](./hello-world.md).
 
@@ -94,10 +102,14 @@ dependencies {
 }
 ```
 
-It runs on the JVM and JavaScript. To start right away, use the
-[Prolog incarnation template](https://github.com/jakta-bdi/jakta-prolog-incarnation-template), a project already set up.
+It runs on the JVM and JavaScript.
 
-The [string incarnation](../explanation/incarnations/string.md) is the smallest one, and you can also
+:::tip[Start from a template]
+The [Prolog incarnation template](https://github.com/jakta-bdi/jakta-prolog-incarnation-template) is a project
+already set up with it.
+:::
+
+The [string incarnation](pathname:///api/jakta-string-incarnation/index.html) is the smallest one, and you can also
 [write your own](../how-to/custom-incarnation.md).
 
 ## Next steps

@@ -61,7 +61,9 @@ fun main(): Unit = runBlocking {
 - `Any`, the type of the agent **body**: the agent's embodiment in the node it lives in.
   `embodiedAs { Any() }` creates it. This agent needs no body, so any object will do.
 
+:::info
 `agent { }` at the top level returns a *factory*: the agent is created only when it is added to a node.
+:::
 
 ### Goals
 
@@ -88,6 +90,9 @@ same process. Since it suspends, `main` uses `runBlocking`.
 `Logger.setMinSeverity(Severity.Assert)` hides the engine logs, so that only what agents print is shown
 (see [Logging](../how-to/create-mas.md#logging)).
 
+<details>
+<summary>What <code>runLocally()</code> stands for</summary>
+
 `runLocally()` is a shorthand for running the MAS with a `CoroutineNodeRunner` over a `SharedMemoryNetwork`:
 
 ```kotlin
@@ -95,6 +100,8 @@ mas(NodeBuilders.baseNode()) {
     node { withAgents(helloWorldAgent) }
 }.run(CoroutineNodeRunner(SharedMemoryNetwork()))
 ```
+
+</details>
 
 Run it from the project folder:
 
@@ -108,7 +115,9 @@ The agent prints its message through the logger, with its id:
 Assert: (Agent-1caa7468-e043-462f-ad5b-799f3f7591d2) Hello, world!
 ```
 
+:::tip
 The same code is the [`hello-world`](https://github.com/jakta-bdi/jakta/tree/main/examples/hello-world) example in the
 JaKtA repository, where it runs with `./gradlew :examples:hello-world:run`.
+:::
 
 Next: learn about [beliefs](../explanation/basic-concepts/beliefs.md), or continue with [Intermediate: Ping-pong agents](./ping-pong.md).

@@ -7,8 +7,11 @@ sidebar_position: 5
 A plan can pursue other goals: wait for a **sub-goal** within its own intention, get the result of the plan that
 achieved it, or start a **concurrent intention** and carry on; and when a sub-goal fails, a **failure plan** can
 recover from it. This guide follows a barista serving two orders.
-The complete program is the [`sub-goals`](https://github.com/jakta-bdi/jakta/tree/main/examples/sub-goals) example;
-run it with `./gradlew :examples:sub-goals:run`.
+
+:::info[Complete example]
+The [`sub-goals`](https://github.com/jakta-bdi/jakta/tree/main/examples/sub-goals) example; run it with
+`./gradlew :examples:sub-goals:run`.
+:::
 
 The goals are plain Kotlin types, and each trigger accepts the goals of its type, which become the plan's context:
 
@@ -67,7 +70,9 @@ adding.goal { this as? Open } triggers {
 }
 ```
 
+:::info
 Every initial goal, and every plan triggered by an event, also runs in its own intention.
+:::
 
 ## Recover from a failed sub-goal
 
