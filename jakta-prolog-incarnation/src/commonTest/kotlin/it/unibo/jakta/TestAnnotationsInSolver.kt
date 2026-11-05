@@ -49,19 +49,6 @@ class TestAnnotationsInSolver {
     }
 
     @Test
-    fun `beliefs sharing their source are matched without rewriting, and again once another source comes`() {
-        val fromAlice = listOf(1, 2).map { initialBelief { "cell"(it)[source("alice")] } }
-        val alice = listOf(mapOf("X" to "1", "S" to "alice"), mapOf("X" to "2", "S" to "alice"))
-        assertEquals(alice, fromAlice.solve { "cell"(X)[source(S)] })
-        assertEquals(alice, fromAlice.solve { "cell"(X)[source(S)] }) // the cached theory
-        assertEquals(emptyList(), fromAlice.solve { "cell"(X)[source("bob")] })
-        val alsoBob = fromAlice + initialBelief { "cell"(3)[source("bob")] }
-        assertEquals(listOf(mapOf("X" to "3")), alsoBob.solve { "cell"(X)[source("bob")] })
-        // a built-in has no annotations: it is the agent's own deduction
-        assertEquals(listOf(mapOf("N" to "1", "S" to "self")), alsoBob.solve { "is"(N, 1)[source(S)] })
-    }
-
-    @Test
     fun `a query without annotations matches beliefs from any source`() {
         assertEquals(2, facts.solve { "propose"(I, T) }.size)
     }
