@@ -9,3 +9,4 @@ kotlin-js-store
 *.hprof
 local.properties
 .codacy/
+.claude/
