@@ -66,6 +66,10 @@
     margin-bottom: 0.25rem;
   }
 
+  .memberName span {
+    display: block;
+  }
+
   .teamMember p {
     font-size: 0.9rem;
     margin-bottom: 0.75rem;
