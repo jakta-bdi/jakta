@@ -4,8 +4,8 @@
     width: 100%;
     top: var(--ifm-navbar-height);
     z-index: calc(var(--ifm-z-index-fixed) - 1);
-    background: rgba(30, 30, 30, 0.55);
-    /* Overlay style */
+    /* Over the hero: a translucent plum, from the palette (custom.css). */
+    background: color-mix(in srgb, var(--jakta-plum) 60%, transparent);
     box-shadow: var(--ifm-navbar-shadow);
     transition: background 0.5s;
 }
@@ -23,54 +23,33 @@
     margin: 0 2rem;
 }
 
+/* Once the page scrolls past the hero. */
 .solid {
     background-color: var(--ifm-background-color);
 }
 
-
+/* One colour for all the items (white over the hero, the text colour once scrolled), the others a little dimmer
+   than the active one. The underline, in the same colour, rises from the bottom on hover and stays under the
+   active section. */
 .navLink {
-    color: var(--ifm-color-secondary);
+    color: #fff;
+    opacity: 0.75;
     text-decoration: none;
     font-size: 1.1rem;
     padding-bottom: 4px;
-    border-bottom: 2px solid transparent;
-    transition: color 0.5s;
+    background: linear-gradient(currentColor, currentColor) no-repeat left bottom / 100% 0;
+    transition: opacity 0.2s, background-size 0.3s;
 }
 
-.navLink:hover {
-    color: var(--ifm-color-secondary);
-    text-decoration: none;
-    border-bottom: 2px solid var(--ifm-color-secondary);
-}
-
+.navLink:hover,
 .active {
-    border-bottom: 2px solid var(--ifm-color-secondary);
+    color: #fff;
+    opacity: 1;
+    text-decoration: none;
+    background-size: 100% 2px;
 }
 
-.solid .navLink {
-    color: var(--ifm-color-primary);
-}
-
+.solid .navLink,
 .solid .navLink:hover {
-    color: var(--ifm-color-primary);
-    text-decoration: none;
-    border-bottom: 3px solid var(--ifm-color-primary);
-}
-
-.solid .active {
-    border-bottom: 3px solid var(--ifm-color-primary);
-}
-
-[data-theme='dark'] .navLink {
-    color: var(--ifm-color-secondary);
-}
-
-[data-theme='dark'] .solid .navLink:hover {
-    color: var(--ifm-color-secondary);
-    text-decoration: none;
-    border-bottom: 3px solid var(--ifm-color-secondary);
-}
-
-[data-theme='dark'] .solid .active {
-    border-bottom: 3px solid var(--ifm-color-secondary);
+    color: var(--ifm-font-color-base);
 }

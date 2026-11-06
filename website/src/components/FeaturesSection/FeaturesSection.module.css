@@ -7,7 +7,8 @@
   justify-content: center;
   width: 80%;
   margin: auto;
-  scroll-margin-top: calc(var(--ifm-navbar-height) + 8rem + 10px);
+  /* the first box overlaps the hero by 4rem: leave room for it */
+  scroll-margin-top: calc(var(--home-anchor-offset) + 5rem);
   padding-bottom: 2rem;
 }
 
@@ -17,7 +18,7 @@
   border-radius: 1.5rem;
   box-shadow: 0 2px 16px rgba(0,0,0,0.32);
   margin: -4rem auto 2rem auto;
-  padding: 1rem 2rem;
+  padding: 0.5rem 2rem;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -36,7 +37,7 @@
   min-width: 30%;
 }
 .infoLogo img {
-  width: 65%;
+  width: 45%;
   display: block;
   padding: 5%;
   margin: auto;
@@ -76,9 +77,11 @@
 }
 
 .featureIcon {
-  width:25%;
+  display: block;
+  width: 18%;
+  aspect-ratio: 1;
   margin-bottom: 1rem;
-  color: var(--ifm-color-primary);
+  background: var(--jakta-gradient);
 }
 
 @media (max-width: 996px) {
