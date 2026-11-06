@@ -16,8 +16,7 @@
     align-items: center;
     list-style: none;
     margin: 0;
-    height: var(--home-section-bar-height);
-    padding: 0;
+    padding: 1rem 0;
 }
 
 .navItem {
@@ -29,6 +28,8 @@
 @media (max-width: 996px) {
     .navList {
         justify-content: space-evenly;
+        height: var(--home-section-bar-height);
+        padding: 0;
         overflow-x: auto;
         scrollbar-width: none;
     }
@@ -44,6 +45,7 @@
 
     .navLink {
         font-size: 0.95rem;
+        white-space: nowrap;
     }
 }
 
@@ -61,7 +63,6 @@
     text-decoration: none;
     font-size: 1.1rem;
     padding-bottom: 4px;
-    white-space: nowrap;
     background: linear-gradient(currentColor, currentColor) no-repeat left bottom / 100% 0;
     transition: opacity 0.2s, background-size 0.3s;
 }

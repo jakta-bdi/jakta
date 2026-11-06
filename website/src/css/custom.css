@@ -35,8 +35,7 @@
   --custom-section-color: #f1f0f5;
 
   /* Where a home page section lands when its link is clicked: right below the navbar and the section bar. */
-  --home-section-bar-height: 3.6rem;
-  --home-anchor-offset: calc(var(--ifm-navbar-height) + var(--home-section-bar-height));
+  --home-anchor-offset: calc(var(--ifm-navbar-height) + 3.9rem);
 
   /* Soft, layered card shadows, tinted with the plum; the lifted one for hovered cards. */
   --jakta-card-shadow: 0 1px 3px color-mix(in srgb, var(--jakta-plum) 8%, transparent),
@@ -333,6 +332,7 @@ html {
 @media (max-width: 996px) {
   :root {
     --home-section-bar-height: 2.9rem;
+    --home-anchor-offset: calc(var(--ifm-navbar-height) + var(--home-section-bar-height));
   }
 }
 

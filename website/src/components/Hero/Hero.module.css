@@ -41,8 +41,7 @@
   width: 80%;
   margin: 0 auto;
   /* The bottom padding includes the 4rem the "What is JaKtA?" box overlaps the hero by. */
-  /* The section bar is fixed over the top of the hero: the text starts below it. */
-  padding: calc(var(--home-section-bar-height) + 2.5rem) 2rem 8rem;
+  padding: 4rem 2rem 8rem;
 }
 
 .heroText {
@@ -118,6 +117,7 @@
 @media (max-width: 996px) {
   .heroContent {
     width: 100%;
+    /* The section bar is fixed over the top of the hero: the text starts below it. */
     padding: calc(var(--home-section-bar-height) + 2rem) 1.5rem 6.5rem;
   }
 
