@@ -27,17 +27,52 @@
 }
 
 
+/* On phones and tablets the section is one column. */
 @media (max-width: 996px) {
   .helloSection {
-    width: calc(100% - 2rem);
+    width: 100%;
     flex-direction: column;
     /* A wrapping column sizes each column to its content, so the code overflowed the page. */
     flex-wrap: nowrap;
     padding: 2.5rem 0;
+    /* the text's own margins space its parts, now that they are the section's items */
+    gap: 0;
   }
 
+  /* The text's parts become the section's items, so the agent can come right after its explanation, before
+     how to add JaKtA and the buttons. */
   .helloText {
-    min-width: 0;
+    display: contents;
+  }
+
+  .helloText > *,
+  .helloCode {
+    margin-left: 1rem;
+    margin-right: 1rem;
+  }
+
+  .helloText > :nth-child(n + 4) {
+    order: 2;
+  }
+
+  .helloCode {
+    margin-bottom: 1.5rem;
+  }
+
+  /* The code shrinks until its longest line fits the screen, so it never scrolls sideways: --code-columns is
+     that line's length, a monospace character is about 0.61em wide, and the block's margins, padding and
+     border take 3.5rem + 3px of the width. */
+  .helloSection :global(.theme-code-block) {
+    --code-columns: 57;
+    font-size: min(100%, calc((100vw - 3.5rem - 3px) / (var(--code-columns) * 0.61)));
+  }
+
+  .helloCode :global(.theme-code-block) {
+    --code-columns: 51;
+  }
+
+  .helloSection :global(.theme-code-block) pre code {
+    padding: 0.75rem;
   }
 }
 

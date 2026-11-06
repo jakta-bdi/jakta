@@ -19,7 +19,7 @@ export default function TeamSection() {
     <section className={styles.teamSection} id="team">
       <h2 className="section-title">Meet the <span className="gradient-text">JaKtA team</span></h2>
 
-        <p className="text-lg padding--md">
+        <p className="padding--md">
             We are a group of researchers from the  
             <a 
                 href="https://www.unibo.it/en" 
@@ -56,7 +56,7 @@ export default function TeamSection() {
       </div>
 
       <div className="padding-top--lg">
-        <p className="text-lg">
+        <p>
             Discover more about what we and our colleagues do on the  
             <a 
             href="https://pslab-unibo.github.io/"
