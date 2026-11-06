@@ -19,21 +19,21 @@
 <text x="152" y="113" font-family="Noto Sans" font-weight="700" font-size="38" fill="#ffffff" letter-spacing="0.5">JaKtA</text>
 <text x="72" y="262" font-family="Noto Sans" font-weight="800" font-size="62" fill="#ffffff" letter-spacing="-1">BDI agents,</text>
 <text x="72" y="334" font-family="Noto Sans" font-weight="800" font-size="62" fill="url(#brand)" letter-spacing="-1">in plain Kotlin.</text>
-<text x="72" y="398" font-family="Noto Sans" font-size="24" fill="#bdb6cf">Beliefs, goals and plans as a type-safe DSL,</text>
-<text x="72" y="432" font-family="Noto Sans" font-size="24" fill="#bdb6cf">running on the JVM, JavaScript and native.</text>
+<text x="72" y="398" font-family="Noto Sans" font-size="21" fill="#bdb6cf">Build type-safe, reactive, and proactive systems.</text>
+<text x="72" y="430" font-family="Noto Sans" font-size="21" fill="#bdb6cf">Multi-paradigm and multi-platform by design.</text>
 <text x="72" y="566" font-family="Noto Sans" font-weight="600" font-size="22" fill="#8f87a8">jakta-bdi.github.io</text>
 <rect x="640" y="104" width="492" height="420" rx="18" fill="#161124" fill-opacity="0.92" stroke="url(#edge)" stroke-width="1.5"/>
 <line x1="640" y1="152" x2="1132" y2="152" stroke="#ffffff" stroke-opacity="0.07"/>
 <circle cx="668" cy="128" r="6.5" fill="#ff5f57"/><circle cx="690" cy="128" r="6.5" fill="#febc2e"/><circle cx="712" cy="128" r="6.5" fill="#28c840"/>
 <text x="1110" y="134" text-anchor="end" font-family="DejaVu Sans Mono" font-size="15" fill="#8b84a3">Agent.kt</text>
-<text x="672" y="216" font-family="DejaVu Sans Mono" font-size="17" xml:space="preserve"><tspan fill="#7fb4ff">agent</tspan><tspan fill="#8b84a3">&lt;</tspan><tspan fill="#c792ff">String</tspan><tspan fill="#8b84a3">, </tspan><tspan fill="#c792ff">String</tspan><tspan fill="#8b84a3">, </tspan><tspan fill="#c792ff">Any</tspan><tspan fill="#8b84a3">&gt; {</tspan></text>
-<text x="672" y="246" font-family="DejaVu Sans Mono" font-size="17" xml:space="preserve"><tspan fill="#7fb4ff">    hasInitialGoals </tspan><tspan fill="#8b84a3">{ </tspan><tspan fill="#e9e4f5">!</tspan><tspan fill="#ff8fab">&quot;sayHello&quot;</tspan><tspan fill="#8b84a3"> }</tspan></text>
-<text x="672" y="276" font-family="DejaVu Sans Mono" font-size="17" xml:space="preserve"><tspan fill="#7fb4ff">    hasPlanLibrary </tspan><tspan fill="#8b84a3">{</tspan></text>
-<text x="672" y="306" font-family="DejaVu Sans Mono" font-size="17" xml:space="preserve"><tspan fill="#e9e4f5">        adding</tspan><tspan fill="#8b84a3">.</tspan><tspan fill="#7fb4ff">goal </tspan><tspan fill="#8b84a3">{</tspan></text>
-<text x="672" y="336" font-family="DejaVu Sans Mono" font-size="17" xml:space="preserve"><tspan fill="#7fb4ff">            takeIf </tspan><tspan fill="#8b84a3">{ </tspan><tspan fill="#c792ff">it </tspan><tspan fill="#8b84a3">== </tspan><tspan fill="#ff8fab">&quot;sayHello&quot;</tspan><tspan fill="#8b84a3"> }</tspan></text>
-<text x="672" y="366" font-family="DejaVu Sans Mono" font-size="17" xml:space="preserve"><tspan fill="#8b84a3">        } </tspan><tspan fill="#7fb4ff">triggers </tspan><tspan fill="#8b84a3">{</tspan></text>
-<text x="672" y="396" font-family="DejaVu Sans Mono" font-size="17" xml:space="preserve"><tspan fill="#e9e4f5">            agent</tspan><tspan fill="#8b84a3">.</tspan><tspan fill="#7fb4ff">print</tspan><tspan fill="#8b84a3">(</tspan><tspan fill="#ff8fab">&quot;Hello, world!&quot;</tspan><tspan fill="#8b84a3">)</tspan></text>
-<text x="672" y="426" font-family="DejaVu Sans Mono" font-size="17" xml:space="preserve"><tspan fill="#8b84a3">        }</tspan></text>
-<text x="672" y="456" font-family="DejaVu Sans Mono" font-size="17" xml:space="preserve"><tspan fill="#8b84a3">    }</tspan></text>
-<text x="672" y="486" font-family="DejaVu Sans Mono" font-size="17" xml:space="preserve"><tspan fill="#8b84a3">}</tspan></text>
+<text x="664" y="189" font-family="DejaVu Sans Mono" font-size="18.5" xml:space="preserve"><tspan fill="#7fb4ff">agent</tspan><tspan fill="#8b84a3">&lt;</tspan><tspan fill="#c792ff">String</tspan><tspan fill="#8b84a3">, </tspan><tspan fill="#c792ff">String</tspan><tspan fill="#8b84a3">, </tspan><tspan fill="#c792ff">Any</tspan><tspan fill="#8b84a3">&gt; {</tspan></text>
+<text x="664" y="223" font-family="DejaVu Sans Mono" font-size="18.5" xml:space="preserve"><tspan fill="#7fb4ff">    hasInitialGoals </tspan><tspan fill="#8b84a3">{ </tspan><tspan fill="#e9e4f5">!</tspan><tspan fill="#ff8fab">&quot;sayHello&quot;</tspan><tspan fill="#8b84a3"> }</tspan></text>
+<text x="664" y="257" font-family="DejaVu Sans Mono" font-size="18.5" xml:space="preserve"><tspan fill="#7fb4ff">    hasPlanLibrary </tspan><tspan fill="#8b84a3">{</tspan></text>
+<text x="664" y="291" font-family="DejaVu Sans Mono" font-size="18.5" xml:space="preserve"><tspan fill="#e9e4f5">        adding</tspan><tspan fill="#8b84a3">.</tspan><tspan fill="#7fb4ff">goal </tspan><tspan fill="#8b84a3">{</tspan></text>
+<text x="664" y="325" font-family="DejaVu Sans Mono" font-size="18.5" xml:space="preserve"><tspan fill="#7fb4ff">            takeIf </tspan><tspan fill="#8b84a3">{ </tspan><tspan fill="#c792ff">it </tspan><tspan fill="#8b84a3">== </tspan><tspan fill="#ff8fab">&quot;sayHello&quot;</tspan><tspan fill="#8b84a3"> }</tspan></text>
+<text x="664" y="359" font-family="DejaVu Sans Mono" font-size="18.5" xml:space="preserve"><tspan fill="#8b84a3">        } </tspan><tspan fill="#7fb4ff">triggers </tspan><tspan fill="#8b84a3">{</tspan></text>
+<text x="664" y="393" font-family="DejaVu Sans Mono" font-size="18.5" xml:space="preserve"><tspan fill="#e9e4f5">            agent</tspan><tspan fill="#8b84a3">.</tspan><tspan fill="#7fb4ff">print</tspan><tspan fill="#8b84a3">(</tspan><tspan fill="#ff8fab">&quot;Hello, world!&quot;</tspan><tspan fill="#8b84a3">)</tspan></text>
+<text x="664" y="427" font-family="DejaVu Sans Mono" font-size="18.5" xml:space="preserve"><tspan fill="#8b84a3">        }</tspan></text>
+<text x="664" y="461" font-family="DejaVu Sans Mono" font-size="18.5" xml:space="preserve"><tspan fill="#8b84a3">    }</tspan></text>
+<text x="664" y="495" font-family="DejaVu Sans Mono" font-size="18.5" xml:space="preserve"><tspan fill="#8b84a3">}</tspan></text>
 </svg>
