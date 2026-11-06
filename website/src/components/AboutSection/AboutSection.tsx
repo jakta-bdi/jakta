@@ -5,7 +5,7 @@ import CodeBlock from '@theme/CodeBlock';
 export default function AboutSection() {
   return (
     <section className={styles.aboutSection} id="about">
-      <h2>About JaKtA</h2>
+      <h2 className="section-title">Cite <span className="gradient-text">JaKtA</span></h2>
       <div className={styles.aboutContent}>
 
         {/* <div className={styles.aboutGrid}>
@@ -30,7 +30,7 @@ export default function AboutSection() {
             If you're interested in research developments check out the other <a href="/publications">publications</a>.</p>
           </div>
 
-          <CodeBlock showLineNumbers={false}>
+          <CodeBlock language="bibtex" className="bibtex" showLineNumbers={false}>
   {`@article{DBLP:journals/sncs/BaiardiBCP24,
     author       = {Martina Baiardi and Samuele Burattini and Giovanni Ciatto and Danilo Pianini},
     title        = {Blending {BDI} Agents 

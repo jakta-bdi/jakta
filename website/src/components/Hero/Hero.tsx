@@ -1,31 +1,33 @@
 import React from 'react';
-import clsx from 'clsx';
 import Link from '@docusaurus/Link';
 import Heading from '@theme/Heading';
 import styles from './Hero.module.css';
 
 export default function Hero() {
   return (
-    <header className={clsx(styles.heroBanner)}>
-      <div className={styles.heroBg}>
-        <div className={styles.heroOverlay} />
-      </div>
+    <header className={styles.heroBanner}>
+      <div className={styles.heroBg} />
+      <div className={styles.heroShade} />
       <div className={styles.heroContent}>
-        <Heading as="h1" className={styles.heroTitle}>
-          JaKtA: BDI Agents Made Simple
-        </Heading>
-        <p className={styles.heroSubtitle}>
-          Build robust, reactive, and proactive systems with Kotlin.
-          <br />
-          Multi-paradigm and multi-platform by design.
-        </p>
-        <div className={styles.heroButtons}>
-          <Link className={styles.primaryBtn} to="/docs/tutorials/">
-            Get Started
-          </Link>
-          <Link className={styles.secondaryBtn} to="/docs/intro">
-            Learn More
-          </Link>
+        <div className={styles.heroText}>
+          <Heading as="h1" className={styles.heroTitle}>
+            BDI agents,
+            <br />
+            <span className={styles.gradientText}>in plain Kotlin.</span>
+          </Heading>
+          <p className={styles.heroSubtitle}>
+            Build type-safe, reactive, and proactive systems.
+            <br />
+            Multi-paradigm and multi-platform by design.
+          </p>
+          <div className={styles.heroButtons}>
+            <Link className="pill-button pill-button--primary" to="/docs/tutorials/">
+              Get Started
+            </Link>
+            <Link className={`pill-button pill-button--outline ${styles.onPhoto}`} to="/docs/intro">
+              Learn More
+            </Link>
+          </div>
         </div>
       </div>
     </header>

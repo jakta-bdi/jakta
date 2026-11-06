@@ -1,9 +1,37 @@
-import {themes as prismThemes} from 'prism-react-renderer';
+import type {PrismTheme} from 'prism-react-renderer';
 import tableCodeBreaks from './src/plugins/table-code-breaks.mjs';
 import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
+
+// Code colours from the social card (static/img/jakta-social.svg): purple keywords, blue calls, pink strings,
+// on neutral backgrounds.
+function jaktaCodeTheme(c: {text: string; background: string; muted: string; keyword: string; call: string; string: string; number: string}): PrismTheme {
+  return {
+    plain: {color: c.text, backgroundColor: c.background},
+    styles: [
+      {types: ['comment', 'prolog', 'doctype', 'cdata'], style: {color: c.muted, fontStyle: 'italic'}},
+      {types: ['punctuation', 'operator'], style: {color: c.muted}},
+      {types: ['keyword', 'builtin', 'class-name', 'boolean', 'important', 'atrule', 'selector'], style: {color: c.keyword}},
+      {types: ['function', 'annotation', 'attr-name', 'tag'], style: {color: c.call}},
+      {types: ['string', 'char', 'template-string', 'regex', 'attr-value', 'url'], style: {color: c.string}},
+      {types: ['number', 'constant', 'symbol'], style: {color: c.number}},
+      {types: ['deleted'], style: {color: c.string}},
+      {types: ['inserted'], style: {color: c.call}},
+    ],
+  };
+}
+
+const lightCodeTheme = jaktaCodeTheme({
+  text: '#24292f', background: '#f6f8fa', muted: '#6e7781',
+  keyword: '#9a2fd8', call: '#1d5fd1', string: '#c0266d', number: '#c0266d',
+});
+
+const darkCodeTheme = jaktaCodeTheme({
+  text: '#e6e6e6', background: '#151419', muted: '#8b8b96',
+  keyword: '#c792ff', call: '#7fb4ff', string: '#ff8fab', number: '#ff8fab',
+});
 
 const githubURL : string = 'https://github.com/jakta-bdi';
 const websiteURL : string = 'https://jakta-bdi.github.io';
@@ -101,7 +129,7 @@ const config: Config = {
   },
   ],
 
-  clientModules: ['./src/clientModules/fitTables.js'],
+  clientModules: ['./src/clientModules/fitTables.js', './src/clientModules/prismBibtex.js'],
 
   presets: [
     [
@@ -250,8 +278,8 @@ const config: Config = {
       copyright: `Copyright © ${new Date().getFullYear()} JaKtA, Org. Built with Docusaurus.`,
     },
     prism: {
-      theme: prismThemes.github,
-      darkTheme: prismThemes.vsDark,
+      theme: lightCodeTheme,
+      darkTheme: darkCodeTheme,
       defaultLanguage: 'kotlin',
     },
     algolia: {

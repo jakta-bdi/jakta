@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styles from './HomePageNavbar.module.css';
 
 const sections = [
@@ -12,17 +12,19 @@ const HomePageNavbar: React.FC = () => {
 	const [activeSection, setActiveSection] = useState<string>('features');
 	const [scrolled, setScrolled] = useState<boolean>(false);
 
+	const navRef = useRef<HTMLElement>(null);
+
 	useEffect(() => {
 		const handleScroll = () => {
+			// The active section is the last one whose top has passed a line just below this bar, measured from the bar
+			// so it matches where the anchors land (their scroll margin); at the bottom of the page, the last section.
+			const line = (navRef.current?.getBoundingClientRect().bottom ?? 0) + 120;
+			const atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2;
 			let current = sections[0].id;
 			for (const section of sections) {
 				const el = document.getElementById(section.id);
-				if (el) {
-					const rect = el.getBoundingClientRect();
-					if (rect.top <= 100 && rect.bottom > 100) {
-						current = section.id;
-						break;
-					}
+				if (el && (el.getBoundingClientRect().top <= line || atBottom)) {
+					current = section.id;
 				}
 			}
 			setActiveSection(current);
@@ -34,7 +36,7 @@ const HomePageNavbar: React.FC = () => {
 	}, []);
 
 	return (
-		<nav className={scrolled ? `${styles.navbar} ${styles.solid}` : styles.navbar}>
+		<nav ref={navRef} className={scrolled ? `${styles.navbar} ${styles.solid}` : styles.navbar}>
 			<ul className={styles.navList}>
 				{sections.map((section) => (
 					<li className={styles.navItem} key={section.id}>

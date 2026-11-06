@@ -1,15 +1,13 @@
+/* No card around the section: the code window is the only framed element, as on the social card. */
 .helloSection {
-  background: var(--ifm-card-background-color);
   color: var(--ifm-font-color-base);
-  border-radius: 1.5rem;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.32);
   width: 80%;
-  margin: 2rem auto 3rem auto;
-  padding: 2rem;
+  margin: 0 auto;
+  padding: 3rem 0;
   display: flex;
   flex-wrap: wrap;
   gap: 2rem;
-  scroll-margin-top: calc(var(--ifm-navbar-height) + 8rem + 10px);
+  scroll-margin-top: var(--home-anchor-offset);
 }
 
 .helloText {
@@ -28,24 +26,13 @@
   gap: 0.75rem;
 }
 
-/* Negative of the primary button: purple text and border, no fill; a darker purple on hover. */
-.helloButtons .showcaseButton,
-.helloButtons .showcaseButton:hover {
-  --ifm-button-border-width: 2px;
-  --ifm-button-background-color: transparent;
-  --ifm-button-border-color: var(--ifm-color-primary);
-  --ifm-button-color: var(--ifm-color-primary);
-}
-
-.helloButtons .showcaseButton:hover {
-  --ifm-button-border-color: var(--ifm-color-primary-dark);
-  --ifm-button-color: var(--ifm-color-primary-dark);
-}
 
 @media (max-width: 996px) {
   .helloSection {
     width: calc(100% - 2rem);
     flex-direction: column;
-    padding: 1.25rem;
+    /* A wrapping column sizes each column to its content, so the code overflowed the page. */
+    flex-wrap: nowrap;
+    padding: 2.5rem 0;
   }
 }

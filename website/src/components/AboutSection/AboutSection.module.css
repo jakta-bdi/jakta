@@ -1,12 +1,14 @@
 
 .aboutSection {
-  padding: 4rem 0;
-  background: var(--ifm--background-color);
-  scroll-margin-top: calc(var(--ifm-navbar-height) + 2rem);
+  padding: 3rem 0 4rem;
+  scroll-margin-top: var(--home-anchor-offset);
 }
 
 .aboutSection h2 {
   text-align: center;
+}
+
+.aboutSection h2 {
   margin-bottom: 2rem;
 }
 

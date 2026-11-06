@@ -1,17 +1,4 @@
 import React from 'react';
-import ConfigurationIconRaw from '@site/static/img/configuration.svg';
-import BlendingIconRaw from '@site/static/img/blending.svg';
-import MultiplatformIconRaw from '@site/static/img/multiplatform.svg';
-// Remove width/height attributes from SVGs by wrapping them
-function stripSizeProps(IconComponent: React.ComponentType<any>) {
-  return function StrippedIcon(props: any) {
-    return <IconComponent {...props} width={undefined} height={undefined} />;
-  };
-}
-
-const ConfigurationIcon = stripSizeProps(ConfigurationIconRaw);
-const BlendingIcon = stripSizeProps(BlendingIconRaw);
-const MultiplatformIcon = stripSizeProps(MultiplatformIconRaw);
 import Heading from '@theme/Heading';
 import styles from './FeaturesSection.module.css';
 
@@ -19,7 +6,7 @@ function InfoCard() {
   return (
     <div className={styles.infoSection}>
       <div className={styles.infoText}>
-        <Heading as="h2">What is JaKtA?</Heading>
+        <Heading as="h2" className="section-title">What is <span className="gradient-text">JaKtA</span>?</Heading>
         <p>
           JaKtA is an agent-oriented programming framework for building robust
           intelligent agents using the Belief-Desire-Intention (BDI) cognitive
@@ -39,11 +26,13 @@ function InfoCard() {
   );
 }
 
-function FeatureCard({ Icon, title, children }: { Icon?: React.ComponentType<{ className?: string }>; title: string; children: React.ReactNode }) {
+// The icon is a mask over the brand gradient, so the single-colour SVG takes the gradient.
+function FeatureCard({ icon, title, children }: { icon: string; title: string; children: React.ReactNode }) {
+  const mask = `url(${icon}) center / contain no-repeat`;
   return (
     <div className={styles.featureCard}>
       <div className={styles.featureCardContent}>
-        {Icon ? <Icon className={styles.featureIcon} /> : null}
+        <span className={styles.featureIcon} style={{mask, WebkitMask: mask}} aria-hidden="true" />
         <Heading as="h3">{title}</Heading>
         {children}
       </div>
@@ -55,14 +44,14 @@ export default function FeaturesSection() {
   return (
     <section className={styles.featuresSection} id={"features"}>
       <InfoCard />
-      <FeatureCard Icon={BlendingIcon} title="Paradigm Blending">
-        <p>Mix Functional and Object-Oriented programming within your MAS codebase</p>
+      <FeatureCard icon="/img/blending.svg" title="Multi Paradigm">
+        <p>Paradigm blending: mix Functional and Object-Oriented programming within your MAS codebase</p>
       </FeatureCard>
-      <FeatureCard Icon={MultiplatformIcon} title="Multi Platform">
-        <p>Write once, run on the JVM, in JavaScript (browser and Node.js), and natively on Linux, Windows, macOS and iOS</p>
+      <FeatureCard icon="/img/multiplatform.svg" title="Multi Platform">
+        <p>Write once, run on the JVM, in JavaScript, and natively on Linux, Windows, macOS and iOS</p>
       </FeatureCard>
-      <FeatureCard Icon={ConfigurationIcon} title="Configurable">
-        <p>Plug in the knowledge representation (Prolog, strings, or your own types) and the execution model, from coroutines to Alchemist simulations</p>
+      <FeatureCard icon="/img/configuration.svg" title="Configurable">
+        <p>Plug in the knowledge representation and the execution model, from coroutines to simulations</p>
       </FeatureCard>
     </section>
   );

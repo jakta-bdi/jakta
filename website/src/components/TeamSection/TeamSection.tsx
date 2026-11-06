@@ -17,7 +17,7 @@ type Author = {
 export default function TeamSection() {
   return (
     <section className={styles.teamSection} id="team">
-      <h2>Meet the JaKtA Team</h2>
+      <h2 className="section-title">Meet the <span className="gradient-text">JaKtA team</span></h2>
 
         <p className="text-lg padding--md">
             We are a group of researchers from the  
@@ -31,7 +31,7 @@ export default function TeamSection() {
                 href="https://disi.unibo.it/en" 
                 target="_blank" 
                 rel="noopener noreferrer" 
-            > Department of Computer Science and Engineering (DISI)</a>,  
+            > Department of Computer Science and Engineering</a>,  
             based in Cesena, Italy <Icon inline={true} icon="twemoji:flag-italy" />
         </p>
 

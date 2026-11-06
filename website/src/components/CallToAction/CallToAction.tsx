@@ -8,7 +8,7 @@ const CTA_URL = 'https://github.com/jakta-bdi/';
 export default function CallToAction() {
   return (
     <section className={styles.callToActionSection}>
-      <h2>Join the JaKtA Community!</h2>
+      <h2 className="section-title">Join the <span className="gradient-text">JaKtA community</span></h2>
       <p>
         Be a part of our open-source journey. Collaborate, contribute, and connect with fellow MAS and BDI enthusiasts.
       </p>
