@@ -8,15 +8,13 @@ function InfoCard() {
       <div className={styles.infoText}>
         <Heading as="h2" className="section-title">What is <span className="gradient-text">JaKtA</span>?</Heading>
         <p>
-          JaKtA is an agent-oriented programming framework for building robust
-          intelligent agents using the Belief-Desire-Intention (BDI) cognitive
-          architecture.
-          It&apos;s implemented in <a target="_blank" rel="noreferrer" href="https://kotlinlang.org/">Kotlin</a> and aims to simplify the development of complex agent-based systems by leveraging the language&apos;s modern features and concise syntax.
-          Thanks to Kotlin multi-paradigm design, JaKtA agents seamlessly interoperate with Object-Oriented and Functional Programming, making BDI agents approachable for a wide range of developers.
-          Kotlin multiplatform support also opens the door for JaKtA agents to run on various platforms, from servers to mobile devices.
+          JaKtA is a framework for programming intelligent agents with the Belief-Desire-Intention (BDI)
+          architecture, built in <a target="_blank" rel="noreferrer" href="https://kotlinlang.org/">Kotlin</a>.
+          Agents are plain Kotlin code, so there is no separate agent language to learn and you keep the tools you
+          already love: your IDE, build tool, debugger and libraries.
         </p>
         <p>
-          If you intend to use JaKtA for a research project, make sure to <a href="#about">cite it</a>.
+          If you use JaKtA in a research project, please <a href="#about">cite it</a>.
         </p>
       </div>
       <div className={styles.infoLogo}>
