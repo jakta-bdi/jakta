@@ -16,11 +16,35 @@
     align-items: center;
     list-style: none;
     margin: 0;
-    padding: 1rem 0;
+    height: var(--home-section-bar-height);
+    padding: 0;
 }
 
 .navItem {
     margin: 0 2rem;
+}
+
+/* On phones the items share the width evenly, smaller, so all four fit on one line; on very narrow screens the
+   bar scrolls sideways instead of cutting them off. */
+@media (max-width: 996px) {
+    .navList {
+        justify-content: space-evenly;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .navList::-webkit-scrollbar {
+        display: none;
+    }
+
+    .navItem {
+        margin: 0 0.5rem;
+        flex-shrink: 0;
+    }
+
+    .navLink {
+        font-size: 0.95rem;
+    }
 }
 
 /* Once the page scrolls past the hero. */
@@ -37,6 +61,7 @@
     text-decoration: none;
     font-size: 1.1rem;
     padding-bottom: 4px;
+    white-space: nowrap;
     background: linear-gradient(currentColor, currentColor) no-repeat left bottom / 100% 0;
     transition: opacity 0.2s, background-size 0.3s;
 }

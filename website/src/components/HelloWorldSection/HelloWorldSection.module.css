@@ -35,4 +35,15 @@
     flex-wrap: nowrap;
     padding: 2.5rem 0;
   }
+
+  .helloText {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 576px) {
+  .helloButtons :global(.pill-button) {
+    width: 100%;
+    text-align: center;
+  }
 }

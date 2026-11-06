@@ -16,7 +16,7 @@ export default function Hero() {
             <span className={styles.gradientText}>in plain Kotlin.</span>
           </Heading>
           <p className={styles.heroSubtitle}>
-            Build type-safe, reactive, and proactive systems.
+            Build type-safe, reactive, and proactive systems.{' '}
             <br />
             Multi-paradigm and multi-platform by design.
           </p>

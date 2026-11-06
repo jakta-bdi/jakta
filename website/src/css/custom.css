@@ -35,7 +35,8 @@
   --custom-section-color: #f1f0f5;
 
   /* Where a home page section lands when its link is clicked: right below the navbar and the section bar. */
-  --home-anchor-offset: calc(var(--ifm-navbar-height) + 3.9rem);
+  --home-section-bar-height: 3.6rem;
+  --home-anchor-offset: calc(var(--ifm-navbar-height) + var(--home-section-bar-height));
 
   /* Soft, layered card shadows, tinted with the plum; the lifted one for hovered cards. */
   --jakta-card-shadow: 0 1px 3px color-mix(in srgb, var(--jakta-plum) 8%, transparent),
@@ -326,6 +327,13 @@ html {
 /* The footer is its own band in both themes: a deep, muted purple from the hero's shade. */
 .footer--dark {
   --ifm-footer-background-color: var(--jakta-plum);
+}
+
+/* On phones the section bar is slimmer (HomePageNavbar.module.css). */
+@media (max-width: 996px) {
+  :root {
+    --home-section-bar-height: 2.9rem;
+  }
 }
 
 /* Home page section titles, as the hero's: the key words in the brand gradient. */
