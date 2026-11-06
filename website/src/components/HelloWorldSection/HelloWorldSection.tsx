@@ -58,7 +58,7 @@ export default function HelloWorldSection() {
         </div>
       </div>
       <div className={`${styles.helloCode} code-window`}>
-        <CodeBlock language="kotlin" title="Agent.kt" showLineNumbers>
+        <CodeBlock language="kotlin" title="Agent.kt">
           {helloWorld}
         </CodeBlock>
       </div>

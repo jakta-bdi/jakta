@@ -308,6 +308,13 @@ html {
   border-bottom: 1px solid var(--ifm-color-emphasis-200);
 }
 
+/* On phones and tablets a lighter shadow: the large one looks heavy on a small screen. */
+@media (max-width: 996px) {
+  :is(.code-window, html.docs-doc-id-intro .theme-doc-markdown) .theme-code-block {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  }
+}
+
 /* A block without a title still gets the bar with the dots. */
 :is(.code-window, html.docs-doc-id-intro .theme-doc-markdown) .theme-code-block:not(:has([class*='codeBlockTitle']))::before {
   content: '';
@@ -326,6 +333,14 @@ html {
 /* The footer is its own band in both themes: a deep, muted purple from the hero's shade. */
 .footer--dark {
   --ifm-footer-background-color: var(--jakta-plum);
+}
+
+/* On phones the section bar is slimmer (HomePageNavbar.module.css). */
+@media (max-width: 996px) {
+  :root {
+    --home-section-bar-height: 2.9rem;
+    --home-anchor-offset: calc(var(--ifm-navbar-height) + var(--home-section-bar-height));
+  }
 }
 
 /* Home page section titles, as the hero's: the key words in the brand gradient. */

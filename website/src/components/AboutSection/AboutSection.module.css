@@ -54,3 +54,53 @@
 	padding: 1rem 2rem;
 	z-index: 10;
 }
+
+@media (max-width: 996px) {
+  .aboutSection {
+    padding: 2.5rem 0 3rem;
+  }
+
+  .citeCard {
+    width: calc(100% - 2rem);
+    padding: 1.25rem 1rem 0.25rem;
+  }
+
+  .citeCard :global(.bibtex) {
+    font-size: 0.8rem;
+  }
+
+  /* Collapsed, the entry shows its first lines, fading out above the toggle. */
+  .bibtexWrap:not(.expanded) {
+    position: relative;
+    max-height: 12rem;
+    overflow: hidden;
+  }
+
+  .bibtexWrap:not(.expanded)::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0;
+    height: 4rem;
+    background: linear-gradient(transparent, var(--ifm-card-background-color));
+    pointer-events: none;
+  }
+
+  .bibtexToggle {
+    display: block;
+    margin: 0.5rem auto 1rem;
+    padding: 0.25rem 1rem;
+    border: none;
+    background: none;
+    color: var(--ifm-color-primary);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+}
+
+/* The whole entry fits on wider screens: no toggle. */
+@media (min-width: 997px) {
+  .bibtexToggle {
+    display: none;
+  }
+}

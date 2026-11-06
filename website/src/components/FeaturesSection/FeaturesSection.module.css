@@ -37,7 +37,7 @@
   min-width: 30%;
 }
 .infoLogo img {
-  width: 45%;
+  width: 65%;
   display: block;
   padding: 5%;
   margin: auto;
@@ -45,12 +45,21 @@
 @media (max-width: 996px) {
   .infoSection {
     flex-direction: column;
-    text-align: center;
-    padding: 2rem 1rem;
+    padding: 1.5rem 1.25rem;
+    margin-bottom: 1rem;
+  }
+  .infoText {
+    padding: 0;
+    /* justified text leaves wide gaps on a narrow column */
+    text-align: left;
   }
   .infoLogo {
+    order: -1;
     text-align: center;
-    margin-top: 1rem;
+  }
+  .infoLogo img {
+    width: 6rem;
+    padding: 0 0 1rem;
   }
 }
 
@@ -86,6 +95,7 @@
 
 @media (max-width: 996px) {
   .featuresSection {
+    width: calc(100% - 2rem);
     flex-direction: column;
     gap: 1rem;
   }

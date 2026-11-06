@@ -46,6 +46,32 @@
   margin-bottom: 1rem;
 }
 
-.text-lg {
-  font-size: 40px;
+@media (max-width: 996px) {
+  .teamSection {
+    padding: 2.5rem 1rem 3rem;
+  }
+
+  .teamGrid {
+    gap: 1rem;
+  }
+
+  /* Two cards per row. */
+  .teamMember {
+    width: calc(50% - 0.5rem);
+    padding: 1.25rem 0.75rem;
+  }
+
+  .teamMember h3 {
+    font-size: 1.05rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .memberName span {
+    display: block;
+  }
+
+  .teamMember p {
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+  }
 }

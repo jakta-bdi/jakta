@@ -23,6 +23,32 @@
     margin: 0 2rem;
 }
 
+/* On phones the items share the width evenly, smaller, so all four fit on one line; on very narrow screens the
+   bar scrolls sideways instead of cutting them off. */
+@media (max-width: 996px) {
+    .navList {
+        justify-content: space-evenly;
+        height: var(--home-section-bar-height);
+        padding: 0;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .navList::-webkit-scrollbar {
+        display: none;
+    }
+
+    .navItem {
+        margin: 0 0.5rem;
+        flex-shrink: 0;
+    }
+
+    .navLink {
+        font-size: 0.95rem;
+        white-space: nowrap;
+    }
+}
+
 /* Once the page scrolls past the hero. */
 .solid {
     background-color: var(--ifm-background-color);
