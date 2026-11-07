@@ -20,6 +20,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
@@ -42,7 +44,10 @@ import model.BoardState
 import model.Mark
 
 private const val MAX_THINK_TIME_MS = 2000f
-private const val TRACE_SHARE_COMPACT = 0.3f
+
+// on a phone the app scrolls as a page: the board takes the width of the screen, the trace sits below it
+private val BOARD_MAX_WIDTH_COMPACT = 420.dp
+private val TRACE_HEIGHT_COMPACT = 280.dp
 private val TIGHT_PADDING = PaddingValues(horizontal = 10.dp, vertical = 8.dp)
 
 /**
@@ -56,18 +61,18 @@ fun TicTacToeApp(app: TicTacToeAppState) {
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         val compact = maxWidth < COMPACT_WIDTH
         // read here: the rows and columns below cannot see the constraints
-        val traceHeight = maxHeight * TRACE_SHARE_COMPACT
         val traceWidth = sideTraceWidth(maxWidth)
-        Column(modifier = Modifier.fillMaxSize()) {
+        val scroll = rememberScrollState()
+        Column(modifier = if (compact) Modifier.fillMaxSize().verticalScroll(scroll) else Modifier.fillMaxSize()) {
             Toolbar(app, onNewGame = { app.newGame(scope) })
             Divider()
             if (compact) {
                 // on a phone: the board, then the trace below it
-                Game(app, board, modifier = Modifier.weight(1f).fillMaxWidth().padding(8.dp))
-                AgentTracePanel(modifier = Modifier.fillMaxWidth().height(traceHeight))
+                Game(app, board, compact = true, modifier = Modifier.fillMaxWidth().padding(8.dp))
+                AgentTracePanel(modifier = Modifier.fillMaxWidth().height(TRACE_HEIGHT_COMPACT))
             } else {
                 Row(modifier = Modifier.fillMaxSize()) {
-                    Game(app, board, modifier = Modifier.weight(1f).fillMaxHeight().padding(16.dp))
+                    Game(app, board, compact = false, modifier = Modifier.weight(1f).fillMaxHeight().padding(16.dp))
                     AgentTracePanel(modifier = Modifier.width(traceWidth).fillMaxHeight())
                 }
             }
@@ -120,20 +125,30 @@ private fun Toolbar(app: TicTacToeAppState, onNewGame: () -> Unit) {
 
 @Composable
 private fun ToolGroup(content: @Composable () -> Unit) {
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+    // a group too wide for a phone wraps its buttons rather than squeezing their labels
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        itemVerticalAlignment = Alignment.CenterVertically,
+    ) {
         content()
     }
 }
 
 @Composable
-private fun Game(app: TicTacToeAppState, board: BoardState, modifier: Modifier) {
+private fun Game(app: TicTacToeAppState, board: BoardState, compact: Boolean, modifier: Modifier) {
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Text(status(board, app), style = MaterialTheme.typography.h5)
-        BoardView(board, onClick = app::click, modifier = Modifier.weight(1f))
+        // as large as fits: as wide as the screen on a phone, as tall as the room left otherwise
+        val boardSize = when {
+            compact -> Modifier.widthIn(max = BOARD_MAX_WIDTH_COMPACT).fillMaxWidth()
+            else -> Modifier.weight(1f)
+        }
+        BoardView(board, onClick = app::click, modifier = boardSize)
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("Agents think: ${app.thinkTime.inWholeMilliseconds} ms")
             Slider(
