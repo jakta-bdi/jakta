@@ -104,10 +104,12 @@ private fun agentColour(agent: String): Color = AGENT_COLOURS[agent.hashCode().m
 
 /**
  * Shows what the agents printed, following the newest line.
+ * Each agent's name is written in its colour from [agentColours], such as the colour the app draws it with,
+ * or else in one picked from its name.
  */
 @Suppress("MagicNumber")
 @Composable
-fun AgentTracePanel(modifier: Modifier = Modifier) {
+fun AgentTracePanel(modifier: Modifier = Modifier, agentColours: Map<String, Color> = emptyMap()) {
     val lines by AgentTrace.lines.collectAsState()
     val listState = rememberLazyListState()
 
@@ -127,9 +129,10 @@ fun AgentTracePanel(modifier: Modifier = Modifier) {
         }
         LazyColumn(state = listState) {
             items(lines) { line ->
+                val nameColour = agentColours[line.agent] ?: agentColour(line.agent)
                 Text(
                     buildAnnotatedString {
-                        withStyle(SpanStyle(color = agentColour(line.agent), fontWeight = FontWeight.Bold)) {
+                        withStyle(SpanStyle(color = nameColour, fontWeight = FontWeight.Bold)) {
                             append(line.agent)
                         }
                         append("  ")

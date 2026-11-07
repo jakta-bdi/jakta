@@ -110,6 +110,8 @@ fun KitchenApp(app: KitchenAppState) {
     val orders by app.restaurant.orders.collectAsState()
     val messages by app.restaurant.messages.collectAsState()
     val kitchens = app.kitchens.map { it.state.collectAsState().value }
+    // in the trace, each chef's lines are in the colour of its kitchen
+    val chefColours = app.kitchens.mapIndexed { index, kitchen -> kitchen.chef to CHEF_COLOURS[index] }.toMap()
 
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         // read here: the rows and columns below cannot see the constraints
@@ -182,7 +184,7 @@ fun KitchenApp(app: KitchenAppState) {
                     when (tab) {
                         CompactTab.ORDERS -> OrderList(orders, kitchens, modifier = panel.padding(8.dp))
                         CompactTab.MESSAGES -> MessageLogPanel(messages, modifier = panel)
-                        CompactTab.TRACE -> AgentTracePanel(modifier = panel)
+                        CompactTab.TRACE -> AgentTracePanel(modifier = panel, agentColours = chefColours)
                     }
                 }
 
@@ -194,7 +196,7 @@ fun KitchenApp(app: KitchenAppState) {
                     }
                     Row(modifier = Modifier.height(height * BOTTOM_SHARE_MEDIUM).fillMaxWidth()) {
                         MessageLogPanel(messages, modifier = Modifier.weight(1f).fillMaxHeight())
-                        AgentTracePanel(modifier = Modifier.weight(1f).fillMaxHeight())
+                        AgentTracePanel(modifier = Modifier.weight(1f).fillMaxHeight(), agentColours = chefColours)
                     }
                 }
 
@@ -203,7 +205,7 @@ fun KitchenApp(app: KitchenAppState) {
                     Kitchens(app, kitchens, walkMillis, modifier = Modifier.weight(1f).fillMaxHeight())
                     Column(modifier = Modifier.width(340.dp).fillMaxHeight()) {
                         MessageLogPanel(messages, modifier = Modifier.weight(1f).fillMaxWidth())
-                        AgentTracePanel(modifier = Modifier.weight(1f).fillMaxWidth())
+                        AgentTracePanel(modifier = Modifier.weight(1f).fillMaxWidth(), agentColours = chefColours)
                     }
                 }
             }

@@ -49,6 +49,9 @@ private const val PERCENT = 100
 private const val TENTHS = 10.0
 private const val TRACE_SHARE_COMPACT = 0.3f
 
+/** Each robot is named after its colour, and so are its lines in the trace. */
+private val ROBOT_TRACE_COLOURS = RobotColour.entries.associate { it.name.lowercase() to Color(it.argb) }
+
 /**
  * The main Composable function for the Vacuum World application.
  */
@@ -123,13 +126,19 @@ fun VacuumWorldApp(app: VacuumWorldAppState) {
                 Box(Modifier.weight(1f).fillMaxWidth().padding(8.dp), contentAlignment = Alignment.Center) {
                     WorldGrid(world, robots.map { it.value }, onClick = app::toggleDust)
                 }
-                AgentTracePanel(modifier = Modifier.fillMaxWidth().height(traceHeight))
+                AgentTracePanel(
+                    modifier = Modifier.fillMaxWidth().height(traceHeight),
+                    agentColours = ROBOT_TRACE_COLOURS,
+                )
             } else {
                 Row(modifier = Modifier.fillMaxSize()) {
                     Box(Modifier.weight(1f).fillMaxHeight().padding(16.dp), contentAlignment = Alignment.Center) {
                         WorldGrid(world, robots.map { it.value }, onClick = app::toggleDust)
                     }
-                    AgentTracePanel(modifier = Modifier.width(traceWidth).fillMaxHeight())
+                    AgentTracePanel(
+                        modifier = Modifier.width(traceWidth).fillMaxHeight(),
+                        agentColours = ROBOT_TRACE_COLOURS,
+                    )
                 }
             }
         }
