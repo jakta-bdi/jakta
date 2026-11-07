@@ -26,6 +26,8 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import kotlin.math.roundToInt
 import kotlin.time.Duration
@@ -33,15 +35,17 @@ import model.Block
 import model.Move
 import model.Stacks
 
-private const val GROUND_HEIGHT = 60f
-private const val TOP_MARGIN = 20f
-private const val MAX_BLOCK_SIZE = 90f
+// in dp, so that the plane looks the same on any screen density
+private val GROUND_HEIGHT = 24.dp
+private val TOP_MARGIN = 16.dp
+private val MAX_BLOCK_SIZE = 90.dp
 private const val BLOCK_TO_SPACING = 0.9f
 
-private const val RAIL_HEIGHT = 8f
-private const val CARRIAGE_HEIGHT = 18f
-private const val MIN_CABLE = 12f
-private const val GRIPPER_HEIGHT = 8f
+private val RAIL_HEIGHT = 8.dp
+private val CARRIAGE_HEIGHT = 18.dp
+private val MIN_CABLE = 12.dp
+private val GRIPPER_HEIGHT = 8.dp
+private val LINE_WIDTH = 4.dp
 
 // the share of the move delay the arm uses, so that it is back up before the next move starts
 private const val ARM_SHARE_OF_DELAY = 0.9
@@ -70,17 +74,22 @@ private fun firstFreeColumn(columns: Map<Block, Int>, columnCount: Int): Int =
 /**
  * Where blocks and the arm are drawn: one column per block, so that every stack keeps its place.
  */
-private class PlaneLayout(size: Size, val columnCount: Int, tallestStack: Float, withArm: Boolean) {
+private class PlaneLayout(size: Size, density: Density, val columnCount: Int, tallestStack: Float, withArm: Boolean) :
+    Density by density {
     val spacing = size.width / (columnCount + 1)
-    val groundY = size.height - GROUND_HEIGHT
-    val railY = TOP_MARGIN
+    val groundY = size.height - GROUND_HEIGHT.toPx()
+    val railY = TOP_MARGIN.toPx()
+    val railHeight = RAIL_HEIGHT.toPx()
+    val carriageHeight = CARRIAGE_HEIGHT.toPx()
+    val gripperHeight = GRIPPER_HEIGHT.toPx()
+    val lineWidth = LINE_WIDTH.toPx()
 
     // the gripper's lowest point when the arm is up, with room above the stacks for a carried block
-    val armUpY = railY + RAIL_HEIGHT + CARRIAGE_HEIGHT + MIN_CABLE + GRIPPER_HEIGHT
+    val armUpY = railY + railHeight + carriageHeight + MIN_CABLE.toPx() + gripperHeight
     val blockSize = minOf(
-        MAX_BLOCK_SIZE,
+        MAX_BLOCK_SIZE.toPx(),
         spacing * BLOCK_TO_SPACING,
-        if (withArm) (groundY - armUpY) / (tallestStack + 1) else (groundY - TOP_MARGIN) / tallestStack,
+        if (withArm) (groundY - armUpY) / (tallestStack + 1) else (groundY - railY) / tallestStack,
     )
 
     fun columnX(column: Int) = (column + 1) * spacing
@@ -140,18 +149,24 @@ private fun Move.isDoneIn(stacks: Stacks): Boolean {
  */
 @Suppress("MagicNumber")
 private fun DrawScope.drawArm(layout: PlaneLayout, x: Float, gripperY: Float, holding: Boolean) {
-    drawRect(RAIL_COLOR, Offset(0f, layout.railY), Size(size.width, RAIL_HEIGHT))
+    drawRect(RAIL_COLOR, Offset(0f, layout.railY), Size(size.width, layout.railHeight))
     val carriageWidth = layout.blockSize * 0.7f
-    val carriageTop = layout.railY + RAIL_HEIGHT
-    drawRect(ARM_COLOR, Offset(x - carriageWidth / 2, carriageTop), Size(carriageWidth, CARRIAGE_HEIGHT))
-    val gripperTop = gripperY - GRIPPER_HEIGHT
-    drawLine(CABLE_COLOR, Offset(x, carriageTop + CARRIAGE_HEIGHT), Offset(x, gripperTop), strokeWidth = 4f)
+    val carriageTop = layout.railY + layout.railHeight
+    drawRect(ARM_COLOR, Offset(x - carriageWidth / 2, carriageTop), Size(carriageWidth, layout.carriageHeight))
+    val gripperTop = gripperY - layout.gripperHeight
+    drawLine(
+        CABLE_COLOR,
+        Offset(x, carriageTop + layout.carriageHeight),
+        Offset(x, gripperTop),
+        strokeWidth = layout.lineWidth,
+    )
     // the gripper: a bar with a finger on each side, closed around a held block, open otherwise
     val gripperWidth = layout.blockSize * if (holding) 1.1f else 1.3f
-    drawRect(ARM_COLOR, Offset(x - gripperWidth / 2, gripperTop), Size(gripperWidth, GRIPPER_HEIGHT))
+    drawRect(ARM_COLOR, Offset(x - gripperWidth / 2, gripperTop), Size(gripperWidth, layout.gripperHeight))
     val fingerLength = layout.blockSize * 0.35f
-    listOf(x - gripperWidth / 2, x + gripperWidth / 2 - 6f).forEach { fingerX ->
-        drawRect(ARM_COLOR, Offset(fingerX, gripperY), Size(6f, fingerLength))
+    val fingerWidth = layout.lineWidth * 1.5f
+    listOf(x - gripperWidth / 2, x + gripperWidth / 2 - fingerWidth).forEach { fingerX ->
+        drawRect(ARM_COLOR, Offset(fingerX, gripperY), Size(fingerWidth, fingerLength))
     }
 }
 
@@ -222,7 +237,7 @@ fun BlocksWorldPlane(
         Modifier
     } else {
         Modifier.pointerInput(stacks, onMove) {
-            fun layout() = PlaneLayout(size.toSize(), columnCount, stacks.maxOf { it.size }.toFloat(), withArm)
+            fun layout() = PlaneLayout(size.toSize(), this, columnCount, stacks.maxOf { it.size }.toFloat(), withArm)
             detectDragGestures(
                 onDragStart = { start ->
                     // grabbing anywhere in a column picks its top block: start is reported past the touch slop
@@ -250,9 +265,9 @@ fun BlocksWorldPlane(
     val tallestStack by animateFloatAsState(maxOf(stacks.maxOf { it.size }, landingHeight).toFloat())
 
     Canvas(modifier = modifier.background(background).fillMaxSize().then(dragModifier)) {
-        val layout = PlaneLayout(size, columnCount, tallestStack, withArm)
+        val layout = PlaneLayout(size, this, columnCount, tallestStack, withArm)
 
-        drawRect(Color.DarkGray, Offset(0f, layout.groundY), Size(size.width, GROUND_HEIGHT))
+        drawRect(Color.DarkGray, Offset(0f, layout.groundY), Size(size.width, size.height - layout.groundY))
 
         if (onMove != null && dragged != null) {
             val target = layout.columnAt(dragPosition.x)
@@ -263,7 +278,10 @@ fun BlocksWorldPlane(
                     color = if (column == target) Color(0xFF3F51AA) else Color.Gray,
                     topLeft = spot.topLeft,
                     size = spot.size,
-                    style = Stroke(width = 3f, pathEffect = PathEffect.dashPathEffect(floatArrayOf(12f, 8f))),
+                    style = Stroke(
+                        width = layout.lineWidth * 0.75f,
+                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(4.dp.toPx(), 3.dp.toPx())),
+                    ),
                 )
             }
             stackIn(target)?.let { stack ->
