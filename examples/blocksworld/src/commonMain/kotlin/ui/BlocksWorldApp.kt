@@ -15,7 +15,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
@@ -39,7 +41,12 @@ import model.Stacks
 private const val MAX_MOVE_DELAY_MS = 2000f
 private const val WORLD_WEIGHT = 3f
 private const val GOAL_WEIGHT = 2f
-private const val TRACE_SHARE_COMPACT = 0.25f
+
+// on a phone the app scrolls as a page, so its panels get a height of their own
+private val GOAL_HEIGHT_COMPACT = 220.dp
+private val WORLD_HEIGHT_COMPACT = 320.dp
+private val TRACE_HEIGHT_COMPACT = 280.dp
+
 private val GOAL_COLOR = Color(0xFF2E7D32)
 private val GOAL_BACKGROUND = Color(0xFFE8F5E9)
 
@@ -59,9 +66,9 @@ fun BlocksWorldApp(app: BlocksWorldAppState) {
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         val compact = maxWidth < COMPACT_WIDTH
         // read here: the rows and columns below cannot see the constraints
-        val traceHeight = maxHeight * TRACE_SHARE_COMPACT
         val traceWidth = sideTraceWidth(maxWidth)
-        Column(modifier = Modifier.fillMaxSize()) {
+        val scroll = rememberScrollState()
+        Column(modifier = if (compact) Modifier.fillMaxSize().verticalScroll(scroll) else Modifier.fillMaxSize()) {
             // the controls wrap on more lines when the window is narrow, each group staying together
             FlowRow(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp),
@@ -106,11 +113,18 @@ fun BlocksWorldApp(app: BlocksWorldAppState) {
 
             if (compact) {
                 // on a phone: the goal and the world, then the trace below them
-                Planes(app, worldState, currentMove, goalReached, Modifier.weight(1f).fillMaxWidth())
-                AgentTracePanel(modifier = Modifier.fillMaxWidth().height(traceHeight))
+                Planes(app, worldState, currentMove, goalReached, compact = true, modifier = Modifier.fillMaxWidth())
+                AgentTracePanel(modifier = Modifier.fillMaxWidth().height(TRACE_HEIGHT_COMPACT))
             } else {
                 Row(modifier = Modifier.fillMaxSize()) {
-                    Planes(app, worldState, currentMove, goalReached, Modifier.weight(1f).fillMaxHeight())
+                    Planes(
+                        app,
+                        worldState,
+                        currentMove,
+                        goalReached,
+                        compact = false,
+                        modifier = Modifier.weight(1f).fillMaxHeight(),
+                    )
                     AgentTracePanel(modifier = Modifier.width(traceWidth).fillMaxHeight())
                 }
             }
@@ -124,6 +138,7 @@ private fun Planes(
     worldState: Stacks,
     currentMove: Move?,
     goalReached: Boolean,
+    compact: Boolean,
     modifier: Modifier,
 ) {
     val editable = !app.isRunning
@@ -131,7 +146,7 @@ private fun Planes(
         // the goal comes first, framed, so that it reads as the state the world should reach
         Column(
             modifier = Modifier
-                .weight(GOAL_WEIGHT)
+                .then(if (compact) Modifier.height(GOAL_HEIGHT_COMPACT) else Modifier.weight(GOAL_WEIGHT))
                 .border(3.dp, GOAL_COLOR, RoundedCornerShape(8.dp))
                 .background(GOAL_BACKGROUND, RoundedCornerShape(8.dp))
                 .padding(8.dp),
@@ -149,7 +164,11 @@ private fun Planes(
                 background = GOAL_BACKGROUND,
             )
         }
-        Column(modifier = Modifier.weight(WORLD_WEIGHT).padding(top = 8.dp)) {
+        Column(
+            modifier = Modifier
+                .then(if (compact) Modifier.height(WORLD_HEIGHT_COMPACT) else Modifier.weight(WORLD_WEIGHT))
+                .padding(top = 8.dp),
+        ) {
             PanelHeader(title = "World", subtitle = "the current state, where the agent moves the blocks") {
                 // shuffling the world also interrupts the agent
                 OutlinedButton(onClick = { app.shuffleWorld() }) { Text("Shuffle") }

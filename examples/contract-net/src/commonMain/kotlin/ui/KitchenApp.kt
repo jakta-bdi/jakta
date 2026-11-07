@@ -34,7 +34,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.Divider
 import androidx.compose.material.LinearProgressIndicator
@@ -83,11 +85,13 @@ import org.jetbrains.compose.resources.Font
 private const val MIN_SPEED = 0.5f
 private const val MAX_SPEED = 3f
 private const val TENTHS = 10.0
-private const val BOTTOM_SHARE_COMPACT = 0.3f
 private const val BOTTOM_SHARE_MEDIUM = 0.35f
 
 /** From this width up the logs sit beside the restaurant, else below it. */
 private val WIDE_WIDTH = 1100.dp
+
+/** On a phone the app scrolls as a page, and the panels below the kitchens are this tall. */
+private val PANEL_HEIGHT_COMPACT = 320.dp
 
 /** The colours the chefs are drawn with, one per chef. */
 @Suppress("MagicNumber")
@@ -111,7 +115,9 @@ fun KitchenApp(app: KitchenAppState) {
         // read here: the rows and columns below cannot see the constraints
         val width = maxWidth
         val height = maxHeight
-        Column(modifier = Modifier.fillMaxSize()) {
+        val compact = width < COMPACT_WIDTH
+        val scroll = rememberScrollState()
+        Column(modifier = if (compact) Modifier.fillMaxSize().verticalScroll(scroll) else Modifier.fillMaxSize()) {
             // the controls wrap on more lines when the window is narrow, each group staying together
             FlowRow(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp),
@@ -146,7 +152,7 @@ fun KitchenApp(app: KitchenAppState) {
                     )
                 }
             }
-            if (width >= COMPACT_WIDTH) {
+            if (!compact) {
                 Text(
                     "Order dishes, click a station to switch it on or off, and send a chef to nap: " +
                         "asleep, it is offline.",
@@ -158,11 +164,11 @@ fun KitchenApp(app: KitchenAppState) {
 
             val walkMillis = app.restaurant.realTime(WALK_TIME).inWholeMilliseconds
             when {
-                width < COMPACT_WIDTH -> {
+                compact -> {
                     // on a phone: the dishes to order, the kitchens, and below them one panel at a time
                     var tab by remember { mutableStateOf(CompactTab.ORDERS) }
                     DishButtons(onOrder = app::order, perRow = 3, modifier = Modifier.padding(8.dp))
-                    Kitchens(app, kitchens, walkMillis, modifier = Modifier.weight(1f).fillMaxWidth())
+                    Kitchens(app, kitchens, walkMillis, fillHeight = false, modifier = Modifier.fillMaxWidth())
                     TabRow(
                         selectedTabIndex = tab.ordinal,
                         backgroundColor = MaterialTheme.colors.surface,
@@ -172,7 +178,7 @@ fun KitchenApp(app: KitchenAppState) {
                             Tab(selected = it == tab, onClick = { tab = it }, text = { Text(it.title) })
                         }
                     }
-                    val panel = Modifier.fillMaxWidth().height(height * BOTTOM_SHARE_COMPACT)
+                    val panel = Modifier.fillMaxWidth().height(PANEL_HEIGHT_COMPACT)
                     when (tab) {
                         CompactTab.ORDERS -> OrderList(orders, kitchens, modifier = panel.padding(8.dp))
                         CompactTab.MESSAGES -> MessageLogPanel(messages, modifier = panel)
@@ -212,12 +218,21 @@ private fun ToolGroup(content: @Composable () -> Unit) {
     }
 }
 
-/** The kitchens, two per row. */
+/** The kitchens, two per row, sharing the height they get or, without [fillHeight], as tall as they need. */
 @Composable
-private fun Kitchens(app: KitchenAppState, kitchens: List<KitchenState>, walkMillis: Long, modifier: Modifier) {
+private fun Kitchens(
+    app: KitchenAppState,
+    kitchens: List<KitchenState>,
+    walkMillis: Long,
+    modifier: Modifier,
+    fillHeight: Boolean = true,
+) {
     Column(modifier = modifier.padding(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         app.kitchens.chunked(2).forEachIndexed { row, pair ->
-            Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(
+                modifier = if (fillHeight) Modifier.weight(1f) else Modifier,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 pair.forEachIndexed { column, kitchen ->
                     val index = row * 2 + column
                     KitchenCard(
@@ -225,13 +240,14 @@ private fun Kitchens(app: KitchenAppState, kitchens: List<KitchenState>, walkMil
                         kitchens[index],
                         CHEF_COLOURS[index],
                         walkMillis = walkMillis,
-                        modifier = Modifier.weight(1f).fillMaxHeight(),
+                        fillHeight = fillHeight,
+                        modifier = Modifier.weight(1f),
                     )
                 }
                 if (pair.size == 1) Spacer(modifier = Modifier.weight(1f))
             }
         }
-        if (app.kitchens.size <= 2) Spacer(modifier = Modifier.weight(1f))
+        if (fillHeight && app.kitchens.size <= 2) Spacer(modifier = Modifier.weight(1f))
     }
 }
 
@@ -323,29 +339,40 @@ private fun OrderSlip(order: Order, cooking: Boolean) {
     }
 }
 
-@Suppress("MagicNumber")
+@Suppress("MagicNumber", "LongParameterList")
 @Composable
-private fun KitchenCard(kitchen: Kitchen, state: KitchenState, colour: Color, walkMillis: Long, modifier: Modifier) {
+private fun KitchenCard(
+    kitchen: Kitchen,
+    state: KitchenState,
+    colour: Color,
+    walkMillis: Long,
+    fillHeight: Boolean,
+    modifier: Modifier,
+) {
     Column(
-        modifier = modifier.border(1.dp, Color(0xFFBDBDBD), RoundedCornerShape(6.dp)).padding(8.dp),
+        modifier = modifier
+            .then(if (fillHeight) Modifier.fillMaxHeight() else Modifier)
+            .border(1.dp, Color(0xFFBDBDBD), RoundedCornerShape(6.dp))
+            .padding(8.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(modifier = Modifier.size(12.dp).background(colour, RoundedCornerShape(6.dp)))
-            Text(
-                " ${kitchen.chef.replaceFirstChar { it.uppercase() }}",
-                fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.subtitle1,
-            )
-            Text(
-                "  served ${state.served}",
-                fontSize = 12.sp,
-                maxLines = 1,
-                modifier = Modifier.weight(1f),
-            )
+            // the name above what the chef served, so that both fit in a narrow card
+            Column(modifier = Modifier.weight(1f).padding(start = 6.dp)) {
+                Text(
+                    kitchen.chef.replaceFirstChar { it.uppercase() },
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.subtitle1,
+                )
+                Text("served ${state.served}", fontSize = 12.sp, color = Color.Gray)
+            }
             OutlinedButton(onClick = kitchen::toggleNap) { Text(if (state.napping) "Wake up" else "Nap") }
         }
-        Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
+        Box(
+            modifier = if (fillHeight) Modifier.weight(1f).fillMaxWidth() else Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.Center,
+        ) {
             KitchenFloor(state, colour, walkMillis, onStation = kitchen::toggleStation)
         }
         Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
