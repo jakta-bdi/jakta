@@ -61,6 +61,9 @@ fun VacuumWorldApp(app: VacuumWorldAppState) {
 
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         val compact = maxWidth < COMPACT_WIDTH
+        // read here: the rows and columns below cannot see the constraints
+        val traceHeight = maxHeight * TRACE_SHARE_COMPACT
+        val traceWidth = sideTraceWidth(maxWidth)
         Column(modifier = Modifier.fillMaxSize()) {
             // the controls wrap on more lines when the window is narrow, each group staying together
             FlowRow(
@@ -120,13 +123,13 @@ fun VacuumWorldApp(app: VacuumWorldAppState) {
                 Box(Modifier.weight(1f).fillMaxWidth().padding(8.dp), contentAlignment = Alignment.Center) {
                     WorldGrid(world, robots.map { it.value }, onClick = app::toggleDust)
                 }
-                AgentTracePanel(modifier = Modifier.fillMaxWidth().height(maxHeight * TRACE_SHARE_COMPACT))
+                AgentTracePanel(modifier = Modifier.fillMaxWidth().height(traceHeight))
             } else {
                 Row(modifier = Modifier.fillMaxSize()) {
                     Box(Modifier.weight(1f).fillMaxHeight().padding(16.dp), contentAlignment = Alignment.Center) {
                         WorldGrid(world, robots.map { it.value }, onClick = app::toggleDust)
                     }
-                    AgentTracePanel(modifier = Modifier.width(sideTraceWidth(maxWidth)).fillMaxHeight())
+                    AgentTracePanel(modifier = Modifier.width(traceWidth).fillMaxHeight())
                 }
             }
         }

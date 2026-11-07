@@ -43,7 +43,10 @@ val COMPACT_WIDTH: Dp = 720.dp
 fun sideTraceWidth(width: Dp): Dp = (width * SIDE_TRACE_SHARE).coerceIn(240.dp, 420.dp)
 
 /**
- * A line printed by the agent named [agent].
+ * A line of the trace.
+ *
+ * @property agent the name of the agent that printed it.
+ * @property message what the agent printed.
  */
 data class TraceLine(val agent: String, val message: String)
 

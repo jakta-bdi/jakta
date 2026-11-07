@@ -37,6 +37,7 @@ import kotlinx.coroutines.withContext
 import runThermostat
 
 private val STEP_TIME = 200.milliseconds
+private const val TRACE_SHARE_COMPACT = 0.35f
 
 /**
  * The thermostat application: a room whose temperature, target and outside temperature can be changed
@@ -56,6 +57,9 @@ fun ThermostatApp(agentDispatcher: CoroutineDispatcher = Dispatchers.Default) {
     }
 
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        // read here: the rows and columns below cannot see the constraints
+        val traceHeight = maxHeight * TRACE_SHARE_COMPACT
+        val traceWidth = sideTraceWidth(maxWidth)
         if (maxWidth < COMPACT_WIDTH) {
             // on a phone: the room, then the trace below it
             Column(modifier = Modifier.fillMaxSize()) {
@@ -64,12 +68,12 @@ fun ThermostatApp(agentDispatcher: CoroutineDispatcher = Dispatchers.Default) {
                     room,
                     modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(16.dp),
                 )
-                AgentTracePanel(modifier = Modifier.fillMaxWidth().height(maxHeight * 0.35f))
+                AgentTracePanel(modifier = Modifier.fillMaxWidth().height(traceHeight))
             }
         } else {
             Row(modifier = Modifier.fillMaxSize()) {
                 Controls(state, room, modifier = Modifier.weight(1f).fillMaxHeight().padding(24.dp))
-                AgentTracePanel(modifier = Modifier.width(sideTraceWidth(maxWidth)).fillMaxHeight())
+                AgentTracePanel(modifier = Modifier.width(traceWidth).fillMaxHeight())
             }
         }
     }

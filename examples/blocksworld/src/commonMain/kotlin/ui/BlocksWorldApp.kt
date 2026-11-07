@@ -58,6 +58,9 @@ fun BlocksWorldApp(app: BlocksWorldAppState) {
 
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         val compact = maxWidth < COMPACT_WIDTH
+        // read here: the rows and columns below cannot see the constraints
+        val traceHeight = maxHeight * TRACE_SHARE_COMPACT
+        val traceWidth = sideTraceWidth(maxWidth)
         Column(modifier = Modifier.fillMaxSize()) {
             // the controls wrap on more lines when the window is narrow, each group staying together
             FlowRow(
@@ -104,11 +107,11 @@ fun BlocksWorldApp(app: BlocksWorldAppState) {
             if (compact) {
                 // on a phone: the goal and the world, then the trace below them
                 Planes(app, worldState, currentMove, goalReached, Modifier.weight(1f).fillMaxWidth())
-                AgentTracePanel(modifier = Modifier.fillMaxWidth().height(maxHeight * TRACE_SHARE_COMPACT))
+                AgentTracePanel(modifier = Modifier.fillMaxWidth().height(traceHeight))
             } else {
                 Row(modifier = Modifier.fillMaxSize()) {
                     Planes(app, worldState, currentMove, goalReached, Modifier.weight(1f).fillMaxHeight())
-                    AgentTracePanel(modifier = Modifier.width(sideTraceWidth(maxWidth)).fillMaxHeight())
+                    AgentTracePanel(modifier = Modifier.width(traceWidth).fillMaxHeight())
                 }
             }
         }

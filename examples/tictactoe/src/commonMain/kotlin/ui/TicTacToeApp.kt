@@ -55,17 +55,20 @@ fun TicTacToeApp(app: TicTacToeAppState) {
 
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         val compact = maxWidth < COMPACT_WIDTH
+        // read here: the rows and columns below cannot see the constraints
+        val traceHeight = maxHeight * TRACE_SHARE_COMPACT
+        val traceWidth = sideTraceWidth(maxWidth)
         Column(modifier = Modifier.fillMaxSize()) {
             Toolbar(app, onNewGame = { app.newGame(scope) })
             Divider()
             if (compact) {
                 // on a phone: the board, then the trace below it
                 Game(app, board, modifier = Modifier.weight(1f).fillMaxWidth().padding(8.dp))
-                AgentTracePanel(modifier = Modifier.fillMaxWidth().height(maxHeight * TRACE_SHARE_COMPACT))
+                AgentTracePanel(modifier = Modifier.fillMaxWidth().height(traceHeight))
             } else {
                 Row(modifier = Modifier.fillMaxSize()) {
                     Game(app, board, modifier = Modifier.weight(1f).fillMaxHeight().padding(16.dp))
-                    AgentTracePanel(modifier = Modifier.width(sideTraceWidth(maxWidth)).fillMaxHeight())
+                    AgentTracePanel(modifier = Modifier.width(traceWidth).fillMaxHeight())
                 }
             }
         }

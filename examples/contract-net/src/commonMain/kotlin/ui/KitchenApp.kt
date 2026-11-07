@@ -108,7 +108,9 @@ fun KitchenApp(app: KitchenAppState) {
     val kitchens = app.kitchens.map { it.state.collectAsState().value }
 
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        // read here: the rows and columns below cannot see the constraints
         val width = maxWidth
+        val height = maxHeight
         Column(modifier = Modifier.fillMaxSize()) {
             // the controls wrap on more lines when the window is narrow, each group staying together
             FlowRow(
@@ -170,7 +172,7 @@ fun KitchenApp(app: KitchenAppState) {
                             Tab(selected = it == tab, onClick = { tab = it }, text = { Text(it.title) })
                         }
                     }
-                    val panel = Modifier.fillMaxWidth().height(maxHeight * BOTTOM_SHARE_COMPACT)
+                    val panel = Modifier.fillMaxWidth().height(height * BOTTOM_SHARE_COMPACT)
                     when (tab) {
                         CompactTab.ORDERS -> OrderList(orders, kitchens, modifier = panel.padding(8.dp))
                         CompactTab.MESSAGES -> MessageLogPanel(messages, modifier = panel)
@@ -184,7 +186,7 @@ fun KitchenApp(app: KitchenAppState) {
                         OrdersPanel(orders, kitchens, app::order, modifier = Modifier.width(200.dp).fillMaxHeight())
                         Kitchens(app, kitchens, walkMillis, modifier = Modifier.weight(1f).fillMaxHeight())
                     }
-                    Row(modifier = Modifier.height(maxHeight * BOTTOM_SHARE_MEDIUM).fillMaxWidth()) {
+                    Row(modifier = Modifier.height(height * BOTTOM_SHARE_MEDIUM).fillMaxWidth()) {
                         MessageLogPanel(messages, modifier = Modifier.weight(1f).fillMaxHeight())
                         AgentTracePanel(modifier = Modifier.weight(1f).fillMaxHeight())
                     }
