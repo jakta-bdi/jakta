@@ -8,14 +8,18 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.Button
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
@@ -38,6 +42,8 @@ import model.BoardState
 import model.Mark
 
 private const val MAX_THINK_TIME_MS = 2000f
+private const val TRACE_SHARE_COMPACT = 0.3f
+private val TIGHT_PADDING = PaddingValues(horizontal = 10.dp, vertical = 8.dp)
 
 /**
  * The main Composable function for the Tic-Tac-Toe application.
@@ -47,52 +53,92 @@ fun TicTacToeApp(app: TicTacToeAppState) {
     val scope = rememberCoroutineScope()
     val board by app.board.state.collectAsState()
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(12.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Button(onClick = { app.newGame(scope) }) { Text("New game") }
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        val compact = maxWidth < COMPACT_WIDTH
+        Column(modifier = Modifier.fillMaxSize()) {
+            Toolbar(app, onNewGame = { app.newGame(scope) })
+            Divider()
+            if (compact) {
+                // on a phone: the board, then the trace below it
+                Game(app, board, modifier = Modifier.weight(1f).fillMaxWidth().padding(8.dp))
+                AgentTracePanel(modifier = Modifier.fillMaxWidth().height(maxHeight * TRACE_SHARE_COMPACT))
+            } else {
+                Row(modifier = Modifier.fillMaxSize()) {
+                    Game(app, board, modifier = Modifier.weight(1f).fillMaxHeight().padding(16.dp))
+                    AgentTracePanel(modifier = Modifier.width(sideTraceWidth(maxWidth)).fillMaxHeight())
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun Toolbar(app: TicTacToeAppState, onNewGame: () -> Unit) {
+    // the controls wrap on more lines when the window is narrow, each group staying together
+    FlowRow(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        ToolGroup {
+            Button(onClick = onNewGame) { Text("New game") }
             for (mark in Mark.entries) {
                 OutlinedButton(onClick = { app.togglePlayer(mark) }) {
                     Text("$mark: ${if (app.players[mark] == Player.HUMAN) "you" else "agent"}")
                 }
             }
-            Text("Difficulty", modifier = Modifier.padding(start = 16.dp))
+        }
+        ToolGroup {
+            Text("Difficulty")
             for (difficulty in Difficulty.entries) {
-                OutlinedButton(onClick = { app.difficulty = difficulty }, enabled = difficulty != app.difficulty) {
+                OutlinedButton(
+                    onClick = { app.difficulty = difficulty },
+                    enabled = difficulty != app.difficulty,
+                    contentPadding = TIGHT_PADDING,
+                ) {
                     Text(difficulty.name.lowercase())
                 }
             }
-            Text("Size · ${BoardState(app.size).winLength} in a row", modifier = Modifier.padding(start = 16.dp))
+        }
+        ToolGroup {
+            Text("${BoardState(app.size).winLength} in a row")
             for (size in BOARD_SIZES) {
                 val selected = size == app.size
-                OutlinedButton(onClick = { app.changeSize(size) }, enabled = !selected) { Text("$size×$size") }
-            }
-        }
-
-        Divider()
-
-        Row(modifier = Modifier.fillMaxSize()) {
-            Column(
-                modifier = Modifier.weight(1f).fillMaxHeight().padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                Text(status(board, app), style = MaterialTheme.typography.h5)
-                BoardView(board, onClick = app::click, modifier = Modifier.weight(1f))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Agents think: ${app.thinkTime.inWholeMilliseconds} ms")
-                    Slider(
-                        value = app.thinkTime.inWholeMilliseconds.toFloat(),
-                        onValueChange = { app.thinkTime = it.roundToInt().milliseconds },
-                        valueRange = 0f..MAX_THINK_TIME_MS,
-                        modifier = Modifier.width(240.dp).padding(start = 12.dp),
-                    )
+                OutlinedButton(
+                    onClick = { app.changeSize(size) },
+                    enabled = !selected,
+                    contentPadding = TIGHT_PADDING,
+                ) {
+                    Text("$size×$size")
                 }
             }
-            AgentTracePanel(modifier = Modifier.width(420.dp).fillMaxHeight())
+        }
+    }
+}
+
+@Composable
+private fun ToolGroup(content: @Composable () -> Unit) {
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+        content()
+    }
+}
+
+@Composable
+private fun Game(app: TicTacToeAppState, board: BoardState, modifier: Modifier) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text(status(board, app), style = MaterialTheme.typography.h5)
+        BoardView(board, onClick = app::click, modifier = Modifier.weight(1f))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("Agents think: ${app.thinkTime.inWholeMilliseconds} ms")
+            Slider(
+                value = app.thinkTime.inWholeMilliseconds.toFloat(),
+                onValueChange = { app.thinkTime = it.roundToInt().milliseconds },
+                valueRange = 0f..MAX_THINK_TIME_MS,
+                modifier = Modifier.widthIn(max = 240.dp).padding(start = 12.dp),
+            )
         }
     }
 }
