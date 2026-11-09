@@ -32,8 +32,13 @@ enum class Mark {
  *
  * @property size the number of rows and columns.
  * @property cells the mark in each cell, row by row, or null if the cell is empty.
+ * @property winLength the marks in a row needed to win: the whole row on 3×3, one less on larger boards.
  */
-data class BoardState(val size: Int, val cells: List<Mark?> = List(size * size) { null }) {
+data class BoardState(
+    val size: Int,
+    val cells: List<Mark?> = List(size * size) { null },
+    val winLength: Int = if (size > 3) size - 1 else size,
+) {
 
     /**
      * The mark at column [x] and row [y], or null if the cell is empty.
@@ -41,13 +46,16 @@ data class BoardState(val size: Int, val cells: List<Mark?> = List(size * size) 
     operator fun get(x: Int, y: Int): Mark? = cells[y * size + x]
 
     /**
-     * Every row, column and diagonal, as lists of (x, y) coordinates.
+     * Every run of [winLength] cells along a row, column or diagonal, as lists of (x, y) coordinates.
      */
     val lines: List<List<Pair<Int, Int>>> by lazy {
         val indices = 0 until size
-        indices.map { y -> indices.map { x -> x to y } } +
-            indices.map { x -> indices.map { y -> x to y } } +
-            listOf(indices.map { it to it }, indices.map { it to size - 1 - it })
+        val directions = listOf(1 to 0, 0 to 1, 1 to 1, 1 to -1)
+        directions.flatMap { (dx, dy) ->
+            indices.flatMap { x -> indices.map { y -> x to y } }.map { (x, y) ->
+                (0 until winLength).map { x + it * dx to y + it * dy }
+            }.filter { line -> line.all { (x, y) -> x in indices && y in indices } }
+        }
     }
 
     /**

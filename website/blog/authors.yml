@@ -1,6 +1,6 @@
 anitvam:
   name: Martina Baiardi
-  title: Maintainer
+  title: Project Founder
   url: https://github.com/anitvam
   image_url: https://github.com/anitvam.png
   page: true
@@ -9,7 +9,7 @@ anitvam:
 
 samubura:
   name: Samuele Burattini
-  title: Contributor
+  title: Maintainer
   url: https://github.com/samubura
   image_url: https://github.com/samubura.png
   page: true
