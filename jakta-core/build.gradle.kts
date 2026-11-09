@@ -3,7 +3,7 @@ import org.gradle.kotlin.dsl.withType
 
 apply(plugin = rootProject.libs.plugins.kotlin.multiplatform.id)
 
-configureKotlinMultiplatform()
+configureKotlinMultiplatform(publishNpm = true)
 
 kotlinMultiplatform {
     sourceSets {
