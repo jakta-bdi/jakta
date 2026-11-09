@@ -7,7 +7,9 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [windows, macos, ubuntu]
+        # Branches and pull requests build on Ubuntu only; main builds on every OS before releasing,
+        # since macOS and Windows are needed for the Apple and MinGW native targets.
+        os: ${{ fromJSON(github.ref == 'refs/heads/main' && '["windows", "macos", "ubuntu"]' || '["ubuntu"]') }}
     runs-on: ${{ matrix.os }}-latest
     permissions:
       contents: read

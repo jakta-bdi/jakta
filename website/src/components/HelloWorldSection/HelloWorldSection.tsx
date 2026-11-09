@@ -36,7 +36,7 @@ export default function HelloWorldSection() {
   return (
     <section className={styles.helloSection} id="showcase">
       <div className={styles.helloText}>
-        <Heading as="h2">Hello world</Heading>
+        <Heading as="h2" className="section-title">Hello, <span className="gradient-text">world!</span></Heading>
         <p>
           Agents are written in pure Kotlin: their <b>goals</b>, <b>beliefs</b> and <b>plans</b> are declared
           with the DSL, and plan bodies are plain <code>suspend</code> Kotlin code.
@@ -49,16 +49,16 @@ export default function HelloWorldSection() {
         <p>Add JaKtA to your Gradle build:</p>
         <CodeBlock language="kotlin">{dependencies}</CodeBlock>
         <div className={styles.helloButtons}>
-          <Link className="button button--primary" to="/docs/tutorials/hello-world">
+          <Link className="pill-button pill-button--primary" to="/docs/tutorials/hello-world">
             Walk through the example
           </Link>
-          <Link className={`button button--outline button--primary ${styles.showcaseButton}`} to="/docs/showcase/blocksworld">
+          <Link className="pill-button pill-button--outline" to="/docs/showcase/blocksworld">
             Try the showcase in your browser
           </Link>
         </div>
       </div>
-      <div className={styles.helloCode}>
-        <CodeBlock language="kotlin" title="Main.kt" showLineNumbers>
+      <div className={`${styles.helloCode} code-window`}>
+        <CodeBlock language="kotlin" title="Agent.kt">
           {helloWorld}
         </CodeBlock>
       </div>

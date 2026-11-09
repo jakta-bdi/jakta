@@ -9,7 +9,7 @@ for [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform.html).
 Agents have **beliefs** about the world, **goals** to achieve, and **plans** that say how to achieve them.
 You write all three with a Kotlin DSL, and plan bodies are ordinary `suspend` Kotlin code:
 
-```kotlin title="Main.kt"
+```kotlin title="Agent.kt"
 val helloWorldAgent = agent<String, String, Any> {
     embodiedAs { Any() }
     hasInitialGoals {

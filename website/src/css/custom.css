@@ -4,45 +4,66 @@
  * work well for content-centric websites.
  */
 
-/* You can override the default Infima variables here. */
+/* The palette. Everything on the site takes its colours from these tokens: the brand colours of the social card
+   (static/img/jakta-social.svg), and the accent derived from them for text (links, active items, hovers). */
 :root {
-  --ifm-color-primary: #B125EA;
-  --ifm-color-primary-dark: #9413c9;
-  --ifm-color-primary-darker: #7F52FF;;
-  --ifm-color-primary-darkest: #591fff;
-  --ifm-color-primary-light: #E24462;
-  --ifm-color-primary-lighter: #e55a75;
-  --ifm-color-primary-lightest: #ef9cac;
+  --jakta-violet: #9b6bff;
+  --jakta-magenta: #d03cf0;
+  --jakta-pink: #ff5a7a;
+  --jakta-gradient: linear-gradient(90deg, var(--jakta-violet) 0%, var(--jakta-magenta) 50%, var(--jakta-pink) 100%);
+  /* Gradient buttons light up with this glow when hovered. */
+  --jakta-glow: 0 0 20px color-mix(in srgb, var(--jakta-magenta) 55%, transparent);
+  /* The deep purples of the hero's shade and of the footer. */
+  --jakta-ink: #0d0a15;
+  --jakta-plum: #261e35;
+
+  /* Accent for text (links, active items, hovers): the gradient's magenta, deepened to read on white (4.8:1). */
+  --ifm-color-primary: #bd11e2;
+  --ifm-color-primary-dark: #a50fc6;
+  --ifm-color-primary-darker: #990eb7;
+  --ifm-color-primary-darkest: #760b8d;
+  --ifm-color-primary-light: #ca23ee;
+  --ifm-color-primary-lighter: #ce31f0;
+  --ifm-color-primary-lightest: #d85cf3;
   --ifm-code-font-size: 95%;
 
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+  --docusaurus-highlighted-code-line-bg: color-mix(in srgb, var(--jakta-violet) 12%, transparent);
 
   --ifm-background-color: #fff;
   --ifm-card-background-color: #fff;
+  /* a faintly cool grey: a neutral one reads warm next to the purple hero */
+  --custom-section-color: #f1f0f5;
 
-  --custom-section-color: #efefef;
+  /* Where a home page section lands when its link is clicked: right below the navbar and the section bar. */
+  --home-anchor-offset: calc(var(--ifm-navbar-height) + 3.9rem);
 
+  /* Soft, layered card shadows, tinted with the plum; the lifted one for hovered cards. */
+  --jakta-card-shadow: 0 1px 3px color-mix(in srgb, var(--jakta-plum) 8%, transparent),
+    0 8px 24px color-mix(in srgb, var(--jakta-plum) 10%, transparent);
+  --jakta-card-shadow-lifted: 0 2px 6px color-mix(in srgb, var(--jakta-plum) 10%, transparent),
+    0 16px 40px color-mix(in srgb, var(--jakta-plum) 18%, transparent);
 }
 
-/* For readability concerns, you should choose a lighter palette in dark mode. */
-[data-theme='dark'] {
-  --ifm-color-primary: #B125EA;
-  --ifm-color-primary-dark: #9413c9;
-  --ifm-color-primary-darker: #7F52FF;;
-  --ifm-color-primary-darkest: #591fff;
-  --ifm-color-primary-light: #E24462;
-  --ifm-color-primary-lighter: #e55a75;
-  --ifm-color-primary-lightest: #ef9cac;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
-  --ifm-card-background-color: #222;
-  --ifm-background-color: #1b1b1d;
-
-  --custom-section-color: #222;
-}
-
-
-.footer--dark {
-  --ifm-footer-background-color: #3c2344;
+/* `:root` matches Docusaurus's own dark-theme selector, which otherwise wins for the background colours. */
+[data-theme='dark']:root {
+  /* Accent for text on the dark page: the gradient's magenta, lightened to read (6.1:1). */
+  --ifm-color-primary: #da67f3;
+  --ifm-color-primary-dark: #d34bf1;
+  --ifm-color-primary-darker: #d03cf0;
+  --ifm-color-primary-darkest: #c513ec;
+  --ifm-color-primary-light: #e183f5;
+  --ifm-color-primary-lighter: #e492f6;
+  --ifm-color-primary-lightest: #efbcfa;
+  --docusaurus-highlighted-code-line-bg: color-mix(in srgb, var(--jakta-violet) 15%, transparent);
+  /* One neutral scale: the page, then the navbar, cards and sections a step lighter. */
+  --ifm-background-color: #18181b;
+  --ifm-background-surface-color: #1f1f23;
+  --ifm-card-background-color: #1f1f23;
+  --custom-section-color: #1f1f23;
+  /* On the dark page a shadow barely shows: a faint edge outlines the cards instead. */
+  --jakta-card-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06), 0 8px 24px rgba(0, 0, 0, 0.35);
+  --jakta-card-shadow-lifted: 0 0 0 1px color-mix(in srgb, var(--jakta-violet) 35%, transparent),
+    0 16px 40px rgba(0, 0, 0, 0.5);
 }
 
 .navbar-logo {
@@ -132,4 +153,206 @@ html {
 .markdown table.table--squeeze th,
 .markdown table.table--squeeze td {
   overflow-wrap: anywhere;
+}
+
+/* Mermaid diagrams: no drop shadows (Mermaid's light grey ones look like smudges on the dark theme), and in
+   the dark theme boxes and notes in the brand colours instead of Mermaid's greys. */
+.docusaurus-mermaid-container svg :is([filter], rect, path, polygon, circle, ellipse) {
+  filter: none !important;
+}
+
+/* Edge labels are small tinted tags: they hide the line behind them and stay readable on the page as well as
+   inside grouped areas. Light theme: lavender tags, notes and groups instead of Mermaid's yellow. */
+.docusaurus-mermaid-container svg :is(.edgeLabel, .edgeLabel p, .labelBkg) {
+  background-color: color-mix(in srgb, var(--jakta-violet) 14%, white) !important;
+  color: var(--jakta-plum) !important;
+}
+
+.docusaurus-mermaid-container svg .edgeLabel rect {
+  fill: color-mix(in srgb, var(--jakta-violet) 14%, white) !important;
+}
+
+.docusaurus-mermaid-container svg rect.note {
+  fill: color-mix(in srgb, var(--jakta-magenta) 10%, white) !important;
+  stroke: var(--jakta-magenta) !important;
+}
+
+.docusaurus-mermaid-container svg .cluster rect {
+  fill: color-mix(in srgb, var(--jakta-violet) 5%, white) !important;
+  stroke: color-mix(in srgb, var(--jakta-violet) 45%, white) !important;
+}
+
+[data-theme='dark'] .docusaurus-mermaid-container svg :is(.edgeLabel, .edgeLabel p, .labelBkg) {
+  background-color: color-mix(in srgb, var(--jakta-violet) 22%, var(--jakta-ink)) !important;
+  color: #ece8f5 !important;
+}
+
+[data-theme='dark'] .docusaurus-mermaid-container svg .edgeLabel rect {
+  fill: color-mix(in srgb, var(--jakta-violet) 22%, var(--jakta-ink)) !important;
+}
+
+[data-theme='dark'] .docusaurus-mermaid-container svg .cluster rect {
+  fill: color-mix(in srgb, var(--jakta-violet) 6%, transparent) !important;
+  stroke: color-mix(in srgb, var(--jakta-violet) 50%, transparent) !important;
+}
+
+[data-theme='dark'] .docusaurus-mermaid-container svg :is(rect.actor, .node rect, .node polygon, .node circle, .node path) {
+  fill: color-mix(in srgb, var(--jakta-violet) 12%, var(--jakta-ink)) !important;
+  stroke: var(--jakta-violet) !important;
+}
+
+[data-theme='dark'] .docusaurus-mermaid-container svg rect.note {
+  fill: color-mix(in srgb, var(--jakta-magenta) 15%, var(--jakta-ink)) !important;
+  stroke: var(--jakta-magenta) !important;
+}
+
+/* One button style across the site, as in the hero: pill-shaped, primary buttons in the brand gradient. */
+.button {
+  --ifm-button-border-radius: 2rem;
+}
+
+.button--primary:not(.button--outline) {
+  background: var(--jakta-gradient);
+  border-color: transparent;
+}
+
+.button--primary:not(.button--outline):hover {
+  background: var(--jakta-gradient);
+  border-color: transparent;
+  box-shadow: var(--jakta-glow);
+}
+
+/* Pill buttons, styled as in the hero, at the size of the standard buttons (the hero makes its own larger).
+   The outline one has the brand gradient as its border and text (the hero makes its own white, on the photo). */
+.pill-button {
+  display: inline-block;
+  border: 2px solid transparent;
+  border-radius: 2rem;
+  padding: 0.375rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.5;
+  transition: box-shadow 0.2s;
+}
+
+.pill-button:hover {
+  text-decoration: none;
+}
+
+.pill-button--primary,
+.pill-button--primary:hover {
+  /* border-box: the gradient spans the transparent border instead of repeating under it */
+  background: var(--jakta-gradient) border-box;
+  color: #fff;
+}
+
+.pill-button:hover {
+  box-shadow: var(--jakta-glow);
+}
+
+.pill-button--outline,
+.pill-button--outline:hover {
+  position: relative;
+  background: var(--jakta-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  /* also on hover, where the link hover colour would replace the gradient text */
+  color: transparent;
+}
+
+/* The gradient border: a gradient ring around the button, whatever the background behind it. */
+.pill-button--outline::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  padding: 2px;
+  border-radius: inherit;
+  background: var(--jakta-gradient);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+
+
+/* Code blocks as windows, as on the social card: rounded, a gradient border, and a title bar with three dots and
+   the file name on the right. Used on the home page (.code-window) and on the "What is JaKtA?" page. */
+:root {
+  --code-window-dots:
+    radial-gradient(circle closest-side, #ff5f57 90%, transparent) 1rem 50% / 0.8rem 0.8rem no-repeat,
+    radial-gradient(circle closest-side, #febc2e 90%, transparent) 2.2rem 50% / 0.8rem 0.8rem no-repeat,
+    radial-gradient(circle closest-side, #28c840 90%, transparent) 3.4rem 50% / 0.8rem 0.8rem no-repeat;
+  /* the title bar, a shade apart from the code so the window has a visible header */
+  --code-window-bar: #e6e8ee;
+}
+
+[data-theme='dark'] {
+  --code-window-bar: #1f1e25;
+}
+
+:is(.code-window, html.docs-doc-id-intro .theme-doc-markdown) .theme-code-block {
+  border: 1.5px solid transparent;
+  border-radius: 18px;
+  background:
+    linear-gradient(var(--prism-background-color), var(--prism-background-color)) padding-box,
+    linear-gradient(135deg, color-mix(in srgb, var(--jakta-violet) 70%, transparent), color-mix(in srgb, var(--jakta-pink) 50%, transparent)) border-box;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+:is(.code-window, html.docs-doc-id-intro .theme-doc-markdown) .theme-code-block [class*='codeBlockTitle'] {
+  padding-left: 5rem;
+  text-align: right;
+  background: var(--code-window-dots), var(--code-window-bar);
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+}
+
+/* On phones and tablets a lighter shadow: the large one looks heavy on a small screen. */
+@media (max-width: 996px) {
+  :is(.code-window, html.docs-doc-id-intro .theme-doc-markdown) .theme-code-block {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  }
+}
+
+/* A block without a title still gets the bar with the dots. */
+:is(.code-window, html.docs-doc-id-intro .theme-doc-markdown) .theme-code-block:not(:has([class*='codeBlockTitle']))::before {
+  content: '';
+  display: block;
+  height: 2.5rem;
+  background: var(--code-window-dots), var(--code-window-bar);
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+}
+
+/* BibTeX entries wrap instead of scrolling sideways. */
+.bibtex code {
+  white-space: pre-wrap !important;
+  overflow-wrap: anywhere;
+}
+
+/* The footer is its own band in both themes: a deep, muted purple from the hero's shade. */
+.footer--dark {
+  --ifm-footer-background-color: var(--jakta-plum);
+}
+
+/* On phones the section bar is slimmer (HomePageNavbar.module.css). */
+@media (max-width: 996px) {
+  :root {
+    --home-section-bar-height: 2.9rem;
+    --home-anchor-offset: calc(var(--ifm-navbar-height) + var(--home-section-bar-height));
+  }
+}
+
+/* Home page section titles, as the hero's: the key words in the brand gradient. */
+.section-title {
+  font-size: clamp(1.8rem, 3vw, 2.3rem);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.gradient-text {
+  background: var(--jakta-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }

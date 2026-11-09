@@ -1,63 +1,23 @@
 import React from 'react';
-import { Cite } from '@citation-js/core';
-import '@citation-js/plugin-bibtex';
-import '@citation-js/plugin-csl';
 
+// Formatted at build time by src/plugins/bibtex-loader.js
 // @ts-ignore
-import bibtexText from '!!raw-loader!../../../static/jakta-references.bib';
+import sections from '../../../static/jakta-references.bib';
 
-const PublicationsList: React.FC = () => {
-	const sections = new Map<string, string[]>();
-	let years: string[] = [];
-	let error: string | null = null;
-	try {
-		const cite = new Cite(bibtexText);
-		const data = cite.get({ type: 'json' });
-		// Group entries by year
-		data.forEach((entry: any) => {
-			let year = '';
-			if (entry.issued && entry.issued['date-parts'] && entry.issued['date-parts'][0]) {
-				year = String(entry.issued['date-parts'][0][0]);
-			} else if (entry.year) {
-				year = String(entry.year);
-			} else {
-				year = 'Unknown';
-			}
-			const singleCite = new Cite([entry]);
-			let citation = singleCite.format('bibliography', {
-				format: 'html',
-				template: 'apa',
-				lang: 'en-US',
-			});
-			// Replace plain URLs in citation text with clickable links
-			if (entry.URL) {
-				const urlRegex = /(https?:\/\/[^\s<]+)/g;
-				citation = citation.replace(urlRegex, `<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>`);
-			}
-			sections.set(year, [...(sections.get(year) ?? []), citation]);
-		});
-		// Sort years descending
-		years = [...sections.keys()].sort((a, b) => b.localeCompare(a, undefined, { numeric: true }));
-	} catch (e: any) {
-		error = e.message;
-	}
-
-	return (
-		<>
-			{error && <p style={{ color: 'red' }}>{error}</p>}
-			{years.map((year) => (
-				<section key={year} style={{ marginBottom: '2.5rem' }}>
-					<h2>{year}</h2>
-					<ul style={{ paddingLeft: '1.5em' }}>
-						{sections.get(year)?.map((citation, idx) => (
-							<li key={idx} style={{ marginBottom: '1rem'}}
-									dangerouslySetInnerHTML={{ __html: citation }} />
-						))}
-					</ul>
-				</section>
-			))}
-		</>
-	);
-};
+const PublicationsList: React.FC = () => (
+	<>
+		{(sections as {year: string; citations: string[]}[]).map(({year, citations}) => (
+			<section key={year} style={{ marginBottom: '2.5rem' }}>
+				<h2>{year}</h2>
+				<ul style={{ paddingLeft: '1.5em' }}>
+					{citations.map((citation, idx) => (
+						<li key={idx} style={{ marginBottom: '1rem'}}
+								dangerouslySetInnerHTML={{ __html: citation }} />
+					))}
+				</ul>
+			</section>
+		))}
+	</>
+);
 
 export default PublicationsList;
