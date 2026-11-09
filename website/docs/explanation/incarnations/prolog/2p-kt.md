@@ -14,9 +14,9 @@ The Prolog incarnation relies on it for:
 | `PrologGoal` | `Struct` |
 | Writing terms in Kotlin | 2P-Kt's Prolog DSL (`"f"(X)`, `impliedBy`, `and`, ...) |
 | Triggers | Unification, with a JaKtA-specific unifier that also matches annotations |
-| Guards (`satisfies`) and `testQuery` | A classic 2P-Kt solver, run with the belief base as its theory |
+| Guards (`satisfies`) and `testQuery` | A 2P-Kt `solve-prolog` solver, run with the belief base as its theory |
 
-The incarnation exposes the 2P-Kt modules it uses (`core`, `solve-classic`, `parser`, `dsl-*`, `serialize`)
+The incarnation exposes the 2P-Kt modules it uses (`core`, `solve-prolog`, `parser`, `dsl-*`, `serialize`)
 as `api` dependencies, so the whole 2P-Kt API is available in your code without extra dependencies.
 
 ## The DSL in a nutshell

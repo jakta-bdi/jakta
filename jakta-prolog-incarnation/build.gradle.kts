@@ -14,7 +14,7 @@ kotlinMultiplatform {
             implementation(libs.kermit)
 
             api(libs.tuprolog.core)
-            api(libs.tuprolog.solve.classic)
+            api(libs.tuprolog.solve.prolog)
             api(libs.tuprolog.parser.core)
             api(libs.tuprolog.dsl.core)
             api(libs.tuprolog.dsl.unify)
