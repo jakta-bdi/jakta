@@ -36,7 +36,6 @@
     "@docusaurus/types": "3.10.2",
     "@svgr/webpack": "^8.1.0",
     "@types/js-yaml": "^4.0.9",
-    "raw-loader": "^4.0.2",
     "typescript": "~7.0.0"
   },
   "browserslist": {

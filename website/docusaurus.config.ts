@@ -119,7 +119,7 @@ const config: Config = {
             rules: [
               {
                 test: /\.bib$/,
-                use: "raw-loader",
+                use: require.resolve("./src/plugins/bibtex-loader.js"),
               },
             ],
           },

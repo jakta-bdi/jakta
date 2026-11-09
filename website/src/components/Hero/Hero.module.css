@@ -114,6 +114,17 @@
     color-mix(in srgb, var(--jakta-violet) 20%, transparent);
 }
 
+/* On desktop the section bar is fixed over the top of the hero: a taller hero, with more room above the text. */
+@media (min-width: 997px) {
+  .heroBanner {
+    min-height: 70vh;
+  }
+
+  .heroContent {
+    padding-top: 7rem;
+  }
+}
+
 @media (max-width: 996px) {
   .heroContent {
     width: 100%;
