@@ -89,7 +89,7 @@ interface MutableAgentState<Belief : Any, Goal : Any> :
      * [it.unibo.jakta.belief.BeliefRevision]).
      * @throws IllegalArgumentException if any of the [replacements] is not in [scope].
      */
-    fun replace(scope: (Belief) -> Belief?, replacements: List<Belief>)
+    fun replace(replacements: List<Belief>, scope: (Belief) -> Belief?)
 
     /**
      * Logs a message to the agent's output.

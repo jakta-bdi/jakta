@@ -24,10 +24,10 @@ internal data class BeliefBaseImpl<Belief : Any>(
 
     override fun remove(element: Belief): Boolean = apply(revisionStrategy.remove(beliefs, element))
 
-    override fun replace(scope: (Belief) -> Belief?, replacements: List<Belief>): Boolean {
+    override fun replace(replacements: List<Belief>, scope: (Belief) -> Belief?): Boolean {
         val outOfScope = replacements.filter { scope(it) == null }
         require(outOfScope.isEmpty()) { "Replacements must be in the scope they replace, but $outOfScope are not" }
-        return apply(revisionStrategy.replace(beliefs, scope, replacements))
+        return apply(revisionStrategy.replace(beliefs, replacements, scope))
     }
 
     private fun apply(revision: BeliefRevision.Revision<Belief>, notify: Boolean = true): Boolean {

@@ -44,7 +44,7 @@ interface BeliefRevision<Belief : Any> {
      * By default, comparing beliefs by equality, the beliefs in scope that are not among the replacements are dropped,
      * and the replacements that are not held are stored, each announced as removed or added.
      */
-    fun replace(current: Collection<Belief>, scope: (Belief) -> Belief?, replacements: List<Belief>): Revision<Belief> {
+    fun replace(current: Collection<Belief>, replacements: List<Belief>, scope: (Belief) -> Belief?): Revision<Belief> {
         val incoming = replacements.distinct()
         val outdated = current.mapNotNull(scope).filter { it !in incoming }
         val new = incoming.filter { it !in current }

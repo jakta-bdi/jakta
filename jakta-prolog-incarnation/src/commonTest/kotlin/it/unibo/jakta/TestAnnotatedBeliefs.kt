@@ -154,7 +154,7 @@ class TestAnnotatedBeliefs {
         vararg beliefs: PrologBelief,
     ): Pair<List<Pair<String, Set<Struct>>>, List<Pair<AgentEvent.Internal.Belief<PrologBelief>, Set<Struct>>>> {
         val (beliefBase, events) = annotatedBeliefBase(*beliefs)
-        beliefBase.replace(replace.scope, replace.replacements)
+        beliefBase.replace(replace.replacements, replace.scope)
         val held = beliefBase.snapshot().map { it.head.toString() to it.annotations }.sortedBy { it.first }
         return held to events.drain()
     }
@@ -234,12 +234,9 @@ class TestAnnotatedBeliefs {
         // as Alice untelling ping(X)[certain]: the scope matches the whole belief, and gives only Alice's source
         val certainFromAlice = initialBelief { "ping"(1)[atomOf("certain"), source("alice")] }
         val query = newContextBeliefQuery { "ping"(X)[atomOf("certain"), source("alice")] }
-        val untell = AgentUpdate.Replace<PrologBelief>(
-            { belief ->
-                belief.setAnnotations(source("alice")).takeIf { belief.matchBelief(query) != null }
-            },
-            emptyList(),
-        )
+        val untell = AgentUpdate.Replace<PrologBelief>(emptyList()) { belief ->
+            belief.setAnnotations(source("alice")).takeIf { belief.matchBelief(query) != null }
+        }
         val (held, events) = replaced(untell, certainFromAlice, fromCarol)
         assertEquals(listOf("ping(1)" to setOf("certain".toAtom()) + sources("carol")), held)
         assertEquals(listOf(sources("alice")), events.map { it.second })
@@ -265,7 +262,7 @@ class TestAnnotatedBeliefs {
             ),
         )
         val replace = replaceFrom(self, listOf(pingQuery), listOf(initialBelief { "ping"(3) }))
-        beliefBase.replace(replace.scope, replace.replacements)
+        beliefBase.replace(replace.replacements, replace.scope)
         assertEquals(setOf("ping(2)", "ping(3)"), beliefBase.snapshot().map { it.head.toString() }.toSet())
     }
 

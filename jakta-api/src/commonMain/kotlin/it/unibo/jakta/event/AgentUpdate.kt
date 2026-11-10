@@ -31,7 +31,7 @@ sealed interface AgentUpdate<T : Any> {
      * itself, or, for beliefs with metadata, the belief with only the metadata in scope (see
      * [it.unibo.jakta.belief.BeliefRevision]). Use [where] when a belief is either wholly in scope or not at all.
      */
-    data class Replace<B : Any>(val scope: (B) -> B?, val replacements: List<B>) : AgentUpdate<B> {
+    data class Replace<B : Any>(val replacements: List<B>, val scope: (B) -> B?) : AgentUpdate<B> {
         /**
          * Factory methods for [Replace].
          */
@@ -40,7 +40,7 @@ sealed interface AgentUpdate<T : Any> {
              * The beliefs that satisfy [filter] are now [replacements].
              */
             fun <B : Any> where(replacements: List<B>, filter: (B) -> Boolean): Replace<B> =
-                Replace({ belief -> belief.takeIf(filter) }, replacements)
+                Replace(replacements) { belief -> belief.takeIf(filter) }
         }
     }
 

@@ -61,8 +61,8 @@ object AnnotatedBeliefRevision : BeliefRevision<PrologBelief> {
 
     override fun replace(
         current: Collection<PrologBelief>,
-        scope: (PrologBelief) -> PrologBelief?,
         replacements: List<PrologBelief>,
+        scope: (PrologBelief) -> PrologBelief?,
     ): Revision<PrologBelief> {
         // one replacement per term, with all its annotations
         val wanted = replacements.groupBy { it }.map { (belief, same) ->

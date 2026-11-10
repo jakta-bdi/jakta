@@ -17,5 +17,5 @@ interface BeliefBase<Belief : Any> : MutableCollection<Belief> {
      * @return whether the belief base changed.
      * @throws IllegalArgumentException if any of the [replacements] is not in [scope].
      */
-    fun replace(scope: (Belief) -> Belief?, replacements: List<Belief>): Boolean
+    fun replace(replacements: List<Belief>, scope: (Belief) -> Belief?): Boolean
 }

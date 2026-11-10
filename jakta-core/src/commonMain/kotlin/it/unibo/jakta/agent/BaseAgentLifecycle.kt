@@ -255,7 +255,7 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
             is AgentUpdate.Forget<*> -> (update as AgentUpdate.Forget<Belief>).beliefs.forEach { state.forget(it) }
 
             is AgentUpdate.Replace<*> -> (update as AgentUpdate.Replace<Belief>).let {
-                state.replace(it.scope, it.replacements)
+                state.replace(it.replacements, it.scope)
             }
 
             // TODO goal removal does not stop the intentions already pursuing the goal

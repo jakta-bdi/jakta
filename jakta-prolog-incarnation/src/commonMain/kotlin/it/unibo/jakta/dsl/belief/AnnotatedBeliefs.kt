@@ -31,13 +31,10 @@ fun replaceFrom(
     val annotation = source(from)
     val scope = queries.map { it.addAnnotations(annotation) }
     // of a belief matching a query, only what [from] contributed is in scope
-    return AgentUpdate.Replace(
-        { belief ->
-            val inScope = scope.any { query -> belief.matchBelief(query) != null }
-            belief.setAnnotations(annotation).takeIf { inScope }
-        },
-        beliefs.map { it.addAnnotations(annotation) },
-    )
+    return AgentUpdate.Replace(beliefs.map { it.addAnnotations(annotation) }) { belief ->
+        val inScope = scope.any { query -> belief.matchBelief(query) != null }
+        belief.setAnnotations(annotation).takeIf { inScope }
+    }
 }
 
 /**
@@ -49,7 +46,7 @@ fun MutableAgentState<PrologBelief, *>.update(belief: PrologBelief) {
     val head = belief.head
     val sameFunctorAndArity = Struct.of(head.functor, List(head.arity) { Var.anonymous() })
     val replacement = replaceFrom(self, listOf(sameFunctorAndArity), listOf(belief))
-    replace(replacement.scope, replacement.replacements)
+    replace(replacement.replacements, replacement.scope)
 }
 
 /**
@@ -64,25 +61,22 @@ fun MutableAgentState<PrologBelief, *>.update(belief: PrologBelief) {
 fun MutableAgentState<PrologBelief, *>.forgetAllMatching(beliefQuery: Struct) {
     val patterns = beliefQuery.annotations
     val anyAnnotations = beliefQuery.removeAllAnnotations()
-    replace(
-        { belief ->
-            val termMatch = belief.matchBelief(anyAnnotations)
-            when {
-                termMatch == null || belief.matchBelief(beliefQuery) == null -> null
+    replace(emptyList()) { belief ->
+        val termMatch = belief.matchBelief(anyAnnotations)
+        when {
+            termMatch == null || belief.matchBelief(beliefQuery) == null -> null
 
-                patterns.isEmpty() -> belief
+            patterns.isEmpty() -> belief
 
-                else -> {
-                    val bound = patterns.map { it.apply(termMatch.substitution) }
-                    val forgotten = belief.effectiveAnnotations.filter { annotation ->
-                        bound.any { Unificator.default.match(it, annotation) }
-                    }
-                    belief.setAnnotations(*forgotten.toTypedArray())
+            else -> {
+                val bound = patterns.map { it.apply(termMatch.substitution) }
+                val forgotten = belief.effectiveAnnotations.filter { annotation ->
+                    bound.any { Unificator.default.match(it, annotation) }
                 }
+                belief.setAnnotations(*forgotten.toTypedArray())
             }
-        },
-        emptyList(),
-    )
+        }
+    }
 }
 
 /**

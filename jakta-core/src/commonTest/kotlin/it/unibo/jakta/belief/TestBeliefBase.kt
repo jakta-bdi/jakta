@@ -90,11 +90,11 @@ class TestBeliefBase {
         val inScope: (String) -> String? = { belief ->
             belief.takeIf { it.startsWith("at(") || it.startsWith("charge=") }
         }
-        assertEquals(true, beliefBase.replace(inScope, listOf("at(2)", "charge=3")))
+        assertEquals(true, beliefBase.replace(listOf("at(2)", "charge=3"), inScope))
         assertEquals(setOf("at(2)", "door=open", "charge=3"), beliefBase.snapshot().toSet())
         assertEquals(listOf(BeliefRemoveEvent("at(1)"), BeliefAddEvent("at(2)")), events.drain())
         // the same replacement again changes nothing
-        assertEquals(false, beliefBase.replace(inScope, listOf("at(2)", "charge=3")))
+        assertEquals(false, beliefBase.replace(listOf("at(2)", "charge=3"), inScope))
         assertEquals(emptyList(), events.drain())
     }
 
@@ -102,7 +102,7 @@ class TestBeliefBase {
     fun replacementsMustBeInTheirScope() {
         val beliefBase = BeliefBaseFactory.of(UnlimitedChannelQueue(), listOf("at(1)"))
         val atScope: (String) -> String? = { belief -> belief.takeIf { it.startsWith("at(") } }
-        assertFailsWith<IllegalArgumentException> { beliefBase.replace(atScope, listOf("door=open")) }
+        assertFailsWith<IllegalArgumentException> { beliefBase.replace(listOf("door=open"), atScope) }
         assertEquals(setOf("at(1)"), beliefBase.snapshot().toSet())
     }
 }
