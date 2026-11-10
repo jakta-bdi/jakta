@@ -175,7 +175,7 @@ fun MasBuilder<BaseNode<Any>, BaseNodeBuilder<Any, BaseNode<Any>>>.blocksWorldNo
                     } triggers {
                         agent.print("Block ", X, " is not clear.")
                         agent.print("Check if I can move ", H, " to clear ", X)
-                        agent.achieve(goal { clear(H) }) // TODO the Jason solution does not include this
+                        agent.achieve(goal { clear(H) })
                         agent.print("Moving block ", H, " on ", table)
                         blocksWorld.move(H.value(), table.value)
                         agent.print(X, " should now be clear.")

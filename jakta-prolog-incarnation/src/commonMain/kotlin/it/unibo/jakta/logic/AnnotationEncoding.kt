@@ -16,9 +16,9 @@ import it.unibo.tuprolog.core.Var
 import it.unibo.tuprolog.solve.Signature
 import it.unibo.tuprolog.solve.Solution
 import it.unibo.tuprolog.solve.Solver
-import it.unibo.tuprolog.solve.classic.ClassicSolverFactory
 import it.unibo.tuprolog.solve.flags.TrackVariables
 import it.unibo.tuprolog.solve.flags.Unknown
+import it.unibo.tuprolog.solve.prolog.PrologSolverFactory
 import it.unibo.tuprolog.unify.AbstractUnificator
 import it.unibo.tuprolog.utils.setTag
 
@@ -80,7 +80,7 @@ private val storedFirst = object : AbstractUnificator() {
 }
 
 // referenced directly: the by-name lookup behind Solver.prolog fails in bundled JS apps (webpack)
-private fun solverOf(theory: Iterable<Clause>): Solver = ClassicSolverFactory
+private fun solverOf(theory: Iterable<Clause>): Solver = PrologSolverFactory
     .newBuilder()
     .unificator(storedFirst)
     .staticKb(theory)
