@@ -40,9 +40,10 @@ fun PrologBelief.withAnnotations(annotations: Set<Struct>): PrologBelief {
  * - Removing a belief removes only its annotations, and the belief when none is left: forgetting `ping(1)`, i.e.
  *   `ping(1)[source(self)]`, leaves `ping(1)[source(alice)]` if Alice told it too, and raises `-ping(1)[source(self)]`.
  *
- * - Replacing the beliefs in a scope shows the scope each source of a belief on its own, e.g. `ping(1)[source(self)]`
- *   and `ping(1)[source(alice)]`, so that a scope can select the contributions of some sources only: see [replaceSelf],
- *   [replaceFrom] and [replaceAll].
+ * - Replacing removes from each belief held the annotations its scope gives, unless the replacements keep them: a scope
+ *   giving `ping(1)[source(self)]` for `ping(1)[source(self), source(alice)]` replaces only the agent's own
+ *   contribution, while one giving the whole belief replaces every source. See [replaceSelf], [replaceFrom] and
+ *   [replaceAll].
  *
  * Use [forgetAllMatching] to forget beliefs whatever their annotations.
  */
@@ -81,19 +82,18 @@ object AnnotatedBeliefRevision : BeliefRevision<PrologBelief> {
 
     override fun replace(
         current: Collection<PrologBelief>,
-        scope: (PrologBelief) -> Boolean,
+        scope: (PrologBelief) -> PrologBelief?,
         replacements: List<PrologBelief>,
     ): Revision<PrologBelief> {
         // one replacement per term, with all its annotations
         val wanted = replacements.groupBy { it }.map { (belief, same) ->
             belief.withAnnotations(same.flatMap { it.annotations }.toSet())
         }
-        // the contributions in scope that the replacements do not keep, judging each source of a belief on its own
+        // the annotations the scope removes from each belief held, except those the replacements keep
         val outdated = current.mapNotNull { held ->
+            val inScope = scope(held) ?: return@mapNotNull null
             val wantedAnnotations = wanted.held(held)?.annotations.orEmpty()
-            val outdatedAnnotations = held.annotations
-                .filter { it !in wantedAnnotations && scope(held.withAnnotations(setOf(it))) }
-                .toSet()
+            val outdatedAnnotations = (held.annotations intersect inScope.annotations) - wantedAnnotations
             outdatedAnnotations.takeIf { it.isNotEmpty() }?.let { held.withAnnotations(it) }
         }
         // removals first, then additions, each applied to the beliefs as revised so far
@@ -125,7 +125,7 @@ fun <Goal : Any, Body : Any> AgentBuilder<PrologBelief, Goal, Body>.usesAnnotate
  * which also retracts what other agents told about them.
  */
 fun replaceAll(queries: List<Struct>, beliefs: Iterable<PrologBelief>): AgentUpdate.Replace<PrologBelief> =
-    AgentUpdate.Replace({ belief -> queries.any { belief.matchBelief(it) != null } }, beliefs.toList())
+    AgentUpdate.Replace.where(beliefs.toList()) { belief -> queries.any { belief.matchBelief(it) != null } }
 
 /**
  * What [from] contributed to the beliefs matching any of [queries] is now [beliefs], attributed to [from]; what other
@@ -163,8 +163,12 @@ private fun replacementFrom(
     }
     val annotation = source(from)
     val scope = queries.map { it.tag(annotation) }
+    // of a belief matching a query, only what [from] contributed is in scope
     return AgentUpdate.Replace(
-        { belief -> scope.any { belief.matchBelief(it) != null } },
+        { belief ->
+            val inScope = scope.any { query -> belief.matchBelief(query) != null }
+            belief.withAnnotations(setOf(annotation)).takeIf { inScope }
+        },
         beliefs.map { it.withAnnotations(setOf(annotation)) },
     )
 }

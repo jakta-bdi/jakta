@@ -27,13 +27,16 @@ fun AgentState<PrologBelief, PrologGoal>.handleKQMLPayload(payload: KQMLPayload,
             AgentUpdate.Believe(beliefs)
         }
 
-        // Only the sender's source is removed: with annotated beliefs, what others told stays.
+        // Of the beliefs matching the query, with the sender among their sources, only the sender's source is in scope:
+        // with annotated beliefs, what others told stays.
         is Untell -> {
             val query = payload.beliefQuery.tag(source(sender))
-            val toRemove = beliefs.filter {
-                it.matchBelief(query) != null
-            }.map { it.withAnnotations(setOf(source(sender))) }
-            AgentUpdate.Forget(toRemove)
+            AgentUpdate.Replace<PrologBelief>(
+                { belief ->
+                    belief.withAnnotations(setOf(source(sender))).takeIf { belief.matchBelief(query) != null }
+                },
+                emptyList(),
+            )
         }
 
         is Achieve -> {

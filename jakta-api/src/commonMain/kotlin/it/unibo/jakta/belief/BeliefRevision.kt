@@ -6,6 +6,15 @@ package it.unibo.jakta.belief
  * By default, it treats beliefs as a set ([plain]): a revision overrides only the operations it changes, for instance
  * to merge the sources of equal beliefs, keep a single value for some beliefs, or keep the beliefs consistent.
  *
+ * Beliefs may carry metadata, such as their sources or a confidence: the core never looks at it, and it is the belief
+ * type and the revision chosen for it that give it meaning. For that:
+ * - equal beliefs are the same belief, whatever their metadata: the belief type's equality ignores it;
+ * - each operation carries the metadata it is about inside the beliefs it is given: [add] and [remove] add or remove
+ *   the metadata of their belief, and the scope of [replace] says, for each belief held, the belief to remove from it;
+ * - the revision decides how the metadata of equal beliefs combine, and what each change announces.
+ *
+ * Beliefs without metadata need none of this: an equal belief is simply the same belief.
+ *
  * @param Belief The type representing the agent's *beliefs*.
  */
 interface BeliefRevision<Belief : Any> {
@@ -30,12 +39,14 @@ interface BeliefRevision<Belief : Any> {
 
     /**
      * How the belief base, holding [current], changes when asked that the beliefs in [scope] are now [replacements].
+     * The [scope] gives, for each belief held, the belief to remove from it (all of it, or only some of its metadata),
+     * or `null` if the belief is out of scope: what it gives is removed, unless it is among the replacements.
      * By default, comparing beliefs by equality, the beliefs in scope that are not among the replacements are dropped,
      * and the replacements that are not held are stored, each announced as removed or added.
      */
-    fun replace(current: Collection<Belief>, scope: (Belief) -> Boolean, replacements: List<Belief>): Revision<Belief> {
+    fun replace(current: Collection<Belief>, scope: (Belief) -> Belief?, replacements: List<Belief>): Revision<Belief> {
         val incoming = replacements.distinct()
-        val outdated = current.filter { scope(it) && it !in incoming }
+        val outdated = current.mapNotNull(scope).filter { it !in incoming }
         val new = incoming.filter { it !in current }
         return Revision(add = new, remove = outdated, announceAdded = new, announceRemoved = outdated)
     }

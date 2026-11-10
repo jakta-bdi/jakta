@@ -87,7 +87,9 @@ class TestBeliefBase {
         val events = UnlimitedChannelQueue<AgentEvent.Internal.Belief<String>>()
         val beliefBase = BeliefBaseFactory.of(events, listOf("at(1)", "door=open", "charge=3"))
         // the beliefs in scope are now at(2) and charge=3: at(1) goes, at(2) comes, charge=3 is unchanged
-        val inScope: (String) -> Boolean = { it.startsWith("at(") || it.startsWith("charge=") }
+        val inScope: (String) -> String? = { belief ->
+            belief.takeIf { it.startsWith("at(") || it.startsWith("charge=") }
+        }
         assertEquals(true, beliefBase.replace(inScope, listOf("at(2)", "charge=3")))
         assertEquals(setOf("at(2)", "door=open", "charge=3"), beliefBase.snapshot().toSet())
         assertEquals(listOf(BeliefRemoveEvent("at(1)"), BeliefAddEvent("at(2)")), events.drain())
@@ -99,7 +101,8 @@ class TestBeliefBase {
     @Test
     fun replacementsMustBeInTheirScope() {
         val beliefBase = BeliefBaseFactory.of(UnlimitedChannelQueue(), listOf("at(1)"))
-        assertFailsWith<IllegalArgumentException> { beliefBase.replace({ it.startsWith("at(") }, listOf("door=open")) }
+        val atScope: (String) -> String? = { belief -> belief.takeIf { it.startsWith("at(") } }
+        assertFailsWith<IllegalArgumentException> { beliefBase.replace(atScope, listOf("door=open")) }
         assertEquals(setOf("at(1)"), beliefBase.snapshot().toSet())
     }
 }
