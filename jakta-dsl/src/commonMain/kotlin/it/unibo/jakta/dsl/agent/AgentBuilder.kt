@@ -10,6 +10,7 @@ import it.unibo.jakta.event.AgentEvent.External.Perception
 import it.unibo.jakta.event.AgentUpdate
 import it.unibo.jakta.node.Node
 import it.unibo.jakta.plan.Plan
+import it.unibo.jakta.plan.PlanSelection
 
 /**
  * Builder interface for defining an agent with beliefs, goals, and plans.
@@ -73,6 +74,12 @@ interface AgentBuilder<Belief : Any, Goal : Any, Body : Any> {
      * Adds a goal plan to the agent's plan library.
      */
     fun addGoalPlan(plan: Plan.Goal<Belief, Goal, *, *>)
+
+    /**
+     * Sets how the agent chooses among the applicable plans for an event (its option selection function).
+     * By default, the agent runs the first applicable plan, in the order of the plan library.
+     */
+    fun selectsPlansWith(selection: PlanSelection<Belief, Goal>)
 
     /**
      * Define how an agent can be embodied in the node.

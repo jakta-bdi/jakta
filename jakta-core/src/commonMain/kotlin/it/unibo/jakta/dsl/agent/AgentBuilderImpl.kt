@@ -12,6 +12,7 @@ import it.unibo.jakta.event.AgentEvent.External.Perception
 import it.unibo.jakta.event.AgentUpdate
 import it.unibo.jakta.node.Node
 import it.unibo.jakta.plan.Plan
+import it.unibo.jakta.plan.PlanSelection
 import kotlin.properties.Delegates
 
 /**
@@ -25,6 +26,8 @@ class AgentBuilderImpl<Belief : Any, Goal : Any, Body : Any>(
     private var initialGoals = listOf<Goal>()
     private var beliefPlans = listOf<Plan.Belief<Belief, Goal, *, *>>()
     private var goalPlans = listOf<Plan.Goal<Belief, Goal, *, *>>()
+
+    private var planSelection: PlanSelection<Belief, Goal> = PlanSelection.first()
 
     private var bodyFactory: (AgentID) -> Body by Delegates.notNull()
 
@@ -50,6 +53,10 @@ class AgentBuilderImpl<Belief : Any, Goal : Any, Body : Any>(
     override fun hasInitialGoals(block: GoalBuilder<Goal>.() -> Unit) {
         val builder = GoalBuilderImpl(::addGoal)
         builder.apply(block)
+    }
+
+    override fun selectsPlansWith(selection: PlanSelection<Belief, Goal>) {
+        this.planSelection = selection
     }
 
     override fun embodiedAs(bodyFactory: (AgentID) -> Body) {
@@ -99,5 +106,6 @@ class AgentBuilderImpl<Belief : Any, Goal : Any, Body : Any>(
             perceptionHandler = perceptionHandler,
             messageHandler = messageHandler,
         )
+        override val planSelection: PlanSelection<Belief, Goal> = this@AgentBuilderImpl.planSelection
     }
 }

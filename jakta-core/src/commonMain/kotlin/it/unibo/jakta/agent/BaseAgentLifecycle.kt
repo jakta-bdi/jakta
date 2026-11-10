@@ -95,6 +95,7 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
      */
     private fun CoroutineScope.handleBeliefEvent(event: AgentEvent.Internal.Belief<Belief>) {
         selectPlan(
+            event = event,
             entity = event.belief,
             entityMessage = when (event) {
                 is AgentEvent.Internal.Belief.Add<Belief> -> "addition of belief"
@@ -118,6 +119,7 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
     //  This requires refactoring of type management
     private fun CoroutineScope.handleGoalEvent(event: AgentEvent.Internal.Goal<Goal, Any?>) {
         selectPlan(
+            event = event,
             entity = event.goal,
             entityMessage = when (event) {
                 is AgentEvent.Internal.Goal.Add<Goal, *> -> "addition of goal"
@@ -143,9 +145,9 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
      * Launches the selected [option] on an intention. The plan runs with the context of the option,
      * computed at selection time: its trigger and guard are not evaluated again when it starts.
      */
-    private fun <TriggerEntity : Any> CoroutineScope.launchPlan(
+    private fun CoroutineScope.launchPlan(
         event: AgentEvent.Internal,
-        option: Option<Belief, Goal, TriggerEntity, *, *>,
+        option: Option<Belief, Goal, *, *, *>,
         completion: CompletableDeferred<Any?>? = null, // TODO Check if this Any? can be improved
     ) {
         val plan = option.plan
@@ -175,17 +177,18 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
     }
 
     /**
-     * Selects the first applicable plan of [planList] for [entity], as an [Option] carrying the context
-     * computed by its trigger and guard.
-     * Each trigger is evaluated once, each guard at most once, all on the same snapshot of the beliefs,
-     * and no guard is evaluated after the first applicable plan.
+     * Selects the plan of [planList] to run for [event] with the agent's
+     * [it.unibo.jakta.plan.PlanSelection], as an [Option] carrying the context computed by its trigger and guard.
+     * Each trigger is evaluated once and each guard at most once, all on the same snapshot of the beliefs:
+     * the options are computed lazily, so a guard is only evaluated if the selection asks for that option.
      */
     private fun <TriggerEntity : Any> selectPlan(
+        event: AgentEvent.Internal,
         entity: TriggerEntity,
         entityMessage: String,
         planList: List<Plan<Belief, Goal, TriggerEntity, *, *>>,
         desiredResult: KType,
-    ): Option<Belief, Goal, TriggerEntity, *, *>? {
+    ): Option<Belief, Goal, *, *, *>? {
         val relevant = planList.mapNotNull { it.relevantOption(entity, desiredResult) }
 
         if (relevant.isEmpty()) {
@@ -194,10 +197,11 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
         }
 
         val beliefs = executableAgent.state.beliefs
-        return relevant.firstNotNullOfOrNull { it(beliefs) }?.also {
+        val options = relevant.asSequence().mapNotNull { it(beliefs) }.constrainOnce()
+        return executableAgent.planSelection.select(event, options)?.also {
             log.d { "Selected plan ${it.plan} for $entityMessage: $entity" }
         } ?: run {
-            log.w { "No applicable plans for $entityMessage: $entity" }
+            log.w { "No plan selected for $entityMessage: $entity" }
             null
         }
     }

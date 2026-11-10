@@ -3,6 +3,7 @@ package it.unibo.jakta.agent
 import it.unibo.jakta.event.AgentEvent
 import it.unibo.jakta.event.EventInbox
 import it.unibo.jakta.event.EventStream
+import it.unibo.jakta.plan.PlanSelection
 
 /**
  * The view on an [Agent] from the [AgentLifecycle] perspective.
@@ -25,4 +26,10 @@ interface ExecutableAgent<Belief : Any, Goal : Any> : Agent {
      * The mutable state of the agent.
      */
     val state: MutableAgentState<Belief, Goal>
+
+    /**
+     * How the agent chooses among the applicable plans for an event.
+     */
+    val planSelection: PlanSelection<Belief, Goal>
+        get() = PlanSelection.first()
 }

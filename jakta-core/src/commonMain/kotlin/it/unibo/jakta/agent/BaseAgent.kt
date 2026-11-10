@@ -5,6 +5,7 @@ import it.unibo.jakta.event.EventInbox
 import it.unibo.jakta.event.EventQueue
 import it.unibo.jakta.event.EventStream
 import it.unibo.jakta.event.UnlimitedChannelQueue
+import it.unibo.jakta.plan.PlanSelection
 
 /**
  * Default implementation of an [it.unibo.jakta.agent.Agent].
@@ -28,6 +29,8 @@ class BaseAgent<Belief : Any, Goal : Any, Body : Any>(agentSpecification: AgentS
         get() = eventQueue
 
     override val body: Body = agentSpecification.body
+
+    override val planSelection: PlanSelection<Belief, Goal> = agentSpecification.planSelection
 
     override val state: MutableAgentState<Belief, Goal> = BaseMutableAgentState(
         agentSpecification.initialState,
