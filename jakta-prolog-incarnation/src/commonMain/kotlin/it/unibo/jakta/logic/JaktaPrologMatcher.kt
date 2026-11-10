@@ -1,5 +1,7 @@
 package it.unibo.jakta.logic
 
+import it.unibo.jakta.annotations
+import it.unibo.jakta.effectiveAnnotations
 import it.unibo.jakta.self
 import it.unibo.jakta.source
 import it.unibo.tuprolog.core.Clause
@@ -46,24 +48,15 @@ private val annotationUnificator = object : AbstractUnificator() {
         else -> term
     }
 
-    @Suppress("UNCHECKED_CAST")
     private fun unifyTags(
         fact: Term,
         query: Term,
         initialResult: Substitution,
         occurCheckEnabled: Boolean,
     ): Substitution {
-        val factAnnotations =
-            (fact.tags["jakta.annotations"] as? Set<Struct>).orEmpty().toMutableList()
-
-        // every unannotated struct is considered annotated with source(self)
-        // TODO what happens if I want to have [source(self), source(bob)]???
-        if (factAnnotations.isEmpty()) {
-            factAnnotations.add(source(self))
-        }
-
-        val queryAnnotations =
-            (query.tags["jakta.annotations"] as? Set<Struct>).orEmpty().toMutableList()
+        // data without annotations is the agent's own; a query without annotations matches any
+        val factAnnotations = fact.effectiveAnnotations.toMutableList()
+        val queryAnnotations = query.annotations.toMutableList()
 
         val result = when {
             queryAnnotations.isEmpty() -> initialResult

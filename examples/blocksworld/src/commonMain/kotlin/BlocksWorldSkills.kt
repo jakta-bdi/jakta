@@ -1,11 +1,12 @@
 import it.unibo.jakta.dsl.belief.PrologBelief
 import it.unibo.jakta.dsl.belief.matchBelief
 import it.unibo.jakta.dsl.belief.newContextBeliefQuery
-import it.unibo.jakta.dsl.belief.replaceSelf
+import it.unibo.jakta.dsl.belief.replaceFrom
 import it.unibo.jakta.event.AgentEvent.External.Perception
 import it.unibo.jakta.event.AgentUpdate
 import it.unibo.jakta.node.Node
 import it.unibo.jakta.plan.PlanScope
+import it.unibo.jakta.self
 import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.Fact
 import it.unibo.tuprolog.core.Struct
@@ -66,7 +67,7 @@ val filterQuery = newContextBeliefQuery { "on"(X, Y) }
  * Handles the perception of the Blocks World state and updates the agent's beliefs accordingly.
  */
 fun handleBlocksWorldPerceptions(event: BlocksWorldPerception): AgentUpdate<*> =
-    replaceSelf(listOf(filterQuery), event.state.toPrologFacts())
+    replaceFrom(self, listOf(filterQuery), event.state.toPrologFacts())
 
 /**
  * Converts a list of stacks of blocks into a set of Prolog beliefs representing

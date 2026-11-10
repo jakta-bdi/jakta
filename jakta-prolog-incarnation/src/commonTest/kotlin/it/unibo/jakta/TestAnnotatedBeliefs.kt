@@ -13,9 +13,7 @@ import it.unibo.jakta.dsl.belief.initialBelief
 import it.unibo.jakta.dsl.belief.matchBelief
 import it.unibo.jakta.dsl.belief.matchingBelief
 import it.unibo.jakta.dsl.belief.newContextBeliefQuery
-import it.unibo.jakta.dsl.belief.replaceAll
 import it.unibo.jakta.dsl.belief.replaceFrom
-import it.unibo.jakta.dsl.belief.replaceSelf
 import it.unibo.jakta.dsl.belief.sourcesOf
 import it.unibo.jakta.dsl.belief.update
 import it.unibo.jakta.dsl.belief.usesAnnotatedBeliefs
@@ -163,14 +161,14 @@ class TestAnnotatedBeliefs {
 
     @Test
     fun `a perception no longer seeing its own belief removes it`() {
-        val (held, events) = replaced(replaceSelf(listOf(pingQuery), emptyList()), ping)
+        val (held, events) = replaced(replaceFrom(self, listOf(pingQuery), emptyList()), ping)
         assertEquals(emptyList(), held)
         assertEquals(listOf(sources("self")), events.map { it.second })
     }
 
     @Test
     fun `a perception no longer seeing a belief keeps what others told`() {
-        val (held, events) = replaced(replaceSelf(listOf(pingQuery), emptyList()), ping, fromAlice)
+        val (held, events) = replaced(replaceFrom(self, listOf(pingQuery), emptyList()), ping, fromAlice)
         assertEquals(listOf("ping(1)" to sources("alice")), held)
         assertEquals(true, events.single().first is BeliefRemoveEvent)
         assertEquals(sources("self"), events.single().second)
@@ -178,21 +176,21 @@ class TestAnnotatedBeliefs {
 
     @Test
     fun `a perception does not retract what others told`() {
-        val (held, events) = replaced(replaceSelf(listOf(pingQuery), emptyList()), fromAlice)
+        val (held, events) = replaced(replaceFrom(self, listOf(pingQuery), emptyList()), fromAlice)
         assertEquals(listOf("ping(1)" to sources("alice")), held)
         assertEquals(emptyList(), events)
     }
 
     @Test
     fun `a perception seeing its own belief again changes nothing`() {
-        val (held, events) = replaced(replaceSelf(listOf(pingQuery), listOf(ping)), ping)
+        val (held, events) = replaced(replaceFrom(self, listOf(pingQuery), listOf(ping)), ping)
         assertEquals(listOf("ping(1)" to sources("self")), held)
         assertEquals(emptyList(), events)
     }
 
     @Test
     fun `a perception seeing what others told adds its own source`() {
-        val (held, events) = replaced(replaceSelf(listOf(pingQuery), listOf(ping)), fromAlice)
+        val (held, events) = replaced(replaceFrom(self, listOf(pingQuery), listOf(ping)), fromAlice)
         assertEquals(listOf("ping(1)" to sources("alice", "self")), held)
         assertEquals(true, events.single().first is BeliefAddEvent)
         assertEquals(sources("self"), events.single().second)
@@ -202,7 +200,7 @@ class TestAnnotatedBeliefs {
     fun `a perception replaces the old value with the new one`() {
         val newPing = initialBelief { "ping"(2) }
         val (held, events) = replaced(
-            replaceSelf(listOf(pingQuery), listOf(newPing)),
+            replaceFrom(self, listOf(pingQuery), listOf(newPing)),
             ping,
             initialBelief {
                 "pong"(1)
@@ -248,8 +246,9 @@ class TestAnnotatedBeliefs {
     }
 
     @Test
-    fun `replaceAll replaces every source`() {
-        val (held, events) = replaced(replaceAll(listOf(pingQuery), emptyList()), ping, fromAlice, fromCarol)
+    fun `a replacement of whole beliefs replaces every source`() {
+        val all = AgentUpdate.Replace.where<PrologBelief>(emptyList()) { it.matchBelief(pingQuery) != null }
+        val (held, events) = replaced(all, ping, fromAlice, fromCarol)
         assertEquals(emptyList(), held)
         assertEquals(listOf(sources("self", "alice", "carol")), events.map { it.second })
     }
@@ -265,7 +264,7 @@ class TestAnnotatedBeliefs {
                 },
             ),
         )
-        val replace = replaceSelf(listOf(pingQuery), listOf(initialBelief { "ping"(3) }))
+        val replace = replaceFrom(self, listOf(pingQuery), listOf(initialBelief { "ping"(3) }))
         beliefBase.replace(replace.scope, replace.replacements)
         assertEquals(setOf("ping(2)", "ping(3)"), beliefBase.snapshot().map { it.head.toString() }.toSet())
     }

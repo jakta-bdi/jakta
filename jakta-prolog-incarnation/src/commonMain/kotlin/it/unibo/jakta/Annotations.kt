@@ -48,7 +48,7 @@ val self = Atom.of("self")
  * The annotations of this term, as written: none if it has none. On a belief, those of its head.
  */
 val Term.annotations: Set<Struct>
-    get() = annotatedPart.getTag<Set<Struct>>(JAKTA_ANNOTATIONS_TAG).orEmpty()
+    get() = (if (this is Rule) head else this).getTag<Set<Struct>>(JAKTA_ANNOTATIONS_TAG).orEmpty()
 
 /**
  * This term with [annotations] added to those it has: `p(1)[source(alice)]` with `certain` added is
@@ -79,9 +79,7 @@ fun <T : Term> T.setAnnotations(vararg annotations: Struct): T = withAnnotations
 operator fun <T : Term> T.get(annotation: Struct, vararg otherAnnotations: Struct): T =
     addAnnotations(annotation, *otherAnnotations)
 
-private val Term.annotatedPart: Term
-    get() = if (this is Rule) head else this
-
+// tuProlog's setTag returns a Term, and a belief is rebuilt from its head: both stay of the receiver's own type
 private fun <T : Term> T.withAnnotations(annotations: Set<Struct>): T {
     @Suppress("UNCHECKED_CAST")
     return when (this) {
@@ -95,7 +93,7 @@ private fun <T : Term> T.withAnnotations(annotations: Set<Struct>): T {
 }
 
 /**
- * The annotations of this belief, where a belief without annotations counts as `[source(self)]`.
+ * The annotations of this term, where a term without annotations counts as `[source(self)]`: the agent's own.
  */
-internal val PrologBelief.effectiveAnnotations: Set<Struct>
+internal val Term.effectiveAnnotations: Set<Struct>
     get() = annotations.ifEmpty { setOf(source(self)) }

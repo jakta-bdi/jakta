@@ -1,10 +1,11 @@
 import it.unibo.jakta.dsl.belief.PrologBelief
 import it.unibo.jakta.dsl.belief.matchBelief
 import it.unibo.jakta.dsl.belief.newContextBeliefQuery
-import it.unibo.jakta.dsl.belief.replaceSelf
+import it.unibo.jakta.dsl.belief.replaceFrom
 import it.unibo.jakta.event.AgentEvent.External.Perception
 import it.unibo.jakta.event.AgentUpdate
 import it.unibo.jakta.node.Node
+import it.unibo.jakta.self
 import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.Fact
 import it.unibo.tuprolog.core.Integer
@@ -99,7 +100,11 @@ private val distractedQuery = newContextBeliefQuery { "distracted"(X) }
  */
 fun handleBoardPerception(event: BoardPerception): AgentUpdate<*> {
     val distracted = event.distracted.map { Fact.of(Struct.of("distracted", Atom.of(it.symbol))) }
-    return replaceSelf(listOf(cellQuery, turnQuery, distractedQuery), event.board.toBeliefs(event.random) + distracted)
+    return replaceFrom(
+        self,
+        listOf(cellQuery, turnQuery, distractedQuery),
+        event.board.toBeliefs(event.random) + distracted,
+    )
 }
 
 private fun BoardState.toBeliefs(random: Random): Set<PrologBelief> {

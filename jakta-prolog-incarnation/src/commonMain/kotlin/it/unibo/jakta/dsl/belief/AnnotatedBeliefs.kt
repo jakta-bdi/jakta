@@ -15,40 +15,12 @@ import it.unibo.tuprolog.core.Var
 import it.unibo.tuprolog.unify.Unificator
 
 /**
- * The beliefs matching any of [queries] are now [beliefs], whatever their sources: an authoritative observation,
- * which also retracts what other agents told about them.
- */
-fun replaceAll(queries: List<Struct>, beliefs: Iterable<PrologBelief>): AgentUpdate.Replace<PrologBelief> =
-    AgentUpdate.Replace.where(beliefs.toList()) { belief -> queries.any { belief.matchBelief(it) != null } }
-
-/**
  * What [from] contributed to the beliefs matching any of [queries] is now [beliefs], attributed to [from]; what other
- * sources contributed stays. The queries must not have annotations. In a perception handler, e.g.
- * `replaceFrom(Atom.of("percept"), queries, beliefs)` marks what the agent perceives with `source(percept)`.
+ * sources contributed stays. The queries must not have annotations. In a perception handler,
+ * `replaceFrom(self, queries, beliefs)` updates what the agent perceives as its own beliefs, while
+ * `replaceFrom(Atom.of("percept"), queries, beliefs)` marks it with `source(percept)`.
  */
-fun replaceFrom(from: Term, queries: List<Struct>, beliefs: Iterable<PrologBelief>): AgentUpdate.Replace<PrologBelief> =
-    replacementFrom(from, queries, beliefs)
-
-/**
- * What the agent itself perceived about the beliefs matching any of [queries] is now [beliefs]; what other agents told
- * stays. The usual update for a perception.
- */
-fun replaceSelf(queries: List<Struct>, beliefs: Iterable<PrologBelief>): AgentUpdate.Replace<PrologBelief> =
-    replacementFrom(self, queries, beliefs)
-
-/**
- * Updates the agent's own belief with the functor and arity of [belief] to [belief], as Jason's `-+`: updating
- * `counter(4)` forgets the agent's own `counter(_)` and believes `counter(4)[source(self)]`, while the `counter(_)`
- * that other agents told stay. It goes through the revision's replacement, as [replaceSelf] does for perceptions.
- */
-fun MutableAgentState<PrologBelief, *>.update(belief: PrologBelief) {
-    val head = belief.head
-    val sameFunctorAndArity = Struct.of(head.functor, List(head.arity) { Var.anonymous() })
-    val replacement = replacementFrom(self, listOf(sameFunctorAndArity), listOf(belief))
-    replace(replacement.scope, replacement.replacements)
-}
-
-private fun replacementFrom(
+fun replaceFrom(
     from: Term,
     queries: List<Struct>,
     beliefs: Iterable<PrologBelief>,
@@ -66,6 +38,18 @@ private fun replacementFrom(
         },
         beliefs.map { it.addAnnotations(annotation) },
     )
+}
+
+/**
+ * Updates the agent's own belief with the functor and arity of [belief] to [belief], as Jason's `-+`: updating
+ * `counter(4)` forgets the agent's own `counter(_)` and believes `counter(4)[source(self)]`, while the `counter(_)`
+ * that other agents told stay. It goes through the revision's replacement, as [replaceFrom] does for perceptions.
+ */
+fun MutableAgentState<PrologBelief, *>.update(belief: PrologBelief) {
+    val head = belief.head
+    val sameFunctorAndArity = Struct.of(head.functor, List(head.arity) { Var.anonymous() })
+    val replacement = replaceFrom(self, listOf(sameFunctorAndArity), listOf(belief))
+    replace(replacement.scope, replacement.replacements)
 }
 
 /**

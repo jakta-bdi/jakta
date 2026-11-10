@@ -21,8 +21,7 @@ import it.unibo.jakta.setAnnotations
  *
  * - Replacing removes from each belief held the annotations its scope gives, unless the replacements keep them: a scope
  *   giving `ping(1)[source(self)]` for `ping(1)[source(self), source(alice)]` replaces only the agent's own
- *   contribution, while one giving the whole belief replaces every source. See [replaceSelf], [replaceFrom] and
- *   [replaceAll].
+ *   contribution, while one giving the whole belief replaces every source. See [replaceFrom].
  *
  * Use [forgetAllMatching] to forget beliefs whatever their annotations.
  */
