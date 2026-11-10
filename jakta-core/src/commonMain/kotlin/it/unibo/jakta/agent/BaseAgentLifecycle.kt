@@ -7,8 +7,11 @@ import it.unibo.jakta.event.GoalAddEvent
 import it.unibo.jakta.event.GoalFailedEvent
 import it.unibo.jakta.event.GoalRemoveEvent
 import it.unibo.jakta.intention.IntentionDispatcher
+import it.unibo.jakta.plan.Option
 import it.unibo.jakta.plan.Plan
 import kotlin.coroutines.ContinuationInterceptor
+import kotlin.reflect.KType
+import kotlin.reflect.typeOf
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
@@ -97,18 +100,15 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
                 is AgentEvent.Internal.Belief.Add<Belief> -> "addition of belief"
                 is AgentEvent.Internal.Belief.Remove<Belief> -> "removal of belief"
             },
-            planList = executableAgent.state.beliefPlans,
-            relevantFilter = {
+            planList = executableAgent.state.beliefPlans.filter {
                 when (event) {
                     is AgentEvent.Internal.Belief.Add<Belief> -> it is Plan.Belief.Addition<Belief, Goal, *, *>
                     is AgentEvent.Internal.Belief.Remove<Belief> -> it is Plan.Belief.Removal<Belief, Goal, *, *>
-                } && it.isRelevant(event.belief)
+                }
             },
-            applicableFilter = {
-                it.isApplicable(executableAgent.state.beliefs, event.belief)
-            },
+            desiredResult = typeOf<Any?>(),
         )?.let {
-            launchPlan(event, event.belief, it)
+            launchPlan(event, it)
         } ?: run {
             handleFailure(event, Exception("No plan found for $event"))
         }
@@ -124,43 +124,44 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
                 is AgentEvent.Internal.Goal.Remove<Goal, *> -> "removal of goal"
                 is AgentEvent.Internal.Goal.Failed<Goal, *> -> "failure of goal"
             },
-            planList = executableAgent.state.goalPlans,
-            relevantFilter = {
+            planList = executableAgent.state.goalPlans.filter {
                 when (event) {
                     is AgentEvent.Internal.Goal.Add<Goal, *> -> it is Plan.Goal.Addition<Belief, Goal, *, *>
                     is AgentEvent.Internal.Goal.Remove<Goal, *> -> it is Plan.Goal.Removal<Belief, Goal, *, *>
                     is AgentEvent.Internal.Goal.Failed<Goal, *> -> it is Plan.Goal.Failure<Belief, Goal, *, *>
-                } && it.isRelevant(event.goal)
+                }
             },
-            applicableFilter = {
-                it.isApplicable(executableAgent.state.beliefs, event.goal)
-            },
+            desiredResult = event.resultType,
         )?.let {
-            launchPlan(event, event.goal, it, event.completion)
+            launchPlan(event, it, event.completion)
         } ?: run {
             handleFailure(event, Exception("No plan found for $event"))
         }
     }
 
+    /**
+     * Launches the selected [option] on an intention. The plan runs with the context of the option,
+     * computed at selection time: its trigger and guard are not evaluated again when it starts.
+     */
     private fun <TriggerEntity : Any> CoroutineScope.launchPlan(
         event: AgentEvent.Internal,
-        entity: TriggerEntity,
-        plan: Plan<Belief, Goal, TriggerEntity, *, *>,
+        option: Option<Belief, Goal, TriggerEntity, *, *>,
         completion: CompletableDeferred<Any?>? = null, // TODO Check if this Any? can be improved
     ) {
+        val plan = option.plan
         val intention = executableAgent.state.mutableIntentionPool.nextIntention(
             event,
             this.coroutineContext.job,
         )
         log.d { "Launching plan $plan for event $event on intention $intention" }
         val interceptor =
-            this.coroutineContext[ContinuationInterceptor] ?: error { "No ContinuationInterceptor in context" }
+            this.coroutineContext[ContinuationInterceptor] ?: error("No ContinuationInterceptor in context")
 
         launch(IntentionDispatcher(interceptor) + intention + intention.job) {
             @Suppress("TooGenericExceptionCaught")
             try {
                 log.d { "Running plan $plan for event $event" }
-                val result = plan.run(executableAgent.state, entity)
+                val result = option.run(executableAgent.state)
                 completion?.complete(result)
             } catch (e: CancellationException) {
                 throw e
@@ -173,33 +174,46 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
         }
     }
 
+    /**
+     * Selects the first applicable plan of [planList] for [entity], as an [Option] carrying the context
+     * computed by its trigger and guard.
+     * Each trigger is evaluated once, each guard at most once, all on the same snapshot of the beliefs,
+     * and no guard is evaluated after the first applicable plan.
+     */
     private fun <TriggerEntity : Any> selectPlan(
         entity: TriggerEntity,
         entityMessage: String,
         planList: List<Plan<Belief, Goal, TriggerEntity, *, *>>,
-        relevantFilter: (Plan<Belief, Goal, TriggerEntity, *, *>) -> Boolean,
-        applicableFilter: (Plan<Belief, Goal, TriggerEntity, *, *>) -> Boolean,
-    ): Plan<Belief, Goal, TriggerEntity, *, *>? {
-        val relevant = planList.filter(relevantFilter)
+        desiredResult: KType,
+    ): Option<Belief, Goal, TriggerEntity, *, *>? {
+        val relevant = planList.mapNotNull { it.relevantOption(entity, desiredResult) }
 
         if (relevant.isEmpty()) {
             log.w { "No relevant plans for $entityMessage: $entity" }
+            return null
         }
 
-        val applicable = relevant.filter(applicableFilter)
-
-        if (applicable.isEmpty()) {
-            log.w { "No applicable plans for $entityMessage: $entity" }
-        }
-
-        return applicable.firstOrNull()?.let {
-            log.d { "Selected plan $it for $entityMessage: $entity" }
-            it
+        val beliefs = executableAgent.state.beliefs
+        return relevant.firstNotNullOfOrNull { it(beliefs) }?.also {
+            log.d { "Selected plan ${it.plan} for $entityMessage: $entity" }
         } ?: run {
-            log.w { "No plan selected for $entityMessage: $entity" }
+            log.w { "No applicable plans for $entityMessage: $entity" }
             null
         }
     }
+
+    /**
+     * Evaluates the trigger of this plan for [entity].
+     * @return null if the plan is not relevant, otherwise a function evaluating the guard on some beliefs.
+     */
+    private fun <TriggerEntity : Any, Context : Any, PlanResult> Plan<Belief, Goal, TriggerEntity, Context, PlanResult>
+        .relevantOption(
+            entity: TriggerEntity,
+            desiredResult: KType,
+        ): ((Collection<Belief>) -> Option<Belief, Goal, TriggerEntity, Context, PlanResult>?)? =
+        relevantContext(entity, desiredResult)?.let { triggerContext ->
+            { beliefs -> optionFor(beliefs, triggerContext) }
+        }
 
     private fun handleFailure(event: AgentEvent.Internal, e: Exception) {
         when (event) {
