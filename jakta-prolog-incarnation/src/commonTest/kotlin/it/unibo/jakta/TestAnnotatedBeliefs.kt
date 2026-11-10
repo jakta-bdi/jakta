@@ -47,7 +47,6 @@ import it.unibo.tuprolog.core.toAtom
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
@@ -409,18 +408,18 @@ class TestAnnotatedBeliefs {
     }
 
     @Test
-    fun `forgetAllMatching rejects annotations that are not ground`() = runTest {
-        var failure: Throwable? = null
-        var left = 0
+    fun `forgetAllMatching with a source variable forgets every source`() = runTest {
+        var left: List<PrologBelief> = emptyList()
         run(
             forgettingAgent {
-                failure = runCatching { forgetAllMatching(newContextBeliefQuery { "ping"(X)[source(S)] }) }
-                    .exceptionOrNull()
-                left = beliefs.size
+                forgetAllMatching(newContextBeliefQuery { "ping"(X)[source(S)] })
+                left = beliefs.toList()
             },
         )
-        assertTrue(failure is IllegalArgumentException, "Expected an IllegalArgumentException, got $failure")
-        assertEquals(4, left)
+        assertEquals(
+            listOf("pong(1)" to sources("alice")),
+            left.map { it.head.toString() to it.annotations },
+        )
     }
 
     @Test

@@ -14,6 +14,7 @@ import it.unibo.tuprolog.core.Rule
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Term
 import it.unibo.tuprolog.core.Var
+import it.unibo.tuprolog.unify.Unificator
 import it.unibo.tuprolog.utils.setTag
 
 /**
@@ -174,24 +175,32 @@ private fun replacementFrom(
 }
 
 /**
- * Forgets the beliefs matching [beliefQuery], through the revision's replacement. A query without annotations forgets
- * them whatever their annotations: `p(X)` forgets every `p(_)`. A query with annotations forgets only those:
- * `p(X)[source(alice)]` forgets what Alice told about `p(_)`, while what others told stays.
- * @throws IllegalArgumentException if the annotations of [beliefQuery] are not ground: to forget whatever the
- * annotations, leave them out.
+ * Forgets every solution of [beliefQuery], through the revision's replacement. A query without annotations forgets the
+ * matching beliefs whole: `p(X)` forgets every `p(_)`. A query with annotations forgets, from each matching belief, the
+ * annotations its patterns match: `p(X)[source(alice)]` forgets what Alice told about `p(_)`, while what others told
+ * stays, and `p(X)[source(S)]` forgets every source of every `p(_)`.
+ *
+ * Each annotation pattern is matched on its own, after the bindings of the belief's term: `p(X)[source(X)]` forgets
+ * `source(1)` from `p(1)`, but variables shared by two patterns are not required to agree.
  */
 fun MutableAgentState<PrologBelief, *>.forgetAllMatching(beliefQuery: Struct) {
-    val annotations = beliefQuery.getTag<Set<Struct>>(JAKTA_ANNOTATIONS_TAG).orEmpty()
-    require(annotations.all { it.isGround }) {
-        "The annotations of a query to forget must be ground, but got $annotations: " +
-            "leave them out to forget whatever the annotations"
-    }
+    val patterns = beliefQuery.getTag<Set<Struct>>(JAKTA_ANNOTATIONS_TAG).orEmpty()
+    val anyAnnotations = beliefQuery.setTag(JAKTA_ANNOTATIONS_TAG, emptySet<Struct>())
     replace(
         { belief ->
+            val termMatch = belief.matchBelief(anyAnnotations)
             when {
-                belief.matchBelief(beliefQuery) == null -> null
-                annotations.isEmpty() -> belief
-                else -> belief.withAnnotations(annotations)
+                termMatch == null || belief.matchBelief(beliefQuery) == null -> null
+
+                patterns.isEmpty() -> belief
+
+                else -> {
+                    val bound = patterns.map { it.apply(termMatch.substitution) }
+                    val forgotten = belief.annotations.filter { annotation ->
+                        bound.any { Unificator.default.match(it, annotation) }
+                    }
+                    belief.withAnnotations(forgotten.toSet())
+                }
             }
         },
         emptyList(),
