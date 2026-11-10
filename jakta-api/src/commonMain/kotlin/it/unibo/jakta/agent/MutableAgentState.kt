@@ -107,8 +107,10 @@ suspend inline fun <Goal : Any, reified PlanResult> MutableAgentState<*, Goal>.a
 
 /**
  * Public-facing extension function to achieve a goal and wait for its completion, discarding its result.
+ * Since the result is discarded, any plan is a candidate, whatever its result type.
  * @param goal The goal to be achieved.
  */
 @OptIn(InternalJaktaAPI::class)
-suspend inline fun <Goal : Any> MutableAgentState<*, Goal>.achieve(goal: Goal): Unit =
-    internalAchieve(goal, typeOf<Unit>())
+suspend inline fun <Goal : Any> MutableAgentState<*, Goal>.achieve(goal: Goal) {
+    internalAchieve<Any?>(goal, typeOf<Any?>())
+}
