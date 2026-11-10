@@ -10,6 +10,7 @@ import it.unibo.jakta.dsl.belief.PrologBelief
 import it.unibo.jakta.dsl.belief.annotations
 import it.unibo.jakta.dsl.belief.forgetAllMatching
 import it.unibo.jakta.dsl.belief.initialBelief
+import it.unibo.jakta.dsl.belief.matchBelief
 import it.unibo.jakta.dsl.belief.matchingBelief
 import it.unibo.jakta.dsl.belief.newContextBeliefQuery
 import it.unibo.jakta.dsl.belief.replaceAll
@@ -18,6 +19,7 @@ import it.unibo.jakta.dsl.belief.replaceSelf
 import it.unibo.jakta.dsl.belief.sourcesOf
 import it.unibo.jakta.dsl.belief.update
 import it.unibo.jakta.dsl.belief.usesAnnotatedBeliefs
+import it.unibo.jakta.dsl.belief.withAnnotations
 import it.unibo.jakta.dsl.goal.initialGoal
 import it.unibo.jakta.dsl.goal.matchingGoal
 import it.unibo.jakta.dsl.mas
@@ -27,6 +29,7 @@ import it.unibo.jakta.dsl.plan.satisfies
 import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.dsl.plans
 import it.unibo.jakta.event.AgentEvent
+import it.unibo.jakta.event.AgentUpdate
 import it.unibo.jakta.event.BeliefAddEvent
 import it.unibo.jakta.event.BeliefRemoveEvent
 import it.unibo.jakta.event.UnlimitedChannelQueue
@@ -146,7 +149,7 @@ class TestAnnotatedBeliefs {
     private val pingQuery = newContextBeliefQuery { "ping"(X) }
 
     private fun replaced(
-        replace: it.unibo.jakta.event.AgentUpdate.Replace<PrologBelief>,
+        replace: AgentUpdate.Replace<PrologBelief>,
         vararg beliefs: PrologBelief,
     ): Pair<List<Pair<String, Set<Struct>>>, List<Pair<AgentEvent.Internal.Belief<PrologBelief>, Set<Struct>>>> {
         val (beliefBase, events) = annotatedBeliefBase(*beliefs)
@@ -223,6 +226,20 @@ class TestAnnotatedBeliefs {
             ping,
         )
         assertEquals(listOf("ping(1)" to sources("carol", "self"), "ping(3)" to sources("alice")), held)
+    }
+
+    @Test
+    fun `a scope matching several annotations can remove only one source`() {
+        // as Alice untelling ping(X)[certain]: the scope matches the whole belief, and gives only Alice's source
+        val certainFromAlice = initialBelief { "ping"(1)[atomOf("certain"), source("alice")] }
+        val query = newContextBeliefQuery { "ping"(X)[atomOf("certain"), source("alice")] }
+        val untell = AgentUpdate.Replace<PrologBelief>(
+            { belief -> belief.withAnnotations(sources("alice")).takeIf { belief.matchBelief(query) != null } },
+            emptyList(),
+        )
+        val (held, events) = replaced(untell, certainFromAlice, fromCarol)
+        assertEquals(listOf("ping(1)" to setOf("certain".toAtom()) + sources("carol")), held)
+        assertEquals(listOf(sources("alice")), events.map { it.second })
     }
 
     @Test

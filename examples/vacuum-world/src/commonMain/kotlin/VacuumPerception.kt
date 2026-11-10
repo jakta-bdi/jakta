@@ -27,7 +27,9 @@ fun handleVacuumPerception(event: VacuumPerception): AgentUpdate<*> {
     val dust = event.cellsWith(Content.DUST).map { cellBelief("dust_at", it) }
     // the dust memory of the squares seen with dust or empty: those seen with an obstacle or a robot are left alone
     val dustSeenOrGone = (dust + event.cellsWith(Content.EMPTY).map { cellBelief("dust_at", it) }).toSet()
-    return AgentUpdate.Replace({ it.head.functor in functors || it in dustSeenOrGone }, (perceived + dust).toList())
+    return AgentUpdate.Replace.where((perceived + dust).toList()) {
+        it.head.functor in functors || it in dustSeenOrGone
+    }
 }
 
 private fun VacuumPerception.cellsWith(content: Content): List<Pos> =

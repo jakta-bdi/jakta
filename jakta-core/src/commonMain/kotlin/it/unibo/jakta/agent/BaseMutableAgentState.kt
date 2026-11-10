@@ -114,7 +114,7 @@ internal class BaseMutableAgentState<Belief : Any, Goal : Any>(
         this.beliefBase.remove(belief)
     }
 
-    override fun replace(scope: (Belief) -> Boolean, replacements: List<Belief>) {
+    override fun replace(scope: (Belief) -> Belief?, replacements: List<Belief>) {
         this.beliefBase.replace(scope, replacements)
     }
 
