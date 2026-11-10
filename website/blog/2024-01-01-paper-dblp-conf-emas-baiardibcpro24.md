@@ -3,7 +3,7 @@ slug: paper-dblp-conf-emas-baiardibcpro24
 title: "New Publication: On the External Concurrency of Current BDI Frameworks for MAS"
 date: 2024-01-01
 authors: [anitvam, samubura, gciatto, danysk]
-tags: [jakta, paper]
+tags: [paper]
 ---
 
 A new paper related to JaKtA has been published at Engineering Multi-Agent Systems - 12th International Workshop, EMAS 2024, Auckland, New Zealand, May 6-7, 2024, Revised Selected Papers (2024).

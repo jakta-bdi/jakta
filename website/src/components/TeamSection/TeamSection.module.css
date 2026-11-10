@@ -1,8 +1,8 @@
 .teamSection {
-  padding: 4rem 0;
+  padding: 3rem 0 4rem;
   background: var(--custom-section-color);
   text-align: center;
-  scroll-margin-top: calc(var(--ifm-navbar-height) + 2rem);
+  scroll-margin-top: var(--home-anchor-offset);
 }
 
 .teamGrid {
@@ -15,13 +15,28 @@
 .teamMember {
   background: var(--ifm-background-color);
   border-radius: 12px;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.32);
+  box-shadow: var(--jakta-card-shadow);
   padding: 1.5rem 1rem;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
   width: 40%;
   max-width: 220px;
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+/* A card lifts when hovered. */
+.teamMember:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--jakta-card-shadow-lifted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .teamMember,
+  .teamMember:hover {
+    transition: none;
+    transform: none;
+  }
 }
 
 .avatar {
@@ -31,6 +46,32 @@
   margin-bottom: 1rem;
 }
 
-.text-lg {
-  font-size: 40px;
+@media (max-width: 996px) {
+  .teamSection {
+    padding: 2.5rem 1rem 3rem;
+  }
+
+  .teamGrid {
+    gap: 1rem;
+  }
+
+  /* Two cards per row. */
+  .teamMember {
+    width: calc(50% - 0.5rem);
+    padding: 1.25rem 0.75rem;
+  }
+
+  .teamMember h3 {
+    font-size: 1.05rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .memberName span {
+    display: block;
+  }
+
+  .teamMember p {
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+  }
 }

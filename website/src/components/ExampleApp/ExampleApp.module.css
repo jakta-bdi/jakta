@@ -1,0 +1,28 @@
+/* The apps are light: keep them on a white card, also when the site is dark. */
+.frame {
+  height: 800px;
+  margin-bottom: 0.5rem;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: var(--ifm-global-radius);
+  background: #fff;
+  overflow: hidden;
+}
+
+/* On a phone the apps stack their panels, so give them most of the screen, leaving room around to scroll the page. */
+@media (max-width: 996px) {
+  .frame {
+    height: max(560px, 85svh);
+  }
+}
+
+.app {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.newTab {
+  text-align: right;
+  font-size: 0.85rem;
+}

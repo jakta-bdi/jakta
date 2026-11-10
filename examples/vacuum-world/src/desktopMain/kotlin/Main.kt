@@ -1,4 +1,5 @@
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
@@ -17,7 +18,10 @@ fun main() = application {
         state = rememberWindowState(width = 1300.dp, height = 850.dp),
     ) {
         MaterialTheme {
-            VacuumWorldApp(remember { VacuumWorldAppState() })
+            // a white background, as the page the browser version runs in
+            Surface {
+                VacuumWorldApp(remember { VacuumWorldAppState() })
+            }
         }
     }
 }

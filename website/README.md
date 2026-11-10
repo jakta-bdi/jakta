@@ -1,12 +1,28 @@
-# Get started with JaKtA
-The website for the documentation of JaKtA, still a work in progress. Contact us if you encounter issues!
+# JaKtA website
 
-In the meantime, you can check the papers describing JaKtA:
+The JaKtA website, built with [Docusaurus](https://docusaurus.io/) and published at https://jakta-bdi.github.io.
 
-- Baiardi, Martina, Samuele Burattini, Giovanni Ciatto, and Danilo Pianini. [Blending BDI Agents with Object-Oriented and Functional Programming with JaKtA.](https://doi.org/10.1007/s42979-024-03244-y) SN Computer Science 5, no. 8 (2024): 1003. 
-- Baiardi, Martina, Samuele Burattini, Giovanni Ciatto, and Danilo Pianini. [JaKtA: BDI Agent-Oriented Programming in Pure Kotlin.](https://doi.org/10.1007/978-3-031-43264-4_4) In European Conference on Multi-Agent Systems, pp. 49-65. Cham: Springer Nature Switzerland, 2023.
+```bash
+npm ci
+npm start      # dev server at http://localhost:3000
+npm run build  # static build, fails on broken links
+```
 
-Or get your hands on by running some [examples](https://github.com/jakta-bdi/jakta-examples)!
+## Publications
 
-## You got questions? 
-We're here to help, post something on our [Q&A](https://github.com/orgs/jakta-bdi/discussions/categories/q-a) forum on GitHub.
+The [Publications](https://jakta-bdi.github.io/publications) page and the paper blog posts are both generated from
+`static/jakta-references.bib`. To add a paper:
+
+1. add its BibTeX entry to `static/jakta-references.bib` (from [DBLP](https://dblp.org) when it is there);
+2. run `node scripts/generate-publication-blog-posts.mjs` from this folder: it writes a post in `blog/` for each
+   entry that has none, with the abstract from Semantic Scholar when available
+   (set `SEMANTIC_SCHOLAR_API_KEY` to avoid its rate limits);
+3. review the generated post and commit it with the bib change.
+
+The script never touches existing posts: a post is linked to its entry by a `jakta-publication-bib-key` comment,
+so it can be edited freely. Posts are dated January 1st of the publication year unless the entry has a month.
+
+## Releases
+
+Release notes under `releases/` are written on each minor or major release by `scripts/generate-release-blog-post.mjs`
+at the repository root (see `release.config.js`).

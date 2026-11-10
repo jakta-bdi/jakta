@@ -2,8 +2,7 @@ var publishCmd = `
 ./gradlew publishAllPublicationsToProjectLocalRepository zipMavenCentralPortalPublication releaseMavenCentralPortalPublication publish --stacktrace || exit 3
 `
 var prepareCmd = `
-NEXT_RELEASE_VERSION=\${nextRelease.version} node scripts/generate-release-blog-post.mjs
-(cd website && node scripts/generate-publication-blog-posts.mjs) || true
+NEXT_RELEASE_VERSION=\${nextRelease.version} NEXT_RELEASE_TYPE=\${nextRelease.type} node scripts/generate-release-blog-post.mjs
 `
 
 var config = require('semantic-release-preconfigured-conventional-commits');
@@ -34,6 +33,7 @@ config.plugins.push(
                 "package.json",
                 "package-lock.json",
                 "website/blog/*.md",
+                "website/releases/*.md",
             ]
         }
     ],
