@@ -7,6 +7,7 @@ import it.unibo.jakta.event.BeliefRemoveEvent
 import it.unibo.jakta.event.UnlimitedChannelQueue
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 
 class TestBeliefBase {
 
@@ -28,16 +29,13 @@ class TestBeliefBase {
             it.substringBefore('=') == reading.substringBefore('=') && it != reading
         }
 
-        override fun add(beliefs: Collection<String>, belief: String): Revision<String> = when (belief) {
-            in beliefs -> Revision()
+        override fun add(current: Collection<String>, toAdd: String): Revision<String> = when (toAdd) {
+            in current -> Revision()
 
-            else -> beliefs.sameSensor(belief).let { old ->
-                Revision(stored = listOf(belief), dropped = old, added = listOf(belief), removed = old)
+            else -> current.sameSensor(toAdd).let { old ->
+                Revision(add = listOf(toAdd), remove = old, announceAdded = listOf(toAdd), announceRemoved = old)
             }
         }
-
-        override fun remove(beliefs: Collection<String>, belief: String): Revision<String> =
-            BeliefRevision.plain<String>().remove(beliefs, belief)
     }
 
     private fun UnlimitedChannelQueue<AgentEvent.Internal.Belief<String>>.drain() =
@@ -76,11 +74,8 @@ class TestBeliefBase {
             override fun hashCode() = sensor.hashCode()
         }
         val replacing = object : BeliefRevision<Reading> {
-            override fun add(beliefs: Collection<Reading>, belief: Reading) =
-                Revision(stored = listOf(belief), added = listOf(belief))
-
-            override fun remove(beliefs: Collection<Reading>, belief: Reading) =
-                BeliefRevision.plain<Reading>().remove(beliefs, belief)
+            override fun add(current: Collection<Reading>, toAdd: Reading) =
+                Revision(add = listOf(toAdd), announceAdded = listOf(toAdd))
         }
         val beliefBase = BeliefBaseFactory.of(UnlimitedChannelQueue(), listOf(Reading("temp", "alice")), replacing)
         beliefBase.add(Reading("temp", "carol"))
@@ -99,5 +94,12 @@ class TestBeliefBase {
         // the same replacement again changes nothing
         assertEquals(false, beliefBase.replace(inScope, listOf("at(2)", "charge=3")))
         assertEquals(emptyList(), events.drain())
+    }
+
+    @Test
+    fun replacementsMustBeInTheirScope() {
+        val beliefBase = BeliefBaseFactory.of(UnlimitedChannelQueue(), listOf("at(1)"))
+        assertFailsWith<IllegalArgumentException> { beliefBase.replace({ it.startsWith("at(") }, listOf("door=open")) }
+        assertEquals(setOf("at(1)"), beliefBase.snapshot().toSet())
     }
 }

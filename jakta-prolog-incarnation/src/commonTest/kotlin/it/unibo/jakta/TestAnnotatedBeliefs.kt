@@ -16,6 +16,7 @@ import it.unibo.jakta.dsl.belief.replaceAll
 import it.unibo.jakta.dsl.belief.replaceFrom
 import it.unibo.jakta.dsl.belief.replaceSelf
 import it.unibo.jakta.dsl.belief.sourcesOf
+import it.unibo.jakta.dsl.belief.update
 import it.unibo.jakta.dsl.belief.usesAnnotatedBeliefs
 import it.unibo.jakta.dsl.goal.initialGoal
 import it.unibo.jakta.dsl.goal.matchingGoal
@@ -146,7 +147,7 @@ class TestAnnotatedBeliefs {
         vararg beliefs: PrologBelief,
     ): Pair<List<Pair<String, Set<Struct>>>, List<Pair<AgentEvent.Internal.Belief<PrologBelief>, Set<Struct>>>> {
         val (beliefBase, events) = annotatedBeliefBase(*beliefs)
-        beliefBase.replace(replace.scope, replace.beliefs)
+        beliefBase.replace(replace.scope, replace.replacements)
         val held = beliefBase.snapshot().map { it.head.toString() to it.annotations }.sortedBy { it.first }
         return held to events.drain()
     }
@@ -240,7 +241,7 @@ class TestAnnotatedBeliefs {
             ),
         )
         val replace = replaceSelf(listOf(pingQuery), listOf(initialBelief { "ping"(3) }))
-        beliefBase.replace(replace.scope, replace.beliefs)
+        beliefBase.replace(replace.scope, replace.replacements)
         assertEquals(setOf("ping(2)", "ping(3)"), beliefBase.snapshot().map { it.head.toString() }.toSet())
     }
 
@@ -341,6 +342,39 @@ class TestAnnotatedBeliefs {
         }
         run(forgetful)
         assertEquals(listOf("pong(1)"), left)
+    }
+
+    @Test
+    fun `update replaces the agent's own belief with the same functor and arity, keeping what others told`() = runTest {
+        var left: List<PrologBelief> = emptyList()
+        val updating = node(NodeBuilders.baseNode()) {
+            agent(alice) {
+                embodiedAs { Any() }
+                usesAnnotatedBeliefs()
+                believes {
+                    +ping
+                    +initialBelief { "ping"(2)[source("carol")] }
+                    +initialBelief { "ping"(1, 2) }
+                }
+                hasInitialGoals { !initialGoal { start } }
+                withPredefinedPlans(
+                    plans { node ->
+                        prologPlan {
+                            adding.goal { matchingGoal { start } } triggers {
+                                agent.update(initialBelief { "ping"(3) })
+                                left = agent.beliefs.toList()
+                                node.terminateNode()
+                            }
+                        }
+                    },
+                )
+            }
+        }
+        run(updating)
+        assertEquals(
+            listOf("ping(1, 2)" to sources("self"), "ping(2)" to sources("carol"), "ping(3)" to sources("self")),
+            left.map { it.head.toString() to it.annotations }.sortedBy { it.first },
+        )
     }
 
     private fun AgentID.displayName() = when (this) {

@@ -13,6 +13,7 @@ import it.unibo.tuprolog.core.Fact
 import it.unibo.tuprolog.core.Rule
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Term
+import it.unibo.tuprolog.core.Var
 import it.unibo.tuprolog.utils.setTag
 
 /**
@@ -49,69 +50,67 @@ object AnnotatedBeliefRevision : BeliefRevision<PrologBelief> {
     // ponytail: linear lookup of the held belief, fine for belief bases of a few hundred beliefs
     private fun Collection<PrologBelief>.held(belief: PrologBelief) = firstOrNull { it == belief }
 
-    override fun add(beliefs: Collection<PrologBelief>, belief: PrologBelief): Revision<PrologBelief> {
-        val held = beliefs.held(belief) ?: return Revision(stored = listOf(belief), added = listOf(belief))
-        val new = belief.annotations - held.annotations
+    override fun add(current: Collection<PrologBelief>, toAdd: PrologBelief): Revision<PrologBelief> {
+        val held = current.held(toAdd) ?: return super.add(current, toAdd)
+        val newAnnotations = toAdd.annotations - held.annotations
         return when {
-            new.isEmpty() -> Revision()
+            newAnnotations.isEmpty() -> Revision()
 
             else -> Revision(
-                stored = listOf(held.withAnnotations(held.annotations + new)),
-                added = listOf(belief.withAnnotations(new)),
+                add = listOf(held.withAnnotations(held.annotations + newAnnotations)),
+                announceAdded = listOf(toAdd.withAnnotations(newAnnotations)),
             )
         }
     }
 
-    override fun remove(beliefs: Collection<PrologBelief>, belief: PrologBelief): Revision<PrologBelief> {
-        val held = beliefs.held(belief) ?: return Revision()
-        val gone = held.annotations intersect belief.annotations
-        val left = held.annotations - gone
+    override fun remove(current: Collection<PrologBelief>, toRemove: PrologBelief): Revision<PrologBelief> {
+        val held = current.held(toRemove) ?: return Revision()
+        val removedAnnotations = held.annotations intersect toRemove.annotations
+        val keptAnnotations = held.annotations - removedAnnotations
         return when {
-            gone.isEmpty() -> Revision()
+            removedAnnotations.isEmpty() -> Revision()
 
-            left.isEmpty() -> Revision(dropped = listOf(held), removed = listOf(held))
+            keptAnnotations.isEmpty() -> Revision(remove = listOf(held), announceRemoved = listOf(held))
 
             else -> Revision(
-                stored = listOf(held.withAnnotations(left)),
-                removed = listOf(belief.withAnnotations(gone)),
+                add = listOf(held.withAnnotations(keptAnnotations)),
+                announceRemoved = listOf(toRemove.withAnnotations(removedAnnotations)),
             )
         }
     }
 
     override fun replace(
-        beliefs: Collection<PrologBelief>,
+        current: Collection<PrologBelief>,
         scope: (PrologBelief) -> Boolean,
         replacements: List<PrologBelief>,
     ): Revision<PrologBelief> {
         // one replacement per term, with all its annotations
-        val incoming = replacements.groupBy { it }.map { (belief, same) ->
+        val wanted = replacements.groupBy { it }.map { (belief, same) ->
             belief.withAnnotations(same.flatMap { it.annotations }.toSet())
         }
         // the contributions in scope that the replacements do not keep, judging each source of a belief on its own
-        val outgoing = beliefs.mapNotNull { held ->
-            val kept = incoming.held(held)?.annotations.orEmpty()
-            val gone = held.annotations.filter { it !in kept && scope(held.withAnnotations(setOf(it))) }.toSet()
-            gone.takeIf { it.isNotEmpty() }?.let { held.withAnnotations(it) }
+        val outdated = current.mapNotNull { held ->
+            val wantedAnnotations = wanted.held(held)?.annotations.orEmpty()
+            val outdatedAnnotations = held.annotations
+                .filter { it !in wantedAnnotations && scope(held.withAnnotations(setOf(it))) }
+                .toSet()
+            outdatedAnnotations.takeIf { it.isNotEmpty() }?.let { held.withAnnotations(it) }
         }
         // removals first, then additions, each applied to the beliefs as revised so far
-        var current = beliefs.toList()
+        var revised = current.toList()
         var revision = Revision<PrologBelief>()
-        val steps = outgoing.map { belief -> { held: Collection<PrologBelief> -> remove(held, belief) } } +
-            incoming.map { belief -> { held: Collection<PrologBelief> -> add(held, belief) } }
+        val steps = outdated.map { belief -> { held: Collection<PrologBelief> -> remove(held, belief) } } +
+            wanted.map { belief -> { held: Collection<PrologBelief> -> add(held, belief) } }
         for (step in steps) {
-            val next = step(current)
-            current = current.revisedBy(next)
+            val next = step(revised)
+            revised = revised.revisedBy(next)
             revision += next
         }
         return revision
     }
 
     private fun List<PrologBelief>.revisedBy(revision: Revision<PrologBelief>): List<PrologBelief> =
-        revision.stored.fold(
-            filter {
-                it !in revision.dropped
-            },
-        ) { held, stored -> held.filter { it != stored } + stored }
+        revision.add.fold(filter { it !in revision.remove }) { held, stored -> held.filter { it != stored } + stored }
 }
 
 /**
@@ -132,7 +131,33 @@ fun replaceAll(queries: List<Struct>, beliefs: Iterable<PrologBelief>): AgentUpd
  * What [from] contributed to the beliefs matching any of [queries] is now [beliefs], attributed to [from]; what other
  * sources contributed stays. The queries must not have annotations.
  */
-fun replaceFrom(from: Term, queries: List<Struct>, beliefs: Iterable<PrologBelief>): AgentUpdate.Replace<PrologBelief> {
+fun replaceFrom(from: Term, queries: List<Struct>, beliefs: Iterable<PrologBelief>): AgentUpdate.Replace<PrologBelief> =
+    replacementFrom(from, queries, beliefs)
+
+/**
+ * What the agent itself perceived about the beliefs matching any of [queries] is now [beliefs]; what other agents told
+ * stays. The usual update for a perception.
+ */
+fun replaceSelf(queries: List<Struct>, beliefs: Iterable<PrologBelief>): AgentUpdate.Replace<PrologBelief> =
+    replacementFrom(self, queries, beliefs)
+
+/**
+ * Updates the agent's own belief with the functor and arity of [belief] to [belief], as Jason's `-+`: updating
+ * `counter(4)` forgets the agent's own `counter(_)` and believes `counter(4)[source(self)]`, while the `counter(_)`
+ * that other agents told stay. It goes through the revision's replacement, as [replaceSelf] does for perceptions.
+ */
+fun MutableAgentState<PrologBelief, *>.update(belief: PrologBelief) {
+    val head = belief.head
+    val sameFunctorAndArity = Struct.of(head.functor, List(head.arity) { Var.anonymous() })
+    val replacement = replacementFrom(self, listOf(sameFunctorAndArity), listOf(belief))
+    replace(replacement.scope, replacement.replacements)
+}
+
+private fun replacementFrom(
+    from: Term,
+    queries: List<Struct>,
+    beliefs: Iterable<PrologBelief>,
+): AgentUpdate.Replace<PrologBelief> {
     require(queries.none { it.getTag<Set<Struct>>(JAKTA_ANNOTATIONS_TAG).orEmpty().isNotEmpty() }) {
         "The queries of a replacement from $from must not have annotations, but got $queries"
     }
@@ -143,13 +168,6 @@ fun replaceFrom(from: Term, queries: List<Struct>, beliefs: Iterable<PrologBelie
         beliefs.map { it.withAnnotations(setOf(annotation)) },
     )
 }
-
-/**
- * What the agent itself perceived about the beliefs matching any of [queries] is now [beliefs]; what other agents told
- * stays. The usual update for a perception.
- */
-fun replaceSelf(queries: List<Struct>, beliefs: Iterable<PrologBelief>): AgentUpdate.Replace<PrologBelief> =
-    replaceFrom(self, queries, beliefs)
 
 /**
  * Forgets every belief matching [beliefQuery], whatever its annotations.
