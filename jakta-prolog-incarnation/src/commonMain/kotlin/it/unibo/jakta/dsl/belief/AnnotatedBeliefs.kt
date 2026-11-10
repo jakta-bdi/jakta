@@ -174,10 +174,29 @@ private fun replacementFrom(
 }
 
 /**
- * Forgets every belief matching [beliefQuery], whatever its annotations.
+ * Forgets the beliefs matching [beliefQuery], through the revision's replacement. A query without annotations forgets
+ * them whatever their annotations: `p(X)` forgets every `p(_)`. A query with annotations forgets only those:
+ * `p(X)[source(alice)]` forgets what Alice told about `p(_)`, while what others told stays.
+ * @throws IllegalArgumentException if the annotations of [beliefQuery] are not ground: to forget whatever the
+ * annotations, leave them out.
  */
-fun MutableAgentState<PrologBelief, *>.forgetAllMatching(beliefQuery: Struct) =
-    beliefs.filter { it.matchBelief(beliefQuery) != null }.forEach { forget(it) }
+fun MutableAgentState<PrologBelief, *>.forgetAllMatching(beliefQuery: Struct) {
+    val annotations = beliefQuery.getTag<Set<Struct>>(JAKTA_ANNOTATIONS_TAG).orEmpty()
+    require(annotations.all { it.isGround }) {
+        "The annotations of a query to forget must be ground, but got $annotations: " +
+            "leave them out to forget whatever the annotations"
+    }
+    replace(
+        { belief ->
+            when {
+                belief.matchBelief(beliefQuery) == null -> null
+                annotations.isEmpty() -> belief
+                else -> belief.withAnnotations(annotations)
+            }
+        },
+        emptyList(),
+    )
+}
 
 /**
  * The sources of the beliefs matching [beliefQuery]: the agents that told them, and `self` for the agent's own.

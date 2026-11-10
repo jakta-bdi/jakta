@@ -4,6 +4,7 @@ import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.agent.BaseAgentID
+import it.unibo.jakta.agent.MutableAgentState
 import it.unibo.jakta.belief.BeliefBaseFactory
 import it.unibo.jakta.dsl.belief.AnnotatedBeliefRevision
 import it.unibo.jakta.dsl.belief.PrologBelief
@@ -46,6 +47,7 @@ import it.unibo.tuprolog.core.toAtom
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
@@ -359,6 +361,66 @@ class TestAnnotatedBeliefs {
         }
         run(forgetful)
         assertEquals(listOf("pong(1)"), left)
+    }
+
+    private fun forgettingAgent(action: suspend MutableAgentState<PrologBelief, *>.() -> Unit) =
+        node(NodeBuilders.baseNode()) {
+            agent(alice) {
+                embodiedAs { Any() }
+                usesAnnotatedBeliefs()
+                believes {
+                    +ping
+                    +fromCarol
+                    +initialBelief { "ping"(2)[source("alice")] }
+                    +initialBelief { "ping"(3)[source("alice"), source("carol")] }
+                    +initialBelief { "pong"(1)[source("alice")] }
+                }
+                hasInitialGoals { !initialGoal { start } }
+                withPredefinedPlans(
+                    plans { node ->
+                        prologPlan {
+                            adding.goal { matchingGoal { start } } triggers {
+                                agent.action()
+                                node.terminateNode()
+                            }
+                        }
+                    },
+                )
+            }
+        }
+
+    @Test
+    fun `forgetAllMatching with annotations forgets only those, keeping what others told`() = runTest {
+        var left: List<PrologBelief> = emptyList()
+        run(
+            forgettingAgent {
+                forgetAllMatching(newContextBeliefQuery { "ping"(X)[source("alice")] })
+                left = beliefs.toList()
+            },
+        )
+        assertEquals(
+            listOf(
+                "ping(1)" to sources("self", "carol"),
+                "ping(3)" to sources("carol"),
+                "pong(1)" to sources("alice"),
+            ),
+            left.map { it.head.toString() to it.annotations }.sortedBy { it.first },
+        )
+    }
+
+    @Test
+    fun `forgetAllMatching rejects annotations that are not ground`() = runTest {
+        var failure: Throwable? = null
+        var left = 0
+        run(
+            forgettingAgent {
+                failure = runCatching { forgetAllMatching(newContextBeliefQuery { "ping"(X)[source(S)] }) }
+                    .exceptionOrNull()
+                left = beliefs.size
+            },
+        )
+        assertTrue(failure is IllegalArgumentException, "Expected an IllegalArgumentException, got $failure")
+        assertEquals(4, left)
     }
 
     @Test
