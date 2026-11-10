@@ -152,7 +152,7 @@ class TestPrologMatching {
     @Test
     fun `annotated goal mgu with annotated query`() {
         with(JaktaLogicProgrammingScope()) {
-            val goal = "parent"("alice", "charlie").tag(source("bob"))
+            val goal = "parent"("alice", "charlie").addAnnotations(source("bob"))
             val sub = goal.annotatedMguWith(goalQuery { "parent"(X, Y)[source(Z)] })
             if (sub.isFailed) {
                 fail("Failed to find a match")
@@ -164,7 +164,7 @@ class TestPrologMatching {
     @Test
     fun `annotated goal mgu with not annotated query`() {
         with(JaktaLogicProgrammingScope()) {
-            val goal = "parent"("alice", "charlie").tag(source("bob"))
+            val goal = "parent"("alice", "charlie").addAnnotations(source("bob"))
             val sub = goal.annotatedMguWith(goalQuery { "parent"(X, Y) })
             if (sub.isFailed) {
                 fail("Failed to find a match")
@@ -176,7 +176,7 @@ class TestPrologMatching {
     @Test
     fun `annotated goal does not match a query with a different source`() {
         with(JaktaLogicProgrammingScope()) {
-            val goal = "parent"("alice", "charlie").tag(source("bob"))
+            val goal = "parent"("alice", "charlie").addAnnotations(source("bob"))
             assertEquals(true, goal.annotatedMguWith(goalQuery { "parent"(X, Y)[source("alice")] }).isFailed)
             val selfGoal: PrologGoal = "parent"("alice", "charlie")
             assertEquals(true, selfGoal.annotatedMguWith(goalQuery { "parent"(X, Y)[source("bob")] }).isFailed)
@@ -191,7 +191,7 @@ class TestPrologMatching {
     fun `goals and beliefs match annotations the same way`() {
         with(JaktaLogicProgrammingScope()) {
             val own = "job"(1)
-            val delegated = "job"(1).tag(source("alice"))
+            val delegated = "job"(1).addAnnotations(source("alice"))
             // data, pattern, and the expected binding of S (null: no match, "-": match without binding S)
             val cases: List<Triple<Struct, Struct, String?>> = listOf(
                 Triple(own, "job"(N), "-"),

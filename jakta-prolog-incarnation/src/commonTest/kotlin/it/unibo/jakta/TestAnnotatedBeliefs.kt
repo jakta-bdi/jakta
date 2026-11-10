@@ -8,7 +8,6 @@ import it.unibo.jakta.agent.MutableAgentState
 import it.unibo.jakta.belief.BeliefBaseFactory
 import it.unibo.jakta.dsl.belief.AnnotatedBeliefRevision
 import it.unibo.jakta.dsl.belief.PrologBelief
-import it.unibo.jakta.dsl.belief.annotations
 import it.unibo.jakta.dsl.belief.forgetAllMatching
 import it.unibo.jakta.dsl.belief.initialBelief
 import it.unibo.jakta.dsl.belief.matchBelief
@@ -20,7 +19,6 @@ import it.unibo.jakta.dsl.belief.replaceSelf
 import it.unibo.jakta.dsl.belief.sourcesOf
 import it.unibo.jakta.dsl.belief.update
 import it.unibo.jakta.dsl.belief.usesAnnotatedBeliefs
-import it.unibo.jakta.dsl.belief.withAnnotations
 import it.unibo.jakta.dsl.goal.initialGoal
 import it.unibo.jakta.dsl.goal.matchingGoal
 import it.unibo.jakta.dsl.mas
@@ -91,6 +89,13 @@ class TestAnnotatedBeliefs {
         val (beliefBase, events) = annotatedBeliefBase(fromAlice)
         assertEquals(false, beliefBase.add(fromAlice))
         assertEquals(emptyList(), events.drain())
+    }
+
+    @Test
+    fun `adding annotations to a belief annotates its head, keeping those it has`() {
+        val tagged = fromAlice.addAnnotations("certain".toAtom())
+        assertEquals(setOf("certain".toAtom()) + sources("alice"), tagged.annotations)
+        assertEquals(true, tagged.isFact)
     }
 
     @Test
@@ -232,7 +237,9 @@ class TestAnnotatedBeliefs {
         val certainFromAlice = initialBelief { "ping"(1)[atomOf("certain"), source("alice")] }
         val query = newContextBeliefQuery { "ping"(X)[atomOf("certain"), source("alice")] }
         val untell = AgentUpdate.Replace<PrologBelief>(
-            { belief -> belief.withAnnotations(sources("alice")).takeIf { belief.matchBelief(query) != null } },
+            { belief ->
+                belief.setAnnotations(source("alice")).takeIf { belief.matchBelief(query) != null }
+            },
             emptyList(),
         )
         val (held, events) = replaced(untell, certainFromAlice, fromCarol)
