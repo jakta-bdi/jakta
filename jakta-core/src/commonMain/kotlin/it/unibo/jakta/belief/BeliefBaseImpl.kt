@@ -8,37 +8,40 @@ import it.unibo.jakta.event.EventInbox
 internal data class BeliefBaseImpl<Belief : Any>(
     private val events: EventInbox<AgentEvent.Internal.Belief<Belief>>,
     val initialBeliefs: Iterable<Belief> = emptyList(),
-    private val revision: BeliefRevision<Belief> = BeliefRevision.plain(),
+    private val revisionStrategy: BeliefRevision<Belief> = BeliefRevision.plain(),
     private val beliefs: MutableSet<Belief> = mutableSetOf(),
 ) : BeliefBase<Belief>,
     MutableSet<Belief> by beliefs {
 
     init {
         // the initial beliefs are revised as any other, but raise no events
-        initialBeliefs.forEach { apply(revision.add(beliefs, it), notify = false) }
+        initialBeliefs.forEach { apply(revisionStrategy.add(beliefs, it), notify = false) }
     }
 
     override fun snapshot(): Collection<Belief> = beliefs.toSet()
 
-    override fun add(element: Belief): Boolean = apply(revision.add(beliefs, element))
+    override fun add(element: Belief): Boolean = apply(revisionStrategy.add(beliefs, element))
 
-    override fun remove(element: Belief): Boolean = apply(revision.remove(beliefs, element))
+    override fun remove(element: Belief): Boolean = apply(revisionStrategy.remove(beliefs, element))
 
-    override fun replace(scope: (Belief) -> Boolean, beliefs: List<Belief>): Boolean =
-        apply(revision.replace(this.beliefs, scope, beliefs))
+    override fun replace(scope: (Belief) -> Boolean, replacements: List<Belief>): Boolean {
+        val outOfScope = replacements.filterNot(scope)
+        require(outOfScope.isEmpty()) { "Replacements must be in the scope they replace, but $outOfScope are not" }
+        return apply(revisionStrategy.replace(beliefs, scope, replacements))
+    }
 
     private fun apply(revision: BeliefRevision.Revision<Belief>, notify: Boolean = true): Boolean {
-        revision.dropped.forEach { beliefs.remove(it) }
-        revision.stored.forEach {
+        revision.remove.forEach { beliefs.remove(it) }
+        revision.add.forEach {
             // a set keeps the element it already has: replace it, so that an equal but revised belief is stored
             beliefs.remove(it)
             beliefs.add(it)
         }
         if (notify) {
-            revision.removed.forEach { events.send(BeliefRemoveEvent(it)) }
-            revision.added.forEach { events.send(BeliefAddEvent(it)) }
+            revision.announceRemoved.forEach { events.send(BeliefRemoveEvent(it)) }
+            revision.announceAdded.forEach { events.send(BeliefAddEvent(it)) }
         }
-        return revision.stored.isNotEmpty() || revision.dropped.isNotEmpty()
+        return revision.add.isNotEmpty() || revision.remove.isNotEmpty()
     }
 
     override fun addAll(elements: Collection<Belief>): Boolean = elements.map { add(it) }.any { it }

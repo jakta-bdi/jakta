@@ -11,8 +11,9 @@ interface BeliefBase<Belief : Any> : MutableCollection<Belief> {
     fun snapshot(): Collection<Belief>
 
     /**
-     * Makes the beliefs in [scope] become [beliefs], through the belief revision.
+     * Makes the beliefs in [scope] become [replacements], through the belief revision.
      * @return whether the belief base changed.
+     * @throws IllegalArgumentException if any of the [replacements] is not in [scope].
      */
-    fun replace(scope: (Belief) -> Boolean, beliefs: List<Belief>): Boolean
+    fun replace(scope: (Belief) -> Boolean, replacements: List<Belief>): Boolean
 }

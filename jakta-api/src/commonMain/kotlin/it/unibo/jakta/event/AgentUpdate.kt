@@ -23,11 +23,11 @@ sealed interface AgentUpdate<T : Any> {
     }
 
     /**
-     * The beliefs in [scope] are now [beliefs]: those in scope and not among [beliefs] are forgotten, and the new ones
+     * The beliefs in [scope] are now [replacements]: those in scope and not among them are forgotten, and the new ones
      * believed, while beliefs that do not change raise no events. Typically, what a perception tells about some part of
-     * the environment.
+     * the environment. Each of [replacements] must be in [scope], or applying the update fails.
      */
-    data class Replace<B : Any>(val scope: (B) -> Boolean, val beliefs: List<B>) : AgentUpdate<B>
+    data class Replace<B : Any>(val scope: (B) -> Boolean, val replacements: List<B>) : AgentUpdate<B>
 
     /**
      * Adopt each of [goals].
