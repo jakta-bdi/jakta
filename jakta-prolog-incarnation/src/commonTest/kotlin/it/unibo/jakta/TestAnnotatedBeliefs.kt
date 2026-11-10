@@ -96,6 +96,25 @@ class TestAnnotatedBeliefs {
         assertEquals(true, tagged.isFact)
     }
 
+    private val certain = "certain".toAtom()
+
+    @Test
+    fun `a belief without a source is the agent's own`() {
+        val (beliefBase, _) = annotatedBeliefBase(initialBelief { "ping"(1)[atomOf("certain")] })
+        assertEquals(setOf(certain) + sources("self"), beliefBase.snapshot().single().annotations)
+    }
+
+    @Test
+    fun `removing the last source removes the belief, whatever its other annotations`() {
+        val certainFromAlice = initialBelief { "ping"(1)[atomOf("certain"), source("alice")] }
+        val (beliefBase, events) = annotatedBeliefBase(certainFromAlice, fromCarol)
+        beliefBase.remove(fromCarol)
+        assertEquals(setOf(certain) + sources("alice"), beliefBase.snapshot().single().annotations)
+        beliefBase.remove(fromAlice)
+        assertEquals(emptySet(), beliefBase.snapshot().toSet())
+        assertEquals(listOf(sources("carol"), setOf(certain) + sources("alice")), events.drain().map { it.second })
+    }
+
     @Test
     fun `an own belief and a told one are a single belief`() {
         val (beliefBase, _) = annotatedBeliefBase(ping, fromAlice)
@@ -227,6 +246,12 @@ class TestAnnotatedBeliefs {
             ping,
         )
         assertEquals(listOf("ping(1)" to sources("carol", "self"), "ping(3)" to sources("alice")), held)
+    }
+
+    @Test
+    fun `a perception marked with percept keeps what others told`() {
+        val (held, _) = replaced(replaceFrom(percept, listOf(pingQuery), listOf(ping)), fromAlice)
+        assertEquals(listOf("ping(1)" to sources("alice", "percept")), held)
     }
 
     @Test
@@ -375,6 +400,8 @@ class TestAnnotatedBeliefs {
                     +fromCarol
                     +initialBelief { "ping"(2)[source("alice")] }
                     +initialBelief { "ping"(3)[source("alice"), source("carol")] }
+                    +initialBelief { "ping"(4)[atomOf("certain")] }
+                    +initialBelief { "ping"(5)[atomOf("certain"), source("alice")] }
                     +initialBelief { "pong"(1)[source("alice")] }
                 }
                 hasInitialGoals { !initialGoal { start } }
@@ -392,7 +419,7 @@ class TestAnnotatedBeliefs {
         }
 
     @Test
-    fun `forgetAllMatching with annotations forgets only those, keeping what others told`() = runTest {
+    fun `forgetAllMatching with a source forgets only that source, and the beliefs left without one`() = runTest {
         var left: List<PrologBelief> = emptyList()
         run(
             forgettingAgent {
@@ -404,6 +431,7 @@ class TestAnnotatedBeliefs {
             listOf(
                 "ping(1)" to sources("self", "carol"),
                 "ping(3)" to sources("carol"),
+                "ping(4)" to setOf(certain) + sources("self"),
                 "pong(1)" to sources("alice"),
             ),
             left.map { it.head.toString() to it.annotations }.sortedBy { it.first },
@@ -411,7 +439,7 @@ class TestAnnotatedBeliefs {
     }
 
     @Test
-    fun `forgetAllMatching with a source variable forgets every source`() = runTest {
+    fun `forgetAllMatching with a source variable forgets every matching belief`() = runTest {
         var left: List<PrologBelief> = emptyList()
         run(
             forgettingAgent {

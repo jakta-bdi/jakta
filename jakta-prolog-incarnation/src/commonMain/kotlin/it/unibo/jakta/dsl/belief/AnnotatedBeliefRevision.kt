@@ -4,20 +4,22 @@ import it.unibo.jakta.belief.BeliefRevision
 import it.unibo.jakta.belief.BeliefRevision.Revision
 import it.unibo.jakta.dsl.agent.AgentBuilder
 import it.unibo.jakta.effectiveAnnotations
+import it.unibo.jakta.isSource
 import it.unibo.jakta.setAnnotations
 
 /**
  * Belief revision with Jason's annotation semantics: a belief is identified by its term, and its annotations
  * (e.g. its sources) are a set that grows and shrinks.
  *
- * - A belief without annotations is the agent's own, and is stored as such: believing `ping(1)` stores
- *   `ping(1)[source(self)]`. Other sources, such as `source(percept)`, are up to whoever produces the belief, e.g. the
- *   perception handler.
+ * - A belief without a source is the agent's own, and is stored as such: believing `ping(1)` stores
+ *   `ping(1)[source(self)]`, and `ping(1)[certain]` stores `ping(1)[certain, source(self)]`. Other sources, such as
+ *   `source(percept)`, are up to whoever produces the belief, e.g. the perception handler.
  * - Adding a belief already held, with new annotations, stores a single belief with all of them, and announces the
  *   addition of the belief with only the new ones: telling `ping(1)` to an agent that was told it by Alice makes it
  *   believe `ping(1)[source(alice), source(carol)]`, and raises `+ping(1)[source(carol)]`.
- * - Removing a belief removes only its annotations, and the belief when none is left: forgetting `ping(1)`, i.e.
- *   `ping(1)[source(self)]`, leaves `ping(1)[source(alice)]` if Alice told it too, and raises `-ping(1)[source(self)]`.
+ * - Removing a belief removes only its annotations, and the belief when no source is left, whatever its other
+ *   annotations: forgetting `ping(1)`, i.e. `ping(1)[source(self)]`, leaves `ping(1)[source(alice)]` if Alice told it
+ *   too, and raises `-ping(1)[source(self)]`; if not, it removes `ping(1)` altogether.
  *
  * - Replacing removes from each belief held the annotations its scope gives, unless the replacements keep them: a scope
  *   giving `ping(1)[source(self)]` for `ping(1)[source(self), source(alice)]` replaces only the agent's own
@@ -50,7 +52,8 @@ object AnnotatedBeliefRevision : BeliefRevision<PrologBelief> {
         return when {
             removedAnnotations.isEmpty() -> Revision()
 
-            keptAnnotations.isEmpty() -> Revision(remove = listOf(held), announceRemoved = listOf(held))
+            // a belief lives as long as it has a source
+            keptAnnotations.none { it.isSource } -> Revision(remove = listOf(held), announceRemoved = listOf(held))
 
             else -> Revision(
                 add = listOf(held.setAnnotations(*keptAnnotations.toTypedArray())),

@@ -30,18 +30,25 @@ fun source(source: String): Struct = source(Atom.of(source))
 fun source(source: Term): Struct = Struct.of("source", source)
 
 /**
- * An [Atom] representing the "self" annotation.
+ * The source of the agent's own beliefs, as in `source(self)`: a belief without a source is the agent's own.
  */
 val self = Atom.of("self")
+
+/**
+ * The source of what the agent perceives, as in `source(percept)`: a perception handler marks its beliefs with it,
+ * e.g. by `replaceFrom(percept, queries, beliefs)`.
+ */
+val percept = Atom.of("percept")
 
 /*
  * Annotations, as Jason's `p(1)[source(alice)]`, are metadata of a term: equal terms with different annotations are
  * equal. The functions below read and change them on any term (a belief, a query, a goal); on a belief, a [Rule] or a
  * [Fact], they act on its head.
  *
- * A belief without annotations counts as `[source(self)]`: matching treats it so, and the annotated belief revision
- * stores it so. Sources other than an agent, such as `source(percept)` for what the agent perceives, are up to the
- * perception handler, which annotates the beliefs it produces.
+ * A belief without a source counts as the agent's own, `source(self)`, besides any other annotation: matching treats it
+ * so, and the annotated belief revision stores it so, e.g. `p(1)[certain]` as `p(1)[certain, source(self)]`. Sources
+ * other than an agent, such as `source(percept)` for what the agent perceives, are up to the perception handler, which
+ * annotates the beliefs it produces.
  */
 
 /**
@@ -93,7 +100,13 @@ private fun <T : Term> T.withAnnotations(annotations: Set<Struct>): T {
 }
 
 /**
- * The annotations of this term, where a term without annotations counts as `[source(self)]`: the agent's own.
+ * Whether this annotation is a source, `source(S)`.
+ */
+internal val Struct.isSource: Boolean
+    get() = functor == "source" && arity == 1
+
+/**
+ * The annotations of this term, where a term without a source is the agent's own: `source(self)` is added.
  */
 internal val Term.effectiveAnnotations: Set<Struct>
-    get() = annotations.ifEmpty { setOf(source(self)) }
+    get() = annotations.let { if (it.none { annotation -> annotation.isSource }) it + source(self) else it }

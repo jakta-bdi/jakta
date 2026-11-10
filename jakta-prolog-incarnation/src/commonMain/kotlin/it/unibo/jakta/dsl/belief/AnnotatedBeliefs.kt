@@ -5,6 +5,7 @@ import it.unibo.jakta.agent.MutableAgentState
 import it.unibo.jakta.annotations
 import it.unibo.jakta.effectiveAnnotations
 import it.unibo.jakta.event.AgentUpdate
+import it.unibo.jakta.isSource
 import it.unibo.jakta.removeAllAnnotations
 import it.unibo.jakta.self
 import it.unibo.jakta.setAnnotations
@@ -18,7 +19,7 @@ import it.unibo.tuprolog.unify.Unificator
  * What [from] contributed to the beliefs matching any of [queries] is now [beliefs], attributed to [from]; what other
  * sources contributed stays. The queries must not have annotations. In a perception handler,
  * `replaceFrom(self, queries, beliefs)` updates what the agent perceives as its own beliefs, while
- * `replaceFrom(Atom.of("percept"), queries, beliefs)` marks it with `source(percept)`.
+ * `replaceFrom(percept, queries, beliefs)` marks it with `source(percept)`.
  */
 fun replaceFrom(
     from: Term,
@@ -50,34 +51,30 @@ fun MutableAgentState<PrologBelief, *>.update(belief: PrologBelief) {
 }
 
 /**
- * Forgets every solution of [beliefQuery], through the revision's replacement. A query without annotations forgets the
- * matching beliefs whole: `p(X)` forgets every `p(_)`. A query with annotations forgets, from each matching belief, the
- * annotations its patterns match: `p(X)[source(alice)]` forgets what Alice told about `p(_)`, while what others told
- * stays, and `p(X)[source(S)]` forgets every source of every `p(_)`.
+ * Forgets every solution of [beliefQuery], through the revision's replacement. Without annotations, the query forgets
+ * the matching beliefs whole: `p(X)` forgets every `p(_)`. With annotations, it forgets from each matching belief the
+ * annotations the query's ones match, and the belief goes with its last source: with `p(1)[source(alice),
+ * source(bob)]`, `p(X)[source(alice)]` leaves `p(1)[source(bob)]`, and `p(X)[source(S)]` forgets `p(1)`.
  *
- * Each annotation pattern is matched on its own, after the bindings of the belief's term: `p(X)[source(X)]` forgets
- * `source(1)` from `p(1)`, but variables shared by two patterns are not required to agree.
+ * The query's annotations are matched after the bindings of the belief's term, each on its own: variables shared by two
+ * of them are not required to agree.
  */
-fun MutableAgentState<PrologBelief, *>.forgetAllMatching(beliefQuery: Struct) {
-    val patterns = beliefQuery.annotations
-    val anyAnnotations = beliefQuery.removeAllAnnotations()
-    replace(emptyList()) { belief ->
-        val termMatch = belief.matchBelief(anyAnnotations)
-        when {
-            termMatch == null || belief.matchBelief(beliefQuery) == null -> null
+fun MutableAgentState<PrologBelief, *>.forgetAllMatching(beliefQuery: Struct) = replace(emptyList()) { belief ->
+    val termMatch = belief.matchBelief(beliefQuery.removeAllAnnotations())
+    when {
+        termMatch == null || belief.matchBelief(beliefQuery) == null -> null
 
-            patterns.isEmpty() -> belief
+        beliefQuery.annotations.isEmpty() -> belief
 
-            else -> {
-                val bound = patterns.map { it.apply(termMatch.substitution) }
-                val forgotten = belief.effectiveAnnotations.filter { annotation ->
-                    bound.any { Unificator.default.match(it, annotation) }
-                }
-                belief.setAnnotations(*forgotten.toTypedArray())
-            }
+        else -> {
+            val patterns = beliefQuery.annotations.map { it.apply(termMatch.substitution) }
+            val matched = belief.effectiveAnnotations.filter { patterns.any { pattern -> pattern.matches(it) } }
+            belief.setAnnotations(*matched.toTypedArray())
         }
     }
 }
+
+private fun Term.matches(annotation: Struct) = Unificator.default.match(this, annotation)
 
 /**
  * The sources of the beliefs matching [beliefQuery]: the agents that told them, and `self` for the agent's own.
@@ -85,6 +82,6 @@ fun MutableAgentState<PrologBelief, *>.forgetAllMatching(beliefQuery: Struct) {
  */
 fun Collection<PrologBelief>.sourcesOf(beliefQuery: Struct): Set<Term> = filter { it.matchBelief(beliefQuery) != null }
     .flatMap { it.effectiveAnnotations }
-    .filter { it.functor == "source" && it.arity == 1 }
+    .filter { it.isSource }
     .map { it[0] }
     .toSet()
