@@ -47,20 +47,13 @@ jobs:
           distribution: temurin
           java-version: 21
 
-      # API docs are built from the latest release tag, so /api always matches
-      # the version on Maven Central rather than unreleased main.
+      # Every feat/fix merged to main is released right away, so main's public API is the released one,
+      # and KDoc fixes (docs commits, which cut no release) go live without waiting for one.
       - name: Generate API docs (Dokka)
         run: |
-          RELEASE_TAG=$(git describe --tags --abbrev=0)
-          git worktree add /tmp/jakta-release "$RELEASE_TAG"
-          (cd /tmp/jakta-release && ./gradlew :dokkaGenerateHtml --no-configuration-cache)
-          # Tags older than the root Dokka aggregation produce no module pages.
-          if [ -d /tmp/jakta-release/build/dokka/html/jakta-api ]; then
-            rm -rf website/static/api
-            cp -a /tmp/jakta-release/build/dokka/html website/static/api
-          else
-            echo "::warning::$RELEASE_TAG has no aggregated Dokka output, skipping /api"
-          fi
+          ./gradlew :dokkaGenerateHtml --no-configuration-cache
+          rm -rf website/static/api
+          cp -a build/dokka/html website/static/api
 
       # The Compose Multiplatform examples are embedded, running, in the showcase page.
       - name: Build browser examples
