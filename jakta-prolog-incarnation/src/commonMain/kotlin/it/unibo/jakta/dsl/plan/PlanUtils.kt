@@ -5,6 +5,7 @@ import it.unibo.jakta.dsl.belief.PrologBelief
 import it.unibo.jakta.dsl.goal.PrologGoal
 import it.unibo.jakta.logic.JaktaLogicProgrammingScope
 import it.unibo.jakta.logic.MutableSubstitutionPlanContext
+import it.unibo.jakta.logic.applyWithAnnotations
 import it.unibo.jakta.logic.unifiesWith
 import it.unibo.jakta.plan.GuardScope
 import it.unibo.jakta.plan.PlanScope
@@ -26,7 +27,7 @@ fun GuardScope<PrologBelief, MutableSubstitutionPlanContext>.satisfies(
     block: JaktaLogicProgrammingScope.() -> Struct,
 ): MutableSubstitutionPlanContext? {
     val guard = scope.block()
-    val substitutedGuard = guard.apply(this.context.substitution).castToStruct()
+    val substitutedGuard = guard.applyWithAnnotations(this.context.substitution).castToStruct()
     return when (val solution = this.beliefs.unifiesWith(substitutedGuard)) {
         is Solution.Yes -> {
             this.context += solution.substitution
@@ -48,7 +49,7 @@ context(logicScope: JaktaLogicProgrammingScope)
 fun PlanScope<PrologBelief, PrologGoal, MutableSubstitutionPlanContext>.testQuery(
     block: JaktaLogicProgrammingScope.() -> Struct,
 ) {
-    val query = logicScope.block().apply(this.context.substitution).castToStruct()
+    val query = logicScope.block().applyWithAnnotations(this.context.substitution).castToStruct()
     when (val solution = this.agent.beliefs.unifiesWith(query)) {
         is Solution.Yes -> {
             this.context += solution.substitution
@@ -57,15 +58,3 @@ fun PlanScope<PrologBelief, PrologGoal, MutableSubstitutionPlanContext>.testQuer
         else -> error("The query $query is not satisfied")
     }
 }
-
-// /**
-// * Tests a prolog query on the agent's current beliefs and if it succeeds the result of the substitution is merged
-// * with the current plan context.
-// * @param block A lambda function that defines the beliefQuery query to be created.
-// * @return The created [Fact] as a query if it is a valid predicate.
-// */
-// // TODO test this
-// context(logicScope: JaktaLogicProgrammingScope)
-// fun MutableAgentState<PrologBelief, PrologGoal>.forgetAllMatching(beliefQuery: Struct) {
-//    TODO()
-// }

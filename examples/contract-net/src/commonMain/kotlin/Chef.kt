@@ -45,7 +45,7 @@ context(kitchens: KitchenSkill, messaging: MessagingSkill)
 fun chef(id: AgentID, kitchen: Kitchen, waiter: AgentID, restaurant: Restaurant) = with(kitchens) {
     agent<PrologBelief, PrologGoal, Any>(id) {
         embodiedAs { kitchen }
-        handlesPerceptionEvents { if (it is KitchenPerception) handleKitchenPerception(it, beliefs) else null }
+        handlesPerceptionEvents { if (it is KitchenPerception) handleKitchenPerception(it) else null }
         handlesMessageEvents { message ->
             (message.payload as? KQMLPayload)?.let { payload ->
                 val (performative, content) = payload.describe()

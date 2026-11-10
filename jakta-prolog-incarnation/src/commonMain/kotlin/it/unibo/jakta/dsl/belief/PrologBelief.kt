@@ -4,6 +4,7 @@ import it.unibo.jakta.dsl.JaktaDSL
 import it.unibo.jakta.logic.JaktaLogicProgrammingScope
 import it.unibo.jakta.logic.MutableSubstitutionPlanContext
 import it.unibo.jakta.logic.annotatedMguWith
+import it.unibo.jakta.logic.applyWithAnnotations
 import it.unibo.jakta.logic.requireGround
 import it.unibo.jakta.logic.requirePredicate
 import it.unibo.tuprolog.core.Fact
@@ -55,7 +56,7 @@ fun initialBelief(block: JaktaLogicProgrammingScope.() -> Struct): Fact = Fact.o
  */
 context(scope: JaktaLogicProgrammingScope, planContext: MutableSubstitutionPlanContext)
 fun belief(block: JaktaLogicProgrammingScope.() -> Struct): Fact = Fact.of(
-    (scope.block().apply(planContext.substitution) as Struct).also { struct ->
+    (scope.block().applyWithAnnotations(planContext.substitution) as Struct).also { struct ->
         requirePredicate(struct) { "Belief must be a predicate, but got $it" }
         requireGround(struct) { "Belief must be ground, but got $it" }
     },
@@ -75,7 +76,7 @@ fun inferenceRule(block: JaktaLogicProgrammingScope.() -> Rule): Rule = JaktaLog
  */
 context(scope: JaktaLogicProgrammingScope, planContext: MutableSubstitutionPlanContext)
 fun beliefQuery(block: JaktaLogicProgrammingScope.() -> Struct): Struct =
-    (scope.block().apply(planContext.substitution) as Struct).also { struct ->
+    (scope.block().applyWithAnnotations(planContext.substitution) as Struct).also { struct ->
         requirePredicate(struct) { "Belief query must be a predicate, but got $it" }
     }
 
