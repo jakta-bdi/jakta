@@ -42,6 +42,14 @@ const HomePageNavbar: React.FC = () => {
 					<li className={styles.navItem} key={section.id}>
 						<a
 							href={`#${section.id}`}
+							// One smooth scroll, ours: following the hash natively also makes Docusaurus scroll to it again
+							// on the route change, and in Firefox the two scrolls fight and can stall. pushState keeps one
+							// history entry per section without telling the router, so Back still steps through them.
+							onClick={(e) => {
+								e.preventDefault();
+								document.getElementById(section.id)?.scrollIntoView({ behavior: 'smooth' });
+								window.history.pushState(null, '', `#${section.id}`);
+							}}
 							className={
 								`${styles.navLink} ${activeSection === section.id ? styles.active : ''}`
 							}
