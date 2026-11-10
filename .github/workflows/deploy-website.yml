@@ -49,9 +49,10 @@ jobs:
 
       # Every feat/fix merged to main is released right away, so main's public API is the released one,
       # and KDoc fixes (docs commits, which cut no release) go live without waiting for one.
+      # The docs are labelled with the latest release rather than main's -dev version.
       - name: Generate API docs (Dokka)
         run: |
-          ./gradlew :dokkaGenerateHtml --no-configuration-cache
+          ./gradlew :dokkaGenerateHtml --no-configuration-cache -PforceVersion="$(git describe --tags --abbrev=0)"
           rm -rf website/static/api
           cp -a build/dokka/html website/static/api
 
