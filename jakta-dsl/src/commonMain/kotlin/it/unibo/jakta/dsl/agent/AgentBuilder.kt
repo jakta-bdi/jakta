@@ -3,6 +3,7 @@ package it.unibo.jakta.dsl.agent
 import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.agent.AgentSpecification
 import it.unibo.jakta.agent.AgentState
+import it.unibo.jakta.agent.FailedIntentionHandler
 import it.unibo.jakta.dsl.JaktaDSL
 import it.unibo.jakta.dsl.plan.PlanLibraryBuilder
 import it.unibo.jakta.event.AgentEvent.External.Message
@@ -80,6 +81,15 @@ interface AgentBuilder<Belief : Any, Goal : Any, Body : Any> {
      * By default, the agent runs the first applicable plan, in the order of the plan library.
      */
     fun selectsPlansWith(selection: PlanSelection<Belief, Goal>)
+
+    /**
+     * Sets how the agent reacts when one of its intentions fails with nobody left to handle the failure:
+     * no failure plan recovered it, and no plan was waiting for its goal, because it was an initial goal,
+     * a goal pursued with `alsoAchieve`, or the intention reacted to a belief change.
+     * The [handler] runs on an intention of its own and can use `agent` like a plan body,
+     * e.g. `agent.alsoAchieve(goal)` to pursue the goal again. By default, the failure is logged as a warning.
+     */
+    fun handlesFailedIntentions(handler: FailedIntentionHandler<Belief, Goal>)
 
     /**
      * Define how an agent can be embodied in the node.

@@ -109,7 +109,8 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
                 }
             },
             desiredResult = typeOf<Any?>(),
-            onNoPlan = { reason -> handleFailure(event, NoPlanException(reason)) },
+            // A belief change no plan reacts to is not a failure: selectPlan already logged it
+            onNoPlan = { },
         )?.let {
             launchPlan(event, it)
         }
@@ -157,6 +158,7 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
         log.d { "Launching plan $plan for event $event on intention $intention" }
         val interceptor =
             this.coroutineContext[ContinuationInterceptor] ?: error("No ContinuationInterceptor in context")
+        val stepScope = this
 
         launch(IntentionDispatcher(interceptor) + intention + intention.job) {
             @Suppress("TooGenericExceptionCaught")
@@ -168,7 +170,7 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
                 throw e
             } catch (e: Exception) {
                 log.e("Goal failed for exception: ${e.message} ${e.stackTraceToString()}")
-                handleFailure(event, e)
+                stepScope.handleFailure(event, e)
             }
         }.invokeOnCompletion {
             log.d { "Plan Completed: $plan for event $event" }
@@ -245,7 +247,13 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
             { beliefs -> optionFor(beliefs, triggerContext) }
         }
 
-    private fun handleFailure(event: AgentEvent.Internal, e: Exception) {
+    /**
+     * Handles the failure [e] of the plan handling [event], or the lack of a plan for it.
+     * A failed goal gets a chance to recover with its failure plans; a failure no failure plan recovered
+     * escalates to whoever pursued the goal, and once nobody is left, the agent's failed-intention handler is called.
+     */
+    @Suppress("UNCHECKED_CAST")
+    private fun CoroutineScope.handleFailure(event: AgentEvent.Internal, e: Exception) {
         when (event) {
             is AgentEvent.Internal.Goal.Add<*, *> -> {
                 log.d { "Attempting to handle the failure of goal: $event.goal" }
@@ -264,11 +272,50 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
                 log.d { "An error occurred when attempting to handle the failure of goal: $event.goal" }
                 // Whoever pursued the goal gets why it failed in the first place, not why its failure was unhandled
                 val cause = event.cause?.also { if (it !== e) it.addSuppressed(e) } ?: e
-                event.completion?.completeExceptionally(cause)
+                val completion = event.completion
+                if (completion != null) {
+                    completion.completeExceptionally(cause) // escalates to the plan waiting for the goal
+                } else {
+                    handleFailedIntention(event, event.goal as Goal, cause)
+                }
             }
+
+            is AgentEvent.Internal.Belief<*> -> handleFailedIntention(event, goal = null, cause = e)
 
             else -> {
                 log.w { "Handling of event $event failed with exception:${e.message}" }
+            }
+        }
+    }
+
+    /**
+     * Calls the agent's failed-intention handler, on an intention of its own, for the intention started by
+     * [trigger] that failed with [cause] with nobody left to handle the failure; or logs a warning without one.
+     */
+    private fun CoroutineScope.handleFailedIntention(trigger: AgentEvent.Internal, goal: Goal?, cause: Throwable) {
+        val pursued = goal?.let { "the goal $it" } ?: "$trigger"
+        val handler = executableAgent.failedIntentionHandler
+        if (handler == null) {
+            log.w {
+                "The intention pursuing $pursued failed and nothing handled it: $cause. " +
+                    "Use handlesFailedIntentions to react to failed intentions."
+            }
+            return
+        }
+        log.d { "Handling the failed intention pursuing $pursued: $cause" }
+        val intention = executableAgent.state.mutableIntentionPool.nextIntention(trigger, coroutineContext.job)
+        val interceptor =
+            coroutineContext[ContinuationInterceptor] ?: error("No ContinuationInterceptor in context")
+        val failure = BaseFailedIntention(executableAgent.state, trigger, goal, cause)
+        launch(IntentionDispatcher(interceptor) + intention + intention.job) {
+            @Suppress("TooGenericExceptionCaught")
+            try {
+                failure.handler()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                // There is nowhere further to escalate: log it, so that a failing handler cannot loop
+                log.e { "The handler of failed intentions failed for $pursued: $e" }
             }
         }
     }

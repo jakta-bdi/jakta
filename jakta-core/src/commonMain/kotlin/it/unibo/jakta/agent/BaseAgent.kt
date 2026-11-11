@@ -32,6 +32,9 @@ class BaseAgent<Belief : Any, Goal : Any, Body : Any>(agentSpecification: AgentS
 
     override val planSelection: PlanSelection<Belief, Goal> = agentSpecification.planSelection
 
+    override val failedIntentionHandler: FailedIntentionHandler<Belief, Goal>? =
+        agentSpecification.failedIntentionHandler
+
     override val state: MutableAgentState<Belief, Goal> = BaseMutableAgentState(
         agentSpecification.initialState,
         internalInbox,

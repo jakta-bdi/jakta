@@ -160,7 +160,22 @@ with the result of the failure plan. If no failure plan is applicable, or the fa
 the failure propagates to the waiting plan, and so on up the chain of sub-goals
 (see [Failure handling](../execution-model.md#failure-handling) for the details).
 
-:::note
-Nobody waits for a goal added with `alsoAchieve` or as an initial goal: if it fails and no failure plan handles it,
-the failure is only logged.
-:::
+### Failed intentions
+
+Nobody waits for a goal added with `alsoAchieve` or as an initial goal, or for a plan reacting to a belief change:
+if it fails and no failure plan recovers it, the whole **intention** has failed, with nobody left to handle it.
+By default, the failure is logged as a warning. An agent can react to it with `handlesFailedIntentions`:
+
+```kotlin
+agent {
+    handlesFailedIntentions {
+        agent.print("Gave up on $goal: ${cause.message}")
+        goal?.let { agent.alsoAchieve(it) }   // e.g. pursue the goal again
+    }
+}
+```
+
+The handler sees the **root goal** of the intention (`null` if it reacted to a belief change), not the deepest
+sub-goal that failed, and the **original cause**: the exception of the plan that failed first, passed up unchanged.
+It runs on an intention of its own, so it can use `agent` like a plan body: wait, pursue goals, change beliefs.
+A failure inside the handler is only logged. A belief change no plan reacts to is not a failure.

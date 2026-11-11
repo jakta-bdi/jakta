@@ -32,4 +32,11 @@ interface ExecutableAgent<Belief : Any, Goal : Any> : Agent {
      */
     val planSelection: PlanSelection<Belief, Goal>
         get() = PlanSelection.first()
+
+    /**
+     * How the agent reacts when an intention fails with nobody left to handle the failure,
+     * or null to log a warning.
+     */
+    val failedIntentionHandler: FailedIntentionHandler<Belief, Goal>?
+        get() = null
 }

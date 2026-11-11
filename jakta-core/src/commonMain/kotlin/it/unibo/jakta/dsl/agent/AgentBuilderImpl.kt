@@ -5,6 +5,7 @@ import it.unibo.jakta.agent.AgentSpecification
 import it.unibo.jakta.agent.AgentState
 import it.unibo.jakta.agent.BaseAgentID
 import it.unibo.jakta.agent.BaseAgentState
+import it.unibo.jakta.agent.FailedIntentionHandler
 import it.unibo.jakta.dsl.plan.PlanLibraryBuilder
 import it.unibo.jakta.dsl.plan.PlanLibraryBuilderImpl
 import it.unibo.jakta.event.AgentEvent.External.Message
@@ -28,6 +29,8 @@ class AgentBuilderImpl<Belief : Any, Goal : Any, Body : Any>(
     private var goalPlans = listOf<Plan.Goal<Belief, Goal, *, *>>()
 
     private var planSelection: PlanSelection<Belief, Goal> = PlanSelection.first()
+
+    private var failedIntentionHandler: FailedIntentionHandler<Belief, Goal>? = null
 
     private var bodyFactory: (AgentID) -> Body by Delegates.notNull()
 
@@ -57,6 +60,10 @@ class AgentBuilderImpl<Belief : Any, Goal : Any, Body : Any>(
 
     override fun selectsPlansWith(selection: PlanSelection<Belief, Goal>) {
         this.planSelection = selection
+    }
+
+    override fun handlesFailedIntentions(handler: FailedIntentionHandler<Belief, Goal>) {
+        this.failedIntentionHandler = handler
     }
 
     override fun embodiedAs(bodyFactory: (AgentID) -> Body) {
@@ -107,5 +114,7 @@ class AgentBuilderImpl<Belief : Any, Goal : Any, Body : Any>(
             messageHandler = messageHandler,
         )
         override val planSelection: PlanSelection<Belief, Goal> = this@AgentBuilderImpl.planSelection
+        override val failedIntentionHandler: FailedIntentionHandler<Belief, Goal>? =
+            this@AgentBuilderImpl.failedIntentionHandler
     }
 }

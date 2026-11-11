@@ -135,7 +135,10 @@ A goal addition fails when no plan is applicable, or when its plan throws an exc
 3. if no failure plan is applicable, or the failure plan fails too, the completion is completed exceptionally:
    the waiting `achieve` throws, so the calling plan fails in turn, and the failure propagates up the chain of sub-goals.
 
-Goals posted with `alsoAchieve` or as initial goals have no completion, so their failures stop there.
+Goals posted with `alsoAchieve` or as initial goals have no completion, so their failures stop there, as do the
+failures of plans reacting to belief changes: the intention has failed with nobody left to handle it, and the agent's
+`handlesFailedIntentions` handler is called, on an intention of its own, with the root goal and the original cause
+(or a warning is logged, without a handler).
 
 :::info
 Removing a goal (e.g. with a KQML `unachieve`, or an `AgentUpdate.Goal` with removals) triggers `removing.goal { }`
