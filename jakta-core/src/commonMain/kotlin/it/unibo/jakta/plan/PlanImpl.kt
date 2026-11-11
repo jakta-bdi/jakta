@@ -3,6 +3,25 @@ package it.unibo.jakta.plan
 import kotlin.reflect.KType
 
 /**
+ * Base class of the plan implementations: a plan is identified by its [id], not by its lambdas.
+ * Two plans are equal when they are of the same kind and have the same [id],
+ * and a plan is printed as its kind and its [id].
+ */
+abstract class AbstractPlan {
+    /**
+     * The identifier of the plan.
+     */
+    abstract val id: PlanID
+
+    final override fun equals(other: Any?): Boolean =
+        this === other || other is AbstractPlan && other::class == this::class && other.id == id
+
+    final override fun hashCode(): Int = id.hashCode()
+
+    final override fun toString(): String = "${this::class.simpleName}($id)"
+}
+
+/**
  * Implementation of Plan for belief additions.
  */
 data class BeliefAdditionPlan<Belief : Any, Goal : Any, Context : Any, PlanResult>(
@@ -11,7 +30,10 @@ data class BeliefAdditionPlan<Belief : Any, Goal : Any, Context : Any, PlanResul
     override val body: suspend context(Context)
     (PlanScope<Belief, Goal, Context>) -> PlanResult,
     override val resultType: KType,
-) : Plan.Belief.Addition<Belief, Goal, Context, PlanResult>
+    override val id: PlanID = PlanID(),
+    override val metadata: Map<String, Any> = emptyMap(),
+) : AbstractPlan(),
+    Plan.Belief.Addition<Belief, Goal, Context, PlanResult>
 
 /**
  * Implementation of Plan for belief removals.
@@ -22,10 +44,13 @@ data class BeliefRemovalPlan<Belief : Any, Goal : Any, Context : Any, PlanResult
     override val body: suspend context(Context)
     (PlanScope<Belief, Goal, Context>) -> PlanResult,
     override val resultType: KType,
-) : Plan.Belief.Removal<Belief, Goal, Context, PlanResult>
+    override val id: PlanID = PlanID(),
+    override val metadata: Map<String, Any> = emptyMap(),
+) : AbstractPlan(),
+    Plan.Belief.Removal<Belief, Goal, Context, PlanResult>
 
 /**
- *
+ * Implementation of Plan for goal additions.
  */
 data class GoalAdditionPlan<Belief : Any, Goal : Any, Context : Any, PlanResult>(
     override val trigger: (Goal) -> Context?,
@@ -33,7 +58,10 @@ data class GoalAdditionPlan<Belief : Any, Goal : Any, Context : Any, PlanResult>
     override val body: suspend context(Context)
     (PlanScope<Belief, Goal, Context>) -> PlanResult,
     override val resultType: KType,
-) : Plan.Goal.Addition<Belief, Goal, Context, PlanResult>
+    override val id: PlanID = PlanID(),
+    override val metadata: Map<String, Any> = emptyMap(),
+) : AbstractPlan(),
+    Plan.Goal.Addition<Belief, Goal, Context, PlanResult>
 
 /**
  * Implementation of Plan for goal removals.
@@ -44,7 +72,10 @@ data class GoalRemovalPlan<Belief : Any, Goal : Any, Context : Any, PlanResult>(
     override val body: suspend context(Context)
     (PlanScope<Belief, Goal, Context>) -> PlanResult,
     override val resultType: KType,
-) : Plan.Goal.Removal<Belief, Goal, Context, PlanResult>
+    override val id: PlanID = PlanID(),
+    override val metadata: Map<String, Any> = emptyMap(),
+) : AbstractPlan(),
+    Plan.Goal.Removal<Belief, Goal, Context, PlanResult>
 
 /**
  * Implementation of Plan for goal failures.
@@ -55,4 +86,7 @@ data class GoalFailurePlan<Belief : Any, Goal : Any, Context : Any, PlanResult>(
     override val body: suspend context(Context)
     (PlanScope<Belief, Goal, Context>) -> PlanResult,
     override val resultType: KType,
-) : Plan.Goal.Failure<Belief, Goal, Context, PlanResult>
+    override val id: PlanID = PlanID(),
+    override val metadata: Map<String, Any> = emptyMap(),
+) : AbstractPlan(),
+    Plan.Goal.Failure<Belief, Goal, Context, PlanResult>
