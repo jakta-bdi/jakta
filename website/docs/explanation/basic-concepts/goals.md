@@ -128,6 +128,12 @@ adding.goal { this as? Serve } triggers {
 }
 ```
 
+The result type of a plan is the type of its body's last expression, and `achieveWithResult<R>` only selects plans
+whose result type is a subtype of `R`, so a value of the wrong type never reaches the caller. The check is the same on
+every platform, and it does not know the supertypes of your own classes: a plan ending with `Ok(x)` returns `Ok`,
+and is not selected for `achieveWithResult<Outcome>`. Declare the wider type with `returns<Outcome>()` before
+`triggers`, as described in the [DSL reference](../../reference/dsl.md#result-type).
+
 ## Why there are no test goals
 
 AgentSpeak has a second kind of goal, the **test goal** `?g`, to retrieve information from the belief base: it

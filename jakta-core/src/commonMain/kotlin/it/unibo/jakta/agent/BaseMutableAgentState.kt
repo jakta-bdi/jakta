@@ -78,13 +78,26 @@ internal class BaseMutableAgentState<Belief : Any, Goal : Any>(
         this._messageHandler = handler
     }
 
+    init {
+        val duplicateLabels = (_beliefPlans + _goalPlans).groupBy { it.id }
+            .filter { (id, plans) -> id.isLabel && plans.size > 1 }
+            .keys
+        require(duplicateLabels.isEmpty()) { "Several plans are labelled ${duplicateLabels.joinToString()}" }
+    }
+
     override fun addPlan(plan: Plan.Belief<Belief, Goal, *, *>) {
+        checkLabelIsFree(plan)
         this._beliefPlans += plan
     }
 
     override fun addPlan(plan: Plan.Goal<Belief, Goal, *, *>) {
+        checkLabelIsFree(plan)
         this._goalPlans += plan
     }
+
+    private fun checkLabelIsFree(plan: Plan<Belief, Goal, *, *, *>) = require(
+        !plan.id.isLabel || (_beliefPlans + _goalPlans).none { it.id == plan.id },
+    ) { "Another plan is already labelled ${plan.id}" }
 
     @InternalJaktaAPI
     override suspend fun <PlanResult> internalAchieve(goal: Goal, resultType: KType): PlanResult {

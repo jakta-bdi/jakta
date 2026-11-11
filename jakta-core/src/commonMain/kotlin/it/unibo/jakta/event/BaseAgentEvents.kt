@@ -68,12 +68,14 @@ data class GoalRemoveEvent<G : Any, PlanResult>(
  * @param[resultType] the type of result expected from the plan that will handle this goal failure.
  * @param[completion] an optional CompletableDeferred to complete when the plan handling the failure is done.
  * @param[intention] the intention from which the event has been generated, if any.
+ * @param[cause] why the goal failed, if known.
  */
 data class GoalFailedEvent<G : Any, PlanResult>(
     override val goal: G,
     override val resultType: KType,
     override val completion: CompletableDeferred<PlanResult>? = null,
     override val intention: Intention? = null,
+    override val cause: Throwable? = null,
 ) : AgentEvent.Internal.Goal.Failed<G, PlanResult>
 
 /**

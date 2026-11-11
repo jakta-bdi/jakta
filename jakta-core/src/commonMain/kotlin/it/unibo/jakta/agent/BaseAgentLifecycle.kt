@@ -9,6 +9,7 @@ import it.unibo.jakta.event.GoalRemoveEvent
 import it.unibo.jakta.intention.IntentionDispatcher
 import it.unibo.jakta.plan.Option
 import it.unibo.jakta.plan.Plan
+import it.unibo.jakta.reflection.isSubtypeOfMultiPlatform
 import kotlin.coroutines.ContinuationInterceptor
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
@@ -108,10 +109,9 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
                 }
             },
             desiredResult = typeOf<Any?>(),
+            onNoPlan = { reason -> handleFailure(event, NoPlanException(reason)) },
         )?.let {
             launchPlan(event, it)
-        } ?: run {
-            handleFailure(event, Exception("No plan found for $event"))
         }
     }
 
@@ -134,10 +134,9 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
                 }
             },
             desiredResult = event.resultType,
+            onNoPlan = { reason -> handleFailure(event, NoPlanException(reason)) },
         )?.let {
             launchPlan(event, it, event.completion)
-        } ?: run {
-            handleFailure(event, Exception("No plan found for $event"))
         }
     }
 
@@ -181,6 +180,7 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
      * [it.unibo.jakta.plan.PlanSelection], as an [Option] carrying the context computed by its trigger and guard.
      * Each trigger is evaluated once and each guard at most once, all on the same snapshot of the beliefs:
      * the options are computed lazily, so a guard is only evaluated if the selection asks for that option.
+     * If no plan is selected, [onNoPlan] is called with the reason.
      */
     private fun <TriggerEntity : Any> selectPlan(
         event: AgentEvent.Internal,
@@ -188,21 +188,47 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
         entityMessage: String,
         planList: List<Plan<Belief, Goal, TriggerEntity, *, *>>,
         desiredResult: KType,
+        onNoPlan: (reason: String) -> Unit,
     ): Option<Belief, Goal, *, *, *>? {
         val relevant = planList.mapNotNull { it.relevantOption(entity, desiredResult) }
-
-        if (relevant.isEmpty()) {
-            log.w { "No relevant plans for $entityMessage: $entity" }
-            return null
-        }
-
-        val beliefs = executableAgent.state.beliefs
-        val options = relevant.asSequence().mapNotNull { it(beliefs) }.constrainOnce()
-        return executableAgent.planSelection.select(event, options)?.also {
-            log.d { "Selected plan ${it.plan} for $entityMessage: $entity" }
-        } ?: run {
-            log.w { "No plan selected for $entityMessage: $entity" }
+        val selected = if (relevant.isEmpty()) {
             null
+        } else {
+            val beliefs = executableAgent.state.beliefs
+            val options = relevant.asSequence().mapNotNull { it(beliefs) }.constrainOnce()
+            executableAgent.planSelection.select(event, options)
+        }
+        if (selected != null) {
+            log.d { "Selected plan ${selected.plan} for $entityMessage: $entity" }
+        } else {
+            val reason = (
+                if (relevant.isEmpty()) "No relevant plan" else "No plan selected among the relevant ones"
+                ) + " for $entityMessage: $entity" + rejectedForResultType(entity, planList, desiredResult)
+            log.w { reason }
+            onNoPlan(reason)
+        }
+        return selected
+    }
+
+    /**
+     * Explains which plans would have been relevant for [entity] but return a type
+     * that is not a subtype of [desiredResult], or returns an empty string if there are none.
+     * Only evaluated when no plan was found, so the triggers it evaluates again cost nothing in the common case.
+     */
+    private fun <TriggerEntity : Any> rejectedForResultType(
+        entity: TriggerEntity,
+        planList: List<Plan<Belief, Goal, TriggerEntity, *, *>>,
+        desiredResult: KType,
+    ): String {
+        val rejected = planList.filter {
+            !it.resultType.isSubtypeOfMultiPlatform(desiredResult) && it.trigger(entity) != null
+        }
+        return if (rejected.isEmpty()) {
+            ""
+        } else {
+            rejected.joinToString(prefix = ". Rejected for their result type: ", separator = "; ") {
+                "plan ${it.id} returns ${it.resultType}, not a subtype of $desiredResult"
+            } + ". A plan returning a subtype of $desiredResult can declare it with returns<$desiredResult>()"
         }
     }
 
@@ -229,13 +255,16 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
                         event.resultType,
                         event.completion,
                         event.intention,
+                        cause = e,
                     ),
                 )
             }
 
             is AgentEvent.Internal.Goal.Failed<*, *> -> {
                 log.d { "An error occurred when attempting to handle the failure of goal: $event.goal" }
-                event.completion?.completeExceptionally(e)
+                // Whoever pursued the goal gets why it failed in the first place, not why its failure was unhandled
+                val cause = event.cause?.also { if (it !== e) it.addSuppressed(e) } ?: e
+                event.completion?.completeExceptionally(cause)
             }
 
             else -> {
@@ -301,3 +330,9 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
         }
     }
 }
+
+/**
+ * Thrown when no plan is found for an event: no plan is relevant, or none is applicable or selected.
+ * The message explains why, including the plans rejected only because of their result type.
+ */
+class NoPlanException(message: String) : Exception(message)
