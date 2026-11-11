@@ -50,7 +50,14 @@ sealed interface AgentEvent {
             /**
              * Generated when the pursuit of a goal fails either intentionally or due to an error.
              */
-            interface Failed<G : Any, PlanResult> : Goal<G, PlanResult>
+            interface Failed<G : Any, PlanResult> : Goal<G, PlanResult> {
+                /**
+                 * Why the goal failed, if known: the exception thrown by its plan, or why no plan was found.
+                 * If no failure plan handles the failure, whoever pursued the goal gets this exception.
+                 */
+                val cause: Throwable?
+                    get() = null
+            }
         }
 
         /**

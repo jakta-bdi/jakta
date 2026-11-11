@@ -1,5 +1,6 @@
 package it.unibo.jakta.plan
 
+import it.unibo.jakta.InternalJaktaAPI
 import it.unibo.jakta.agent.MutableAgentState
 import it.unibo.jakta.reflection.isSubtypeOfMultiPlatform
 import kotlin.reflect.KType
@@ -12,6 +13,10 @@ import kotlin.reflect.typeOf
  * by checking the current beliefs of the agent.
  * Once triggered and applicable, the plan's body is executed
  * allowing the agent to perform actions in its environment to achieve the desired outcome.
+ *
+ * Plans are created with the DSL, which derives their [resultType] from the type their body returns:
+ * implementing the plan interfaces by hand requires opting in to [InternalJaktaAPI],
+ * since a [resultType] that does not match the body would break the type safety of `achieveWithResult`.
  */
 sealed interface Plan<Belief : Any, Goal : Any, TriggerEntity : Any, Context : Any, PlanResult> {
     /**
@@ -120,11 +125,13 @@ sealed interface Plan<Belief : Any, Goal : Any, TriggerEntity : Any, Context : A
         /**
          * Plans that are triggered by the addition of a belief.
          */
+        @SubclassOptInRequired(InternalJaktaAPI::class)
         interface Addition<B : Any, G : Any, Context : Any, PlanResult> : Belief<B, G, Context, PlanResult>
 
         /**
          * Plans that are triggered by the removal of a belief.
          */
+        @SubclassOptInRequired(InternalJaktaAPI::class)
         interface Removal<B : Any, G : Any, Context : Any, PlanResult> : Belief<B, G, Context, PlanResult>
     }
 
@@ -136,16 +143,19 @@ sealed interface Plan<Belief : Any, Goal : Any, TriggerEntity : Any, Context : A
         /**
          * Plans that are triggered by the addition of a goal.
          */
+        @SubclassOptInRequired(InternalJaktaAPI::class)
         interface Addition<B : Any, G : Any, Context : Any, PlanResult> : Goal<B, G, Context, PlanResult>
 
         /**
          * Plans that are triggered by the removal of a goal.
          */
+        @SubclassOptInRequired(InternalJaktaAPI::class)
         interface Removal<B : Any, G : Any, Context : Any, PlanResult> : Goal<B, G, Context, PlanResult>
 
         /**
          * Plans that are triggered by the failure of a goal.
          */
+        @SubclassOptInRequired(InternalJaktaAPI::class)
         interface Failure<B : Any, G : Any, Context : Any, PlanResult> : Goal<B, G, Context, PlanResult>
     }
 }

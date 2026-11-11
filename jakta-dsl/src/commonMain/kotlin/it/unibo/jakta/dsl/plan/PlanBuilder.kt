@@ -60,6 +60,13 @@ interface PlanBuilder<B : Any, G : Any, Context : Any> {
          * Builder interface for defining plans triggered by additions of goals.
          */
         interface Goal<B : Any, G : Any, Context : Any> : Addition<B, G, Context> {
+            /**
+             * Declares the result type [R] of the goal addition plan, instead of inferring it from the last expression
+             * of its body: use it to widen the result type, e.g. `returns<Result>()` for a body ending with `Ok(x)`.
+             * The body passed to `triggers` must then return an [R]. Call it after the guard, before `triggers`.
+             */
+            fun <R> returns(): Returning<Addition.Goal<B, G, Context>, R> = Returning(this)
+
 
             /**
              * Adds a guard condition to the plan that must be satisfied for the plan to trigger.
@@ -125,6 +132,13 @@ interface PlanBuilder<B : Any, G : Any, Context : Any> {
          */
         interface Goal<B : Any, G : Any, Context : Any> : Removal<B, G, Context> {
             /**
+             * Declares the result type [R] of the goal removal plan, instead of inferring it from the last expression
+             * of its body: use it to widen the result type, e.g. `returns<Result>()` for a body ending with `Ok(x)`.
+             * The body passed to `triggers` must then return an [R]. Call it after the guard, before `triggers`.
+             */
+            fun <R> returns(): Returning<Removal.Goal<B, G, Context>, R> = Returning(this)
+
+            /**
              * Adds a guard condition to the plan that must be satisfied for the plan to trigger.
              * @param guard a function that takes the context and returns a modified context or null to block the plan
              * @return the updated plan builder with the guard applied
@@ -157,6 +171,13 @@ interface PlanBuilder<B : Any, G : Any, Context : Any> {
          * Builder interface for defining plans triggered by goal failure interceptions.
          */
         interface Goal<B : Any, G : Any, Context : Any> : FailureInterception<B, G, Context> {
+            /**
+             * Declares the result type [R] of the goal failure interception plan, instead of inferring it from the last expression
+             * of its body: use it to widen the result type, e.g. `returns<Result>()` for a body ending with `Ok(x)`.
+             * The body passed to `triggers` must then return an [R]. Call it after the guard, before `triggers`.
+             */
+            fun <R> returns(): Returning<FailureInterception.Goal<B, G, Context>, R> = Returning(this)
+
             /**
              * Adds a guard condition to the plan that must be satisfied for the plan to trigger.
              * @param guard a function that takes the context and returns a modified context or null to block the plan

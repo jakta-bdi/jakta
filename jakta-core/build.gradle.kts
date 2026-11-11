@@ -17,10 +17,6 @@ kotlinMultiplatform {
             implementation(kotlin("test"))
             implementation(libs.kotlinx.coroutines.test)
         }
-
-        jvmMain.dependencies {
-            implementation(libs.kotlin.reflect)
-        }
     }
 
     tasks.withType<Cpd> {

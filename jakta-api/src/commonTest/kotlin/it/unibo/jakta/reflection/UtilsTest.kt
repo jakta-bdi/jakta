@@ -81,4 +81,22 @@ class UtilsTest {
     fun `unrelated collection interfaces are not related`() {
         assertFalse(typeOf<Set<Int>>().isSubtypeOfWithoutFullReflection(typeOf<List<Int>>()))
     }
+
+    private sealed interface Outcome
+
+    private data class Success(val value: Int) : Outcome
+
+    @Test
+    fun `user-defined subtypes are not recognised, on every platform`() {
+        // The same answer on the JVM, in JS and natively: plan selection must not depend on the platform.
+        assertFalse(typeOf<Success>().isSubtypeOfMultiPlatform(typeOf<Outcome>()))
+    }
+
+    @Test
+    fun `user-defined types still match themselves, their nullable version and Any`() {
+        assertTrue(typeOf<Success>().isSubtypeOfMultiPlatform(typeOf<Success>()))
+        assertTrue(typeOf<Success>().isSubtypeOfMultiPlatform(typeOf<Success?>()))
+        assertTrue(typeOf<Success>().isSubtypeOfMultiPlatform(typeOf<Any>()))
+        assertTrue(typeOf<Success?>().isSubtypeOfMultiPlatform(typeOf<Any?>()))
+    }
 }

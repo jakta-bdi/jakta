@@ -140,6 +140,26 @@ the event is just logged.
 and the context is also available as a Kotlin context parameter. The value of its last expression is the
 **result** of the plan, returned to whoever pursued the goal with `achieveWithResult`.
 
+### Result type
+
+The **result type** of a goal plan is the type of its body's last expression, inferred by the compiler.
+`achieveWithResult<R>` only selects plans whose result type is a subtype of `R`, and `achieve`, which discards
+the result, accepts any plan. The subtype check is the same on every platform: it recognises exact types, `Any`,
+nullability, `Nothing` and the standard library hierarchies (`Int` is a `Number`, `MutableList<T>` is a
+`List<T>`), but **not the supertypes of your own classes**.
+
+When the inferred type is narrower than intended, declare it with `returns<R>()`, after the guard and before
+`triggers`. The compiler then checks the body against it:
+
+```kotlin
+adding.goal { this as? Brew }.returns<Outcome>() triggers {   // without it, the result type would be Ok
+    Ok(cup)
+}
+```
+
+`returns<R>()` is available on goal addition, removal and failure plans. If a goal finds no plan only because of
+the result types, it fails with a `NoPlanException` naming the rejected plans.
+
 | Member | Meaning |
 |---|---|
 | `agent: MutableAgentState<B, G>` | The agent's state, see below. |

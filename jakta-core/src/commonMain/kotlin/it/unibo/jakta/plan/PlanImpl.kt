@@ -1,9 +1,12 @@
 package it.unibo.jakta.plan
 
+import it.unibo.jakta.InternalJaktaAPI
 import kotlin.reflect.KType
 
 /**
  * Base class of the plan implementations: a plan is identified by its [id], not by its lambdas.
+ * Plans are created through the DSL, never by hand: their constructors are internal,
+ * so that their `resultType` is always the type their body returns.
  * Two plans are equal when they are of the same kind and have the same [id],
  * and a plan is printed as its kind and its [id].
  */
@@ -24,7 +27,9 @@ abstract class AbstractPlan {
 /**
  * Implementation of Plan for belief additions.
  */
-data class BeliefAdditionPlan<Belief : Any, Goal : Any, Context : Any, PlanResult>(
+@OptIn(InternalJaktaAPI::class)
+@ConsistentCopyVisibility
+data class BeliefAdditionPlan<Belief : Any, Goal : Any, Context : Any, PlanResult> internal constructor(
     override val trigger: (Belief) -> Context?,
     override val guard: GuardScope<Belief, Context>.() -> Context?,
     override val body: suspend context(Context)
@@ -38,7 +43,9 @@ data class BeliefAdditionPlan<Belief : Any, Goal : Any, Context : Any, PlanResul
 /**
  * Implementation of Plan for belief removals.
  */
-data class BeliefRemovalPlan<Belief : Any, Goal : Any, Context : Any, PlanResult>(
+@OptIn(InternalJaktaAPI::class)
+@ConsistentCopyVisibility
+data class BeliefRemovalPlan<Belief : Any, Goal : Any, Context : Any, PlanResult> internal constructor(
     override val trigger: (Belief) -> Context?,
     override val guard: GuardScope<Belief, Context>.() -> Context?,
     override val body: suspend context(Context)
@@ -52,7 +59,9 @@ data class BeliefRemovalPlan<Belief : Any, Goal : Any, Context : Any, PlanResult
 /**
  * Implementation of Plan for goal additions.
  */
-data class GoalAdditionPlan<Belief : Any, Goal : Any, Context : Any, PlanResult>(
+@OptIn(InternalJaktaAPI::class)
+@ConsistentCopyVisibility
+data class GoalAdditionPlan<Belief : Any, Goal : Any, Context : Any, PlanResult> internal constructor(
     override val trigger: (Goal) -> Context?,
     override val guard: GuardScope<Belief, Context>.() -> Context?,
     override val body: suspend context(Context)
@@ -66,7 +75,9 @@ data class GoalAdditionPlan<Belief : Any, Goal : Any, Context : Any, PlanResult>
 /**
  * Implementation of Plan for goal removals.
  */
-data class GoalRemovalPlan<Belief : Any, Goal : Any, Context : Any, PlanResult>(
+@OptIn(InternalJaktaAPI::class)
+@ConsistentCopyVisibility
+data class GoalRemovalPlan<Belief : Any, Goal : Any, Context : Any, PlanResult> internal constructor(
     override val trigger: (Goal) -> Context?,
     override val guard: GuardScope<Belief, Context>.() -> Context?,
     override val body: suspend context(Context)
@@ -80,7 +91,9 @@ data class GoalRemovalPlan<Belief : Any, Goal : Any, Context : Any, PlanResult>(
 /**
  * Implementation of Plan for goal failures.
  */
-data class GoalFailurePlan<Belief : Any, Goal : Any, Context : Any, PlanResult>(
+@OptIn(InternalJaktaAPI::class)
+@ConsistentCopyVisibility
+data class GoalFailurePlan<Belief : Any, Goal : Any, Context : Any, PlanResult> internal constructor(
     override val trigger: (Goal) -> Context?,
     override val guard: GuardScope<Belief, Context>.() -> Context?,
     override val body: suspend context(Context)
