@@ -64,13 +64,8 @@ val filterQuery = newContextBeliefQuery { "on"(X, Y) }
 /**
  * Handles the perception of the Blocks World state and updates the agent's beliefs accordingly.
  */
-fun handleBlocksWorldPerceptions(
-    event: BlocksWorldPerception,
-    previousBeliefs: Collection<PrologBelief>,
-): AgentUpdate<*> = AgentUpdate.Belief(
-    event.state.toPrologFacts(),
-    previousBeliefs.filter { it.matchBelief(filterQuery) != null }.toSet(),
-)
+fun handleBlocksWorldPerceptions(event: BlocksWorldPerception): AgentUpdate<*> =
+    AgentUpdate.Replace.where(event.state.toPrologFacts().toList()) { it.matchBelief(filterQuery) != null }
 
 /**
  * Converts a list of stacks of blocks into a set of Prolog beliefs representing

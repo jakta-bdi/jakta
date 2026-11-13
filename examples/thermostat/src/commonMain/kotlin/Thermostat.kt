@@ -36,7 +36,7 @@ fun thermostat() = agent<RoomBelief, String, Any>(BaseAgentID("thermostat")) {
         when (perception) {
             is RoomReading -> {
                 val belief = RoomBelief(perception.temperature.roundedToTenths(), perception.target, perception.mode)
-                if (belief in beliefs) null else AgentUpdate.Belief(setOf(belief), beliefs.toSet())
+                AgentUpdate.Replace.where(listOf(belief)) { true }
             }
 
             else -> null

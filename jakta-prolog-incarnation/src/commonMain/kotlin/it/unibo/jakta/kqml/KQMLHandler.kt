@@ -1,5 +1,6 @@
 package it.unibo.jakta.kqml
 
+import it.unibo.jakta.addAnnotations
 import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.agent.AgentState
 import it.unibo.jakta.dsl.belief.PrologBelief
@@ -8,12 +9,9 @@ import it.unibo.jakta.dsl.goal.PrologGoal
 import it.unibo.jakta.dsl.goal.replyAllTo
 import it.unibo.jakta.dsl.goal.replyOne
 import it.unibo.jakta.event.AgentUpdate
-import it.unibo.jakta.event.AgentUpdate.Belief
-import it.unibo.jakta.event.AgentUpdate.Goal
 import it.unibo.jakta.logic.JaktaLogicProgrammingScope
+import it.unibo.jakta.setAnnotations
 import it.unibo.jakta.source
-import it.unibo.jakta.tag
-import it.unibo.tuprolog.core.Fact
 import it.unibo.tuprolog.core.toAtom
 
 /**
@@ -24,39 +22,40 @@ import it.unibo.tuprolog.core.toAtom
 fun AgentState<PrologBelief, PrologGoal>.handleKQMLPayload(payload: KQMLPayload, sender: AgentID): AgentUpdate<*> =
     when (payload) {
         is Tell -> {
-            val beliefs = payload.beliefs.map { Fact.of(it.head.tag(source(sender))) }.toSet()
-            Belief(beliefs)
+            val beliefs = payload.beliefs.map { it.addAnnotations(source(sender)) }
+            AgentUpdate.Believe(beliefs)
         }
 
+        // Of the beliefs matching the query, with the sender among their sources, only the sender's source is in scope:
+        // with annotated beliefs, what others told stays.
         is Untell -> {
-            val query = payload.beliefQuery.tag(source(sender))
-            val toRemove = beliefs.filter {
-                it.matchBelief(query) != null
-            }.toSet()
-            Belief(emptySet(), toRemove)
+            val query = payload.beliefQuery.addAnnotations(source(sender))
+            AgentUpdate.Replace<PrologBelief>(emptyList()) { belief ->
+                belief.setAnnotations(setOf(source(sender))).takeIf { belief.matchBelief(query) != null }
+            }
         }
 
         is Achieve -> {
-            val goal = payload.goal.tag(source(sender))
-            Goal(setOf(goal))
+            val goal = payload.goal.addAnnotations(source(sender))
+            AgentUpdate.Adopt(goal)
         }
 
         is Unachieve -> {
-            val goal = payload.goalQuery.tag(source(sender))
-            Goal(emptySet(), setOf(goal))
+            val goal = payload.goalQuery.addAnnotations(source(sender))
+            AgentUpdate.Drop(goal)
         }
 
         is AskAll -> {
             val query = payload.query
             val id = payload.id.toString().toAtom()
-            val goal = JaktaLogicProgrammingScope().replyAllTo(query, id).tag(source(sender))
-            Goal(setOf(goal))
+            val goal = JaktaLogicProgrammingScope().replyAllTo(query, id).addAnnotations(source(sender))
+            AgentUpdate.Adopt(goal)
         }
 
         is AskOne -> {
             val query = payload.query
             val id = payload.id.toString().toAtom()
-            val goal = JaktaLogicProgrammingScope().replyOne(query, id).tag(source(sender))
-            Goal(setOf(goal))
+            val goal = JaktaLogicProgrammingScope().replyOne(query, id).addAnnotations(source(sender))
+            AgentUpdate.Adopt(goal)
         }
     }
