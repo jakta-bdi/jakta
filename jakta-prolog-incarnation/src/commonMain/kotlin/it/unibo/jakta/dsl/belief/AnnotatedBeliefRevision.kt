@@ -1,11 +1,14 @@
 package it.unibo.jakta.dsl.belief
 
+import it.unibo.jakta.annotations
 import it.unibo.jakta.belief.BeliefRevision
 import it.unibo.jakta.belief.BeliefRevision.Revision
 import it.unibo.jakta.dsl.agent.AgentBuilder
-import it.unibo.jakta.effectiveAnnotations
 import it.unibo.jakta.isSource
+import it.unibo.jakta.self
 import it.unibo.jakta.setAnnotations
+import it.unibo.jakta.source
+import it.unibo.tuprolog.core.Struct
 
 /**
  * Belief revision with Jason's annotation semantics: a belief is identified by its term, and its annotations
@@ -31,24 +34,27 @@ object AnnotatedBeliefRevision : BeliefRevision<PrologBelief> {
     // ponytail: linear lookup of the held belief, fine for belief bases of a few hundred beliefs
     private fun Collection<PrologBelief>.held(belief: PrologBelief) = firstOrNull { it == belief }
 
+    // what the revision is given without a source is the agent's own; what it holds always has a source
+    private fun Set<Struct>.withImplicitSelf(): Set<Struct> = if (none { it.isSource }) this + source(self) else this
+
     override fun add(current: Collection<PrologBelief>, toAdd: PrologBelief): Revision<PrologBelief> {
         val held = current.held(toAdd)
-            ?: return super.add(current, toAdd.setAnnotations(*toAdd.effectiveAnnotations.toTypedArray()))
-        val newAnnotations = toAdd.effectiveAnnotations - held.effectiveAnnotations
+            ?: return super.add(current, toAdd.setAnnotations(toAdd.annotations.withImplicitSelf()))
+        val newAnnotations = toAdd.annotations.withImplicitSelf() - held.annotations
         return when {
             newAnnotations.isEmpty() -> Revision()
 
             else -> Revision(
-                add = listOf(held.setAnnotations(*(held.effectiveAnnotations + newAnnotations).toTypedArray())),
-                announceAdded = listOf(toAdd.setAnnotations(*newAnnotations.toTypedArray())),
+                add = listOf(held.setAnnotations(held.annotations + newAnnotations)),
+                announceAdded = listOf(toAdd.setAnnotations(newAnnotations)),
             )
         }
     }
 
     override fun remove(current: Collection<PrologBelief>, toRemove: PrologBelief): Revision<PrologBelief> {
         val held = current.held(toRemove) ?: return Revision()
-        val removedAnnotations = held.effectiveAnnotations intersect toRemove.effectiveAnnotations
-        val keptAnnotations = held.effectiveAnnotations - removedAnnotations
+        val removedAnnotations = held.annotations intersect toRemove.annotations.withImplicitSelf()
+        val keptAnnotations = held.annotations - removedAnnotations
         return when {
             removedAnnotations.isEmpty() -> Revision()
 
@@ -56,8 +62,8 @@ object AnnotatedBeliefRevision : BeliefRevision<PrologBelief> {
             keptAnnotations.none { it.isSource } -> Revision(remove = listOf(held), announceRemoved = listOf(held))
 
             else -> Revision(
-                add = listOf(held.setAnnotations(*keptAnnotations.toTypedArray())),
-                announceRemoved = listOf(toRemove.setAnnotations(*removedAnnotations.toTypedArray())),
+                add = listOf(held.setAnnotations(keptAnnotations)),
+                announceRemoved = listOf(toRemove.setAnnotations(removedAnnotations)),
             )
         }
     }
@@ -69,15 +75,15 @@ object AnnotatedBeliefRevision : BeliefRevision<PrologBelief> {
     ): Revision<PrologBelief> {
         // one replacement per term, with all its annotations
         val wanted = replacements.groupBy { it }.map { (belief, same) ->
-            belief.setAnnotations(*same.flatMap { it.effectiveAnnotations }.toTypedArray())
+            belief.setAnnotations(same.flatMap { it.annotations.withImplicitSelf() }.toSet())
         }
         // the annotations the scope removes from each belief held, except those the replacements keep
         val outdated = current.mapNotNull { held ->
             val inScope = scope(held) ?: return@mapNotNull null
-            val wantedAnnotations = wanted.held(held)?.effectiveAnnotations.orEmpty()
-            val inScopeAnnotations = held.effectiveAnnotations intersect inScope.effectiveAnnotations
+            val wantedAnnotations = wanted.held(held)?.annotations.orEmpty()
+            val inScopeAnnotations = held.annotations intersect inScope.annotations.withImplicitSelf()
             val outdatedAnnotations = inScopeAnnotations - wantedAnnotations
-            outdatedAnnotations.takeIf { it.isNotEmpty() }?.let { held.setAnnotations(*it.toTypedArray()) }
+            outdatedAnnotations.takeIf { it.isNotEmpty() }?.let { held.setAnnotations(it) }
         }
         // removals first, then additions, each applied to the beliefs as revised so far
         var revised = current.toList()

@@ -31,7 +31,7 @@ fun AgentState<PrologBelief, PrologGoal>.handleKQMLPayload(payload: KQMLPayload,
         is Untell -> {
             val query = payload.beliefQuery.addAnnotations(source(sender))
             AgentUpdate.Replace<PrologBelief>(emptyList()) { belief ->
-                belief.setAnnotations(source(sender)).takeIf { belief.matchBelief(query) != null }
+                belief.setAnnotations(setOf(source(sender))).takeIf { belief.matchBelief(query) != null }
             }
         }
 

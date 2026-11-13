@@ -3,7 +3,6 @@ package it.unibo.jakta.dsl.belief
 import it.unibo.jakta.addAnnotations
 import it.unibo.jakta.agent.MutableAgentState
 import it.unibo.jakta.annotations
-import it.unibo.jakta.effectiveAnnotations
 import it.unibo.jakta.event.AgentUpdate
 import it.unibo.jakta.isSource
 import it.unibo.jakta.removeAllAnnotations
@@ -18,8 +17,10 @@ import it.unibo.tuprolog.unify.Unificator
 /**
  * What [from] contributed to the beliefs matching any of [queries] is now [beliefs], attributed to [from]; what other
  * sources contributed stays. The queries must not have annotations. In a perception handler,
- * `replaceFrom(self, queries, beliefs)` updates what the agent perceives as its own beliefs, while
- * `replaceFrom(percept, queries, beliefs)` marks it with `source(percept)`.
+ * `replaceFrom(percept, queries, beliefs)` updates what the agent perceives, marked with `source(percept)`.
+ *
+ * It needs [AnnotatedBeliefRevision] (`usesAnnotatedBeliefs()`), which keeps the sources it reads: an agent that needs
+ * no annotations replaces its beliefs with `AgentUpdate.Replace.where`.
  */
 fun replaceFrom(
     from: Term,
@@ -34,7 +35,7 @@ fun replaceFrom(
     // of a belief matching a query, only what [from] contributed is in scope
     return AgentUpdate.Replace(beliefs.map { it.addAnnotations(annotation) }) { belief ->
         val inScope = scope.any { query -> belief.matchBelief(query) != null }
-        belief.setAnnotations(annotation).takeIf { inScope }
+        belief.setAnnotations(setOf(annotation)).takeIf { inScope }
     }
 }
 
@@ -68,8 +69,10 @@ fun MutableAgentState<PrologBelief, *>.forgetAllMatching(beliefQuery: Struct) = 
 
         else -> {
             val patterns = beliefQuery.annotations.map { it.apply(termMatch.substitution) }
-            val matched = belief.effectiveAnnotations.filter { patterns.any { pattern -> pattern.matches(it) } }
-            belief.setAnnotations(*matched.toTypedArray())
+            val matched = belief.annotations.filter {
+                patterns.any { pattern -> pattern.matches(it) }
+            }
+            belief.setAnnotations(matched.toSet())
         }
     }
 }
@@ -77,11 +80,12 @@ fun MutableAgentState<PrologBelief, *>.forgetAllMatching(beliefQuery: Struct) = 
 private fun Term.matches(annotation: Struct) = Unificator.default.match(this, annotation)
 
 /**
- * The sources of the beliefs matching [beliefQuery]: the agents that told them, and `self` for the agent's own.
+ * The sources of the beliefs matching [beliefQuery]: the agents that told them, and `self` for the agent's own, as
+ * [AnnotatedBeliefRevision] stores them.
  * Unlike a `[source(S)]` pattern, which binds `S` to a single source, it collects them all.
  */
 fun Collection<PrologBelief>.sourcesOf(beliefQuery: Struct): Set<Term> = filter { it.matchBelief(beliefQuery) != null }
-    .flatMap { it.effectiveAnnotations }
+    .flatMap { it.annotations }
     .filter { it.isSource }
     .map { it[0] }
     .toSet()

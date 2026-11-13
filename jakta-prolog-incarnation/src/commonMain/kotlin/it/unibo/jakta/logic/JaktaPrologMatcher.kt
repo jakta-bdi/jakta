@@ -1,9 +1,6 @@
 package it.unibo.jakta.logic
 
 import it.unibo.jakta.annotations
-import it.unibo.jakta.effectiveAnnotations
-import it.unibo.jakta.self
-import it.unibo.jakta.source
 import it.unibo.tuprolog.core.Clause
 import it.unibo.tuprolog.core.Rule
 import it.unibo.tuprolog.core.Struct
@@ -54,8 +51,8 @@ private val annotationUnificator = object : AbstractUnificator() {
         initialResult: Substitution,
         occurCheckEnabled: Boolean,
     ): Substitution {
-        // data without annotations is the agent's own; a query without annotations matches any
-        val factAnnotations = fact.effectiveAnnotations.toMutableList()
+        // a query without annotations matches any
+        val factAnnotations = fact.annotations.toMutableList()
         val queryAnnotations = query.annotations.toMutableList()
 
         val result = when {

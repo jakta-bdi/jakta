@@ -1,7 +1,6 @@
 package it.unibo.jakta
 
 import it.unibo.jakta.agent.AgentID
-import it.unibo.jakta.dsl.belief.PrologBelief
 import it.unibo.tuprolog.core.Atom
 import it.unibo.tuprolog.core.Fact
 import it.unibo.tuprolog.core.Rule
@@ -43,12 +42,11 @@ val percept = Atom.of("percept")
 /*
  * Annotations, as Jason's `p(1)[source(alice)]`, are metadata of a term: equal terms with different annotations are
  * equal. The functions below read and change them on any term (a belief, a query, a goal); on a belief, a [Rule] or a
- * [Fact], they act on its head.
+ * [Fact], they act on its head. Matching reads them as written: a query without annotations matches any, and one with
+ * annotations matches the beliefs that have them.
  *
- * A belief without a source counts as the agent's own, `source(self)`, besides any other annotation: matching treats it
- * so, and the annotated belief revision stores it so, e.g. `p(1)[certain]` as `p(1)[certain, source(self)]`. Sources
- * other than an agent, such as `source(percept)` for what the agent perceives, are up to the perception handler, which
- * annotates the beliefs it produces.
+ * What annotations mean, e.g. that a belief without a source is the agent's own, is up to the belief revision: see
+ * `AnnotatedBeliefRevision`. Without it, beliefs are a plain set and keep the annotations they are written with.
  */
 
 /**
@@ -61,24 +59,18 @@ val Term.annotations: Set<Struct>
  * This term with [annotations] added to those it has: `p(1)[source(alice)]` with `certain` added is
  * `p(1)[certain, source(alice)]`. In the DSL, `p(1)[certain]` does the same.
  */
-fun <T : Term> T.addAnnotations(vararg annotations: Struct): T = withAnnotations(setOf(*annotations) + this.annotations)
+fun <T : Term> T.addAnnotations(vararg annotations: Struct): T = setAnnotations(setOf(*annotations) + this.annotations)
 
 /**
  * This term without [annotations]: `p(1)[certain, source(alice)]` without `source(alice)` is `p(1)[certain]`.
  */
 fun <T : Term> T.removeAnnotations(vararg annotations: Struct): T =
-    withAnnotations(this.annotations - setOf(*annotations))
+    setAnnotations(this.annotations - setOf(*annotations))
 
 /**
  * This term without any annotation: `p(1)[certain, source(alice)]` becomes `p(1)`.
  */
-fun <T : Term> T.removeAllAnnotations(): T = withAnnotations(emptySet())
-
-/**
- * This term with exactly [annotations], replacing those it has: `p(1)[certain, source(alice)]` with only
- * `source(alice)` is `p(1)[source(alice)]`. A replacement scope uses it to say which annotations of a belief it means.
- */
-fun <T : Term> T.setAnnotations(vararg annotations: Struct): T = withAnnotations(setOf(*annotations))
+fun <T : Term> T.removeAllAnnotations(): T = setAnnotations(emptySet())
 
 /**
  * Annotates a term with the operator syntax `p(1)[annotation, ...]`, as [addAnnotations].
@@ -86,8 +78,13 @@ fun <T : Term> T.setAnnotations(vararg annotations: Struct): T = withAnnotations
 operator fun <T : Term> T.get(annotation: Struct, vararg otherAnnotations: Struct): T =
     addAnnotations(annotation, *otherAnnotations)
 
-// tuProlog's setTag returns a Term, and a belief is rebuilt from its head: both stay of the receiver's own type
-private fun <T : Term> T.withAnnotations(annotations: Set<Struct>): T {
+/**
+ * This term with exactly [annotations], replacing those it has: `p(1)[certain, source(alice)]` with only
+ * `setOf(source(alice))` is `p(1)[source(alice)]`. A replacement scope uses it to say which annotations of a belief it
+ * means.
+ */
+fun <T : Term> T.setAnnotations(annotations: Set<Struct>): T {
+    // tuProlog's setTag returns a Term, and a belief is rebuilt from its head: both stay of the receiver's own type
     @Suppress("UNCHECKED_CAST")
     return when (this) {
         is Rule -> {
@@ -104,9 +101,3 @@ private fun <T : Term> T.withAnnotations(annotations: Set<Struct>): T {
  */
 internal val Struct.isSource: Boolean
     get() = functor == "source" && arity == 1
-
-/**
- * The annotations of this term, where a term without a source is the agent's own: `source(self)` is added.
- */
-internal val Term.effectiveAnnotations: Set<Struct>
-    get() = annotations.let { if (it.none { annotation -> annotation.isSource }) it + source(self) else it }

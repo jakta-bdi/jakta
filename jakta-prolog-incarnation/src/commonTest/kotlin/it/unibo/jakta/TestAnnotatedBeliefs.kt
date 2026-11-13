@@ -260,7 +260,7 @@ class TestAnnotatedBeliefs {
         val certainFromAlice = initialBelief { "ping"(1)[atomOf("certain"), source("alice")] }
         val query = newContextBeliefQuery { "ping"(X)[atomOf("certain"), source("alice")] }
         val untell = AgentUpdate.Replace<PrologBelief>(emptyList()) { belief ->
-            belief.setAnnotations(source("alice")).takeIf { belief.matchBelief(query) != null }
+            belief.setAnnotations(setOf(source("alice"))).takeIf { belief.matchBelief(query) != null }
         }
         val (held, events) = replaced(untell, certainFromAlice, fromCarol)
         assertEquals(listOf("ping(1)" to setOf("certain".toAtom()) + sources("carol")), held)
@@ -273,22 +273,6 @@ class TestAnnotatedBeliefs {
         val (held, events) = replaced(all, ping, fromAlice, fromCarol)
         assertEquals(emptyList(), held)
         assertEquals(listOf(sources("self", "alice", "carol")), events.map { it.second })
-    }
-
-    @Test
-    fun `without annotated beliefs, a perception replaces the agent's own beliefs only`() {
-        val beliefBase = BeliefBaseFactory.of<PrologBelief>(
-            UnlimitedChannelQueue(),
-            listOf(
-                ping,
-                initialBelief {
-                    "ping"(2)[source("alice")]
-                },
-            ),
-        )
-        val replace = replaceFrom(self, listOf(pingQuery), listOf(initialBelief { "ping"(3) }))
-        beliefBase.replace(replace.replacements, replace.scope)
-        assertEquals(setOf("ping(2)", "ping(3)"), beliefBase.snapshot().map { it.head.toString() }.toSet())
     }
 
     private val alice: AgentID = BaseAgentID("alice")
