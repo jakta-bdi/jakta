@@ -2,7 +2,7 @@ import de.aaschmid.gradle.plugins.cpd.Cpd
 
 apply(plugin = rootProject.libs.plugins.kotlin.multiplatform.id)
 
-configureKotlinMultiplatform(includeNative = false)
+configureKotlinMultiplatform(includeNative = false, publishNpm = true)
 
 kotlinMultiplatform {
     sourceSets {
