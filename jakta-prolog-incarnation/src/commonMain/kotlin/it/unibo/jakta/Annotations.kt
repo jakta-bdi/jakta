@@ -47,6 +47,11 @@ val percept = Atom.of("percept")
  *
  * What annotations mean, e.g. that a belief without a source is the agent's own, is up to the belief revision: see
  * `AnnotatedBeliefRevision`. Without it, beliefs are a plain set and keep the annotations they are written with.
+ *
+ * Goals go through no revision, so the agent's own goals have no source, while those other agents delegated have
+ * `source(sender)`: with annotated beliefs, `[source(S)]` matches the agent's own beliefs (`S = self`) but only
+ * delegated goals. Stamping sources where beliefs and goals enter the agent, for both alike, is left to incarnation
+ * hooks in the core (#1038).
  */
 
 /**
