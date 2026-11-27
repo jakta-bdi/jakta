@@ -22,6 +22,7 @@ import it.unibo.jakta.dsl.goal.matchingGoal
 import it.unibo.jakta.dsl.mas
 import it.unibo.jakta.dsl.node
 import it.unibo.jakta.dsl.node.NodeBuilders
+import it.unibo.jakta.dsl.plan.satisfies
 import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.dsl.plans
 import it.unibo.jakta.event.AgentEvent
@@ -39,6 +40,7 @@ import it.unibo.jakta.node.ExecutableNode
 import it.unibo.jakta.node.SharedMemoryNetwork
 import it.unibo.jakta.skills.MessagingSkill
 import it.unibo.tuprolog.core.Struct
+import it.unibo.tuprolog.core.Term
 import it.unibo.tuprolog.core.toAtom
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -468,6 +470,54 @@ class TestAnnotatedBeliefs {
             listOf("ping(1, 2)" to sources("self"), "ping(2)" to sources("carol"), "ping(3)" to sources("self")),
             left.map { it.head.toString() to it.annotations }.sortedBy { it.first },
         )
+    }
+
+    @Test
+    fun `a guard backtracks over the sources of a belief told by two agents`() = runTest {
+        var trustedRefuser: Term? = null
+
+        fun refuser(id: AgentID, wait: Int) = node(NodeBuilders.baseNode()) {
+            context(MessagingSkill(node)) {
+                agent(id) {
+                    embodiedAs { Any() }
+                    hasInitialGoals { !initialGoal { start } }
+                    hasPlanLibrary {
+                        prologPlan {
+                            adding.goal { matchingGoal { start } } triggers {
+                                delay(wait.seconds)
+                                agent.tellTo(alice, initialBelief { "refuse"(3) })
+                                node.terminateNode()
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        val manager = node(NodeBuilders.baseNode()) {
+            agent(alice) {
+                embodiedAs { Any() }
+                usesAnnotatedBeliefs()
+                believes { +initialBelief { "trusted"(carol.toString().toAtom()) } }
+                handlesMessageEvents { message ->
+                    (message.payload as? KQMLPayload)?.let { handleKQMLPayload(it, message.sender) }
+                }
+                hasPlanLibrary {
+                    prologPlan {
+                        adding.belief { matchingBelief { "refuse"(3) } } onlyWhen {
+                            // refuse(3)[source(bob), source(carol)]: a greedy match takes bob, who is not trusted
+                            satisfies { "refuse"(3)[source(S)] and "trusted"(S) }
+                        } triggers {
+                            trustedRefuser = context.substitution[S]
+                            node.terminateNode()
+                        }
+                    }
+                }
+            }
+        }
+
+        run(refuser(bob, wait = 1), refuser(carol, wait = 2), manager)
+        assertEquals(carol.toString().toAtom(), trustedRefuser)
     }
 
     private fun AgentID.displayName() = when (this) {
