@@ -13,8 +13,7 @@ import kotlinx.coroutines.runBlocking
 
 private val workerID = BaseAgentID("Worker")
 
-private val worker = agent<String, String, Any>(workerID) {
-    embodiedAs { Any() }
+private val worker = agent<String, String>(workerID) {
     hasInitialGoals { !"work" }
     hasPlanLibrary {
         adding.goal {
@@ -27,8 +26,7 @@ private val worker = agent<String, String, Any>(workerID) {
     }
 }
 
-private val quitter = agent<String, String, Any>(BaseAgentID("Quitter")) {
-    embodiedAs { Any() }
+private val quitter = agent<String, String>(BaseAgentID("Quitter")) {
     hasInitialGoals { !"quit" }
     hasPlanLibrary {
         adding.goal {
@@ -49,7 +47,6 @@ fun main(): Unit = runBlocking {
         node {
             withAgents(quitter)
             agent<String, String>(BaseAgentID("Manager")) {
-                embodiedAs { Any() }
                 hasInitialGoals { !"manage" }
                 hasPlanLibrary {
                     adding.goal {

@@ -30,8 +30,7 @@ private fun Double.roundedToTenths() = (this * 10).roundToInt() / 10.0
  * its node provides.
  */
 context(hvac: Hvac)
-fun thermostat() = agent<RoomBelief, String, Any>(BaseAgentID("thermostat")) {
-    embodiedAs { Any() }
+fun thermostat() = agent<RoomBelief, String>(BaseAgentID("thermostat")) {
     handlesPerceptionEvents { perception ->
         when (perception) {
             is RoomReading -> {

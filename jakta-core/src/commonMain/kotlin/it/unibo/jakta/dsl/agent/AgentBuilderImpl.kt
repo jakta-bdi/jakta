@@ -13,21 +13,22 @@ import it.unibo.jakta.event.AgentEvent.External.Perception
 import it.unibo.jakta.event.AgentUpdate
 import it.unibo.jakta.node.Node
 import it.unibo.jakta.plan.Plan
-import kotlin.properties.Delegates
 
 /**
  * Implementation of the AgentBuilder interface.
+ * @param defaultBody the body factory used when [embodiedAs] is not called, if the node has one for its body type.
  */
 class AgentBuilderImpl<Belief : Any, Goal : Any, Body : Any>(
     override val node: Node<Body>,
     private val id: AgentID? = null,
+    defaultBody: ((AgentID) -> Body)? = null,
 ) : AgentBuilder<Belief, Goal, Body> {
     private var initialBeliefs = listOf<Belief>()
     private var initialGoals = listOf<Goal>()
     private var beliefPlans = listOf<Plan.Belief<Belief, Goal, *, *>>()
     private var goalPlans = listOf<Plan.Goal<Belief, Goal, *, *>>()
 
-    private var bodyFactory: (AgentID) -> Body by Delegates.notNull()
+    private var bodyFactory: ((AgentID) -> Body)? = defaultBody
 
     private var beliefRevision: BeliefRevision<Belief> = BeliefRevision.plain()
 
@@ -96,7 +97,10 @@ class AgentBuilderImpl<Belief : Any, Goal : Any, Body : Any>(
 
     override fun build(): AgentSpecification<Belief, Goal, Body> = object : AgentSpecification<Belief, Goal, Body> {
         override val id: AgentID = this@AgentBuilderImpl.id ?: BaseAgentID()
-        override val body: Body = this@AgentBuilderImpl.bodyFactory(id)
+        override val body: Body = checkNotNull(this@AgentBuilderImpl.bodyFactory) {
+            "Agent ${id.displayName} has no body: give it one with embodiedAs { ... } " +
+                "(only agents on nodes whose body type is Any get one by default)"
+        }(id)
         override val initialGoals: List<Goal> = this@AgentBuilderImpl.initialGoals
         override val initialState: AgentState<Belief, Goal> = BaseAgentState(
             beliefs = initialBeliefs,

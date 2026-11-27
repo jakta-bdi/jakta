@@ -17,6 +17,7 @@ import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.node.ExecutableNode
 import it.unibo.jakta.node.Node
 import it.unibo.jakta.plan.Plan
+import kotlin.jvm.JvmName
 
 /**
  * DSL entrypoint for creating a Multi-Agent System (MAS).
@@ -55,6 +56,23 @@ fun <Belief : Any, Goal : Any, Body : Any> agent(
 }
 
 /**
+ * Entry point for creating an agent that needs no body, without calling [AgentBuilder.embodiedAs].
+ * Its body is an [Any] of its own, distinct from every other agent's, unless [AgentBuilder.embodiedAs] gives it
+ * another one.
+ * An agent with a body of another type must be created with all three type arguments,
+ * as in `agent<Belief, Goal, Body> { }`: when they are inferred, this overload is chosen.
+ * @return a factory to create an agent, given the node the agent will run on.
+ */
+@JaktaDSL
+@JvmName("agentWithoutBody")
+fun <Belief : Any, Goal : Any> agent(
+    block: AgentBuilder<Belief, Goal, Any>.() -> Unit,
+): (Node<Any>) -> AgentSpecification<Belief, Goal, Any> = agent<Belief, Goal, Any> {
+    embodiedAs { Any() }
+    block()
+}
+
+/**
  * Entry point for creating an agent using the JaKtA DSL.
  * @param id the id for the Agent.
  * @return a factory to create an agent, given the node the agent will run on.
@@ -67,6 +85,25 @@ fun <Belief : Any, Goal : Any, Body : Any> agent(
     val ab = AgentBuilderImpl<Belief, Goal, Body>(node, id)
     ab.apply(block)
     ab.build()
+}
+
+/**
+ * Entry point for creating an agent with the given [id] that needs no body, without calling [AgentBuilder.embodiedAs].
+ * Its body is an [Any] of its own, distinct from every other agent's, unless [AgentBuilder.embodiedAs] gives it
+ * another one.
+ * An agent with a body of another type must be created with all three type arguments,
+ * as in `agent<Belief, Goal, Body>(id) { }`: when they are inferred, this overload is chosen.
+ * @param id the id for the Agent.
+ * @return a factory to create an agent, given the node the agent will run on.
+ */
+@JaktaDSL
+@JvmName("agentWithoutBody")
+fun <Belief : Any, Goal : Any> agent(
+    id: AgentID,
+    block: AgentBuilder<Belief, Goal, Any>.() -> Unit,
+): (Node<Any>) -> AgentSpecification<Belief, Goal, Any> = agent<Belief, Goal, Any>(id) {
+    embodiedAs { Any() }
+    block()
 }
 
 // TODO entrypoint for plans???

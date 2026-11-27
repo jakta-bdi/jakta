@@ -77,6 +77,9 @@ interface AgentBuilder<Belief : Any, Goal : Any, Body : Any> {
 
     /**
      * Define how an agent can be embodied in the node.
+     * Each agent's body must differ from the body of every other agent in the MAS (it is not equal to any of them),
+     * since agents are told apart by their bodies; this is not checked.
+     * Optional when the node's body type is [Any]: an agent without it gets an [Any] of its own as its body.
      */
     fun embodiedAs(bodyFactory: (AgentID) -> Body)
 

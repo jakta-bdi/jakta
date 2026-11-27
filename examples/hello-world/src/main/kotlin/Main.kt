@@ -11,8 +11,7 @@ import kotlinx.coroutines.runBlocking
  * An agent with a single goal, `sayHello`, and a plan that prints a greeting and stops the node.
  * Beliefs and goals are plain strings, so it only needs `jakta-core`.
  */
-val helloWorldAgent = agent<String, String, Any> {
-    embodiedAs { Any() }
+val helloWorldAgent = agent<String, String> {
     hasInitialGoals {
         !"sayHello"
     }

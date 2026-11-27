@@ -92,7 +92,6 @@ fun MasBuilder<BaseNode<Any>, BaseNodeBuilder<Any, BaseNode<Any>>>.ticTacToeNode
  * What every agent does: perceive the board, joining the game to see it a first time.
  */
 private fun AgentBuilder<PrologBelief, PrologGoal, Any>.commonBehaviour() {
-    embodiedAs { Any() }
     handlesPerceptionEvents {
         when (it) {
             is BoardPerception -> handleBoardPerception(it)

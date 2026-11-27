@@ -21,8 +21,7 @@ private fun GuardScope<Int, Int>.unexplored(): Int? = context.takeIf { it !in be
 /**
  * An agent following the Collatz sequence of [start] until it loops.
  */
-fun collatz(start: Int) = agent<Int, Int, Any> {
-    embodiedAs { Any() }
+fun collatz(start: Int) = agent<Int, Int> {
     hasInitialGoals {
         !start
     }

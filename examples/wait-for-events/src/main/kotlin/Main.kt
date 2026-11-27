@@ -14,10 +14,9 @@ import kotlinx.coroutines.runBlocking
  */
 fun main(): Unit = runBlocking {
     Logger.setMinSeverity(Severity.Assert)
-    mas(NodeBuilders.baseNode()) {
+    mas(NodeBuilders.baseNode<Any>()) {
         node {
             agent<String, String> {
-                embodiedAs { Any() }
                 hasInitialGoals {
                     !"waitForDelivery"
                     !"deliver"

@@ -16,10 +16,9 @@ private fun GuardScope<Int, Int>.hasNoKnownDivisor(): Int? = context.takeIf { be
 /**
  * An agent finding the prime numbers up to [limit].
  */
-fun primeSieve(limit: Int) = agent<Int, Int, Any> {
+fun primeSieve(limit: Int) = agent<Int, Int> {
     fun Int.candidate(): Int? = takeIf { it in 2..limit }
 
-    embodiedAs { Any() }
     hasInitialGoals {
         !2
     }
