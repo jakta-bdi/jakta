@@ -15,6 +15,11 @@ interface ExecutableNode<Body : Any> : Node<Body> {
     val systemEvents: EventStream<SystemEvent>
 
     /**
+     * The processes launched on the node with [launchProcess], that the runner executes.
+     */
+    val processes: EventStream<suspend () -> Unit>
+
+    /**
      * Handles an external event received by the node.
      */
     fun handleExternalEvent(event: SystemEvent)

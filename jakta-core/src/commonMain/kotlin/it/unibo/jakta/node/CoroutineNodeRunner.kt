@@ -51,6 +51,14 @@ class CoroutineNodeRunner<Body : Any, N : ExecutableNode<Body>>(val connection: 
                 }
             }
 
+            // run the processes of the node alongside its agents, they are cancelled with them when the node stops
+            launch {
+                while (isActive) {
+                    val process = node.processes.next()
+                    appScope.launch { process() }
+                }
+            }
+
             // handle incoming events from the remote connection
             launch {
                 while (isActive) {
