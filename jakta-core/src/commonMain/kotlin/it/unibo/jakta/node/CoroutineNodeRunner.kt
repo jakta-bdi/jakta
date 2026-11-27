@@ -18,6 +18,7 @@ import kotlinx.coroutines.yield
 /**
  * A [NodeRunner] implementation that uses Kotlin coroutines
  * to manage the execution of agents within a node.
+ * A node stops when it is terminated, or when its last agent is removed.
  * @param [connection] The [NodeNetwork] used for communication and event handling.
  * @param [Body] The type of the agent's body.
  * @param [N] The type of the executable node that this runner will manage.
@@ -55,13 +56,18 @@ class CoroutineNodeRunner<Body : Any, N : ExecutableNode<Body>>(val connection: 
             launch {
                 while (isActive) {
                     val event = subscription.queue.next()
+                    // a node that started empty keeps running, a node whose agents have all left stops
+                    val lastAgentLeaves = event is SystemEvent.AgentRemoval && node.agents.keys == setOf(event.id)
                     node.handleExternalEvent(event)
                     when (event) {
                         is SystemEvent.AgentAddition<*, *> -> if (event.nodeID == node.id) {
                             appScope.startAgent(node, event.executableAgent)
                         }
 
-                        is SystemEvent.AgentRemoval -> stopAgent(event.id)
+                        is SystemEvent.AgentRemoval -> {
+                            stopAgent(event.id)
+                            if (lastAgentLeaves) node.terminateNode()
+                        }
 
                         is SystemEvent.ShutDownNode -> if (event.nodeID == node.id) {
                             stopNode(node, subscription, appScope.coroutineContext.job, event.error)
