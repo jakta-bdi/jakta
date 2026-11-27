@@ -50,13 +50,43 @@ sealed interface Plan<Belief : Any, Goal : Any, TriggerEntity : Any, Context : A
     val resultType: KType
 
     /**
+     * Returns the context produced by the trigger for the given [TriggerEntity] [e],
+     * or null if the plan is not relevant for it:
+     * a plan is relevant if its result type is a subtype of [desiredResult]
+     * and its trigger returns a non-null context for [e].
+     * The trigger is evaluated at most once.
+     */
+    fun relevantContext(e: TriggerEntity, desiredResult: KType = typeOf<Any?>()): Context? =
+        if (resultType.isSubtypeOfMultiPlatform(desiredResult)) trigger(e) else null
+
+    /**
+     * Evaluates the guard on the given [beliefs] for a [triggerContext] returned by [relevantContext].
+     * @return the [Option] to run, with the context returned by the guard, or null if the guard does not hold.
+     */
+    fun optionFor(
+        beliefs: Collection<Belief>,
+        triggerContext: Context,
+    ): Option<Belief, Goal, TriggerEntity, Context, PlanResult>? =
+        guard(GuardScope(beliefs, triggerContext))?.let { Option(this, it) }
+
+    /**
+     * Evaluates the trigger for [e], then the guard on the given [beliefs], once each.
+     * @return the [Option] to run if the plan is applicable, null otherwise.
+     */
+    fun optionFor(
+        beliefs: Collection<Belief>,
+        e: TriggerEntity,
+        desiredResult: KType = typeOf<Any?>(),
+    ): Option<Belief, Goal, TriggerEntity, Context, PlanResult>? =
+        relevantContext(e, desiredResult)?.let { optionFor(beliefs, it) }
+
+    /**
      * Checks if the plan is relevant for the given [TriggerEntity] and desired result type.
      * A plan is considered relevant if its result type is a subtype of the desired result type
      * and if the trigger function returns a non-null context for the provided entity.
      */
-    fun isRelevant(e: TriggerEntity, desiredResult: KType = typeOf<Any>()): Boolean =
-        resultType.isSubtypeOfMultiPlatform(desiredResult) &&
-            this.trigger(e) != null
+    fun isRelevant(e: TriggerEntity, desiredResult: KType = typeOf<Any?>()): Boolean =
+        relevantContext(e, desiredResult) != null
 
     /**
      * Checks if the plan is applicable in the given [GuardScope] for the provided [TriggerEntity]
@@ -64,29 +94,17 @@ sealed interface Plan<Belief : Any, Goal : Any, TriggerEntity : Any, Context : A
      * and if the guard condition is satisfied in the given guard scope
      * returning a non-null context.
      */
-    fun isApplicable(beliefs: Collection<Belief>, e: TriggerEntity, desiredResult: KType = typeOf<Any>()): Boolean =
-        resultType.isSubtypeOfMultiPlatform(desiredResult) &&
-            trigger(e)?.let { guard(GuardScope(beliefs, it)) != null } ?: false
+    fun isApplicable(beliefs: Collection<Belief>, e: TriggerEntity, desiredResult: KType = typeOf<Any?>()): Boolean =
+        optionFor(beliefs, e, desiredResult) != null
 
     /**
-     * @return the Context of this Plan applied to the trigger and the guard.
-     * The invocation of this method is supposed to be performed during execution,
-     * this implies that this plan has a valid context that can be executed.
+     * Executes the plan within the provided [agent], with the [context] computed by its trigger and guard
+     * when the plan was selected (see [Option]).
+     * The trigger and the guard are not evaluated again: the plan's body runs within a [PlanScope]
+     * built from the agent and this context, and its result is returned.
      */
-    private fun getPlanContext(beliefs: Collection<Belief>, e: TriggerEntity): Context = trigger(e)?.let {
-        guard(GuardScope(beliefs, it))
-    } ?: error { "Execution not possible without a plan context" }
-
-    /**
-     * Executes the plan within the provided [agent], and for the given trigger [entity].
-     * It constructs a [PlanScope] using the agent, and the context obtained
-     * by applying the trigger and guard functions to the entity.
-     * The plan's body is then executed within this scope, and the result is returned.
-     */
-    suspend fun run(agent: MutableAgentState<Belief, Goal>, entity: TriggerEntity): PlanResult {
-        val context = getPlanContext(agent.beliefs, entity)
-        return context(context) { body(BasePlanScope(agent, context)) }
-    }
+    suspend fun run(agent: MutableAgentState<Belief, Goal>, context: Context): PlanResult =
+        context(context) { body(BasePlanScope(agent, context)) }
 
     /**
      * Plans that are triggered by changes in beliefs.
