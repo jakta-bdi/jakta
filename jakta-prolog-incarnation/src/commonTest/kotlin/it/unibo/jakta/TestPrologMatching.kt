@@ -3,12 +3,17 @@ package it.unibo.jakta
 import it.unibo.jakta.dsl.belief.inferenceRule
 import it.unibo.jakta.dsl.belief.initialBelief
 import it.unibo.jakta.dsl.belief.noSubstitutionBeliefQuery
+import it.unibo.jakta.dsl.goal.PrologGoal
+import it.unibo.jakta.dsl.goal.goalQuery
 import it.unibo.jakta.logic.JaktaLogicProgrammingScope
 import it.unibo.jakta.logic.annotatedMguWith
 import it.unibo.jakta.logic.unifiesWith
+import it.unibo.tuprolog.core.Fact
+import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.solve.Solution
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import kotlin.test.fail
 
 class TestPrologMatching {
@@ -79,19 +84,13 @@ class TestPrologMatching {
     }
 
     @Test
-    fun `not annotated belief is implicitly annotated with source(self)`() {
+    fun `a belief without annotations does not match a query with a source`() {
         val belief = initialBelief {
             "parent"("alice", "charlie")
         }
         with(JaktaLogicProgrammingScope()) {
             val query = noSubstitutionBeliefQuery { "parent"(X, Y)[source(Z)] }
-            val sub = belief.annotatedMguWith(query)
-            if (sub.isFailed) {
-                fail("Failed to find a match")
-            }
-            assertEquals("alice", sub[X].toString())
-            assertEquals("charlie", sub[Y].toString())
-            assertEquals(self.toString(), sub[Z].toString())
+            assertTrue(belief.annotatedMguWith(query).isFailed)
         }
     }
 
@@ -128,6 +127,84 @@ class TestPrologMatching {
                 is Solution.Yes -> assertEquals("charlie", solution.substitution[Y].toString())
                 is Solution.No -> fail("No solution found")
                 is Solution.Halt -> fail("The solving process was halted: ${solution.exception}")
+            }
+        }
+    }
+
+    @Test
+    fun `a goal without annotations does not match a query with a source`() {
+        with(JaktaLogicProgrammingScope()) {
+            val goal: PrologGoal = "parent"("alice", "charlie")
+            assertTrue(goal.annotatedMguWith(goalQuery { "parent"(X, Y)[source(Z)] }).isFailed)
+        }
+    }
+
+    @Test
+    fun `annotated goal mgu with annotated query`() {
+        with(JaktaLogicProgrammingScope()) {
+            val goal = "parent"("alice", "charlie").addAnnotations(source("bob"))
+            val sub = goal.annotatedMguWith(goalQuery { "parent"(X, Y)[source(Z)] })
+            if (sub.isFailed) {
+                fail("Failed to find a match")
+            }
+            assertEquals("bob", sub[Z].toString())
+        }
+    }
+
+    @Test
+    fun `annotated goal mgu with not annotated query`() {
+        with(JaktaLogicProgrammingScope()) {
+            val goal = "parent"("alice", "charlie").addAnnotations(source("bob"))
+            val sub = goal.annotatedMguWith(goalQuery { "parent"(X, Y) })
+            if (sub.isFailed) {
+                fail("Failed to find a match")
+            }
+            assertEquals("alice", sub[X].toString())
+        }
+    }
+
+    @Test
+    fun `annotated goal does not match a query with a different source`() {
+        with(JaktaLogicProgrammingScope()) {
+            val goal = "parent"("alice", "charlie").addAnnotations(source("bob"))
+            assertEquals(true, goal.annotatedMguWith(goalQuery { "parent"(X, Y)[source("alice")] }).isFailed)
+            val selfGoal: PrologGoal = "parent"("alice", "charlie")
+            assertEquals(true, selfGoal.annotatedMguWith(goalQuery { "parent"(X, Y)[source("bob")] }).isFailed)
+        }
+    }
+
+    /**
+     * Goals and beliefs match annotations the same way, as written: a pattern without annotations matches any, and
+     * one with annotations only data that has them (the annotated belief revision adds `source(self)`).
+     */
+    @Test
+    fun `goals and beliefs match annotations the same way`() {
+        with(JaktaLogicProgrammingScope()) {
+            val own = "job"(1)
+            val delegated = "job"(1).addAnnotations(source("alice"))
+            // data, pattern, and the expected binding of S (null: no match, "-": match without binding S)
+            val cases: List<Triple<Struct, Struct, String?>> = listOf(
+                Triple(own, "job"(N), "-"),
+                Triple(own, "job"(N)[source(S)], null),
+                Triple(own, "job"(N)[source(self)], null),
+                Triple(own, "job"(N)[source("alice")], null),
+                Triple(delegated, "job"(N), "-"),
+                Triple(delegated, "job"(N)[source(S)], "alice"),
+                Triple(delegated, "job"(N)[source(self)], null),
+                Triple(delegated, "job"(N)[source("alice")], "-"),
+            )
+            for ((data, pattern, expected) in cases) {
+                for ((kind, match) in listOf(
+                    Pair("goal", data.annotatedMguWith(pattern)),
+                    Pair("belief", Fact.of(data).annotatedMguWith(pattern)),
+                )) {
+                    val actual = when {
+                        match.isFailed -> null
+                        S in match -> match[S].toString()
+                        else -> "-"
+                    }
+                    assertEquals(expected, actual, "$kind $data against $pattern")
+                }
             }
         }
     }

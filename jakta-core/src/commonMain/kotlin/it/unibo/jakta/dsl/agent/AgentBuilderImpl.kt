@@ -5,6 +5,7 @@ import it.unibo.jakta.agent.AgentSpecification
 import it.unibo.jakta.agent.AgentState
 import it.unibo.jakta.agent.BaseAgentID
 import it.unibo.jakta.agent.BaseAgentState
+import it.unibo.jakta.belief.BeliefRevision
 import it.unibo.jakta.dsl.plan.PlanLibraryBuilder
 import it.unibo.jakta.dsl.plan.PlanLibraryBuilderImpl
 import it.unibo.jakta.event.AgentEvent.External.Message
@@ -27,6 +28,8 @@ class AgentBuilderImpl<Belief : Any, Goal : Any, Body : Any>(
     private var goalPlans = listOf<Plan.Goal<Belief, Goal, *, *>>()
 
     private var bodyFactory: (AgentID) -> Body by Delegates.notNull()
+
+    private var beliefRevision: BeliefRevision<Belief> = BeliefRevision.plain()
 
     // By default, all messages are discarded.
     private var messageHandler: AgentState<Belief, Goal>.(Message<*>) -> AgentUpdate<*>? = { null }
@@ -54,6 +57,10 @@ class AgentBuilderImpl<Belief : Any, Goal : Any, Body : Any>(
 
     override fun embodiedAs(bodyFactory: (AgentID) -> Body) {
         this.bodyFactory = bodyFactory
+    }
+
+    override fun revisesBeliefsWith(revision: BeliefRevision<Belief>) {
+        this.beliefRevision = revision
     }
 
     override fun hasPlanLibrary(block: PlanLibraryBuilder<Belief, Goal>.() -> Unit) {
@@ -98,6 +105,7 @@ class AgentBuilderImpl<Belief : Any, Goal : Any, Body : Any>(
             goalPlans = this@AgentBuilderImpl.goalPlans,
             perceptionHandler = perceptionHandler,
             messageHandler = messageHandler,
+            beliefRevision = beliefRevision,
         )
     }
 }

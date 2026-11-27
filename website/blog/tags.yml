@@ -1,19 +1,9 @@
-jakta:
-  label: JaKtA
-  permalink: /jakta
-  description: General news about JaKtA
-
-release:
-  label: Release
-  permalink: /release
-  description: Description of new releases of JaKtA
-
 community:
   label: Community
   permalink: /community
-  description: News about the JaKtA community
+  description: News about JaKtA and its community
 
 paper:
-  label: Paper
+  label: Papers
   permalink: /paper
-  description: Papers about or using JaKtA
+  description: Research papers about or using JaKtA

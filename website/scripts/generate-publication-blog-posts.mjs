@@ -74,6 +74,8 @@ async function tryFetch(url, headers) {
     try {
       const res = await fetch(url, { headers })
       if (res.status === 429) continue
+      // An unknown paper is a confirmed absence, not an unreachable service.
+      if (res.status === 404) return { ok: true, data: null }
       if (!res.ok) return { ok: false }
       return { ok: true, data: await res.json() }
     } catch {
@@ -133,7 +135,7 @@ function buildPost({ entry, authorNames, blogAuthorKeys, year, pubDate, venue, u
   if (blogAuthorKeys.length > 0) {
     frontmatterLines.push(`authors: [${blogAuthorKeys.join(', ')}]`)
   }
-  frontmatterLines.push('tags: [jakta, paper]', '---')
+  frontmatterLines.push('tags: [paper]', '---')
 
   const detailLines = [
     `**Authors**: ${authorNames.join(', ')}`,
@@ -175,11 +177,10 @@ async function main() {
       const blogAuthorKeys = authorNames
         .map((name) => authorNameToKey.get(name.toLowerCase()))
         .filter(Boolean)
-      const year = entry.issued?.['date-parts']?.[0]?.[0] ?? null
-      // DBLP bib entries only ever carry a year, never month/day, so the
-      // publication date is pinned to Jan 1st of that year -- still far more
-      // accurate than dating the post the day the script happened to run.
-      const pubDate = year ? `${year}-01-01` : today
+      const [year = null, month = 1] = entry.issued?.['date-parts']?.[0] ?? []
+      // DBLP bib entries only carry a year, so the post is dated Jan 1st of that year unless the
+      // entry has a `month` -- still far more accurate than the day the script happened to run.
+      const pubDate = year ? `${year}-${String(month).padStart(2, '0')}-01` : today
       const venue = entry['container-title'] ?? ''
       const doi = stripLatexEscapes(entry.DOI)
       // citation-js percent-encodes the raw `url` field's stray LaTeX escapes

@@ -1,14 +1,15 @@
+/* The photo credit sits right above the footer, in the footer's colours (custom.css), so it reads as part of it. */
 .attributionBox {
   width: 100%;
   padding: 0.5rem 1rem;
-  background: rgba(40, 40, 40, 0.7);
-  color: #eee;
-  font-size: 0.85rem;
-  text-align: left;
-
+  background: var(--jakta-plum);
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.8rem;
+  text-align: center;
 }
+
 .attributionBox a {
-  color: #ccc;
+  color: inherit;
   text-decoration: underline;
 }
 

@@ -3,7 +3,7 @@ slug: paper-dblp-conf-eumas-baiardibcp23
 title: "New Publication: JaKtA: BDI Agent-Oriented Programming in Pure Kotlin"
 date: 2023-01-01
 authors: [anitvam, samubura, gciatto, danysk]
-tags: [jakta, paper]
+tags: [paper]
 ---
 
 A new paper related to JaKtA has been published at Multi-Agent Systems - 20th European Conference, EUMAS 2023, Naples, Italy, September 14-15, 2023, Proceedings (2023).

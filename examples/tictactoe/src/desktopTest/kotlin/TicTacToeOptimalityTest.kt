@@ -33,7 +33,6 @@ class TicTacToeOptimalityTest {
                 ticTacToeNode(
                     board,
                     mapOf(agent to Player.AGENT, agent.other to Player.HUMAN),
-                    HumanMoves(),
                     thinkTime = { Duration.ZERO },
                     random = Random(seed),
                 )
