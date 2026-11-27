@@ -29,7 +29,7 @@ class KitchenSkill(node: Node<Any>) : Skill<Any>(node) {
         val kitchen = kitchen
         val reading = kitchen.sense()
         node.publishEvent(reading) { it === kitchen }
-        wait({ event: AgentEvent -> event.takeIf { it === reading } })
+        waitForEvent({ event: AgentEvent -> event.takeIf { it === reading } })
     }
 
     /** Walks to [station], or to the pass if `null`. */

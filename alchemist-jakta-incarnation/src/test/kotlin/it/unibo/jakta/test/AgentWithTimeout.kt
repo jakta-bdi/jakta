@@ -10,6 +10,8 @@ import it.unibo.jakta.dsl.device
 import it.unibo.jakta.dsl.node.NodeBuilders
 import it.unibo.jakta.dsl.plan.triggers
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.withTimeoutOrNull
 
 /** The simulated time at which the agent started waiting. */
 var waitStartedAt: Double? = null
@@ -27,8 +29,8 @@ fun <P : Position<P>> JaktaForAlchemistRuntime<P>.entrypointWithTimeout() = devi
                     ifGoalMatch("wait")
                 } triggers {
                     waitStartedAt = alchemistEnvironment.simulation.time.toDouble()
-                    // no event matches: the wait ends with its timeout
-                    agent.wait<Unit>({ null }, 5.seconds)
+                    // a timeout, not a delay: it goes through the dispatcher's invokeOnTimeout
+                    withTimeoutOrNull(5.seconds) { awaitCancellation() }
                     waitTimedOutAt = alchemistEnvironment.simulation.time.toDouble()
                     node.terminateNode()
                 }

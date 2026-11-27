@@ -25,4 +25,12 @@ interface ExecutableAgent<Belief : Any, Goal : Any> : Agent {
      * The mutable state of the agent.
      */
     val state: MutableAgentState<Belief, Goal>
+
+    /**
+     * Resumes the intentions [waiting][MutableAgentState.waitForEvent] for [event]: those whose filter returns a
+     * non-null value for it. The [AgentLifecycle] calls it after handling an event, so that the waiting intentions
+     * see the state the event produced.
+     * @param event the event the agent handled.
+     */
+    fun resumeWaiting(event: AgentEvent)
 }

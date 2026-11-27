@@ -36,7 +36,7 @@ class TestWaitEvent {
                 ifGoalMatch("goal")
             } triggers {
                 agent.print("I am waiting for a belief to appear")
-                val belief = agent.wait({ e -> filterBeliefEvent(e) }, timeout)
+                val belief = agent.waitForEvent({ e -> filterBeliefEvent(e) }, timeout)
                 belief?.let {
                     agent.print("Received \"$belief\"")
                 } ?: agent.print("Time has run out!")

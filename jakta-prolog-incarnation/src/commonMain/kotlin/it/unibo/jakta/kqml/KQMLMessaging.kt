@@ -127,7 +127,7 @@ suspend fun MutableAgentState<PrologBelief, PrologGoal>.askOneTo(
             else -> null
         }
     }
-    return this.wait(eventFilter, timeout)
+    return this.waitForEvent(eventFilter, timeout)
 }
 
 /**
@@ -162,7 +162,7 @@ suspend fun MutableAgentState<PrologBelief, PrologGoal>.askAllTo(
             else -> null
         }
     }
-    return this.wait(eventFilter, timeout)
+    return this.waitForEvent(eventFilter, timeout)
 }
 
 // TODO should we even allow broadcasting `ask` performatives?
@@ -181,7 +181,7 @@ suspend fun MutableAgentState<PrologBelief, PrologGoal>.askAllTo(
 // ): Substitution? {
 //    kqmlBroadcast(payload)
 //    val eventFilter = TODO()
-//    return this.wait(eventFilter, timeout)
+//    return this.waitForEvent(eventFilter, timeout)
 // }
 //
 // /**
@@ -196,5 +196,5 @@ suspend fun MutableAgentState<PrologBelief, PrologGoal>.askAllTo(
 //        broadcast(payload)
 //    }
 //    val eventFilter = TODO()
-//    return this.wait(eventFilter, timeout)
+//    return this.waitForEvent(eventFilter, timeout)
 // }
