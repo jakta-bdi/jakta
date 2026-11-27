@@ -51,7 +51,6 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
 
     @Suppress("UNCHECKED_CAST")
     private fun handleEvent(event: AgentEvent, scope: CoroutineScope) {
-        completeWaitingEventFilters(event)
         when (event) {
             is AgentEvent.Internal -> {
                 // TODO to remove this cast i should type the top level Event.Internal
@@ -70,20 +69,9 @@ class BaseAgentLifecycle<Belief : Any, Goal : Any>(override val executableAgent:
 
             is AgentEvent.External -> handleExternalEvent(event)
         }
-    }
-
-    /**
-     * Iterates over the map of waiting event filters.
-     * If the filter matches complete the associated deferred and remove the filter from the map.
-     */
-    @Suppress("UNCHECKED_CAST") // TODO Check
-    private fun completeWaitingEventFilters(event: AgentEvent) {
-        for ((filter, deferred) in executableAgent.state.waitEventFilters) {
-            val result = filter(event)
-            if (result != null) {
-                (deferred as CompletableDeferred<Any>).complete(result)
-            }
-        }
+        // after handling, so that the waiting intentions see the state the event produced (e.g. a goal adopted);
+        // steps are how intentions are scheduled, not something to wait for
+        if (event !is AgentEvent.Internal.Step) executableAgent.resumeWaiting(event)
     }
 
     /**

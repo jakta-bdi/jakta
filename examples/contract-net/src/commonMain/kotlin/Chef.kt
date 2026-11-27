@@ -139,7 +139,7 @@ fun chef(id: AgentID, kitchen: Kitchen, waiter: AgentID, restaurant: Restaurant)
             prologPlan {
                 adding.goal { matchingGoal { work } } onlyWhen { satisfies { napping } } triggers {
                     agent.print("Zzz...")
-                    agent.wait({ event -> event.takeIf { it.isRemovalOf(nappingBelief) } })
+                    agent.waitUntil { (nappingBelief !in beliefs).takeIf { it } }
                     agent.alsoAchieve(goal { work })
                 }
             }
@@ -169,7 +169,7 @@ fun chef(id: AgentID, kitchen: Kitchen, waiter: AgentID, restaurant: Restaurant)
             }
             prologPlan {
                 adding.goal { matchingGoal { work } } triggers {
-                    agent.wait({ event -> event.takeIf { it.isAdditionOf("ticket") } })
+                    agent.waitForEvent({ event -> event.takeIf { it.isAdditionOf("ticket") } })
                     agent.alsoAchieve(goal { work })
                 }
             }

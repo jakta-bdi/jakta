@@ -54,6 +54,6 @@ class VacuumSkill(node: Node<VacuumBody>) : Skill<VacuumBody>(node) {
         val body = body
         val reading = body.sense()
         node.publishEvent(reading) { it === body }
-        wait({ event: AgentEvent -> event.takeIf { it === reading } })
+        waitForEvent({ event: AgentEvent -> event.takeIf { it === reading } })
     }
 }
