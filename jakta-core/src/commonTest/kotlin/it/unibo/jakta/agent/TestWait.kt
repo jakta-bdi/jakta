@@ -7,12 +7,14 @@ import it.unibo.jakta.dsl.mas
 import it.unibo.jakta.dsl.mas.runLocally
 import it.unibo.jakta.dsl.node.NodeBuilders
 import it.unibo.jakta.dsl.plan.triggers
+import it.unibo.jakta.event.AgentEvent
 import it.unibo.jakta.event.AgentEvent.External.Message
 import it.unibo.jakta.event.BeliefAddEvent
 import it.unibo.jakta.event.BeliefRemoveEvent
 import it.unibo.jakta.event.beliefAdded
 import it.unibo.jakta.event.beliefRemoved
 import it.unibo.jakta.event.messageReceived
+import it.unibo.jakta.event.perceived
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -41,7 +43,7 @@ class TestWait {
                             }
                             hasPlanLibrary {
                                 adding.goal { takeIf { it == "first" || it == "second" } } triggers {
-                                    received += agent.wait(parcel, 30.seconds)
+                                    received += agent.waitForEvent(parcel, 30.seconds)
                                 }
                                 adding.goal { takeIf { it == "deliver" } } triggers {
                                     delay(1.seconds)
@@ -59,7 +61,7 @@ class TestWait {
     }
 
     @Test
-    fun waitUntilBelieveReturnsRightAwayWhatIsAlreadyBelieved(): TestResult {
+    fun waitUntilReturnsRightAwayIfTheConditionAlreadyHolds(): TestResult {
         Logger.setMinSeverity(Severity.Assert)
         val received = mutableListOf<String?>()
         return runTest {
@@ -73,7 +75,7 @@ class TestWait {
                             hasPlanLibrary {
                                 adding.goal { takeIf { it == "check" } } triggers {
                                     // waiting for events alone would time out: the belief came before the call
-                                    received += agent.waitUntilBelieve(1.seconds) { it == "parcel" }
+                                    received += agent.waitUntil(1.seconds) { beliefs.firstOrNull { it == "parcel" } }
                                     node.terminateNode()
                                 }
                             }
@@ -86,7 +88,7 @@ class TestWait {
     }
 
     @Test
-    fun waitUntilBelieveWaitsForAMatchingBelief(): TestResult {
+    fun waitUntilWaitsForTheConditionToHold(): TestResult {
         Logger.setMinSeverity(Severity.Assert)
         val received = mutableListOf<String?>()
         return runTest {
@@ -101,8 +103,10 @@ class TestWait {
                             }
                             hasPlanLibrary {
                                 adding.goal { takeIf { it == "check" } } triggers {
-                                    received += agent.waitUntilBelieve(30.seconds) { it.startsWith("parcel") }
-                                    received += agent.waitUntilBelieve(1.seconds) { it == "never" }
+                                    received += agent.waitUntil(30.seconds) {
+                                        beliefs.firstOrNull { it.startsWith("parcel") }
+                                    }
+                                    received += agent.waitUntil(1.seconds) { beliefs.firstOrNull { it == "never" } }
                                     node.terminateNode()
                                 }
                                 adding.goal { takeIf { it == "deliver" } } triggers {
@@ -117,6 +121,144 @@ class TestWait {
             assertEquals(listOf("parcel-42", null), received)
         }
     }
+
+    @Test
+    fun waitUntilChecksTheWholeState(): TestResult {
+        Logger.setMinSeverity(Severity.Assert)
+        val received = mutableListOf<Int?>()
+        return runTest {
+            mas(NodeBuilders.baseNode()) {
+                node {
+                    withAgents(
+                        agent<String, String, Any> {
+                            embodiedAs { Any() }
+                            believes { +"answer-1" }
+                            hasInitialGoals {
+                                !"collect"
+                                !"answer"
+                            }
+                            hasPlanLibrary {
+                                adding.goal { takeIf { it == "collect" } } triggers {
+                                    received += agent.waitUntil(30.seconds) {
+                                        beliefs.count { it.startsWith("answer") }.takeIf { it >= 3 }
+                                    }
+                                    node.terminateNode()
+                                }
+                                adding.goal { takeIf { it == "answer" } } triggers {
+                                    delay(1.seconds)
+                                    agent.believe("answer-2")
+                                    delay(1.seconds)
+                                    agent.believe("answer-3")
+                                }
+                            }
+                        },
+                    )
+                }
+            }.runLocally()
+            assertEquals(listOf<Int?>(3), received)
+        }
+    }
+
+    @Test
+    fun waitersSeeTheStateTheEventProduced(): TestResult {
+        Logger.setMinSeverity(Severity.Assert)
+        val received = mutableListOf<Int?>()
+        return runTest {
+            mas(NodeBuilders.baseNode()) {
+                node {
+                    withAgents(
+                        agent<String, String, Any> {
+                            embodiedAs { Any() }
+                            hasInitialGoals { !"watch" }
+                            hasPlanLibrary {
+                                adding.goal { takeIf { it == "watch" } } triggers {
+                                    agent.alsoAchieve("sleep")
+                                    // resumed after the goal is handled: its intention is already there
+                                    received += agent.waitForEvent({ event ->
+                                        if (event is AgentEvent.Internal.Goal.Add<*, *>) agent.intentions.size else null
+                                    }, 30.seconds)
+                                    node.terminateNode()
+                                }
+                                adding.goal { takeIf { it == "sleep" } } triggers {
+                                    delay(10.seconds)
+                                }
+                            }
+                        },
+                    )
+                }
+            }.runLocally()
+            assertEquals(listOf<Int?>(2), received)
+        }
+    }
+
+    @Test
+    fun stepsAreNotEvents(): TestResult {
+        Logger.setMinSeverity(Severity.Assert)
+        val received = mutableListOf<AgentEvent?>()
+        return runTest {
+            mas(NodeBuilders.baseNode()) {
+                node {
+                    withAgents(
+                        agent<String, String, Any> {
+                            embodiedAs { Any() }
+                            hasInitialGoals {
+                                !"watch"
+                                !"tick"
+                            }
+                            hasPlanLibrary {
+                                adding.goal { takeIf { it == "watch" } } triggers {
+                                    received += agent.waitForEvent({ it as? AgentEvent.Internal.Step }, 5.seconds)
+                                    node.terminateNode()
+                                }
+                                adding.goal { takeIf { it == "tick" } } triggers {
+                                    repeat(3) { delay(1.seconds) } // each resumption is a step
+                                }
+                            }
+                        },
+                    )
+                }
+            }.runLocally()
+            assertEquals(listOf<AgentEvent?>(null), received)
+        }
+    }
+
+    @Test
+    fun signalsAreCaughtWithoutBecomingBeliefs(): TestResult {
+        Logger.setMinSeverity(Severity.Assert)
+        val received = mutableListOf<Signal?>()
+        val beliefs = mutableListOf<Collection<String>>()
+        return runTest {
+            mas(NodeBuilders.baseNode()) {
+                node {
+                    withAgents(
+                        agent<String, String, Any> {
+                            embodiedAs { Any() }
+                            handlesPerceptionEvents { null } // a signal: no belief, no goal
+                            hasInitialGoals {
+                                !"watch"
+                                !"signal"
+                            }
+                            hasPlanLibrary {
+                                adding.goal { takeIf { it == "watch" } } triggers {
+                                    received += agent.waitForEvent(perceived<Signal>(), 30.seconds)
+                                    beliefs += agent.beliefs
+                                    node.terminateNode()
+                                }
+                                adding.goal { takeIf { it == "signal" } } triggers {
+                                    delay(1.seconds)
+                                    node.publishEvent(Signal)
+                                }
+                            }
+                        },
+                    )
+                }
+            }.runLocally()
+            assertEquals(listOf<Signal?>(Signal), received)
+            assertEquals(listOf<Collection<String>>(emptySet()), beliefs)
+        }
+    }
+
+    private data object Signal : AgentEvent.External.Perception
 
     @Test
     fun filtersMatchOnlyTheirKindOfEventAndType() {
