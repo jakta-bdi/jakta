@@ -74,8 +74,8 @@ private val annotationUnificator = object : AbstractUnificator() {
 }
 
 /**
- * `'$jakta_annotated'(Goal, Patterns)`: for each belief unifying with `Goal`, every way each of the `Patterns`
- * matches a different annotation of the belief. A `Goal` of the form `(H :- B)` looks at the rules instead, whose
+ * `'$jakta_annotated'(Query, Patterns)`: for each belief unifying with `Query`, every way each of the `Patterns`
+ * matches a different annotation of the belief. A `Query` of the form `(H :- B)` looks at the rules instead, whose
  * annotations are those of the whole clause.
  */
 private object AnnotatedBelief : BinaryRelation.WithoutSideEffects<ExecutionContext>("\$jakta_annotated") {
@@ -83,18 +83,18 @@ private object AnnotatedBelief : BinaryRelation.WithoutSideEffects<ExecutionCont
         first: Term,
         second: Term,
     ): Sequence<Substitution> {
-        val goal = first as? Struct ?: return emptySequence()
+        val query = first as? Struct ?: return emptySequence()
         val patterns = second.castToList().toList()
-        val ofRules = goal.functor == ":-" && goal.arity == 2
+        val ofRules = query.functor == ":-" && query.arity == 2
         val clauses = when {
             ofRules -> (context.staticKb.clauses + context.dynamicKb.clauses).asSequence().filter { it.isRule }
-            else -> (context.staticKb[goal] + context.dynamicKb[goal]).filter { it.isFact }
+            else -> (context.staticKb[query] + context.dynamicKb[query]).filter { it.isFact }
         }
         return clauses.filterIsInstance<Rule>().flatMap { clause ->
             val term = if (ofRules) Struct.of(":-", clause.head, clause.body) else clause.head.removeAllAnnotations()
             // the clause and its annotations as a single term, so that a copy keeps their variables shared
             val copy = Struct.of("annotated", term, PrologList.of(clause.annotations)).freshCopy().castToStruct()
-            when (val matched = Unificator.default.mgu(copy[0], goal)) {
+            when (val matched = Unificator.default.mgu(copy[0], query)) {
                 is Substitution.Fail -> emptySequence()
 
                 else -> annotationMatches(patterns, copy[1].castToList().toList(), matched) { x, y ->
@@ -124,10 +124,10 @@ object JaktaSolver {
         .build()
 
     /**
-     * The arguments of this term that are goals, if it is a control construct such as `(A, B)` or `findall(T, G, L)`:
-     * annotated goals are looked for there, and not in data such as the template and the list of `findall`.
+     * The arguments of this term that are queries, if it is a control construct such as `(A, B)` or `findall(T, G, L)`:
+     * annotated queries are looked for there, and not in data such as the template and the list of `findall`.
      */
-    private val Struct.goalArguments: List<Int>
+    private val Struct.queryArguments: List<Int>
         get() = when ("$functor/$arity") {
             ",/2", ";/2", "->/2", "*->/2", "forall/2" -> listOf(0, 1)
             "\\+/1", "not/1", "call/1", "once/1" -> listOf(0)
@@ -137,16 +137,24 @@ object JaktaSolver {
 
     /*
      * Annotations are tags, whose variables the solver never substitutes, renames or reports, and a unificator returns
-     * a single substitution, so it cannot backtrack over them. So an annotated goal `p(X)[q1, ..., qm]` is solved as
-     * `'$jakta_annotated'(p(X), [q1, ..., qm])`, with its annotations as a plain list. Goals without annotations are
+     * a single substitution, so it cannot backtrack over them. So an annotated query `p(X)[q1, ..., qm]` is solved as
+     * `'$jakta_annotated'(p(X), [q1, ..., qm])`, with its annotations as a plain list. Queries without annotations are
      * left as they are.
      */
-    private fun annotatedGoals(term: Term): Term {
+    private fun rewriteAnnotatedQueries(term: Term): Term {
         if (term !is Struct) return term
-        val goals = term.goalArguments
+        val queries = term.queryArguments
         return when {
-            goals.isNotEmpty() -> term.setArgs(
-                term.args.mapIndexed { i, argument -> if (i in goals) annotatedGoals(argument) else argument },
+            queries.isNotEmpty() -> term.setArgs(
+                term.args.mapIndexed { i, argument ->
+                    if (i in
+                        queries
+                    ) {
+                        rewriteAnnotatedQueries(argument)
+                    } else {
+                        argument
+                    }
+                },
             )
 
             term.annotations.isEmpty() -> term
@@ -163,27 +171,27 @@ object JaktaSolver {
      * The solutions of [query] on [theory], lazily. Annotations are solved like the rest of the terms, with
      * backtracking: each solution binds the variables of the query, those in its annotations included.
      *
-     * Annotations belong to beliefs and to whole rules: a goal with annotations, as `p(X)[source(S)]`, looks at the
+     * Annotations belong to beliefs and to whole rules: a query with annotations, as `p(X)[source(S)]`, looks at the
      * beliefs only, while `p(X)` looks at the rules too; `(p(X) :- B)[source(S)]` looks at the rules, as clauses.
      *
-     * A goal known only when solving, as `G` in `G = p(X)[source(S)], call(G)`, still filters by constant annotations,
+     * A query known only when solving, as `G` in `G = p(X)[source(S)], call(G)`, still filters by constant annotations,
      * but does not bind the variables in them.
      */
     fun solve(theory: Collection<Clause>, query: Struct): Sequence<Solution> {
-        fun Clause.hasAnnotatedGoals() = this is Rule && body.hasAnnotations()
-        if (!query.hasAnnotations() && theory.none { it.hasAnnotatedGoals() }) return get(theory).solve(query)
+        fun Clause.hasAnnotatedQueries() = this is Rule && body.hasAnnotations()
+        if (!query.hasAnnotations() && theory.none { it.hasAnnotatedQueries() }) return get(theory).solve(query)
         val clauses = theory.map {
             if (it is Rule &&
-                it.hasAnnotatedGoals()
+                it.hasAnnotatedQueries()
             ) {
-                Rule.of(it.head, annotatedGoals(it.body))
+                Rule.of(it.head, rewriteAnnotatedQueries(it.body))
             } else {
                 it
             }
         }
-        val goal = annotatedGoals(query).castToStruct()
+        val rewritten = rewriteAnnotatedQueries(query).castToStruct()
         val variables = query.allVariables()
-        return get(clauses).solve(goal).map {
+        return get(clauses).solve(rewritten).map {
             when (it) {
                 is Solution.Yes -> Solution.yes(
                     query,

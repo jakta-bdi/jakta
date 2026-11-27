@@ -93,7 +93,7 @@ class TestAnnotationsInSolver {
         )
         val beliefs = beliefBase.snapshot().toList()
         assertEquals(listOf(sources("self"), sources("bob"), sources("self")), beliefs.map { it.annotations })
-        // a rule's head has no annotations: derived beliefs have none, and annotated goals look at beliefs only
+        // a rule's head has no annotations: derived beliefs have none, and annotated queries look at beliefs only
         assertEquals(listOf(mapOf("X" to "5")), beliefs.solve { "cheap"(X) })
         assertEquals(0, beliefs.solve { "cheap"(X)[source(S)] }.size)
         // as a clause, the rule is found with its source
