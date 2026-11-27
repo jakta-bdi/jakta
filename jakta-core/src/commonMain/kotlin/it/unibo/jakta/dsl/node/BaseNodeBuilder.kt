@@ -10,9 +10,13 @@ import it.unibo.jakta.node.Node
 /**
  * Implementation of the [NodeBuilder] interface.
  * @param initialNode the initial [ExecutableNode].
+ * @param defaultBody the body of the agents that do not call `embodiedAs`, if there is one for this body type
+ * (see [NodeBuilders.defaultBody]).
  */
-open class BaseNodeBuilder<Body : Any, out N : ExecutableNode<Body>>(private val initialNode: N) :
-    NodeBuilder<Body, N> {
+open class BaseNodeBuilder<Body : Any, out N : ExecutableNode<Body>>(
+    private val initialNode: N,
+    private val defaultBody: ((AgentID) -> Body)? = null,
+) : NodeBuilder<Body, N> {
 
     override val node: Node<Body>
         get() = initialNode
@@ -35,7 +39,7 @@ open class BaseNodeBuilder<Body : Any, out N : ExecutableNode<Body>>(private val
         id: AgentID?,
         block: AgentBuilder<Belief, Goal, Body>.() -> Unit,
     ) {
-        val agentBuilder = AgentBuilderImpl<Belief, Goal, Body>(node, id)
+        val agentBuilder = AgentBuilderImpl<Belief, Goal, Body>(node, id, defaultBody)
         val agent: AgentBuilder<Belief, Goal, Body> = agentBuilder.apply(block)
         agents += agent
     }

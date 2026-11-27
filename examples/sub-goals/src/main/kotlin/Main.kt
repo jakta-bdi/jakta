@@ -42,10 +42,9 @@ data object Grind : Task
  */
 fun main(): Unit = runBlocking {
     Logger.setMinSeverity(Severity.Assert)
-    mas(NodeBuilders.baseNode()) {
+    mas(NodeBuilders.baseNode<Any>()) {
         node {
             agent<String, Task> {
-                embodiedAs { Any() }
                 believes {
                     +"beans"
                 }

@@ -10,9 +10,8 @@ import it.unibo.jakta.node.RuntimeNodes
  * Factory method for building a [JaktaForAlchemistNode].
  * @return a factory for a [BaseNodeBuilder] which creates a [JaktaForAlchemistNode].
  */
-fun <Body : Any> NodeBuilders.alchemistNode(): () -> BaseNodeBuilder<Body, JaktaForAlchemistNode<Body>> = {
-    BaseNodeBuilder<Body, JaktaForAlchemistNode<Body>>(JaktaForAlchemistNode())
-}
+inline fun <reified Body : Any> NodeBuilders.alchemistNode(): () -> BaseNodeBuilder<Body, JaktaForAlchemistNode<Body>> =
+    { BaseNodeBuilder<Body, JaktaForAlchemistNode<Body>>(JaktaForAlchemistNode(), defaultBody<Body>()) }
 
 /**
  * Builder of a device inside the simulation.

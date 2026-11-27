@@ -19,7 +19,6 @@ private val alice = BaseAgentID("Alice")
 private val bob = BaseAgentID("Bob")
 
 private fun AgentBuilder<ToldBelief, String, Any>.receivesTextMessages() {
-    embodiedAs { Any() }
     handlesMessageEvents { message ->
         when (val payload = message.payload) {
             is String -> AgentUpdate.Believe(ToldBelief(payload, message.sender))
@@ -29,7 +28,7 @@ private fun AgentBuilder<ToldBelief, String, Any>.receivesTextMessages() {
 }
 
 context(_: MessagingSkill)
-private fun ponger() = agent<ToldBelief, String, Any>(bob) {
+private fun ponger() = agent<ToldBelief, String>(bob) {
     receivesTextMessages()
     hasPlanLibrary {
         adding.belief {

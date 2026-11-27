@@ -44,7 +44,6 @@ fun MasBuilder<BaseNode<Any>, BaseNodeBuilder<Any, BaseNode<Any>>>.blocksWorldNo
             fun clear(block: Var): Struct = Struct.of("clear", block)
             fun on(block: Term, support: Term): Struct = Struct.of("on", block, support)
 
-            embodiedAs { Any() }
             believes {
                 +initialBelief { clear(table) }
                 +inferenceRule { clear(X) impliedBy not(on(`_`, X)) }
