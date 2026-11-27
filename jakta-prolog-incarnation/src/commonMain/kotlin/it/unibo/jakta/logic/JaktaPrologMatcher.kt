@@ -124,14 +124,16 @@ object JaktaSolver {
         .build()
 
     /**
-     * The arguments of this term that are queries, if it is a control construct such as `(A, B)` or `findall(T, G, L)`:
-     * annotated queries are looked for there, and not in data such as the template and the list of `findall`.
+     * The arguments of this term that are queries, if it is one of the control constructs of 2p-kt, such as `(A, B)`
+     * or `findall(T, G, L)`: annotated queries are looked for there, and not in data such as the template and the list
+     * of `findall`. 2p-kt lists its built-ins, but not which of their arguments are queries.
      */
     private val Struct.queryArguments: List<Int>
         get() = when ("$functor/$arity") {
-            ",/2", ";/2", "->/2", "*->/2", "forall/2" -> listOf(0, 1)
+            ",/2", ";/2", "->/2" -> listOf(0, 1)
             "\\+/1", "not/1", "call/1", "once/1" -> listOf(0)
             "findall/3", "bagof/3", "setof/3", "^/2" -> listOf(1)
+            "catch/3" -> listOf(0, 2)
             else -> emptyList()
         }
 

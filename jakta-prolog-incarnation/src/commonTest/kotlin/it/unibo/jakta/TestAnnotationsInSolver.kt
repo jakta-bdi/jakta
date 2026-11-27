@@ -40,6 +40,9 @@ class TestAnnotationsInSolver {
     fun `a source variable is bound at the top level and in a conjunction`() {
         assertEquals(both, facts.solve { "propose"(I, T)[source(S)] })
         assertEquals(both, facts.solve { "ready"(I) and "propose"(I, T)[source(S)] })
+        // inside the control constructs too, e.g. catch/3, which runs its first and its last argument
+        assertEquals(both, facts.solve { "catch"("propose"(I, T)[source(S)], E, "fail") })
+        assertEquals(both, facts.solve { "once"("ready"(I)) and "propose"(I, T)[source(S)] })
     }
 
     @Test
