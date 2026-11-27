@@ -7,8 +7,37 @@ import it.unibo.jakta.plan.GoalFailurePlan
 import it.unibo.jakta.plan.GoalRemovalPlan
 import it.unibo.jakta.plan.GuardScope
 import it.unibo.jakta.plan.Plan
+import it.unibo.jakta.plan.PlanID
 import it.unibo.jakta.plan.PlanScope
 import kotlin.reflect.KType
+
+/**
+ * Label and metadata shared by the plan builders.
+ */
+abstract class BasePlanBuilder<Belief : Any, Goal : Any, Context : Any> : PlanBuilder<Belief, Goal, Context> {
+    private var label: String? = null
+
+    /**
+     * The metadata attached to the plan so far.
+     */
+    protected val metadata: Map<String, Any>
+        get() = _metadata.toMap()
+
+    private val _metadata: MutableMap<String, Any> = mutableMapOf()
+
+    override fun setLabel(label: String) {
+        this.label = label
+    }
+
+    override fun addMetadata(entries: Map<String, Any>) {
+        _metadata += entries
+    }
+
+    /**
+     * The id of the plan being built: its label, if it has one, or a new generated id.
+     */
+    protected fun planId(): PlanID = label?.let { PlanID.labelled(it) } ?: PlanID()
+}
 
 /**
  * Implementation of PlanBuilder for belief additions.
@@ -17,7 +46,8 @@ class BeliefAdditionPlanBuilderImpl<Belief : Any, Goal : Any, Context : Any>(
     private val addBeliefPlan: (plan: Plan.Belief<Belief, Goal, *, *>) -> Unit,
     private val trigger: Belief.() -> Context?,
     private var guard: GuardScope<Belief, Context>.() -> Context? = { this.context },
-) : PlanBuilder.Addition.Belief<Belief, Goal, Context> {
+) : BasePlanBuilder<Belief, Goal, Context>(),
+    PlanBuilder.Addition.Belief<Belief, Goal, Context> {
     override fun onlyWhen(
         guard: GuardScope<Belief, Context>.() -> Context?,
     ): PlanBuilder.Addition.Belief<Belief, Goal, Context> = this.also { this.guard = guard }
@@ -27,7 +57,7 @@ class BeliefAdditionPlanBuilderImpl<Belief : Any, Goal : Any, Context : Any>(
         resultType: KType,
         body: suspend context(Context) PlanScope<Belief, Goal, Context>.() -> PlanResult,
     ): Plan.Belief.Addition<Belief, Goal, Context, PlanResult> =
-        buildAndRegisterPlan(resultType, trigger, guard, body, ::BeliefAdditionPlan, addBeliefPlan)
+        buildAndRegisterPlan(resultType, trigger, guard, body, planId(), metadata, ::BeliefAdditionPlan, addBeliefPlan)
 }
 
 /**
@@ -37,7 +67,8 @@ class GoalAdditionPlanBuilderImpl<Belief : Any, Goal : Any, Context : Any>(
     private val addGoalPlan: (plan: Plan.Goal<Belief, Goal, *, *>) -> Unit,
     private val trigger: Goal.() -> Context?,
     private var guard: GuardScope<Belief, Context>.() -> Context? = { this.context },
-) : PlanBuilder.Addition.Goal<Belief, Goal, Context> {
+) : BasePlanBuilder<Belief, Goal, Context>(),
+    PlanBuilder.Addition.Goal<Belief, Goal, Context> {
     override fun onlyWhen(
         guard: GuardScope<Belief, Context>.() -> Context?,
     ): PlanBuilder.Addition.Goal<Belief, Goal, Context> = this.also { this.guard = guard }
@@ -47,7 +78,7 @@ class GoalAdditionPlanBuilderImpl<Belief : Any, Goal : Any, Context : Any>(
         resultType: KType,
         body: suspend context(Context) PlanScope<Belief, Goal, Context>.() -> PlanResult,
     ): Plan.Goal.Addition<Belief, Goal, Context, PlanResult> =
-        buildAndRegisterPlan(resultType, trigger, guard, body, ::GoalAdditionPlan, addGoalPlan)
+        buildAndRegisterPlan(resultType, trigger, guard, body, planId(), metadata, ::GoalAdditionPlan, addGoalPlan)
 }
 
 /**
@@ -57,7 +88,8 @@ class BeliefRemovalPlanBuilderImpl<Belief : Any, Goal : Any, Context : Any>(
     private val removeBeliefPlan: (plan: Plan.Belief<Belief, Goal, *, *>) -> Unit,
     private val trigger: Belief.() -> Context?,
     private var guard: GuardScope<Belief, Context>.() -> Context? = { this.context },
-) : PlanBuilder.Removal.Belief<Belief, Goal, Context> {
+) : BasePlanBuilder<Belief, Goal, Context>(),
+    PlanBuilder.Removal.Belief<Belief, Goal, Context> {
     override fun onlyWhen(
         guard: GuardScope<Belief, Context>.() -> Context?,
     ): PlanBuilder.Removal.Belief<Belief, Goal, Context> = this.also { this.guard = guard }
@@ -67,7 +99,7 @@ class BeliefRemovalPlanBuilderImpl<Belief : Any, Goal : Any, Context : Any>(
         resultType: KType,
         body: suspend context(Context) PlanScope<Belief, Goal, Context>.() -> PlanResult,
     ): Plan.Belief.Removal<Belief, Goal, Context, PlanResult> =
-        buildAndRegisterPlan(resultType, trigger, guard, body, ::BeliefRemovalPlan, removeBeliefPlan)
+        buildAndRegisterPlan(resultType, trigger, guard, body, planId(), metadata, ::BeliefRemovalPlan, removeBeliefPlan)
 }
 
 /**
@@ -77,7 +109,8 @@ class GoalRemovalPlanBuilderImpl<Belief : Any, Goal : Any, Context : Any>(
     private val removeGoalPlan: (plan: Plan.Goal<Belief, Goal, *, *>) -> Unit,
     private val trigger: Goal.() -> Context?,
     private var guard: GuardScope<Belief, Context>.() -> Context? = { this.context },
-) : PlanBuilder.Removal.Goal<Belief, Goal, Context> {
+) : BasePlanBuilder<Belief, Goal, Context>(),
+    PlanBuilder.Removal.Goal<Belief, Goal, Context> {
     override fun onlyWhen(
         guard: GuardScope<Belief, Context>.() -> Context?,
     ): PlanBuilder.Removal.Goal<Belief, Goal, Context> = this.also { this.guard = guard }
@@ -87,7 +120,7 @@ class GoalRemovalPlanBuilderImpl<Belief : Any, Goal : Any, Context : Any>(
         resultType: KType,
         body: suspend context(Context) PlanScope<Belief, Goal, Context>.() -> PlanResult,
     ): Plan.Goal.Removal<Belief, Goal, Context, PlanResult> =
-        buildAndRegisterPlan(resultType, trigger, guard, body, ::GoalRemovalPlan, removeGoalPlan)
+        buildAndRegisterPlan(resultType, trigger, guard, body, planId(), metadata, ::GoalRemovalPlan, removeGoalPlan)
 }
 
 /**
@@ -97,7 +130,8 @@ class GoalFailurePlanBuilderImpl<Belief : Any, Goal : Any, Context : Any>(
     private val failingGoalPlan: (plan: Plan.Goal<Belief, Goal, *, *>) -> Unit,
     private val trigger: Goal.() -> Context?,
     private var guard: GuardScope<Belief, Context>.() -> Context? = { this.context },
-) : PlanBuilder.FailureInterception.Goal<Belief, Goal, Context> {
+) : BasePlanBuilder<Belief, Goal, Context>(),
+    PlanBuilder.FailureInterception.Goal<Belief, Goal, Context> {
     override fun onlyWhen(
         guard: GuardScope<Belief, Context>.() -> Context?,
     ): PlanBuilder.FailureInterception.Goal<Belief, Goal, Context> = this.also { this.guard = guard }
@@ -107,7 +141,7 @@ class GoalFailurePlanBuilderImpl<Belief : Any, Goal : Any, Context : Any>(
         resultType: KType,
         body: suspend context(Context) PlanScope<Belief, Goal, Context>.() -> PlanResult,
     ): Plan.Goal.Failure<Belief, Goal, Context, PlanResult> =
-        buildAndRegisterPlan(resultType, trigger, guard, body, ::GoalFailurePlan, failingGoalPlan)
+        buildAndRegisterPlan(resultType, trigger, guard, body, planId(), metadata, ::GoalFailurePlan, failingGoalPlan)
 }
 
 private fun <B, G, TE, C, PR, P> buildAndRegisterPlan(
@@ -115,13 +149,17 @@ private fun <B, G, TE, C, PR, P> buildAndRegisterPlan(
     trigger: TE.() -> C?,
     guard: GuardScope<B, C>.() -> C?,
     body: suspend context(C) PlanScope<B, G, C>.() -> PR,
+    id: PlanID,
+    metadata: Map<String, Any>,
     builder: (
         (TE) -> C?,
         GuardScope<B, C>.() -> C?,
         suspend context(C)
         PlanScope<B, G, C>.() -> PR,
         KType,
+        PlanID,
+        Map<String, Any>,
     ) -> P,
     register: (P) -> Unit,
 ): P where B : Any, G : Any, TE : Any, C : Any, P : Plan<B, G, TE, C, PR> =
-    builder(trigger, guard, body, resultType).also { register(it) }
+    builder(trigger, guard, body, resultType, id, metadata).also { register(it) }

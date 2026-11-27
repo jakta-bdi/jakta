@@ -14,6 +14,18 @@ import kotlin.reflect.typeOf
 interface PlanBuilder<B : Any, G : Any, Context : Any> {
 
     /**
+     * Gives the plan a stable, human-readable [label], used as its [it.unibo.jakta.plan.Plan.id].
+     * Prefer the [labelled] DSL function, which keeps the type of the builder.
+     */
+    fun setLabel(label: String)
+
+    /**
+     * Attaches [entries] to the [it.unibo.jakta.plan.Plan.metadata] of the plan.
+     * Prefer the [withMetadata] DSL function, which keeps the type of the builder.
+     */
+    fun addMetadata(entries: Map<String, Any>)
+
+    /**
      * Builder interface for defining plans triggered by additions of beliefs or goals.
      */
     interface Addition<B : Any, G : Any, Context : Any> : PlanBuilder<B, G, Context> {
@@ -240,3 +252,19 @@ inline infix fun <
 ): Plan.Goal.Failure<B, G, Context, PlanResult>
     where B : Any, G : Any, Context : Any =
     this.triggersImpl(typeOf<PlanResult>(), body)
+
+/**
+ * Gives the plan a stable, human-readable [label], used as its id: in logs, and to find the plan again.
+ * @return this builder, to go on with `onlyWhen` and `triggers`.
+ */
+@JaktaDSL
+infix fun <P : PlanBuilder<*, *, *>> P.labelled(label: String): P = also { it.setLabel(label) }
+
+/**
+ * Attaches metadata [entries] to the plan, e.g. a priority read by a plan selection policy.
+ * The core does not interpret them.
+ * @return this builder, to go on with `onlyWhen` and `triggers`.
+ */
+@JaktaDSL
+fun <P : PlanBuilder<*, *, *>> P.withMetadata(vararg entries: Pair<String, Any>): P =
+    also { it.addMetadata(entries.toMap()) }
