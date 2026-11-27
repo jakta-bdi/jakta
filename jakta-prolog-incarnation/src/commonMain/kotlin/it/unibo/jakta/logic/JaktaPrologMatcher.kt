@@ -11,7 +11,6 @@ import it.unibo.tuprolog.core.Substitution
 import it.unibo.tuprolog.core.Term
 import it.unibo.tuprolog.core.Var
 import it.unibo.tuprolog.solve.ExecutionContext
-import it.unibo.tuprolog.solve.Signature
 import it.unibo.tuprolog.solve.Solution
 import it.unibo.tuprolog.solve.Solver
 import it.unibo.tuprolog.solve.flags.TrackVariables
@@ -124,22 +123,17 @@ object JaktaSolver {
         .flag(TrackVariables) { ON }
         .build()
 
-    // the goal arguments of the control constructs, where annotated goals are looked for
-    private val controlArguments: Map<Signature, List<Int>> = mapOf(
-        Signature(",", 2) to listOf(0, 1),
-        Signature(";", 2) to listOf(0, 1),
-        Signature("->", 2) to listOf(0, 1),
-        Signature("*->", 2) to listOf(0, 1),
-        Signature("\\+", 1) to listOf(0),
-        Signature("not", 1) to listOf(0),
-        Signature("call", 1) to listOf(0),
-        Signature("once", 1) to listOf(0),
-        Signature("findall", 3) to listOf(1),
-        Signature("bagof", 3) to listOf(1),
-        Signature("setof", 3) to listOf(1),
-        Signature("^", 2) to listOf(1),
-        Signature("forall", 2) to listOf(0, 1),
-    )
+    /**
+     * The arguments of this term that are goals, if it is a control construct such as `(A, B)` or `findall(T, G, L)`:
+     * annotated goals are looked for there, and not in data such as the template and the list of `findall`.
+     */
+    private val Struct.goalArguments: List<Int>
+        get() = when ("$functor/$arity") {
+            ",/2", ";/2", "->/2", "*->/2", "forall/2" -> listOf(0, 1)
+            "\\+/1", "not/1", "call/1", "once/1" -> listOf(0)
+            "findall/3", "bagof/3", "setof/3", "^/2" -> listOf(1)
+            else -> emptyList()
+        }
 
     /*
      * Annotations are tags, whose variables the solver never substitutes, renames or reports, and a unificator returns
@@ -149,10 +143,10 @@ object JaktaSolver {
      */
     private fun annotatedGoals(term: Term): Term {
         if (term !is Struct) return term
-        val control = controlArguments[Signature(term.functor, term.arity)]
+        val goals = term.goalArguments
         return when {
-            control != null -> term.setArgs(
-                term.args.mapIndexed { i, argument -> if (i in control) annotatedGoals(argument) else argument },
+            goals.isNotEmpty() -> term.setArgs(
+                term.args.mapIndexed { i, argument -> if (i in goals) annotatedGoals(argument) else argument },
             )
 
             term.annotations.isEmpty() -> term
@@ -259,12 +253,12 @@ private fun Term.hasAnnotations(): Boolean =
 /**
  * This term with [substitution] applied to it, and to its annotations too, which [Term.apply] leaves untouched.
  */
-fun Term.applyWithAnnotations(substitution: Substitution): Term = when {
+fun Term.applyToTermAndAnnotations(substitution: Substitution): Term = when {
     !hasAnnotations() -> apply(substitution)
 
     else -> {
         val struct = this as Struct
-        val applied = struct.setArgs(struct.args.map { it.applyWithAnnotations(substitution) })
+        val applied = struct.setArgs(struct.args.map { it.applyToTermAndAnnotations(substitution) })
         applied.setAnnotations(struct.annotations.map { it.apply(substitution).castToStruct() }.toSet())
     }
 }

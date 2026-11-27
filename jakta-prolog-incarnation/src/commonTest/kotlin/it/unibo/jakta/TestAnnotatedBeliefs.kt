@@ -39,7 +39,6 @@ import it.unibo.jakta.node.CoroutineNodeRunner
 import it.unibo.jakta.node.ExecutableNode
 import it.unibo.jakta.node.SharedMemoryNetwork
 import it.unibo.jakta.skills.MessagingSkill
-import it.unibo.tuprolog.core.EmptyList
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Term
 import it.unibo.tuprolog.core.toAtom
@@ -474,27 +473,24 @@ class TestAnnotatedBeliefs {
     }
 
     @Test
-    fun `a guard counts the same refusal told by two agents`() = runTest {
-        val refusal = initialBelief { "refuse"(3) }
-        var refusers: Set<Term> = emptySet()
+    fun `a guard backtracks over the sources of a belief told by two agents`() = runTest {
+        var trustedRefuser: Term? = null
 
-        fun refuser(id: AgentID) = node(NodeBuilders.baseNode()) {
-            agent(id) {
-                embodiedAs { Any() }
-                hasInitialGoals { !initialGoal { start } }
-                withPredefinedPlans(
-                    plans { node ->
-                        context(MessagingSkill(node)) {
-                            prologPlan {
-                                adding.goal { matchingGoal { start } } triggers {
-                                    delay(1.seconds)
-                                    agent.tellTo(alice, refusal)
-                                    node.terminateNode()
-                                }
+        fun refuser(id: AgentID, wait: Int) = node(NodeBuilders.baseNode()) {
+            context(MessagingSkill(node)) {
+                agent(id) {
+                    embodiedAs { Any() }
+                    hasInitialGoals { !initialGoal { start } }
+                    hasPlanLibrary {
+                        prologPlan {
+                            adding.goal { matchingGoal { start } } triggers {
+                                delay(wait.seconds)
+                                agent.tellTo(alice, initialBelief { "refuse"(3) })
+                                node.terminateNode()
                             }
                         }
-                    },
-                )
+                    }
+                }
             }
         }
 
@@ -502,27 +498,26 @@ class TestAnnotatedBeliefs {
             agent(alice) {
                 embodiedAs { Any() }
                 usesAnnotatedBeliefs()
+                believes { +initialBelief { "trusted"(carol.toString().toAtom()) } }
                 handlesMessageEvents { message ->
                     (message.payload as? KQMLPayload)?.let { handleKQMLPayload(it, message.sender) }
                 }
-                withPredefinedPlans(
-                    plans { node ->
-                        prologPlan {
-                            adding.belief { matchingBelief { "refuse"(3) } } onlyWhen {
-                                // the sources of refuse(3), two of them
-                                satisfies { "findall"(S, "refuse"(3)[source(S)], consOf(X, consOf(Y, EmptyList()))) }
-                            } triggers {
-                                refusers = setOfNotNull(context.substitution[X], context.substitution[Y])
-                                node.terminateNode()
-                            }
+                hasPlanLibrary {
+                    prologPlan {
+                        adding.belief { matchingBelief { "refuse"(3) } } onlyWhen {
+                            // refuse(3)[source(bob), source(carol)]: a greedy match takes bob, who is not trusted
+                            satisfies { "refuse"(3)[source(S)] and "trusted"(S) }
+                        } triggers {
+                            trustedRefuser = context.substitution[S]
+                            node.terminateNode()
                         }
-                    },
-                )
+                    }
+                }
             }
         }
 
-        run(refuser(bob), refuser(carol), manager)
-        assertEquals(setOf(bob, carol).map { it.toString().toAtom() }.toSet<Term>(), refusers)
+        run(refuser(bob, wait = 1), refuser(carol, wait = 2), manager)
+        assertEquals(carol.toString().toAtom(), trustedRefuser)
     }
 
     private fun AgentID.displayName() = when (this) {

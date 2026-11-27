@@ -10,7 +10,7 @@ import it.unibo.jakta.logic.JaktaLogicProgrammingScope
 import it.unibo.jakta.logic.MutableSubstitutionPlanContext
 import it.unibo.jakta.logic.allSolutionsOf
 import it.unibo.jakta.logic.annotatedMguWith
-import it.unibo.jakta.logic.applyWithAnnotations
+import it.unibo.jakta.logic.applyToTermAndAnnotations
 import it.unibo.tuprolog.core.Rule
 import it.unibo.tuprolog.core.Struct
 import it.unibo.tuprolog.core.Substitution
@@ -147,7 +147,7 @@ class TestAnnotationsInSolver {
     fun `the substitution of the plan reaches the annotations`() {
         // the guard of a plan whose trigger bound S, as satisfies { } applies the plan's substitution
         val guard = with(JaktaLogicProgrammingScope()) {
-            ("propose"(I, T)[source(S)]).applyWithAnnotations(Substitution.of(S, atomOf("alice"))).castToStruct()
+            ("propose"(I, T)[source(S)]).applyToTermAndAnnotations(Substitution.of(S, atomOf("alice"))).castToStruct()
         }
         assertEquals(listOf(mapOf("I" to "1", "T" to "5")), facts.solve { guard })
     }
