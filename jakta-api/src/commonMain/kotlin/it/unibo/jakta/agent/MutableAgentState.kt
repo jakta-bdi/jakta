@@ -3,13 +3,11 @@ package it.unibo.jakta.agent
 import it.unibo.jakta.InternalJaktaAPI
 import it.unibo.jakta.event.AgentEvent
 import it.unibo.jakta.event.AgentUpdate
-import it.unibo.jakta.event.beliefAdded
 import it.unibo.jakta.intention.MutableIntentionPool
 import it.unibo.jakta.plan.Plan
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
 import kotlin.time.Duration
-import kotlinx.coroutines.CompletableDeferred
 
 /**
  * Mutable state of an agent, allowing modifications to its beliefs, plans, and event handlers.
@@ -22,11 +20,6 @@ interface MutableAgentState<Belief : Any, Goal : Any> :
      * The mutable pool of intentions that the agent is currently pursuing.
      */
     val mutableIntentionPool: MutableIntentionPool
-
-    /**
-     * A map of event filters that will keep intentions suspended on the associated deferred.
-     */
-    val waitEventFilters: MutableMap<(AgentEvent) -> Any?, CompletableDeferred<*>>
 
     /**
      * Modifies the perception handler function that defines which external events are of interest of the agent.
@@ -102,15 +95,36 @@ interface MutableAgentState<Belief : Any, Goal : Any> :
      * Suspends the intention until the agent handles an event for which [eventFilter] returns a non-null value,
      * or the [timeout] is passed.
      * The filter is called on each event the agent handles while the intention waits, and returning `null` means
-     * "not this one": the intention keeps waiting. Only the events handled after the call are considered;
-     * to wait for something the agent may already believe, use [waitUntilBelieve].
+     * "not this one": the intention keeps waiting. Only the events handled after the call are considered, and the
+     * steps of intentions ([AgentEvent.Internal.Step]) are not among them.
+     * Use it for what an event tells and the agent's state does not keep: which message a reply belongs to, how a goal
+     * ended, a belief that came and went; to wait until something holds, even if it already does, use [waitUntil].
      * Ready-made filters: [it.unibo.jakta.event.beliefAdded], [it.unibo.jakta.event.beliefRemoved],
      * [it.unibo.jakta.event.messageReceived] and [it.unibo.jakta.event.perceived].
      * @param eventFilter the event filter to match what agent is waiting for continuing its execution.
      * @param timeout the maximum [Duration] the agent waits if no event matches the filter.
      * @return the value returned by the eventFilter, or `null` if the timeout passed.
      */
-    suspend fun <T : Any> wait(eventFilter: (AgentEvent) -> T?, timeout: Duration? = null): T?
+    suspend fun <T : Any> waitForEvent(eventFilter: (AgentEvent) -> T?, timeout: Duration? = null): T?
+
+    /**
+     * Suspends the intention until [condition] holds on the agent's state, and returns what it returns;
+     * returns `null` if the [timeout] passes first.
+     *
+     * Unlike [waitForEvent], it checks [condition] right away: if it already holds, it returns
+     * **without suspending at all**. Otherwise, it checks it again after each event the agent handles, when the state
+     * may have changed; what changes without an event (e.g. the time) is seen at the next event.
+     * The [condition] returns `null` while it does not hold; for a plain check, use `takeIf { it }`:
+     * ```kotlin
+     * agent.waitUntil(5.seconds) { beliefs.firstOrNull { it.startsWith("parcel") } }
+     * agent.waitUntil(5.seconds) { (beliefs.size >= 3).takeIf { it } }
+     * ```
+     * @param timeout the maximum [Duration] the agent waits for [condition] to hold.
+     * @param condition what the agent is waiting for, checked on its current state.
+     * @return the value returned by [condition], or `null` if the timeout passed.
+     */
+    suspend fun <T : Any> waitUntil(timeout: Duration? = null, condition: AgentState<Belief, Goal>.() -> T?): T? =
+        condition() ?: waitForEvent({ condition() }, timeout)
 }
 
 /**
@@ -130,19 +144,3 @@ suspend inline fun <Goal : Any, reified PlanResult> MutableAgentState<*, Goal>.a
 @OptIn(InternalJaktaAPI::class)
 suspend inline fun <Goal : Any> MutableAgentState<*, Goal>.achieve(goal: Goal): Unit =
     internalAchieve(goal, typeOf<Unit>())
-
-/**
- * Suspends the intention until the agent believes something matching [predicate], and returns that belief;
- * returns `null` if the [timeout] passes first.
- *
- * Unlike [MutableAgentState.wait], it looks at the current beliefs first: if the agent already believes something
- * matching [predicate], it returns it right away, **without suspending at all**. Otherwise, it waits for the
- * addition of a matching belief.
- * @param timeout the maximum [Duration] the agent waits if it believes nothing matching [predicate].
- * @param predicate which belief the agent is waiting for.
- * @return the first matching belief, or `null` if the timeout passed.
- */
-suspend inline fun <reified Belief : Any> MutableAgentState<Belief, *>.waitUntilBelieve(
-    timeout: Duration? = null,
-    crossinline predicate: (Belief) -> Boolean,
-): Belief? = beliefs.firstOrNull { predicate(it) } ?: wait(beliefAdded<Belief> { predicate(it) }, timeout)

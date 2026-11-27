@@ -29,11 +29,12 @@ class BaseAgent<Belief : Any, Goal : Any, Body : Any>(agentSpecification: AgentS
 
     override val body: Body = agentSpecification.body
 
-    override val state: MutableAgentState<Belief, Goal> = BaseMutableAgentState(
-        agentSpecification.initialState,
-        internalInbox,
-        id,
-    )
+    private val mutableState = BaseMutableAgentState(agentSpecification.initialState, internalInbox, id)
+
+    override val state: MutableAgentState<Belief, Goal>
+        get() = mutableState
+
+    override fun resumeWaiting(event: AgentEvent) = mutableState.resumeWaiting(event)
 
     init {
         agentSpecification.initialGoals.forEach { state.alsoAchieve(it) }

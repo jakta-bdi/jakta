@@ -5,8 +5,8 @@ import it.unibo.jakta.event.AgentEvent.External.Perception
 import it.unibo.jakta.event.AgentEvent.Internal.Belief
 
 /*
- * Ready-made event filters for `agent.wait(filter, timeout)`: each one returns what it matched, or `null` for any
- * other event, so that the waiting intention keeps waiting.
+ * Ready-made event filters for `agent.waitForEvent(filter, timeout)`: each one returns what it matched, or `null`
+ * for any other event, so that the waiting intention keeps waiting.
  */
 
 /**

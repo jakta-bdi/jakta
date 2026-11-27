@@ -4,14 +4,10 @@ import it.unibo.jakta.dsl.mas
 import it.unibo.jakta.dsl.mas.runLocally
 import it.unibo.jakta.dsl.node.NodeBuilders
 import it.unibo.jakta.dsl.plan.triggers
-import it.unibo.jakta.event.AgentEvent
+import it.unibo.jakta.event.beliefAdded
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-
-private fun beliefAdded(expected: String): (AgentEvent) -> String? = { event ->
-    ((event as? AgentEvent.Internal.Belief.Add<*>)?.belief as? String)?.takeIf { it == expected }
-}
 
 /**
  * An agent waiting for a parcel while another intention delivers it.
@@ -31,7 +27,7 @@ fun main(): Unit = runBlocking {
                         takeIf { it == "waitForDelivery" }
                     } triggers {
                         agent.print("Waiting for the parcel...")
-                        val parcel = agent.wait(beliefAdded("parcel"), timeout = 5.seconds)
+                        val parcel = agent.waitForEvent(beliefAdded<String> { it == "parcel" }, timeout = 5.seconds)
                         if (parcel != null) agent.print("Parcel received!") else agent.print("Gave up waiting")
                         node.terminateNode()
                     }

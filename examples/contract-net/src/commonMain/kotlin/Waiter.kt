@@ -13,7 +13,6 @@ import it.unibo.jakta.dsl.goal.initialGoal
 import it.unibo.jakta.dsl.goal.matchingGoal
 import it.unibo.jakta.dsl.plan.satisfies
 import it.unibo.jakta.dsl.plan.triggers
-import it.unibo.jakta.event.AgentEvent
 import it.unibo.jakta.kqml.KQMLPayload
 import it.unibo.jakta.kqml.broadcastTell
 import it.unibo.jakta.kqml.handleKQMLPayload
@@ -98,7 +97,7 @@ fun waiter(id: AgentID, restaurant: Restaurant) = with(board) {
             }
             prologPlan {
                 adding.goal { matchingGoal { waitTables } } triggers {
-                    agent.wait({ event -> event.takeIf { it.isAdditionOf("order") } })
+                    agent.waitForEvent({ event -> event.takeIf { it.isAdditionOf("order") } })
                     agent.alsoAchieve(goal { waitTables })
                 }
             }
@@ -135,7 +134,7 @@ fun waiter(id: AgentID, restaurant: Restaurant) = with(board) {
             prologPlan {
                 adding.goal { matchingGoal { "watch"(I, D, C, T) } } triggers {
                     val deadline = agent.realTime(T.value<Double>().seconds * GRACE)
-                    val answer = agent.wait({ event -> event.takeIf { it.isOutcomeOf(I.value()) } }, deadline)
+                    val answer = agent.waitForEvent({ event -> event.takeIf { it.isOutcomeOf(I.value()) } }, deadline)
                     if (answer == null && belief { "assigned"(I, D, C) } in agent.beliefs) {
                         agent.forget(belief { "assigned"(I, D, C) })
                         agent.print(C, " is late with order ", I, ": I take it back")
@@ -185,8 +184,6 @@ fun waiter(id: AgentID, restaurant: Restaurant) = with(board) {
  */
 context(board: WaiterSkill)
 private suspend fun RestaurantAgent.awaitAnswers(id: Int) {
-    fun everyoneAnswered() = beliefs.answersTo(id).size >= beliefs.participants()
-    if (everyoneAnswered()) return
     val deadline = with(board) { realTime(DEADLINE) }
-    wait({ event -> event.takeIf { it is AgentEvent.Internal.Belief.Add<*> && everyoneAnswered() } }, deadline)
+    waitUntil(deadline) { (beliefs.answersTo(id).size >= beliefs.participants()).takeIf { it } }
 }

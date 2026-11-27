@@ -59,8 +59,14 @@ internal class BaseMutableAgentState<Belief : Any, Goal : Any>(
     override val goalPlans: List<Plan.Goal<Belief, Goal, *, *>>
         get() = _goalPlans.toList()
 
-    override val waitEventFilters: MutableMap<(AgentEvent) -> Any?, CompletableDeferred<*>> =
-        mutableMapOf()
+    /** A wait in progress: each one is an entry of its own, even when several share the same filter. */
+    private class Waiting<T : Any>(val filter: (AgentEvent) -> T?, val resumption: CompletableDeferred<T>) {
+        fun resumeOn(event: AgentEvent) {
+            filter(event)?.let { resumption.complete(it) }
+        }
+    }
+
+    private val waiting = mutableListOf<Waiting<*>>()
 
     private var _perceptionHandler: AgentState<Belief, Goal>.(Perception) -> AgentUpdate<*>? =
         initialAgentState.perceptionHandler
@@ -122,22 +128,24 @@ internal class BaseMutableAgentState<Belief : Any, Goal : Any>(
         logger.a { message }
     }
 
-    override suspend fun <T : Any> wait(eventFilter: (AgentEvent) -> T?, timeout: Duration?): T? {
-        val deferred = CompletableDeferred<T>()
-        // each wait gets a key of its own: two waits on the same filter must not replace each other
-        val key: (AgentEvent) -> T? = { eventFilter(it) }
-        this.waitEventFilters[key] = deferred
-
+    override suspend fun <T : Any> waitForEvent(eventFilter: (AgentEvent) -> T?, timeout: Duration?): T? {
+        val wait = Waiting(eventFilter, CompletableDeferred())
+        waiting += wait
         return try {
             if (timeout != null) {
-                withTimeoutOrNull(timeout) {
-                    deferred.await()
-                }
+                withTimeoutOrNull(timeout) { wait.resumption.await() }
             } else {
-                deferred.await()
+                wait.resumption.await()
             }
         } finally {
-            waitEventFilters.remove(key)
+            // also when the intention is cancelled (e.g. dropped) while waiting
+            waiting -= wait
         }
+    }
+
+    /** Resumes the intentions waiting for [event] (see [ExecutableAgent.resumeWaiting]). */
+    fun resumeWaiting(event: AgentEvent) {
+        // a copy: a resumed intention may stop waiting while the others are checked
+        waiting.toList().forEach { it.resumeOn(event) }
     }
 }
