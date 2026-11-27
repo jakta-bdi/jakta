@@ -130,8 +130,8 @@ fun Collection<Rule>.unifiesWith(query: Struct): Solution = JaktaSolver.get(this
 
 /**
  * Extension function to compute the most general unifier (MGU) between a [Struct] and a query [Struct]
- * using annotation semantics: the receiver is the annotated data (e.g. a belief or a goal), which is implicitly
- * annotated with `source(self)` when it has no annotations.
+ * using annotation semantics: the receiver is the annotated data (e.g. a belief or a goal), whose annotations
+ * must include those of the query, read as written.
  */
 fun Struct.annotatedMguWith(query: Struct): Substitution = annotationUnificator.mgu(query, this)
 
