@@ -2,7 +2,7 @@ package it.unibo.jakta.event
 
 import it.unibo.jakta.agent.AgentID
 import it.unibo.jakta.agent.ExecutableAgent
-import it.unibo.jakta.node.Node
+import it.unibo.jakta.node.MessageFilter
 import it.unibo.jakta.node.NodeID
 
 /**
@@ -29,5 +29,5 @@ data class ShutDownNodeEvent(override val nodeID: NodeID, override val error: Th
  */
 data class AgentMessageEvent<P : Any, Body : Any>(
     override val message: AgentEvent.External.Message<P>,
-    override val filterFunction: Node<Body>.(Body) -> Boolean,
+    override val filter: MessageFilter<Body>,
 ) : SystemEvent.AgentMessage<P, Body>
