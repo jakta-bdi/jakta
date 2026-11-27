@@ -80,6 +80,18 @@ interface MutableAgentState<Belief : Any, Goal : Any> :
     fun forget(belief: Belief)
 
     /**
+     * Makes the beliefs in [scope] become [replacements]: those in scope and not among [replacements] are forgotten,
+     * and the new ones believed, through the agent's belief revision, which sees the whole replacement at once.
+     * Everything in [scope] that is not replaced is forgotten, so keep the scope narrow: incarnations usually offer
+     * safer helpers built on this one, such as a scope given by queries, or Jason's `-+`.
+     * @param scope for each belief held, the belief to remove from it, or `null` if it is out of scope: the belief
+     * itself, or, for beliefs with metadata, the belief with only the metadata in scope (see
+     * [it.unibo.jakta.belief.BeliefRevision]).
+     * @throws IllegalArgumentException if any of the [replacements] is not in [scope].
+     */
+    fun replace(replacements: List<Belief>, scope: (Belief) -> Belief?)
+
+    /**
      * Logs a message to the agent's output.
      * @param[message] The message to be printed.
      */

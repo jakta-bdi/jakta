@@ -7,7 +7,8 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
-import androidx.compose.ui.unit.sp
+
+private const val LABEL_SHARE = 0.4f
 
 /**
  * A map of block labels to their corresponding colors.
@@ -45,7 +46,8 @@ fun DrawScope.drawBlock(label: String, rect: Rect, textMeasurer: TextMeasurer) {
         text = label,
         style = TextStyle(
             color = Color.White,
-            fontSize = 20.sp,
+            // the label grows and shrinks with the block
+            fontSize = (rect.height * LABEL_SHARE).toSp(),
         ),
     )
 

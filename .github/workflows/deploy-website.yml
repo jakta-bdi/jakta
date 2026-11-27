@@ -8,8 +8,10 @@ on:
       - "website/**"
       - ".github/workflows/deploy-website.yml"
   workflow_run:
+    # Must be the top-level workflow name: "CI/CD Process" only runs via
+    # workflow_call from "CI/CD", and workflow_run never fires for called workflows.
     workflows:
-      - "CI/CD Process"
+      - "CI/CD"
     types:
       - completed
   workflow_dispatch:
@@ -24,7 +26,7 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     if: >-
       github.event_name != 'workflow_run'
       || (
@@ -35,11 +37,33 @@ jobs:
     steps:
       - name: Checkout main repository
         uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Setup Java
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21
+
+      # Every feat/fix merged to main is released right away, so main's public API is the released one,
+      # and KDoc fixes (docs commits, which cut no release) go live without waiting for one.
+      # The docs are labelled with the latest release rather than main's -dev version.
+      - name: Generate API docs (Dokka)
+        run: |
+          ./gradlew :dokkaGenerateHtml --no-configuration-cache -PforceVersion="$(git describe --tags --abbrev=0)"
+          rm -rf website/static/api
+          cp -a build/dokka/html website/static/api
+
+      # The Compose Multiplatform examples are embedded, running, in the showcase page.
+      - name: Build browser examples
+        run: website/scripts/build-examples.sh
 
       - name: Setup Node.js
-        uses: actions/setup-node@v7.0.0
+        uses: actions/setup-node@v7.1.0
         with:
-          node-version: 24
+          node-version: 26
           cache: npm
           cache-dependency-path: website/package-lock.json
 

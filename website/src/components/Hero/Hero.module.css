@@ -1,118 +1,157 @@
+/* The hero follows the social card (static/img/jakta-social.svg): the Jakta peak, darkened and tinted,
+   under the brand glows, with the text on the left. */
+
 .heroBanner {
   position: relative;
   min-height: 60vh;
   display: flex;
   align-items: center;
-  justify-content: center;
   overflow: hidden;
-  background: none;
+  background: var(--jakta-ink);
+  color: #fff;
 }
 
 .heroBg {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
+  inset: 0;
   background-image: url('/img/jakta-cropped.jpg');
   background-size: cover;
-  background-repeat: no-repeat;
   background-position: top;
-  filter: brightness(0.5) blur(0px);
+  background-repeat: no-repeat;
+  filter: grayscale(1) brightness(0.55) contrast(1.15);
 }
 
-.heroOverlay {
+.heroShade {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(180deg, var(--ifm-color-primary) 60%, rgba(0,0,0,0.5) 100%);
-  opacity: 0.7;
-  z-index: 2;
+  inset: 0;
   pointer-events: none;
+  background:
+    radial-gradient(circle at 12% 10%, color-mix(in srgb, var(--jakta-violet) 45%, transparent), transparent 60%),
+    radial-gradient(circle at 95% 100%, color-mix(in srgb, var(--jakta-pink) 38%, transparent), transparent 55%),
+    linear-gradient(180deg, transparent 60%, color-mix(in srgb, var(--jakta-ink) 75%, transparent) 100%),
+    linear-gradient(90deg, color-mix(in srgb, var(--jakta-ink) 90%, transparent) 0%, color-mix(in srgb, var(--jakta-ink) 72%, transparent) 25%, color-mix(in srgb, var(--jakta-ink) 38%, transparent) 45%, color-mix(in srgb, var(--jakta-ink) 20%, transparent) 100%),
+    color-mix(in srgb, var(--jakta-plum) 35%, transparent);
 }
 
+/* Same width as the features section below (FeaturesSection.module.css); the text starts 2rem in, as the
+   "What is JaKtA?" box pads its content, so it clears the box's rounded corner. */
 .heroContent {
   position: relative;
-  z-index: 3;
-  width: 100%;
-  text-align: center;
-  padding: 4rem 2rem;
-  color: #fff;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  z-index: 1;
+  width: 80%;
+  margin: 0 auto;
+  /* The bottom padding includes the 4rem the "What is JaKtA?" box overlaps the hero by. */
+  padding: 4rem 2rem 8rem;
 }
 
-.heroLogo {
-  width: 120px;
-  height: 120px;
-  margin-bottom: 2rem;
+.heroText {
+  max-width: 40rem;
 }
 
 .heroTitle {
-  font-size: 2.5rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-  letter-spacing: 0.02em;
+  font-size: clamp(2.4rem, 5vw, 4rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: #fff;
+  margin-bottom: 1.5rem;
+}
+
+.gradientText {
+  background: var(--jakta-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .heroSubtitle {
   font-size: 1.3rem;
-  font-weight: 400;
+  line-height: 1.5;
+  color: color-mix(in srgb, white 75%, var(--jakta-violet));
   margin-bottom: 2rem;
-  letter-spacing: 0.01em;
 }
 
 .heroButtons {
   display: flex;
+  flex-wrap: wrap;
   gap: 1rem;
-  justify-content: center;
 }
 
-.primaryBtn {
-  background: var(--ifm-color-primary);
-  color: #fff;
-  border-radius: 2rem;
+/* The hero's buttons are larger than the standard ones. */
+.heroButtons :global(.pill-button) {
   padding: 0.75rem 2rem;
   font-size: 1rem;
   font-weight: 600;
-  border: none;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  transition: background 0.2s;
-}
-.primaryBtn:hover {
-  color: white;
-  text-decoration: none;
-  background: var(--ifm-color-primary-dark);
 }
 
-.secondaryBtn {
-  background: transparent;
+/* The outline button is white on the photo, instead of the gradient (two classes, so it wins over the shared
+   outline style whatever order the stylesheets load in). */
+:global(.pill-button--outline).onPhoto {
+  background: none;
   color: #fff;
-  border: 2px solid #fff;
-  border-radius: 2rem;
-  padding: 0.75rem 2rem;
-  font-size: 1rem;
-  font-weight: 600;
-  transition: background 0.2s, color 0.2s;
+  border-color: #fff;
 }
-.secondaryBtn:hover {
-  background: #fff;
-  text-decoration: none;
-  color: var(--ifm-color-primary);
+
+:global(.pill-button--outline).onPhoto::before {
+  display: none;
+}
+
+:global(.pill-button--outline).onPhoto:hover {
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.45);
+}
+
+
+/* The light theme keeps the same look, with a lighter photo and a softer shade. */
+:global([data-theme='light']) .heroBg {
+  filter: grayscale(1) brightness(0.75) contrast(1.1);
+}
+
+:global([data-theme='light']) .heroShade {
+  background:
+    radial-gradient(circle at 12% 10%, color-mix(in srgb, var(--jakta-violet) 40%, transparent), transparent 60%),
+    radial-gradient(circle at 95% 100%, color-mix(in srgb, var(--jakta-pink) 32%, transparent), transparent 55%),
+    linear-gradient(90deg, color-mix(in srgb, var(--jakta-plum) 85%, transparent) 0%, color-mix(in srgb, var(--jakta-plum) 68%, transparent) 30%, color-mix(in srgb, var(--jakta-plum) 28%, transparent) 55%, color-mix(in srgb, var(--jakta-plum) 12%, transparent) 100%),
+    color-mix(in srgb, var(--jakta-violet) 20%, transparent);
+}
+
+/* On desktop the section bar is fixed over the top of the hero: a taller hero, with more room above the text. */
+@media (min-width: 997px) {
+  .heroBanner {
+    min-height: 70vh;
+  }
+
+  .heroContent {
+    padding-top: 7rem;
+  }
 }
 
 @media (max-width: 996px) {
-  .heroTitle {
-    font-size: 2rem;
+  .heroContent {
+    width: 100%;
+    /* The section bar is fixed over the top of the hero: the text starts below it. */
+    padding: calc(var(--home-section-bar-height) + 2rem) 1.5rem 6.5rem;
   }
+
+
   .heroSubtitle {
     font-size: 1.1rem;
   }
-  .heroContent {
-    padding: 2rem 1rem;
+
+  /* The subtitle's line breaks are for the wide layout. */
+  .heroSubtitle br {
+    display: none;
+  }
+}
+
+@media (max-width: 576px) {
+  .heroTitle {
+    font-size: 2.2rem;
+  }
+
+  /* The two buttons side by side, as wide as each other. */
+  .heroButtons :global(.pill-button) {
+    flex: 1;
+    padding: 0.7rem 1rem;
+    text-align: center;
   }
 }

@@ -9,6 +9,11 @@
       "matchManagers": ["gradle"],
       "matchDepTypes": ["dependencies"],
       "semanticCommitScope": "core-deps"
+    },
+    {
+      "description": "The JDK in the workflows matches the one the CI action builds with (21): no bumps until 2.0 moves everything to one .java-version",
+      "matchDepNames": ["java-jdk"],
+      "enabled": false
     }
   ],
   "assignees": ["anitvam"]

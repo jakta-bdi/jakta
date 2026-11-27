@@ -20,7 +20,8 @@ kotlinMultiplatform {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(project(":examples:ui-common"))
+            implementation(libs.bundles.compose)
+            implementation(libs.kermit)
 
             implementation(jakta("core"))
             implementation(jakta("prolog-incarnation"))

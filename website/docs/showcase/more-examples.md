@@ -1,0 +1,43 @@
+---
+sidebar_position: 5
+---
+
+# All the examples
+
+The JaKtA repository ships runnable examples in the
+[`examples`](https://github.com/jakta-bdi/jakta/tree/main/examples) folder. Clone it and run them with Gradle:
+
+```bash
+git clone https://github.com/jakta-bdi/jakta.git
+cd jakta
+./gradlew :examples:hello-world:run
+```
+
+Replace `hello-world` with the name of any example below. The examples with a user interface use Compose Multiplatform
+and also run in the browser with `./gradlew :examples:<name>:jsBrowserDevelopmentRun`.
+
+<div className="examples-table">
+
+| Example | Description |
+|---|---|
+| [`hello-world`](https://github.com/jakta-bdi/jakta/tree/main/examples/hello-world) | A single agent with one goal and one plan that prints a message and stops the node. See [Basic: Hello world](../tutorials/hello-world.md). |
+| [`ping-pong`](https://github.com/jakta-bdi/jakta/tree/main/examples/ping-pong) | Two agents on two nodes exchanging messages turned into beliefs. See [Intermediate: Ping-pong agents](../tutorials/ping-pong.md) and [Create a JaKtA Multi-Agent System](../how-to/create-mas.md). |
+| [`thermostat`](https://github.com/jakta-bdi/jakta/tree/main/examples/thermostat) (with UI) | A thermostat keeping a changing room at its target temperature through perceptions, a skill and guarded plans. See [Advanced: Thermostat](../tutorials/thermostat.md) and [Connect agents to an external environment](../how-to/connect-environment.md). |
+| [`blocksworld`](https://github.com/jakta-bdi/jakta/tree/main/examples/blocksworld) (with UI) | An agent building towers of blocks with Prolog inference rules, recursive sub-goals and custom skills. See [Blocks World](./blocksworld.md), [Skills](../explanation/interaction/acting.md) and [Beliefs](../explanation/basic-concepts/beliefs.md). |
+| [`tictactoe`](https://github.com/jakta-bdi/jakta/tree/main/examples/tictactoe) (with UI) | A tic-tac-toe player whose Prolog rules and plans are generated in Kotlin for any board size. See [Tic-tac-toe](./tictactoe.md) and [Turn perceptions into Prolog facts](../how-to/prolog/perceptions.md). |
+| [`vacuum-world`](https://github.com/jakta-bdi/jakta/tree/main/examples/vacuum-world) (with UI) | One to four embodied robots that keep a map clean forever. See [Vacuum World](./vacuum-world.md), [Give agents a body](../how-to/custom-body.md) and [Turn perceptions into Prolog facts](../how-to/prolog/perceptions.md). |
+| [`contract-net`](https://github.com/jakta-bdi/jakta/tree/main/examples/contract-net) (with UI) | A waiter giving each order to the chef that can cook it the soonest, with a contract net of KQML messages among agents on their own nodes. See [Contract Net](./contract-net.md) and [KQML Messaging](../explanation/incarnations/prolog/kqml.md). |
+| [`runtime-agents`](https://github.com/jakta-bdi/jakta/tree/main/examples/runtime-agents) | Adding and removing agents while the MAS runs. See [Add and remove agents at runtime](../how-to/runtime-agents.md). |
+| [`sub-goals`](https://github.com/jakta-bdi/jakta/tree/main/examples/sub-goals) | A barista achieving sub-goals, getting their results, starting a concurrent intention and recovering from a failed sub-goal. See [Achieve sub-goals and recover from failures](../how-to/sub-goals.md). |
+| [`wait-for-events`](https://github.com/jakta-bdi/jakta/tree/main/examples/wait-for-events) | Waiting for an event, with a timeout, while another intention makes it happen. See [Wait for events and use time](../how-to/wait-for-events.md). |
+| [`alchemist-ping-pong`](https://github.com/jakta-bdi/jakta/tree/main/examples/alchemist-ping-pong) | Alice and Bob playing ping-pong from two devices of an [Alchemist](https://alchemistsimulator.github.io/) simulation, in simulated time, shown in Alchemist's viewer. See [Simulate a MAS with Alchemist](../how-to/alchemist.md). |
+| [`custom-incarnation`](https://github.com/jakta-bdi/jakta/tree/main/examples/custom-incarnation) | Plain numbers as beliefs and goals: an agent following the Collatz sequence until it loops, and a prime sieve. See [Write your own incarnation](../how-to/custom-incarnation.md). |
+
+</div>
+
+## Dig deeper in the unit tests
+
+If you want to have a look, there are less polished, minimal examples in the unit tests of
+[`jakta-core`](https://github.com/jakta-bdi/jakta/tree/main/jakta-core/src/commonTest/kotlin/it/unibo/jakta/dsl/examples),
+[`jakta-prolog-incarnation`](https://github.com/jakta-bdi/jakta/tree/main/jakta-prolog-incarnation/src/commonTest/kotlin/it/unibo/jakta)
+and [`alchemist-jakta-incarnation`](https://github.com/jakta-bdi/jakta/tree/main/alchemist-jakta-incarnation/src/test/kotlin/it/unibo/jakta/test).

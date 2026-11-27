@@ -1,0 +1,10 @@
+/* Keep the theme's grid column: the wrapper must not be a layout box. */
+.releases {
+  display: contents;
+}
+
+/* Anchors share the list page's path, so the theme would mark all of them as active. */
+.releases a[class*='sidebarItemLinkActive'] {
+  color: var(--ifm-font-color-base);
+  font-weight: normal;
+}
