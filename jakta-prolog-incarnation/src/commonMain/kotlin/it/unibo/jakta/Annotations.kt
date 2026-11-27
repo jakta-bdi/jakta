@@ -41,9 +41,10 @@ val percept = Atom.of("percept")
 
 /*
  * Annotations, as Jason's `p(1)[source(alice)]`, are metadata of a term: equal terms with different annotations are
- * equal. The functions below read and change them on any term (a belief, a query, a goal); on a belief, a [Rule] or a
- * [Fact], they act on its head. Matching reads them as written: a query without annotations matches any, and one with
- * annotations matches the beliefs that have them.
+ * equal. The functions below read and change them on any term (a belief, a query, a goal). On a [Fact] they act on its
+ * head, the belief; on a [Rule] they act on the whole clause, `(h :- b)[source(bob)]`: who told the rule, not what it
+ * derives. Matching reads them as written: a query without annotations matches any, and one with annotations matches
+ * the beliefs that have them, and a rule only as a clause, as `(h :- B)[source(S)]`.
  *
  * What annotations mean, e.g. that a belief without a source is the agent's own, is up to the belief revision: see
  * `AnnotatedBeliefRevision`. Without it, beliefs are a plain set and keep the annotations they are written with.
@@ -55,10 +56,11 @@ val percept = Atom.of("percept")
  */
 
 /**
- * The annotations of this term, as written: none if it has none. On a belief, those of its head.
+ * The annotations of this term, as written: none if it has none. On a [Fact], those of its head; on a [Rule], those of
+ * the whole clause.
  */
 val Term.annotations: Set<Struct>
-    get() = (if (this is Rule) head else this).getTag<Set<Struct>>(JAKTA_ANNOTATIONS_TAG).orEmpty()
+    get() = (if (this is Rule && isFact) head else this).getTag<Set<Struct>>(JAKTA_ANNOTATIONS_TAG).orEmpty()
 
 /**
  * This term with [annotations] added to those it has: `p(1)[source(alice)]` with `certain` added is
@@ -91,12 +93,8 @@ operator fun <T : Term> T.get(annotation: Struct, vararg otherAnnotations: Struc
 fun <T : Term> T.setAnnotations(annotations: Set<Struct>): T {
     // tuProlog's setTag returns a Term, and a belief is rebuilt from its head: both stay of the receiver's own type
     @Suppress("UNCHECKED_CAST")
-    return when (this) {
-        is Rule -> {
-            val annotatedHead = head.setTag(JAKTA_ANNOTATIONS_TAG, annotations)
-            if (isFact) Fact.of(annotatedHead) else Rule.of(annotatedHead, body)
-        }
-
+    return when {
+        this is Rule && isFact -> Fact.of(head.setTag(JAKTA_ANNOTATIONS_TAG, annotations))
         else -> setTag(JAKTA_ANNOTATIONS_TAG, annotations)
     } as T
 }

@@ -1,9 +1,11 @@
 package it.unibo.jakta.dsl.belief
 
+import it.unibo.jakta.annotations
 import it.unibo.jakta.dsl.JaktaDSL
 import it.unibo.jakta.logic.JaktaLogicProgrammingScope
 import it.unibo.jakta.logic.MutableSubstitutionPlanContext
 import it.unibo.jakta.logic.annotatedMguWith
+import it.unibo.jakta.logic.applyWithAnnotations
 import it.unibo.jakta.logic.requireGround
 import it.unibo.jakta.logic.requirePredicate
 import it.unibo.tuprolog.core.Fact
@@ -55,7 +57,7 @@ fun initialBelief(block: JaktaLogicProgrammingScope.() -> Struct): Fact = Fact.o
  */
 context(scope: JaktaLogicProgrammingScope, planContext: MutableSubstitutionPlanContext)
 fun belief(block: JaktaLogicProgrammingScope.() -> Struct): Fact = Fact.of(
-    (scope.block().apply(planContext.substitution) as Struct).also { struct ->
+    (scope.block().applyWithAnnotations(planContext.substitution) as Struct).also { struct ->
         requirePredicate(struct) { "Belief must be a predicate, but got $it" }
         requireGround(struct) { "Belief must be ground, but got $it" }
     },
@@ -64,9 +66,13 @@ fun belief(block: JaktaLogicProgrammingScope.() -> Struct): Fact = Fact.of(
 /**
  * Creates a Prolog inference rule from the provided block.
  * @param block A lambda function that defines the inference rule to be created.
+ * Annotations go on the whole rule, `(h :- b)[source(bob)]`, not on its head: who told a rule says nothing of the
+ * beliefs it derives, which have none.
  * @return The created [Rule] if it is a valid rule.
  */
-fun inferenceRule(block: JaktaLogicProgrammingScope.() -> Rule): Rule = JaktaLogicProgrammingScope().block()
+fun inferenceRule(block: JaktaLogicProgrammingScope.() -> Rule): Rule = JaktaLogicProgrammingScope().block().also {
+    require(it.head.annotations.isEmpty()) { "Annotate the whole rule, (h :- b)[...], not its head, but got $it" }
+}
 
 /**
  * Creates a Prolog beliefQuery query from the provided block, using the contextual [scope].
@@ -75,7 +81,7 @@ fun inferenceRule(block: JaktaLogicProgrammingScope.() -> Rule): Rule = JaktaLog
  */
 context(scope: JaktaLogicProgrammingScope, planContext: MutableSubstitutionPlanContext)
 fun beliefQuery(block: JaktaLogicProgrammingScope.() -> Struct): Struct =
-    (scope.block().apply(planContext.substitution) as Struct).also { struct ->
+    (scope.block().applyWithAnnotations(planContext.substitution) as Struct).also { struct ->
         requirePredicate(struct) { "Belief query must be a predicate, but got $it" }
     }
 

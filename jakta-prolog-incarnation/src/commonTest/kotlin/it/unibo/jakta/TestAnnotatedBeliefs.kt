@@ -22,6 +22,7 @@ import it.unibo.jakta.dsl.goal.matchingGoal
 import it.unibo.jakta.dsl.mas
 import it.unibo.jakta.dsl.node
 import it.unibo.jakta.dsl.node.NodeBuilders
+import it.unibo.jakta.dsl.plan.satisfies
 import it.unibo.jakta.dsl.plan.triggers
 import it.unibo.jakta.dsl.plans
 import it.unibo.jakta.event.AgentEvent
@@ -38,7 +39,9 @@ import it.unibo.jakta.node.CoroutineNodeRunner
 import it.unibo.jakta.node.ExecutableNode
 import it.unibo.jakta.node.SharedMemoryNetwork
 import it.unibo.jakta.skills.MessagingSkill
+import it.unibo.tuprolog.core.EmptyList
 import it.unibo.tuprolog.core.Struct
+import it.unibo.tuprolog.core.Term
 import it.unibo.tuprolog.core.toAtom
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -468,6 +471,58 @@ class TestAnnotatedBeliefs {
             listOf("ping(1, 2)" to sources("self"), "ping(2)" to sources("carol"), "ping(3)" to sources("self")),
             left.map { it.head.toString() to it.annotations }.sortedBy { it.first },
         )
+    }
+
+    @Test
+    fun `a guard counts the same refusal told by two agents`() = runTest {
+        val refusal = initialBelief { "refuse"(3) }
+        var refusers: Set<Term> = emptySet()
+
+        fun refuser(id: AgentID) = node(NodeBuilders.baseNode()) {
+            agent(id) {
+                embodiedAs { Any() }
+                hasInitialGoals { !initialGoal { start } }
+                withPredefinedPlans(
+                    plans { node ->
+                        context(MessagingSkill(node)) {
+                            prologPlan {
+                                adding.goal { matchingGoal { start } } triggers {
+                                    delay(1.seconds)
+                                    agent.tellTo(alice, refusal)
+                                    node.terminateNode()
+                                }
+                            }
+                        }
+                    },
+                )
+            }
+        }
+
+        val manager = node(NodeBuilders.baseNode()) {
+            agent(alice) {
+                embodiedAs { Any() }
+                usesAnnotatedBeliefs()
+                handlesMessageEvents { message ->
+                    (message.payload as? KQMLPayload)?.let { handleKQMLPayload(it, message.sender) }
+                }
+                withPredefinedPlans(
+                    plans { node ->
+                        prologPlan {
+                            adding.belief { matchingBelief { "refuse"(3) } } onlyWhen {
+                                // the sources of refuse(3), two of them
+                                satisfies { "findall"(S, "refuse"(3)[source(S)], consOf(X, consOf(Y, EmptyList()))) }
+                            } triggers {
+                                refusers = setOfNotNull(context.substitution[X], context.substitution[Y])
+                                node.terminateNode()
+                            }
+                        }
+                    },
+                )
+            }
+        }
+
+        run(refuser(bob), refuser(carol), manager)
+        assertEquals(setOf(bob, carol).map { it.toString().toAtom() }.toSet<Term>(), refusers)
     }
 
     private fun AgentID.displayName() = when (this) {
