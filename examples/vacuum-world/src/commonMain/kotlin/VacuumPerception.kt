@@ -21,15 +21,15 @@ data class VacuumPerception(val position: Pos, val facing: Direction, val square
  * one. It also keeps the robot's memory of the dust it saw, `dust_at(X, Y)`: remembered when a square shows dust,
  * forgotten when it shows the square empty. Other beliefs, like `visited(X, Y, N)`, are left alone.
  */
-fun handleVacuumPerception(event: VacuumPerception, beliefs: Collection<PrologBelief>): AgentUpdate<*> {
+fun handleVacuumPerception(event: VacuumPerception): AgentUpdate<*> {
     val perceived = event.toBeliefs()
-    val previous = beliefs.filter { it.head.functor in perceived.map { new -> new.head.functor } }.toSet()
-    val dustSeen = event.cellsWith(Content.DUST).map { cellBelief("dust_at", it) }.toSet() - beliefs.toSet()
-    val dustGone = event.cellsWith(Content.EMPTY).map { cellBelief("dust_at", it) }.toSet() intersect beliefs.toSet()
-    return AgentUpdate.Belief(
-        additions = perceived - previous + dustSeen,
-        removals = previous - perceived + dustGone,
-    )
+    val functors = perceived.map { it.head.functor }.toSet()
+    val dust = event.cellsWith(Content.DUST).map { cellBelief("dust_at", it) }
+    // the dust memory of the squares seen with dust or empty: those seen with an obstacle or a robot are left alone
+    val dustSeenOrGone = (dust + event.cellsWith(Content.EMPTY).map { cellBelief("dust_at", it) }).toSet()
+    return AgentUpdate.Replace.where((perceived + dust).toList()) {
+        it.head.functor in functors || it in dustSeenOrGone
+    }
 }
 
 private fun VacuumPerception.cellsWith(content: Content): List<Pos> =

@@ -65,7 +65,7 @@ fun vacuumNode(bodies: List<VacuumBody>): ExecutableNode<VacuumBody> = node(Node
         bodies.forEachIndexed { index, body ->
             agent<PrologBelief, PrologGoal>(BaseAgentID(RobotColour.entries[index].name.lowercase())) {
                 embodiedAs { body }
-                handlesPerceptionEvents { if (it is VacuumPerception) handleVacuumPerception(it, beliefs) else null }
+                handlesPerceptionEvents { if (it is VacuumPerception) handleVacuumPerception(it) else null }
                 believes {
                     // towards(D, S, E): facing D, the square S lies towards E; step(E, DX, DY): a step towards E
                     for (direction in Direction.entries) {

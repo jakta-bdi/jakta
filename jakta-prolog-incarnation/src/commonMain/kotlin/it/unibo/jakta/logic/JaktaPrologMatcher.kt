@@ -1,7 +1,6 @@
 package it.unibo.jakta.logic
 
-import it.unibo.jakta.self
-import it.unibo.jakta.source
+import it.unibo.jakta.annotations
 import it.unibo.tuprolog.core.Clause
 import it.unibo.tuprolog.core.Rule
 import it.unibo.tuprolog.core.Struct
@@ -46,24 +45,15 @@ private val annotationUnificator = object : AbstractUnificator() {
         else -> term
     }
 
-    @Suppress("UNCHECKED_CAST")
     private fun unifyTags(
         fact: Term,
         query: Term,
         initialResult: Substitution,
         occurCheckEnabled: Boolean,
     ): Substitution {
-        val factAnnotations =
-            (fact.tags["jakta.annotations"] as? Set<Struct>).orEmpty().toMutableList()
-
-        // every unannotated struct is considered annotated with source(self)
-        // TODO what happens if I want to have [source(self), source(bob)]???
-        if (factAnnotations.isEmpty()) {
-            factAnnotations.add(source(self))
-        }
-
-        val queryAnnotations =
-            (query.tags["jakta.annotations"] as? Set<Struct>).orEmpty().toMutableList()
+        // a query without annotations matches any
+        val factAnnotations = fact.annotations.toMutableList()
+        val queryAnnotations = query.annotations.toMutableList()
 
         val result = when {
             queryAnnotations.isEmpty() -> initialResult
@@ -140,8 +130,8 @@ fun Collection<Rule>.unifiesWith(query: Struct): Solution = JaktaSolver.get(this
 
 /**
  * Extension function to compute the most general unifier (MGU) between a [Struct] and a query [Struct]
- * using annotation semantics: the receiver is the annotated data (e.g. a belief or a goal), which is implicitly
- * annotated with `source(self)` when it has no annotations.
+ * using annotation semantics: the receiver is the annotated data (e.g. a belief or a goal), whose annotations
+ * must include those of the query, read as written.
  */
 fun Struct.annotatedMguWith(query: Struct): Substitution = annotationUnificator.mgu(query, this)
 

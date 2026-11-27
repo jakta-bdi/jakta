@@ -65,7 +65,7 @@ fun MasBuilder<BaseNode<Any>, BaseNodeBuilder<Any, BaseNode<Any>>>.blocksWorldNo
             }
             handlesPerceptionEvents {
                 when (it) {
-                    is BlocksWorldPerception -> handleBlocksWorldPerceptions(it, beliefs)
+                    is BlocksWorldPerception -> handleBlocksWorldPerceptions(it)
                     else -> null
                 }
             }

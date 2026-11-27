@@ -22,7 +22,7 @@ private fun AgentBuilder<ToldBelief, String, Any>.receivesTextMessages() {
     embodiedAs { Any() }
     handlesMessageEvents { message ->
         when (val payload = message.payload) {
-            is String -> AgentUpdate.Belief(setOf(ToldBelief(payload, message.sender)), emptySet())
+            is String -> AgentUpdate.Believe(ToldBelief(payload, message.sender))
             else -> null
         }
     }

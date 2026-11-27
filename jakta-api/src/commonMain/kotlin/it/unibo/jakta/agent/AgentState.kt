@@ -1,5 +1,6 @@
 package it.unibo.jakta.agent
 
+import it.unibo.jakta.belief.BeliefRevision
 import it.unibo.jakta.event.AgentEvent
 import it.unibo.jakta.event.AgentUpdate
 import it.unibo.jakta.intention.Intention
@@ -44,4 +45,10 @@ interface AgentState<Belief : Any, Goal : Any> {
      * convert a [AgentEvent.External.Message] into an [AgentUpdate] .
      */
     val messageHandler: AgentState<Belief, Goal>.(AgentEvent.External.Message<*>) -> AgentUpdate<*>?
+
+    /**
+     * How the agent revises its beliefs when one is added or removed; by default, they are a set.
+     */
+    val beliefRevision: BeliefRevision<Belief>
+        get() = BeliefRevision.plain()
 }

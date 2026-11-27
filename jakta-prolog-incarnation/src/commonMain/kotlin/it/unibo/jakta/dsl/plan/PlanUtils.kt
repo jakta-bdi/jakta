@@ -57,15 +57,3 @@ fun PlanScope<PrologBelief, PrologGoal, MutableSubstitutionPlanContext>.testQuer
         else -> error("The query $query is not satisfied")
     }
 }
-
-// /**
-// * Tests a prolog query on the agent's current beliefs and if it succeeds the result of the substitution is merged
-// * with the current plan context.
-// * @param block A lambda function that defines the beliefQuery query to be created.
-// * @return The created [Fact] as a query if it is a valid predicate.
-// */
-// // TODO test this
-// context(logicScope: JaktaLogicProgrammingScope)
-// fun MutableAgentState<PrologBelief, PrologGoal>.forgetAllMatching(beliefQuery: Struct) {
-//    TODO()
-// }

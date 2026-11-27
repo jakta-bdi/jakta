@@ -96,12 +96,12 @@ private val distractedQuery = newContextBeliefQuery { "distracted"(X) }
  * Updates `cell(X, Y, Mark)`, `turn(Mark)` and `distracted(Mark)` beliefs, where empty cells are marked `e`.
  * Only what changed is added or removed, so each move triggers only the new `turn` belief.
  */
-fun handleBoardPerception(event: BoardPerception, beliefs: Collection<PrologBelief>): AgentUpdate<*> {
-    val queries = listOf(cellQuery, turnQuery, distractedQuery)
-    val old = beliefs.filter { belief -> queries.any { belief.matchBelief(it) != null } }.toSet()
+fun handleBoardPerception(event: BoardPerception): AgentUpdate<*> {
     val distracted = event.distracted.map { Fact.of(Struct.of("distracted", Atom.of(it.symbol))) }
-    val new = event.board.toBeliefs(event.random) + distracted
-    return AgentUpdate.Belief(new - old, old - new)
+    val queries = listOf(cellQuery, turnQuery, distractedQuery)
+    return AgentUpdate.Replace.where((event.board.toBeliefs(event.random) + distracted).toList()) { belief ->
+        queries.any { belief.matchBelief(it) != null }
+    }
 }
 
 private fun BoardState.toBeliefs(random: Random): Set<PrologBelief> {

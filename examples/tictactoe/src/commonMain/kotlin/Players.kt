@@ -95,7 +95,7 @@ private fun AgentBuilder<PrologBelief, PrologGoal, Any>.commonBehaviour() {
     embodiedAs { Any() }
     handlesPerceptionEvents {
         when (it) {
-            is BoardPerception -> handleBoardPerception(it, beliefs)
+            is BoardPerception -> handleBoardPerception(it)
             else -> null
         }
     }
